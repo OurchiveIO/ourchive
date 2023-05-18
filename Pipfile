@@ -1,0 +1,22 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+djangorestframework = "*"
+django-filter = "*"
+psycopg2-binary = "*"
+requests = "*"
+django-background-tasks = "*"
+pytest = "*"
+selenium = "*"
+webdriver-manager = "*"
+Markdown = "*"
+Django = "*"
+faker = "*"
+
+[requires]
+python_version = "3.7"

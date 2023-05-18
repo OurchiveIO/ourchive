@@ -1,0 +1,42 @@
+{% extends 'index.html' %}
+{% block content %}	
+{% if anchor %}
+<script>
+    window.onload = function(){
+        const anchor_val = '{{anchor}}';
+        window.location = '#'+anchor_val;
+        show_val = anchor_val.includes("work") ? 0 : 1;
+        UIkit.switcher(document.getElementById("user_content_switcher_header")).show(show_val);
+    };
+</script>
+{% endif %}
+<div class="uk-width-1">
+    <div class="uk-text-right uk-width-1">
+        {% if user.username == request.user.username %}
+            <a href="{{ root }}/username/{{ user.username }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
+        {% endif %}
+    </div>
+	<div class="uk-width-1 uk-align-center">
+        <div class="uk-card uk-card-body"> 
+            <img src="{{ user.userprofile.icon }}" class="uk-align-center" style="border-radius: 50%"/> 
+            <h1 class="uk-heading-line uk-text-center"> <span>{{ user.username }}</span> </h1> 
+        </div>
+        <div class="uk-card uk-card-body uk-align-center">
+            <h2> Profile </h2>
+            <span>{% autoescape off %} {{ user.userprofile.profile }} {% endautoescape %}</span> 
+        </div>
+        <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.userprofile.default_content == 'Work' %}0{% else %}1{% endif %}" id="user_content_switcher_header">
+            <li><a href="#">Works</a></li>
+            <li><a href="#">Bookmarks</a></li>
+        </ul>
+        <ul class="uk-switcher uk-margin" id="user_content_switcher">
+            <li id="work_tab">
+                {% include "works_list.html" with works=works root=root username=username next=works_next previous=works_previous include_header=False %} 
+            </li>
+            <li id="bookmark_tab">
+                {% include "bookmarks_list.html" with bookmarks=bookmarks next=bookmarks_next previous=bookmarks_previous include_header=False %}
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

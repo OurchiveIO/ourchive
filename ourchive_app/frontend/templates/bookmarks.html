@@ -1,0 +1,12 @@
+{% extends 'index.html' %}
+{% block content %}	
+<div class="uk-width-1-1">
+	{% if user_filter %}
+    	<div class="uk-margin">
+			<div class="uk-card"><h1 class="uk-heading-line uk-text-center"> <span> Bookmarks by {{ user_filter }}</span> </h1> 
+			</div>
+		</div>
+	{% endif %}
+	{% include "bookmarks_list.html" %}
+</div>
+{% endblock %}

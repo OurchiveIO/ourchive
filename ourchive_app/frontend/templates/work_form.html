@@ -1,0 +1,349 @@
+{% extends 'index.html' %}
+{% block content %}	
+{% load static %}
+<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
+<div class="uk-width-1-1 uk-text-left"> 
+<form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
+    <script>
+
+        function getCurrentTab(submitted) {
+            //var expanded = document.getElementById('toc_link').getAttribute("aria-expanded");
+            var new_chapter_clicked = submitted === "New Chapter";
+            document.getElementById('redirect_toc').value = new_chapter_clicked;
+            document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
+            document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
+        }
+        
+        function removetag(delete_id) {
+            tag_id = delete_id.slice(0, -7);
+            document.getElementById(tag_id).remove();
+            document.getElementById(tag_id+"_txt").remove();
+        }
+
+        function tagCheck (e, type) {
+            if (e.keyCode == 188 || e.keyCode == 13) {
+                var section = document.getElementById(type+"_tags");
+                var final = section.lastChild;
+                final.value = final.value.replace(/,\s*$/, "");
+                section.removeChild(section.lastChild);
+                var wrapper= document.createElement('div');
+                wrapper.innerHTML= '<input type="hidden" id="tags_'+final.value+'_'+type+'" name="tags_'+final.value+'_'+type+'" value="tags_'+final.value+'_'+type+'">';
+                var div= wrapper.firstChild;
+                section.appendChild(div);
+                wrapper.innerHTML = '<span style="margin-left: 5px;" class="uk-badge" id="tags_'+final.value+'_'+type+'_txt">'+final.value+' <span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\')" id="tags_'+final.value+'_'+type+'_delete"></span></span>  ';
+                div = wrapper.firstChild;
+                section.appendChild(div);
+                final.value = '';
+                section.appendChild(final);
+                section.lastChild.focus();
+            }
+        }
+        
+    </script>
+    {% csrf_token %}
+    <input type="hidden" name="work_id" value="{{ work.id }}">
+    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+        <div class="uk-width-1-2">
+            <span class="uk-text-large"><a href="/works/{{work.id}}">{{ work.title }}</a></span>
+        </div>
+        <div class="uk-text-right uk-width-1-2">
+            <input class="uk-button uk-width-small uk-button-danger" onclick="history.back()" value="Cancel" />
+            <button type="submit" disabled style="display: none" aria-hidden="true"></button>
+            <input class="uk-button uk-width-small uk-button-primary" onclick="this.form.submitted=this.value;" type="submit" value="Submit"/>
+        </div>
+    </div>
+    <hr/>
+        {% if show_chapter %}
+            <ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade; active: 1">
+        {% else %}
+            <ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade; active: 0">
+        {% endif %}
+            <li><a href="#" id="edit_work_link">Edit Work</a></li>
+            <li><a href="#" id="toc_link">Edit Chapters</a></li>
+        </ul>   
+    <input type="hidden" id="redirect_toc" name="redirect_toc">
+
+    <ul class="uk-switcher uk-margin" id="work_switcher">
+        <li>
+            <fieldset class="uk-fieldset">
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-horizontal-text">Work Type</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select uk-form-width-small" name="work_type">
+                            {% for item in work_types %}
+                                <option value="{{item.url}}" {% if work.work_type == item.url %} selected="selected" {% endif %}>{{ item.type_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-horizontal-text">Title</label>
+                    <div class="uk-form-controls">
+                        <div class="uk-inline">
+                            <input class="uk-input uk-form-width-large" type="text" name="title" value="{{ work.title|default_if_none:'' }}">
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-horizontal-text">Summary</label>
+                    <div class="uk-form-controls">
+                        <div class="uk-inline">
+                            <input type="hidden" id="summary" name="summary" value="{{ work.summary|safe|default_if_none:'' }}">
+                            <textarea id="summaryEditor"></textarea>
+                            <script type="text/javascript">
+                                      tinymce.init({
+                                        selector: '#summaryEditor',
+                                        plugins: [
+                                          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak', 
+                                          'fullscreen', 'insertdatetime',
+                                          'media', 'table', 'emoticons'
+                                        ],
+                                        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
+                                          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+                                          'forecolor backcolor emoticons | help',
+                                        menubar: '',
+                                        content_css: 'css/content.css',
+                                        init_instance_callback : function(editor) {
+                                            var workSummary = document.getElementById('summary').value;
+                                            if (workSummary === "None") {
+                                                workSummary = '';
+                                            }
+                                            editor.setContent(workSummary);
+                                        }
+                                      });
+                              </script>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-horizontal-text">Notes</label>
+                    <div class="uk-form-controls">
+                        <div class="uk-inline">
+                            <input type="hidden" id="notes" name="notes" value="{{ work.notes|safe|default_if_none:'' }}">
+                            <textarea id="notesEditor"></textarea>
+                            <script type="text/javascript">
+                                      tinymce.init({
+                                        selector: '#notesEditor',
+                                        plugins: [
+                                          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
+                                          'fullscreen', 'insertdatetime',
+                                          'media', 'table', 'emoticons'
+                                        ],
+                                        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
+                                          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+                                          'forecolor backcolor emoticons | help',
+                                        menubar: '',
+                                        content_css: 'css/content.css',
+                                        init_instance_callback : function(editor) {
+                                            var workNotes = document.getElementById('notes').value;
+                                            if (workNotes === "None") {
+                                                workNotes = '';
+                                            }
+                                            editor.setContent(workNotes);
+                                        }
+                                      });
+                              </script>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-horizontal-text">Complete?</label>
+                    <div class="uk-form-controls">
+                        <div class="uk-inline">
+                            <label><input class="uk-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}> </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-horizontal-text">Draft?</label>
+                    <div class="uk-form-controls">
+                        <div class="uk-inline">
+                            <label for="draft"><input class="uk-checkbox" type="checkbox" name="draft" {% if work.draft %} checked {% endif %}> </label>
+                        </div>
+                    </div>
+                </div>
+
+            <div class="uk-margin">
+                <label class="uk-form-label" for="form-horizontal-text">Cover</label>
+                {% if work.cover_url %}
+                <img src="{{ work.cover_url }}"/>
+                {% endif %}
+                <div class="uk-form-controls">
+                    <div class="uk-inline">
+                        <div class="js-upload-img uk-placeholder uk-text-center">
+                            <span uk-icon="icon: cloud-upload"></span>
+                        <div uk-form-custom="target: true">
+                            <input type="file">
+                            <input class="uk-input uk-form-width-medium" id="js-img-input" type="text" placeholder="Select file" name="cover_url">
+                        </div>
+                        <progress id="js-progressbar-img" class="uk-progress" value="0" max="100" hidden></progress>
+                        <script>
+                            var bar = document.getElementById('js-progressbar-img');
+
+                            UIkit.upload('.js-upload-img', {
+
+                                url: '',
+                                multiple: false,
+
+                                beforeSend: function () {
+                                    function getCookie(name) {
+                                        var cookieValue = null;
+                                        if (document.cookie && document.cookie !== '') {
+                                            var cookies = document.cookie.split(';');
+                                            cookies.forEach(function (value) { 
+                                                var cookie = value.trim();
+                                                // Does this cookie string begin with the name we want?
+                                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                                    return;
+                                                }
+                                            });
+                                        }
+                                        return cookieValue;
+                                    }
+                                    var csrftoken = getCookie('csrftoken');
+                                    arguments[0]['headers']['X-CSRFToken'] = csrftoken;
+                                    console.log('beforeSend', arguments);
+                                },
+                                beforeAll: function () {
+                                    console.log('beforeAll', arguments);
+                                },
+                                load: function () {
+                                    console.log('load', arguments);
+                                },
+                                error: function () {
+                                    console.log('error', arguments);
+                                },
+                                complete: function () {
+                                    console.log('complete', arguments);
+                                },
+
+                                loadStart: function (e) {
+                                    console.log('loadStart', arguments);
+
+                                    bar.removeAttribute('hidden');
+                                    bar.max = e.total;
+                                    bar.value = e.loaded;
+                                },
+
+                                progress: function (e) {
+                                    console.log('progress', arguments);
+
+                                    bar.max = e.total;
+                                    bar.value = e.loaded;
+                                },
+
+                                loadEnd: function (e) {
+                                    console.log('loadEnd', arguments);
+
+                                    bar.max = e.total;
+                                    bar.value = e.loaded;
+                                },
+
+                                completeAll: function () {
+                                    console.log('completeAll', arguments);
+
+                                    setTimeout(function () {
+                                        bar.setAttribute('hidden', 'hidden');
+                                    }, 1000);
+
+                                    document.getElementById('js-img-input').value = arguments[0]['response'];
+                                }
+
+                            });
+
+                        </script>
+                        </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-horizontal-text">Cover Alt Text</label>
+                    <div class="uk-form-controls">
+                        <div class="uk-inline">
+                            <input class="uk-input uk-form-width-large" type="text" name="cover_alt_text" value="{{ work.cover_alt_text|default_if_none:'' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select uk-form-width-large" name="comments_permitted">                    
+                            <option {% if work.anon_comments_permitted and work.comments_permitted %} selected {% endif %}>All</option>
+                            <option {% if work.anon_comments_permitted == False and work.comments_permitted %} selected {% endif %}>Registered users only</option>
+                            <option {% if not work.anon_comments_permitted and not work.comments_permitted %} selected {% endif %}>None</option>
+
+                        </select>
+                    </div>
+                </div>
+                {% for type, tag in tags.items %}
+                <div class="uk-margin">
+                    <label class="uk-form-label" for="form-horizontal-text">{{ type }}</label>
+                    <div class="uk-form-controls">                
+                        <div class="uk-inline">
+                            <div id="{{ type }}_tags">
+                            {% for single_tag in tag %}
+                                <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="tags_{{ single_tag.text }}_{{ type }}">
+                                <span class="uk-badge" id="tags_{{ single_tag.text }}_{{ type }}_txt">{{ single_tag.text }} <span uk-icon="close" onclick="removetag(this.id)" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
+                            {% endfor %}
+                            <input style="margin-left: 5px;" class="uk-input uk-form-width-small uk-form-small uk-form-blank" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </fieldset>
+        </li>
+        <li id="chapters_toc">
+            <script>
+                var util = UIkit.util;
+
+                util.ready(function () {
+
+                    util.on(document.body, 'stop', function (e, sortable, el) {
+                        var list = document.getElementById("chapters_list").getElementsByTagName("li");
+                        var tracking = 1;
+                        for (let item of list) {
+                            var child = item.querySelector('.chapters_tracker')
+                            child.value = tracking;
+                            tracking += 1;
+                        }
+                    });
+                });
+            </script>
+            <ul class="uk-grid-small uk-child-width-1 uk-text-left" uk-sortable="handle: .uk-sortable-handle" uk-grid id="chapters_list">
+                {% for chapter in chapters %}
+                <li id="chapters_list_{{chapter.id}}">
+                    <div class="uk-card uk-card-hover uk-card-body uk-grid-small uk-child-width-1-2 uk-text-left uk-padding-small" uk-grid>
+                        <div class="uk-sortable-handle">
+                            <span class="uk-margin-small-right" uk-icon="icon: table"></span>Chapter {{chapter.number}}: {{chapter.title}}
+                        </div>
+                        <div><a href="/works/{{work.id}}/chapters/{{chapter.id}}/edit">Edit</a> | <a href="/works/{{work.id}}/chapters/{{chapter.id}}/delete">Delete</a></div>
+                        {% if chapter.draft %}
+                            <div class="uk-width-auto">
+                                <span class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+                            </div>
+                            {% endif %}
+                    </div>
+                    
+                    <input type="hidden" class="chapters_tracker" id="chapters_{{chapter.id}}" name="chapters_{{chapter.id}}" value="{{chapter.number}}">
+                </li>
+                {% endfor %}
+                <input class="uk-button uk-button-link" style="width:15em;" onclick="this.form.submitted=this.value;" type="submit" value="New Chapter"/>
+            </ul>
+
+
+        </li>
+    </ul>
+    
+</form>
+</div>
+{% endblock %}

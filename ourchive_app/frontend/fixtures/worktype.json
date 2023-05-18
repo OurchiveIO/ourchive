@@ -1,0 +1,26 @@
+[
+{
+    "model": "api.worktype",
+    "pk": 1,
+    "fields": {
+        "uid": "511e55d3-5c02-491b-87fe-c421edf6f081",
+        "type_name": "Fic"
+    }
+},
+{
+    "model": "api.worktype",
+    "pk": 2,
+    "fields": {
+        "uid": "27afa34a-6193-4215-9933-d666d1f06bb2",
+        "type_name": "Podfic"
+    }
+},
+{
+    "model": "api.worktype",
+    "pk": 3,
+    "fields": {
+        "uid": "030c96d8-434a-4ffc-b18b-30dec2a2513e",
+        "type_name": "Art"
+    }
+}
+]

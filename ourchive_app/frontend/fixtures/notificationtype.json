@@ -1,0 +1,29 @@
+[
+{
+    "model": "api.notificationtype",
+    "pk": 1,
+    "fields": {
+        "uid": "2893f75a-4aac-4254-bd76-e7ba294beee8",
+        "type_label": "Upload Notification",
+        "send_email": false
+    }
+},
+{
+    "model": "api.notificationtype",
+    "pk": 2,
+    "fields": {
+        "uid": "c5c3d33f-5ac8-4a1d-89eb-8e00189fbaad",
+        "type_label": "Comment Notification",
+        "send_email": false
+    }
+},
+{
+    "model": "api.notificationtype",
+    "pk": 3,
+    "fields": {
+        "uid": "11cd6580-c5d1-4a5d-bd16-c42918ecf966",
+        "type_label": "System Notification",
+        "send_email": false
+    }
+}
+]

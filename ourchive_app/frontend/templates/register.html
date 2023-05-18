@@ -1,0 +1,48 @@
+{% extends 'index.html' %}
+{% block content %}	
+<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+<form class="uk-form-horizontal"  method="post">
+	{% csrf_token %}
+    <div class="uk-margin">
+    	<label class="uk-form-label" for="form-horizontal-text">Username</label>
+        <div class="uk-form-controls">
+            <div class="uk-inline">
+	            <span class="uk-form-icon" uk-icon="icon: user"></span>
+	            <input class="uk-input" type="text" name="username">
+	        </div>
+        </div>
+        
+    </div>
+
+    <div class="uk-margin">
+        <label class="uk-form-label" for="form-horizontal-text">Email</label>
+        <div class="uk-form-controls">
+            <div class="uk-inline">
+                <span class="uk-form-icon" uk-icon="icon: mail"></span>
+                <input class="uk-input" type="email" name="email">
+            </div>
+        </div>
+        
+    </div>
+
+    <div class="uk-margin">
+    	<label class="uk-form-label" for="form-horizontal-text">Password</label>
+        <div class="uk-form-controls">
+	        <div class="uk-inline">
+	            <span class="uk-form-icon uk-form-icon" uk-icon="icon: lock"></span>
+	            <input class="uk-input" type="password" name="password">
+	        </div>
+	    </div>
+    </div>
+    <div class="uk-margin">
+    	<label class="uk-form-label" for="form-horizontal-text"></label>
+        <div class="uk-form-controls">
+        	<div class="uk-inline">
+	    		<input class="uk-button uk-button-default" type="submit" value="Register"/>
+	    	</div>
+        </div>
+    	
+    </div>
+</form>
+</div>
+{% endblock %}

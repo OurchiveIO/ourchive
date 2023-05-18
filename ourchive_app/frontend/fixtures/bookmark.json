@@ -1,0 +1,244 @@
+[
+{
+    "model": "api.bookmark",
+    "pk": 2,
+    "fields": {
+        "uid": "28964a44-27cb-4b41-b042-6a3c5f6f0833",
+        "title": "Bookmark 2",
+        "rating": 5,
+        "description": "",
+        "created_on": "2023-01-26T17:49:32.958Z",
+        "updated_on": "2023-05-10T01:30:18.471Z",
+        "draft": false,
+        "anon_comments_permitted": false,
+        "comments_permitted": true,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 2,
+        "tags": [
+            12
+        ]
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 3,
+    "fields": {
+        "uid": "7cb231f2-effb-4912-98fc-0e2e30e4fc9a",
+        "title": "BOOKMARK 3",
+        "rating": 5,
+        "description": "",
+        "created_on": "2023-01-26T17:49:47.283Z",
+        "updated_on": "2023-01-26T17:50:02.408Z",
+        "draft": false,
+        "anon_comments_permitted": false,
+        "comments_permitted": false,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 2,
+        "tags": []
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 4,
+    "fields": {
+        "uid": "71caa7e4-286a-488f-bc56-200c73620f98",
+        "title": "it was fine",
+        "rating": 2,
+        "description": "",
+        "created_on": "2023-05-08T22:35:50.669Z",
+        "updated_on": "2023-05-08T22:35:58.359Z",
+        "draft": false,
+        "anon_comments_permitted": false,
+        "comments_permitted": false,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 2,
+        "tags": []
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 5,
+    "fields": {
+        "uid": "f3629b32-efbc-4d15-8f13-2ea0bc92f7f7",
+        "title": "My Favorite Things",
+        "rating": 5,
+        "description": null,
+        "created_on": "2023-05-09T12:40:11.096Z",
+        "updated_on": "2023-05-09T12:40:11.131Z",
+        "draft": true,
+        "anon_comments_permitted": false,
+        "comments_permitted": false,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 4,
+        "tags": []
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 6,
+    "fields": {
+        "uid": "d1d01dba-b363-4f3c-8999-734de0970172",
+        "title": "Another bookmark",
+        "rating": 5,
+        "description": "desc desc desc",
+        "created_on": "2023-05-09T21:07:24.251Z",
+        "updated_on": "2023-05-09T21:07:34.964Z",
+        "draft": false,
+        "anon_comments_permitted": true,
+        "comments_permitted": true,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 4,
+        "tags": []
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 7,
+    "fields": {
+        "uid": "45086ef3-f613-41ae-987e-8b422b375e4f",
+        "title": "new bookmark",
+        "rating": 5,
+        "description": "",
+        "created_on": "2023-05-09T21:10:05.834Z",
+        "updated_on": "2023-05-09T21:10:13.130Z",
+        "draft": false,
+        "anon_comments_permitted": true,
+        "comments_permitted": true,
+        "collection": null,
+        "user": 2,
+        "is_private": true,
+        "work": 4,
+        "tags": []
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 8,
+    "fields": {
+        "uid": "61e4afc5-cd1d-4e5e-92c8-1416eca93c8a",
+        "title": "Yet another bookmark",
+        "rating": 5,
+        "description": "",
+        "created_on": "2023-05-10T16:00:36.021Z",
+        "updated_on": "2023-05-10T16:00:37.433Z",
+        "draft": false,
+        "anon_comments_permitted": false,
+        "comments_permitted": false,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 6,
+        "tags": []
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 9,
+    "fields": {
+        "uid": "6aa6f52b-7872-4990-8a1b-e22f2b010d71",
+        "title": "New Bookmark",
+        "rating": 5,
+        "description": "",
+        "created_on": "2023-05-10T16:00:41.496Z",
+        "updated_on": "2023-05-10T16:00:42.757Z",
+        "draft": false,
+        "anon_comments_permitted": false,
+        "comments_permitted": false,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 6,
+        "tags": []
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 10,
+    "fields": {
+        "uid": "98918585-2125-47eb-a80e-0ff2f9b492cc",
+        "title": "Genericism",
+        "rating": 5,
+        "description": "",
+        "created_on": "2023-05-10T16:00:45.725Z",
+        "updated_on": "2023-05-10T16:00:49.229Z",
+        "draft": false,
+        "anon_comments_permitted": false,
+        "comments_permitted": false,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 6,
+        "tags": []
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 11,
+    "fields": {
+        "uid": "f4585613-1130-48d7-afbd-f603dfdf33fe",
+        "title": "Another one!",
+        "rating": 5,
+        "description": "",
+        "created_on": "2023-05-10T16:00:52.049Z",
+        "updated_on": "2023-05-10T16:00:53.150Z",
+        "draft": false,
+        "anon_comments_permitted": false,
+        "comments_permitted": false,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 6,
+        "tags": []
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 12,
+    "fields": {
+        "uid": "3ff3dd88-b280-4ae3-aba7-32da42888241",
+        "title": "LOREM IPSUM ETC ETC ETC",
+        "rating": 5,
+        "description": "",
+        "created_on": "2023-05-10T16:00:55.787Z",
+        "updated_on": "2023-05-10T16:00:57.451Z",
+        "draft": false,
+        "anon_comments_permitted": false,
+        "comments_permitted": false,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 6,
+        "tags": []
+    }
+},
+{
+    "model": "api.bookmark",
+    "pk": 13,
+    "fields": {
+        "uid": "346d88b0-d3bc-4f94-bf75-b408ca028e81",
+        "title": "New Bookmark blah blah blah long title blah blah blah long title",
+        "rating": 5,
+        "description": "",
+        "created_on": "2023-05-10T16:01:00.353Z",
+        "updated_on": "2023-05-10T16:04:24.378Z",
+        "draft": false,
+        "anon_comments_permitted": false,
+        "comments_permitted": false,
+        "collection": null,
+        "user": 1,
+        "is_private": true,
+        "work": 6,
+        "tags": []
+    }
+}
+]

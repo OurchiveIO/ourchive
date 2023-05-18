@@ -1,0 +1,16 @@
+[
+{
+    "model": "api.userprofile",
+    "pk": 1,
+    "fields": {
+        "uid": "5bcdbf08-bac9-4575-8578-3b9148c288ec",
+        "created_on": "2023-05-08T15:19:02.903Z",
+        "updated_on": "2023-05-10T15:09:14.302Z",
+        "profile": "I'm here to eat sandwiches and run up that tree, and I'm all out of sandwiches.",
+        "icon": "/files/image/imp/4faf7127-4e6d-4666-9b9c-49b2bcd9ad79_beautifulgenius.png",
+        "icon_alt_text": "None",
+        "has_notifications": false,
+        "user": 1
+    }
+}
+]

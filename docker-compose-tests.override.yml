@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:10.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+  web:
+    build: .
+    command: python /code/ourchive_app/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - migration
+  migration:
+    build: .
+    command: python /code/ourchive_app/manage.py migrate --noinput
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

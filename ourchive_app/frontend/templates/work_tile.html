@@ -1,0 +1,45 @@
+<div class="uk-margin">
+	<div class="uk-card uk-card-default">
+	    <div class="uk-card-header">
+	        <div class="uk-grid-small uk-flex-middle" uk-grid>
+	            {% if work.cover_url != "None" and work.cover_url is not None and work.cover_url != "" %}
+	            <div class="uk-width-auto">
+	                <img class="uk-border-circle" width="40" height="40" alt="{{work.cover_alt_text}}" src="{{work.cover_url}}">
+	            </div>
+	            {% endif %}
+	            <div class="uk-width-expand">
+	                {% if work.draft == True %}
+	                	<h3 class="uk-card-title uk-margin-remove-bottom"><a href="/works/{{work.id}}?draft=true">{{work.title}}</a></h3>
+	                {% else %}
+	                	<h3 class="uk-card-title uk-margin-remove-bottom"><a href="/works/{{work.id}}">{{work.title}}</a></h3>
+	                {% endif %}
+	                <p class="uk-text-meta uk-margin-remove-top">{{ work.user }}</p>
+	            </div>
+	        	{% if work.draft %}
+	            <div class="uk-width-auto">
+	                <span class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+	            </div>
+	            {% endif %}
+	        </div>
+	    </div>
+	    <div class="uk-card-body">
+	        <p>{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>
+		        {% for type, tag in work.tags.items %} 
+			        <dt>{{ type }}</dt>
+			        <dd>
+			        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="{{ root }}/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
+			        </dd>
+			    {% endfor %}
+	    </div>
+	    <div class="uk-card-footer">
+	        <a href="/works/{{work.id}}" class="uk-button uk-button-text">Read more</a>
+	        {% if work.user == request.user.username %}
+	        <div class="uk-align-right">
+	            <a href="{{ root }}/works/{{ work.id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
+	            <a href="{{ root }}/works/{{ work.id }}/delete"><span uk-icon="icon: trash" title="Delete"></span> </a>
+	        </div>
+	            {% endif %}
+	    </div>
+
+	</div>  
+</div> 

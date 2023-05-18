@@ -1,0 +1,8 @@
+{% extends 'index.html' %}
+{% block content %}	
+	<form class="uk-search uk-search-large" method="post" action="search/">
+		{% csrf_token %}
+		<a href="#" uk-search-icon></a>
+		<input class="uk-search-input" type="search" name="term" placeholder="Search..." value="{{ term }}">
+	</form>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'index.html' %}
+{% block content %}	
+<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+<div class="js-upload uk-placeholder uk-text-center">
+    {% csrf_token %}
+    <span uk-icon="icon: cloud-upload"></span>
+    <span class="uk-text-middle">Attach binaries by dropping them here or</span>
+    <div uk-form-custom>
+        <input type="file" name="file">
+        <span class="uk-link">selecting one</span>
+    </div>
+</div>
+
+<progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
+
+<script>
+
+    var bar = document.getElementById('js-progressbar');
+
+    UIkit.upload('.js-upload', {
+
+        url: '',
+        multiple: false,
+
+        beforeSend: function () {
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    cookies.forEach(function (value) { 
+                        var cookie = value.trim();
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            var csrftoken = getCookie('csrftoken');
+            arguments[0]['headers']['X-CSRFToken'] = csrftoken;
+            console.log('beforeSend', arguments);
+        },
+        beforeAll: function () {
+            console.log('beforeAll', arguments);
+        },
+        load: function () {
+            console.log('load', arguments);
+        },
+        error: function () {
+            console.log('error', arguments);
+        },
+        complete: function () {
+            console.log('complete', arguments);
+        },
+
+        loadStart: function (e) {
+            console.log('loadStart', arguments);
+
+            bar.removeAttribute('hidden');
+            bar.max = e.total;
+            bar.value = e.loaded;
+        },
+
+        progress: function (e) {
+            console.log('progress', arguments);
+
+            bar.max = e.total;
+            bar.value = e.loaded;
+        },
+
+        loadEnd: function (e) {
+            console.log('loadEnd', arguments);
+
+            bar.max = e.total;
+            bar.value = e.loaded;
+        },
+
+        completeAll: function () {
+            console.log('completeAll', arguments);
+
+            setTimeout(function () {
+                bar.setAttribute('hidden', 'hidden');
+            }, 1000);
+
+            alert('Upload Completed');
+        }
+
+    });
+
+</script>
+
+</div>
+{% endblock %}
