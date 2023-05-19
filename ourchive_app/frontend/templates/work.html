@@ -39,7 +39,7 @@
         <div><span class="uk-text-large">Notes</span></div>
         <div><span class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></div>
     </div>
-    <p class="uk-article-meta"><b>{{ work.fingerguns }} Fingerguns</b></p>
+    <p class="uk-article-meta"><span class="uk-inline"><b>{{ work.fingerguns }} Fingerguns</b></span> | <span class="uk-inline"><b>{{ work.word_count }} Words</b></span></p>
     <hr/>
     <dl class="uk-description-list uk-description-list-divider">
     {% for type, tag in tags.items %} 

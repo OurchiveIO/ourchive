@@ -174,8 +174,11 @@ def edit_user(request, username):
 		user_data.pop('unaltered_icon')
 		profile_id = user_data['userprofile_id']
 		user_data.pop('userprofile_id')
-		response = do_put(f'api/userprofile/{profile_id}/', request, data=user_data)
-		if response[1] == 200:
+		if profile_id:
+			response = do_put(f'api/userprofile/{profile_id}/', request, data=user_data)
+		else:
+			response = do_post(f'api/userprofiles', request, data=user_data)
+		if response[1] == 200 or response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'User profile updated.')	
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to update this user profile.')	
@@ -188,7 +191,11 @@ def edit_user(request, username):
 			user = response[0]['results']
 			if len(user) > 0:
 				user = user[0]
-				user['userprofile']['profile'] = escape(user['userprofile']['profile']) if user['userprofile']['profile'] is not None else ''
+				if user['userprofile'] is not None:
+					if user['userprofile']['profile'] is not None:
+						user['userprofile']['profile'] = escape(user['userprofile']['profile']) 
+					else:
+						user['userprofile']['profile'] =''
 				return render(request, 'user_form.html', {'user': user})
 			else:
 				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.')	
@@ -214,13 +221,19 @@ def user_notifications(request, username):
 		request.session['has_notifications'] = has_notifications
 	else:
 		request.session['has_notifications'] = False
-	response = do_get(f'api/users/{username}/notifications', request, params=request.GET)[0]
-	notifications = response['results']
-	return render(request, 'notifications.html', {
-		'notifications': notifications,
-		'next': f"/username/{username}/notifications/{response['next_params']}" if response['next_params'] is not None else None,
-		'previous': f"/username/{username}/notifications/{response['prev_params']}" if response['prev_params'] is not None else None})
-
+	response = do_get(f'api/users/{username}/notifications', request, params=request.GET)
+	if response[1] == 204 or response[1] == 200:
+		notifications = response[0]['results']
+		return render(request, 'notifications.html', {
+			'notifications': notifications,
+			'next': f"/username/{username}/notifications/{response['next_params']}" if response['next_params'] is not None else None,
+			'previous': f"/username/{username}/notifications/{response['prev_params']}" if response['prev_params'] is not None else None})	
+	elif response[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to view these notifications.')	
+	else:
+		messages.add_message(request, messages.ERROR, 'An error has occurred while fetching notifications. Please contact your administrator.')	
+	return redirect(f'/')
+	
 def delete_notification(request, username, notification_id): 
 	response = do_delete(f'api/notifications/{notification_id}', request)
 	if response[1] == 204:
@@ -609,7 +622,9 @@ def edit_bookmark(request, pk):
 		bookmark_dict = bookmark_dict.dict()
 		bookmark_dict["user"] = str(request.user)
 		#bookmark_dict.pop("work")
-		response = do_put(f'api/bookmarks/{pk}/draft', request, data=bookmark_dict)
+		bookmark_dict["draft"] = 'draft' in bookmark_dict
+		print(bookmark_dict)
+		response = do_put(f'api/bookmarks/{pk}/', request, data=bookmark_dict)
 		if response[1] == 200:			
 			messages.add_message(request, messages.SUCCESS, 'Bookmark updated.')	
 		elif response[1] == 403:
@@ -766,7 +781,6 @@ def create_chapter_comment(request, work_id, chapter_id):
 	if request.method == 'POST':
 		comment_dict = request.POST.copy()
 		offset_url = int(request.GET.get('offset', 0))
-		print(offset_url)
 		if request.user.is_authenticated:
 			comment_dict["user"] = str(request.user)
 		else:
@@ -872,7 +886,6 @@ def bookmark(request, pk):
 	get_url = f'api/bookmarks/{pk}/draft' if request.GET.get('draft') == "True" else f'api/bookmarks/{pk}'
 	bookmark = do_get(get_url, request)[0]
 	comments = do_get(f'api/bookmarks/{pk}/comments', request)[0]
-	print(comments['next_params'])
 	bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new"
 	bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit"""
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"

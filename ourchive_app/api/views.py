@@ -95,7 +95,7 @@ class UserWorkList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer    
     permission_classes = [IsOwnerOrReadOnly]
     def get_queryset(self):
-        return Work.objects.filter(user__username=self.kwargs['username']).order_by('id')
+        return Work.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False)|Q(user__id=self.request.user.id)).order_by('id')
 
 class UserBookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer    

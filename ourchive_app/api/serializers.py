@@ -297,9 +297,6 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
     def process_tags(self, work, validated_data, tags):
-        print(work)
-        print(validated_data)
-        print(tags)
         work.tags.clear()
         required_tag_types = list(TagType.objects.filter(required=True))
         has_any_required = len(required_tag_types) > 0
@@ -366,7 +363,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
             required_tag_types = list(TagType.objects.filter(required=True))
             has_any_required = len(required_tag_types) > 0
             for item in tags:
-                tag_id = item['text']
+                tag_id = item['text'].lower()
+                tag_friendly_name = item['text']
                 tag_type = item['tag_type']
                 if tag_type in required_tag_types:
                     if tag_id is None or tag_id == '':
@@ -375,6 +373,9 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
                     else:
                         required_tag_types.pop()
                 tag, created = Tag.objects.get_or_create(text=tag_id, tag_type=tag_type)
+                if tag.display_text == '':
+                    tag.display_text = tag_friendly_name
+                    tag.save()
                 bookmark.tags.add(tag)
             bookmark.save()
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)        
@@ -387,9 +388,13 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
             for item in tags:
-                tag_id = item['text']
+                tag_id = item['text'].lower()
+                tag_friendly_name = item['text']
                 tag_type = item['tag_type_id']
                 tag, created = Tag.objects.get_or_create(text=tag_id, tag_type=tag_type)
+                if tag.display_text == '':
+                    tag.display_text = tag_friendly_name
+                    tag.save()
                 bookmark.tags.add(tag)
         bookmark.save()
         return bookmark

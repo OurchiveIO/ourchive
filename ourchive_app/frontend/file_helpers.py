@@ -5,6 +5,7 @@ from botocore.exceptions import ClientError
 import uuid
 import os
 import pathlib
+import audioread
 
 class FileHelperService:
 	def get_service():
@@ -23,6 +24,11 @@ class FileCommon:
 		uuid_str = str(uuid.uuid4())
 		return uuid_str + '_' + original_name + suffix
 
+	def calculate_audio_duration(self, filename):
+		with audioread.audio_open(filename) as f:
+			#TODO: move processing to celery task
+		    print(f.duration)
+
 class LocalFileHelper:	
 	common = FileCommon()
 
@@ -34,6 +40,8 @@ class LocalFileHelper:
 		with open(full_name, 'wb+') as destination:
 			for chunk in file.chunks():
 				destination.write(chunk)
+		if (content_type == 'audio/'):
+			self.common.calculate_audio_duration(full_name)
 		return settings.MEDIA_URL + content_type + username + "/" + filename
 
 	def handle_file_serve(self, prepend, filename):

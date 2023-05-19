@@ -18,13 +18,15 @@
     </div>
 	<div class="uk-width-1 uk-align-center">
         <div class="uk-card uk-card-body"> 
-            <img src="{{ user.userprofile.icon }}" class="uk-align-center" style="border-radius: 50%"/> 
+            <img src="{{ user.userprofile.icon }}" class="uk-align-center uk-height-max-small" style="border-radius: 50%"/> 
             <h1 class="uk-heading-line uk-text-center"> <span>{{ user.username }}</span> </h1> 
         </div>
-        <div class="uk-card uk-card-body uk-align-center">
-            <h2> Profile </h2>
-            <span>{% autoescape off %} {{ user.userprofile.profile }} {% endautoescape %}</span> 
-        </div>
+        {% if user.userprofile.profile %}
+            <div class="uk-card uk-card-body uk-align-center">
+                <h2> Profile </h2>
+                <span>{% autoescape off %} {{ user.userprofile.profile }} {% endautoescape %}</span> 
+            </div>
+        {% endif %}
         <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.userprofile.default_content == 'Work' %}0{% else %}1{% endif %}" id="user_content_switcher_header">
             <li><a href="#">Works</a></li>
             <li><a href="#">Bookmarks</a></li>
