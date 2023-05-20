@@ -19,3 +19,4 @@ mutagen
 pydub
 elasticsearch
 elasticsearch_dsl
+audioread
