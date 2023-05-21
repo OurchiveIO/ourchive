@@ -18,3 +18,12 @@ Required:
     ```
     check out [this](https://askubuntu.com/questions/1372562/how-to-install-libpq-dev-14-0-1-on-ubuntu-21-10)
 3. create a new database to use in postgres
+4. create dotenv file
+5. add db password and secret key to dotenv file.
+6. from the `ourchive_app` folder:
+	`python manage.py migrate`
+	`python manage.py loaddata settings`
+	`python manage.py runserver`
+
+	and boom, you've got ourchive up and running. 
+
