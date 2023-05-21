@@ -28,12 +28,7 @@ File Upload: Django OR Tus (configurable provider)
 
 Postgres will need to be up and running.
 
-Things to run:
-
-```python manage.py migrate```
-```python manage.py loaddata settings```
-
-Without loading data from the settings fixture, you may encounter errors when the system tries to pull default settings by name.
+see [local-dev][local-dev.md] for further local dev set up.
 
 
 <a name="contributor-guidelines"></a>
