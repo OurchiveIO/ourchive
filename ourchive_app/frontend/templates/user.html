@@ -28,8 +28,8 @@
             </div>
         {% endif %}
         <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.userprofile.default_content == 'Work' %}0{% else %}1{% endif %}" id="user_content_switcher_header">
-            <li><a href="#">Works</a></li>
-            <li><a href="#">Bookmarks</a></li>
+            <li><a href="#" id="user_works_selector">Works</a></li>
+            <li><a href="#" id="user_bookmarks_selector">Bookmarks</a></li>
         </ul>
         <ul class="uk-switcher uk-margin" id="user_content_switcher">
             <li id="work_tab">

@@ -23,7 +23,7 @@ def group_tags(tag_types, tags):
 
 def get_headers(request):
 	headers = {}
-	headers['X-CSRFToken'] = request.COOKIES['csrftoken']
+	headers['X-CSRFToken'] = request.COOKIES['csrftoken'] if 'csrftoken' in request.COOKIES else None
 	headers['content-type'] = 'application/json'
 	return headers
 
@@ -56,6 +56,13 @@ def get_object_tags(parent, request):
 		tags = group_tags(tag_types['results'], item['tags']) if 'tags' in item else {}
 		item['tags'] = tags
 	return parent
+
+def get_works_list(request, username=None):
+	url = f'api/users/{username}/works' if username is not None else f'api/works'
+	response = do_get(url, request, params=request.GET)[0]
+	works = response['results']
+	works = get_object_tags(works, request)
+	return {'works': works, 'next_params': response['next_params'], 'prev_params': response['prev_params']}
 
 def index(request):
 	if request.user.is_authenticated:
@@ -112,13 +119,11 @@ def user_name(request, username):
 		return render(request, 'user.html', {'user': {}})
 
 def user_works(request, username):
-	response = do_get(f'api/users/{username}/works', request, params=request.GET)[0]
-	works = response['results']
-	works = get_object_tags(works, request)
+	works = get_works_list(request, username)
 	return render(request, 'works.html', {
-		'works': works,
-		'next': f"/username/{username}/works/{response['next_params']}" if response["next_params"] is not None else None,
-		'previous': f"/username/{username}/works/{response['prev_params']}" if response["prev_params"] is not None else None,
+		'works': works['works'],
+		'next': f"/username/{username}/works/{works['next_params']}" if works["next_params"] is not None else None,
+		'previous': f"/username/{username}/works/{works['prev_params']}" if works["prev_params"] is not None else None,
 		'user_filter': username,
 		'root': settings.ALLOWED_HOSTS[0]})
 
