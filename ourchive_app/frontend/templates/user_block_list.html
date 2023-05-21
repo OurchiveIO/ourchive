@@ -1,0 +1,15 @@
+{% extends 'index.html' %}
+{% block content %}	
+<div class="uk-width-1-1 uk-text-left" uk-grid>
+	{% if not blocklist %}
+	<p>No users have been blocked. To block a user, navigate to their profile and click the "block" icon.</p>
+	{% endif %}
+	{% for block in blocklist %}
+		<div>
+	        <div class="uk-card uk-card-default uk-card-body">
+	            <p>{{block.blocked_user}} (<a href="{{ root }}/users/{{username}}/blocks/{{block.id}}/unblock">Unblock</a>)</p>
+	        </div>
+	    </div>
+	{% endfor %}
+</div>
+{% endblock %}

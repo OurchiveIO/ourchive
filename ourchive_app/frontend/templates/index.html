@@ -59,6 +59,7 @@
 	                    			<li><a href="/username/{{request.user}}/works">Works</a></li>
 	                    			<li><a href="/username/{{request.user}}/edit">Edit Profile</a></li>
 	                    			<li><a href="/username/{{request.user}}/account/edit">Edit Account</a></li>
+	                    			<li><a href="/users/{{request.user}}/blocklist">Blocklist</a></li>
 	                    			{% if request.session.has_notifications %}
 	                    			<li><a class="uk-text-emphasis uk-text-secondary" href="/username/{{request.user}}/notifications">Notifications (Unread)</a></li>
 	                    			{% else %}

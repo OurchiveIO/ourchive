@@ -118,6 +118,33 @@ def user_name(request, username):
 	else:
 		return render(request, 'user.html', {'user': {}})
 
+def user_block_list(request, username):
+	blocklist = do_get(f'api/users/{username}/userblocks', request)
+	if blocklist[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to view this blocklist.')	
+		return redirect(f'/username/{username}')
+	return render(request, 'user_block_list.html', {
+		'blocklist': blocklist[0]['results'],
+		'username': username
+	})
+
+def block_user(request, username):
+	data = {'user': request.user.username, 'blocked_user': username}
+	blocklist = do_post(f'api/userblocks', request, data)
+	if blocklist[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to view this blocklist.')	
+	if blocklist[1] >= 200 and blocklist[1] < 300:
+		messages.add_message(request, messages.SUCCESS, 'User blocked.')
+	return redirect(f'/username/{username}')
+
+def unblock_user(request, username, pk):
+	blocklist = do_delete(f'api/userblocks/{pk}', request)
+	if blocklist[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to unblock this user.')	
+	if blocklist[1] >= 200 and blocklist[1] < 300:
+		messages.add_message(request, messages.SUCCESS, 'User unblocked.')
+	return redirect(f'/username/{username}')
+
 def user_works(request, username):
 	works = get_works_list(request, username)
 	return render(request, 'works.html', {

@@ -19,8 +19,9 @@ class UserProfileCommentSerializer(serializers.HyperlinkedModelSerializer):
 
 class UserBlocksSerializer(serializers.HyperlinkedModelSerializer):
     uid = serializers.ReadOnlyField()
-    user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='id')
-    blocked_user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='id')
+    id = serializers.ReadOnlyField()
+    user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
+    blocked_user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
     class Meta:
         model = UserBlocks
         fields = '__all__'
