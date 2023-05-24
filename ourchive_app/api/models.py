@@ -440,3 +440,18 @@ class OurchiveSetting(models.Model):
 
     def __str__(self):
         return self.name
+
+class ContentPage(models.Model):
+
+    __tablename__ = 'ourchive_settings'
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    value = models.TextField(null=True, blank=True)
+    order = models.IntegerField(default=1)
+
+    def __repr__(self):
+        return '<ContentPage: {}>'.format(self.id)
+
+    def __str__(self):
+        return self.name
