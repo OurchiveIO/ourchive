@@ -33,7 +33,7 @@
 	            {% endif %}
 	        </div>
 	    <div class="uk-width-1">
-	    	<p class="uk-text-medium">{{ bookmark.description }}</p>
+	    	<p class="uk-text-medium">{{ bookmark.description|safe }}</p>
 	    </div>	  
 	    <div class="uk-width-1">
 	    	{% for stars in rating_range %}

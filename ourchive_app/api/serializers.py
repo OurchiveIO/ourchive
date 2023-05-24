@@ -358,6 +358,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         model = Bookmark
         fields = '__all__'
     def update(self, bookmark, validated_data):
+        if 'title' in validated_data and validated_data['title'] == '':
+            validated_data['title'] = f'Bookmark: {bookmark.work.title}'
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
             bookmark.tags.clear()
@@ -378,6 +380,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
                     tag.display_text = tag_friendly_name
                     tag.save()
                 bookmark.tags.add(tag)
+            if bookmark.title == '':
+                bookmark.title = bookmark.work.title
             bookmark.save()
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)        
         return Bookmark.objects.filter(id=bookmark.id).first()

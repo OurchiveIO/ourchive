@@ -35,6 +35,23 @@ def get_results(results):
 	results_status_code = results.status_code
 	return [results_json, results_status_code]
 
+def sanitize_rich_text(rich_text):
+	if rich_text is not None:
+		rich_text = escape(rich_text) 
+	else:
+		rich_text =''
+	return rich_text
+
+def process_results(results, object):
+	if results[1] >= 200 and results[1] < 300:
+		return 'OK'
+	if results[1] >= 400 and results[1] < 500 and results[1] != 404:
+		return f"You are not authorized to access this {object}. Please contact your administrator for more information."
+	if results[1] == 404:
+		return f"We could not find this {object}. You may not have access to it, or it may not exist."
+	if results[1] == 500:
+		f"An error occurred while accessing this {object}. Please contact your administrator for more information."
+ 
 def do_patch(url, request, data={}):
 	return get_results(requests.patch(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
 
@@ -51,17 +68,27 @@ def do_get(url, request, params={}):
 	return get_results(requests.get(append_root_url(url), params=params, cookies=request.COOKIES, headers=get_headers(request)))
 
 def get_object_tags(parent, request):
-	tag_types = do_get('api/tagtypes', request)[0]
-	for item in parent:
-		tags = group_tags(tag_types['results'], item['tags']) if 'tags' in item else {}
-		item['tags'] = tags
+	tag_types = do_get('api/tagtypes', request)
+	result_message = process_results(tag_types, 'tag types')
+	if result_message != 'OK':
+		messages.add_message(request, messages.ERROR, result_message)
+	else:
+		tag_types = tag_types[0]
+		for item in parent:
+			tags = group_tags(tag_types['results'], item['tags']) if 'tags' in item else {}
+			item['tags'] = tags
 	return parent
 
 def get_works_list(request, username=None):
 	url = f'api/users/{username}/works' if username is not None else f'api/works'
-	response = do_get(url, request, params=request.GET)[0]
-	works = response['results']
-	works = get_object_tags(works, request)
+	response = do_get(url, request, params=request.GET)
+	result_message = process_results(response, 'works')
+	if result_message !='OK':
+		messages.add_message(request, messages.ERROR, result_message)
+		return redirect('/')
+	else:
+		works = response[0]['results']
+		works = get_object_tags(works, request)
 	return {'works': works, 'next_params': response['next_params'], 'prev_params': response['prev_params']}
 
 def index(request):
@@ -116,7 +143,8 @@ def user_name(request, username):
 			'user': user['results'][0]
 		})
 	else:
-		return render(request, 'user.html', {'user': {}})
+		messages.add_message(request, messages.ERROR, 'User not found.')
+		return redirect('/')
 
 def user_block_list(request, username):
 	blocklist = do_get(f'api/users/{username}/userblocks', request)
@@ -224,10 +252,7 @@ def edit_user(request, username):
 			if len(user) > 0:
 				user = user[0]
 				if user['userprofile'] is not None:
-					if user['userprofile']['profile'] is not None:
-						user['userprofile']['profile'] = escape(user['userprofile']['profile']) 
-					else:
-						user['userprofile']['profile'] =''
+					user['userprofile']['profile'] = sanitize_rich_text(user['userprofile']['profile']) 
 				return render(request, 'user_form.html', {'user': user})
 			else:
 				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.')	
@@ -448,9 +473,9 @@ def edit_chapter(request, work_id, id):
 	else:
 		if request.user.is_authenticated:			
 			chapter = do_get(f'api/chapters/{id}', request)[0]
-			chapter['text'] = escape(chapter['text']) if chapter['text'] is not None else ''
-			chapter['summary'] = escape(chapter['summary']) if chapter['summary'] is not None else ''
-			chapter['notes'] = escape(chapter['notes']) if chapter['notes'] is not None else ''
+			chapter['text'] = sanitize_rich_text(chapter['text'])
+			chapter['summary'] = sanitize_rich_text(chapter['summary'])
+			chapter['notes'] = sanitize_rich_text(chapter['notes'])
 			return render(request, 'chapter_form.html', {'chapter': chapter})
 		else:
 			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')	
@@ -513,8 +538,8 @@ def edit_work(request, id):
 		tag_types = do_get(f'api/tagtypes', request)[0]
 		if request.user.is_authenticated:
 			work = do_get(f'api/works/{id}/draft', request)[0]
-			work['summary'] = escape(work['summary']) if work['summary'] is not None else ''
-			work['notes'] = escape(work['notes']) if work['notes'] is not None else ''
+			work['summary'] = sanitize_rich_text(work['summary'])
+			work['notes'] = sanitize_rich_text(work['notes'])
 			chapters = do_get(f'api/works/{id}/chapters/draft', request)[0]
 			tags = group_tags(tag_types['results'], work['tags'])
 			return render(request, 'work_form.html', {'work_types': work_types['results'],
@@ -604,7 +629,7 @@ def delete_chapter(request, work_id, chapter_id):
 
 def new_bookmark(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
-		data = {'title': 'New Bookmark', 'user': request.user.username, 'work_id': work_id, 'is_private': True, 'rating': 5}
+		data = {'title': '', 'user': request.user.username, 'work_id': work_id, 'is_private': True, 'rating': 5}
 		response = do_post(f'api/bookmarks/', request, data=data)
 		if response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark created.')	
@@ -655,7 +680,6 @@ def edit_bookmark(request, pk):
 		bookmark_dict["user"] = str(request.user)
 		#bookmark_dict.pop("work")
 		bookmark_dict["draft"] = 'draft' in bookmark_dict
-		print(bookmark_dict)
 		response = do_put(f'api/bookmarks/{pk}/', request, data=bookmark_dict)
 		if response[1] == 200:			
 			messages.add_message(request, messages.SUCCESS, 'Bookmark updated.')	
@@ -669,6 +693,7 @@ def edit_bookmark(request, pk):
 		if request.user.is_authenticated:
 			tag_types = do_get(f'api/tagtypes', request)[0]
 			bookmark = do_get(f'api/bookmarks/{pk}/draft', request)[0]
+			bookmark['description'] = sanitize_rich_text(bookmark['description'])
 			tags = group_tags(tag_types['results'], bookmark['tags']) if 'tags' in bookmark else []
 			return render(request, 'bookmark_form.html', {
 				'rating_range': [1,2,3,4,5],
@@ -911,6 +936,7 @@ def bookmarks(request):
 	bookmarks = get_object_tags(bookmarks, request)
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks, 
+		'rating_range': [1,2,3,4,5],
 		'next': f"/bookmarks/{next_param}" if next_param is not None else None,
 		'previous': f"/bookmarks/{previous_param}" if previous_param is not None else None})
 
