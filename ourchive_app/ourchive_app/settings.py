@@ -24,10 +24,10 @@ load_dotenv(find_dotenv())
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ')ug-d&%)o2ff=r^8&j6%8tsr82kh)1+n9pwi6_d(vhwinvfzar'
+SECRET_KEY = os.getenv('OURCHIVE_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('OURCHIVE_DEBUG', False)
 
 ALLOWED_HOSTS = ["http://127.0.0.1:8000", "127.0.0.1", "host.docker.internal", "localhost", "http://localhost:8000",]
 
@@ -101,7 +101,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'ourchive_db',
         'USER': 'ourchive',
-        'PASSWORD': 'ourchive',
+        'PASSWORD': os.getenv('OURCHIVE_DB_PW'),
         'HOST': 'localhost',
         'PORT': '5432',
     }
