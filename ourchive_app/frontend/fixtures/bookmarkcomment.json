@@ -1,0 +1,106 @@
+[
+{
+    "model": "api.bookmarkcomment",
+    "pk": 1,
+    "fields": {
+        "uid": "fbdcb22e-aead-40ed-9b14-0be6ff3ddd44",
+        "text": "hello",
+        "user": 1,
+        "created_on": "2023-05-09T21:07:59.144Z",
+        "updated_on": "2023-05-09T21:07:59.144Z",
+        "parent_comment": null,
+        "bookmark": 6
+    }
+},
+{
+    "model": "api.bookmarkcomment",
+    "pk": 2,
+    "fields": {
+        "uid": "496a02bc-90a3-4570-a179-db56f7fdaf14",
+        "text": "goodbye",
+        "user": 3,
+        "created_on": "2023-05-09T21:10:27.946Z",
+        "updated_on": "2023-05-09T21:10:27.946Z",
+        "parent_comment": null,
+        "bookmark": 7
+    }
+},
+{
+    "model": "api.bookmarkcomment",
+    "pk": 3,
+    "fields": {
+        "uid": "9294955d-6785-4727-8194-6aa575616c8c",
+        "text": "we must ask ourselves why we are doing this",
+        "user": 3,
+        "created_on": "2023-05-09T21:12:09.555Z",
+        "updated_on": "2023-05-09T21:12:09.555Z",
+        "parent_comment": null,
+        "bookmark": 7
+    }
+},
+{
+    "model": "api.bookmarkcomment",
+    "pk": 4,
+    "fields": {
+        "uid": "42e1c913-1b98-4d3e-9657-27013b291f13",
+        "text": "but ultimately it's for the vine",
+        "user": 3,
+        "created_on": "2023-05-09T21:12:50.298Z",
+        "updated_on": "2023-05-09T21:12:50.298Z",
+        "parent_comment": null,
+        "bookmark": 7
+    }
+},
+{
+    "model": "api.bookmarkcomment",
+    "pk": 5,
+    "fields": {
+        "uid": "94c7eacb-e18b-407d-870f-a0d7f09433e5",
+        "text": "indicating one is old",
+        "user": 1,
+        "created_on": "2023-05-10T01:21:18.167Z",
+        "updated_on": "2023-05-10T01:21:18.167Z",
+        "parent_comment": null,
+        "bookmark": 2
+    }
+},
+{
+    "model": "api.bookmarkcomment",
+    "pk": 6,
+    "fields": {
+        "uid": "0479563c-021d-42d9-a5df-9549bdb616eb",
+        "text": "hello world",
+        "user": 1,
+        "created_on": "2023-05-10T01:37:58.306Z",
+        "updated_on": "2023-05-10T01:37:58.306Z",
+        "parent_comment": null,
+        "bookmark": 2
+    }
+},
+{
+    "model": "api.bookmarkcomment",
+    "pk": 7,
+    "fields": {
+        "uid": "67187668-7a34-4afc-8f6e-3bcc796d17e8",
+        "text": "(well, i don't think so)",
+        "user": 1,
+        "created_on": "2023-05-10T02:06:18.804Z",
+        "updated_on": "2023-05-10T02:06:18.804Z",
+        "parent_comment": 5,
+        "bookmark": 2
+    }
+},
+{
+    "model": "api.bookmarkcomment",
+    "pk": 8,
+    "fields": {
+        "uid": "eea6f111-6f66-4d23-b955-76158ff32ee4",
+        "text": "that's your opinion!",
+        "user": 1,
+        "created_on": "2023-05-10T02:25:28.920Z",
+        "updated_on": "2023-05-10T02:25:28.920Z",
+        "parent_comment": 7,
+        "bookmark": 2
+    }
+}
+]

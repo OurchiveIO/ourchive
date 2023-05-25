@@ -1,0 +1,32 @@
+.idea/*
+uploads/*
+audio/*
+ourchive_app/files/*
+venv/*
+ourchive-env/*
+tus-data/*
+tus-data/data/*
+.DS_Store
+venv
+node_modules
+static/bundle.js
+npm-debug.log
+Pipfile.lock
+*.pyc
+server/flask_app/uploads/*
+*.epub
+*.jpg
+*.log
+drivers
+assets
+output
+.vscode
+.idea
+# ignore any .env folder
+**/.env
+
+# ignore the venv
+**/venv
+
+# ignore python stuff
+**/__pycache__

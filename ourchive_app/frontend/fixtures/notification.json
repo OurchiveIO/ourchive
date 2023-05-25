@@ -1,0 +1,54 @@
+[
+{
+    "model": "api.notification",
+    "pk": 2,
+    "fields": {
+        "uid": "22ee685d-8f6b-4299-847f-9b95ea42e481",
+        "created_on": "2023-05-10T13:32:18.173Z",
+        "title": "You have a comment",
+        "content": "Clicky to see <a href=\"/works\">here</a>.",
+        "read": true,
+        "user": 1,
+        "notification_type": 2
+    }
+},
+{
+    "model": "api.notification",
+    "pk": 3,
+    "fields": {
+        "uid": "d1c2c2d8-2d44-47b8-9f9a-533642c58872",
+        "created_on": "2023-05-10T14:21:48.894Z",
+        "title": "Type 3 notification",
+        "content": "I'm a notification of type having id 3.",
+        "read": true,
+        "user": 1,
+        "notification_type": 3
+    }
+},
+{
+    "model": "api.notification",
+    "pk": 4,
+    "fields": {
+        "uid": "a0ec0311-39d9-407a-ae24-02c18eb20231",
+        "created_on": "2023-05-10T14:22:08.603Z",
+        "title": "Different notification type",
+        "content": "I'm a notification of type having id 2.",
+        "read": true,
+        "user": 1,
+        "notification_type": 2
+    }
+},
+{
+    "model": "api.notification",
+    "pk": 5,
+    "fields": {
+        "uid": "8236c269-bf28-4b50-9199-2f09ce108e3e",
+        "created_on": "2023-05-10T14:22:26.829Z",
+        "title": "Another new notification",
+        "content": "Hello. I am a notification",
+        "read": true,
+        "user": 1,
+        "notification_type": 1
+    }
+}
+]

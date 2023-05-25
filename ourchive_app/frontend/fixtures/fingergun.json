@@ -1,0 +1,83 @@
+[
+{
+    "model": "api.fingergun",
+    "pk": 1,
+    "fields": {
+        "uid": "4fc67d95-99da-460e-8b66-37320de842db",
+        "work": 2,
+        "user": 1
+    }
+},
+{
+    "model": "api.fingergun",
+    "pk": 2,
+    "fields": {
+        "uid": "5a99d1d0-de13-41ca-a6b4-47fe1b8c204e",
+        "work": 2,
+        "user": 1
+    }
+},
+{
+    "model": "api.fingergun",
+    "pk": 3,
+    "fields": {
+        "uid": "1edf4546-e39c-49d9-a0e2-6b97051a4076",
+        "work": 2,
+        "user": 1
+    }
+},
+{
+    "model": "api.fingergun",
+    "pk": 4,
+    "fields": {
+        "uid": "29d2796e-ea17-47e7-be2a-5b8b13b64e90",
+        "work": 7,
+        "user": 1
+    }
+},
+{
+    "model": "api.fingergun",
+    "pk": 5,
+    "fields": {
+        "uid": "572fd5e0-4fd5-4cc6-a35b-99e3a28e1376",
+        "work": 7,
+        "user": 1
+    }
+},
+{
+    "model": "api.fingergun",
+    "pk": 6,
+    "fields": {
+        "uid": "9ecbff4e-fef4-4620-af0c-074a46db8091",
+        "work": 7,
+        "user": 1
+    }
+},
+{
+    "model": "api.fingergun",
+    "pk": 7,
+    "fields": {
+        "uid": "ac61ba63-8c98-4843-b94a-a3a40b2d634a",
+        "work": 7,
+        "user": 1
+    }
+},
+{
+    "model": "api.fingergun",
+    "pk": 8,
+    "fields": {
+        "uid": "745058e2-82a7-466a-80e4-71b8ae42f44e",
+        "work": 7,
+        "user": 1
+    }
+},
+{
+    "model": "api.fingergun",
+    "pk": 9,
+    "fields": {
+        "uid": "c53dafac-b42b-4b46-9340-87c9f1d88152",
+        "work": 7,
+        "user": 1
+    }
+}
+]

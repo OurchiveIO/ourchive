@@ -1,0 +1,79 @@
+{% extends 'index.html' %}
+{% block content %}	
+<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+<article class="uk-article">
+    <div class="uk-child-width-2-1" uk-grid>
+        <div class="uk-width-2-3">
+            <h1 class="uk-article-title" style="display: inline;"><a class="uk-link-reset" href="{{ root }}/works/{{ id }}">{{ work.title }}</a></h1> <span class="uk-text-large" style="padding-left: 10px;">by <a href="{{ root }}/username/{{ work.user }}">{{ work.user }}</a></span>
+            {% if work.draft %}
+            <div class="uk-width-auto">
+                <span class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="uk-text-right uk-width-1-3">
+            {% if work.user == request.user.username %}
+            <a href="{{ root }}/works/{{ id }}/publish-full"><span uk-icon="icon: world" title="Publish All"></span> </a>
+            {% if work.draft %}
+            <a href="{{ root }}/works/{{ id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+            {% endif %}
+            <a href="{{ root }}/works/{{ id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
+            <a href="{{ root }}/works/{{ id }}/delete"><span uk-icon="icon: trash" title="Delete"></span> </a>
+            {% endif %}
+            {% if view_full %}
+            <a href="{{ root }}/works/{{ id }}/"><span uk-icon="icon: minus-circle" title="View By Chapter"></span> </a>
+            {% else %}
+            <a href="{{ root }}/works/{{ id }}/?view_full=true"><span uk-icon="icon: plus-circle" title="View All Chapters"></span> </a>
+            {% endif %}
+            <a href="{{ root }}/bookmarks/new/{{ id }}"><span uk-icon="icon: bookmark" title="Bookmark"></span> </a>
+            <a href="{{ root }}/fingerguns/{{ id }}"><span uk-icon="icon: bolt" title="Add Fingerguns"></span> </a>
+        </div>
+    {% if work.cover_url %}
+        <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
+            <div><img src="{{work.cover_url}}"/>
+        </div>
+    {% endif %}
+    <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
+        <div><span class="uk-text-large">Summary</span></div>
+        <div><span class="uk-text-medium">{% autoescape off %}{{ work.summary|default_if_none:'' }}{% endautoescape %}</span></div>
+        <div><span class="uk-text-large">Notes</span></div>
+        <div><span class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></div>
+    </div>
+    <p class="uk-article-meta"><span class="uk-inline"><b>{{ work.fingerguns }} Fingerguns</b></span> | <span class="uk-inline"><b>{{ work.word_count }} Words</b></span></p>
+    <hr/>
+    <dl class="uk-description-list uk-description-list-divider">
+    {% for type, tag in tags.items %} 
+        <dt>{{ type }}</dt>
+        <dd>
+        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="{{ root }}/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
+        </dd>
+    {% endfor %}
+    </dl>
+    <hr/>
+    {% if chapter %} 
+        {% include "chapter.html" %}
+    {% elif chapters %}
+        {% for chapter in chapters %}
+            {% include "chapter.html" %}
+        {% endfor %}
+    {% endif %}
+    <!-- use iconnav for work edit icons -->
+    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid>
+        <div>
+            <ul class="uk-pagination">
+            {% if previous_chapter is not None %}<li><a href="{{ previous_chapter }}"><span class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
+            {% if next_chapter is not None %}<li class="uk-margin-auto-left"><a href="{{ next_chapter }}">Next <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
+        </ul>
+        </div>        
+    </div>    
+</article>
+</div>
+{% if scroll_comment_id %}
+    <script>
+        window.onload = function(){
+            const element = document.getElementById("comment_container_{{scroll_comment_id}}");
+            element.scrollIntoView();
+        };
+    </script>
+{% endif %}
+{% endblock %}

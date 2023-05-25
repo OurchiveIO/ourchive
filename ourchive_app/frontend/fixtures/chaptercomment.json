@@ -1,0 +1,80 @@
+[
+{
+    "model": "api.chaptercomment",
+    "pk": 5,
+    "fields": {
+        "uid": "98d98c7f-9585-42ad-b749-be847670b2f6",
+        "text": "here is a chapter comment!",
+        "user": 1,
+        "created_on": "2023-05-09T20:32:38.479Z",
+        "updated_on": "2023-05-09T20:32:38.479Z",
+        "parent_comment": null,
+        "chapter": 6
+    }
+},
+{
+    "model": "api.chaptercomment",
+    "pk": 6,
+    "fields": {
+        "uid": "246bf2ff-f779-40dc-85dc-5edfa29c6451",
+        "text": "here's another chapter comment!",
+        "user": 1,
+        "created_on": "2023-05-09T20:34:26.010Z",
+        "updated_on": "2023-05-09T20:34:26.010Z",
+        "parent_comment": null,
+        "chapter": 6
+    }
+},
+{
+    "model": "api.chaptercomment",
+    "pk": 7,
+    "fields": {
+        "uid": "06a7ce2d-4126-4a0f-a95d-8041ba3bc2de",
+        "text": "Comment",
+        "user": 1,
+        "created_on": "2023-05-09T20:35:40.676Z",
+        "updated_on": "2023-05-09T20:35:40.676Z",
+        "parent_comment": null,
+        "chapter": 5
+    }
+},
+{
+    "model": "api.chaptercomment",
+    "pk": 8,
+    "fields": {
+        "uid": "6edf6e61-3f16-4693-95ac-f1292e514617",
+        "text": "I liked it, thanks",
+        "user": 1,
+        "created_on": "2023-05-09T20:37:24.819Z",
+        "updated_on": "2023-05-09T20:37:24.819Z",
+        "parent_comment": null,
+        "chapter": 5
+    }
+},
+{
+    "model": "api.chaptercomment",
+    "pk": 9,
+    "fields": {
+        "uid": "b54cf90e-3d44-4708-9f6a-6479237cbdf7",
+        "text": "Well, I don't know.",
+        "user": 1,
+        "created_on": "2023-05-09T20:39:44.287Z",
+        "updated_on": "2023-05-09T20:39:44.287Z",
+        "parent_comment": null,
+        "chapter": 5
+    }
+},
+{
+    "model": "api.chaptercomment",
+    "pk": 10,
+    "fields": {
+        "uid": "6ba7a3ab-ebed-47d1-a33c-1af6f22a5dd4",
+        "text": "This was fine. Do you take criticism?",
+        "user": 1,
+        "created_on": "2023-05-09T20:40:01.646Z",
+        "updated_on": "2023-05-09T20:40:01.646Z",
+        "parent_comment": null,
+        "chapter": 5
+    }
+}
+]

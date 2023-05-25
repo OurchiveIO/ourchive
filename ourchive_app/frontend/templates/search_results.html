@@ -1,0 +1,155 @@
+{% extends 'index.html' %}
+{% block content %}	
+	<div uk-grid>
+		<div class="uk-width-1">
+			<ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade;connect: .search-switcher">
+	            <li><a href="#" id="works_tab">Works ({{ works|length }})</a></li>
+	            <li><a href="#" id="bookmarks_tab">Bookmarks ({{ bookmarks|length }})</a></li>
+	            <li><a href="#" id="tags_tab">Tags ({{ tag_count }})</a></li>
+	            <li><a href="#" id="users_tab">Users ({{ users|length }})</a></li>
+        	</ul>
+		</div>
+		<div class="uk-width-1">
+			
+			<ul class="uk-switcher uk-margin search-switcher">
+			<li> 
+				<div uk-grid>
+	    		<div class="uk-width-1-4"> 
+		        	<div class="uk-card uk-card-default uk-card-body">
+		        		<form class="uk-form-horizontal"  method="post" id="searchResultsForm" action="/search/filter">	
+		        			{% csrf_token %}
+				        	<dl class="uk-description-list uk-description-list-divider ">	
+						        {% for facet in facets %} 
+									{% include "facet_tile.html" %}     
+							    {% endfor %}		        
+							</dl>
+							<input type="hidden" id="term" name="term" value="{{ term }}">
+							<input class="uk-button uk-button-default" type="submit" value="Submit"/>
+						</form>
+				</div>
+			</div>
+
+		    <div class="uk-width-3-4">
+		    	<div class="uk-margin">
+			        <div uk-form-custom="target: > * > span:last-child">
+			            <select>
+			                <option value="">Sort by...</option>
+			                <option value="2">Fingerguns</option>
+			                <option value="3">Newest</option>
+			                <option value="4">Oldest</option>
+			            </select>
+			            <span class="uk-link">
+			                <span uk-icon="icon: plus"></span>
+			                <span></span>
+			            </span>
+			        </div>
+			    </div>			
+
+				{% for work in works %} 
+					{% include "work_tile.html" %}     
+			    {% endfor %}
+			</div>
+			</div>
+		</li>
+
+		<li> 
+			<div uk-grid>
+	    		<div class="uk-width-1-4"> 
+		        	<div class="uk-card uk-card-default uk-card-body">
+		        	<form class="uk-form-horizontal"  method="post" id="searchResultsForm" action="/search/filter">	
+		        			{% csrf_token %}
+				        	<dl class="uk-description-list uk-description-list-divider ">	
+						        {% for facet in facets %} 
+									{% include "facet_tile.html" %}     
+							    {% endfor %}		        
+							</dl>
+							<input type="hidden" id="term" name="term" value="{{ term }}">
+							<input class="uk-button uk-button-default" type="submit" value="Submit"/>
+						</form>
+				</div>
+			</div>
+			<div class="uk-width-3-4">
+				<div uk-form-custom="target: > * > span:last-child">
+		            <select>
+		                <option value="">Sort by...</option>
+		                <option value="2">Fingerguns</option>
+		                <option value="3">Newest</option>
+		                <option value="4">Oldest</option>
+		            </select>
+		            <span class="uk-link">
+		                <span uk-icon="icon: plus"></span>
+		                <span></span>
+		            </span>
+		        </div>
+		        {% for bookmark in bookmarks %} 
+					{% include "bookmark_tile.html" %}     
+			    {% endfor %}
+			</div>     
+		</li>
+
+		<li> 
+			<div uk-grid>
+	    		<div class="uk-width-1-4"> 
+		        	<div class="uk-card uk-card-default uk-card-body">
+		        	<form class="uk-form-horizontal"  method="post" id="searchResultsForm" action="/search/filter">	
+		        			{% csrf_token %}
+				        	<dl class="uk-description-list uk-description-list-divider ">	
+						        {% for facet in facets %} 
+									{% include "facet_tile.html" %}     
+							    {% endfor %}		        
+							</dl>
+							<input type="hidden" id="term" name="term" value="{{ term }}">
+							<input class="uk-button uk-button-default" type="submit" value="Submit"/>
+						</form>
+				</div>
+			</div>
+			<div class="uk-width-3-4">
+				<div uk-form-custom="target: > * > span:last-child">
+		            <select>
+		                <option value="">Sort by...</option>
+		                <option value="2">Work count</option>
+		                <option value="3">Bookmark count</option>
+		                <option value="4">Newest</option>
+		                <option value="5">Oldest</option>
+		            </select>
+		            <span class="uk-link">
+		                <span uk-icon="icon: plus"></span>
+		                <span></span>
+		            </span>
+		        </div>
+		        <dl class="uk-description-list uk-description-list-divider ">
+		        {% for type, tag in tags.items %} 
+			        <dt>{{ type }}</dt>
+			        <dd>
+			        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="/tags/{{single_tag.id}}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
+			        </dd>
+			    {% endfor %}
+				</dl>
+			</div>     
+		</li>
+
+		<li> 
+			<div uk-grid>
+			<div class="uk-width-1">
+				<div uk-form-custom="target: > * > span:last-child">
+		            <select>
+		                <option value="">Sort by...</option>
+		                <option value="2">Alphabetical</option>
+		                <option value="3">Newest</option>
+		                <option value="4">Oldest</option>
+		            </select>
+		            <span class="uk-link">
+		                <span uk-icon="icon: plus"></span>
+		                <span></span>
+		            </span>
+		        </div>
+		        {% for user in users %} 
+					<p> <a href="{{ root }}/username/{{ user.username }}">{{ user.username }}</a> </p>
+			    {% endfor %}
+			</div>     
+		</li>
+
+	</ul>
+</div>
+</div>
+{% endblock %}

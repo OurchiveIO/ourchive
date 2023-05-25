@@ -1,0 +1,365 @@
+{% extends 'index.html' %}
+{% block content %}	
+{% load static %}
+<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
+<div class="uk-width-1-1 uk-text-left"> 
+	<form class="uk-form-horizontal"  method="post" id="chapterForm" onsubmit="return getRichTextValues()">
+		<script>
+	        function getRichTextValues() {
+	        	document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
+            	document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
+            	document.getElementById('chapter_text').value = tinymce.get("textEditor").getContent().replace(/\r?\n?/g, '');
+	        }
+    	</script>
+		{% csrf_token %}
+		<input type="hidden" id="work" name="work" value="{{ chapter.work }}">
+		<input type="hidden" id="work" name="chapter_id" value="{{ chapter.id }}">
+		<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+	        <div class="uk-width-2-3">
+	            <span class="uk-text-large">{{ chapter.title|default_if_none:'' }}</span>
+	        </div>
+	        <div class="uk-text-right uk-width-1-3">
+	        	<input class="uk-button uk-button-danger" type="button" onclick="history.back()" value="Cancel"/>
+	            <input class="uk-button uk-button-primary" type="submit" value="Submit"/>
+	        </div>
+	    </div>
+    <hr/>
+		<fieldset class="uk-fieldset">
+		<div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Title</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                    <input class="uk-input uk-form-width-large" type="text" name="title" value="{{ chapter.title|default_if_none:'' }}">
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Summary</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                    <input type="hidden" id="summary" name="summary" value="{{ chapter.summary|safe|default_if_none:'' }}">
+                    <textarea id="summaryEditor"></textarea>
+                    <script type="text/javascript">
+                                      tinymce.init({
+                                        selector: '#summaryEditor',
+                                        width: 600,
+                                        height: 300,
+                                        plugins: [
+                                          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
+                                          'fullscreen', 'insertdatetime',
+                                          'media', 'table', 'emoticons'
+                                        ],
+                                        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
+                                          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+                                          'forecolor backcolor emoticons | help',
+                                        menubar: '',
+                                        content_css: 'css/content.css',
+                                        init_instance_callback : function(editor) {
+                                        	var chapterSummary = document.getElementById('summary').value;
+                                        	if (chapterSummary === "None") {
+                                        		chapterSummary = '';
+                                        	}
+                                            editor.setContent(chapterSummary);
+                                        }
+                                      });
+                   </script>
+                </div>
+            </div>
+        </div>
+
+       <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Number</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                    <input class="uk-input" type="number" name="number" min="1" value="{{ chapter.number }}">
+                </div>
+            </div>            
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Notes</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                    <input type="hidden" id="notes" name="notes" value="{{ chapter.notes|safe|default_if_none:'' }}">
+                    <textarea id="notesEditor"></textarea>
+                    <script type="text/javascript">
+                                      tinymce.init({
+                                        selector: '#notesEditor',
+                                        width: 600,
+                                        height: 300,
+                                        plugins: [
+                                          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
+                                          'fullscreen', 'insertdatetime',
+                                          'media', 'table', 'emoticons'
+                                        ],
+                                        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
+                                          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+                                          'forecolor backcolor emoticons | help',
+                                        menubar: '',
+                                        content_css: 'css/content.css',
+                                        init_instance_callback : function(editor) {
+                                        	var chapterNotes = document.getElementById('notes').value;
+                                        	if (chapterNotes === "None") {
+                                        		chapterNotes = '';
+                                        	}
+                                            editor.setContent(chapterNotes);
+                                        }
+                                      });
+                   </script>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Chapter Image</label>
+            {% if chapter.image_url %}
+                <img src="{{ chapter.image_url }}"/>
+            {% endif %}
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                	<div class="js-upload-img uk-placeholder uk-text-center">
+                    <span uk-icon="icon: cloud-upload"></span>
+				    <div uk-form-custom="target: true">
+			            <input type="file">
+			            <input class="uk-input uk-form-width-medium" id="js-img-input" type="text" placeholder="Select file" name="image_url">
+			        </div>
+				    <progress id="js-progressbar-img" class="uk-progress" value="0" max="100" hidden></progress>
+				    <script>
+					    var bar = document.getElementById('js-progressbar-img');
+
+					    UIkit.upload('.js-upload-img', {
+
+					        url: '',
+					        multiple: false,
+
+					        beforeSend: function () {
+					            function getCookie(name) {
+					                var cookieValue = null;
+					                if (document.cookie && document.cookie !== '') {
+					                    var cookies = document.cookie.split(';');
+					                    cookies.forEach(function (value) { 
+					                        var cookie = value.trim();
+					                        // Does this cookie string begin with the name we want?
+					                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+					                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					                            return;
+					                        }
+					                    });
+					                }
+					                return cookieValue;
+					            }
+					            var csrftoken = getCookie('csrftoken');
+					            arguments[0]['headers']['X-CSRFToken'] = csrftoken;
+					            console.log('beforeSend', arguments);
+					        },
+					        beforeAll: function () {
+					            console.log('beforeAll', arguments);
+					        },
+					        load: function () {
+					            console.log('load', arguments);
+					        },
+					        error: function () {
+					            console.log('error', arguments);
+					        },
+					        complete: function () {
+					            console.log('complete', arguments);
+					        },
+
+					        loadStart: function (e) {
+					            console.log('loadStart', arguments);
+
+					            bar.removeAttribute('hidden');
+					            bar.max = e.total;
+					            bar.value = e.loaded;
+					        },
+
+					        progress: function (e) {
+					            console.log('progress', arguments);
+
+					            bar.max = e.total;
+					            bar.value = e.loaded;
+					        },
+
+					        loadEnd: function (e) {
+					            console.log('loadEnd', arguments);
+
+					            bar.max = e.total;
+					            bar.value = e.loaded;
+					        },
+
+					        completeAll: function () {
+					            console.log('completeAll', arguments);
+
+					            setTimeout(function () {
+					                bar.setAttribute('hidden', 'hidden');
+					            }, 1000);
+
+					            document.getElementById('js-img-input').value = arguments[0]['response'];
+					        }
+
+					    });
+
+					</script>
+				</div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Draft?</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                    <label><input class="uk-checkbox" type="checkbox" name="draft" {% if chapter.draft %} checked {% endif %}> </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Image Alt Text</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                    <textarea class="uk-textarea uk-form-width-large" rows="2" placeholder="Image alt text" name="image_alt_text" maxlength="600">{{ chapter.image_alt_text|default_if_none:'' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Chapter Audio</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                	<div class="js-upload-audio uk-placeholder uk-text-center">
+                    <span uk-icon="icon: cloud-upload"></span>
+				    <div uk-form-custom="target: true">
+			            <input type="file">
+			            <input class="uk-input uk-form-width-medium" id="js-audio-input" type="text" placeholder="Select file" name="audio_url">
+			        </div>
+
+				    <progress id="js-progressbar-audio" class="uk-progress" value="0" max="100" hidden></progress>
+				    <script>
+					    var bar = document.getElementById('js-progressbar-audio');
+					    UIkit.upload('.js-upload-audio', {
+
+					        url: '',
+					        multiple: false,
+
+					        beforeSend: function () {
+					            function getCookie(name) {
+					                var cookieValue = null;
+					                if (document.cookie && document.cookie !== '') {
+					                    var cookies = document.cookie.split(';');
+					                    cookies.forEach(function (value) { 
+					                        var cookie = value.trim();
+					                        // Does this cookie string begin with the name we want?
+					                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+					                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					                            return;
+					                        }
+					                    });
+					                }
+					                return cookieValue;
+					            }
+					            var csrftoken = getCookie('csrftoken');
+					            arguments[0]['headers']['X-CSRFToken'] = csrftoken;
+					            console.log('beforeSend', arguments);
+
+					        },
+					        beforeAll: function () {
+					            console.log('beforeAll', arguments);
+					        },
+					        load: function () {
+					            console.log('load', arguments);
+					        },
+					        error: function () {
+					            console.log('error', arguments);
+					        },
+					        complete: function () {
+					            console.log('complete', arguments);
+					        },
+
+					        loadStart: function (e) {
+					            console.log('loadStart', arguments);
+
+					            bar.removeAttribute('hidden');
+					            bar.max = e.total;
+					            bar.value = e.loaded;
+					        },
+
+					        progress: function (e) {
+					            console.log('progress', arguments);
+
+					            bar.max = e.total;
+					            bar.value = e.loaded;
+					        },
+
+					        loadEnd: function (e) {
+					            console.log('loadEnd', arguments);
+
+					            bar.max = e.total;
+					            bar.value = e.loaded;
+					        },
+
+					        completeAll: function () {
+					            console.log('completeAll', arguments);
+
+					            setTimeout(function () {
+					                bar.setAttribute('hidden', 'hidden');
+					            }, 1000);
+
+					            document.getElementById('js-audio-input').value = arguments[0]['response'];
+					        }
+
+					    });
+
+					</script>
+				</div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Audio Description</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                    <textarea class="uk-textarea uk-form-width-large" rows="2" placeholder="Audio description" name="audio_description" maxlength="600">{{ chapter.audio_description|default_if_none:'' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Chapter Text</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                	<input type="hidden" id="chapter_text" name="text" value="{{ chapter.text|safe|default_if_none:'' }}">
+                    <textarea id="textEditor"></textarea>
+                    <script type="text/javascript">
+                                      tinymce.init({
+                                        selector: '#textEditor',
+                                        width: 600,
+                                        height: 300,
+                                        plugins: [
+                                          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
+                                          'fullscreen', 'insertdatetime',
+                                          'media', 'table', 'emoticons'
+                                        ],
+                                        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
+                                          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+                                          'forecolor backcolor emoticons | help',
+                                        menubar: '',
+                                        content_css: 'css/content.css',
+                                        init_instance_callback : function(editor) {
+                                        	var chapterText = document.getElementById('chapter_text').value;
+                                            editor.setContent(chapterText);
+                                        }
+                                      });
+                   </script>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+	</form>
+</div>
+{% endblock %}

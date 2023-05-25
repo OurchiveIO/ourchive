@@ -1,0 +1,35 @@
+[
+{
+    "model": "api.userblocks",
+    "pk": 1,
+    "fields": {
+        "uid": "4e4cc372-712f-4a2f-84e6-46e931af0d16",
+        "created_on": "2023-05-09T14:31:39.278Z",
+        "updated_on": "2023-05-09T14:31:39.278Z",
+        "user": 1,
+        "blocked_user": 2
+    }
+},
+{
+    "model": "api.userblocks",
+    "pk": 2,
+    "fields": {
+        "uid": "1ef9a344-8a43-413a-ad5b-7f67235a365a",
+        "created_on": "2023-05-09T15:39:54.712Z",
+        "updated_on": "2023-05-09T15:39:54.712Z",
+        "user": 1,
+        "blocked_user": 3
+    }
+},
+{
+    "model": "api.userblocks",
+    "pk": 3,
+    "fields": {
+        "uid": "d1b7358f-18e9-4122-8c68-eab209e155b1",
+        "created_on": "2023-05-09T15:40:27.736Z",
+        "updated_on": "2023-05-09T15:40:27.736Z",
+        "user": 2,
+        "blocked_user": 3
+    }
+}
+]

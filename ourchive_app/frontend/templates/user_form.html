@@ -1,0 +1,182 @@
+{% extends 'index.html' %}
+{% block content %}	
+{% load static %}
+<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
+<div class="uk-width-1-1 uk-text-left"> 
+	<form class="uk-form-horizontal"  method="post" id="userForm" onsubmit="return getProfileText()">
+		<script>
+	        function getProfileText() {
+	        	document.getElementById('profile').value = tinymce.get("profileEditor").getContent().replace(/\r?\n?/g, '');
+	        }
+    	</script>
+		{% csrf_token %}
+		<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+			<div class="uk-width-1-2">
+            	<span class="uk-text-large">Edit Profile Information</span>
+        	</div>
+	        <div class="uk-text-right uk-width-1-2">
+	        	<input class="uk-button uk-width-small uk-button-danger" onclick="history.back()" value="Cancel"/>
+            	<button type="submit" disabled style="display: none" aria-hidden="true"></button>
+	            <input class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
+	        </div>
+	    </div>
+    <hr/>
+		<fieldset class="uk-fieldset">
+		<input type="hidden" id="unaltered_icon" name="unaltered_icon" value="{{ user.userprofile.icon }}">
+		<input type="hidden" id="userprofile_id" name="userprofile_id" value="{{ user.userprofile.id }}">
+		<input type="hidden" id="user" name="user" value="{{ user.username }}">
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">User Icon</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                	<img src="{{ user.userprofile.icon }}" style="border-radius: 50%; max-height: 50px; max-width: 50px;"/>
+                	<div class="js-upload-img uk-placeholder uk-text-center">
+                    <span uk-icon="icon: cloud-upload"></span>
+				    <div uk-form-custom="target: true">
+			            <input type="file">
+			            <input class="uk-input uk-form-width-medium" id="js-img-input" type="text" placeholder="Upload new icon" name="icon">
+			        </div>
+				    <progress id="js-progressbar-img" class="uk-progress" value="0" max="100" hidden></progress>
+				    <script>
+					    var bar = document.getElementById('js-progressbar-img');
+
+					    UIkit.upload('.js-upload-img', {
+
+					        url: '',
+					        multiple: false,
+
+					        beforeSend: function () {
+					            function getCookie(name) {
+					                var cookieValue = null;
+					                if (document.cookie && document.cookie !== '') {
+					                    var cookies = document.cookie.split(';');
+					                    cookies.forEach(function (value) { 
+					                        var cookie = value.trim();
+					                        // Does this cookie string begin with the name we want?
+					                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+					                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					                            return;
+					                        }
+					                    });
+					                }
+					                return cookieValue;
+					            }
+					            var csrftoken = getCookie('csrftoken');
+					            arguments[0]['headers']['X-CSRFToken'] = csrftoken;
+					            console.log('beforeSend', arguments);
+					        },
+					        beforeAll: function () {
+					            console.log('beforeAll', arguments);
+					        },
+					        load: function () {
+					            console.log('load', arguments);
+					        },
+					        error: function () {
+					            console.log('error', arguments);
+					        },
+					        complete: function () {
+					            console.log('complete', arguments);
+					        },
+
+					        loadStart: function (e) {
+					            console.log('loadStart', arguments);
+
+					            bar.removeAttribute('hidden');
+					            bar.max = e.total;
+					            bar.value = e.loaded;
+					        },
+
+					        progress: function (e) {
+					            console.log('progress', arguments);
+
+					            bar.max = e.total;
+					            bar.value = e.loaded;
+					        },
+
+					        loadEnd: function (e) {
+					            console.log('loadEnd', arguments);
+
+					            bar.max = e.total;
+					            bar.value = e.loaded;
+					        },
+
+					        completeAll: function () {
+					            console.log('completeAll', arguments);
+
+					            setTimeout(function () {
+					                bar.setAttribute('hidden', 'hidden');
+					            }, 1000);
+
+					            document.getElementById('js-img-input').value = arguments[0]['response'];
+					        }
+
+					    });
+
+					</script>
+				</div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Icon Alt Text</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                    <textarea class="uk-textarea uk-form-width-large" rows="2" placeholder="Image alt text" name="icon_alt_text" maxlength="600">{{ user.userprofile.icon_alt_text|default_if_none:'' }}</textarea>
+                </div>
+            </div>
+        </div>   
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Default Content</label>
+            <div class="uk-form-controls">
+            	<select class="uk-select uk-form-width-small" name="default_content">
+            	{% if user.userprofile.default_content == "Work" %}
+                    <option value="Work" selected="selected">Work</option>
+                    <option value="Bookmark">Bookmark</option>
+                {% elif user.userprofile.default_content == "Bookmark" %} 
+                	<option value="Work">Work</option>
+                    <option value="Bookmark" selected="selected">Bookmark</option>
+                {% else %}
+                	<option value="Work">Work</option>
+                    <option value="Bookmark">Bookmark</option>
+                {% endif %}
+                </select>
+            </div>
+        </div>      
+
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Profile Text</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                	<input type="hidden" id="profile" name="profile" value="{{ user.userprofile.profile|safe|default_if_none:'' }}">
+                    <textarea id="profileEditor"></textarea>
+                    <script type="text/javascript">
+                                      tinymce.init({
+                                        selector: '#profileEditor',
+                                        width: 600,
+                                        height: 300,
+                                        plugins: [
+                                          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
+                                          'fullscreen', 'insertdatetime',
+                                          'media', 'table', 'emoticons'
+                                        ],
+                                        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
+                                          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+                                          'forecolor backcolor emoticons | help',
+                                        menubar: '',
+                                        content_css: 'css/content.css',
+                                        init_instance_callback : function(editor) {
+                                        	var profileText = document.getElementById('profile').value;
+                                            editor.setContent(profileText);
+                                        }
+                                      });
+                   </script>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+	</form>
+</div>
+{% endblock %}

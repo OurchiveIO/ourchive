@@ -1,0 +1,101 @@
+{% extends 'index.html' %}
+{% block content %}	
+<div class="uk-width-1-1 uk-text-left" uk-grid>
+	<script>
+		function loadMoreComments(next, chapterId) {
+			fetch(next)
+			  .then((response) => {
+			    return response.text();
+			  })
+			  .then((myText) => {		 
+				container_block = document.getElementById( 'bookmark-'+chapterId+'-comments-list' );
+				container_block.innerHTML += myText;
+			  });
+		}
+	</script>
+	<article class="uk-article">
+	    <div class="uk-child-width-2-1" uk-grid>
+	        <div class="uk-width-2-3">
+	            <h1 class="uk-article-title" style="display: inline;"><a class="uk-link-reset" href="{{ root }}/bookmarks/{{ id }}">{{ bookmark.title }}</a></h1> <span class="uk-text-large" style="padding-left: 10px;">by <a href="{{ root }}/username/{{ bookmark.user }}">{{ bookmark.user }}</a></span>
+	            {% if bookmark.draft %}
+	            <div class="uk-width-auto">
+	                <span class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+	            </div>
+	            {% endif %}
+	        </div>
+	        <div class="uk-text-right uk-width-1-3">
+	            {% if bookmark.user == request.user.username %}
+	            {% if bookmark.draft %}
+	            <a href="{{ root }}/bookmarks/{{ bookmark.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+	            {% endif %}
+	            <a href="{{ root }}/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
+	            <a href="{{ root }}/bookmarks/{{ bookmark.id }}/delete"><span uk-icon="icon: trash"></span> </a>
+	            {% endif %}
+	        </div>
+	    <div class="uk-width-1">
+	    	<p class="uk-text-medium">{{ bookmark.description|safe }}</p>
+	    </div>	  
+	    <div class="uk-width-1">
+	    	{% for stars in rating_range %}
+	            <div class="uk-animation-toggle uk-inline" tabindex="0">
+	                <div>
+	                    {% if stars <= bookmark.rating %}
+	                        <span uk-icon="icon: star" id="rating_{{stars}}" class="rating-star"></span>
+	                    {% else %}
+	                        <span uk-icon="icon: star" id="rating_{{stars}}"></span>
+	                    {% endif %}
+	                    
+	                </div>
+	            </div>
+	        {% endfor %}
+	    </div>	  
+	    <hr/>
+	    <div class="uk-width-1">
+	    	<span class="uk-text-medium">Work link: <a class="uk-link-reset" href="{{ root }}/works/{{ work.id }}">{{ work.title }}</a></span>
+	    </div>
+	    <dl class="uk-description-list uk-description-list-divider">
+	    {% for type, tag in tags.items %} 
+	        <dt>{{ type }}</dt>
+	        <dd>
+	        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="{{single_tag.url}}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
+	        </dd>
+	    {% endfor %}
+	    </dl>
+	    <hr/>
+	    <div class="uk-grid-small uk-child-width-auto" uk-grid>
+	        <div>
+	             <button class="uk-button uk-button-text" type="button" uk-toggle="target: #bookmark-{{bookmark.id}}-comments">{{ comments.count}} Comments</button>    		
+	        </div>
+	    </div>
+	    <div class="uk-grid-small uk-child-width-auto" uk-grid>
+	        <div id="bookmark-{{bookmark.id}}-comments" {% if not expand_comments %} hidden {% endif %}>
+	        	<ul class="uk-comment-list" id="bookmark-{{bookmark.id}}-comments-list">
+	        		{% include "bookmark_comments.html" with post_action_url=bookmark.post_action_url edit_action_url=bookmark.edit_action_url next=comments.next next_params=comments.next_params comments=comments.results %}
+	        	</ul>
+	        </div>
+	    </div>
+	    {% if user_can_comment %}
+	    <div id="bookmark-{{bookmark.id}}-new">
+            <form action="/bookmarks/{{bookmark.id}}/comments/new" method="post" class="uk-form uk-grid-small" uk-grid>
+                {% csrf_token %}
+                <div class="uk-width-1-1">
+                	<input type="hidden" id="bookmark" name="bookmark" value="{{ bookmark.id }}">
+                	<textarea class="uk-textarea" id="text" name="text"></textarea>
+                </div>
+                <div class="uk-width-1-1">
+                	<button class="uk-button uk-button-default uk-align-right">Post Comment</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+	</article>
+	</div>
+	{% if scroll_comment_id %}
+		<script>
+			window.onload = function(){
+				const element = document.getElementById("comment_container_{{scroll_comment_id}}");
+				element.scrollIntoView();
+			};
+		</script>
+	{% endif %}
+{% endblock %}

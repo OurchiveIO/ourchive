@@ -1,0 +1,15 @@
+<div class="uk-width-1-2">
+	<div class="uk-card uk-card-default">
+	    <div class="uk-card-header">
+	        <div class="uk-grid-small uk-flex-middle" uk-grid>
+		        <h3 class="uk-card-title uk-margin-remove-bottom" id="notification_title">{{notification.title}}</h3>
+		    </div>
+		</div>
+		<div class="uk-card-body">
+	    	<p id="notification_content">{{ notification.content|safe }}</p>
+		</div>
+	    <div class="uk-card-footer" id="notification_actions_container">
+	        {% if not notification.read %}<a href="/username/{{ notification.user }}/notifications/{{ notification.id }}/read" id="notification_mark_read" title="Mark as read" class="uk-icon-link uk-margin-right" uk-icon="check"></a>{% endif %} <a href="/username/{{ notification.user }}/notifications/{{ notification.id }}/delete" id="notification_mark_delete" title="Delete" class="uk-icon-link" uk-icon="trash"></a>
+	    </div>
+	</div>  
+</div>

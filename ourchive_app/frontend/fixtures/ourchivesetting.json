@@ -1,0 +1,22 @@
+[
+{
+    "model": "api.ourchivesetting",
+    "pk": 1,
+    "fields": {
+        "uid": "0ea71667-e4fa-4b58-a13a-f811424f33fc",
+        "name": "Registration Permitted",
+        "value": "True",
+        "grouping": "General"
+    }
+},
+{
+    "model": "api.ourchivesetting",
+    "pk": 2,
+    "fields": {
+        "uid": "5e8463d5-a144-4194-b312-c52faeff6f11",
+        "name": "Search Provider",
+        "value": "Default",
+        "grouping": "Search"
+    }
+}
+]

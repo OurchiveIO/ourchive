@@ -1,0 +1,48 @@
+{% extends 'index.html' %}
+{% block content %}	
+	<script>
+		function loadMoreWorks(next, tagId) {
+			fetch(next)
+			  .then((response) => {
+			    return response.text();
+			  })
+			  .then((myText) => {
+			  	document.getElementById("loadMoreWorks").remove();				 
+				container_block = document.getElementById( 'works_list' );
+				container_block.innerHTML = myText;
+			  });
+		}
+	</script>
+	<div uk-grid>
+		<div class="uk-width-1">
+			<ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade;connect: .search-switcher">
+	            <li><a href="#" id="works_tab">Works ({{ works.count }})</a></li>
+	            <li><a href="#" id="bookmarks_tab">Bookmarks ({{ bookmarks|length }})</a></li>
+        	</ul>
+		</div>
+		<div class="uk-width-1">
+			
+			<ul class="uk-switcher uk-margin search-switcher">
+			<li> 
+				<div uk-grid>
+		    	<div class="uk-width-3-4">
+		    		<div id="works_list">
+						{% include "paginated_works.html" %}     
+			    	</div>
+				</div>
+				</div>
+			</li>
+
+			<li> 
+				<div uk-grid>
+				<div class="uk-width-3-4">
+		        {% for bookmark in bookmarks %} 
+					{% include "bookmark_tile.html" %}     
+			    {% endfor %}
+			</div>   
+			</div>  
+		</li>
+	</ul>
+</div>
+</div>
+{% endblock %}

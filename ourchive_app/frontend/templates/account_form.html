@@ -1,0 +1,40 @@
+{% extends 'index.html' %}
+{% block content %}	
+{% load static %}
+<div class="uk-width-1-1 uk-text-left"> 
+	<form class="uk-form-horizontal"  method="post" id="accountForm">
+		{% csrf_token %}
+		<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+			<div class="uk-width-1-2">
+            	<span class="uk-text-large">Edit Account Information</span>
+        	</div>
+	        <div class="uk-text-right uk-width-1-2">
+	        	<input class="uk-button uk-width-small uk-button-danger" onclick="history.back()" value="Cancel" />
+            	<button type="submit" disabled style="display: none" aria-hidden="true"></button>
+	            <input class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
+	        </div>
+	    </div>
+    <hr/>
+		<fieldset class="uk-fieldset">
+		<input type="hidden" id="id" name="id" value="{{ user.id }}">
+        <div class="uk-margin">
+            <label class="uk-form-label" for="form-horizontal-text">Email</label>
+            <div class="uk-form-controls">
+                <div class="uk-inline">
+                    <input class="uk-input uk-form-width-large" type="text" name="email" value="{{ user.email }}">
+                </div>
+            </div>
+            <div class="uk-margin">
+		    	<label class="uk-form-label" for="form-horizontal-text">Confirm Password</label>
+		        <div class="uk-form-controls">
+			        <div class="uk-inline">
+			            <span class="uk-form-icon uk-form-icon" uk-icon="icon: lock"></span>
+			            <input class="uk-input" type="password" name="password">
+			        </div>
+			    </div>
+		    </div>
+        </div>        
+    </fieldset>
+	</form>
+</div>
+{% endblock %}
