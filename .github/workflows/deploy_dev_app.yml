@@ -21,6 +21,11 @@ jobs:
           mkdir ~/.ssh
           echo "$remote_key" > ~/.ssh/id_github
           chmod 600 ~/.ssh/id_github
+          apt-get install python3-pip python3-dev
+          pip3 install virtualenv
+          virtualenv venv
+          source venv/bin/activate
+          pip install django
           python ourchive_app/manage.py collectstatic
           rsync -avzr -e "ssh -p ${remote_port} -i ~/.ssh/id_github -o StrictHostKeyChecking=no" ${local_dir} ${remote_user}@${remote_host}:${remote_dir}
           rm ~/.ssh/id_github
