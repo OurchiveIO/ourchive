@@ -39,5 +39,5 @@ jobs:
         run: |
           echo "$remote_key" > ~/.ssh/id_github
           chmod 600 ~/.ssh/id_github
-          ssh ${remote_user}@${remote_host} -i ~/.ssh/id_github -o StrictHostKeyChecking=no bash dev_deploy/test.sh
+          ssh ${remote_user}@${remote_host} -i ~/.ssh/id_github -o StrictHostKeyChecking=no cd dev_deploy && bash test.sh
           rm ~/.ssh/id_github
