@@ -15,7 +15,7 @@ jobs:
           remote_user: ${{ secrets.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_KEY }}
           dev_env_file: ${{ secrets.DEV_ENV_FILE }}
-          local_dir: "ourchive/ourchive_app"
+          local_dir: "ourchive_app"
           remote_dir: "/home/ourchive-integration/dev_deploy"
         run: |
           mkdir ~/.ssh
