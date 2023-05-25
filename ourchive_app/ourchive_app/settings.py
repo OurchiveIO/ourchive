@@ -17,6 +17,7 @@ from dotenv import load_dotenv, find_dotenv
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+API_PROTOCOL = 'http'
 
 load_dotenv(find_dotenv())
 
@@ -27,9 +28,15 @@ load_dotenv(find_dotenv())
 SECRET_KEY = os.getenv('OURCHIVE_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('OURCHIVE_DEBUG', False)
+DEBUG = os.getenv('OURCHIVE_DEBUG') == 'True'
 
-ALLOWED_HOSTS = ["http://127.0.0.1:8000", "127.0.0.1", "localhost", "http://localhost:8000", "45.79.159.247", "ourchive-dev.stopthatimp.net"]
+hosts = []
+if os.getenv('OURCHIVE_DEV') == 'True':
+    hosts = [*]
+else:
+    hosts = ["ourchive-dev.stopthatimp.net", "45.79.159.247"]
+
+ALLOWED_HOSTS = hosts
 
 
 # Application definition
