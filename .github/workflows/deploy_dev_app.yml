@@ -21,8 +21,8 @@ jobs:
           mkdir ~/.ssh
           echo "$remote_key" > ~/.ssh/id_github
           chmod 600 ~/.ssh/id_github
-          apt-get install python3-pip python3-dev
-          pip3 install virtualenv
+          sudo apt-get install python3-pip python3-dev
+          sudo -H pip3 install virtualenv
           virtualenv venv
           source venv/bin/activate
           pip install django
