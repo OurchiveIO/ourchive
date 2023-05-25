@@ -31,4 +31,14 @@ jobs:
           rsync -avzr -e "ssh -p ${remote_port} -i ~/.ssh/id_github -o StrictHostKeyChecking=no" ${local_dir} ${remote_user}@${remote_host}:${remote_dir}
           rm ~/.ssh/id_github
       - name: Execute Python Script
-        run: ssh -i ~/.ssh/id_github -o StrictHostKeyChecking=no bash dev_deploy/test.sh
+        env:
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_port: ${{ secrets.DEPLOY_PORT }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          mkdir ~/.ssh
+          echo "$remote_key" > ~/.ssh/id_github
+          chmod 600 ~/.ssh/id_github
+          ssh ${remote_user}@${remote_host}:${remote_dir} -i ~/.ssh/id_github -o StrictHostKeyChecking=no bash dev_deploy/test.sh
+          rm ~/.ssh/id_github
