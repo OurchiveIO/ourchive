@@ -21,5 +21,6 @@ jobs:
           mkdir ~/.ssh
           echo "$remote_key" > ~/.ssh/id_github
           chmod 600 ~/.ssh/id_github
-          rsync -avzr --delete -e "ssh -p ${remote_port} -i ~/.ssh/id_github -o StrictHostKeyChecking=no" ${local_dir} ${remote_user}@${remote_host}:${remote_dir}
+          python ourchive_app/manage.py collectstatic
+          rsync -avzr -e "ssh -p ${remote_port} -i ~/.ssh/id_github -o StrictHostKeyChecking=no" ${local_dir} ${remote_user}@${remote_host}:${remote_dir}
           rm ~/.ssh/id_github

@@ -32,7 +32,7 @@ DEBUG = os.getenv('OURCHIVE_DEBUG') == 'True'
 
 hosts = []
 if os.getenv('OURCHIVE_DEV') == 'True':
-    hosts = [*]
+    hosts = ['*']
 else:
     hosts = ["ourchive-dev.stopthatimp.net", "45.79.159.247"]
 

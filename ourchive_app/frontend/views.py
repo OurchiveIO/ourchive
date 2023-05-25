@@ -28,7 +28,7 @@ def get_headers(request):
 	return headers
 
 def append_root_url(url):
-	return f"{settings.API_PROTOCOL}/{settings.ALLOWED_HOSTS[0]}/{url}"
+	return f"{settings.API_PROTOCOL}://{settings.ALLOWED_HOSTS[0]}/{url}"
 
 def get_results(results):
 	results_json = results.json() if (results.status_code != 204 and results.status_code != 500) else {}
@@ -95,8 +95,11 @@ def index(request):
 	if request.user.is_authenticated:
 		request_url = f"api/users/{request.user.id}/"
 		response = do_get(request_url, request)[0]
-		has_notifications = response['userprofile']['has_notifications']
-		request.session['has_notifications'] = has_notifications
+		if 'userprofile' in response and response['userprofile']['has_notifications']:
+			has_notifications = response['userprofile']['has_notifications']
+			request.session['has_notifications'] = has_notifications
+		else:
+			request.session['has_notifications'] = False
 	else:
 		request.session['has_notifications'] = False
 	return render(request, 'index.html', {
