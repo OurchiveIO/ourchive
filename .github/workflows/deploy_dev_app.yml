@@ -30,3 +30,5 @@ jobs:
           python ourchive_app/manage.py collectstatic
           rsync -avzr -e "ssh -p ${remote_port} -i ~/.ssh/id_github -o StrictHostKeyChecking=no" ${local_dir} ${remote_user}@${remote_host}:${remote_dir}
           rm ~/.ssh/id_github
+      - name: Execute Python Script
+        run: ssh -p ${remote_port} -i ~/.ssh/id_github -o StrictHostKeyChecking=no bash dev_deploy/test.sh
