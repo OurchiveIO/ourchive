@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@development
       - name: "Copies development branch to ourchive-dev server"
         env:
           remote_host: ${{ secrets.DEPLOY_HOST }}
