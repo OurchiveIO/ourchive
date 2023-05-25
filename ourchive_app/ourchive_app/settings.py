@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv('OURCHIVE_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('OURCHIVE_DEBUG', False)
 
-ALLOWED_HOSTS = ["http://127.0.0.1:8000", "127.0.0.1", "host.docker.internal", "localhost", "http://localhost:8000",]
+ALLOWED_HOSTS = ["http://127.0.0.1:8000", "127.0.0.1", "localhost", "http://localhost:8000", "45.79.159.247", "ourchive-dev.stopthatimp.net"]
 
 
 # Application definition
