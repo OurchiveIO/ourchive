@@ -277,8 +277,9 @@ def user_bookmarks(request, username):
 def user_notifications(request, username):
 	if request.user.is_authenticated:
 		response = do_get(f'api/users/{request.user.id}/', request, params=request.GET)
-		has_notifications = response[0]['userprofile']['has_notifications']
-		request.session['has_notifications'] = has_notifications
+		if response[0] is not None and response[0]['userprofile'] is not None:
+			has_notifications = response[0]['userprofile']['has_notifications']
+			request.session['has_notifications'] = has_notifications
 	else:
 		request.session['has_notifications'] = False
 	response = do_get(f'api/users/{username}/notifications', request, params=request.GET)
