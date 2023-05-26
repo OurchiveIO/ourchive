@@ -95,7 +95,7 @@ def index(request):
 	if request.user.is_authenticated:
 		request_url = f"api/users/{request.user.id}/"
 		response = do_get(request_url, request)[0]
-		if 'userprofile' in response and response['userprofile']['has_notifications']:
+		if 'userprofile' in response and response['userprofile'] is not None and 'has_notifications' in response['userprofile']:
 			has_notifications = response['userprofile']['has_notifications']
 			request.session['has_notifications'] = has_notifications
 		else:
