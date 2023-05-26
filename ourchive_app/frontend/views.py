@@ -13,6 +13,7 @@ from .search_models import SearchObject
 from html import escape
 import logging
 
+logger = logging.getLogger(__name__)
 
 def group_tags(tag_types, tags):
 	result = {}
