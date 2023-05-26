@@ -17,7 +17,7 @@ from dotenv import load_dotenv, find_dotenv
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-API_PROTOCOL = 'http'
+API_PROTOCOL = 'http://'
 
 load_dotenv(find_dotenv())
 
@@ -32,7 +32,7 @@ DEBUG = os.getenv('OURCHIVE_DEBUG') == 'True'
 
 hosts = []
 if os.getenv('OURCHIVE_DEV') == 'True':
-    hosts = ['*']
+    hosts = ["127.0.0.1:8000", "127.0.0.1", "host.docker.internal", "localhost", "http://localhost:8000",]
 else:
     hosts = ["ourchive-dev.stopthatimp.net", "45.79.159.247"]
 
