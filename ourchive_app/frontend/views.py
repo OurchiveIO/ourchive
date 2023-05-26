@@ -27,6 +27,7 @@ def get_headers(request):
 	headers = {}
 	headers['X-CSRFToken'] = request.COOKIES['csrftoken'] if 'csrftoken' in request.COOKIES else None
 	headers['content-type'] = 'application/json'
+	headers['Origin'] = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}'
 	return headers
 
 def append_root_url(url):

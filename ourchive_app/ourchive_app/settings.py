@@ -17,8 +17,6 @@ from dotenv import load_dotenv, find_dotenv
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-API_PROTOCOL = 'http://'
-
 load_dotenv(find_dotenv())
 
 # Quick-start development settings - unsuitable for production
@@ -38,6 +36,7 @@ else:
 
 ALLOWED_HOSTS = hosts
 
+API_PROTOCOL = 'http://' if DEBUG else 'https://'
 
 # Application definition
 
