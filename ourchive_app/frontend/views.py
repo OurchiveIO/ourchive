@@ -710,6 +710,7 @@ def edit_bookmark(request, pk):
 			bookmark = do_get(f'api/bookmarks/{pk}/draft', request)[0]
 			bookmark['description'] = sanitize_rich_text(bookmark['description'])
 			tags = group_tags(tag_types['results'], bookmark['tags']) if 'tags' in bookmark else []
+			print(bookmark)
 			return render(request, 'bookmark_form.html', {
 				'rating_range': [1,2,3,4,5],
 				'bookmark': bookmark, 

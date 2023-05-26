@@ -45,7 +45,7 @@
                 wrapper.innerHTML= '<input type="hidden" id="tags_'+final.value+'_'+type+'" name="tags_'+final.value+'_'+type+'" value="{\'url\': \'\', \'tag_type\': \''+type+'\', \'tag_type_id\': \'\', \'text\': \''+final.value+'\'}">';
                 var div= wrapper.firstChild;
                 section.appendChild(div);
-                wrapper.innerHTML = '<div class="uk-inline" style="margin-right: 5px;"><span class="uk-badge" style="font-size: 14px; font-weight: bold; padding: 8px;" id="tags_'+final.value+'_'+type+'_txt">'+final.value+' <span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\')" id="tags_'+final.value+'_'+type+'_delete"></span></span> </div>';
+                wrapper.innerHTML = '<span class="uk-badge uk-padding-small uk-margin-right" id="tags_'+final.value+'_'+type+'_txt"><span class="uk-text-bold uk-text-default uk-padding-small">'+final.value+' </span><span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\')" id="tags_'+final.value+'_'+type+'_delete"></span></span>';
                 div = wrapper.firstChild;
                 section.appendChild(div);
                 final.value = '';
@@ -56,7 +56,7 @@
         
     </script>
     {% csrf_token %}
-    <input type="hidden" name="bookmark_id" value="{{ bookmark.id }}">
+    <input type="hidden" name="bookmark_id" value="{{ bookmark.id }}"/>
     <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
         <div class="uk-width-1-2">
             <span class="uk-text-large">Edit Bookmark</span>
@@ -68,13 +68,6 @@
         </div>
     </div>
     <hr/>
-        <ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade">
-            <li></li>
-        </ul>   
-    
-
-    <ul class="uk-switcher uk-margin">
-        <li>
             <fieldset class="uk-fieldset">
 
                 <div class="uk-margin">
@@ -181,18 +174,14 @@
                             <div id="{{ type }}_tags">
                             {% for single_tag in tag %}
                                 <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="{{ single_tag }}">
-                                <div class="uk-inline" style="margin-right: 5px;"><span class="uk-badge" style="font-size: 14px; font-weight: bold; padding: 8px;"  id="tags_{{ single_tag.text }}_{{ type }}_txt">{{ single_tag.text }} <span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{type}}')" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span></div>
+                                <span class="uk-badge uk-padding-small" id="tags_{{ single_tag.text }}_{{ type }}_txt"><span class="uk-text-bold uk-text-default uk-padding-small">{{ single_tag.text }} </span><span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{type}}')" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
                             {% endfor %}
-                            <input class="uk-input uk-form-width-small uk-form-small uk-form-blank" type="text" id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')"></div>
+                            <input class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')"></div>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </fieldset>
-
-        </li>
-       
-    </ul>
     <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
         <div class="uk-text-right uk-width-1-1">
             <input class="uk-button uk-button-danger" type="button" onclick="history.back()" value="Cancel"/>

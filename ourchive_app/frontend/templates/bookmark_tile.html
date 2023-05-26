@@ -3,7 +3,11 @@
 	    <div class="uk-card-header">
 	        <div class="uk-grid-small uk-flex-middle" uk-grid>
 		        <div class="uk-width-expand">
+	                {% if bookmark.title %}
 	                <a href="/bookmarks/{{bookmark.id}}?draft={{bookmark.draft}}" class="uk-inline"><h3 class="uk-card-title uk-margin-remove-bottom">{{bookmark.title}}</h3></a>
+	                {% else %}
+	                <a href="/bookmarks/{{bookmark.id}}?draft={{bookmark.draft}}" class="uk-inline"><h3 class="uk-card-title uk-margin-remove-bottom">Bookmark - {{bookmark.work.title}}</h3></a>
+	                {% endif %}
 	                <span class="uk-inline uk-align-right">{% for stars in rating_range %}
 	                    {% if stars <= bookmark.rating %}
 	                        <span uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}" class="rating-star uk-text-middle"></span>
