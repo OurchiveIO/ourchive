@@ -287,8 +287,8 @@ def user_notifications(request, username):
 		notifications = response[0]['results']
 		return render(request, 'notifications.html', {
 			'notifications': notifications,
-			'next': f"/username/{username}/notifications/{response['next_params']}" if response['next_params'] is not None else None,
-			'previous': f"/username/{username}/notifications/{response['prev_params']}" if response['prev_params'] is not None else None})	
+			'next': f"/username/{username}/notifications/{response[0]['next_params']}" if response[0]['next_params'] is not None else None,
+			'previous': f"/username/{username}/notifications/{response[0]['prev_params']}" if response[0]['prev_params'] is not None else None})	
 	elif response[1] == 403:
 		messages.add_message(request, messages.ERROR, 'You are not authorized to view these notifications.')	
 	else:
