@@ -32,7 +32,7 @@ def append_root_url(url):
 	return f"{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}/{url}"
 
 def get_results(results):
-	results_json = results.json() if (results.status_code != 204 and results.status_code != 500) else {}
+	results_json = results.json() if (results.status_code != 204 and results.status_code != 500 and results.status_code != 403 and results.status_code != 404) else {}
 	results_status_code = results.status_code
 	return [results_json, results_status_code]
 
