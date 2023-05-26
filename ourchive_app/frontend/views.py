@@ -64,7 +64,8 @@ def do_patch(url, request, data={}):
 	return get_results(requests.patch(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
 
 def do_post(url, request, data={}):
-	return get_results(requests.post(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
+	response = requests.post(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request))
+	return get_results(response)
 
 def do_put(url, request, data={}):
 	return get_results(requests.put(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
@@ -73,7 +74,8 @@ def do_delete(url, request):
 	return get_results(requests.delete(append_root_url(url), cookies=request.COOKIES, headers=get_headers(request)))
 
 def do_get(url, request, params={}):
-	return get_results(requests.get(append_root_url(url), params=params, cookies=request.COOKIES, headers=get_headers(request)))
+	response = requests.get(append_root_url(url), params=params, cookies=request.COOKIES, headers=get_headers(request))
+	return get_results(response)
 
 def get_object_tags(parent, request):
 	tag_types = do_get('api/tagtypes', request)

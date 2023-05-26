@@ -20,3 +20,4 @@ pydub
 elasticsearch
 elasticsearch_dsl
 audioread
+django-cors-headers
