@@ -1,7 +1,10 @@
 from rest_framework.views import exception_handler
+import logging
+
+logger = logging.getLogger(__name__)
 
 def custom_exception_handler(exc, context):
-    print(exc)
+    logger.error(exc)
 
     # Call REST framework's default exception handler first,
     # to get the standard error response.

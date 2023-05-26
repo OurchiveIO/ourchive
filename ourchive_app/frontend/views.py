@@ -11,6 +11,7 @@ import threading
 from django.http import HttpResponse
 from .search_models import SearchObject
 from html import escape
+import logging
 
 
 def group_tags(tag_types, tags):
@@ -419,10 +420,10 @@ def new_work(request):
 			'work': work})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this work.')	
-			return redirect('/')
+			return redirect('/works')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this work. Please contact your administrator.')	
-			return redirect('/')		
+			return redirect('/works')		
 	elif request.user.is_authenticated:
 		return edit_work(request, int(request.POST['work_id']))
 	else:
