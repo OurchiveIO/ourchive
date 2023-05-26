@@ -13,10 +13,10 @@
 <div class="uk-width-1">
     <div class="uk-text-right uk-width-1">
         {% if user.username == request.user.username %}
-            <a href="{{ root }}/username/{{ user.username }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
-            <a href="{{ root }}/users/blocklist"><span uk-icon="icon: ban" title="Blocklist"></span> </a>
+            <a href="/username/{{ user.username }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
+            <a href="/users/blocklist"><span uk-icon="icon: ban" title="Blocklist"></span> </a>
         {% else %}
-            <a href="{{ root }}/users/{{ user.username }}/block"><span uk-icon="icon: ban" title="Block"></span> </a>
+            <a href="/users/{{ user.username }}/block"><span uk-icon="icon: ban" title="Block"></span> </a>
         {% endif %}
     </div>
 	<div class="uk-width-1 uk-align-center">
