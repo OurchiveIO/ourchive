@@ -45,7 +45,7 @@
     <div>
         <ul class="uk-pagination">
             {% if next_params %}
-                <li><a onclick="loadMoreComments('{{root}}/works/{{work.id}}/chapters/{{chapter.id}}/comments{{next_params}}&chapter_offset={{chapter_offset}}', '{{chapter.id}}')"><button class="uk-button uk-button-text" type="button" uk-toggle="target: #comment_{{comment.id}}_loadMoreComments">Load More Comments</button></a></li>
+                <li><a onclick="loadMoreComments('/works/{{work.id}}/chapters/{{chapter.id}}/comments{{next_params}}&chapter_offset={{chapter_offset}}', '{{chapter.id}}')"><button class="uk-button uk-button-text" type="button" uk-toggle="target: #comment_{{comment.id}}_loadMoreComments">Load More Comments</button></a></li>
             {% endif %}
         </ul>
     </div>        
