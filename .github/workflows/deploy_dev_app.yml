@@ -1,7 +1,9 @@
 name: "Deploy Dev App"
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - development
 jobs:
   build:
     runs-on: ubuntu-latest
