@@ -34,6 +34,7 @@ def append_root_url(url):
 def get_results(results):
 	results_json = results.json() if (results.status_code != 204 and results.status_code != 500 and results.status_code != 403 and results.status_code != 404) else {}
 	results_status_code = results.status_code
+	logger.debug(f"status code: {results_status_code}")
 	return [results_json, results_status_code]
 
 def sanitize_rich_text(rich_text):
