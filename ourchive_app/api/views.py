@@ -79,7 +79,7 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
         else:
             return UserProfile.objects.filter(id=self.kwargs['pk'])
     serializer_class = UserProfileSerializer
-    permission_classes = [RegistrationPermitted]
+    permission_classes = [IsOwner]
 
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
