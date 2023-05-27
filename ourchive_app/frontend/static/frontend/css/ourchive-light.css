@@ -10061,3 +10061,7 @@ a:hover {
   border-style: dashed;
   border-width: 1px;
   border-color: #07393C; }
+
+.custom-icon {
+  height: 1em;
+  width: 1em; }

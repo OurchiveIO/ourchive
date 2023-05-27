@@ -10053,3 +10053,7 @@ a:hover {
   border-style: dashed;
   border-width: 1px;
   border-color: #EDE4D4; }
+
+.custom-icon {
+  height: 1em;
+  width: 1em; }

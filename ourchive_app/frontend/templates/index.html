@@ -48,6 +48,15 @@
 			                </form>
 			            </div>
 		        	</li>
+		    	 	<li>
+		    	 		<a href="/switch-css-mode">
+		    	 			{% if request.session.css_mode == "dark" %}
+		    	 			<span class="custom-icon" uk-icon="icon: sun-regular; ratio:1" title="Light Mode">
+		    	 			{% else %}
+		    	 			<span class="custom-icon" uk-icon="icon: moon-regular; ratio:1" title="Dark Mode">
+		    	 			{% endif %}
+		    	 		</a></span>
+		    	 	</li>
 		        	<li>		        
 			            {% if not request.user.is_authenticated %}<li class="uk-active"><a href="/login"><span uk-icon="icon: sign-in; ratio:1.25" title="Sign In"></a></span></li>{% endif %}
 			            {% if not request.user.is_authenticated %}<li class="uk-active"><a href="/register"><span uk-icon="icon: user; ratio:1.25" title="Register"></a></span></li>{% endif %}
