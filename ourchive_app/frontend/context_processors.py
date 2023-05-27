@@ -2,7 +2,6 @@ from .api_utils import do_get
 
 def set_style(request):
     css_mode = request.session.get('css_mode')
-    print(f"CSS: {css_mode}")
     return {
         'css_mode': css_mode if css_mode is not None else "light"
     }
@@ -18,3 +17,4 @@ def set_has_notifications(request):
             request.session['has_notifications'] = False
     else:
         request.session['has_notifications'] = False
+    return {}
