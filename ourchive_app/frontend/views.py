@@ -121,6 +121,7 @@ def index(request):
 	    'heading_message': 'Welcome to Ourchive',
 	    'long_message': 'Ourchive is a configurable, extensible, multimedia archive, meant to serve as a modern alternative to PHP-based archives. You can search for existing works, create your own, or create curated collections of works you\'ve enjoyed. Have fun with it!',
 		'root': settings.ALLOWED_HOSTS[0],
+		'stylesheet_name': 'ourchive-light.css',
 		'has_notifications': request.session['has_notifications']
 	})
 
@@ -737,7 +738,7 @@ def delete_bookmark(request, bookmark_id):
 		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this bookmark.')	
 	else:
 		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this bookmark. Please contact your administrator.')	
-	return redirect('/')
+	return referrer_redirect(request)
 
 def log_in(request):
 	if request.method == 'POST':
