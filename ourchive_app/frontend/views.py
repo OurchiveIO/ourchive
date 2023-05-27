@@ -100,7 +100,7 @@ def get_works_list(request, username=None):
 	else:
 		works = response[0]['results']
 		works = get_object_tags(works, request)
-	return {'works': works, 'next_params': response['next_params'], 'prev_params': response['prev_params']}
+	return {'works': works, 'next_params': response['next_params'] if 'next_params' in response else None, 'prev_params': response['prev_params'] if 'prev_params' in response else None}
 
 def index(request):
 	if request.user.is_authenticated:
@@ -552,7 +552,12 @@ def edit_work(request, id):
 		work_types = do_get(f'api/worktypes', request)[0]
 		tag_types = do_get(f'api/tagtypes', request)[0]
 		if request.user.is_authenticated:
-			work = do_get(f'api/works/{id}/draft', request)[0]
+			work = do_get(f'api/works/{id}/draft', request)
+			result_message = process_results(work, 'work')
+			if result_message !='OK':
+				messages.add_message(request, messages.ERROR, result_message)
+				return redirect('/')
+			work = work[0]
 			work['summary'] = sanitize_rich_text(work['summary'])
 			work['notes'] = sanitize_rich_text(work['notes'])
 			chapters = do_get(f'api/works/{id}/chapters/draft', request)[0]
@@ -791,7 +796,12 @@ def work(request, pk):
 	work_types = do_get(f'api/worktypes', request)[0]
 	is_draft = request.GET.get('draft')
 	url = f'api/works/{pk}/'
-	work = do_get(url, request)[0]
+	work = do_get(url, request)
+	result_message = process_results(work, 'work')
+	if result_message !='OK':
+		messages.add_message(request, messages.ERROR, result_message)
+		return redirect('/')
+	work = work[0]
 	tag_types = do_get(f'api/tagtypes', request)[0]
 	tags = group_tags(tag_types['results'], work['tags']) if 'tags' in work else {}	
 	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else ""}'
