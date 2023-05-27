@@ -51,6 +51,10 @@ def sanitize_rich_text(rich_text):
 		rich_text =''
 	return rich_text
 
+def referrer_redirect(request):
+	refer = request.META['HTTP_REFERER'] if request.META['HTTP_REFERER'] is not None and '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER'] else '/'
+	return redirect(refer)
+
 def process_results(results, object):
 	if results[1] >= 200 and results[1] < 300:
 		return 'OK'
@@ -635,7 +639,7 @@ def delete_work(request, work_id):
 		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this work.')	
 	else:
 		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this work. Please contact your administrator.')	
-	return redirect('/')
+	return referrer_redirect(request)
 
 def delete_chapter(request, work_id, chapter_id):
 	response = do_delete(f'api/chapters/{chapter_id}/', request)
@@ -741,8 +745,7 @@ def log_in(request):
 		if user is not None:
 			login(request, user)
 			messages.add_message(request, messages.SUCCESS, 'Login successful.')	
-			refer = request.POST.get('referrer') if request.POST.get('referrer') is not None and '/login' not in request.POST.get('referrer') and '/register' not in request.POST.get('referrer') and '/reset' not in request.POST.get('referrer') else '/'
-			return redirect(refer)
+			return referrer_redirect(request)
 		else:
 			messages.add_message(request, messages.ERROR, 'Login unsuccessful. Please try again.')
 			return redirect('/login')
@@ -758,8 +761,7 @@ def reset_password(request):
 		if user is not None:
 			login(request, user)
 			messages.add_message(request, messages.SUCCESS, 'Login successful.')	
-			refer = request.POST.get('referrer') if request.POST.get('referrer') is not None and '/login' not in request.POST.get('referrer') and '/register' not in request.POST.get('referrer') else '/'
-			return redirect(refer)
+			return referrer_redirect(request)
 		else:
 			messages.add_message(request, messages.ERROR, 'Login unsuccessful. Please try again.')
 			return redirect('/login')
