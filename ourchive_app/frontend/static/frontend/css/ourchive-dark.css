@@ -40,7 +40,7 @@ a,
 a:hover,
 .uk-link:hover,
 .uk-link-toggle:hover .uk-link {
-  color: #70163C;
+  color: #F89762;
   text-decoration: underline; }
 
 /* Text-level semantics
@@ -760,7 +760,7 @@ a.uk-link-reset,
   color: #55112D !important; }
 
 .uk-list-secondary > ::before {
-  color: #AF4308 !important; }
+  color: #F89762 !important; }
 
 /* Image bullet modifier
  ========================================================================== */
@@ -1957,19 +1957,19 @@ select.uk-form-width-xsmall {
  * Secondary
  */
 .uk-button-secondary {
-  background-color: #AF4308;
+  background-color: #F89762;
   color: #FFF;
   border: 1px solid transparent; }
 
 /* Hover */
 .uk-button-secondary:hover {
-  background-color: #973a07;
+  background-color: #f7874a;
   color: #FFF; }
 
 /* OnClick + Active */
 .uk-button-secondary:active,
 .uk-button-secondary.uk-active {
-  background-color: #7e3006;
+  background-color: #f67731;
   color: #FFF; }
 
 /*
@@ -2249,7 +2249,7 @@ select.uk-form-width-xsmall {
  * Secondary
  */
 .uk-section-secondary {
-  background: #AF4308; }
+  background: #F89762; }
 
 /* Overlap modifier
  ========================================================================== */
@@ -2487,7 +2487,7 @@ select.uk-form-width-xsmall {
  * Secondary
  */
 .uk-tile-secondary {
-  background-color: #AF4308; }
+  background-color: #F89762; }
 
 /* ========================================================================
    Component: Card
@@ -2625,7 +2625,7 @@ select.uk-form-width-xsmall {
  * Secondary
  */
 .uk-card-secondary {
-  background-color: #AF4308;
+  background-color: #F89762;
   color: #FFF;
   box-shadow: 0 5px 15px rgba(249, 246, 241, 0.08); }
 
@@ -2633,7 +2633,7 @@ select.uk-form-width-xsmall {
   color: #FFF; }
 
 .uk-card-secondary.uk-card-hover:hover {
-  background-color: #AF4308;
+  background-color: #F89762;
   box-shadow: 0 14px 25px rgba(249, 246, 241, 0.16); }
 
 /* Size modifier
@@ -2820,7 +2820,7 @@ select.uk-form-width-xsmall {
  */
 .uk-marker {
   padding: 5px;
-  background: #AF4308;
+  background: #F89762;
   color: #FFF;
   border-radius: 500px; }
 
@@ -3033,7 +3033,7 @@ select.uk-form-width-xsmall {
  * Primary
  */
 .uk-overlay-primary {
-  background: rgba(175, 67, 8, 0.8); }
+  background: rgba(248, 151, 98, 0.8); }
 
 /* ========================================================================
    Component: Article
@@ -3936,7 +3936,7 @@ select.uk-form-width-xsmall {
   box-sizing: border-box;
   width: 270px;
   padding: 20px 20px;
-  background: #AF4308;
+  background: #F89762;
   /* 3 */
   overflow-y: auto; }
 
@@ -7164,7 +7164,7 @@ ul.uk-nav-sub {
   color: #55112D !important; }
 
 .uk-text-secondary {
-  color: #AF4308 !important; }
+  color: #F89762 !important; }
 
 .uk-text-success {
   color: #EDE4D4 !important; }
@@ -7474,7 +7474,7 @@ iframe[data-uk-cover] {
   background-color: #55112D; }
 
 .uk-background-secondary {
-  background-color: #AF4308; }
+  background-color: #F89762; }
 
 /* Size
  ========================================================================== */
