@@ -14,10 +14,9 @@
             document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
         }
         
-        function removetag(delete_id) {
-            tag_id = delete_id.slice(0, -7);
-            document.getElementById(tag_id).remove();
-            document.getElementById(tag_id+"_txt").remove();
+        function removetag(tag, type) {
+            document.getElementById("tags_"+tag+"_"+type).remove();
+            document.getElementById("tags_"+tag+"_"+type+"_txt").remove();
         }
 
         function tagCheck (e, type) {
@@ -30,7 +29,7 @@
                 wrapper.innerHTML= '<input type="hidden" id="tags_'+final.value+'_'+type+'" name="tags_'+final.value+'_'+type+'" value="tags_'+final.value+'_'+type+'">';
                 var div= wrapper.firstChild;
                 section.appendChild(div);
-                wrapper.innerHTML = '<span style="margin-left: 5px;" class="uk-badge" id="tags_'+final.value+'_'+type+'_txt">'+final.value+' <span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\')" id="tags_'+final.value+'_'+type+'_delete"></span></span>  ';
+                wrapper.innerHTML = '<span class="uk-badge uk-padding-small uk-margin-right" id="tags_'+final.value+'_'+type+'_txt"><span class="uk-text-bold uk-text-default uk-padding-small">'+final.value+' </span><span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\')" id="tags_'+final.value+'_'+type+'_delete"></span></span>  ';
                 div = wrapper.firstChild;
                 section.appendChild(div);
                 final.value = '';
@@ -47,7 +46,7 @@
             <span class="uk-text-large"><a href="/works/{{work.id}}">{{ work.title }}</a></span>
         </div>
         <div class="uk-text-right uk-width-1-2">
-            <input class="uk-button uk-width-small uk-button-danger" onclick="history.back()" value="Cancel" />
+            <input class="uk-button uk-width-small uk-button-secondary" onclick="history.back()" value="Cancel" />
             <button type="submit" disabled style="display: none" aria-hidden="true"></button>
             <input class="uk-button uk-width-small uk-button-primary" onclick="this.form.submitted=this.value;" type="submit" value="Submit"/>
         </div>
@@ -293,9 +292,9 @@
                             <div id="{{ type }}_tags">
                             {% for single_tag in tag %}
                                 <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="tags_{{ single_tag.text }}_{{ type }}">
-                                <span class="uk-badge" id="tags_{{ single_tag.text }}_{{ type }}_txt">{{ single_tag.text }} <span uk-icon="close" onclick="removetag(this.id)" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
+                                <span class="uk-badge uk-padding-small" id="tags_{{ single_tag.text }}_{{ type }}_txt"><span class="uk-text-bold uk-text-default uk-padding-small">{{ single_tag.text }}</span> <span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{type}}')" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
                             {% endfor %}
-                            <input style="margin-left: 5px;" class="uk-input uk-form-width-small uk-form-small uk-form-blank" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')"></div>
+                            <input class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')"></div>
                         </div>
                     </div>
                 </div>

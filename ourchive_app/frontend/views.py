@@ -11,7 +11,9 @@ import threading
 from django.http import HttpResponse
 from .search_models import SearchObject
 from html import escape
+import logging
 
+logger = logging.getLogger(__name__)
 
 def group_tags(tag_types, tags):
 	result = {}
@@ -25,14 +27,21 @@ def get_headers(request):
 	headers = {}
 	headers['X-CSRFToken'] = request.COOKIES['csrftoken'] if 'csrftoken' in request.COOKIES else None
 	headers['content-type'] = 'application/json'
+	headers['Origin'] = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}'
 	return headers
 
 def append_root_url(url):
 	return f"{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}/{url}"
 
 def get_results(results):
-	results_json = results.json() if (results.status_code != 204 and results.status_code != 500) else {}
+	try:
+		results_json = results.json() if (results.status_code != 204 and results.status_code != 500 and results.status_code != 403 and results.status_code != 404) else {}
+	except Exception as e:
+		logger.error(f"exception: {e}")
+		logger.debug(f"exception occurred: {e}")
+		results_json = {}
 	results_status_code = results.status_code
+	logger.debug(f"status code: {results_status_code}")
 	return [results_json, results_status_code]
 
 def sanitize_rich_text(rich_text):
@@ -56,7 +65,8 @@ def do_patch(url, request, data={}):
 	return get_results(requests.patch(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
 
 def do_post(url, request, data={}):
-	return get_results(requests.post(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
+	response = requests.post(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request))
+	return get_results(response)
 
 def do_put(url, request, data={}):
 	return get_results(requests.put(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
@@ -65,7 +75,8 @@ def do_delete(url, request):
 	return get_results(requests.delete(append_root_url(url), cookies=request.COOKIES, headers=get_headers(request)))
 
 def do_get(url, request, params={}):
-	return get_results(requests.get(append_root_url(url), params=params, cookies=request.COOKIES, headers=get_headers(request)))
+	response = requests.get(append_root_url(url), params=params, cookies=request.COOKIES, headers=get_headers(request))
+	return get_results(response)
 
 def get_object_tags(parent, request):
 	tag_types = do_get('api/tagtypes', request)
@@ -89,13 +100,13 @@ def get_works_list(request, username=None):
 	else:
 		works = response[0]['results']
 		works = get_object_tags(works, request)
-	return {'works': works, 'next_params': response['next_params'], 'prev_params': response['prev_params']}
+	return {'works': works, 'next_params': response['next_params'] if 'next_params' in response else None, 'prev_params': response['prev_params'] if 'prev_params' in response else None}
 
 def index(request):
 	if request.user.is_authenticated:
 		request_url = f"api/users/{request.user.id}/"
 		response = do_get(request_url, request)[0]
-		if 'userprofile' in response and response['userprofile']['has_notifications']:
+		if 'userprofile' in response and response['userprofile'] is not None and 'has_notifications' in response['userprofile']:
 			has_notifications = response['userprofile']['has_notifications']
 			request.session['has_notifications'] = has_notifications
 		else:
@@ -277,8 +288,9 @@ def user_bookmarks(request, username):
 def user_notifications(request, username):
 	if request.user.is_authenticated:
 		response = do_get(f'api/users/{request.user.id}/', request, params=request.GET)
-		has_notifications = response[0]['userprofile']['has_notifications']
-		request.session['has_notifications'] = has_notifications
+		if response[0] is not None and response[0]['userprofile'] is not None:
+			has_notifications = response[0]['userprofile']['has_notifications']
+			request.session['has_notifications'] = has_notifications
 	else:
 		request.session['has_notifications'] = False
 	response = do_get(f'api/users/{username}/notifications', request, params=request.GET)
@@ -286,8 +298,8 @@ def user_notifications(request, username):
 		notifications = response[0]['results']
 		return render(request, 'notifications.html', {
 			'notifications': notifications,
-			'next': f"/username/{username}/notifications/{response['next_params']}" if response['next_params'] is not None else None,
-			'previous': f"/username/{username}/notifications/{response['prev_params']}" if response['prev_params'] is not None else None})	
+			'next': f"/username/{username}/notifications/{response[0]['next_params']}" if response[0]['next_params'] is not None else None,
+			'previous': f"/username/{username}/notifications/{response[0]['prev_params']}" if response[0]['prev_params'] is not None else None})	
 	elif response[1] == 403:
 		messages.add_message(request, messages.ERROR, 'You are not authorized to view these notifications.')	
 	else:
@@ -418,10 +430,10 @@ def new_work(request):
 			'work': work})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this work.')	
-			return redirect('/')
+			return redirect('/works')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this work. Please contact your administrator.')	
-			return redirect('/')		
+			return redirect('/works')		
 	elif request.user.is_authenticated:
 		return edit_work(request, int(request.POST['work_id']))
 	else:
@@ -540,7 +552,12 @@ def edit_work(request, id):
 		work_types = do_get(f'api/worktypes', request)[0]
 		tag_types = do_get(f'api/tagtypes', request)[0]
 		if request.user.is_authenticated:
-			work = do_get(f'api/works/{id}/draft', request)[0]
+			work = do_get(f'api/works/{id}/draft', request)
+			result_message = process_results(work, 'work')
+			if result_message !='OK':
+				messages.add_message(request, messages.ERROR, result_message)
+				return redirect('/')
+			work = work[0]
 			work['summary'] = sanitize_rich_text(work['summary'])
 			work['notes'] = sanitize_rich_text(work['notes'])
 			chapters = do_get(f'api/works/{id}/chapters/draft', request)[0]
@@ -698,6 +715,7 @@ def edit_bookmark(request, pk):
 			bookmark = do_get(f'api/bookmarks/{pk}/draft', request)[0]
 			bookmark['description'] = sanitize_rich_text(bookmark['description'])
 			tags = group_tags(tag_types['results'], bookmark['tags']) if 'tags' in bookmark else []
+			print(bookmark)
 			return render(request, 'bookmark_form.html', {
 				'rating_range': [1,2,3,4,5],
 				'bookmark': bookmark, 
@@ -778,7 +796,12 @@ def work(request, pk):
 	work_types = do_get(f'api/worktypes', request)[0]
 	is_draft = request.GET.get('draft')
 	url = f'api/works/{pk}/'
-	work = do_get(url, request)[0]
+	work = do_get(url, request)
+	result_message = process_results(work, 'work')
+	if result_message !='OK':
+		messages.add_message(request, messages.ERROR, result_message)
+		return redirect('/')
+	work = work[0]
 	tag_types = do_get(f'api/tagtypes', request)[0]
 	tags = group_tags(tag_types['results'], work['tags']) if 'tags' in work else {}	
 	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else ""}'

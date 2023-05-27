@@ -4,9 +4,10 @@
 	{% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static 'frontend/css/uikit.ourchive.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'frontend/css/ourchive.css' %}" />
     <link rel="stylesheet" href="{% static 'frontend/css/scroll-to-top.css' %}" />
     <link rel="stylesheet" href="{% static 'frontend/css/editor.css' %}" />
+    <link rel="shortcut icon" href="{% static 'favicon/favicon.ico' %}"/>
     <script src="{% static 'frontend/js/uikit.min.js' %}"></script>
     <script src="{% static 'frontend/js/uikit-icons.min.js' %}"></script>
     <title>Ourchive</title>
@@ -15,11 +16,11 @@
 	{% if messages %}
 		{% for message in messages %}
 			<script>
-				var status = '{{message.tags}}' === 'success' ? '{{message.tags}}' : 'danger';
+				var status = '{{message.tags}}' === 'success' ? 'primary' : 'danger';
 				UIkit.notification({
-				    message: '{{ message }}',
+				    message: '<strong>{{ message }}</strong>',
 				    status: status,
-				    pos: 'bottom-right',
+				    pos: 'top-center',
 				    timeout: 2500
 				});
 			</script>

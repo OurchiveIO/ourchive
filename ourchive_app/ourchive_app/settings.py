@@ -17,8 +17,6 @@ from dotenv import load_dotenv, find_dotenv
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-API_PROTOCOL = 'http://'
-
 load_dotenv(find_dotenv())
 
 # Quick-start development settings - unsuitable for production
@@ -38,6 +36,7 @@ else:
 
 ALLOWED_HOSTS = hosts
 
+API_PROTOCOL = 'http://' if DEBUG else 'https://'
 
 # Application definition
 
@@ -51,7 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'frontend',
-    'django.contrib.postgres'
+    'django.contrib.postgres',
+    'corsheaders',
     #'background_task',
 ]
 
@@ -63,7 +63,23 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8000',
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    'http://127.0.0.1:8000',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ROOT_URLCONF = 'ourchive_app.urls'
 

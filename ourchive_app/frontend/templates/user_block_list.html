@@ -7,7 +7,7 @@
 	{% for block in blocklist %}
 		<div>
 	        <div class="uk-card uk-card-default uk-card-body">
-	            <p>{{block.blocked_user}} (<a href="{{ root }}/users/{{username}}/blocks/{{block.id}}/unblock">Unblock</a>)</p>
+	            <p>{{block.blocked_user}} (<a href="/users/{{username}}/blocks/{{block.id}}/unblock">Unblock</a>)</p>
 	        </div>
 	    </div>
 	{% endfor %}

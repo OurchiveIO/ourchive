@@ -70,7 +70,7 @@ class PublishWork(APIView):
 class UserProfileList(generics.ListCreateAPIView):
     queryset = UserProfile.objects.get_queryset().order_by('id')
     serializer_class = UserProfileSerializer
-    permission_classes = [RegistrationPermitted]
+    permission_classes = [IsOwnerOrReadOnly]
 
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
@@ -79,17 +79,17 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
         else:
             return UserProfile.objects.filter(id=self.kwargs['pk'])
     serializer_class = UserProfileSerializer
-    permission_classes = [RegistrationPermitted]
+    permission_classes = [IsOwnerOrReadOnly]
 
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
-    permission_classes = [RegistrationPermitted]
+    permission_classes = [IsOwnerOrReadOnly]
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
-    permission_classes = [RegistrationPermitted]
+    permission_classes = [IsOwnerOrReadOnly]
 
 class UserWorkList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer    
