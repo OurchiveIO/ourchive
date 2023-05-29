@@ -2,8 +2,8 @@
 {% block content %}	
 {% load static %}
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
-<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>  
-<form class="uk-form-horizontal"  method="post" id="bookmarkForm" onsubmit="return getDescriptionText()">
+<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bookmark-form-parent-grid" uk-grid>  
+<form class="uk-form-horizontal" method="post" id="bookmarkForm" onsubmit="return getDescriptionText()">
     <script>
         function getDescriptionText() {
             document.getElementById('description').value = tinymce.get("descriptionEditor").getContent().replace(/\r?\n?/g, '');
@@ -56,34 +56,34 @@
         
     </script>
     {% csrf_token %}
-    <input type="hidden" name="bookmark_id" value="{{ bookmark.id }}"/>
-    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
-        <div class="uk-width-1-2">
-            <span class="uk-text-large">Edit Bookmark</span>
+    <input id="bookmark-form-hidden-id" type="hidden" name="bookmark_id" value="{{ bookmark.id }}"/>
+    <div id="bookmark-form-actions-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+        <div id="bookmark-form-header-parent" class="uk-width-1-2">
+            <span id="bookmark-form-header-span" class="uk-text-large">Edit Bookmark</span>
         </div>
-        <div class="uk-text-right uk-width-1-2">
-            <input class="uk-button uk-button-danger" type="button" onclick="history.back()" value="Cancel"/>
-            <button type="submit" disabled style="display: none" aria-hidden="true"></button>
-            <input class="uk-button uk-button-primary" type="submit" value="Submit"/>
+        <div id="bookmark-form-actions-group" class="uk-text-right uk-width-1-2">
+            <input id="bookmark-form-cancel" class="uk-button uk-button-danger" type="button" onclick="history.back()" value="Cancel"/>
+            <button id="bookmark-form-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
+            <input id="bookmark-form-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
         </div>
     </div>
-    <hr/>
-            <fieldset class="uk-fieldset">
+    <hr id="bookmark-form-hr"/>
+            <fieldset id="bookmark-form-fieldset" class="uk-fieldset">
 
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="form-horizontal-text">Title</label>
-                    <div class="uk-form-controls">
-                        <div class="uk-inline">
-                            <input class="uk-input uk-form-width-large" type="text" name="title" value="{{ bookmark.title|default_if_none:'' }}">
+                <div id="bookmark-form-title-parent" class="uk-margin">
+                    <label id="bookmark-form-title-label" class="uk-form-label" for="form-horizontal-text">Title</label>
+                    <div id="bookmark-form-title-form-control" class="uk-form-controls">
+                        <div id="bookmark-form-title-inline-div" class="uk-inline">
+                            <input id="bookmark-form-title-input" class="uk-input uk-form-width-large" type="text" name="title" value="{{ bookmark.title|default_if_none:'' }}">
                         </div>
                     </div>
                     
                 </div>
 
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="form-horizontal-text">Description</label>
-                    <div class="uk-form-controls">
-                        <div class="uk-inline">
+                <div id="bookmark-form-description-parent" class="uk-margin">
+                    <label id="bookmark-form-description-label" class="uk-form-label" for="form-horizontal-text">Description</label>
+                    <div id="bookmark-form-description-form-controls" class="uk-form-controls">
+                        <div id="bookmark-form-description-inline" class="uk-inline">
                             <input type="hidden" id="description" name="description" value="{{ bookmark.description|safe|default_if_none:'' }}">
                             <textarea id="descriptionEditor"></textarea>
                             <script type="text/javascript">
@@ -112,18 +112,18 @@
                     
                 </div>
 
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="form-horizontal-text">Rating</label>
-                    <div class="uk-form-controls">
-                        <div class="uk-inline">
+                <div class="uk-margin" id="bookmark-form-rating-parent">
+                    <label id="bookmark-form-rating-label" class="uk-form-label" for="form-horizontal-text">Rating</label>
+                    <div class="uk-form-controls" id="bookmark-form-rating-controls">
+                        <div class="uk-inline" id="bookmark-form-rating-inline">
                             <input type="hidden" name="rating" id="bookmark_rating" value="{{ bookmark.rating }}">
                             {% for stars in rating_range %}
-                                <div class="uk-animation-toggle uk-inline" tabindex="0">
-                                    <div class="uk-animation-fade">
+                                <div id="bookmark-form-rating-star-toggle" class="uk-animation-toggle uk-inline" tabindex="0">
+                                    <div id="bookmark-form-rating-star-animation" class="uk-animation-fade">
                                         {% if stars <= bookmark.rating %}
-                                            <span uk-icon="icon: star" onclick="colorStar({{stars}})" id="rating_{{stars}}" class="rating-star"></span>
+                                            <span id="bookmark-form-rating-star-filled" uk-icon="icon: star" onclick="colorStar({{stars}})" id="rating_{{stars}}" class="rating-star"></span>
                                         {% else %}
-                                            <span uk-icon="icon: star" onclick="colorStar({{stars}})" id="rating_{{stars}}"></span>
+                                            <span id="bookmark-form-rating-star-empty" uk-icon="icon: star" onclick="colorStar({{stars}})" id="rating_{{stars}}"></span>
                                         {% endif %}
                                         
                                     </div>
@@ -134,19 +134,19 @@
                         
                     </div>
                 </div>
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="form-horizontal-text">Draft?</label>
-                    <div class="uk-form-controls">
-                        <div class="uk-inline">
-                            <label for="draft"><input class="uk-checkbox" type="checkbox" name="draft" {% if bookmark.draft %} checked {% endif %}> </label>
+                <div class="uk-margin" id="bookmark-form-draft-parent">
+                    <label id="bookmark-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft?</label>
+                    <div id="bookmark-form-draft-controls" class="uk-form-controls">
+                        <div id="bookmark-form-draft-inline" class="uk-inline">
+                            <label id="bookmark-form-draft-label" for="draft"><input id="bookmark-form-draft-input" class="uk-checkbox" type="checkbox" name="draft" {% if bookmark.draft %} checked {% endif %}> </label>
                         </div>
                     </div>
                 </div>
 
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
-                    <div class="uk-form-controls">
-                        <select class="uk-select uk-form-width-large" name="comments_permitted">                    
+                <div class="uk-margin" id="bookmark-form-allow-comments-parent">
+                    <label id="bookmark-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
+                    <div id="bookmark-form-allow-comments-controls" class="uk-form-controls">
+                        <select id="bookmark-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted">                    
                             <option {% if bookmark.anon_comments_permitted and bookmark.comments_permitted %} selected {% endif %}>All</option>
                             <option {% if bookmark.anon_comments_permitted == False and bookmark.comments_permitted %} selected {% endif %}>Registered users only</option>
                             <option {% if not bookmark.anon_comments_permitted and not bookmark.comments_permitted %} selected {% endif %}>None</option>
@@ -155,22 +155,22 @@
                     </div>
                 </div>
 
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="form-horizontal-text">Work</label>
-                    <div class="uk-form-controls">
-                        <div class="uk-inline">
-                            <input class="uk-input uk-form-width-large" type="text" disabled="true" name="work_title" value="{{ bookmark.work.title }}">   
-                            <input type="hidden" name="work_id" value="{{ bookmark.work.id }}">                         
+                <div class="uk-margin" id="bookmark-form-work-parent">
+                    <label id="bookmark-form-work-label" class="uk-form-label" for="form-horizontal-text">Work</label>
+                    <div id="bookmark-form-work-controls" class="uk-form-controls">
+                        <div id="bookmark-form-work-inline" class="uk-inline">
+                            <input id="bookmark-form-work-title" class="uk-input uk-form-width-large" type="text" disabled="true" name="work_title" value="{{ bookmark.work.title }}">   
+                            <input id="bookmark-form-work-id-hidden" type="hidden" name="work_id" value="{{ bookmark.work.id }}">                         
                         </div>
                     </div>
                 </div>
 
                 
                 {% for type, tag in tags.items %}
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="form-horizontal-text">{{ type }}</label>
-                    <div class="uk-form-controls">                
-                        <div class="uk-inline">
+                <div class="uk-margin" id="bookmark-form-tag-parent">
+                    <label id="bookmark-form-tag-type-label" class="uk-form-label" for="form-horizontal-text">{{ type }}</label>
+                    <div id="bookmark-form-tag-controls" class="uk-form-controls">                
+                        <div id="bookmark-form-tag-inline" class="uk-inline">
                             <div id="{{ type }}_tags">
                             {% for single_tag in tag %}
                                 <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="{{ single_tag }}">
@@ -182,10 +182,10 @@
                 </div>
                 {% endfor %}
             </fieldset>
-    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
-        <div class="uk-text-right uk-width-1-1">
-            <input class="uk-button uk-button-danger" type="button" onclick="history.back()" value="Cancel"/>
-            <input class="uk-button uk-button-primary" type="submit" value="Submit"/>
+    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bookmark-form-actions-footer-parent" uk-grid>
+        <div class="uk-text-right uk-width-1-1" id="bookmark-form-actions-footer-child">
+            <input id="bookmark-form-actions-footer-cancel" class="uk-button uk-button-danger" type="button" onclick="history.back()" value="Cancel"/>
+            <input id="bookmark-form-actions-footer-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
         </div>
     </div>    
 </form>

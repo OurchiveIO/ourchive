@@ -1,4 +1,4 @@
-#scroll {
+.scroll-to-top {
     position:fixed;
     right:10px;
     bottom:10px;
@@ -9,7 +9,7 @@
     display:none;
     padding: 1em;
 }
-#scroll span {
+.scroll-to-top span {
     position:absolute;
     top:50%;
     left:50%;
@@ -20,7 +20,7 @@
     border:8px solid transparent;
     border-bottom-color:#ffffff;
 }
-#scroll:hover {
+.scroll-to-top:hover {
     opacity:1;filter:"alpha(opacity=100)";
     -ms-filter:"alpha(opacity=100)";
 }

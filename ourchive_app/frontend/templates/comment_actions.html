@@ -1,36 +1,36 @@
 <div id="comment-{{comment.id}}-reply" class="uk-width-1-1" hidden>
-            <form class="uk-form" action="{{ post_action }}" method="post">
-                {% csrf_token %}
-                <div class="uk-width-1-1">
-                    <label class="uk-form-label" for="form-horizontal-text">Reply</label>
-                    <div class="uk-form-controls">
-                        <div class="uk-inline">
-                            <input type="hidden" id="parent_comment" name="parent_comment" value="{{ comment.id }}">
-                            <input type="hidden" id="{{ object_name }}" name="{{ object_name }}" value="{{ object_id }}">
-                            <textarea class="uk-textarea uk-form-width-large" rows="5" id="text" name="text"></textarea>
-                        </div>
-                    </div>
+    <form class="uk-form" id="reply-{{comment.id}}-form" action="{{ post_action }}" method="post">
+        {% csrf_token %}
+        <div class="uk-width-1-1" id="reply-{{comment.id}}-parent-div">
+            <label id="reply-{{comment.id}}-label" class="uk-form-label" for="form-horizontal-text">Reply</label>
+            <div id="reply-{{comment.id}}-parent-controls" class="uk-form-controls">
+                <div class="uk-inline" id="reply-{{comment.id}}-hidden-fields">
+                    <input type="hidden" id="parent_comment" name="parent_comment" value="{{ comment.id }}">
+                    <input type="hidden" id="{{ object_name }}" name="{{ object_name }}" value="{{ object_id }}">
+                    <textarea class="uk-textarea uk-form-width-large" rows="5" id="text" name="text"></textarea>
                 </div>
-                <div class="uk-width-1-1 uk-margin-top">
-                    <input class="uk-button uk-button-default" type="submit" value="Post Comment"/>
-                </div>
-            </form>
+            </div>
         </div>
-        <div class="uk-width-1-1" id="comment-{{comment.id}}-edit" hidden>
-            <form class="uk-form"  method="post" id="commentEditForm" action="{{ edit_action }}" uk-grid>
-                {% csrf_token %}
-                <div class="uk-width-1-1">
-                    <label class="uk-form-label" for="form-horizontal-text">Edit Comment</label>
-                    <div class="uk-form-controls">
-                        <div class="uk-inline">
-                            <input type="hidden" id="comment_id" name="id" value="{{ comment.id }}">
-                            <textarea class="uk-textarea uk-form-width-large" rows="5" placeholder="Text" name="text">{{ comment.text|default_if_none:'' }}</textarea>
+        <div class="uk-width-1-1 uk-margin-top" id="post-comment-parent-div">
+            <input id="post-comment-input" class="uk-button uk-button-default" type="submit" value="Post Comment"/>
+        </div>
+    </form>
+</div>
+<div class="uk-width-1-1" id="comment-{{comment.id}}-edit" hidden>
+    <form class="uk-form" method="post" id="commentEditForm" action="{{ edit_action }}" uk-grid>
+        {% csrf_token %}
+        <div class="uk-width-1-1" id="edit-comment-parent-div">
+            <label id="edit-comment-label" class="uk-form-label" for="form-horizontal-text">Edit Comment</label>
+            <div id="edit-comment-form-controls" class="uk-form-controls">
+                <div id="edit-comment-input-div" class="uk-inline">
+                    <input type="hidden" id="comment_id" name="id" value="{{ comment.id }}">
+                    <textarea id="edit-comment-textarea" class="uk-textarea uk-form-width-large" rows="5" placeholder="Text" name="text">{{ comment.text|default_if_none:'' }}</textarea>
 
-                        </div>
-                    </div>
                 </div>
-                <div class="uk-width-1-1">
-                    <input class="uk-button uk-button-default" type="submit" value="Edit Comment"/>
-                </div>
-            </form>    
+            </div>
         </div>
+        <div class="uk-width-1-1" id="edit-comment-submit-parent">
+            <input id="edit-comment-submit" class="uk-button uk-button-default" type="submit" value="Edit Comment"/>
+        </div>
+    </form>    
+</div>

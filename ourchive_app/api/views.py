@@ -84,12 +84,12 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [RegistrationPermitted]
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [RegistrationPermitted]
 
 class UserWorkList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer    

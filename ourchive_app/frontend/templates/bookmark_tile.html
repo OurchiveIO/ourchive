@@ -1,36 +1,42 @@
-<div class="uk-margin">
-	<div class="uk-card uk-card-default">
-	    <div class="uk-card-header">
-	        <div class="uk-grid-small uk-flex-middle" uk-grid>
-		        <div class="uk-width-expand">
+<div id="bk-tile-parent" class="uk-margin">
+	<div id="bk-tile-card" class="uk-card uk-card-default">
+	    <div id="bk-tile-header-parent" class="uk-card-header">
+	        <div id="bk-tile-header-grid" class="uk-grid-small uk-flex-middle" uk-grid>
+		        <div id="bk-tile-header-content" class="uk-width-expand">
 	                {% if bookmark.title %}
-	                <a href="/bookmarks/{{bookmark.id}}?draft={{bookmark.draft}}" class="uk-inline"><h3 class="uk-card-title uk-margin-remove-bottom">{{bookmark.title}}</h3></a>
+	                <a id="bk-tile-title-link" href="/bookmarks/{{bookmark.id}}?draft={{bookmark.draft}}" class="uk-inline"><h3 id="bk-tile-title" class="uk-card-title uk-margin-remove-bottom">{{bookmark.title}}</h3></a>
 	                {% else %}
-	                <a href="/bookmarks/{{bookmark.id}}?draft={{bookmark.draft}}" class="uk-inline"><h3 class="uk-card-title uk-margin-remove-bottom">Bookmark - {{bookmark.work.title}}</h3></a>
+	                <a id="bk-tile-work-link" href="/bookmarks/{{bookmark.id}}?draft={{bookmark.draft}}" class="uk-inline"><h3 id="bk-tile-work-title" class="uk-card-title uk-margin-remove-bottom">Bookmark - {{bookmark.work.title}}</h3></a>
 	                {% endif %}
-	                <span class="uk-inline uk-align-right">{% for stars in rating_range %}
+	                <span id="bk-tile-rating-span" class="uk-inline uk-align-right">{% for stars in rating_range %}
 	                    {% if stars <= bookmark.rating %}
-	                        <span uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}" class="rating-star uk-text-middle"></span>
+	                        <span id="bk-tile-rating-star-filled" uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}" class="rating-star uk-text-middle"></span>
 	                    {% else %}
-	                        <span uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}"></span>
+	                        <span id="bk-tile-rating-star-unfilled" uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}"></span>
 	                    {% endif %}
 				    {% endfor %}</span>
-	                <p class="uk-text-meta uk-margin-remove-top">{{ bookmark.user }}</p>
+	                <p id="bk-tile-creator" class="uk-text-meta uk-margin-remove-top">{{ bookmark.user }}</p>
 		        </div>
 		    </div>
 		</div>
-		<div class="uk-card-body">
-	    	<p><strong>Work</strong>: {{ bookmark.work.title }}</p>
-	        <p><strong>Rating</strong>: {{ bookmark.rating }} stars</p>
+		<div id="bk-tile-body" class="uk-card-body">
+	    	<p id="bk-tile-work"><strong id="bk-tile-work-label">Work</strong>: {{ bookmark.work.title }}</p>
+	        <p id="bk-tile-rating-body"><strong id="bk-tile-rating-body-label">Rating</strong>: {{ bookmark.rating }} stars</p>
 	        {% for type, tag in bookmark.tags.items %} 
-		        <dt>{{ type }}</dt>
-		        <dd>
-		        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
+		        <dt id="bk-tile-tag-type-{{type}}">{{ type }}</dt>
+		        <dd id="bk-tile-tag-container-{{type}}">
+		        <span id="bk-tile-tag-icon-{{type}}" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="bk-tile-tag-{{single_tag.id}}-link" href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
 		        </dd>
 		    {% endfor %}
 		</div>
-	    <div class="uk-card-footer">
-	        <a href="/bookmarks/{{bookmark.id}}" class="uk-button uk-button-text">Read more</a>
+	    <div class="uk-card-footer" id="bk-tile-footer-parent">
+	        <a id="bk-tile-readmore-link" href="/bookmarks/{{bookmark.id}}" class="uk-button uk-button-text">Read more</a>
+	        {% if bookmark.user == request.user.username %}
+	        <div id="bk-tile-actions-parent" class="uk-align-right">
+	            <a id="bk-tile-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span id="bk-tile-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
+	            <a id="bk-tile-delete-link" href="/bookmarks/{{ bookmark.id }}/delete"><span uk-icon="icon: trash" id="bk-tile-delete-span" title="Delete"></span> </a>
+	        </div>
+	        {% endif %}
 	    </div>
 	</div>  
 </div>

@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-import requests
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
@@ -12,6 +11,7 @@ from django.http import HttpResponse
 from .search_models import SearchObject
 from html import escape
 import logging
+from .api_utils import do_get, do_post, do_patch, do_delete, do_put, process_results
 
 logger = logging.getLogger(__name__)
 
@@ -23,27 +23,6 @@ def group_tags(tag_types, tags):
 		result[tag['tag_type']].append(tag)
 	return result
 
-def get_headers(request):
-	headers = {}
-	headers['X-CSRFToken'] = request.COOKIES['csrftoken'] if 'csrftoken' in request.COOKIES else None
-	headers['content-type'] = 'application/json'
-	headers['Origin'] = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}'
-	return headers
-
-def append_root_url(url):
-	return f"{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}/{url}"
-
-def get_results(results):
-	try:
-		results_json = results.json() if (results.status_code != 204 and results.status_code != 500 and results.status_code != 403 and results.status_code != 404) else {}
-	except Exception as e:
-		logger.error(f"exception: {e}")
-		logger.debug(f"exception occurred: {e}")
-		results_json = {}
-	results_status_code = results.status_code
-	logger.debug(f"status code: {results_status_code}")
-	return [results_json, results_status_code]
-
 def sanitize_rich_text(rich_text):
 	if rich_text is not None:
 		rich_text = escape(rich_text) 
@@ -51,32 +30,9 @@ def sanitize_rich_text(rich_text):
 		rich_text =''
 	return rich_text
 
-def process_results(results, object):
-	if results[1] >= 200 and results[1] < 300:
-		return 'OK'
-	if results[1] >= 400 and results[1] < 500 and results[1] != 404:
-		return f"You are not authorized to access this {object}. Please contact your administrator for more information."
-	if results[1] == 404:
-		return f"We could not find this {object}. You may not have access to it, or it may not exist."
-	if results[1] == 500:
-		f"An error occurred while accessing this {object}. Please contact your administrator for more information."
- 
-def do_patch(url, request, data={}):
-	return get_results(requests.patch(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
-
-def do_post(url, request, data={}):
-	response = requests.post(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request))
-	return get_results(response)
-
-def do_put(url, request, data={}):
-	return get_results(requests.put(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
-
-def do_delete(url, request):
-	return get_results(requests.delete(append_root_url(url), cookies=request.COOKIES, headers=get_headers(request)))
-
-def do_get(url, request, params={}):
-	response = requests.get(append_root_url(url), params=params, cookies=request.COOKIES, headers=get_headers(request))
-	return get_results(response)
+def referrer_redirect(request):
+	refer = request.META['HTTP_REFERER'] if request.META['HTTP_REFERER'] is not None and '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER'] else '/'
+	return redirect(refer)
 
 def get_object_tags(parent, request):
 	tag_types = do_get('api/tagtypes', request)
@@ -103,21 +59,12 @@ def get_works_list(request, username=None):
 	return {'works': works, 'next_params': response['next_params'] if 'next_params' in response else None, 'prev_params': response['prev_params'] if 'prev_params' in response else None}
 
 def index(request):
-	if request.user.is_authenticated:
-		request_url = f"api/users/{request.user.id}/"
-		response = do_get(request_url, request)[0]
-		if 'userprofile' in response and response['userprofile'] is not None and 'has_notifications' in response['userprofile']:
-			has_notifications = response['userprofile']['has_notifications']
-			request.session['has_notifications'] = has_notifications
-		else:
-			request.session['has_notifications'] = False
-	else:
-		request.session['has_notifications'] = False
 	return render(request, 'index.html', {
 	    'heading_message': 'Welcome to Ourchive',
 	    'long_message': 'Ourchive is a configurable, extensible, multimedia archive, meant to serve as a modern alternative to PHP-based archives. You can search for existing works, create your own, or create curated collections of works you\'ve enjoyed. Have fun with it!',
 		'root': settings.ALLOWED_HOSTS[0],
-		'has_notifications': request.session['has_notifications']
+		'stylesheet_name': 'ourchive-light.css',
+		'has_notifications': request.session.get('has_notifications')
 	})
 
 def user_name(request, username):
@@ -286,13 +233,6 @@ def user_bookmarks(request, username):
 		'user_filter': username})
 
 def user_notifications(request, username):
-	if request.user.is_authenticated:
-		response = do_get(f'api/users/{request.user.id}/', request, params=request.GET)
-		if response[0] is not None and response[0]['userprofile'] is not None:
-			has_notifications = response[0]['userprofile']['has_notifications']
-			request.session['has_notifications'] = has_notifications
-	else:
-		request.session['has_notifications'] = False
 	response = do_get(f'api/users/{username}/notifications', request, params=request.GET)
 	if response[1] == 204 or response[1] == 200:
 		notifications = response[0]['results']
@@ -635,7 +575,7 @@ def delete_work(request, work_id):
 		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this work.')	
 	else:
 		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this work. Please contact your administrator.')	
-	return redirect('/')
+	return referrer_redirect(request)
 
 def delete_chapter(request, work_id, chapter_id):
 	response = do_delete(f'api/chapters/{chapter_id}/', request)
@@ -649,7 +589,7 @@ def delete_chapter(request, work_id, chapter_id):
 
 def new_bookmark(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
-		data = {'title': '', 'user': request.user.username, 'work_id': work_id, 'is_private': True, 'rating': 5}
+		data = {'title': '', 'description': '', 'user': request.user.username, 'work_id': work_id, 'is_private': True, 'rating': 5}
 		response = do_post(f'api/bookmarks/', request, data=data)
 		if response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark created.')	
@@ -733,7 +673,7 @@ def delete_bookmark(request, bookmark_id):
 		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this bookmark.')	
 	else:
 		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this bookmark. Please contact your administrator.')	
-	return redirect('/')
+	return referrer_redirect(request)
 
 def log_in(request):
 	if request.method == 'POST':
@@ -741,8 +681,7 @@ def log_in(request):
 		if user is not None:
 			login(request, user)
 			messages.add_message(request, messages.SUCCESS, 'Login successful.')	
-			refer = request.POST.get('referrer') if request.POST.get('referrer') is not None and '/login' not in request.POST.get('referrer') and '/register' not in request.POST.get('referrer') and '/reset' not in request.POST.get('referrer') else '/'
-			return redirect(refer)
+			return referrer_redirect(request)
 		else:
 			messages.add_message(request, messages.ERROR, 'Login unsuccessful. Please try again.')
 			return redirect('/login')
@@ -758,8 +697,7 @@ def reset_password(request):
 		if user is not None:
 			login(request, user)
 			messages.add_message(request, messages.SUCCESS, 'Login successful.')	
-			refer = request.POST.get('referrer') if request.POST.get('referrer') is not None and '/login' not in request.POST.get('referrer') and '/register' not in request.POST.get('referrer') else '/'
-			return redirect(refer)
+			return referrer_redirect(request)
 		else:
 			messages.add_message(request, messages.ERROR, 'Login unsuccessful. Please try again.')
 			return redirect('/login')
@@ -997,6 +935,10 @@ def works_by_tag_next(request, tag_id):
 	offset_url = request.GET.get('offset', '')
 	works = do_get(f'{next_url}&offset={offset_url}', request)[0]
 	return render(request, 'paginated_works.html', {'works': works, 'tag_id': tag_id})
+
+def switch_css_mode(request):
+	request.session['css_mode'] = "dark" if request.session.get('css_mode') == "light" or request.session.get('css_mode') is None else "light"
+	return referrer_redirect(request)
 
 def upload_file(request):
 	if request.method == 'POST':
