@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'frontend',
     'django.contrib.postgres',
     'corsheaders',
+    'anymail',
     #'background_task',
 ]
 
@@ -93,8 +94,17 @@ S3_BUCKET = 'ourchive_media'
 
 SEARCH_BACKEND = 'POSTGRES'
 
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = BASE_DIR+"/sent_emails"
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+    EMAIL_FILE_PATH = BASE_DIR+"/sent_emails"
+else:
+    ANYMAIL = {
+        "MAILGUN_API_KEY": os.getenv("OURCHIVE_MAILGUN_API_KEY"),
+        "MAILGUN_SENDER_DOMAIN": 'ourchive-mail.stopthatimp.net', 
+    }
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend" 
+    DEFAULT_FROM_EMAIL = "admin@ourchive-dev.stopthatimp.net"  
+    SERVER_EMAIL = "serveradmin@ourchive-dev.stopthatimp.net" 
 
 TEMPLATES = [
     {
