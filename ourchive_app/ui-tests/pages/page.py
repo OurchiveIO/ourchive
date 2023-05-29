@@ -1,13 +1,6 @@
 from pages import locators, element
 from pages.locators import MainPageLocators
-from pages.element import BasePageElement
-
-class SearchTextElement(BasePageElement):
-    """This class gets the search text from the specified locator"""
-
-    #The locator for search box where search string is entered
-    locator = 'q'
-
+from selenium.webdriver.common.by import By
 
 class BasePage(object):
     """Base class to initialize the base page that will be called from all
@@ -16,30 +9,20 @@ class BasePage(object):
     def __init__(self, driver):
         self.driver = driver
 
+    def is_title_matches(self, expected_text):
+        """Verifies that the hardcoded text "Python" appears in page title"""
+
+        return expected_text in self.driver.title     
+
 
 class MainPage(BasePage):
     """Home page action methods come here. I.e. Python.org"""
 
-    #Declares a variable that will contain the retrieved text
-    search_text_element = SearchTextElement()
-
-    def is_title_matches(self):
-        """Verifies that the hardcoded text "Python" appears in page title"""
-
-        return "Ourchive" in self.driver.title
-
-    def find_all_sidenav_items(self):
+    def find_all_left_nav_items(self):
         """Triggers the search"""
 
-        elements = self.driver.find_elements(*MainPageLocators.SIDENAV_ITEMS)
-
-        return elements      
-
-
-class SearchResultsPage(BasePage):
-    """Search results page action methods come here"""
-
-    def is_results_found(self):
-        # Probably should search for this text in the specific page
-        # element, but as for now it works fine
-        return "No results found." not in self.driver.page_source
+        parent = self.driver.find_element(MainPageLocators.NAV_LEFT_PARENT[0], MainPageLocators.NAV_LEFT_PARENT[1])
+        print(f"Parent Item: {parent.text}")
+        children = parent.find_elements(By.TAG_NAME, "li")
+ 
+        return children      
