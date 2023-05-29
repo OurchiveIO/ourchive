@@ -1,4 +1,4 @@
-<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+<div id="chapter-grid-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
 	<script>
 		function loadMoreComments(next, chapterId) {
 			fetch(next)
@@ -11,40 +11,40 @@
 			  });
 		}
 	</script>
-	<div class="uk-width-2-3">
-		<h2><a class="uk-link-reset" href="">Chapter {{ chapter.number }}: {{ chapter.title }}</a></h2>
+	<div class="uk-width-2-3" id="chapter-header-parent">
+		<h2 id="chapter-header-h2"><a id="chapter-header-link" class="uk-link-reset" href="">Chapter {{ chapter.number }}: {{ chapter.title }}</a></h2>
 		{% if chapter.draft %}
-	            <div class="uk-width-auto">
-	                <span class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+	            <div class="uk-width-auto" id="chapter-draft-div">
+	                <span id="chapter-draft-badge" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
 	            </div>
 	    {% endif %}
 	</div>	
 	
-	<div class="uk-text-right uk-width-1-3">
+	<div class="uk-text-right uk-width-1-3" id="chapter-user-actions-parent">
             {% if work.user == request.user.username %}
             {% if chapter.draft %}
-            <a href="/works/{{ work.id }}/chapters/{{ chapter.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+            <a id="chapter-publish-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/publish"><span id="chapter-publish-span" uk-icon="icon: check" title="Publish"></span> </a>
             {% endif %}
-            <a href="/works/{{ work.id }}/chapters/{{ chapter.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
-            <a href="/works/{{work.id}}/chapters/{{ chapter.id }}/delete"><span uk-icon="icon: trash"></span> </a>
+            <a id="chapter-edit-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/edit"><span uk-icon="icon: file-edit" id="chapter-edit-span"></span> </a>
+            <a id="chapter-delete-link" href="/works/{{work.id}}/chapters/{{ chapter.id }}/delete"><span uk-icon="icon: trash" id="chapter-delete-span"></span> </a>
             {% endif %}
     </div>
-    <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
-		<div><span class="uk-text-large">Summary</span></div>
-	    <div><span class="uk-text-medium">{% autoescape off %}{{ chapter.summary }}{% endautoescape %}</span></div>
-		<div><span class="uk-text-large">Notes</span></div>
-	    <div><span class="uk-text-medium">{% autoescape off %}{{ chapter.notes }}{% endautoescape %}</span></div>
+    <div id="chapter-context-parent" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
+		<div id="chapter-summary-header"><span id="chapter-summary-label" class="uk-text-large">Summary</span></div>
+	    <div id="chapter-summary-div"><span id="chapter-summary-text" class="uk-text-medium">{% autoescape off %}{{ chapter.summary }}{% endautoescape %}</span></div>
+		<div id="chapter-notes-header"><span id="chapter-notes-label" class="uk-text-large">Notes</span></div>
+	    <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.notes }}{% endautoescape %}</span></div>
 	</div>
-   	<hr/>	
-	{% if chapter.image_url %}<p><img src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/></p><hr/>{% endif %}
-	{% if chapter.audio_url %}<p><audio src="{{ chapter.audio_url }}" controls></audio></p><hr/>{% endif %}
-	{% if chapter.text %}<span class="uk-text-medium">{% autoescape off %}{{ chapter.text }}{% endautoescape %}</span><hr/>{% endif %}
-	<div class="uk-grid-small uk-child-width-auto" uk-grid>
-        <div>
-             <button class="uk-button uk-button-text" type="button" uk-toggle="target: #chapter-{{chapter.id}}-comments">{{ chapter.comments.count}} Comment(s)</button>    		
+   	<hr id="chapter-content-hr"/>	
+	{% if chapter.image_url %}<p id="chapter-image-graf"><img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/></p><hr id="chapter-image-hr"/>{% endif %}
+	{% if chapter.audio_url %}<p id="chapter-audio-graf"><audio id="chapter-audio" src="{{ chapter.audio_url }}" controls></audio></p><hr id="chapter-audio-hr"/>{% endif %}
+	{% if chapter.text %}<span id="chapter-text" class="uk-text-medium">{% autoescape off %}{{ chapter.text }}{% endautoescape %}</span><hr id="chapter-text-hr"/>{% endif %}
+	<div id="chapter-comments-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
+        <div id="chapter-comments-load-div">
+             <button id="chapter-comments-load-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #chapter-{{chapter.id}}-comments">{{ chapter.comments.count}} Comment(s)</button>    		
         </div>
     </div>
-    <div class="uk-grid-small uk-child-width-auto" uk-grid>
+    <div id="chapter-comments-parent-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
         <div id="chapter-{{chapter.id}}-comments" {% if not expand_comments %} hidden {% endif %}>
         		<ul class="uk-comment-list" id="chapter-{{chapter.id}}-comments-list">
         			{% include "chapter_comments.html" with post_action_url=chapter.post_action_url edit_action_url=chapter.edit_action_url next=chapter.comments.next next_params=chapter.comments.next_params comments=chapter.comments.results chapter_offset=chapter_offset %}   
@@ -53,13 +53,13 @@
     </div>
     {% if user_can_comment %}
      <div id="chapter-{{chapter.id}}-new">
-        <form action="{{chapter.post_action_url}}" method="post" class="uk-form uk-grid-small" uk-grid>
+        <form id="chapter-comment-form" action="{{chapter.post_action_url}}" method="post" class="uk-form uk-grid-small" uk-grid>
             {% csrf_token %}
-            <div class="uk-width-1-1"><input type="hidden" id="chapter" name="chapter" value="{{ chapter.id }}">
-            	<textarea class="uk-textarea" id="text" name="text"></textarea>
+            <div id="chapter-comment-id-div" class="uk-width-1-1"><input type="hidden" id="chapter-comment-id-hidden" name="chapter" value="{{ chapter.id }}">
+            	<textarea id="chapter-comment-textarea" class="uk-textarea" id="text" name="text"></textarea>
             </div>
-            <div class="uk-width-1-1">
-            	<button class="uk-button uk-button-default uk-align-right">Post Comment</button>
+            <div class="uk-width-1-1" id="chapter-post-comment-div">
+            	<button id="chapter-post-comment-button" class="uk-button uk-button-default uk-align-right">Post Comment</button>
             </div>
         </form>
     </div>
