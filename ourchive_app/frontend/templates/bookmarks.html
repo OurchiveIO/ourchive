@@ -1,9 +1,9 @@
 {% extends 'index.html' %}
 {% block content %}	
-<div class="uk-width-1-1">
+<div class="uk-width-1-1" id="bookmarks-view-parent">
 	{% if user_filter %}
-    	<div class="uk-margin">
-			<div class="uk-card"><h1 class="uk-heading-line uk-text-center"> <span id="user_bookmarks_header"> Bookmarks by {{ user_filter }}</span> </h1> 
+    	<div class="uk-margin" id="user-bookmarks-parent">
+			<div class="uk-card" id="user-books-uk-card"><h1 id="user-bookmarks-header-h1" class="uk-heading-line uk-text-center"> <span id="user_bookmarks_header"> Bookmarks by {{ user_filter }}</span> </h1> 
 			</div>
 		</div>
 	{% endif %}
