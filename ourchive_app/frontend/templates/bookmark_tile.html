@@ -3,23 +3,40 @@
 	    <div class="uk-card-header">
 	        <div class="uk-grid-small uk-flex-middle" uk-grid>
 		        <div class="uk-width-expand">
-	                <a href="/bookmarks/{{bookmark.id}}?draft={{bookmark.draft}}"><h3 class="uk-card-title uk-margin-remove-bottom">{{bookmark.title}}</h3></a>
+	                {% if bookmark.title %}
+	                <a href="/bookmarks/{{bookmark.id}}?draft={{bookmark.draft}}" class="uk-inline"><h3 class="uk-card-title uk-margin-remove-bottom">{{bookmark.title}}</h3></a>
+	                {% else %}
+	                <a href="/bookmarks/{{bookmark.id}}?draft={{bookmark.draft}}" class="uk-inline"><h3 class="uk-card-title uk-margin-remove-bottom">Bookmark - {{bookmark.work.title}}</h3></a>
+	                {% endif %}
+	                <span class="uk-inline uk-align-right">{% for stars in rating_range %}
+	                    {% if stars <= bookmark.rating %}
+	                        <span uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}" class="rating-star uk-text-middle"></span>
+	                    {% else %}
+	                        <span uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}"></span>
+	                    {% endif %}
+				    {% endfor %}</span>
 	                <p class="uk-text-meta uk-margin-remove-top">{{ bookmark.user }}</p>
 		        </div>
 		    </div>
 		</div>
 		<div class="uk-card-body">
 	    	<p><strong>Work</strong>: {{ bookmark.work.title }}</p>
-	        <p><strong>Rating</strong>: {{ bookmark.rating }}</p>
-		        {% for type, tag in bookmark.tags.items %} 
-			        <dt>{{ type }}</dt>
-			        <dd>
-			        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="{{ root }}/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
-			        </dd>
-			    {% endfor %}
+	        <p><strong>Rating</strong>: {{ bookmark.rating }} stars</p>
+	        {% for type, tag in bookmark.tags.items %} 
+		        <dt>{{ type }}</dt>
+		        <dd>
+		        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
+		        </dd>
+		    {% endfor %}
 		</div>
 	    <div class="uk-card-footer">
 	        <a href="/bookmarks/{{bookmark.id}}" class="uk-button uk-button-text">Read more</a>
+	        {% if bookmark.user == request.user.username %}
+	        <div class="uk-align-right">
+	            <a href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
+	            <a href="/bookmarks/{{ bookmark.id }}/delete"><span uk-icon="icon: trash" title="Delete"></span> </a>
+	        </div>
+	        {% endif %}
 	    </div>
 	</div>  
 </div>

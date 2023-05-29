@@ -1,6 +1,6 @@
 {% extends 'index.html' %}
 {% block content %}	
-<div class="uk-width-1-1 uk-text-left" uk-grid>
+<div class="uk-width-1-1 uk-text-left" uk-grid id="bookmark-uk-grid">
 	<script>
 		function loadMoreComments(next, chapterId) {
 			fetch(next)
@@ -13,61 +13,61 @@
 			  });
 		}
 	</script>
-	<article class="uk-article">
-	    <div class="uk-child-width-2-1" uk-grid>
-	        <div class="uk-width-2-3">
-	            <h1 class="uk-article-title" style="display: inline;"><a class="uk-link-reset" href="{{ root }}/bookmarks/{{ id }}">{{ bookmark.title }}</a></h1> <span class="uk-text-large" style="padding-left: 10px;">by <a href="{{ root }}/username/{{ bookmark.user }}">{{ bookmark.user }}</a></span>
+	<article class="uk-article" id="bookmark-uk-article">
+	    <div class="uk-child-width-2-1" id="bookmark-uk-child-grid" uk-grid>
+	        <div class="uk-width-2-3" id="bookmark-title-parent">
+	            <h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bookmark.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large" style="padding-left: 10px;">by <a id="bookmark-user-link" href="/username/{{ bookmark.user }}">{{ bookmark.user }}</a></span>
 	            {% if bookmark.draft %}
-	            <div class="uk-width-auto">
-	                <span class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+	            <div id="bookmark-draft-badge" class="uk-width-auto">
+	                <span id="bookmark-draft-span" class="uk-label uk-label-warning"><strong id="bookmark-draft-text">DRAFT</strong></span>
 	            </div>
 	            {% endif %}
 	        </div>
-	        <div class="uk-text-right uk-width-1-3">
+	        <div class="uk-text-right uk-width-1-3" id="bookmark-user-controls-parent">
 	            {% if bookmark.user == request.user.username %}
 	            {% if bookmark.draft %}
-	            <a href="{{ root }}/bookmarks/{{ bookmark.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+	            <a id="bookmark-publish-link" href="/bookmarks/{{ bookmark.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
 	            {% endif %}
-	            <a href="{{ root }}/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
-	            <a href="{{ root }}/bookmarks/{{ bookmark.id }}/delete"><span uk-icon="icon: trash"></span> </a>
+	            <a id="bookmark-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
+	            <a id="bookmark-delete-link" href="/bookmarks/{{ bookmark.id }}/delete"><span uk-icon="icon: trash"></span> </a>
 	            {% endif %}
 	        </div>
-	    <div class="uk-width-1">
-	    	<p class="uk-text-medium">{{ bookmark.description }}</p>
+	    <div class="uk-width-1" id="bookmark-description-parent">
+	    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>
 	    </div>	  
-	    <div class="uk-width-1">
+	    <div class="uk-width-1" id="bookmark-rating-parent">
 	    	{% for stars in rating_range %}
-	            <div class="uk-animation-toggle uk-inline" tabindex="0">
-	                <div>
+	            <div id="bookmark-star-parent" class="uk-animation-toggle uk-inline" tabindex="0">
+	                <div id="bookkmark-star-child">
 	                    {% if stars <= bookmark.rating %}
-	                        <span uk-icon="icon: star" id="rating_{{stars}}" class="rating-star"></span>
+	                        <span id="bookmark-star-filled-span" uk-icon="icon: star" id="rating_{{stars}}" class="rating-star"></span>
 	                    {% else %}
-	                        <span uk-icon="icon: star" id="rating_{{stars}}"></span>
+	                        <span id="bookmark-star-empty-span" uk-icon="icon: star" id="rating_{{stars}}"></span>
 	                    {% endif %}
 	                    
 	                </div>
 	            </div>
 	        {% endfor %}
 	    </div>	  
-	    <hr/>
-	    <div class="uk-width-1">
-	    	<span class="uk-text-medium">Work link: <a class="uk-link-reset" href="{{ root }}/works/{{ work.id }}">{{ work.title }}</a></span>
+	    <hr id="bookmark-tag-hr"/>
+	    <div class="uk-width-1" id="bookmark-work-link-parent">
+	    	<span id="bookmark-work-link-span" class="uk-text-medium">Work link: <a id="bookmark-work-link-id" class="uk-link-reset" href="/works/{{ work.id }}">{{ work.title }}</a></span>
 	    </div>
-	    <dl class="uk-description-list uk-description-list-divider">
+	    <dl class="uk-description-list uk-description-list-divider" id="bookmark-tag-parent">
 	    {% for type, tag in tags.items %} 
-	        <dt>{{ type }}</dt>
-	        <dd>
-	        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="{{single_tag.url}}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
+	        <dt id="bookmark-tag-type">{{ type }}</dt>
+	        <dd id="bookmark-tag-container">
+	        <span id="bookmark-tag-icon" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="{{single_tag.url}}" id="bookmark-tag-link" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
 	        </dd>
 	    {% endfor %}
 	    </dl>
-	    <hr/>
-	    <div class="uk-grid-small uk-child-width-auto" uk-grid>
-	        <div>
-	             <button class="uk-button uk-button-text" type="button" uk-toggle="target: #bookmark-{{bookmark.id}}-comments">{{ comments.count}} Comments</button>    		
+	    <hr id="bookmark-comments-hr"/>
+	    <div id="bookmark-comments-toggle-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
+	        <div id="bookmark-comments-toggle-row">
+	             <button id="bookmark-comments-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #bookmark-{{bookmark.id}}-comments">{{ comments.count}} Comments</button>    		
 	        </div>
 	    </div>
-	    <div class="uk-grid-small uk-child-width-auto" uk-grid>
+	    <div class="uk-grid-small uk-child-width-auto" id="bookmark-comments-grid" uk-grid>
 	        <div id="bookmark-{{bookmark.id}}-comments" {% if not expand_comments %} hidden {% endif %}>
 	        	<ul class="uk-comment-list" id="bookmark-{{bookmark.id}}-comments-list">
 	        		{% include "bookmark_comments.html" with post_action_url=bookmark.post_action_url edit_action_url=bookmark.edit_action_url next=comments.next next_params=comments.next_params comments=comments.results %}
@@ -76,14 +76,14 @@
 	    </div>
 	    {% if user_can_comment %}
 	    <div id="bookmark-{{bookmark.id}}-new">
-            <form action="/bookmarks/{{bookmark.id}}/comments/new" method="post" class="uk-form uk-grid-small" uk-grid>
+            <form action="/bookmarks/{{bookmark.id}}/comments/new" method="post" class="uk-form uk-grid-small" id="bookmark-comment-form" uk-grid>
                 {% csrf_token %}
-                <div class="uk-width-1-1">
-                	<input type="hidden" id="bookmark" name="bookmark" value="{{ bookmark.id }}">
-                	<textarea class="uk-textarea" id="text" name="text"></textarea>
+                <div class="uk-width-1-1" id="bookmark-comment-form-parent">
+                	<input type="hidden" id="bookmark-comment-hidden-input" name="bookmark" value="{{ bookmark.id }}">
+                	<textarea class="uk-textarea" id="bookmark-comment-input" name="text"></textarea>
                 </div>
-                <div class="uk-width-1-1">
-                	<button class="uk-button uk-button-default uk-align-right">Post Comment</button>
+                <div class="uk-width-1-1" id="bookmark-comment-post-parent">
+                	<button id="bookmark-comment-post-button" class="uk-button uk-button-default uk-align-right">Post Comment</button>
                 </div>
             </form>
         </div>

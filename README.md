@@ -24,9 +24,11 @@ Host: Debian Linux
 Database: Postgres
 Task scheduler: Django Background Tasks
 Search: Postgres OR Elastic (configurable provider)
-File Upload: Django OR Tus (configurable provider)
+File Upload: Django OR S3 (configurable provider)
 
 Postgres will need to be up and running.
+
+FFMPEG should be installed on the Linux machine to enable audio processing.
 
 see [local-dev][local-dev.md] for further local dev set up.
 

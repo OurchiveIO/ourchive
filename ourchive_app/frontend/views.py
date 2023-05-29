@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-import requests
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
@@ -11,7 +10,10 @@ import threading
 from django.http import HttpResponse
 from .search_models import SearchObject
 from html import escape
+import logging
+from .api_utils import do_get, do_post, do_patch, do_delete, do_put, process_results
 
+logger = logging.getLogger(__name__)
 
 def group_tags(tag_types, tags):
 	result = {}
@@ -21,55 +23,48 @@ def group_tags(tag_types, tags):
 		result[tag['tag_type']].append(tag)
 	return result
 
-def get_headers(request):
-	headers = {}
-	headers['X-CSRFToken'] = request.COOKIES['csrftoken']
-	headers['content-type'] = 'application/json'
-	return headers
+def sanitize_rich_text(rich_text):
+	if rich_text is not None:
+		rich_text = escape(rich_text) 
+	else:
+		rich_text =''
+	return rich_text
 
-def append_root_url(url):
-	return f"{settings.ALLOWED_HOSTS[0]}/{url}"
-
-def get_results(results):
-	results_json = results.json() if (results.status_code != 204 and results.status_code != 500) else {}
-	results_status_code = results.status_code
-	return [results_json, results_status_code]
-
-def do_patch(url, request, data={}):
-	return get_results(requests.patch(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
-
-def do_post(url, request, data={}):
-	return get_results(requests.post(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
-
-def do_put(url, request, data={}):
-	return get_results(requests.put(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
-
-def do_delete(url, request):
-	return get_results(requests.delete(append_root_url(url), cookies=request.COOKIES, headers=get_headers(request)))
-
-def do_get(url, request, params={}):
-	return get_results(requests.get(append_root_url(url), params=params, cookies=request.COOKIES, headers=get_headers(request)))
+def referrer_redirect(request):
+	refer = request.META['HTTP_REFERER'] if request.META['HTTP_REFERER'] is not None and '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER'] else '/'
+	return redirect(refer)
 
 def get_object_tags(parent, request):
-	tag_types = do_get('api/tagtypes', request)[0]
-	for item in parent:
-		tags = group_tags(tag_types['results'], item['tags']) if 'tags' in item else {}
-		item['tags'] = tags
+	tag_types = do_get('api/tagtypes', request)
+	result_message = process_results(tag_types, 'tag types')
+	if result_message != 'OK':
+		messages.add_message(request, messages.ERROR, result_message)
+	else:
+		tag_types = tag_types[0]
+		for item in parent:
+			tags = group_tags(tag_types['results'], item['tags']) if 'tags' in item else {}
+			item['tags'] = tags
 	return parent
 
-def index(request):
-	if request.user.is_authenticated:
-		request_url = f"api/users/{request.user.id}/"
-		response = do_get(request_url, request)[0]
-		has_notifications = response['userprofile']['has_notifications']
-		request.session['has_notifications'] = has_notifications
+def get_works_list(request, username=None):
+	url = f'api/users/{username}/works' if username is not None else f'api/works'
+	response = do_get(url, request, params=request.GET)
+	result_message = process_results(response, 'works')
+	if result_message !='OK':
+		messages.add_message(request, messages.ERROR, result_message)
+		return redirect('/')
 	else:
-		request.session['has_notifications'] = False
+		works = response[0]['results']
+		works = get_object_tags(works, request)
+	return {'works': works, 'next_params': response['next_params'] if 'next_params' in response else None, 'prev_params': response['prev_params'] if 'prev_params' in response else None}
+
+def index(request):
 	return render(request, 'index.html', {
 	    'heading_message': 'Welcome to Ourchive',
 	    'long_message': 'Ourchive is a configurable, extensible, multimedia archive, meant to serve as a modern alternative to PHP-based archives. You can search for existing works, create your own, or create curated collections of works you\'ve enjoyed. Have fun with it!',
 		'root': settings.ALLOWED_HOSTS[0],
-		'has_notifications': request.session['has_notifications']
+		'stylesheet_name': 'ourchive-light.css',
+		'has_notifications': request.session.get('has_notifications')
 	})
 
 def user_name(request, username):
@@ -109,16 +104,42 @@ def user_name(request, username):
 			'user': user['results'][0]
 		})
 	else:
-		return render(request, 'user.html', {'user': {}})
+		messages.add_message(request, messages.ERROR, 'User not found.')
+		return redirect('/')
+
+def user_block_list(request, username):
+	blocklist = do_get(f'api/users/{username}/userblocks', request)
+	if blocklist[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to view this blocklist.')	
+		return redirect(f'/username/{username}')
+	return render(request, 'user_block_list.html', {
+		'blocklist': blocklist[0]['results'],
+		'username': username
+	})
+
+def block_user(request, username):
+	data = {'user': request.user.username, 'blocked_user': username}
+	blocklist = do_post(f'api/userblocks', request, data)
+	if blocklist[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to view this blocklist.')	
+	if blocklist[1] >= 200 and blocklist[1] < 300:
+		messages.add_message(request, messages.SUCCESS, 'User blocked.')
+	return redirect(f'/username/{username}')
+
+def unblock_user(request, username, pk):
+	blocklist = do_delete(f'api/userblocks/{pk}', request)
+	if blocklist[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to unblock this user.')	
+	if blocklist[1] >= 200 and blocklist[1] < 300:
+		messages.add_message(request, messages.SUCCESS, 'User unblocked.')
+	return redirect(f'/username/{username}')
 
 def user_works(request, username):
-	response = do_get(f'api/users/{username}/works', request, params=request.GET)[0]
-	works = response['results']
-	works = get_object_tags(works, request)
+	works = get_works_list(request, username)
 	return render(request, 'works.html', {
-		'works': works,
-		'next': f"/username/{username}/works/{response['next_params']}" if response["next_params"] is not None else None,
-		'previous': f"/username/{username}/works/{response['prev_params']}" if response["prev_params"] is not None else None,
+		'works': works['works'],
+		'next': f"/username/{username}/works/{works['next_params']}" if works["next_params"] is not None else None,
+		'previous': f"/username/{username}/works/{works['prev_params']}" if works["prev_params"] is not None else None,
 		'user_filter': username,
 		'root': settings.ALLOWED_HOSTS[0]})
 
@@ -192,10 +213,7 @@ def edit_user(request, username):
 			if len(user) > 0:
 				user = user[0]
 				if user['userprofile'] is not None:
-					if user['userprofile']['profile'] is not None:
-						user['userprofile']['profile'] = escape(user['userprofile']['profile']) 
-					else:
-						user['userprofile']['profile'] =''
+					user['userprofile']['profile'] = sanitize_rich_text(user['userprofile']['profile']) 
 				return render(request, 'user_form.html', {'user': user})
 			else:
 				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.')	
@@ -215,19 +233,13 @@ def user_bookmarks(request, username):
 		'user_filter': username})
 
 def user_notifications(request, username):
-	if request.user.is_authenticated:
-		response = do_get(f'api/users/{request.user.id}/', request, params=request.GET)
-		has_notifications = response[0]['userprofile']['has_notifications']
-		request.session['has_notifications'] = has_notifications
-	else:
-		request.session['has_notifications'] = False
 	response = do_get(f'api/users/{username}/notifications', request, params=request.GET)
 	if response[1] == 204 or response[1] == 200:
 		notifications = response[0]['results']
 		return render(request, 'notifications.html', {
 			'notifications': notifications,
-			'next': f"/username/{username}/notifications/{response['next_params']}" if response['next_params'] is not None else None,
-			'previous': f"/username/{username}/notifications/{response['prev_params']}" if response['prev_params'] is not None else None})	
+			'next': f"/username/{username}/notifications/{response[0]['next_params']}" if response[0]['next_params'] is not None else None,
+			'previous': f"/username/{username}/notifications/{response[0]['prev_params']}" if response[0]['prev_params'] is not None else None})	
 	elif response[1] == 403:
 		messages.add_message(request, messages.ERROR, 'You are not authorized to view these notifications.')	
 	else:
@@ -358,10 +370,10 @@ def new_work(request):
 			'work': work})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this work.')	
-			return redirect('/')
+			return redirect('/works')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this work. Please contact your administrator.')	
-			return redirect('/')		
+			return redirect('/works')		
 	elif request.user.is_authenticated:
 		return edit_work(request, int(request.POST['work_id']))
 	else:
@@ -416,9 +428,9 @@ def edit_chapter(request, work_id, id):
 	else:
 		if request.user.is_authenticated:			
 			chapter = do_get(f'api/chapters/{id}', request)[0]
-			chapter['text'] = escape(chapter['text']) if chapter['text'] is not None else ''
-			chapter['summary'] = escape(chapter['summary']) if chapter['summary'] is not None else ''
-			chapter['notes'] = escape(chapter['notes']) if chapter['notes'] is not None else ''
+			chapter['text'] = sanitize_rich_text(chapter['text'])
+			chapter['summary'] = sanitize_rich_text(chapter['summary'])
+			chapter['notes'] = sanitize_rich_text(chapter['notes'])
 			return render(request, 'chapter_form.html', {'chapter': chapter})
 		else:
 			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')	
@@ -480,9 +492,14 @@ def edit_work(request, id):
 		work_types = do_get(f'api/worktypes', request)[0]
 		tag_types = do_get(f'api/tagtypes', request)[0]
 		if request.user.is_authenticated:
-			work = do_get(f'api/works/{id}/draft', request)[0]
-			work['summary'] = escape(work['summary']) if work['summary'] is not None else ''
-			work['notes'] = escape(work['notes']) if work['notes'] is not None else ''
+			work = do_get(f'api/works/{id}/draft', request)
+			result_message = process_results(work, 'work')
+			if result_message !='OK':
+				messages.add_message(request, messages.ERROR, result_message)
+				return redirect('/')
+			work = work[0]
+			work['summary'] = sanitize_rich_text(work['summary'])
+			work['notes'] = sanitize_rich_text(work['notes'])
 			chapters = do_get(f'api/works/{id}/chapters/draft', request)[0]
 			tags = group_tags(tag_types['results'], work['tags'])
 			return render(request, 'work_form.html', {'work_types': work_types['results'],
@@ -558,7 +575,7 @@ def delete_work(request, work_id):
 		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this work.')	
 	else:
 		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this work. Please contact your administrator.')	
-	return redirect('/')
+	return referrer_redirect(request)
 
 def delete_chapter(request, work_id, chapter_id):
 	response = do_delete(f'api/chapters/{chapter_id}/', request)
@@ -572,7 +589,7 @@ def delete_chapter(request, work_id, chapter_id):
 
 def new_bookmark(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
-		data = {'title': 'New Bookmark', 'user': request.user.username, 'work_id': work_id, 'is_private': True, 'rating': 5}
+		data = {'title': '', 'description': '', 'user': request.user.username, 'work_id': work_id, 'is_private': True, 'rating': 5}
 		response = do_post(f'api/bookmarks/', request, data=data)
 		if response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark created.')	
@@ -623,7 +640,6 @@ def edit_bookmark(request, pk):
 		bookmark_dict["user"] = str(request.user)
 		#bookmark_dict.pop("work")
 		bookmark_dict["draft"] = 'draft' in bookmark_dict
-		print(bookmark_dict)
 		response = do_put(f'api/bookmarks/{pk}/', request, data=bookmark_dict)
 		if response[1] == 200:			
 			messages.add_message(request, messages.SUCCESS, 'Bookmark updated.')	
@@ -637,7 +653,9 @@ def edit_bookmark(request, pk):
 		if request.user.is_authenticated:
 			tag_types = do_get(f'api/tagtypes', request)[0]
 			bookmark = do_get(f'api/bookmarks/{pk}/draft', request)[0]
+			bookmark['description'] = sanitize_rich_text(bookmark['description'])
 			tags = group_tags(tag_types['results'], bookmark['tags']) if 'tags' in bookmark else []
+			print(bookmark)
 			return render(request, 'bookmark_form.html', {
 				'rating_range': [1,2,3,4,5],
 				'bookmark': bookmark, 
@@ -655,7 +673,7 @@ def delete_bookmark(request, bookmark_id):
 		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this bookmark.')	
 	else:
 		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this bookmark. Please contact your administrator.')	
-	return redirect('/')
+	return referrer_redirect(request)
 
 def log_in(request):
 	if request.method == 'POST':
@@ -663,8 +681,7 @@ def log_in(request):
 		if user is not None:
 			login(request, user)
 			messages.add_message(request, messages.SUCCESS, 'Login successful.')	
-			refer = request.POST.get('referrer') if request.POST.get('referrer') is not None and '/login' not in request.POST.get('referrer') and '/register' not in request.POST.get('referrer') and '/reset' not in request.POST.get('referrer') else '/'
-			return redirect(refer)
+			return referrer_redirect(request)
 		else:
 			messages.add_message(request, messages.ERROR, 'Login unsuccessful. Please try again.')
 			return redirect('/login')
@@ -680,8 +697,7 @@ def reset_password(request):
 		if user is not None:
 			login(request, user)
 			messages.add_message(request, messages.SUCCESS, 'Login successful.')	
-			refer = request.POST.get('referrer') if request.POST.get('referrer') is not None and '/login' not in request.POST.get('referrer') and '/register' not in request.POST.get('referrer') else '/'
-			return redirect(refer)
+			return referrer_redirect(request)
 		else:
 			messages.add_message(request, messages.ERROR, 'Login unsuccessful. Please try again.')
 			return redirect('/login')
@@ -718,7 +734,12 @@ def work(request, pk):
 	work_types = do_get(f'api/worktypes', request)[0]
 	is_draft = request.GET.get('draft')
 	url = f'api/works/{pk}/'
-	work = do_get(url, request)[0]
+	work = do_get(url, request)
+	result_message = process_results(work, 'work')
+	if result_message !='OK':
+		messages.add_message(request, messages.ERROR, result_message)
+		return redirect('/')
+	work = work[0]
 	tag_types = do_get(f'api/tagtypes', request)[0]
 	tags = group_tags(tag_types['results'], work['tags']) if 'tags' in work else {}	
 	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else ""}'
@@ -879,6 +900,7 @@ def bookmarks(request):
 	bookmarks = get_object_tags(bookmarks, request)
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks, 
+		'rating_range': [1,2,3,4,5],
 		'next': f"/bookmarks/{next_param}" if next_param is not None else None,
 		'previous': f"/bookmarks/{previous_param}" if previous_param is not None else None})
 
@@ -913,6 +935,10 @@ def works_by_tag_next(request, tag_id):
 	offset_url = request.GET.get('offset', '')
 	works = do_get(f'{next_url}&offset={offset_url}', request)[0]
 	return render(request, 'paginated_works.html', {'works': works, 'tag_id': tag_id})
+
+def switch_css_mode(request):
+	request.session['css_mode'] = "dark" if request.session.get('css_mode') == "light" or request.session.get('css_mode') is None else "light"
+	return referrer_redirect(request)
 
 def upload_file(request):
 	if request.method == 'POST':

@@ -4,9 +4,10 @@
 	{% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static 'frontend/css/uikit.ourchive.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'frontend/css/' %}ourchive-{{css_mode}}.css" />
     <link rel="stylesheet" href="{% static 'frontend/css/scroll-to-top.css' %}" />
     <link rel="stylesheet" href="{% static 'frontend/css/editor.css' %}" />
+    <link rel="shortcut icon" href="{% static 'favicon/favicon.ico' %}"/>
     <script src="{% static 'frontend/js/uikit.min.js' %}"></script>
     <script src="{% static 'frontend/js/uikit-icons.min.js' %}"></script>
     <title>Ourchive</title>
@@ -15,56 +16,76 @@
 	{% if messages %}
 		{% for message in messages %}
 			<script>
-				var status = '{{message.tags}}' === 'success' ? '{{message.tags}}' : 'danger';
+				var status = '{{message.tags}}' === 'success' ? 'primary' : 'danger';
 				UIkit.notification({
-				    message: '{{ message }}',
+				    message: '<strong>{{ message }}</strong>',
 				    status: status,
-				    pos: 'bottom-right',
+				    pos: 'top-center',
 				    timeout: 2500
 				});
 			</script>
 		{% endfor %}
 	
 	{% endif %}
-	<div class="ourchive-navbar">
-		<nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
-		    <div class="uk-navbar-left">
-		    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon></a>
+	<div class="ourchive-navbar" id="ourchive-navbar-parent">
+		<nav class="uk-navbar-container uk-navbar-transparent" uk-navbar id="uk-nav-parent">
+		    <div class="uk-navbar-left" id="uk-nav-left">
+		    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
 		        <ul class="uk-navbar-nav uk-visible@s">
-		            <li class="uk-active"><a href="/">Home</a></li>
-		            <li><a href="/works">Works</a></li>
-		            <li><a href="/bookmarks">Bookmarks</a></li>
+		            <li class="uk-active" id="nav-home"><a href="/">Home</a></li>
+		            <li><a href="/works" id="nav-works">Works</a></li>
+		            <li><a href="/bookmarks" id="nav-bookmarks">Bookmarks</a></li>
 		        </ul>
 		    </div>	    
-		    <div class="uk-navbar-right uk-margin-right">
-		    	 <ul class="uk-navbar-nav">
-		    	 	<li>
-			            <a class="uk-navbar-toggle" uk-search-icon href="#"></a>
-			            <div class="uk-drop" uk-drop="mode: click; pos: left-center; offset: 0">
-			                <form class="uk-search uk-search-navbar uk-width-1-1" action="/search/" method="post">
+		    <div class="uk-navbar-right uk-margin-right" id="uk-nav-right">
+		    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
+		    	 	<li id="nav-search-li">
+			            <a class="uk-navbar-toggle" uk-search-icon href="#" id="nav-search-toggle"></a>
+			            <div id="nav-search-div" class="uk-drop" uk-drop="mode: click; pos: left-center; offset: 0">
+			                <form class="uk-search uk-search-navbar uk-width-1-1" action="/search/" method="post" id="nav-search-form">
 			                	{% csrf_token %}
-			                    <input class="uk-search-input" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}">
+			                    <input class="uk-search-input" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input">
 			                </form>
 			            </div>
 		        	</li>
-		        	<li>		        
-			            {% if not request.user.is_authenticated %}<li class="uk-active"><a href="/login"><span uk-icon="icon: sign-in; ratio:1.25" title="Sign In"></a></span></li>{% endif %}
-			            {% if not request.user.is_authenticated %}<li class="uk-active"><a href="/register"><span uk-icon="icon: user; ratio:1.25" title="Register"></a></span></li>{% endif %}
+		    	 	<li id="theme-switcher-li">
+		    	 		<a href="/switch-css-mode" id="theme-switcher-link">
+		    	 			{% if request.session.css_mode == "dark" %}
+		    	 			<span class="custom-icon" uk-icon="icon: sun-regular; ratio:1" title="Light Mode" id="theme-switcher-light">
+		    	 			{% else %}
+		    	 			<span class="custom-icon" uk-icon="icon: moon-regular; ratio:1" title="Dark Mode" id="theme-switcher-dark">
+		    	 			{% endif %}
+		    	 		</a></span>
+		    	 	</li>
+		        	<li id="nav-right-main">		        
+			            {% if not request.user.is_authenticated %}
+			            	<li class="uk-active" id="nav-login-li">
+			            		<a href="/login" id="nav-login-link">
+			            			<span uk-icon="icon: sign-in; ratio:1.25" title="Sign In" id="nav-login-icon"></span>
+			            		</a>
+			            	</li>
+			            	<li class="uk-active" id="nav-register-li">
+			            		<a href="/register" id="nav-register-link">
+			            			<span uk-icon="icon: user; ratio:1.25" title="Register" id="nav-register-icon"></span>
+			            		</a>
+			            	</li>
+			            {% endif %}
 			            {% if request.user.is_authenticated %}
-			            	<a href="/username/{{request.user}}">{{ request.user }}</a>
-			            	<div class="uk-navbar-dropdown">
-	                    		<ul class="uk-nav uk-navbar-dropdown-nav">
-	                    			<li><a href="/works/new/">New Work</a></li>
-	                    			<li><a href="/username/{{request.user}}/bookmarks">Bookmarks</a></li>
-	                    			<li><a href="/username/{{request.user}}/works">Works</a></li>
-	                    			<li><a href="/username/{{request.user}}/edit">Edit Profile</a></li>
-	                    			<li><a href="/username/{{request.user}}/account/edit">Edit Account</a></li>
+			            	<a href="/username/{{request.user}}" id="nav-username">{{ request.user }}</a>
+			            	<div class="uk-navbar-dropdown" id="nav-user-dropdown-div">
+	                    		<ul class="uk-nav uk-navbar-dropdown-nav" id="nav-user-dropdown-ul">
+	                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
+	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks" id="nav-bookmarks-link">Bookmarks</a></li>
+	                    			<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">Works</a></li>
+	                    			<li id="nav-edit-profile-li"><a href="/username/{{request.user}}/edit" id="nav-edit-profile-link">Edit Profile</a></li>
+	                    			<li id="nav-edit-account-li"><a href="/username/{{request.user}}/account/edit" id="nav-edit-account-link">Edit Account</a></li>
+	                    			<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">Blocklist</a></li>
 	                    			{% if request.session.has_notifications %}
-	                    			<li><a class="uk-text-emphasis uk-text-secondary" href="/username/{{request.user}}/notifications">Notifications (Unread)</a></li>
+	                    			<li id="nav-notifications-unread-li"><a class="uk-text-emphasis uk-text-secondary" href="/username/{{request.user}}/notifications" id="nav-notifications-unread-link">Notifications (Unread)</a></li>
 	                    			{% else %}
-	                    			<li><a href="/username/{{request.user}}/notifications">Notifications</a></li>
+	                    			<li id="nav-notifications-li"><a href="/username/{{request.user}}/notifications" id="nav-notifications-link">Notifications</a></li>
 	                    			{% endif %}
-					            	<li><a href="/logout">Sign Out</a></li>
+					            	<li id="nav-signout-li"><a href="/logout" id="nav-signout-link">Sign Out</a></li>
 			        			</ul>
 			        	</div>
 			        	{% endif %}
@@ -75,45 +96,48 @@
 		</nav>
 	</div>
 	<div id="sidenav" uk-offcanvas="flip: true" class="uk-offcanvas">
-		<div class="uk-offcanvas-bar">
-			<ul class="uk-nav">
-				<li class="uk-active"><a href="/">Home</a></li>
-	            <li><a href="/works">Works</a></li>
-	            <li><a href="/bookmarks">Bookmarks</a></li>
-	            <li><a href="/search">Search Results</a></li>
-	            {% if not request.user.is_authenticated %}<li class="uk-active"><a href="/login"><span uk-icon="icon: sign-in; ratio:1.25" title="Sign in"></a></li>{% endif %}
-	            {% if not request.user.is_authenticated %}<li class="uk-active"><a href="/register"><span uk-icon="icon: user; ratio:1.25" title="Register"></a></a></li>{% endif %}
-	            {% if request.user.is_authenticated %}<li class="uk-active"><a href="/logout"><span uk-icon="icon: sign-out; ratio:1.25" title="Sign out"></span></a></li>{% endif %}
+		<div class="uk-offcanvas-bar" id="sidenav-parent-div">
+			<ul class="uk-nav" id="sidenav-ul">
+				<li id="sidenav-home-li" class="uk-active"><a id="sidenav-home-link" href="/">Home</a></li>
+	            <li id="sidenav-works-li"><a id="sidenav-works-link" href="/works">Works</a></li>
+	            <li id="sidenav-bookmarks-li"><a id="sidenav-bookmarks-link" href="/bookmarks">Bookmarks</a></li>
+	            <li id="sidenav-search-li"><a id="sidenav-search-link" href="/search">Search Results</a></li>
+	            {% if not request.user.is_authenticated %}
+	            	<li id="sidenav-sign-in-li" class="uk-active">
+	            		<a id="sidenav-sign-in-link" href="/login"><span uk-icon="icon: sign-in; ratio:1.25" title="Sign in"/></a></li>
+	            	<li id="sidenav-register-li" class="uk-active">
+	            		<a id="sidenav-register-link" href="/register"><span uk-icon="icon: user; ratio:1.25" title="Register"/></a></a></li>
+	            {% endif %}
+	            {% if request.user.is_authenticated %}
+	            	<li id="sidenav-signout-li" class="uk-active">
+	            		<a id="sidenav-signout-link" href="/logout"><span uk-icon="icon: sign-out; ratio:1.25" title="Sign out"></span></a></li>
+	            {% endif %}
 			</ul>
 		</div>
 	</div>
-	<button id="scroll" class="uk-button uk-button-primary" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="arrow-up"></span></button>
-	<div class="uk-container uk-margin">	
-		<div uk-grid id="parent-grid">
+	<button id="scroll-to-top-button" class="uk-button uk-button-primary" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="arrow-up"></span></button>
+	<div class="uk-container uk-margin" id="content-block-parent">	
+		<div uk-grid id="parent-grid" id="content-block-parent-grid">
 			{% block content %}
-				<div class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid>
-				    <div>
-				        <h1 class="uk-heading-medium">{{ heading_message }}</h1>
-				  		<span>{{ long_message }}</span>
-				    </div>
-				    <div>
-						<form class="uk-search uk-search-large" method="post" action="search/">
+				<div class="uk-child-width-1-1" id="index-content-div">
+				        <h1 id="index-content-heading" class="uk-heading-medium">{{ heading_message }}</h1>
+				  		<span id="index-content-message">{{ long_message }}</span>
+						<form id="index-content-search-form" class="uk-search uk-search-large" method="post" action="search/">
 							{% csrf_token %}
-							<a href="#" uk-search-icon></a>
-							<input class="uk-search-input" type="search" name="term" placeholder="Search..." value="{{ term }}">
+							<a id="index-content-search-link" href="#" uk-search-icon></a>
+							<input id="index-content-search-input" class="uk-search-input" type="search" name="term" placeholder="Search..." value="{{ term }}">
 						</form>
-				    </div>
-				</div>			  
+				</div>		  
 			{% endblock %}	
 	    </div>
 	</div>
 	<script src="{% static 'frontend/js/scroll-to-top.js' %}"></script>
 </body>
-<footer>
-	<hr>
-	<div class="uk-text-center" uk-grid>
-	    <div class="uk-width-1-2">
-	        <span class="uk-text-meta uk-padding">Ourchive is created & maintained by <a href="https://github.com/klreeher">@klreeher</a> and <a href="https://github.com/c-e-p">@c-e-p</a>.</span>
+<footer id="ourchive-footer">
+	<hr id="footer-hr">
+	<div id="footer-parent-grid" class="uk-text-center" uk-grid>
+	    <div id="footer-child-grid" class="uk-width-1-2">
+	        <span id="footer-created-by" class="uk-text-meta uk-padding">Ourchive is created & maintained by <a href="https://github.com/klreeher">@klreeher</a> and <a href="https://github.com/c-e-p">@c-e-p</a>.</span>
 	    </div>
 	</div>
 </footer>

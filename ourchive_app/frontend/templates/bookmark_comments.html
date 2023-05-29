@@ -45,7 +45,7 @@
     <div>
         <ul class="uk-pagination">
             {% if next %}
-                <li><a onclick="loadMoreComments('{{root}}/bookmarks/{{bookmark.id}}/comments{{next_params}}', '{{bookmark.id}}')"><button class="uk-button uk-button-text" type="button" uk-toggle="target: #comment_{{comment.id}}_loadMoreComments">Load More Comments</button></a></li>
+                <li><a onclick="loadMoreComments('/bookmarks/{{bookmark.id}}/comments{{next_params}}', '{{bookmark.id}}')"><button class="uk-button uk-button-text" type="button" uk-toggle="target: #comment_{{comment.id}}_loadMoreComments">Load More Comments</button></a></li>
             {% endif %}
         </ul>
     </div>        

@@ -17,20 +17,26 @@ from dotenv import load_dotenv, find_dotenv
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 load_dotenv(find_dotenv())
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.getenv('OURCHIVE_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('OURCHIVE_DEBUG') == 'True'
 
-ALLOWED_HOSTS = ["http://127.0.0.1:8000", "127.0.0.1", "host.docker.internal", "localhost", "http://localhost:8000",]
+hosts = []
+if os.getenv('OURCHIVE_DEV') == 'True':
+    hosts = ["127.0.0.1:8000", "127.0.0.1", "host.docker.internal", "localhost", "http://localhost:8000",]
+else:
+    hosts = ["ourchive-dev.stopthatimp.net", "45.79.159.247"]
 
+ALLOWED_HOSTS = hosts
+
+API_PROTOCOL = 'http://' if DEBUG else 'https://'
 
 # Application definition
 
@@ -44,7 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'frontend',
-    'django.contrib.postgres'
+    'django.contrib.postgres',
+    'corsheaders',
     #'background_task',
 ]
 
@@ -56,7 +63,23 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8000',
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    'http://127.0.0.1:8000',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ROOT_URLCONF = 'ourchive_app.urls'
 
@@ -85,6 +108,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
+                'frontend.context_processors.set_style',
+                'frontend.context_processors.set_has_notifications'
             ],
         },
     },
@@ -101,7 +126,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'ourchive_db',
         'USER': 'ourchive',
-        'PASSWORD': os.environ['DB_ROOT_PW'],
+        'PASSWORD': os.getenv('OURCHIVE_DB_PW'),
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -145,6 +170,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'api.custom_exception_handler.custom_exception_handler',

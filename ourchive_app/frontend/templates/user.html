@@ -13,7 +13,10 @@
 <div class="uk-width-1">
     <div class="uk-text-right uk-width-1">
         {% if user.username == request.user.username %}
-            <a href="{{ root }}/username/{{ user.username }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
+            <a href="/username/{{ user.username }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
+            <a href="/users/{{ user.username }}/blocklist"><span uk-icon="icon: ban" title="Blocklist"></span> </a>
+        {% else %}
+            <a href="/users/{{ user.username }}/block"><span uk-icon="icon: ban" title="Block"></span> </a>
         {% endif %}
     </div>
 	<div class="uk-width-1 uk-align-center">
@@ -28,8 +31,8 @@
             </div>
         {% endif %}
         <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.userprofile.default_content == 'Work' %}0{% else %}1{% endif %}" id="user_content_switcher_header">
-            <li><a href="#">Works</a></li>
-            <li><a href="#">Bookmarks</a></li>
+            <li><a href="#" id="user_works_selector">Works</a></li>
+            <li><a href="#" id="user_bookmarks_selector">Bookmarks</a></li>
         </ul>
         <ul class="uk-switcher uk-margin" id="user_content_switcher">
             <li id="work_tab">

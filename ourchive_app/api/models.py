@@ -311,12 +311,12 @@ class Bookmark(models.Model):
     __tablename__ = 'bookmarks'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, default='', blank=True)
     rating = models.IntegerField()
     description = models.TextField(null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    draft = models.BooleanField(default=True)
+    draft = models.BooleanField(default=False)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
     comment_count = models.IntegerField(default=0)
@@ -437,6 +437,21 @@ class OurchiveSetting(models.Model):
 
     def __repr__(self):
         return '<OurchiveSettings: {}>'.format(self.id)
+
+    def __str__(self):
+        return self.name
+
+class ContentPage(models.Model):
+
+    __tablename__ = 'ourchive_settings'
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    value = models.TextField(null=True, blank=True)
+    order = models.IntegerField(default=1)
+
+    def __repr__(self):
+        return '<ContentPage: {}>'.format(self.id)
 
     def __str__(self):
         return self.name
