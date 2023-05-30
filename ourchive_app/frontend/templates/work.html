@@ -52,28 +52,36 @@
     <hr/>
     {% if chapter %} 
         {% include "chapter.html" %}
+        <!-- use iconnav for work edit icons -->
+        <div class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid>
+            <div>
+                <ul class="uk-pagination">
+                {% if previous_chapter is not None %}<li><a href="{{ previous_chapter }}"><span class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
+                {% if next_chapter is not None %}<li class="uk-margin-auto-left"><a href="{{ next_chapter }}">Next <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
+            </ul>
+            </div>        
+        </div>    
     {% elif chapters %}
         {% for chapter in chapters %}
             {% include "chapter.html" %}
         {% endfor %}
+        <!-- use iconnav for work edit icons -->
+        <div class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid>
+            <div>
+                <ul class="uk-pagination">
+                {% if previous_chapter is not None %}<li><a href="{{ previous_chapter }}"><span class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
+                {% if next_chapter is not None %}<li class="uk-margin-auto-left"><a href="{{ next_chapter }}">Next <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
+            </ul>
+            </div>        
+        </div>    
     {% endif %}
-    <!-- use iconnav for work edit icons -->
-    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid>
-        <div>
-            <ul class="uk-pagination">
-            {% if previous_chapter is not None %}<li><a href="{{ previous_chapter }}"><span class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
-            {% if next_chapter is not None %}<li class="uk-margin-auto-left"><a href="{{ next_chapter }}">Next <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
-        </ul>
-        </div>        
-    </div>    
 </article>
 </div>
 {% if scroll_comment_id %}
     <script>
         window.onload = function(){
-            const element = document.getElementById("comment_container_{{scroll_comment_id}}");
-            element.scrollIntoView();
-        };
+            document.getElementById("ch-comment-{{scroll_comment_id}}-icon-div").scrollIntoView();
+        }
     </script>
 {% endif %}
 {% endblock %}

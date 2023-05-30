@@ -12,6 +12,7 @@ from .search_models import SearchObject
 from html import escape
 import logging
 from .api_utils import do_get, do_post, do_patch, do_delete, do_put, process_results
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -764,28 +765,29 @@ def work(request, pk):
 	chapter_response = do_get(chapter_url_string, request)[0]
 	user_can_comment = (work['comments_permitted'] and (work['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in work else False
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
-	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
 	chapters = []
 	for chapter in chapter_response['results']:
 		if 'id' in chapter:
-			chapter_comments = do_get(f"api/chapters/{chapter['id']}/comments", request)[0]
+			comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
+			chapter_comments = do_get(f"api/chapters/{chapter['id']}/comments?limit=10&offset={comment_offset}", request)[0]
 			chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 			chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}"""
 			chapter['comments'] = chapter_comments
+			chapter['comment_offset'] = comment_offset
 			chapters.append(chapter)
 	return render(request, 'work.html', {'work_types': work_types['results'], 
 		'work': work,
 		'user_can_comment': user_can_comment,
-		'scroll_comment_id': scroll_comment_id, 
 		'expand_comments': expand_comments,
+		'scroll_comment_id': request.GET.get("scrollCommentId") if request.GET.get("scrollCommentId") is not None else None,
 		'id': pk,
 		'tags': tags,
 		'view_full': view_full,
 		'root': settings.ALLOWED_HOSTS[0],
 		'chapters': chapters,
 		'chapter_offset': chapter_offset,
-		'next_chapter': settings.ALLOWED_HOSTS[0] + '/works/'+str(pk)+'?offset='+str(chapter_offset + 1) if 'next' in chapter_response and chapter_response['next'] else None,
-		'previous_chapter': settings.ALLOWED_HOSTS[0] + '/works/'+str(pk)+'?offset='+str(chapter_offset - 1)  if 'previous' in chapter_response and chapter_response['previous'] else None,})
+		'next_chapter': '/works/'+str(pk)+'?offset='+str(chapter_offset + 1) if 'next' in chapter_response and chapter_response['next'] else None,
+		'previous_chapter': '/works/'+str(pk)+'?offset='+str(chapter_offset - 1)  if 'previous' in chapter_response and chapter_response['previous'] else None,})
 
 def render_comments(request, work_id, chapter_id):
 	limit = request.GET.get('limit', '')
@@ -796,11 +798,16 @@ def render_comments(request, work_id, chapter_id):
 	edit_action_url = f"""/works/{work_id}/chapters/{chapter_id}/comments/edit?offset={chapter_offset}"""
 	return render(request, 'chapter_comments.html', {
 		'comments': comments['results'], 
+		'current_offset': comments['current'],
+		'top_level': 'true',
 		'chapter_offset': chapter_offset,
-		'chapter': {'id': chapter_id}, 
+		'chapter': {'id': chapter_id},
+		'comment_count': comments['count'], 
+		'next_params': comments['next_params'],
+		'prev_params': comments['prev_params'],
 		'work': {'id': work_id},
 		'post_action_url': post_action_url,
-		'edit_action_url': edit_action_url})
+		'edit_action_url': edit_action_url})	
 
 def render_bookmark_comments(request, pk):
 	limit = request.GET.get('limit', '')
@@ -818,6 +825,12 @@ def create_chapter_comment(request, work_id, chapter_id):
 	if request.method == 'POST':
 		comment_dict = request.POST.copy()
 		offset_url = int(request.GET.get('offset', 0))
+		if int(request.POST.get('chapter_comment_count')) > 10 and request.POST.get('parent_comment') is None:
+			comment_offset = int(int(request.POST.get('chapter_comment_count'))/10)*10
+		elif int(request.POST.get('chapter_comment_count')) > 10 and request.POST.get('parent_comment') is not None:
+			comment_offset = request.POST.get('parent_comment_next')
+		else:
+			comment_offset = 0
 		if request.user.is_authenticated:
 			comment_dict["user"] = str(request.user)
 		else:
@@ -830,7 +843,7 @@ def create_chapter_comment(request, work_id, chapter_id):
 			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.')	
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.')	
-		return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_id}&offset={offset_url}")
+		return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_id}&offset={offset_url}&comment_offset={comment_offset}&comment_offset_chapter={chapter_id}")
 
 def edit_chapter_comment(request, work_id, chapter_id):
 	if request.method == 'POST':

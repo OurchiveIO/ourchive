@@ -4,9 +4,11 @@
         <div class="uk-width-1-1" id="reply-{{comment.id}}-parent-div">
             <label id="reply-{{comment.id}}-label" class="uk-form-label" for="form-horizontal-text">Reply</label>
             <div id="reply-{{comment.id}}-parent-controls" class="uk-form-controls">
-                <div class="uk-inline" id="reply-{{comment.id}}-hidden-fields">
+                <div class="uk-inline" id="reply-{{comment.id}}-fields">
                     <input type="hidden" id="parent_comment" name="parent_comment" value="{{ comment.id }}">
+                    <input type="hidden" id="parent_comment_next" name="parent_comment_next" value="{{current_offset}}"/>
                     <input type="hidden" id="{{ object_name }}" name="{{ object_name }}" value="{{ object_id }}">
+                    <input type="hidden" id="{{ object_name }}_comment_count" name="{{ object_name }}_comment_count" value="{{ comment_count }}">
                     <textarea class="uk-textarea uk-form-width-large" rows="5" id="text" name="text"></textarea>
                 </div>
             </div>

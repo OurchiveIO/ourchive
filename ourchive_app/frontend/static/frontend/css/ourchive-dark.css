@@ -75,7 +75,7 @@ strong {
   /* 2 */
   font-size: 0.975rem;
   /* 3 */
-  color: #70163C;
+  color: #EA590B;
   white-space: nowrap;
   padding: 2px 6px;
   background: #042325; }
@@ -84,7 +84,7 @@ strong {
  * Emphasize
  */
 em {
-  color: #70163C; }
+  color: #EA590B; }
 
 /*
  * Insert
@@ -1517,8 +1517,8 @@ textarea.uk-form-large,
  */
 .uk-form-danger,
 .uk-form-danger:focus {
-  color: #70163C;
-  border-color: #70163C; }
+  color: #EA590B;
+  border-color: #EA590B; }
 
 /*
  * Success
@@ -1976,19 +1976,19 @@ select.uk-form-width-xsmall {
  * Danger
  */
 .uk-button-danger {
-  background-color: #70163C;
+  background-color: #EA590B;
   color: #FFF;
   border: 1px solid transparent; }
 
 /* Hover */
 .uk-button-danger:hover {
-  background-color: #5b1231;
+  background-color: #d2500a;
   color: #FFF; }
 
 /* OnClick + Active */
 .uk-button-danger:active,
 .uk-button-danger.uk-active {
-  background-color: #450e25;
+  background-color: #b94609;
   color: #FFF; }
 
 /*
@@ -2891,15 +2891,15 @@ select.uk-form-width-xsmall {
  * Warning
  */
 .uk-alert-warning {
-  background: #cdaebc;
-  color: #70163C; }
+  background: #f9d4bf;
+  color: #EA590B; }
 
 /*
  * Danger
  */
 .uk-alert-danger {
-  background: #d0b2bf;
-  color: #70163C; }
+  background: #fadbcb;
+  color: #EA590B; }
 
 /*
  * Content
@@ -2997,14 +2997,14 @@ select.uk-form-width-xsmall {
  * Warning
  */
 .uk-label-warning {
-  background-color: #70163C;
+  background-color: #EA590B;
   color: #FFF; }
 
 /*
  * Danger
  */
 .uk-label-danger {
-  background-color: #70163C;
+  background-color: #EA590B;
   color: #FFF; }
 
 /* ========================================================================
@@ -4251,7 +4251,7 @@ select.uk-form-width-xsmall {
  * Primary
  */
 .uk-notification-message-primary {
-  color: #55112D; }
+  color: #F9F6F1; }
 
 /*
  * Success
@@ -4263,13 +4263,13 @@ select.uk-form-width-xsmall {
  * Warning
  */
 .uk-notification-message-warning {
-  color: #70163C; }
+  color: #EA590B; }
 
 /*
  * Danger
  */
 .uk-notification-message-danger {
-  color: #70163C; }
+  color: #EA590B; }
 
 /* ========================================================================
    Component: Tooltip
@@ -7170,10 +7170,10 @@ ul.uk-nav-sub {
   color: #EDE4D4 !important; }
 
 .uk-text-warning {
-  color: #70163C !important; }
+  color: #EA590B !important; }
 
 .uk-text-danger {
-  color: #70163C !important; }
+  color: #EA590B !important; }
 
 /* Background modifier
  ========================================================================== */
@@ -10015,6 +10015,9 @@ em {
 
 .ourchive-navbar {
   background-color: #55112D; }
+
+.uk-alert-warning {
+  color: #042325 !important; }
 
 .uk-navbar-nav > li > a:hover {
   background-color: #042325; }
