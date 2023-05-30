@@ -224,10 +224,12 @@ def edit_user(request, username):
 
 def delete_user(request, username):
 	if not request.user.is_authenticated:
-		messages.add_message(request, messages.WARNING, 'You are not authorized to view this page.')
 		if 'HTTP_REFERER' in request.META and 'delete' not in request.META.get('HTTP_REFERER'):
 			return referrer_redirect(request)
 		else:
+			if 'delete' not in request.META.get('HTTP_REFERER') and 'account/edit' not in request.META.get('HTTP_REFERER'):
+				# you get to the button through the account edit screen, so we don't want to flash a warning if they came through here
+				messages.add_message(request, messages.WARNING, 'You are not authorized to view this page.')
 			return redirect('/')
 	elif request.method == 'POST':
 		response = do_delete(f'api/users/{request.user.id}', request)
