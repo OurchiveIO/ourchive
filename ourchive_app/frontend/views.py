@@ -865,6 +865,15 @@ def edit_chapter_comment(request, work_id, chapter_id):
 	if request.method == 'POST':
 		comment_dict = request.POST.copy()
 		offset_url = int(request.GET.get('offset', 0))
+		comment_count = int(request.POST.get('chapter_comment_count'))
+		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
+		if comment_count > 10 and request.POST.get('parent_comment_val') is None:
+			comment_offset = int(int(request.POST.get('chapter_comment_count'))/10)*10
+		elif comment_count > 10 and request.POST.get('parent_comment_val') is not None:
+			comment_offset = request.POST.get('parent_comment_next')
+		else:
+			comment_offset = 0
+		comment_dict.pop('parent_comment_val')
 		if request.user.is_authenticated:
 			comment_dict["user"] = str(request.user)
 		else:
@@ -876,7 +885,10 @@ def edit_chapter_comment(request, work_id, chapter_id):
 			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.')	
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.')	
-		return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_dict['id']}&offset={offset_url}")
+		if comment_thread is None:
+			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_dict['id']}&offset={offset_url}&comment_offset={comment_offset}&comment_offset_chapter={chapter_id}")
+		else:
+			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_dict['id']}&offset={offset_url}&comment_thread={comment_thread}&comment_count={comment_count}")
 	else:
 		messages.add_message(request, messages.ERROR, 'Invalid URL.')	
 		return redirect(f'/works/{work_id}')

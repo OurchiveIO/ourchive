@@ -26,6 +26,10 @@
             <div id="edit-comment-form-controls" class="uk-form-controls">
                 <div id="edit-comment-input-div" class="uk-inline">
                     <input type="hidden" id="comment_id" name="id" value="{{ comment.id }}">
+                     <input type="hidden" id="parent_comment_val" name="parent_comment_val" value="{{ comment.parent_comment}}">
+                    <input type="hidden" id="parent_comment_next" name="parent_comment_next" value="{{current_offset}}"/>
+                    <input type="hidden" id="{{ object_name }}" name="{{ object_name }}" value="{{ object_id }}">
+                    <input type="hidden" id="{{ object_name }}_comment_count" name="{{ object_name }}_comment_count" value="{{ comment_count }}">
                     <textarea id="edit-comment-textarea" class="uk-textarea uk-form-width-large" rows="5" placeholder="Text" name="text">{{ comment.text|default_if_none:'' }}</textarea>
 
                 </div>
