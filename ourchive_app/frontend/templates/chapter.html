@@ -56,12 +56,12 @@
     </div>  
     <div id="chapter-{{chapter.id}}-comments" {% if not expand_comments %} hidden {% endif %} class="uk-child-width-expand" uk-grid>
         <div id="chapter-{{chapter.id}}-comments-child-container" uk-width-1-1>
-        	{% include "chapter_comments.html" with post_action_url=chapter.post_action_url edit_action_url=chapter.edit_action_url next=chapter.comments.next next_params=chapter.comments.next_params prev_params=chapter.comments.prev_params comments=chapter.comments.results chapter_offset=chapter_offset comment_count=chapter.comments.count top_level="true" current_offset=chapter.comment_offset %}     
+        	{% include "chapter_comments.html" with post_action_url=chapter.post_action_url edit_action_url=chapter.edit_action_url next=chapter.comments.next next_params=chapter.comments.next_params prev_params=chapter.comments.prev_params comments=chapter.comments.results chapter_offset=chapter_offset comment_count=chapter.comments.count top_level="true" current_offset=chapter.comment_offset depth=0 %}     
         </div>    
     </div>
     {% if user_can_comment %}
      <div id="chapter-{{chapter.id}}-new">
-        <form id="chapter-comment-form" action="{{chapter.post_action_url}}" method="post" class="uk-form uk-grid-small" uk-grid>
+        <form id="chapter-comment-form" action="{{chapter.new_action_url}}" method="post" class="uk-form uk-grid-small" uk-grid>
             {% csrf_token %}
             <div id="chapter-comment-id-div" class="uk-width-1-1">
             	<input type="hidden" id="chapter-comment-id-hidden" name="chapter" value="{{ chapter.id }}">

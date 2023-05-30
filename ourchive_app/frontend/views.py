@@ -768,12 +768,21 @@ def work(request, pk):
 	chapters = []
 	for chapter in chapter_response['results']:
 		if 'id' in chapter:
-			comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
-			chapter_comments = do_get(f"api/chapters/{chapter['id']}/comments?limit=10&offset={comment_offset}", request)[0]
-			chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
-			chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}"""
+			if 'comment_thread' not in request.GET:
+				comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
+				chapter_comments = do_get(f"api/chapters/{chapter['id']}/comments?limit=10&offset={comment_offset}", request)[0]
+				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
+				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}"""
+			else:
+				comment_id = request.GET.get('comment_thread')
+				chapter_comments = do_get(f"api/comments/{comment_id}", request)[0]
+				comment_offset = 0
+				chapter_comments = {'results': [chapter_comments], 'count': request.GET.get('comment_count')}
+				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}&comment_thread={comment_id}"
+				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
 			chapter['comments'] = chapter_comments
 			chapter['comment_offset'] = comment_offset
+			chapter['new_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 			chapters.append(chapter)
 	return render(request, 'work.html', {'work_types': work_types['results'], 
 		'work': work,
@@ -792,6 +801,7 @@ def work(request, pk):
 def render_comments(request, work_id, chapter_id):
 	limit = request.GET.get('limit', '')
 	offset = request.GET.get('offset', '')
+	depth = request.GET.get('depth', 0)
 	chapter_offset = request.GET.get('chapter_offset', '')
 	comments = do_get(f'api/chapters/{chapter_id}/comments?limit={limit}&offset={offset}', request)[0]
 	post_action_url = f"/works/{work_id}/chapters/{chapter_id}/comments/new?offset={chapter_offset}"
@@ -800,6 +810,7 @@ def render_comments(request, work_id, chapter_id):
 		'comments': comments['results'], 
 		'current_offset': comments['current'],
 		'top_level': 'true',
+		'depth': int(depth),
 		'chapter_offset': chapter_offset,
 		'chapter': {'id': chapter_id},
 		'comment_count': comments['count'], 
@@ -825,9 +836,11 @@ def create_chapter_comment(request, work_id, chapter_id):
 	if request.method == 'POST':
 		comment_dict = request.POST.copy()
 		offset_url = int(request.GET.get('offset', 0))
-		if int(request.POST.get('chapter_comment_count')) > 10 and request.POST.get('parent_comment') is None:
+		comment_count = int(request.POST.get('chapter_comment_count'))
+		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
+		if comment_count > 10 and request.POST.get('parent_comment') is None:
 			comment_offset = int(int(request.POST.get('chapter_comment_count'))/10)*10
-		elif int(request.POST.get('chapter_comment_count')) > 10 and request.POST.get('parent_comment') is not None:
+		elif comment_count > 10 and request.POST.get('parent_comment') is not None:
 			comment_offset = request.POST.get('parent_comment_next')
 		else:
 			comment_offset = 0
@@ -843,7 +856,10 @@ def create_chapter_comment(request, work_id, chapter_id):
 			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.')	
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.')	
-		return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_id}&offset={offset_url}&comment_offset={comment_offset}&comment_offset_chapter={chapter_id}")
+		if comment_thread is None:
+			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_id}&offset={offset_url}&comment_offset={comment_offset}&comment_offset_chapter={chapter_id}")
+		else:
+			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_id}&offset={offset_url}&comment_thread={comment_thread}&comment_count={comment_count}")
 
 def edit_chapter_comment(request, work_id, chapter_id):
 	if request.method == 'POST':

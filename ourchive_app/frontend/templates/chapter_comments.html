@@ -2,6 +2,7 @@
 <ul class="uk-comment-list" id="chapter-{{chapter.id}}-comments-list">
 {% endif %}
 {% for comment in comments %}
+{% if depth < 10 %}
 {% if comment.parent_comment != null %}
 <ul class="uk-comment-list" id="ch-comment-{{comment.id}}-ul">
 {% endif %}
@@ -35,18 +36,22 @@
     </div>    
 </article>
 {% if comment.replies %}
-    {% include "chapter_comments.html" with comments=comment.replies chapter=chapter post_action=post_action_url object_name="chapter" object_id=chapter.id edit_action_url=edit_action_url next_params=comment.replies.next_params prev_params=comment.replies.prev_params comment_count=comment_count current_offset=current_offset %}
+    {% include "chapter_comments.html" with comments=comment.replies chapter=chapter post_action=post_action_url object_name="chapter" object_id=chapter.id edit_action_url=edit_action_url next_params=comment.replies.next_params prev_params=comment.replies.prev_params comment_count=comment_count current_offset=current_offset depth=depth|add:1 %}
 {% endif %}
 </li>  
 {% if comment.parent_comment != null %}
 </ul>
 {% endif %}
+{% endif %}
+{% if depth >= 10 %}
+<a href="/works/{{work.id}}/?expandComments=true&scrollCommentId={{comment.id}}&offset={{chapter_offset}}&comment_thread={{comment.id}}&comment_count={{comment_count}}">View Thread...</a>
+{% endif %}
 {% endfor %}
 {% if comment.parent_comment == null %}
 <div id="chapter-{{chapter.id}}-pagination" class="uk-width-1-1 uk-margin-top">
     <ul class="uk-pagination">
-        {% if prev_params %}<li><a onclick="loadMoreComments('/works/{{work.id}}/chapters/{{chapter.id}}/comments{{prev_params}}&chapter_offset={{chapter_offset}}', '{{chapter.id}}')"><span class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
-        {% if next_params %}<li class="uk-margin-auto-left"><a onclick="loadMoreComments('/works/{{work.id}}/chapters/{{chapter.id}}/comments{{next_params}}&chapter_offset={{chapter_offset}}', '{{chapter.id}}')">Next <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
+        {% if prev_params %}<li><a onclick="loadMoreComments('/works/{{work.id}}/chapters/{{chapter.id}}/comments{{prev_params}}&chapter_offset={{chapter_offset}}&depth={{depth}}', '{{chapter.id}}')"><span class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
+        {% if next_params %}<li class="uk-margin-auto-left"><a onclick="loadMoreComments('/works/{{work.id}}/chapters/{{chapter.id}}/comments{{next_params}}&chapter_offset={{chapter_offset}}&depth={{depth}}', '{{chapter.id}}')">Next <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
     </ul>  
 </div>  
 {% endif %}
