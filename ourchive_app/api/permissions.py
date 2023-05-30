@@ -17,15 +17,14 @@ class RegistrationPermitted(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         setting = OurchiveSetting.objects.filter(name='Registration Permitted').first()
-        if setting.value == 'False':
+        if setting.value == 'False' and request.method == 'POST':
             return False
         else:
             return True
     def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:            
+        if request.method in permissions.SAFE_METHODS:   
             return True
-
-        return request.user.is_superuser
+        return obj == request.user or request.user.is_superuser
 
 class Common:
     def user_is_blocked(owner, user):

@@ -31,7 +31,7 @@ def sanitize_rich_text(rich_text):
 	return rich_text
 
 def referrer_redirect(request):
-	refer = request.META['HTTP_REFERER'] if request.META['HTTP_REFERER'] is not None and '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER'] else '/'
+	refer = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') is not None and '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER'] else '/'
 	return redirect(refer)
 
 def get_object_tags(parent, request):
@@ -221,6 +221,20 @@ def edit_user(request, username):
 		else:
 			messages.add_message(request, messages.ERROR, 'You must log in as this user to perform this action.')	
 			return redirect('/login')
+
+def delete_user(request, username):
+	if not request.user.is_authenticated:
+		messages.add_message(request, messages.WARNING, 'You are not authorized to view this page.')
+		if 'HTTP_REFERER' in request.META and 'delete' not in request.META.get('HTTP_REFERER'):
+			return referrer_redirect(request)
+		else:
+			return redirect('/')
+	elif request.method == 'POST':
+		response = do_delete(f'api/users/{request.user.id}', request)
+		messages.add_message(request, messages.SUCCESS, 'Account deleted successfully.')
+		return referrer_redirect(request)
+	else:
+		return render(request, 'delete_account.html', {'user': request.user})
 
 def user_bookmarks(request, username):
 	response = do_get(f'api/users/{username}/bookmarks', request, params=request.GET)[0]

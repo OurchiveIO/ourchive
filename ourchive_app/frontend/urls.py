@@ -50,6 +50,7 @@ urlpatterns = [
     path('users/<str:username>/blocklist', views.user_block_list),
     path('users/<str:username>/blocks/<int:pk>/unblock', views.unblock_user),
     path('users/<str:username>/block', views.block_user),
+    path('users/<str:username>/delete', views.delete_user),
     path('works/<int:work_id>/chapters/<int:id>/edit', views.edit_chapter),
     path('works/<int:work_id>/chapters/new', views.new_chapter),
     path('works/<int:work_id>/chapters/<int:chapter_id>/comments', views.render_comments),
