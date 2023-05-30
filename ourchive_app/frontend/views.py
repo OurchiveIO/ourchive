@@ -823,12 +823,19 @@ def render_comments(request, work_id, chapter_id):
 def render_bookmark_comments(request, pk):
 	limit = request.GET.get('limit', '')
 	offset = request.GET.get('offset', '')
-	comments = do_get(f'api/bookmarks/2/comments?limit={limit}&offset={offset}', request)[0]
+	depth = request.GET.get('depth', 0)
+	comments = do_get(f'api/bookmarks/{pk}/comments?limit={limit}&offset={offset}', request)[0]
 	post_action_url = f"/bookmarks/{pk}/comments/new"
 	edit_action_url = f"""/bookmarks/{pk}/comments/edit"""
 	return render(request, 'bookmark_comments.html', {
 		'comments': comments['results'], 
+		'current_offset': comments['current'],
 		'bookmark': {'id': pk},
+		'top_level': 'true',
+		'depth': int(depth),
+		'comment_count': comments['count'], 
+		'next_params': comments['next_params'],
+		'prev_params': comments['prev_params'],
 		'post_action_url': post_action_url,
 		'edit_action_url': edit_action_url})
 
@@ -906,6 +913,14 @@ def delete_chapter_comment(request, work_id, chapter_id, comment_id):
 def create_bookmark_comment(request, pk):
 	if request.method == 'POST':
 		comment_dict = request.POST.copy()
+		comment_count = int(request.POST.get('bookmark_comment_count'))
+		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
+		if comment_count > 10 and request.POST.get('parent_comment') is None:
+			comment_offset = int(int(request.POST.get('bookmark_comment_count'))/10)*10
+		elif comment_count > 10 and request.POST.get('parent_comment') is not None:
+			comment_offset = request.POST.get('parent_comment_next')
+		else:
+			comment_offset = 0
 		if request.user.is_authenticated:
 			comment_dict["user"] = str(request.user)
 		else:
@@ -918,23 +933,36 @@ def create_bookmark_comment(request, pk):
 			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.')	
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.')	
-		return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_id}")
+		if comment_thread is None:
+			return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_id}&comment_offset={comment_offset}")
+		else:
+			return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_id}&comment_thread={comment_thread}&comment_count={comment_count}")
 
 def edit_bookmark_comment(request, pk):
 	if request.method == 'POST':
 		comment_dict = request.POST.copy()
+		offset_url = int(request.GET.get('offset', 0))
+		comment_count = int(request.POST.get('bookmark_comment_count'))
+		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
+		if comment_count > 10 and request.POST.get('parent_comment_val') is None:
+			comment_offset = int(int(request.POST.get('bookmark_comment_count'))/10)*10
+		elif comment_count > 10 and request.POST.get('parent_comment_val') is not None:
+			comment_offset = request.POST.get('parent_comment_next')
+		else:
+			comment_offset = 0
+		comment_dict.pop('parent_comment_val')
 		if request.user.is_authenticated:
 			comment_dict["user"] = str(request.user)
 		else:
 			comment_dict["user"] = None
-		response = do_put(f"api/bookmarkcomments/{comment_dict['id']}/", request, data=comment_dict)
+		response = do_patch(f"api/bookmarkcomments/{comment_dict['id']}/", request, data=comment_dict)
 		if response[1] == 200 or response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Comment edited.')	
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.')	
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.')	
-		return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_dict['id']}")
+		return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_dict['id']}&comment_offset={comment_offset}")
 	else:
 		messages.add_message(request, messages.ERROR, '404 Page Not Found')	
 		return redirect(f'/bookmarks/{pk}')
@@ -964,14 +992,24 @@ def bookmarks(request):
 def bookmark(request, pk):
 	get_url = f'api/bookmarks/{pk}/draft' if request.GET.get('draft') == "True" else f'api/bookmarks/{pk}'
 	bookmark = do_get(get_url, request)[0]
-	comments = do_get(f'api/bookmarks/{pk}/comments', request)[0]
-	bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new"
-	bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit"""
+	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
+	if 'comment_thread' in request.GET:
+		comment_id = request.GET.get('comment_thread')
+		comments = do_get(f"api/bookmarkcomments/{comment_id}", request)[0]
+		comment_offset = 0
+		comments = {'results': [comments], 'count': request.GET.get('comment_count')}
+		bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
+		bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
+	else:
+		comments = do_get(f'api/bookmarks/{pk}/comments?limit=10&offset={comment_offset}', request)[0]
+		bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new"
+		bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit"""
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
 	return render(request, 'bookmark.html', {
 		'bookmark': bookmark, 
+		'comment_offset': comment_offset,
 		'scroll_comment_id': scroll_comment_id, 
 		'expand_comments': expand_comments, 
 		'user_can_comment': user_can_comment, 

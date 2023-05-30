@@ -7,9 +7,10 @@
 			  .then((response) => {
 			    return response.text();
 			  })
-			  .then((myText) => {		 
-				container_block = document.getElementById( 'bookmark-'+chapterId+'-comments-list' );
-				container_block.innerHTML += myText;
+			  .then((myText) => {			 
+				document.getElementById('bookmark-{{bookmark.id}}-comments-child-container').innerHTML = "";
+				document.getElementById('bookmark-{{bookmark.id}}-comments-child-container').innerHTML = myText;
+				document.getElementById('bookmark-{{bookmark.id}}-comments-child-container').scrollIntoView();
 			  });
 		}
 	</script>
@@ -67,11 +68,9 @@
 	             <button id="bookmark-comments-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #bookmark-{{bookmark.id}}-comments">{{ comments.count}} Comments</button>    		
 	        </div>
 	    </div>
-	    <div class="uk-grid-small uk-child-width-auto" id="bookmark-comments-grid" uk-grid>
-	        <div id="bookmark-{{bookmark.id}}-comments" {% if not expand_comments %} hidden {% endif %}>
-	        	<ul class="uk-comment-list" id="bookmark-{{bookmark.id}}-comments-list">
-	        		{% include "bookmark_comments.html" with post_action_url=bookmark.post_action_url edit_action_url=bookmark.edit_action_url next=comments.next next_params=comments.next_params comments=comments.results %}
-	        	</ul>
+	    <div class="uk-child-width-expand" id="bookmark-{{bookmark.id}}-comments" {% if not expand_comments %} hidden {% endif %} uk-grid>
+	        <div id="bookmark-{{bookmark.id}}-comments-child-container">
+	        		{% include "bookmark_comments.html" with post_action_url=bookmark.post_action_url edit_action_url=bookmark.edit_action_url next=comments.next next_params=comments.next_params prev_params=comments.prev_params comments=comments.results comment_count=comments.count top_level="true" depth=1 current_offset=comment_offset %}
 	        </div>
 	    </div>
 	    {% if user_can_comment %}
@@ -80,6 +79,7 @@
                 {% csrf_token %}
                 <div class="uk-width-1-1" id="bookmark-comment-form-parent">
                 	<input type="hidden" id="bookmark-comment-hidden-input" name="bookmark" value="{{ bookmark.id }}">
+                	<input type="hidden" id="bookmark-comment-count" name="bookmark_comment_count" value="{{comments.count}}"/>
                 	<textarea class="uk-textarea" id="bookmark-comment-input" name="text"></textarea>
                 </div>
                 <div class="uk-width-1-1" id="bookmark-comment-post-parent">
@@ -91,11 +91,10 @@
 	</article>
 	</div>
 	{% if scroll_comment_id %}
-		<script>
-			window.onload = function(){
-				const element = document.getElementById("comment_container_{{scroll_comment_id}}");
-				element.scrollIntoView();
-			};
-		</script>
-	{% endif %}
+	    <script>
+	        window.onload = function(){
+	            document.getElementById("bk-comment-{{scroll_comment_id}}-icon-div").scrollIntoView();
+	        }
+	    </script>
+{% endif %}
 {% endblock %}
