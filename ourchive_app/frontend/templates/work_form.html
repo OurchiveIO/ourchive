@@ -323,7 +323,7 @@
                 <li id="chapters_list_{{chapter.id}}">
                     <div class="uk-card uk-card-hover uk-card-body uk-grid-small uk-child-width-1-2 uk-text-left uk-padding-small" uk-grid>
                         <div class="uk-sortable-handle">
-                            <span class="uk-margin-small-right" uk-icon="icon: table"></span>Chapter {{chapter.number}}: {{chapter.title}}
+                            <span class="uk-margin-small-right" uk-icon="icon: table"></span><span class="uk-text-medium">Chapter {{chapter.number}}: {{chapter.title}}</span>
                         </div>
                         <div><a href="/works/{{work.id}}/chapters/{{chapter.id}}/edit">Edit</a> | <a href="/works/{{work.id}}/chapters/{{chapter.id}}/delete">Delete</a></div>
                         {% if chapter.draft %}
