@@ -18,7 +18,8 @@
             <a href="/works/{{ id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
             {% endif %}
             <a href="/works/{{ id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
-            <a href="/works/{{ id }}/delete"><span uk-icon="icon: trash" title="Delete"></span> </a>
+            <a uk-toggle="target: #work-{{work.id}}-modal-delete"><span uk-icon="icon: trash" title="Delete"></span> </a>
+            {% include "delete_modal.html" with object='work' object_id=work.id %}
             {% endif %}
             {% if view_full %}
             <a href="/works/{{ id }}/"><span uk-icon="icon: minus-circle" title="View By Chapter"></span> </a>

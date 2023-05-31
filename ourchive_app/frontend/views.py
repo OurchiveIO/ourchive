@@ -672,7 +672,6 @@ def edit_bookmark(request, pk):
 			bookmark = do_get(f'api/bookmarks/{pk}/draft', request)[0]
 			bookmark['description'] = sanitize_rich_text(bookmark['description'])
 			tags = group_tags(tag_types['results'], bookmark['tags']) if 'tags' in bookmark else []
-			print(bookmark)
 			return render(request, 'bookmark_form.html', {
 				'rating_range': [1,2,3,4,5],
 				'bookmark': bookmark, 
@@ -690,6 +689,8 @@ def delete_bookmark(request, bookmark_id):
 		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this bookmark.')	
 	else:
 		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this bookmark. Please contact your administrator.')	
+	if str(bookmark_id) in request.META.get('HTTP_REFERER'):
+		return redirect('/bookmarks')
 	return referrer_redirect(request)
 
 def log_in(request):

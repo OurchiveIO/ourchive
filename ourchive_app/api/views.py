@@ -325,7 +325,9 @@ class BookmarkPrimaryCommentDetail(generics.RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         instance.bookmark.comment_count = instance.bookmark.comment_count - 1
         instance.bookmark.save()
-        instance.delete()
+        instance.user = None
+        instance.text = "This comment has been deleted"
+        instance.save()
 
 class BookmarkCollectionList(generics.ListCreateAPIView):
     serializer_class = BookmarkCollectionSerializer
@@ -360,7 +362,9 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
         instance.chapter.comment_count = instance.chapter.comment_count - 1
         instance.chapter.work.save()
         instance.chapter.save()
-        instance.delete()
+        instance.user = None
+        instance.text = "This comment has been deleted"
+        instance.save()
 
 class BookmarkCommentList(generics.ListCreateAPIView):
     serializer_class = BookmarkCommentSerializer

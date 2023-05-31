@@ -325,7 +325,7 @@
                         <div class="uk-sortable-handle">
                             <span class="uk-margin-small-right" uk-icon="icon: table"></span><span class="uk-text-medium">Chapter {{chapter.number}}: {{chapter.title}}</span>
                         </div>
-                        <div><a href="/works/{{work.id}}/chapters/{{chapter.id}}/edit">Edit</a> | <a href="/works/{{work.id}}/chapters/{{chapter.id}}/delete">Delete</a></div>
+                        <div><a href="/works/{{work.id}}/chapters/{{chapter.id}}/edit">Edit</a> | <a uk-toggle="target: #chapter-{{chapter.id}}-modal-delete">Delete</a></div>
                         {% if chapter.draft %}
                             <div class="uk-width-auto">
                                 <span class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
@@ -335,6 +335,7 @@
                     
                     <input type="hidden" class="chapters_tracker" id="chapters_{{chapter.id}}" name="chapters_{{chapter.id}}" value="{{chapter.number}}">
                 </li>
+                {% include "delete_modal.html" with object='chapter' parent_object_id=work.id object_id=chapter.id %}
                 {% endfor %}
                 <input class="uk-button uk-button-link" style="width:15em;" onclick="this.form.submitted=this.value;" type="submit" value="New Chapter"/>
             </ul>

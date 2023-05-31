@@ -1,0 +1,18 @@
+<div id="{{object}}-{{object_id}}-modal-delete" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body">
+        <h2 class="uk-modal-title">Confirm Delete</h2>
+        <p>Are you sure you want to delete this {{object}}?</p>
+        <p class="uk-text-right">
+            <a class="uk-button uk-button-default uk-modal-close uk-margin-right">Cancel</button>
+            {% if parent_object_id %}
+            	{% if root_object_id %}
+            		<a class="uk-button uk-button-primary" href="{% url 'delete-'|add:object root_object_id parent_object_id object_id%}">Delete</a>
+            	{% else %}
+            		<a class="uk-button uk-button-primary" href="{% url 'delete-'|add:object parent_object_id object_id%}">Delete</a>
+            	{% endif %}
+            {% else %}
+            	<a class="uk-button uk-button-primary" href="{% url 'delete-'|add:object object_id%}">Delete</a>
+            {% endif %}
+        </p>
+    </div>
+</div>

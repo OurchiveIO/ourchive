@@ -25,7 +25,7 @@
                 <li id="bk-comment-{{comment.id}}-reply-li"><button id="bk-comment-{{comment.id}}-reply-button" class="uk-button uk-button-text" type="button" uk-toggle="target: #comment-{{comment.id}}-reply">Reply</button></li>
                 {% if comment.user.username == request.user.username %}
                 <li id="bk-comment-{{comment.id}}-edit-li"><button id="bk-comment-{{comment.id}}-edit-button" class="uk-button uk-button-text" type="button" uk-toggle="target: #comment-{{comment.id}}-edit"><span id="bk-comment-{{comment.id}}-edit-span" uk-icon="icon: file-edit"></span> </button></li>
-                <li id="bk-comment-{{comment.id}}-delete-li"><a id="bk-comment-{{comment.id}}-delete-link" href="/bookmarks/{{bookmark.id}}/comments/{{ comment.id }}/delete"><span id="bk-comment-{{comment.id}}-delete-span" uk-icon="icon: trash"></span> </a></li>
+                <li id="bk-comment-{{comment.id}}-delete-li"><a id="bk-comment-{{comment.id}}-delete-link" uk-toggle="target: #bookmark-comment-{{comment.id}}-modal-delete"><span id="bk-comment-{{comment.id}}-delete-span" uk-icon="icon: trash"></span> </a></li>
                 {% endif %}
             </ul>
         </div>
@@ -35,6 +35,7 @@
             {% include "comment_actions.html" with post_action=post_action_url object_name="bookmark" object_id=bookmark.id edit_action=edit_action_url comment_count=comment_count current_offset=current_offset %}
     </div>    
 </article>
+{% include "delete_modal.html" with object='bookmark-comment' parent_object_id=bookmark.id object_id=comment.id %}
 {% if comment.replies %}
     {% include "bookmark_comments.html" with comments=comment.replies post_action_url=post_action_url edit_action_url=edit_action_url object_name="bookmark" object_id=bookmark.id bookmark=bookmark next_params=comment.replies.next_params comment_count=comment_count current_offset=current_offset depth=depth|add:1 top_level=None %}
 {% endif %}

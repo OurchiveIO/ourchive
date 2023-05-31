@@ -34,7 +34,8 @@
 	        {% if bookmark.user == request.user.username %}
 	        <div id="bk-tile-actions-parent" class="uk-align-right">
 	            <a id="bk-tile-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span id="bk-tile-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
-	            <a id="bk-tile-delete-link" href="/bookmarks/{{ bookmark.id }}/delete"><span uk-icon="icon: trash" id="bk-tile-delete-span" title="Delete"></span> </a>
+	            <a id="bk-tile-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: trash" id="bk-tile-delete-span" title="Delete"></span> </a>
+				{% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
 	        </div>
 	        {% endif %}
 	    </div>

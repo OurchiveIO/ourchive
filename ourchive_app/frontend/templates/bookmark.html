@@ -30,7 +30,8 @@
 	            <a id="bookmark-publish-link" href="/bookmarks/{{ bookmark.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
 	            {% endif %}
 	            <a id="bookmark-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
-	            <a id="bookmark-delete-link" href="/bookmarks/{{ bookmark.id }}/delete"><span uk-icon="icon: trash"></span> </a>
+	            <a id="bookmark-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a>
+	            {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
 	            {% endif %}
 	        </div>
 	    <div class="uk-width-1" id="bookmark-description-parent">

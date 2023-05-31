@@ -36,7 +36,8 @@
 	        {% if work.user == request.user.username %}
 	        <div class="uk-align-right">
 	            <a href="/works/{{ work.id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
-	            <a href="/works/{{ work.id }}/delete"><span uk-icon="icon: trash" title="Delete"></span> </a>
+	            <a uk-toggle="target: #work-{{work.id}}-modal-delete"><span uk-icon="icon: trash" title="Delete"></span> </a>
+	            {% include "delete_modal.html" with object='work' object_id=work.id %}
 	        </div>
 	        {% endif %}
 	    </div>
