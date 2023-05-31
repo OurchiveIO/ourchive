@@ -213,7 +213,8 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
         comment.chapter.save()
         comment.chapter.work.save()
         user = User.objects.filter(id=comment.chapter.user.id).first()
-        notification = Notification.objects.create(notification_type_id=2, user=user, title="New Chapter Comment", content=f"""A new comment has been left on your chapter! <a href='/works/{comment.chapter.work.id}'>Click here</a> to view.""")     
+        notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
+        notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Chapter Comment", content=f"""A new comment has been left on your chapter! <a href='/works/{comment.chapter.work.id}'>Click here</a> to view.""")     
         notification.save()
         user.userprofile.has_notifications = True
         user.userprofile.save()
@@ -246,7 +247,8 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         validated_data['text'] = nh3.clean(validated_data['text'])
         comment = BookmarkComment.objects.create(**validated_data)
         user = User.objects.filter(id=comment.bookmark.user.id).first()
-        notification = Notification.objects.create(notification_type_id=2, user=user, title="New Bookmark Comment", content=f"""A new comment has been left on your bookmark! <a href='/bookmarks/{comment.bookmark.id}'>Click here</a> to view.""")     
+        notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
+        notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Bookmark Comment", content=f"""A new comment has been left on your bookmark! <a href='/bookmarks/{comment.bookmark.id}'>Click here</a> to view.""")     
         notification.save()
         user.userprofile.has_notifications = True
         user.userprofile.save()

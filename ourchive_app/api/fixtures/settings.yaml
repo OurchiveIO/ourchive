@@ -16,3 +16,13 @@
     name: Registration Permitted
     value: False
     grouping: General
+- model: api.notificationtype
+  pk: 1
+  fields:
+    type_label: System Notification
+    send_email: False
+- model: api.notificationtype
+  pk: 2
+  fields:
+    type_label: Comment Notification
+    send_email: False
