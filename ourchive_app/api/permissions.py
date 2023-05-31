@@ -32,13 +32,17 @@ class UserAllowsWorkComments(permissions.BasePermission):
             return True
         if request.user.is_superuser:
             return True
-        work = Chapter.objects.filter(id=request.data['chapter']).first().work
-        return (work.comments_permitted and Common.user_is_blocked(work.user.id, request.user.id) is False)
+        if 'chapter' in request.data:
+            work = Chapter.objects.filter(id=request.data['chapter']).first().work
+            return (work.comments_permitted and Common.user_is_blocked(work.user.id, request.user.id) is False)
+        return False
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:            
             return True
-        work = Chapter.objects.filter(id=request.data['chapter']).first().work
-        return (work.comments_permitted and Common.user_is_blocked(work.user.id, request.user.id) is False)
+        if 'chapter' in request.data:
+            work = Chapter.objects.filter(id=request.data['chapter']).first().work
+            return (work.comments_permitted and Common.user_is_blocked(work.user.id, request.user.id) is False)
+        return False
 
 class UserAllowsWorkAnonComments(permissions.BasePermission):
     def has_permission(self, request, view):

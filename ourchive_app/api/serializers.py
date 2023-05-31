@@ -2,6 +2,7 @@ from django.contrib.auth.models import User, Group, AnonymousUser
 from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 import nh3
+from .custom_fields import PrivateField, UserPrivateField
 from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
@@ -32,6 +33,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     bookmark_set = serializers.HyperlinkedRelatedField(many=True, view_name='bookmark-detail', read_only=True)
     userprofile = UserProfileSerializer(read_only=True, required=False, many=False)
     userblocks_set = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name="userblocks-detail")
+    email = UserPrivateField()
     class Meta:
         model = User
         fields = ('id', 'url', 'username', 'password', 'email', 'groups', 'work_set', 'bookmark_set', 'userprofile', 'userblocks_set')
@@ -204,7 +206,7 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         if 'user' in validated_data and isinstance(validated_data['user'], AnonymousUser):
             validated_data.pop('user')
-        validated_data['text'] = nh3.clean(validated_data['text'])
+        validated_data['text'] = nh3.clean(validated_data['text']) if validated_data['text'] is not None else ''
         comment = ChapterComment.objects.create(**validated_data)
         comment.chapter.comment_count += 1
         comment.chapter.work.comment_count += 1
@@ -219,7 +221,7 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['text'] = nh3.clean(ret['text'])
+        ret['text'] = nh3.clean(ret['text']) if ret['text'] is not None else ''
         return ret
 
 class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
