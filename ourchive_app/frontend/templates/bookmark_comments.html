@@ -50,9 +50,9 @@
 {% if top_level %}
 <div id="bookmark-{{bookmark.id}}-pagination" class="uk-width-1-1 uk-margin-top">
     <ul class="uk-pagination">
-        {% if prev_params %}<li><a onclick="loadMoreComments('/bookmarks/{{bookmark.id}}/comments{{prev_params}}&depth={{depth}}', '{{bookmark.id}}')"><span class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
+        {% if prev_params %}<li><a onclick="loadMoreComments('/bookmarks/{{bookmark.id}}/comments{{prev_params}}&depth={{depth}}', '{{bookmark.id}}')"><span class="uk-margin-small-right" uk-pagination-previous></span> Previous Comments</a></li>{% endif %}
         {% if next_params %}
-            <li id="bk-comment-{{comment.id}}-next-li" class="uk-margin-auto-left"><a id="bk-comment-{{comment.id}}-next-link" onclick="loadMoreComments('/bookmarks/{{bookmark.id}}/comments{{next_params}}&depth={{depth}}', '{{bookmark.id}}')">Next <span class="uk-margin-small-left" uk-pagination-next></span></a></li>
+            <li id="bk-comment-{{comment.id}}-next-li" class="uk-margin-auto-left"><a id="bk-comment-{{comment.id}}-next-link" onclick="loadMoreComments('/bookmarks/{{bookmark.id}}/comments{{next_params}}&depth={{depth}}', '{{bookmark.id}}')">Next Comments <span class="uk-margin-small-left" uk-pagination-next></span></a></li>
         {% endif %}
     </ul>      
 </div>
