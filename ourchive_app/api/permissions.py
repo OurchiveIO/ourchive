@@ -2,10 +2,6 @@ from rest_framework import permissions
 from api.models import OurchiveSetting, Chapter, UserBlocks, Bookmark
 from django.contrib.auth.models import AnonymousUser
 
-class Absolutely(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return True
-
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:            
@@ -99,10 +95,6 @@ class IsAdminOrReadOnly(permissions.BasePermission):
             return True
 
         return request.user.is_superuser
-
-class MessagePermissions(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return obj.to_user == request.user or obj.from_user == request.user
 
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):

@@ -4,7 +4,7 @@ from rest_framework import viewsets, generics
 from api.serializers import UserProfileSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, SearchResultsSerializer, FingergunSerializer, UserBlocksSerializer
 from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks
 from rest_framework import generics, permissions
-from api.permissions import Absolutely, IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, MessagePermissions, IsOwner, IsAdminOrReadOnly, IsUser, RegistrationPermitted
+from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, IsUser, RegistrationPermitted
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
@@ -39,7 +39,7 @@ def api_root(request, format=None):
 
 class SearchList(APIView):
     parser_classes = [JSONParser]
-    permission_classes = [Absolutely]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, format=None):
         searcher = OurchiveSearch()
@@ -372,7 +372,7 @@ class BookmarkCommentList(generics.ListCreateAPIView):
 
 class MessageList(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
-    permission_classes = [MessagePermissions]
+    permission_classes = [permissions.IsAdminUser]
     def get_queryset(self):
         return Message.objects.get_queryset().order_by('id')
 
@@ -382,7 +382,7 @@ class MessageList(generics.ListCreateAPIView):
 class MessageDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Message.objects.get_queryset().order_by('id')
     serializer_class = MessageSerializer
-    permission_classes = [MessagePermissions]
+    permission_classes = [permissions.IsAdminUser]
 
 class NotificationTypeDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = NotificationType.objects.get_queryset().order_by('id')

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, Group, AnonymousUser
 from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
+import nh3
 from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
@@ -203,6 +204,7 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         if 'user' in validated_data and isinstance(validated_data['user'], AnonymousUser):
             validated_data.pop('user')
+        validated_data['text'] = nh3.clean(validated_data['text'])
         comment = ChapterComment.objects.create(**validated_data)
         comment.chapter.comment_count += 1
         comment.chapter.work.comment_count += 1
@@ -214,6 +216,11 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
         user.userprofile.has_notifications = True
         user.userprofile.save()
         return comment
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['text'] = nh3.clean(ret['text'])
+        return ret
 
 class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
     user = UserCommentSerializer(read_only=True)
@@ -234,6 +241,7 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         if 'user' in validated_data and isinstance(validated_data['user'], AnonymousUser):
             validated_data.pop('user')
+        validated_data['text'] = nh3.clean(validated_data['text'])
         comment = BookmarkComment.objects.create(**validated_data)
         user = User.objects.filter(id=comment.bookmark.user.id).first()
         notification = Notification.objects.create(notification_type_id=2, user=user, title="New Bookmark Comment", content=f"""A new comment has been left on your bookmark! <a href='/bookmarks/{comment.bookmark.id}'>Click here</a> to view.""")     
@@ -243,6 +251,11 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         comment.bookmark.comment_count = comment.bookmark.comment_count + 1
         comment.bookmark.save()
         return comment
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['text'] = nh3.clean(ret['text'])
+        return ret
 
 class MessageSerializer(serializers.HyperlinkedModelSerializer):
     to_user = serializers.HyperlinkedRelatedField(view_name='user-detail', format='html', read_only=False, queryset=User.objects.all())
@@ -256,7 +269,6 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     work = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all())
     user = serializers.HyperlinkedRelatedField(view_name='user-detail', format='html', read_only=True)
     id = serializers.IntegerField(read_only=True)
-    comments = ChapterCommentSerializer(many=True, required=False, read_only=True)
     word_count = serializers.IntegerField(read_only=True)
     class Meta:
         model = Chapter

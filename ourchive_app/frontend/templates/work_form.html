@@ -154,7 +154,7 @@
                     <label class="uk-form-label" for="form-horizontal-text">Complete?</label>
                     <div class="uk-form-controls">
                         <div class="uk-inline">
-                            <label><input class="uk-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}> </label>
+                            <label class="switch"><input class="uk-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}> <span class="slider round"></span> </label>
                         </div>
                     </div>
                 </div>
@@ -163,7 +163,7 @@
                     <label class="uk-form-label" for="form-horizontal-text">Draft?</label>
                     <div class="uk-form-controls">
                         <div class="uk-inline">
-                            <label for="draft"><input class="uk-checkbox" type="checkbox" name="draft" {% if work.draft %} checked {% endif %}> </label>
+                            <label class="switch"><input class="uk-checkbox" type="checkbox" name="draft" {% if work.draft %} checked {% endif %}> <span class="slider round"></span></label>
                         </div>
                     </div>
                 </div>

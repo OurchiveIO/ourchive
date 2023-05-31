@@ -31,7 +31,7 @@
         </div>
     </header>
     <div class="uk-comment-body" id="ch-comment-{{comment.id}}-text-parent" uk-grid>
-        <div id="ch-comment-{{comment.id}}-text" class="uk-width-1-1"><p>{{comment.text|safe }}</p></div>
+        <div id="ch-comment-{{comment.id}}-text" class="uk-width-1-1"><span class="uk-text-medium ourchive-comment">{{comment.text|safe }}</span></div>
         {% include "comment_actions.html" with post_action=post_action_url object_name="chapter" object_id=chapter.id edit_action=edit_action_url comment_count=comment_count current_offset=current_offset %}   
     </div>    
 </article>

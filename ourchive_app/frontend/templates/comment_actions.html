@@ -1,5 +1,5 @@
 <div id="comment-{{comment.id}}-reply" class="uk-width-1-1" hidden>
-    <form class="uk-form" id="reply-{{comment.id}}-form" action="{{ post_action }}" method="post">
+    <form class="uk-form" id="reply-{{comment.id}}-form" action="{{ post_action }}" method="post" uk-grid>
         {% csrf_token %}
         <div class="uk-width-1-1" id="reply-{{comment.id}}-parent-div">
             <label id="reply-{{comment.id}}-label" class="uk-form-label" for="form-horizontal-text">Reply</label>
@@ -35,7 +35,7 @@
                 </div>
             </div>
         </div>
-        <div class="uk-width-1-1" id="edit-comment-submit-parent">
+        <div class="uk-width-1-1 uk-margin-top" id="edit-comment-submit-parent">
             <input id="edit-comment-submit" class="uk-button uk-button-default" type="submit" value="Edit Comment"/>
         </div>
     </form>    
