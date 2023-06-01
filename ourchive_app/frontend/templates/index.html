@@ -126,7 +126,7 @@
 						<form id="index-content-search-form" class="uk-search uk-search-large" method="post" action="search/">
 							{% csrf_token %}
 							<a id="index-content-search-link" href="#" uk-search-icon></a>
-							<input id="index-content-search-input" class="uk-search-input" type="search" name="term" placeholder="Search..." value="{{ term }}" oninput="doAutocomplete(this.value, 'search', 'main')">
+							<input autocomplete="off" id="index-content-search-input" class="uk-search-input" type="search" name="term" placeholder="Search..." value="{{ term }}" oninput="doAutocomplete(this.value, 'search', 'main')">
 							<div id="tag-autocomplete-dropdown-main" uk-drop></div>
 						</form>
 						

@@ -301,7 +301,7 @@
                             </div>
                         </div>
                         <div class="uk-margin-top">
-                            <input class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')" oninput="doAutocomplete(this.value, 'edit', '{{type}}', '{{type}}')">
+                            <input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')" oninput="doAutocomplete(this.value, 'edit', '{{type}}', '{{type}}')">
                             <div id="tag-autocomplete-dropdown-{{type}}" uk-drop></div>
                         </div>
                     </div>
