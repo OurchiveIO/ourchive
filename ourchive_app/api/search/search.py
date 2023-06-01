@@ -118,7 +118,6 @@ class PostgresProvider:
 		work_filters = self.build_filter_query(work_search.filter.work_type, work_search.filter.work_type_filter, work_filters)
 		# todo work type	
 		query = self.get_query(work_search.term, work_search.term_search_fields)
-		print(query)
 		resultset = None
 		if work_filters is not None and query is not None:
 			resultset = Work.objects.filter(work_filters).filter(query)
