@@ -197,16 +197,10 @@ class PostgresProvider:
 
 	def autocomplete_tags(self, term, tag_type):
 		results = []
-		tag_search = TagSearch()
-		tag_search.filter.tag_type = [tag_type]
-		tag_filters = None
 		if tag_type:
-			tag_filters = self.build_filter_query(tag_search.filter.tag_type, tag_search.filter.tag_type_filter, tag_filters)
-		query = self.get_query(term, ['text'])
-		if tag_filters is None:
-			resultset = Tag.objects.filter(query)
+			resultset = Tag.objects.filter(tag_type__label=tag_type).filter(text__contains=term)	
 		else:
-			resultset = Tag.objects.filter(tag_filters).filter(query)
+			resultset = Tag.objects.filter(text__contains=term)
 		if resultset is None:
 			return results
 		for result in resultset:
