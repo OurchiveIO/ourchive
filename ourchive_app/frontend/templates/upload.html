@@ -1,13 +1,13 @@
 {% extends 'index.html' %}
 {% block content %}	
-<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
-<div class="js-upload uk-placeholder uk-text-center">
+<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid id="upload-parent-grid">
+<div class="js-upload uk-placeholder uk-text-center" id="upload-controls-grid">
     {% csrf_token %}
-    <span uk-icon="icon: cloud-upload"></span>
-    <span class="uk-text-middle">Attach binaries by dropping them here or</span>
-    <div uk-form-custom>
-        <input type="file" name="file">
-        <span class="uk-link">selecting one</span>
+    <span uk-icon="icon: cloud-upload" id="upload-icon"></span>
+    <span class="uk-text-middle" id="upload-message">Attach binaries by dropping them here or</span>
+    <div uk-form-custom id="upload-form-div">
+        <input type="file" name="file" id="upload-file-input">
+        <span class="uk-link" id="select-file-span">selecting one</span>
     </div>
 </div>
 

@@ -1,44 +1,44 @@
 {% extends 'index.html' %}
 {% block content %}	
-	<div uk-grid>
-		<div class="uk-width-1">
-			<ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade;connect: .search-switcher">
-	            <li><a href="#" id="works_tab">Works ({{ works|length }})</a></li>
-	            <li><a href="#" id="bookmarks_tab">Bookmarks ({{ bookmarks|length }})</a></li>
-	            <li><a href="#" id="tags_tab">Tags ({{ tag_count }})</a></li>
-	            <li><a href="#" id="users_tab">Users ({{ users|length }})</a></li>
+	<div uk-grid id="search-results-grid">
+		<div class="uk-width-1" id="search-results-tab-parent">
+			<ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade;connect: .search-switcher" id="search-results-switcher-controls">
+	            <li id="results-switcher-li-works"><a href="#" id="works_tab">Works ({{ works|length }})</a></li>
+	            <li id="results-switcher-li-bookmarks"><a href="#" id="bookmarks_tab">Bookmarks ({{ bookmarks|length }})</a></li>
+	            <li id="results-switcher-li-tags"><a href="#" id="tags_tab">Tags ({{ tag_count }})</a></li>
+	            <li id="results-switcher-li-users"><a href="#" id="users_tab">Users ({{ users|length }})</a></li>
         	</ul>
 		</div>
-		<div class="uk-width-1">
+		<div class="uk-width-1" id="search-results-work-facet-parent">
 			
-			<ul class="uk-switcher uk-margin search-switcher">
-			<li> 
-				<div uk-grid>
-	    		<div class="uk-width-1-4"> 
-		        	<div class="uk-card uk-card-default uk-card-body">
-		        		<form class="uk-form-horizontal"  method="post" id="searchResultsForm" action="/search/filter">	
+			<ul class="uk-switcher uk-margin search-switcher" id="search-results-work-facet-switcher">
+			<li id="search-results-work-facet-switcher-li"> 
+				<div uk-grid id="search-results-work-facet-grid">
+	    		<div class="uk-width-1-4" id="search-results-work-facet-child"> 
+		        	<div class="uk-card uk-card-default uk-card-body" id="search-results-work-facet-card">
+		        		<form class="uk-form-horizontal"  method="post" id="searchResultsForm" action="/search/filter" id="search-results-work-facet-form">	
 		        			{% csrf_token %}
-				        	<dl class="uk-description-list uk-description-list-divider ">	
+				        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl">	
 						        {% for facet in facets %} 
 									{% include "facet_tile.html" %}     
 							    {% endfor %}		        
 							</dl>
 							<input type="hidden" id="term" name="term" value="{{ term }}">
-							<input class="uk-button uk-button-default" type="submit" value="Submit"/>
+							<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default" type="submit" value="Submit"/>
 						</form>
 				</div>
 			</div>
 
-		    <div class="uk-width-3-4">
-		    	<div class="uk-margin">
-			        <div uk-form-custom="target: > * > span:last-child">
-			            <select>
-			                <option value="">Sort by...</option>
-			                <option value="2">Fingerguns</option>
-			                <option value="3">Newest</option>
-			                <option value="4">Oldest</option>
+		    <div class="uk-width-3-4" id="search-results-works-parent">
+		    	<div class="uk-margin" id="search-results-works-sort-child">
+			        <div uk-form-custom="target: > * > span:last-child" id="search-results-works-sort-ukform">
+			            <select id="search-results-works-sort-select">
+			                <option id="search-results-works-sort-placeholder" value="">Sort by...</option>
+			                <option id="search-results-works-sort-fingerguns" value="2">Fingerguns</option>
+			                <option id="search-results-works-sort-newest" value="3">Newest</option>
+			                <option id="search-results-works-sort-oldest" value="4">Oldest</option>
 			            </select>
-			            <span class="uk-link">
+			            <span class="uk-link" id="search-results-works-sort-link">
 			                <span uk-icon="icon: plus"></span>
 			                <span></span>
 			            </span>
@@ -52,31 +52,31 @@
 			</div>
 		</li>
 
-		<li> 
-			<div uk-grid>
-	    		<div class="uk-width-1-4"> 
-		        	<div class="uk-card uk-card-default uk-card-body">
+		<li id="search-results-bookmarks-li"> 
+			<div uk-grid id="search-results-bookmarks-facet-grid">
+	    		<div class="uk-width-1-4" id="search-results-bookmarks-facet-parent"> 
+		        	<div class="uk-card uk-card-default uk-card-body" id="search-results-bookmarks-facet-card">
 		        	<form class="uk-form-horizontal"  method="post" id="searchResultsForm" action="/search/filter">	
 		        			{% csrf_token %}
-				        	<dl class="uk-description-list uk-description-list-divider ">	
+				        	<dl class="uk-description-list uk-description-list-divider " id="search-results-bookmarks-facet-dl">	
 						        {% for facet in facets %} 
 									{% include "facet_tile.html" %}     
 							    {% endfor %}		        
 							</dl>
 							<input type="hidden" id="term" name="term" value="{{ term }}">
-							<input class="uk-button uk-button-default" type="submit" value="Submit"/>
+							<input class="uk-button uk-button-default" type="submit" value="Submit" id="search-results-bookmarks-facet-submit"/>
 						</form>
 				</div>
 			</div>
-			<div class="uk-width-3-4">
-				<div uk-form-custom="target: > * > span:last-child">
-		            <select>
-		                <option value="">Sort by...</option>
-		                <option value="2">Fingerguns</option>
-		                <option value="3">Newest</option>
-		                <option value="4">Oldest</option>
+			<div class="uk-width-3-4" id="search-results-bookmarks-content">
+				<div uk-form-custom="target: > * > span:last-child" id="search-results-bookmarks-sort-parent">
+		            <select id="search-results-bookmarks-sort-select">
+		                <option id="search-results-bookmarks-sort-placeholder" value="">Sort by...</option>
+		                <option id="search-results-bookmarks-sort-fingerguns" value="2">Fingerguns</option>
+		                <option id="search-results-bookmarks-sort-newest" value="3">Newest</option>
+		                <option id="search-results-bookmarks-sort-oldest" value="4">Oldest</option>
 		            </select>
-		            <span class="uk-link">
+		            <span class="uk-link" id="search-results-bookmarks-sort-link">
 		                <span uk-icon="icon: plus"></span>
 		                <span></span>
 		            </span>
@@ -87,64 +87,64 @@
 			</div>     
 		</li>
 
-		<li> 
-			<div uk-grid>
-	    		<div class="uk-width-1-4"> 
-		        	<div class="uk-card uk-card-default uk-card-body">
+		<li id="search-results-tags-li"> 
+			<div uk-grid id="search-results-tags-facet-grid">
+	    		<div class="uk-width-1-4" id="search-results-tags-facet-child"> 
+		        	<div class="uk-card uk-card-default uk-card-body" id="search-results-tags-facet-card">
 		        	<form class="uk-form-horizontal"  method="post" id="searchResultsForm" action="/search/filter">	
 		        			{% csrf_token %}
-				        	<dl class="uk-description-list uk-description-list-divider ">	
+				        	<dl class="uk-description-list uk-description-list-divider" id="search-results-tags-facet-dl">	
 						        {% for facet in facets %} 
 									{% include "facet_tile.html" %}     
 							    {% endfor %}		        
 							</dl>
 							<input type="hidden" id="term" name="term" value="{{ term }}">
-							<input class="uk-button uk-button-default" type="submit" value="Submit"/>
+							<input class="uk-button uk-button-default" type="submit" value="Submit" id="search-results-tags-facet-submit"/>
 						</form>
 				</div>
 			</div>
-			<div class="uk-width-3-4">
-				<div uk-form-custom="target: > * > span:last-child">
-		            <select>
-		                <option value="">Sort by...</option>
-		                <option value="2">Work count</option>
-		                <option value="3">Bookmark count</option>
-		                <option value="4">Newest</option>
-		                <option value="5">Oldest</option>
+			<div class="uk-width-3-4" id="search-results-tags-content">
+				<div uk-form-custom="target: > * > span:last-child" id="search-results-tags-sort-parent">
+		            <select id="search-results-tags-sort-select">
+		                <option id="search-results-tags-sort-placeholder" value="">Sort by...</option>
+		                <option id="search-results-tags-sort-works" value="2">Work count</option>
+		                <option id="search-results-tags-sort-bookmarks" value="3">Bookmark count</option>
+		                <option id="search-results-tags-sort-newest" value="4">Newest</option>
+		                <option id="search-results-tags-sort-oldest" value="5">Oldest</option>
 		            </select>
-		            <span class="uk-link">
+		            <span class="uk-link" id="search-results-tags-sort-link">
 		                <span uk-icon="icon: plus"></span>
 		                <span></span>
 		            </span>
 		        </div>
-		        <dl class="uk-description-list uk-description-list-divider ">
+		        <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
 		        {% for type, tag in tags.items %} 
-			        <dt>{{ type }}</dt>
-			        <dd>
-			        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="/tags/{{single_tag.id}}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
+			        <dt id="search-results-tags-{{type}}-dt">{{ type }}</dt>
+			        <dd id="search-results-tags-{{type}}-dd">
+			        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="search-results-tags-{{single_tag.id}}-link" href="/tags/{{single_tag.id}}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
 			        </dd>
 			    {% endfor %}
 				</dl>
 			</div>     
 		</li>
 
-		<li> 
-			<div uk-grid>
-			<div class="uk-width-1">
-				<div uk-form-custom="target: > * > span:last-child">
-		            <select>
-		                <option value="">Sort by...</option>
-		                <option value="2">Alphabetical</option>
-		                <option value="3">Newest</option>
-		                <option value="4">Oldest</option>
+		<li id="search-results-users-parent"> 
+			<div uk-grid id="search-results-users-grid">
+			<div class="uk-width-1" id="search-results-users-content-parent">
+				<div uk-form-custom="target: > * > span:last-child" id="search-results-users-sort-parent">
+		            <select id="search-results-users-sort-select">
+		                <option id="search-results-users-sort-placeholder" value="">Sort by...</option>
+		                <option id="search-results-users-sort-alpha" value="2">Alphabetical</option>
+		                <option id="search-results-users-sort-newest" value="3">Newest</option>
+		                <option id="search-results-users-sort-oldest" value="4">Oldest</option>
 		            </select>
-		            <span class="uk-link">
+		            <span class="uk-link" id="search-results-users-sort-link">
 		                <span uk-icon="icon: plus"></span>
 		                <span></span>
 		            </span>
 		        </div>
 		        {% for user in users %} 
-					<p> <a href="/username/{{ user.username }}">{{ user.username }}</a> </p>
+					<p id="search-results-user-{{user.id}}"> <a id="search-results-user-{{user.id}}-link" href="/username/{{ user.username }}">{{ user.username }}</a> </p>
 			    {% endfor %}
 			</div>     
 		</li>
