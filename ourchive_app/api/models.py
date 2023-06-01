@@ -248,8 +248,13 @@ class Tag(models.Model):
     __tablename__ = 'tags'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    text = models.CharField(max_length=120)
+    text = models.CharField(max_length=120, db_index=True)
     display_text = models.CharField(max_length=120, default='')
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['text']),
+        ]
     
     tag_type = models.ForeignKey(
         'TagType',
@@ -265,15 +270,21 @@ class TagType(models.Model):
 
     __tablename__ = 'tag_types'
     id = models.AutoField(primary_key=True)
-    label = models.CharField(max_length=200)
+    label = models.CharField(max_length=200, db_index=True)
     admin_administrated = models.BooleanField(default=False)
     required = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['label']),
+        ]
 
     def __repr__(self):
         return '<TagType: {}>'.format(self.id)
 
     def __str__(self):
         return self.label
+
 
 class BookmarkCollection(models.Model):
 

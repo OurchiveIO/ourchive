@@ -1,6 +1,6 @@
 function doAutocomplete(term, source, selector, tag_type='') {
 	var complete_select = 'tag-autocomplete-dropdown-'+selector
-	if (term.length < 3)
+	if (term.length < 5)
 	{
 		return;
 	}
