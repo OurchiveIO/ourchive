@@ -22,9 +22,8 @@
         function tagCheck (e, type) {
             if (e.keyCode == 188 || e.keyCode == 13) {
                 var section = document.getElementById(type+"_tags");
-                var final = section.lastChild;
+                var final = document.getElementById(type+"_new_tag");
                 final.value = final.value.replace(/,\s*$/, "");
-                section.removeChild(section.lastChild);
                 var wrapper= document.createElement('div');
                 wrapper.innerHTML= '<input type="hidden" id="tags_'+final.value+'_'+type+'" name="tags_'+final.value+'_'+type+'" value="tags_'+final.value+'_'+type+'">';
                 var div= wrapper.firstChild;
@@ -33,8 +32,9 @@
                 div = wrapper.firstChild;
                 section.appendChild(div);
                 final.value = '';
-                section.appendChild(final);
-                section.lastChild.focus();
+                final.focus();
+                document.getElementById('tag-autocomplete-dropdown-'+type).innerHTML = "";
+                document.getElementById('no-tag-prompt-'+type).style.display = "none";
             }
         }
         
@@ -290,11 +290,19 @@
                     <div class="uk-form-controls">                
                         <div class="uk-inline">
                             <div id="{{ type }}_tags">
-                            {% for single_tag in tag %}
-                                <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="tags_{{ single_tag.text }}_{{ type }}">
-                                <span class="uk-badge uk-padding-small" id="tags_{{ single_tag.text }}_{{ type }}_txt"><span class="uk-text-bold uk-text-default uk-padding-small">{{ single_tag.text }}</span> <span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{type}}')" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
-                            {% endfor %}
-                            <input class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')"></div>
+                                {% if tag %}
+                                {% for single_tag in tag %}
+                                    <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="tags_{{ single_tag.text }}_{{ type }}">
+                                    <span class="uk-badge uk-padding-small" id="tags_{{ single_tag.text }}_{{ type }}_txt"><span class="uk-text-bold uk-text-default uk-padding-small">{{ single_tag.text }}</span> <span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{type}}')" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
+                                {% endfor %}
+                                {% else %}
+                                <span class="uk-text-medium" id="no-tag-prompt-{{type}}">No tags yet. Add some below.</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="uk-margin-top">
+                            <input class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')" oninput="doAutocomplete(this.value, 'edit', '{{type}}', '{{type}}')">
+                            <div id="tag-autocomplete-dropdown-{{type}}" uk-drop></div>
                         </div>
                     </div>
                 </div>

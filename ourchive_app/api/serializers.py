@@ -373,32 +373,40 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Bookmark
         fields = '__all__'
+
+    def process_tags(self, bookmark, validated_data, tags):
+        bookmark.tags.clear()
+        required_tag_types = list(TagType.objects.filter(required=True))
+        has_any_required = len(required_tag_types) > 0
+        for item in tags:
+            print(item)
+            tag_id = item['text'].lower()
+            tag_friendly_name = item['text']
+            tag_type = item['tag_type']
+            if tag_type in required_tag_types:
+                if tag_id is None or tag_id == '':
+                    # todo: error
+                    return None
+                else:
+                    required_tag_types.pop()
+
+            tag, created = Tag.objects.get_or_create(text=tag_id, tag_type=tag_type)
+            if tag.display_text == '':
+                tag.display_text = tag_friendly_name
+                tag.save()
+            bookmark.tags.add(tag)
+        if has_any_required and len(required_tag_types) > 0:
+            #todo: error
+            return None
+        bookmark.save()
+        return bookmark
+
     def update(self, bookmark, validated_data):
         if 'title' in validated_data and validated_data['title'] == '':
             validated_data['title'] = f'Bookmark: {bookmark.work.title}'
-        if 'tags' in validated_data:
-            tags = validated_data.pop('tags')
-            bookmark.tags.clear()
-            required_tag_types = list(TagType.objects.filter(required=True))
-            has_any_required = len(required_tag_types) > 0
-            for item in tags:
-                tag_id = item['text'].lower()
-                tag_friendly_name = item['text']
-                tag_type = item['tag_type']
-                if tag_type in required_tag_types:
-                    if tag_id is None or tag_id == '':
-                        # todo: error
-                        return None
-                    else:
-                        required_tag_types.pop()
-                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type=tag_type)
-                if tag.display_text == '':
-                    tag.display_text = tag_friendly_name
-                    tag.save()
-                bookmark.tags.add(tag)
-            if bookmark.title == '':
-                bookmark.title = bookmark.work.title
-            bookmark.save()
+        tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        bookmark = self.process_tags(bookmark, validated_data, tags)
+        print('tags processed')
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)        
         return Bookmark.objects.filter(id=bookmark.id).first()
 
@@ -406,18 +414,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
         validated_data['work_id'] = validated_data['work_id'].id
         bookmark = Bookmark.objects.create(**validated_data)
-        if 'tags' in validated_data:
-            tags = validated_data.pop('tags')
-            for item in tags:
-                tag_id = item['text'].lower()
-                tag_friendly_name = item['text']
-                tag_type = item['tag_type_id']
-                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type=tag_type)
-                if tag.display_text == '':
-                    tag.display_text = tag_friendly_name
-                    tag.save()
-                bookmark.tags.add(tag)
-        bookmark.save()
+        bookmark = self.process_tags(bookmark, validated_data, tags)
         return bookmark
 
 class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):

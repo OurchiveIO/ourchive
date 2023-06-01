@@ -1,0 +1,5 @@
+<div class="uk-card uk-card-body uk-card-default uk-card-small">
+	{% for tag in tags %}
+		<p class="uk-text-left uk-margin-large-left"><a href="/tags/{{tag.id}}"><span class="ourchive-autocomplete uk-text-small">{{tag.tag}}</span></a></p>
+	{% endfor %}
+</div>

@@ -80,6 +80,7 @@ urlpatterns = [
     path('fingerguns/', views.FingergunList.as_view(), name='fingergun-list'),
     path('fingerguns/<int:pk>/', views.FingergunDetail.as_view(), name='fingergun-detail'),
     path('works/<int:work_id>/fingerguns', views.FingergunByWorkList.as_view(), name='fingergun-by-work-list'),
+    path('tag-autocomplete', views.TagAutocomplete.as_view(), name='tag-autocomplete')
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

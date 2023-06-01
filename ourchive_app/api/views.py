@@ -34,7 +34,8 @@ def api_root(request, format=None):
         'searchresults': reverse('search-list', request=request, format=format),
         'fingerguns': reverse('fingergun-list', request=request, format=format),
         'userprofiles': reverse('user-profile-list', request=request, format=format),
-        'userblocks': reverse('user-blocks-list', request=request, format=format)
+        'userblocks': reverse('user-blocks-list', request=request, format=format),
+        'tag-autocomplete': reverse('tag-autocomplete', request=request, format=format),
     })
 
 class SearchList(APIView):
@@ -52,6 +53,15 @@ class SearchList(APIView):
     def get_queryset(self):
         searcher = OurchiveSearch()
         return searcher.do_search(**self.kwargs)
+
+class TagAutocomplete(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, format=None):
+        searcher = OurchiveSearch()
+        results = searcher.do_tag_search(request.GET.get('term'), request.GET.get('type'))
+        return Response({'results': results})
 
 class PublishWork(APIView):
     parser_classes = [JSONParser]

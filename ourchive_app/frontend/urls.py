@@ -62,5 +62,6 @@ urlpatterns = [
     path('tags/<int:tag_id>/next', views.works_by_tag_next),
     path('fingerguns/<int:work_id>', views.new_fingerguns),
     path('switch-css-mode/', views.switch_css_mode),
+    path('tag-autocomplete', views.tag_autocomplete),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

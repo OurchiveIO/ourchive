@@ -310,6 +310,14 @@ def search(request):
 		'tags': tags, 'users': users, 'tag_count': tag_count, 'facets': response_json['results']['facet'],
 		'root': settings.ALLOWED_HOSTS[0], 'term': term})
 
+def tag_autocomplete(request):
+	term = request.GET.get('text')
+	params = {'term': term}
+	params['type'] = request.GET.get('type') if 'type' in request.GET else ''
+	response = do_get(f'api/tag-autocomplete', request, params)
+	template = 'tag_autocomplete.html' if request.GET.get('source') == 'search' else 'edit_tag_autocomplete.html'
+	return render(request, template, {'tags': response[0]['results']})
+
 def search_filter(request):
 	tag_types_json = do_get(f'api/tagtypes', request)[0]
 	term = request.POST['term']
@@ -474,6 +482,7 @@ def edit_work(request, id):
 			if 'tags' in request.POST[item]:
 				tag = {}				
 				json_item = request.POST[item].split("_")
+				print(json_item)
 				tag['tag_type'] = json_item[2]
 				tag['text'] = json_item[1]
 				tags.append(tag)
@@ -636,12 +645,13 @@ def edit_bookmark(request, pk):
 		for item in result:
 			tag_types[item['label']] = item
 		for item in request.POST:
-			dict_item = request.POST[item].replace('\'', '"')
-			if 'tag_type_id' in request.POST[item]:				
-				json_item = json.loads(dict_item)
-				if not json_item['tag_type']:
-					json_item['tag_type'] = tag_types[json_item['tag_type']]['url']
-				tags.append(json_item)
+			if 'tags' in request.POST[item]:
+				tag = {}				
+				json_item = request.POST[item].split("_")
+				print(json_item)
+				tag['tag_type'] = json_item[2]
+				tag['text'] = json_item[1]
+				tags.append(tag)
 				bookmark_dict.pop(item)
 			elif 'tag_type' in request.POST[item]:				
 				json_item = json.loads(dict_item)

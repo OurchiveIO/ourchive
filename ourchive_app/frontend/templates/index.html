@@ -10,6 +10,7 @@
     <link rel="shortcut icon" href="{% static 'favicon/favicon.ico' %}"/>
     <script src="{% static 'frontend/js/uikit.min.js' %}"></script>
     <script src="{% static 'frontend/js/uikit-icons.min.js' %}"></script>
+    <script src="{% static 'frontend/js/ourchive-autocomplete.js' %}"></script>
     <title>Ourchive</title>
 </head>
 <body>
@@ -125,8 +126,10 @@
 						<form id="index-content-search-form" class="uk-search uk-search-large" method="post" action="search/">
 							{% csrf_token %}
 							<a id="index-content-search-link" href="#" uk-search-icon></a>
-							<input id="index-content-search-input" class="uk-search-input" type="search" name="term" placeholder="Search..." value="{{ term }}">
+							<input id="index-content-search-input" class="uk-search-input" type="search" name="term" placeholder="Search..." value="{{ term }}" oninput="doAutocomplete(this.value, 'search', 'main')">
+							<div id="tag-autocomplete-dropdown-main" uk-drop></div>
 						</form>
+						
 				</div>		  
 			{% endblock %}	
 	    </div>
