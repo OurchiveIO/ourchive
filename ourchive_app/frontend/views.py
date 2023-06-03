@@ -1004,6 +1004,8 @@ def bookmarks(request):
 def bookmark(request, pk):
 	get_url = f'api/bookmarks/{pk}/draft' if request.GET.get('draft') == "True" else f'api/bookmarks/{pk}'
 	bookmark = do_get(get_url, request)[0]
+	tag_types = do_get(f'api/tagtypes', request)[0]
+	tags = group_tags(tag_types['results'], bookmark['tags']) if 'tags' in bookmark else {}	
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
 		comment_id = request.GET.get('comment_thread')
@@ -1021,6 +1023,7 @@ def bookmark(request, pk):
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
 	return render(request, 'bookmark.html', {
 		'bookmark': bookmark, 
+		'tags': tags,
 		'comment_offset': comment_offset,
 		'scroll_comment_id': scroll_comment_id, 
 		'expand_comments': expand_comments, 

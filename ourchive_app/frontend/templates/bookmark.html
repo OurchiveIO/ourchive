@@ -34,10 +34,11 @@
 	            {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
 	            {% endif %}
 	        </div>
-	    <div class="uk-width-1" id="bookmark-description-parent">
-	    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>
-	    </div>	  
+	    <div class="uk-width-1" id="bookmark-work-link-parent">
+	    	<span id="bookmark-work-link-span" class="uk-text-medium">Work link: <a id="bookmark-work-link-id" class="uk-link-reset" href="/works/{{ work.id }}">{{ work.title }}</a></span>
+	    </div>
 	    <div class="uk-width-1" id="bookmark-rating-parent">
+	    	<p id="bookmark-description-hed" class="uk-text-medium"><span>{{bookmark.user}}'s rating:</span>
 	    	{% for stars in rating_range %}
 	            <div id="bookmark-star-parent" class="uk-animation-toggle uk-inline" tabindex="0">
 	                <div id="bookkmark-star-child">
@@ -50,12 +51,13 @@
 	                </div>
 	            </div>
 	        {% endfor %}
-	    </div>	  
-	    <hr id="bookmark-tag-hr"/>
-	    <div class="uk-width-1" id="bookmark-work-link-parent">
-	    	<span id="bookmark-work-link-span" class="uk-text-medium">Work link: <a id="bookmark-work-link-id" class="uk-link-reset" href="/works/{{ work.id }}">{{ work.title }}</a></span>
-	    </div>
-	    <dl class="uk-description-list uk-description-list-divider" id="bookmark-tag-parent">
+	    </div>	 
+	    <div class="uk-width-1" id="bookmark-description-parent">
+	    	<p id="bookmark-description-hed" class="uk-text-medium"><span>{{bookmark.user}}'s description:</span>
+	    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>
+	    </div>	   
+	    <hr id="bookmark-tag-hr" class="uk-divider-small"/>
+	    <dl class="uk-description-list" id="bookmark-tag-parent">
 	    {% for type, tag in tags.items %} 
 	        <dt id="bookmark-tag-type">{{ type }}</dt>
 	        <dd id="bookmark-tag-container">
@@ -63,7 +65,7 @@
 	        </dd>
 	    {% endfor %}
 	    </dl>
-	    <hr id="bookmark-comments-hr"/>
+	    <hr id="bookmark-comments-hr" class="uk-divider-small"/>
 	    <div id="bookmark-comments-toggle-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
 	        <div id="bookmark-comments-toggle-row">
 	             <button id="bookmark-comments-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #bookmark-{{bookmark.id}}-comments">{{ comments.count}} Comments</button>    		
