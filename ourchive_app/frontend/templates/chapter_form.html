@@ -8,7 +8,22 @@
 	        function getRichTextValues() {
 	        	document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
             	document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
-            	document.getElementById('chapter_text').value = tinymce.get("textEditor").getContent().replace(/\r?\n?/g, '');
+            	if (document.getElementById('chapter-text-edit-mode-toggle').checked) {
+		            document.getElementById('chapter_text').value = tinymce.get("textEditor").getContent().replace(/\r?\n?/g, '');
+		        } else {
+		            document.getElementById('chapter_text').value = document.getElementById('toggle-chapter-plaintext-area').value;
+		        }
+	        }
+
+	        function updateModeText() {
+	        	if (document.getElementById('chapter-text-edit-mode-toggle').checked) {
+	        		tinymce.get("textEditor").setContent(document.getElementById('toggle-chapter-plaintext-area').value);
+	        	}
+	        	else {
+	        		const grafEx = new RegExp('<p>', "g");
+	        		const whEx = new RegExp('</p>', "g");
+	        		document.getElementById('toggle-chapter-plaintext-area').innerHTML = tinymce.get("textEditor").getContent().replace(/\r?\n?/g, '').replace(grafEx, '\n').replace(whEx, '').replace('\n', '');
+	        	}
 	        }
     	</script>
 		{% csrf_token %}
@@ -44,8 +59,10 @@
                     <script type="text/javascript">
                                       tinymce.init({
                                         selector: '#summaryEditor',
-                                        width: 600,
-                                        height: 300,
+                                        width: '100%',
+										height: 450,
+										autoresize_min_height: 450,
+										autoresize_max_height: 800,
                                         plugins: [
                                           'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
                                           'fullscreen', 'insertdatetime',
@@ -96,8 +113,10 @@
                     <script type="text/javascript">
                                       tinymce.init({
                                         selector: '#notesEditor',
-                                        width: 600,
-                                        height: 300,
+                                        width: '100%',
+										height: 450,
+										autoresize_min_height: 450,
+										autoresize_max_height: 800,
                                         plugins: [
                                           'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
                                           'fullscreen', 'insertdatetime',
@@ -332,14 +351,21 @@
         <div class="uk-margin" id="chapter-form-text-parent">
             <label id="chapter-form-text-label" class="uk-form-label" for="form-horizontal-text">Chapter Text</label>
             <div class="uk-form-controls" id="chapter-form-text-controls">
-                <div class="uk-inline" id="chapter-form-text-inline">
+                <div class="uk-inline uk-width-expand" id="chapter-form-text-inline">
+                	<div class="uk-margin-bottom">
+                	<span width="150" class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text?</span>
+                	<label id="chapter-text-edit-mode-label" class="switch uk-width-medium"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText()" checked uk-toggle="target: .chapter-text-toggle")> 
+                		<span class="slider round"></span></label>
+                	</div>
                 	<input type="hidden" id="chapter_text" name="text" value="{{ chapter.text|safe|default_if_none:'' }}">
                     <textarea id="textEditor"></textarea>
                     <script type="text/javascript">
                                       tinymce.init({
                                         selector: '#textEditor',
-                                        width: 600,
-                                        height: 300,
+                                        width: '100%',
+										height: 450,
+										autoresize_min_height: 450,
+										autoresize_max_height: 800,
                                         plugins: [
                                           'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
                                           'fullscreen', 'insertdatetime',
@@ -349,13 +375,20 @@
                                           'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
                                           'forecolor backcolor emoticons | help',
                                         menubar: '',
-                                        content_css: 'css/content.css',
+                                        setup : function(ed) {
+										    ed.on('init', function(event) {
+										      ed.getContainer().classList.add("chapter-text-toggle");
+										    });
+										},
                                         init_instance_callback : function(editor) {
                                         	var chapterText = document.getElementById('chapter_text').value;
                                             editor.setContent(chapterText);
                                         }
                                       });
                    </script>
+                </div>
+                <div class="uk-width-1-1" id="chapter-form-html-text">
+                    <textarea id="toggle-chapter-plaintext-area" rows="25" name="text-plain" class="chapter-text-toggle uk-width-expand" hidden>{{ chapter.text|safe|default_if_none:'' }}</textarea>
                 </div>
             </div>
         </div>

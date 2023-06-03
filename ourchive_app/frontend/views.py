@@ -454,6 +454,7 @@ def edit_chapter(request, work_id, id):
 		if request.user.is_authenticated:			
 			chapter = do_get(f'api/chapters/{id}', request)[0]
 			chapter['text'] = sanitize_rich_text(chapter['text'])
+			chapter['text'] = chapter['text'].replace('\r\n', '<br/>')
 			chapter['summary'] = sanitize_rich_text(chapter['summary'])
 			chapter['notes'] = sanitize_rich_text(chapter['notes'])
 			return render(request, 'chapter_form.html', {'chapter': chapter})
