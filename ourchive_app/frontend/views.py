@@ -16,13 +16,14 @@ import math
 
 logger = logging.getLogger(__name__)
 
-def group_tags(tag_types, tags):
-	result = {}
-	for tag_type in tag_types:
-		result[tag_type['label']] = []
+def group_tags(tags):
+	tag_types = {}
 	for tag in tags:
-		result[tag['tag_type']].append(tag)
-	return result
+		if tag['tag_type'] not in tag_types:
+			tag_types[tag['tag_type']] = [tag]
+		else:
+			tag_types[tag['tag_type']].append(tag)
+	return tag_types
 
 def sanitize_rich_text(rich_text):
 	if rich_text is not None:
@@ -35,16 +36,9 @@ def referrer_redirect(request):
 	refer = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') is not None and '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER'] else '/'
 	return redirect(refer)
 
-def get_object_tags(parent, request):
-	tag_types = do_get('api/tagtypes', request)
-	result_message = process_results(tag_types, 'tag types')
-	if result_message != 'OK':
-		messages.add_message(request, messages.ERROR, result_message)
-	else:
-		tag_types = tag_types[0]
-		for item in parent:
-			tags = group_tags(tag_types['results'], item['tags']) if 'tags' in item else {}
-			item['tags'] = tags
+def get_object_tags(parent):
+	for item in parent:
+		item['tags'] = group_tags(item['tags']) if 'tags' in item else {}
 	return parent
 
 def get_works_list(request, username=None):
@@ -56,7 +50,7 @@ def get_works_list(request, username=None):
 		return redirect('/')
 	else:
 		works = response[0]['results']
-		works = get_object_tags(works, request)
+		works = get_object_tags(works)
 	return {'works': works, 'next_params': response['next_params'] if 'next_params' in response else None, 'prev_params': response['prev_params'] if 'prev_params' in response else None}
 
 def index(request):
@@ -84,14 +78,14 @@ def user_name(request, username):
 			anchor = "bookmark_tab"
 		works_response = do_get(f'api/users/{username}/works', request, params=work_params)[0]
 		works = works_response['results']
-		works = get_object_tags(works, request)
+		works = get_object_tags(works)
 		work_next = f'/username/{username}/{works_response["next_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=")}' if works_response["next_params"] is not None else None
 		work_previous = f'/username/{username}/{works_response["prev_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=")}' if works_response["prev_params"] is not None else None
 		bookmarks_response = do_get(f'api/users/{username}/bookmarks', request, params=bookmark_params)[0]
 		bookmarks = bookmarks_response['results']
 		bookmark_next = f'/username/{username}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
 		bookmark_previous = f'/username/{username}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
-		bookmarks = get_object_tags(bookmarks, request)
+		bookmarks = get_object_tags(bookmarks)
 		return render(request, 'user.html', {
 			'bookmarks': bookmarks, 
 			'bookmarks_next': bookmark_next,
@@ -147,7 +141,7 @@ def user_works(request, username):
 def user_works_drafts(request, username):
 	response = do_get(f'api/users/{username}works/drafts', request)[0]
 	works = response['results']
-	works = get_object_tags(works, request)
+	works = get_object_tags(works)
 	return render(request, 'works.html', {
 		'works': works,
 		'user_filter': username,
@@ -242,7 +236,7 @@ def delete_user(request, username):
 def user_bookmarks(request, username):
 	response = do_get(f'api/users/{username}/bookmarks', request, params=request.GET)[0]
 	bookmarks = response['results']
-	bookmarks = get_object_tags(bookmarks, request)
+	bookmarks = get_object_tags(bookmarks)
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks, 
 		'next': f"/username/{username}/bookmarks/{response['next_params']}" if response["next_params"] is not None else None,
@@ -287,7 +281,7 @@ def mark_notification_read(request, username, notification_id):
 def user_bookmarks_drafts(request, username):
 	response = do_get(f'api/users/{username}/bookmarks/drafts', request)
 	bookmarks = response[0]['results']
-	bookmarks = get_object_tags(bookmarks, request)
+	bookmarks = get_object_tags(bookmarks)
 	return render(request, 'bookmarks.html', {'bookmarks': bookmarks, 'user_filter': username})
 
 def search(request):
@@ -300,10 +294,10 @@ def search(request):
 	request_object = request_builder.with_term(term)
 	response_json = do_post(f'api/search/', request, data=request_object)[0]
 	works = response_json['results']['work']
-	works = get_object_tags(works, request)
+	works = get_object_tags(works)
 	bookmarks = response_json['results']['bookmark']
-	bookmarks = get_object_tags(bookmarks, request)
-	tags = group_tags(tag_types_json['results'], response_json['results']['tag'])
+	bookmarks = get_object_tags(bookmarks)
+	tags = group_tags(response_json['results']['tag'])
 	tag_count = len(response_json['results']['tag'])
 	users = response_json['results']['user']
 	return render(request, 'search_results.html', {'works': works, 'bookmarks': bookmarks,
@@ -353,10 +347,10 @@ def search_filter(request):
 						request_object['bookmark_search']['filter'][filter_details[0]].append(filter_details[1])
 	response_json = do_post(f'api/search/', request, data=request_object)[0]
 	works = response_json['results']['work']
-	works = get_object_tags(works, request)
+	works = get_object_tags(works)
 	bookmarks = response_json['results']['bookmark']
-	bookmarks = get_object_tags(bookmarks, request)
-	tags = group_tags(tag_types_json['results'], response_json['results']['tag'])
+	bookmarks = get_object_tags(bookmarks)
+	tags = group_tags(response_json['results']['tag'])
 	tag_count = len(response_json['results']['tag'])
 	users = response_json['results']['user']
 	return render(request, 'search_results.html', {'works': works, 'bookmarks': bookmarks,
@@ -367,7 +361,7 @@ def search_filter(request):
 def works(request):
 	works_response = do_get(f'api/works/', request, params=request.GET)[0]
 	works = works_response['results']
-	works = get_object_tags(works, request)
+	works = get_object_tags(works)
 	return render(request, 'works.html', {
 		'works': works,
 		'next': f"/works/{works_response['next_params']}" if works_response['next_params'] is not None else None,
@@ -377,7 +371,7 @@ def works(request):
 def works_by_type(request, type_id):
 	response = do_get(f'api/worktypes/{type_id}/works', request)[0]
 	works = response['results']
-	works = get_object_tags(works, request)
+	works = get_object_tags(works)
 	return render(request, 'works.html', {
 		'works': works,
 		'root': settings.ALLOWED_HOSTS[0]})
@@ -390,7 +384,7 @@ def new_work(request):
 			messages.add_message(request, messages.SUCCESS, 'Work created.')	
 			work = response[0]
 			tag_types = do_get(f'api/tagtypes', request)[0]
-			tags = group_tags(tag_types['results'], [])
+			tags = {result['label']:[] for result in tag_types['results']}
 			return render(request, 'work_form.html', {'tags': tags, 'work_types': work_types['results'],
 			'work': work})
 		elif response[1] == 403:
@@ -528,7 +522,7 @@ def edit_work(request, id):
 			work['summary'] = sanitize_rich_text(work['summary'])
 			work['notes'] = sanitize_rich_text(work['notes'])
 			chapters = do_get(f'api/works/{id}/chapters/draft', request)[0]
-			tags = group_tags(tag_types['results'], work['tags'])
+			tags = group_tags(work['tags'])
 			return render(request, 'work_form.html', {'work_types': work_types['results'],
 				'work': work, 
 				'tags': tags,
@@ -622,7 +616,7 @@ def new_bookmark(request, work_id):
 			messages.add_message(request, messages.SUCCESS, 'Bookmark created.')	
 			bookmark = response[0]
 			tag_types = do_get(f'api/tagtypes', request)[0]
-			tags = group_tags(tag_types['results'], bookmark['tags'])
+			tags = group_tags(bookmark['tags'])
 			return render(request, 'bookmark_form.html', {'tags': tags, 'rating_range': [1,2,3,4,5],
 			'bookmark': bookmark})
 		elif response[1] == 403:
@@ -682,7 +676,7 @@ def edit_bookmark(request, pk):
 			tag_types = do_get(f'api/tagtypes', request)[0]
 			bookmark = do_get(f'api/bookmarks/{pk}/draft', request)[0]
 			bookmark['description'] = sanitize_rich_text(bookmark['description'])
-			tags = group_tags(tag_types['results'], bookmark['tags']) if 'tags' in bookmark else []
+			tags = group_tags(bookmark['tags']) if 'tags' in bookmark else []
 			return render(request, 'bookmark_form.html', {
 				'rating_range': [1,2,3,4,5],
 				'bookmark': bookmark, 
@@ -799,8 +793,7 @@ def work(request, pk):
 		messages.add_message(request, messages.ERROR, result_message)
 		return redirect('/')
 	work = work[0]
-	tag_types = do_get(f'api/tagtypes', request)[0]
-	tags = group_tags(tag_types['results'], work['tags']) if 'tags' in work else {}	
+	tags = group_tags(work['tags']) if 'tags' in work else {}	
 	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else ""}'
 	if chapter_offset > 0:
 		chapter_url_string = f'{chapter_url_string}&offset={chapter_offset}'
@@ -1024,7 +1017,7 @@ def bookmarks(request):
 	bookmarks = response['results']
 	previous_param = response['prev_params']
 	next_param = response['next_params']
-	bookmarks = get_object_tags(bookmarks, request)
+	bookmarks = get_object_tags(bookmarks)
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks, 
 		'rating_range': [1,2,3,4,5],
@@ -1034,8 +1027,7 @@ def bookmarks(request):
 def bookmark(request, pk):
 	get_url = f'api/bookmarks/{pk}/draft' if request.GET.get('draft') == "True" else f'api/bookmarks/{pk}'
 	bookmark = do_get(get_url, request)[0]
-	tag_types = do_get(f'api/tagtypes', request)[0]
-	tags = group_tags(tag_types['results'], bookmark['tags']) if 'tags' in bookmark else {}	
+	tags = group_tags(bookmark['tags']) if 'tags' in bookmark else {}	
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
 		comment_id = request.GET.get('comment_thread')
@@ -1064,8 +1056,10 @@ def bookmark(request, pk):
 
 def works_by_tag(request, pk):
 	tagged_works = do_get(f'api/tags/{pk}/works', request)[0]
+	tagged_works['results'] = get_object_tags(tagged_works['results'])
 	tagged_bookmarks = do_get(f'api/tags/{pk}/bookmarks', request)[0]
-	return render(request, 'tag_results.html', {'tag_id': pk, 'works': tagged_works, 'bookmarks': tagged_bookmarks['results']})
+	tagged_bookmarks['results'] = get_object_tags(tagged_bookmarks['results'])
+	return render(request, 'tag_results.html', {'tag_id': pk, 'works': tagged_works, 'bookmarks': tagged_bookmarks})
 
 def works_by_tag_next(request, tag_id):
 	if 'next' in request.GET:

@@ -17,7 +17,7 @@
 		<div class="uk-width-1" id="tag-results-switcher-parent">
 			<ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade;connect: .search-switcher" id="tag-results-switcher-controls">
 	            <li id="tag-results-works-li"><a id="tag-results-works-link" href="#" id="works_tab">Works ({{ works.count }})</a></li>
-	            <li id="tag-results-bookmarks-li"><a id="tag-results-bookmarks-link" href="#" id="bookmarks_tab">Bookmarks ({{ bookmarks|length }})</a></li>
+	            <li id="tag-results-bookmarks-li"><a id="tag-results-bookmarks-link" href="#" id="bookmarks_tab">Bookmarks ({{ bookmarks.count }})</a></li>
         	</ul>
 		</div>
 		<div class="uk-width-1" id="tag-results-results-parent">
@@ -36,7 +36,7 @@
 			<li id="tag-results-bookmarks-switcher-content"> 
 				<div id="tag-results-bookmarks-grid" uk-grid>
 				<div class="uk-width-3-4" id="tag-results-bookmarks-div">
-		        {% for bookmark in bookmarks %} 
+		        {% for bookmark in bookmarks.results %} 
 					{% include "bookmark_tile.html" %}     
 			    {% endfor %}
 			</div>   
