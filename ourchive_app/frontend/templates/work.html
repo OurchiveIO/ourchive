@@ -45,9 +45,11 @@
             <p class="uk-article-meta"><span class="uk-inline uk-text-bold">{{ work.fingerguns }} Fingerguns</span> | <span class="uk-inline uk-text-bold">{{ work.word_count }} Words</span> | <span class="uk-inline uk-text-bold">{{ work.comment_count }} Comments</p>
         </div>
         <hr id="summary-notes-divider-hr"/>
-        <div><span class="uk-text-large">Notes</span></div>
-        <div><span class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></div>
-        <hr/>
+        {% if work.notes %} 
+            <div><span class="uk-text-large">Notes</span></div>
+            <div><span class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></div>
+            <hr/>
+        {% endif %}
     </div>
     <dl class="uk-description-list">
     {% for type, tag in tags.items %} 
