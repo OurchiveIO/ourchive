@@ -3,7 +3,8 @@ from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 import nh3
 from .custom_fields import PrivateField, UserPrivateField
-from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks
+from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, Invitation
+import datetime
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
@@ -39,6 +40,14 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url', 'username', 'password', 'email', 'groups', 'work_set', 'bookmark_set', 'userprofile', 'userblocks_set')
         extra_kwargs = {'password': {'write_only': True}}
     def create(self, validated_data):
+        require_invite = OurchiveSetting.objects.filter(name='Invite Only').first()
+        if require_invite.value == "True":
+            invitation = Invitation.objects.filter(invite_token=validated_data['invite_code']).first()
+            if invitation.token_expiration.date() >= datetime.datetime.now().date():
+                invitation.token_used = True
+                invitation.save()
+            else:
+                raise serializers.ValidationError("Invite token has expired.")
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email']
@@ -448,3 +457,21 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         bookmark.save()
         return bookmark
 
+class InvitationSerializer(serializers.HyperlinkedModelSerializer):
+    email = UserPrivateField()
+    class Meta:
+        model = User
+        fields = ('id', 'url', 'username', 'password', 'email', 'groups', 'work_set', 'bookmark_set', 'userprofile', 'userblocks_set')
+        extra_kwargs = {'password': {'write_only': True}}
+    def create(self, validated_data):
+        user = User.objects.create(
+            username=validated_data['username'],
+            email=validated_data['email']
+        )
+
+        user.set_password(validated_data['password'])
+        user.save()
+        userprofile = UserProfile.objects.create(
+            user=user)
+        userprofile.save()
+        return user

@@ -14,7 +14,13 @@
   pk: 3
   fields:
     name: Registration Permitted
-    value: False
+    value: True
+    grouping: General
+- model: api.ourchivesetting
+  pk: 4
+  fields:
+    name: Invite Only
+    value: True
     grouping: General
 - model: api.notificationtype
   pk: 1

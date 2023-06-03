@@ -748,8 +748,38 @@ def register(request):
 		else:
 			messages.add_message(request, messages.ERROR, 'Registration unsuccessful. Please try again.')
 			return redirect('/login')
-	else:			
-		return render(request, 'register.html', {})
+	else:
+		if 'invite_token' in request.GET:
+			response = do_get(f'api/invitations/', request, params={'email': request.GET.get('email'), 'invite_token': request.GET.get('invite_token')})
+			if response[1] == 200:
+				return render(request, 'register.html', {'permit_registration': True, 'invite_code': response[0]['invitation']})
+			else:
+				messages.add_message(request, messages.ERROR, 'Your invite code or email is incorrect. Please check your link again and contact site admin.')				
+				return redirect('/')
+		permit_registration = do_get(f'api/settings/', request, params={'setting_name': 'Registration Permitted'})[0]
+		invite_only = do_get(f'api/settings', request, params={'setting_name': 'Invite Only'})[0]
+		if permit_registration['results'][0]['value'] == "False":
+			return render(request, 'register.html', {'permit_registration': False})
+		elif invite_only['results'][0]['value'] == "True":
+				return redirect('/request-invite')
+		else:
+			return render(request, 'register.html', {'permit_registration': True})
+
+def request_invite(request):
+	if request.method == 'POST':
+		invite_email = request.POST.get('email')
+		response = do_post(f'api/invitations/', request, data={'email': invite_email})
+		if response[1] == 200 or response[1] == 201:
+			messages.add_message(request, messages.SUCCESS, 'You have been added to the invite queue.')		
+			return render(request, 'request_invite.html', {'invite_sent': True})
+		elif response[1] == 403:
+			messages.add_message(request, messages.ERROR, 'An error occurred requesting your invite. Please contact site admin.')				
+			return redirect('/')
+		elif response[1] == 418:
+			messages.add_message(request, messages.ERROR, 'Your account already exists. Please log in or reset your password.')				
+			return redirect('/login')
+	else:
+		return render(request, 'request_invite.html', {'invite_sent': False})
 
 def log_out(request):
 	logout(request)

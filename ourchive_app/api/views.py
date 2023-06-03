@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets, generics
 from api.serializers import UserProfileSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, SearchResultsSerializer, FingergunSerializer, UserBlocksSerializer
-from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks
+from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation
 from rest_framework import generics, permissions
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, IsUser, RegistrationPermitted
 from rest_framework.response import Response
@@ -13,6 +13,11 @@ from rest_framework.parsers import JSONParser
 from .search.search_service import OurchiveSearch
 from .search.search_obj import GlobalSearch
 from django.db.models import Q
+import json
+import datetime
+from django.utils.crypto import get_random_string
+from django.conf import settings
+import html
 
 
 @api_view(['GET'])
@@ -63,6 +68,30 @@ class TagAutocomplete(APIView):
         results = searcher.do_tag_search(request.GET.get('term'), request.GET.get('type'))
         return Response({'results': results})
 
+class Invitations(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        email_decoded = request.GET.get('email').replace('%40', '@').replace('+', '%2B')
+        invitation = Invitation.objects.filter(invite_token=request.GET.get('invite_token'), email=email_decoded).first()
+        if invitation:
+            return Response({'invitation': invitation.invite_token}, status=200)
+        else:
+            return Response({}, status=404)
+
+    def post(self, request):
+        existing_user = User.objects.filter(email=request.data['email']).first()
+        if existing_user:
+            return Response({'message': 'User is already registered.'}, status=418)
+        invitation = Invitation()
+        invitation.email = html.escape(request.data['email']).replace('+', '%2B')
+        invitation.invite_token = get_random_string(length=100)
+        invitation.token_expiration = datetime.datetime.now() + datetime.timedelta(days=7)
+        invitation.register_link = f"{settings.ALLOWED_HOSTS[0]}/register?invite_token={invitation.invite_token}&email={invitation.email}"
+        invitation.save()
+        return Response({}, status=200)
+
 class PublishWork(APIView):
     parser_classes = [JSONParser]
     permission_classes = [IsOwnerOrReadOnly]
@@ -96,6 +125,8 @@ class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
     permission_classes = [RegistrationPermitted]
+    def perform_create(self, serializer):
+        serializer.save(invite_code=self.request.data['invite_code'], email=self.request.data['email'])
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.get_queryset().order_by('id')
@@ -426,12 +457,17 @@ class NotificationDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsOwner, permissions.IsAdminUser]
 
 class OurchiveSettingList(generics.ListCreateAPIView):
-    queryset = OurchiveSetting.objects.get_queryset().order_by('id')
     serializer_class = OurchiveSettingSerializer
     permission_classes = [IsAdminOrReadOnly]
+    def get_queryset(self):
+        if 'setting_name' in self.request.GET:
+            return OurchiveSetting.objects.filter(name=self.request.GET['setting_name'])
+        else:
+            return OurchiveSetting.objects.order_by('id')
 
 class OurchiveSettingDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = OurchiveSetting.objects.get_queryset().order_by('id')
     serializer_class = OurchiveSettingSerializer
     permission_classes = [IsAdminOrReadOnly]
+    
     

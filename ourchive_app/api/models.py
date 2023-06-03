@@ -466,3 +466,17 @@ class ContentPage(models.Model):
 
     def __str__(self):
         return self.name
+
+class Invitation(models.Model):
+
+    __tablename__ = 'ourchive_settings'
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    email = models.CharField(max_length=200)
+    invite_token = models.CharField(max_length=200)
+    token_expiration = models.DateTimeField()
+    token_used = models.BooleanField(default=False)
+    register_link = models.CharField(max_length=200)
+
+    def __repr__(self):
+        return '<Invitation: {}>'.format(self.id)

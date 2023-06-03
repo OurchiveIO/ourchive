@@ -46,7 +46,8 @@ urlpatterns = [
     path('notificationtypes/<int:pk>/', views.NotificationTypeDetail.as_view(), name='notificationtype-detail'),
     path('settings/', views.OurchiveSettingList.as_view(), name='ourchive-setting-list'),
     path('settings/<int:pk>/', views.OurchiveSettingDetail.as_view(), name='ourchivesetting-detail'),
-	path('users/<int:pk>/',
+	path('settings/', views.OurchiveSettingList.as_view()),
+    path('users/<int:pk>/',
         views.UserDetail.as_view(),
         name='user-detail'),
     path('users/<str:username>/', views.UserNameDetail.as_view(),
@@ -80,7 +81,8 @@ urlpatterns = [
     path('fingerguns/', views.FingergunList.as_view(), name='fingergun-list'),
     path('fingerguns/<int:pk>/', views.FingergunDetail.as_view(), name='fingergun-detail'),
     path('works/<int:work_id>/fingerguns', views.FingergunByWorkList.as_view(), name='fingergun-by-work-list'),
-    path('tag-autocomplete', views.TagAutocomplete.as_view(), name='tag-autocomplete')
+    path('tag-autocomplete', views.TagAutocomplete.as_view(), name='tag-autocomplete'),
+    path('invitations/', views.Invitations.as_view(), name='invitations'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

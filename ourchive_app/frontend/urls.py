@@ -30,6 +30,7 @@ urlpatterns = [
     path('bookmarks/new/<int:work_id>', views.new_bookmark),
     path('login/', views.log_in),
     path('register/', views.register),
+    path('request-invite/', views.request_invite),
     path('logout/', views.log_out),
     path('reset-password/', auth_views.PasswordResetView.as_view(template_name="reset_password.html")),
     path('reset-password/done/', auth_views.PasswordResetDoneView.as_view(template_name="reset_password_done.html"), name='password_reset_done'),
