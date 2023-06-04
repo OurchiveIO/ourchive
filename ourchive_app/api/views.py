@@ -577,9 +577,21 @@ class OurchiveSettingDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class AttributeTypeList(generics.ListCreateAPIView):
-    queryset = AttributeType.objects.get_queryset().order_by('name')
     serializer_class = AttributeTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        queryset = AttributeType.objects
+        if 'allow_on_work' in self.request.GET:
+            queryset = queryset.filter(allow_on_work=self.request.GET['allow_on_work'])
+        if 'allow_on_bookmark' in self.request.GET:
+            queryset = queryset.filter(allow_on_bookmark=self.request.GET['allow_on_bookmark'])
+        if 'allow_on_chapter' in self.request.GET:
+            queryset = queryset.filter(allow_on_chapter=self.request.GET['allow_on_chapter'])
+        if 'allow_on_user' in self.request.GET:
+            queryset = queryset.filter(allow_on_user=self.request.GET['allow_on_user'])
+        else:
+            return AttributeType.objects.order_by('name')
 
 
 class AttributeTypeDetail(generics.RetrieveUpdateDestroyAPIView):

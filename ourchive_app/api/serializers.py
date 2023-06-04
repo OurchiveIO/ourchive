@@ -123,7 +123,27 @@ class TagTypeSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
+class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
+    attribute_type = serializers.SlugRelatedField(
+        queryset=AttributeType.objects.all(), slug_field='name')
+    id = serializers.ReadOnlyField()
+
+    def process_attributes(attr_obj, validated_data, attributes):
+        attr_obj.attributes.clear()
+        for attribute in attributes:
+            attribute = AttributeValue.objects.filter(name=attribute['name']).first()
+            attr_obj.attributes.add(attribute)
+        attr_obj.save()
+        return attr_obj
+
+    class Meta:
+        model = AttributeValue
+        fields = '__all__'
+
+
 class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
+    attribute_values = AttributeValueSerializer(many=True, required=False)
+
     class Meta:
         model = AttributeType
         fields = '__all__'
@@ -197,24 +217,6 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
                 return None
         tag = Tag.objects.create(**validated_data)
         return tag
-
-
-class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
-    attribute_type = serializers.SlugRelatedField(
-        queryset=AttributeType.objects.all(), slug_field='name')
-    id = serializers.ReadOnlyField()
-
-    def process_attributes(attr_obj, validated_data, attributes):
-        attr_obj.attributes.clear()
-        for attribute in attributes:
-            attribute = AttributeValue.objects.filter(name=attribute['name']).first()
-            attr_obj.attributes.add(attribute)
-        attr_obj.save()
-        return attr_obj
-
-    class Meta:
-        model = AttributeValue
-        fields = '__all__'
 
 
 class NotificationTypeSerializer(serializers.HyperlinkedModelSerializer):

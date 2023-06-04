@@ -64,7 +64,7 @@ urlpatterns = [
     path('tag-autocomplete', views.TagAutocomplete.as_view(), name='tag-autocomplete'),
     path('invitations/', views.Invitations.as_view(), name='invitations'),
     path('attributetypes/', views.AttributeTypeList.as_view(), name='attribute-type-list'),
-    path('attributetypes/<int:pk>/', views.AttributeTypeDetail.as_view(), name='attribute-detail'),
+    path('attributetypes/<int:pk>/', views.AttributeTypeDetail.as_view(), name='attributetype-detail'),
     path('attributevalues/', views.AttributeValueList.as_view(), name='attribute-value-list'),
     path('attributevalues/<int:pk>/', views.AttributeValueDetail.as_view(), name='attributevalue-detail'),
 ]
