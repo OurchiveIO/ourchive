@@ -168,20 +168,22 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, tag, validated_data):
         tag_type = TagType.objects.get(label=validated_data['tag_type'])
         if (tag_type.admin_administrated):
-            user = serializers.CurrentUserDefault()
+            user = validated_data['user']
+            validated_data.pop('user')
             if (user.is_superuser):
-                tag = Tag.objects.create(**validated_data)
-                return tag
+                Tag.objects.filter(id=tag.id).update(**validated_data)
+                return Tag.objects.filter(id=tag.id).first()
             else:
                 return None
         else:
-            Tag.objects.update(**validated_data)
-            return tag
+            Tag.objects.filter(id=tag.id).update(**validated_data)
+            return Tag.objects.filter(id=tag.id).first()
 
     def create(self, validated_data):
         tag_type = TagType.objects.get(label=validated_data['tag_type'])
         if (tag_type.admin_administrated):
-            user = serializers.CurrentUserDefault()
+            user = validated_data['user']
+            validated_data.pop('user')
             if (user.is_superuser):
                 tag = Tag.objects.create(**validated_data)
                 return tag
@@ -414,6 +416,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             tag_id = item['text'].lower()
             tag_friendly_name = item['text']
             tag_type = item['tag_type']
+            tag_type_id = TagType.objects.filter(label=tag_type).first().id
             if tag_type in required_tag_types:
                 if tag_id is None or tag_id == '':
                     # todo: error
@@ -421,7 +424,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 else:
                     required_tag_types.pop()
             tag, created = Tag.objects.get_or_create(
-                text=tag_id, tag_type=tag_type)
+                text=tag_id, tag_type_id=tag_type_id)
             if tag.display_text == '':
                 tag.display_text = tag_friendly_name
                 tag.save()
@@ -487,10 +490,10 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         required_tag_types = list(TagType.objects.filter(required=True))
         has_any_required = len(required_tag_types) > 0
         for item in tags:
-            print(item)
             tag_id = item['text'].lower()
             tag_friendly_name = item['text']
             tag_type = item['tag_type']
+            tag_type_id = TagType.objects.filter(label=tag_type).first().id
             if tag_type in required_tag_types:
                 if tag_id is None or tag_id == '':
                     # todo: error
@@ -499,7 +502,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
                     required_tag_types.pop()
 
             tag, created = Tag.objects.get_or_create(
-                text=tag_id, tag_type=tag_type)
+                text=tag_id, tag_type_id=tag_type_id)
             if tag.display_text == '':
                 tag.display_text = tag_friendly_name
                 tag.save()

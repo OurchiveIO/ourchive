@@ -302,11 +302,23 @@ class TagList(generics.ListCreateAPIView):
     serializer_class = TagSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def perform_create(self, serializer):
+        serializer.save(display_text=self.request.data['text'], user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(display_text=self.request.data['display_text'], user=self.request.user)
+
 
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Tag.objects.get_queryset().order_by('id')
     serializer_class = TagSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(display_text=self.request.data['text'], user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(display_text=self.request.data['display_text'], user=self.request.user)
 
 
 class ChapterList(generics.ListCreateAPIView):

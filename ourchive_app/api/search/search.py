@@ -198,6 +198,7 @@ class PostgresProvider:
 	def autocomplete_tags(self, term, tag_type, fetch_all=False):
 		results = []
 		resultset = None
+		term = term.lower()
 		if tag_type:
 			resultset = Tag.objects.filter(tag_type__label=tag_type).filter(text__contains=term)
 		else:
@@ -205,7 +206,7 @@ class PostgresProvider:
 		if resultset is None:
 			resultset = Tag.objects.filter(tag_type__label=tag_type) if fetch_all else []
 		for result in resultset:
-			results.append({"tag": result.text, "id": result.id, "type": result.tag_type.label})
+			results.append({"tag": result.text, "display_text": result.display_text, "id": result.id, "type": result.tag_type.label})
 		return results
 
 	def search_tags(self, **kwargs):

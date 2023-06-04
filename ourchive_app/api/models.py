@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.functions import Lower
 import uuid
 from django.contrib.auth.models import User
 
@@ -265,6 +266,10 @@ class Tag(models.Model):
         indexes = [
             models.Index(fields=['text']),
         ]
+        ordering = ('tag_type__label',)
+        constraints = [
+            models.UniqueConstraint(Lower('text').desc(), 'tag_type_id', name='unique_text_and_type')
+        ]
 
     tag_type = models.ForeignKey(
         'TagType',
@@ -276,6 +281,10 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.text
+
+    def save(self, *args, **kwargs):
+        self.text = self.text.lower()
+        super(Tag, self).save(*args, **kwargs)
 
 
 class TagType(models.Model):
@@ -290,6 +299,7 @@ class TagType(models.Model):
         indexes = [
             models.Index(fields=['label']),
         ]
+        ordering = ('label',)
 
     def __repr__(self):
         return '<TagType: {}>'.format(self.id)

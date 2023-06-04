@@ -26,6 +26,7 @@ def group_tags(tags):
 def group_tags_for_edit(tags, tag_types=None):
 	tag_parent = {tag_type['label']:{'admin_administrated': tag_type['admin_administrated']} for tag_type in tag_types['results']}
 	for tag in tags:
+		tag['text'] = escape(tag['text'])
 		if 'tags' not in tag_parent[tag['tag_type']]:
 			tag_parent[tag['tag_type']]['tags'] = []
 			tag_parent[tag['tag_type']]['tags'].append(tag)
@@ -519,7 +520,6 @@ def edit_work(request, id):
 			if 'tags' in request.POST[item]:
 				tag = {}
 				json_item = request.POST[item].split("_")
-				print(json_item)
 				tag['tag_type'] = json_item[2]
 				tag['text'] = json_item[1]
 				tags.append(tag)
