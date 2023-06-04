@@ -38,6 +38,8 @@ class Work(models.Model):
 
     tags = models.ManyToManyField('Tag')
 
+    attributes = models.ManyToManyField('AttributeValue')
+
     def __repr__(self):
         return '<Work: {}>'.format(self.id)
 
@@ -125,6 +127,8 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE,
     )
 
+    attributes = models.ManyToManyField('AttributeValue')
+
     def __repr__(self):
         return '<UserProfile: {}>'.format(self.id)
 
@@ -165,6 +169,8 @@ class Chapter(models.Model):
         User,
         on_delete=models.CASCADE,
     )
+
+    attributes = models.ManyToManyField('AttributeValue')
 
     def __repr__(self):
         return '<Chapter: {}>'.format(self.id)
@@ -370,6 +376,8 @@ class Bookmark(models.Model):
 
     tags = models.ManyToManyField('Tag')
 
+    attributes = models.ManyToManyField('AttributeValue')
+
     def __str__(self):
         return self.title
 
@@ -507,3 +515,69 @@ class Invitation(models.Model):
 
     def __repr__(self):
         return '<Invitation: {}>'.format(self.id)
+
+
+class AttributeType(models.Model):
+
+    __tablename__ = 'ourchive_settings'
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    display_name = models.CharField(max_length=200)
+    allow_on_work = models.BooleanField(default=False)
+    allow_on_bookmark = models.BooleanField(default=False)
+    allow_on_chapter = models.BooleanField(default=False)
+    allow_on_user = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+        ]
+        ordering = ('name',)
+        constraints = [
+            models.UniqueConstraint(Lower('name').desc(), name='unique_attributetype_name')
+        ]
+
+    def __repr__(self):
+        return '<AttributeType: {}>'.format(self.name)
+
+    def __str__(self):
+        return self.display_name
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super(AttributeType, self).save(*args, **kwargs)
+
+
+class AttributeValue(models.Model):
+
+    __tablename__ = 'ourchive_settings'
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    display_name = models.CharField(max_length=200)
+
+    attribute_type = models.ForeignKey(
+        'AttributeType',
+        on_delete=models.CASCADE,
+        related_name='attribute_values'
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+        ]
+        ordering = ('name',)
+        constraints = [
+            models.UniqueConstraint(Lower('name').desc(), name='unique_attributevalue_name')
+        ]
+
+    def __str__(self):
+        return self.display_name
+
+    def __repr__(self):
+        return '<AttributeValue: {}>'.format(self.name)
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super(AttributeValue, self).save(*args, **kwargs)

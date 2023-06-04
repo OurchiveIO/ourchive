@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets, generics
-from api.serializers import UserProfileSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, SearchResultsSerializer, FingergunSerializer, UserBlocksSerializer
-from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation
+from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, UserProfileSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, SearchResultsSerializer, FingergunSerializer, UserBlocksSerializer
+from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, AttributeValue
 from rest_framework import generics, permissions
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, IsUser, RegistrationPermitted
 from rest_framework.response import Response
@@ -41,6 +41,8 @@ def api_root(request, format=None):
         'userprofiles': reverse('user-profile-list', request=request, format=format),
         'userblocks': reverse('user-blocks-list', request=request, format=format),
         'tag-autocomplete': reverse('tag-autocomplete', request=request, format=format),
+        'attributetypes': reverse('attribute-type-list', request=request, format=format),
+        'attributevalues': reverse('attribute-value-list', request=request, format=format),
     })
 
 
@@ -571,4 +573,28 @@ class OurchiveSettingList(generics.ListCreateAPIView):
 class OurchiveSettingDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = OurchiveSetting.objects.get_queryset().order_by('id')
     serializer_class = OurchiveSettingSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class AttributeTypeList(generics.ListCreateAPIView):
+    queryset = AttributeType.objects.get_queryset().order_by('name')
+    serializer_class = AttributeTypeSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class AttributeTypeDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = AttributeType.objects.get_queryset().order_by('name')
+    serializer_class = AttributeTypeSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class AttributeValueList(generics.ListCreateAPIView):
+    queryset = AttributeValue.objects.get_queryset().order_by('name')
+    serializer_class = AttributeValueSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class AttributeValueDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = AttributeValue.objects.get_queryset().order_by('name')
+    serializer_class = AttributeValueSerializer
     permission_classes = [IsAdminOrReadOnly]
