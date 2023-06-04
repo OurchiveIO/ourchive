@@ -5,6 +5,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
+
 def get_headers(request):
 	headers = {}
 	headers['X-CSRFToken'] = request.COOKIES['csrftoken'] if 'csrftoken' in request.COOKIES else None
@@ -12,8 +13,10 @@ def get_headers(request):
 	headers['Origin'] = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}'
 	return headers
 
+
 def append_root_url(url):
 	return f"{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}/{url}"
+
 
 def get_results(results):
 	try:
@@ -26,6 +29,7 @@ def get_results(results):
 	logger.debug(f"status code: {results_status_code}")
 	return [results_json, results_status_code]
 
+
 def process_results(results, object):
 	if results[1] >= 200 and results[1] < 300:
 		return 'OK'
@@ -35,19 +39,24 @@ def process_results(results, object):
 		return f"We could not find this {object}. You may not have access to it, or it may not exist."
 	if results[1] == 500:
 		f"An error occurred while accessing this {object}. Please contact your administrator for more information."
- 
+
+
 def do_patch(url, request, data={}):
 	return get_results(requests.patch(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
+
 
 def do_post(url, request, data={}):
 	response = requests.post(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request))
 	return get_results(response)
 
+
 def do_put(url, request, data={}):
 	return get_results(requests.put(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
 
+
 def do_delete(url, request):
 	return get_results(requests.delete(append_root_url(url), cookies=request.COOKIES, headers=get_headers(request)))
+
 
 def do_get(url, request, params={}):
 	response = requests.get(append_root_url(url), params=params, cookies=request.COOKIES, headers=get_headers(request))

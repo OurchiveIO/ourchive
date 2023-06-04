@@ -57,15 +57,17 @@
 	    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>
 	    </div>	   
 	    <hr id="bookmark-tag-hr" class="uk-divider-small"/>
-	    <dl class="uk-description-list" id="bookmark-tag-parent">
-	    {% for type, tag in tags.items %} 
-	        <dt id="bookmark-tag-type">{{ type }}</dt>
-	        <dd id="bookmark-tag-container">
-	        <span id="bookmark-tag-icon" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="{{single_tag.url}}" id="bookmark-tag-link" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
-	        </dd>
-	    {% endfor %}
-	    </dl>
-	    <hr id="bookmark-comments-hr" class="uk-divider-small"/>
+	    {% if tags.items %}
+		    <dl class="uk-description-list" id="bookmark-tag-parent">
+		    {% for type, tag in tags.items %} 
+		        <dt id="bookmark-tag-type">{{ type }}</dt>
+		        <dd id="bookmark-tag-container">
+		        <span id="bookmark-tag-icon" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="{{single_tag.url}}" id="bookmark-tag-link" style="padding-left:5px;">{{ single_tag.display_text|default_if_none:single_tag.text }}</a> {% endfor %}
+		        </dd>
+		    {% endfor %}
+		    </dl>
+		    <hr id="bookmark-comments-hr" class="uk-divider-small"/>
+	    {% endif %}
 	    <div id="bookmark-comments-toggle-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
 	        <div id="bookmark-comments-toggle-row">
 	             <button id="bookmark-comments-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #bookmark-{{bookmark.id}}-comments">{{ comments.count}} Comments</button>    		

@@ -55,7 +55,7 @@
     {% for type, tag in tags.items %} 
         <dt>{{ type }}</dt>
         <dd>
-        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
+        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.display_text|default_if_none:single_tag.text }}</a> {% endfor %}
         </dd>
     {% endfor %}
     </dl>

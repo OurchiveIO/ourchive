@@ -43,6 +43,7 @@ def api_root(request, format=None):
         'tag-autocomplete': reverse('tag-autocomplete', request=request, format=format),
     })
 
+
 class SearchList(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.AllowAny]
@@ -59,14 +60,16 @@ class SearchList(APIView):
         searcher = OurchiveSearch()
         return searcher.do_search(**self.kwargs)
 
+
 class TagAutocomplete(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, format=None):
         searcher = OurchiveSearch()
-        results = searcher.do_tag_search(request.GET.get('term'), request.GET.get('type'))
+        results = searcher.do_tag_search(request.GET.get('term'), request.GET.get('type'), request.GET.get('fetch_all', False))
         return Response({'results': results})
+
 
 class Invitations(APIView):
     parser_classes = [JSONParser]
@@ -92,6 +95,7 @@ class Invitations(APIView):
         invitation.save()
         return Response({}, status=200)
 
+
 class PublishWork(APIView):
     parser_classes = [JSONParser]
     permission_classes = [IsOwnerOrReadOnly]
@@ -106,10 +110,12 @@ class PublishWork(APIView):
         work.save()
         return Response({}, status=200)
 
+
 class UserProfileList(generics.ListCreateAPIView):
     queryset = UserProfile.objects.get_queryset().order_by('id')
     serializer_class = UserProfileSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
 
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
@@ -125,35 +131,44 @@ class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
     permission_classes = [RegistrationPermitted]
+
     def perform_create(self, serializer):
         serializer.save(invite_code=self.request.data['invite_code'], email=self.request.data['email'])
+
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
     permission_classes = [RegistrationPermitted]
 
+
 class UserWorkList(generics.ListCreateAPIView):
-    serializer_class = WorkSerializer    
+    serializer_class = WorkSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
-        return Work.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False)|Q(user__id=self.request.user.id)).order_by('id')
+        return Work.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+
 
 class UserBookmarkList(generics.ListCreateAPIView):
-    serializer_class = BookmarkSerializer    
+    serializer_class = BookmarkSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
         return Bookmark.objects.filter(user__username=self.kwargs['username']).order_by('id')
+
 
 class UserBookmarkDraftList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
         return Bookmark.objects.filter(draft=True, user__username=self.kwargs['username'])
 
 
 class UserNameDetail(generics.ListAPIView):
     serializer_class = UserSerializer
+
     def get_queryset(self):
         username = self.kwargs['username']
         return User.objects.filter(username=username)
@@ -163,200 +178,256 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.get_queryset().order_by('id')
     serializer_class = GroupSerializer
 
+
 class WorkList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
-        return Work.objects.filter(Q(draft=False)|Q(user__id=self.request.user.id))
+        return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id))
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class UserWorkDraftList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
         return Work.objects.filter(draft=True, user__username=self.kwargs['username'])
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class UserBlocksList(generics.ListCreateAPIView):
     serializer_class = UserBlocksSerializer
     permission_classes = [IsOwner]
+
     def get_queryset(self):
         if 'username' in self.kwargs and self.kwargs['username'] is not None:
-            return UserBlocks.objects.filter(user__username=self.kwargs['username'] )
+            return UserBlocks.objects.filter(user__username=self.kwargs['username'])
         return UserBlocks.objects.all()
+
 
 class UserBlocksDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserBlocksSerializer
     permission_classes = [IsOwner]
+
     def get_queryset(self):
         return UserBlocks.objects.filter(id=self.kwargs['pk'])
+
 
 class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = WorkSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
-        return Work.objects.filter(Q(draft=False)|Q(user__id=self.request.user.id)).order_by('id')
+        return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+
 
 class WorkDraftDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Work.objects.get_queryset().order_by('id')
     serializer_class = WorkSerializer
     permission_classes = [IsOwner]
 
+
 class FingergunDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Fingergun.objects.get_queryset().order_by('id')
     serializer_class = FingergunSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
+
 class FingergunList(generics.ListCreateAPIView):
     queryset = Fingergun.objects.get_queryset().order_by('id')
-    serializer_class = FingergunSerializer    
+    serializer_class = FingergunSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
+
 class FingergunByWorkList(generics.ListCreateAPIView):
-    serializer_class = FingergunSerializer    
+    serializer_class = FingergunSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
         return Fingergun.objects.filter(work__id=self.kwargs['work_id'])
+
 
 class WorkTypeDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = WorkType.objects.get_queryset().order_by('id')
     serializer_class = WorkTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
 
+
 class WorkTypeList(generics.ListCreateAPIView):
     queryset = WorkType.objects.get_queryset().order_by('id')
-    serializer_class = WorkTypeSerializer    
+    serializer_class = WorkTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
 
+
 class WorkByTypeList(generics.ListCreateAPIView):
-    serializer_class = WorkSerializer    
+    serializer_class = WorkSerializer
     permission_classes = [IsAdminOrReadOnly]
+
     def get_queryset(self):
         return Work.objects.filter(work_type__id=self.kwargs['type_id']).order_by('id')
 
+
 class WorkByTagList(generics.ListCreateAPIView):
-    serializer_class = WorkSerializer    
+    serializer_class = WorkSerializer
     permission_classes = [IsAdminOrReadOnly]
+
     def get_queryset(self):
         return Work.objects.filter(tags__id=self.kwargs['pk']).order_by('id')
+
 
 class TagTypeDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = TagType.objects.get_queryset().order_by('id')
     serializer_class = TagTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
 
+
 class TagTypeList(generics.ListCreateAPIView):
-    queryset = TagType.objects.get_queryset().order_by('id')
     serializer_class = TagTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        if 'admin_administrated' in self.request.GET and self.request.GET.get('admin_administrated') is not None:
+            return TagType.objects.filter(admin_administrated=self.request.GET.get('admin_administrated'))
+        return TagType.objects.all()
+
 
 class TagList(generics.ListCreateAPIView):
     queryset = Tag.objects.get_queryset().order_by('id')
     serializer_class = TagSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Tag.objects.get_queryset().order_by('id')
     serializer_class = TagSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+
 class ChapterList(generics.ListCreateAPIView):
     serializer_class = ChapterSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
-        return Chapter.objects.get_queryset().filter(Q(draft=False)|Q(user__id=self.request.user.id)).order_by('id')
+        return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ChapterSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
-        return Chapter.objects.get_queryset().filter(Q(draft=False)|Q(user__id=self.request.user.id)).order_by('id')
+        return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+
 
 class WorkChapterDetail(generics.ListCreateAPIView):
     serializer_class = ChapterSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
-        return Chapter.objects.filter(work__id=self.kwargs['work_id']).filter(Q(draft=False)|Q(user__id=self.request.user.id)).order_by('number')
+        return Chapter.objects.filter(work__id=self.kwargs['work_id']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('number')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class ChapterDraftList(generics.ListCreateAPIView):
     serializer_class = ChapterSerializer
     permission_classes = [IsOwner]
+
     def get_queryset(self):
         return Chapter.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class ChapterDraftDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Chapter.objects.get_queryset().order_by('id')
     serializer_class = ChapterSerializer
     permission_classes = [IsOwner]
 
+
 class WorkDraftChapterDetail(generics.ListCreateAPIView):
     serializer_class = ChapterSerializer
     permission_classes = [IsOwner]
+
     def get_queryset(self):
         return Chapter.objects.filter(work__id=self.kwargs['work_id']).order_by('number')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class ChapterCommentDetail(generics.ListCreateAPIView):
     serializer_class = ChapterCommentSerializer
     permission_classes = [IsOwnerOrReadOnly, UserAllowsWorkComments, UserAllowsWorkAnonComments]
+
     def get_queryset(self):
         return ChapterComment.objects.filter(chapter__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class BookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
-        return Bookmark.objects.filter(Q(draft=False)|Q(user__id=self.request.user.id)).order_by('id')
+        return Bookmark.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class BookmarkByTagList(generics.ListCreateAPIView):
-    serializer_class = BookmarkSerializer    
+    serializer_class = BookmarkSerializer
     permission_classes = [IsAdminOrReadOnly]
+
     def get_queryset(self):
-        return Bookmark.objects.filter(tags__id=self.kwargs['pk']).filter(Q(draft=False)|Q(user__id=self.request.user.id)).order_by('id')
+        return Bookmark.objects.filter(tags__id=self.kwargs['pk']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+
 
 class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
-        return Bookmark.objects.get_queryset().filter(Q(draft=False)|Q(user__id=self.request.user.id)).order_by('id')
+        return Bookmark.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+
 
 class BookmarkDraftDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsOwner]
+
     def get_queryset(self):
         return Bookmark.objects.filter(draft=True).order_by('id')
+
 
 class BookmarkCommentDetail(generics.ListCreateAPIView):
     serializer_class = BookmarkCommentSerializer
     permission_classes = [UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments]
+
     def get_queryset(self):
         return BookmarkComment.objects.filter(bookmark__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class BookmarkPrimaryCommentDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkCommentSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
         return BookmarkComment.objects.get_queryset().order_by('id')
 
@@ -370,28 +441,34 @@ class BookmarkPrimaryCommentDetail(generics.RetrieveUpdateDestroyAPIView):
         instance.text = "This comment has been deleted"
         instance.save()
 
+
 class BookmarkCollectionList(generics.ListCreateAPIView):
     serializer_class = BookmarkCollectionSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
     def get_queryset(self):
         return BookmarkCollection.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = BookmarkCollection.objects.get_queryset().order_by('id')
     serializer_class = BookmarkCollectionSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
+
 class CommentList(generics.ListCreateAPIView):
     serializer_class = ChapterCommentSerializer
     permission_classes = [UserAllowsWorkComments, UserAllowsWorkAnonComments]
+
     def get_queryset(self):
         return ChapterComment.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ChapterComment.objects.get_queryset().order_by('id')
@@ -407,67 +484,79 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
         instance.text = "This comment has been deleted"
         instance.save()
 
+
 class BookmarkCommentList(generics.ListCreateAPIView):
     serializer_class = BookmarkCommentSerializer
     permission_classes = [UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments]
+
     def get_queryset(self):
         return BookmarkComment.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class MessageList(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAdminUser]
+
     def get_queryset(self):
         return Message.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class MessageDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Message.objects.get_queryset().order_by('id')
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAdminUser]
+
 
 class NotificationTypeDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = NotificationType.objects.get_queryset().order_by('id')
     serializer_class = NotificationTypeSerializer
     permission_classes = [permissions.IsAdminUser]
 
+
 class NotificationTypeList(generics.ListCreateAPIView):
     queryset = NotificationType.objects.get_queryset().order_by('id')
     serializer_class = NotificationTypeSerializer
     permission_classes = [permissions.IsAdminUser]
+
 
 class NotificationList(generics.ListCreateAPIView):
     queryset = Notification.objects.get_queryset().order_by('id')
     serializer_class = NotificationSerializer
     permission_classes = [IsOwner, permissions.IsAdminUser]
 
+
 class UserNotificationList(generics.ListCreateAPIView):
     serializer_class = NotificationSerializer
     permission_classes = [IsOwner, permissions.IsAdminUser]
+
     def get_queryset(self):
         return Notification.objects.filter(user__id=self.request.user.id)
+
 
 class NotificationDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Notification.objects.get_queryset().order_by('id')
     serializer_class = NotificationSerializer
     permission_classes = [IsOwner, permissions.IsAdminUser]
 
+
 class OurchiveSettingList(generics.ListCreateAPIView):
     serializer_class = OurchiveSettingSerializer
     permission_classes = [IsAdminOrReadOnly]
+
     def get_queryset(self):
         if 'setting_name' in self.request.GET:
             return OurchiveSetting.objects.filter(name=self.request.GET['setting_name'])
         else:
             return OurchiveSetting.objects.order_by('id')
 
+
 class OurchiveSettingDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = OurchiveSetting.objects.get_queryset().order_by('id')
     serializer_class = OurchiveSettingSerializer
     permission_classes = [IsAdminOrReadOnly]
-    
-    

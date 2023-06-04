@@ -1,11 +1,11 @@
-from django.urls import path, include
+from django.urls import path
 from . import views
 from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-	path('', views.index),
+    path('', views.index),
     path('search/', views.search),
     path('search/filter', views.search_filter),
     path('works/', views.works),

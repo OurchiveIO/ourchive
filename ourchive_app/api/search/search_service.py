@@ -21,9 +21,8 @@ class OurchiveSearch:
 		results['facet'] = self.searcher.get_result_facets(results)
 		return results
 
-	def do_tag_search(self, term, tag_type):
+	def do_tag_search(self, term, tag_type, fetch_all):
 		results = {}
 		if term is not None:
-			results = self.searcher.autocomplete_tags(term, tag_type)
+			results = self.searcher.autocomplete_tags(term, tag_type, fetch_all)
 		return results
-

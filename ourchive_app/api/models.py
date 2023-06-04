@@ -1,5 +1,4 @@
 from django.db import models
-import datetime
 import uuid
 from django.contrib.auth.models import User
 
@@ -44,6 +43,7 @@ class Work(models.Model):
     def __str__(self):
         return self.title
 
+
 class UserBlocks(models.Model):
 
     __tablename__ = 'user_blocks'
@@ -51,7 +51,7 @@ class UserBlocks(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE
@@ -68,6 +68,7 @@ class UserBlocks(models.Model):
 
     def __repr__(self):
         return '<UserBlocks: {}>'.format(self.uid)
+
 
 class Fingergun(models.Model):
 
@@ -91,6 +92,7 @@ class Fingergun(models.Model):
     def __str__(self):
         return self.title
 
+
 class WorkType(models.Model):
 
     __tablename__ = 'work_types'
@@ -103,6 +105,7 @@ class WorkType(models.Model):
 
     def __str__(self):
         return self.type_name
+
 
 class UserProfile(models.Model):
 
@@ -126,6 +129,7 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return str(self.id)
+
 
 class Chapter(models.Model):
 
@@ -153,7 +157,7 @@ class Chapter(models.Model):
     work = models.ForeignKey(
         'work',
         on_delete=models.CASCADE,
-         related_name='chapters'
+        related_name='chapters'
     )
 
     user = models.ForeignKey(
@@ -166,8 +170,10 @@ class Chapter(models.Model):
 
     def __str__(self):
         return str(self.number) if self.title is None else self.title
+
     class Meta:
         ordering = ['number']
+
 
 class BookmarkComment(models.Model):
 
@@ -188,9 +194,9 @@ class BookmarkComment(models.Model):
     parent_comment = models.ForeignKey(
         'BookmarkComment',
         on_delete=models.CASCADE,
-         related_name='replies',
-         null=True,
-         blank=True
+        related_name='replies',
+        null=True,
+        blank=True
     )
 
     bookmark = models.ForeignKey(
@@ -203,8 +209,10 @@ class BookmarkComment(models.Model):
 
     def __repr__(self):
         return '<Comment: {}>'.format(self.id)
+
     def __str__(self):
         return self.text if self.text is not None else str(id)
+
 
 class ChapterComment(models.Model):
 
@@ -225,9 +233,9 @@ class ChapterComment(models.Model):
     parent_comment = models.ForeignKey(
         'ChapterComment',
         on_delete=models.CASCADE,
-         related_name='replies',
-         null=True,
-         blank=True
+        related_name='replies',
+        null=True,
+        blank=True
     )
 
     chapter = models.ForeignKey(
@@ -240,8 +248,10 @@ class ChapterComment(models.Model):
 
     def __repr__(self):
         return '<Comment: {}>'.format(self.id)
+
     def __str__(self):
         return self.text if self.text is not None else str(id)
+
 
 class Tag(models.Model):
 
@@ -255,7 +265,7 @@ class Tag(models.Model):
         indexes = [
             models.Index(fields=['text']),
         ]
-    
+
     tag_type = models.ForeignKey(
         'TagType',
         on_delete=models.CASCADE,
@@ -263,8 +273,10 @@ class Tag(models.Model):
 
     def __repr__(self):
         return '<Tag: {}>'.format(self.id)
+
     def __str__(self):
         return self.text
+
 
 class TagType(models.Model):
 
@@ -300,7 +312,7 @@ class BookmarkCollection(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
-    
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -313,9 +325,9 @@ class BookmarkCollection(models.Model):
     def __str__(self):
         return self.title
 
-
     def __repr__(self):
         return '<BookmarkCollection: {}>'.format(self.id)
+
 
 class Bookmark(models.Model):
 
@@ -331,9 +343,9 @@ class Bookmark(models.Model):
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
     comment_count = models.IntegerField(default=0)
-    
+
     collection = models.ForeignKey(BookmarkCollection, on_delete=models.CASCADE, null=True, blank=True)
-    
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -350,8 +362,10 @@ class Bookmark(models.Model):
 
     def __str__(self):
         return self.title
+
     def __repr__(self):
         return '<Bookmark: {}>'.format(self.id)
+
 
 class BookmarkLink(models.Model):
 
@@ -361,12 +375,10 @@ class BookmarkLink(models.Model):
     link = models.CharField(max_length=200)
     text = models.CharField(max_length=200)
 
-
     bookmark = models.ForeignKey(
         'Bookmark',
         on_delete=models.CASCADE,
     )
-
 
     def __repr__(self):
         return '<BookmarkLink: {}>'.format(self.id)
@@ -396,10 +408,11 @@ class Message(models.Model):
     replies = models.ManyToManyField('self')
 
     def __repr__(self):
-    	return '<Message: {}>'.format(self.id)
+        return '<Message: {}>'.format(self.id)
 
     def __str__(self):
         return self.subject
+
 
 class Notification(models.Model):
 
@@ -422,6 +435,7 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ('read',)
+
 
 class NotificationType(models.Model):
     __tablename__ = 'notification_types'
@@ -452,6 +466,7 @@ class OurchiveSetting(models.Model):
     def __str__(self):
         return self.name
 
+
 class ContentPage(models.Model):
 
     __tablename__ = 'ourchive_settings'
@@ -467,6 +482,7 @@ class ContentPage(models.Model):
     def __str__(self):
         return self.name
 
+
 class Invitation(models.Model):
 
     __tablename__ = 'ourchive_settings'
@@ -477,6 +493,7 @@ class Invitation(models.Model):
     token_expiration = models.DateTimeField()
     token_used = models.BooleanField(default=False)
     register_link = models.CharField(max_length=200)
+    send_invite = models.BooleanField(default=False)
 
     def __repr__(self):
         return '<Invitation: {}>'.format(self.id)

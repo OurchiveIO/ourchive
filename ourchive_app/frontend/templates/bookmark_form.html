@@ -25,34 +25,6 @@
                 document.getElementById("bookmark_rating").setAttribute("value", starNum - 1);               
             }
         }
-
-        function removetag(tag, type) {
-            document.getElementById("tags_"+tag+"_"+type).remove();
-            document.getElementById("tags_"+tag+"_"+type+"_txt").remove();
-        }
-
-        function addtag(tag, type) {
-            alert(document.getElementById(type+"_tags").innerHTML);
-        }
-
-        function tagCheck (e, type) {
-            if (e.keyCode == 188 || e.keyCode == 13) {
-                var section = document.getElementById(type+"_tags");
-                var final = document.getElementById(type+"_new_tag");
-                final.value = final.value.replace(/,\s*$/, "");
-                var wrapper= document.createElement('div');
-                wrapper.innerHTML= '<input type="hidden" id="tags_'+final.value+'_'+type+'" name="tags_'+final.value+'_'+type+'" value="tags_'+final.value+'_'+type+'">';
-                var div= wrapper.firstChild;
-                section.appendChild(div);
-                wrapper.innerHTML = '<span class="uk-badge uk-padding-small uk-margin-right" id="tags_'+final.value+'_'+type+'_txt"><span class="uk-text-bold uk-text-default uk-padding-small">'+final.value+' </span><span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\')" id="tags_'+final.value+'_'+type+'_delete"></span></span>  ';
-                div = wrapper.firstChild;
-                section.appendChild(div);
-                final.value = '';
-                final.focus();
-                document.getElementById('tag-autocomplete-dropdown-'+type).innerHTML = "";
-                document.getElementById('no-tag-prompt-'+type).style.display = "none";
-            }
-        }
         
     </script>
     {% csrf_token %}
@@ -164,31 +136,7 @@
                         </div>
                     </div>
                 </div>
-
-                
-                {% for type, tag in tags.items %}
-                <div class="uk-margin" id="bookmark-form-tag-parent">
-                    <label id="bookmark-form-tag-type-label" class="uk-form-label" for="form-horizontal-text">{{ type }}</label>
-                    <div id="bookmark-form-tag-controls" class="uk-form-controls">                
-                        <div id="bookmark-form-tag-inline" class="uk-inline">
-                            <div id="{{ type }}_tags">
-                            {% if tag %}
-                                {% for single_tag in tag %}
-                                    <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="tags_{{ single_tag.text }}_{{ type }}">
-                                    <span class="uk-badge uk-padding-small" id="tags_{{ single_tag.text }}_{{ type }}_txt"><span class="uk-text-bold uk-text-default uk-padding-small">{{ single_tag.text }} </span><span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{type}}')" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
-                                {% endfor %}
-                                {% else %}
-                                <span class="uk-text-medium" id="no-tag-prompt-{{type}}">No tags yet. Add some below.</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="uk-margin-top">
-                            <input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')" oninput="doAutocomplete(this.value, 'edit', '{{type}}', '{{type}}')">
-                            <div id="tag-autocomplete-dropdown-{{type}}" uk-drop></div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
+                {% include "edit_tags.html" with object='bookmark' %}
             </fieldset>
     <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bookmark-form-actions-footer-parent" uk-grid>
         <div class="uk-text-right uk-width-1-1" id="bookmark-form-actions-footer-child">

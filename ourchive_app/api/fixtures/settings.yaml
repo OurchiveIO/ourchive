@@ -22,6 +22,18 @@
     name: Invite Only
     value: True
     grouping: General
+- model: api.ourchivesetting
+  pk: 5
+  fields:
+    name: Use Invite Queue
+    value: True
+    grouping: General
+- model: api.ourchivesetting
+  pk: 6
+  fields:
+    name: Invite Queue Limit
+    value: 10
+    grouping: General
 - model: api.notificationtype
   pk: 1
   fields:

@@ -195,14 +195,15 @@ class PostgresProvider:
 			result_json.append(result_dict)
 		return result_json
 
-	def autocomplete_tags(self, term, tag_type):
+	def autocomplete_tags(self, term, tag_type, fetch_all=False):
 		results = []
+		resultset = None
 		if tag_type:
-			resultset = Tag.objects.filter(tag_type__label=tag_type).filter(text__contains=term)	
+			resultset = Tag.objects.filter(tag_type__label=tag_type).filter(text__contains=term)
 		else:
 			resultset = Tag.objects.filter(text__contains=term)
 		if resultset is None:
-			return results
+			resultset = Tag.objects.filter(tag_type__label=tag_type) if fetch_all else []
 		for result in resultset:
 			results.append({"tag": result.text, "id": result.id, "type": result.tag_type.label})
 		return results
@@ -213,7 +214,7 @@ class PostgresProvider:
 		tag_filters = None
 		tag_filters = self.build_filter_query(tag_search.filter.tag_type, tag_search.filter.tag_type_filter, tag_filters)
 		tag_filters = self.build_filter_query(tag_search.filter.text, tag_search.filter.text_filter, tag_filters)
-		
+
 		query = self.get_query(tag_search.term, tag_search.term_search_fields)
 		resultset = None
 		if tag_filters is not None and query is not None:
