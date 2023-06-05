@@ -12,6 +12,11 @@ class AttributeValueAdmin(admin.ModelAdmin):
     search_fields = ('name', 'attribute_type__name')
 
 
+class AttributeTypeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'display_name', 'allow_on_work', 'allow_on_user', 'allow_on_chapter', 'allow_on_bookmark', 'allow_multiselect')
+    search_fields = ('name', 'display_name')
+
+
 class InvitationAdmin(admin.ModelAdmin):
     list_display = ('id', 'email', 'register_link', 'token_expiration', 'token_used')
     search_fields = ('text', 'tag_type__label')
@@ -24,5 +29,5 @@ admin.site.register(OurchiveSetting)
 admin.site.register(ContentPage)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Invitation, InvitationAdmin)
-admin.site.register(AttributeType)
+admin.site.register(AttributeType, AttributeTypeAdmin)
 admin.site.register(AttributeValue, AttributeValueAdmin)

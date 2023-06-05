@@ -8,6 +8,9 @@ from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, \
     NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
     Invitation, AttributeType, AttributeValue
 import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
@@ -130,9 +133,15 @@ class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
 
     def process_attributes(attr_obj, validated_data, attributes):
         attr_obj.attributes.clear()
+        attr_types = set()
         for attribute in attributes:
-            attribute = AttributeValue.objects.filter(name=attribute['name']).first()
-            attr_obj.attributes.add(attribute)
+            attribute = AttributeValue.objects.filter(name=attribute['name'], attribute_type__name=attribute['attribute_type'].name).first()
+            if attribute is not None:
+                if attribute.attribute_type.name in attr_types and attribute.attribute_type.allow_multiselect is False:
+                    logger.error(f"Cannot add attribute value {attribute.name}; attribute type {attribute.attribute_type.name} does not allow multi-select.")
+                else:
+                    attr_obj.attributes.add(attribute)
+                    attr_types.add(attribute.attribute_type.name)
         attr_obj.save()
         return attr_obj
 
@@ -389,6 +398,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         view_name='user-detail', format='html', read_only=True)
     id = serializers.IntegerField(read_only=True)
     word_count = serializers.IntegerField(read_only=True)
+    attributes = AttributeValueSerializer(many=True, required=False)
 
     class Meta:
         model = Chapter
@@ -407,20 +417,23 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'text' in validated_data:
             validated_data['word_count'] = 0 if not validated_data['text'] else len(
                 validated_data['text'].split())
-        attributes = validated_data.pop('attributes') if 'attributes' in validated_data else []
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+            chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
         chapter = Chapter.objects.filter(id=chapter.id)
         chapter.update(**validated_data)
-        chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
         self.update_word_count(chapter.first())
         return chapter.first()
 
     def create(self, validated_data):
         validated_data['word_count'] = 0 if not (
             'text' in validated_data and validated_data['text']) else len(validated_data['text'].split())
-        attributes = validated_data.pop('attributes') if 'attributes' in validated_data else []
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
         chapter = Chapter.objects.create(**validated_data)
         self.update_word_count(chapter)
-        chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
+        if attributes is not None:
+            chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
         return chapter
 
 
@@ -475,9 +488,10 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, work, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
-        attributes = validated_data.pop('attributes') if 'attributes' in validated_data else []
         work = self.process_tags(work, validated_data, tags)
-        work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+            work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
         work = self.update_word_count(work)
         validated_data['word_count'] = work.word_count
         Work.objects.filter(id=work.id).update(**validated_data)
@@ -485,10 +499,12 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
-        attributes = validated_data.pop('attributes') if 'attributes' in validated_data else []
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
         work = Work.objects.create(**validated_data)
         work = self.process_tags(work, validated_data, tags)
-        work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
+        if attributes is not None:
+            work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
         return work
 
 
@@ -552,19 +568,22 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         if 'title' in validated_data and validated_data['title'] == '':
             validated_data['title'] = f'Bookmark: {bookmark.work.title}'
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
-        attributes = validated_data.pop('attributes') if 'attributes' in validated_data else []
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+            bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
         bookmark = self.process_tags(bookmark, validated_data, tags)
-        bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)
         return Bookmark.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
-        attributes = validated_data.pop('attributes') if 'attributes' in validated_data else []
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
         validated_data['work_id'] = validated_data['work_id'].id
         bookmark = Bookmark.objects.create(**validated_data)
         bookmark = self.process_tags(bookmark, validated_data, tags)
-        bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
+        if attributes is not None:
+            bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
         return bookmark
 
 

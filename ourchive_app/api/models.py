@@ -528,6 +528,7 @@ class AttributeType(models.Model):
     allow_on_bookmark = models.BooleanField(default=False)
     allow_on_chapter = models.BooleanField(default=False)
     allow_on_user = models.BooleanField(default=False)
+    allow_multiselect = models.BooleanField(default=True)
 
     class Meta:
         indexes = [
@@ -580,4 +581,28 @@ class AttributeValue(models.Model):
 
     def save(self, *args, **kwargs):
         self.name = self.name.lower()
+        super(AttributeValue, self).save(*args, **kwargs)
+
+
+class WorkAttribute(models.Model):
+
+    __tablename__ = 'work_attributes'
+    id = models.AutoField(primary_key=True)
+    work = models.ForeignKey(
+        'Work',
+        on_delete=models.CASCADE
+    )
+    attribute_value = models.ForeignKey(
+        'AttributeValue',
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<AttributeValue: {}>'.format(self.id)
+
+    def save(self, *args, **kwargs):
+        # check if val is allowed for work
         super(AttributeValue, self).save(*args, **kwargs)

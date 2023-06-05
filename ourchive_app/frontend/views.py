@@ -35,6 +35,15 @@ def group_tags_for_edit(tags, tag_types=None):
 	return tag_parent
 
 
+def process_attributes(work_attributes, all_attributes):
+	work_attributes = [attribute['name'] for attribute in work_attributes]
+	for attribute in all_attributes:
+		for attribute_value in attribute['attribute_values']:
+			if attribute_value['name'] in work_attributes:
+				attribute_value['work'] = True
+	return all_attributes
+
+
 def sanitize_rich_text(rich_text):
 	if rich_text is not None:
 		rich_text = escape(rich_text)
@@ -501,6 +510,15 @@ def edit_chapter(request, work_id, id):
 
 def edit_work(request, id):
 	if request.method == 'POST':
+		attributes = request.POST.getlist('attributevals')
+		work_attributes = []
+		for attribute in attributes:
+			attribute_vals = attribute.split('|_|')
+			if len(attribute_vals) > 1:
+				work_attributes.append({
+					"attribute_type": attribute_vals[0],
+					"name": attribute_vals[1]
+				})
 		if 'files[]' in request.FILES:
 			service = FileHelperService.get_service()
 			if service is not None:
@@ -537,7 +555,8 @@ def edit_work(request, id):
 		work_dict["draft"] = "draft" in work_dict
 		work_dict = work_dict.dict()
 		work_dict["user"] = str(request.user)
-		response = do_put(f'api/works/{id}/draft', request, data=work_dict)
+		work_dict["attributes"] = work_attributes
+		response = do_patch(f'api/works/{id}/draft', request, data=work_dict)
 		if response[1] == 200:
 			for chapter in chapters:
 				response = do_put(f'api/chapters/{chapter["id"]}/draft', request, data=chapter)
@@ -552,9 +571,10 @@ def edit_work(request, id):
 			return redirect(f'/works/{id}/chapters/new?count={len(chapters)}')
 
 	else:
-		work_types = do_get(f'api/worktypes', request)[0]
-		tag_types = do_get(f'api/tagtypes', request)[0]
 		if request.user.is_authenticated:
+			work_types = do_get(f'api/worktypes', request)[0]
+			tag_types = do_get(f'api/tagtypes', request)[0]
+			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
 			work = do_get(f'api/works/{id}/draft', request)
 			result_message = process_results(work, 'work')
 			if result_message != 'OK':
@@ -563,6 +583,7 @@ def edit_work(request, id):
 			work = work[0]
 			work['summary'] = sanitize_rich_text(work['summary'])
 			work['notes'] = sanitize_rich_text(work['notes'])
+			work['attribute_types'] = process_attributes(work['attributes'], work_attributes[0]['results'])
 			chapters = do_get(f'api/works/{id}/chapters/draft', request)[0]
 			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else []
 			return render(request, 'work_form.html', {
