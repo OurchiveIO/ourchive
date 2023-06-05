@@ -534,7 +534,7 @@ class AttributeType(models.Model):
         indexes = [
             models.Index(fields=['name']),
         ]
-        ordering = ('name',)
+        ordering = ['name']
         constraints = [
             models.UniqueConstraint(Lower('name').desc(), name='unique_attributetype_name')
         ]
@@ -568,7 +568,7 @@ class AttributeValue(models.Model):
         indexes = [
             models.Index(fields=['name']),
         ]
-        ordering = ('name',)
+        ordering = ('attribute_type__name','name')
         constraints = [
             models.UniqueConstraint(Lower('name').desc(), name='unique_attributevalue_name')
         ]
@@ -597,12 +597,54 @@ class WorkAttribute(models.Model):
         on_delete=models.CASCADE
     )
 
+    class Meta:
+        ordering = ['id']
+
     def __str__(self):
         return self.id
 
     def __repr__(self):
         return '<AttributeValue: {}>'.format(self.id)
 
-    def save(self, *args, **kwargs):
-        # check if val is allowed for work
-        super(AttributeValue, self).save(*args, **kwargs)
+
+class BookmarkAttribute(models.Model):
+
+    __tablename__ = 'work_attributes'
+    id = models.AutoField(primary_key=True)
+    bookmark = models.ForeignKey(
+        'Bookmark',
+        on_delete=models.CASCADE
+    )
+    attribute_value = models.ForeignKey(
+        'AttributeValue',
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<AttributeValue: {}>'.format(self.id)
+
+
+class ChapterAttribute(models.Model):
+
+    __tablename__ = 'work_attributes'
+    id = models.AutoField(primary_key=True)
+    chapter = models.ForeignKey(
+        'Chapter',
+        on_delete=models.CASCADE
+    )
+    attribute_value = models.ForeignKey(
+        'AttributeValue',
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<AttributeValue: {}>'.format(self.id)
+
+    class Meta:
+        ordering = ['attribute_value']

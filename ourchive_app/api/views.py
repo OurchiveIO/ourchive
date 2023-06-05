@@ -228,6 +228,14 @@ class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
+    def perform_create(self, serializer):
+        serializer.save(attributes=self.request.data['attributes'])
+
+    def perform_update(self, serializer):
+        print("HEWWO")
+        print(self.request.data)
+        serializer.save(attributes=self.request.data['attributes'])
+
 
 class WorkDraftDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Work.objects.get_queryset().order_by('id')
@@ -341,6 +349,12 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
+    def perform_create(self, serializer):
+        serializer.save(attributes=self.request.data['attributes'])
+
+    def perform_update(self, serializer):
+        serializer.save(attributes=self.request.data['attributes'])
+
 
 class WorkChapterDetail(generics.ListCreateAPIView):
     serializer_class = ChapterSerializer
@@ -417,6 +431,12 @@ class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Bookmark.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+
+    def perform_create(self, serializer):
+        serializer.save(attributes=self.request.data['attributes'])
+
+    def perform_update(self, serializer):
+        serializer.save(attributes=self.request.data['attributes'])
 
 
 class BookmarkDraftDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -128,14 +128,14 @@ class TagTypeSerializer(serializers.HyperlinkedModelSerializer):
 
 class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
     attribute_type = serializers.SlugRelatedField(
-        queryset=AttributeType.objects.all(), slug_field='name')
+        queryset=AttributeType.objects.all(), slug_field='display_name')
     id = serializers.ReadOnlyField()
 
     def process_attributes(attr_obj, validated_data, attributes):
         attr_obj.attributes.clear()
         attr_types = set()
         for attribute in attributes:
-            attribute = AttributeValue.objects.filter(name=attribute['name'], attribute_type__name=attribute['attribute_type'].name).first()
+            attribute = AttributeValue.objects.filter(name=attribute['name'], attribute_type__name=attribute['attribute_type']).first()
             if attribute is not None:
                 if attribute.attribute_type.name in attr_types and attribute.attribute_type.allow_multiselect is False:
                     logger.error(f"Cannot add attribute value {attribute.name}; attribute type {attribute.attribute_type.name} does not allow multi-select.")
@@ -398,7 +398,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         view_name='user-detail', format='html', read_only=True)
     id = serializers.IntegerField(read_only=True)
     word_count = serializers.IntegerField(read_only=True)
-    attributes = AttributeValueSerializer(many=True, required=False)
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = Chapter
@@ -428,6 +428,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         validated_data['word_count'] = 0 if not (
             'text' in validated_data and validated_data['text']) else len(validated_data['text'].split())
+        attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
         chapter = Chapter.objects.create(**validated_data)
@@ -446,7 +447,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     word_count = serializers.IntegerField(read_only=True)
     audio_length = serializers.IntegerField(read_only=True)
-    attributes = AttributeValueSerializer(many=True, required=False)
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = Work
@@ -489,6 +490,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, work, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
         work = self.process_tags(work, validated_data, tags)
+        print(validated_data)
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
@@ -499,6 +501,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
         work = Work.objects.create(**validated_data)
@@ -531,6 +534,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         view_name='work-detail', read_only=True)
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = Bookmark
@@ -577,6 +581,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
         validated_data['work_id'] = validated_data['work_id'].id

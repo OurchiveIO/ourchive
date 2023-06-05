@@ -44,13 +44,16 @@
         <div class="uk-text-right">
             <p class="uk-article-meta"><span class="uk-inline uk-text-bold">{{ work.fingerguns }} Fingerguns</span> | <span class="uk-inline uk-text-bold">{{ work.word_count }} Words</span> | <span class="uk-inline uk-text-bold">{{ work.comment_count }} Comments</p>
         </div>
-        <hr id="summary-notes-divider-hr"/>
         {% if work.notes %} 
+            <div class="uk-margin-top"><hr id="summary-notes-divider-hr"/></div>
             <div><span class="uk-text-large">Notes</span></div>
             <div><span class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></div>
-            <hr/>
         {% endif %}
+        {% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}
     </div>
+    {% if work.notes and tags.items %}
+        <div class="uk-margin-top"><hr id="tag-notes-divider-hr"/></div>
+    {% endif %}
     <dl class="uk-description-list">
     {% for type, tag in tags.items %} 
         <dt>{{ type }}</dt>

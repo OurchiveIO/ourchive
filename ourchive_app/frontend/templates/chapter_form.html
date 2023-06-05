@@ -140,6 +140,10 @@
             </div>
         </div>
 
+        <hr id="chapter-attributes-hr"/>
+        	{% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types %}
+        <hr id="chapter-comments-hr"/>
+
         <div class="uk-margin" id="chapter-form-image-parent">
             <label id="chapter-form-image-label" class="uk-form-label" for="form-horizontal-text">Chapter Image</label>
             {% if chapter.image_url %}

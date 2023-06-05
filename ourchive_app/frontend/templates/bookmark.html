@@ -52,6 +52,7 @@
 	            </div>
 	        {% endfor %}
 	    </div>	 
+	    {% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}
 	    <div class="uk-width-1" id="bookmark-description-parent">
 	    	<p id="bookmark-description-hed" class="uk-text-medium"><span>{{bookmark.user}}'s description:</span>
 	    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>

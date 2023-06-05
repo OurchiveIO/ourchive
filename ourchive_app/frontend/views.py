@@ -35,13 +35,37 @@ def group_tags_for_edit(tags, tag_types=None):
 	return tag_parent
 
 
-def process_attributes(work_attributes, all_attributes):
-	work_attributes = [attribute['name'] for attribute in work_attributes]
-	for attribute in all_attributes:
+def process_attributes(obj_attrs, all_attrs):
+	obj_attrs = [attribute['name'] for attribute in obj_attrs]
+	for attribute in all_attrs:
 		for attribute_value in attribute['attribute_values']:
-			if attribute_value['name'] in work_attributes:
-				attribute_value['work'] = True
-	return all_attributes
+			if attribute_value['name'] in obj_attrs:
+				attribute_value['checked'] = True
+	return all_attrs
+
+
+def get_attributes_from_form_data(request):
+	obj_attributes = []
+	attributes = request.POST.getlist('attributevals')
+	for attribute in attributes:
+		attribute_vals = attribute.split('|_|')
+		if len(attribute_vals) > 1:
+			obj_attributes.append({
+				"attribute_type": attribute_vals[0],
+				"name": attribute_vals[1]
+			})
+	return obj_attributes
+
+
+def get_attributes_for_display(obj_attrs):
+	attrs = {}
+	attr_types = set()
+	for attribute in obj_attrs:
+		if attribute['attribute_type'] not in attr_types:
+			attr_types.add(attribute['attribute_type'])
+			attrs[attribute['attribute_type']] = []
+		attrs[attribute['attribute_type']].append(attribute['display_name'])
+	return attrs
 
 
 def sanitize_rich_text(rich_text):
@@ -433,6 +457,8 @@ def new_work(request):
 			work = response[0]
 			tag_types = do_get(f'api/tagtypes', request)[0]
 			tags = {result['label']:[] for result in tag_types['results']}
+			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
+			work['attribute_types'] = process_attributes([], work_attributes[0]['results'])
 			return render(request, 'work_form.html', {
 				'tags': tags, 'work_types': work_types['results'],
 				'work': work})
@@ -457,6 +483,8 @@ def new_chapter(request, work_id):
 		if response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Chapter created.')
 			chapter = response[0]
+			chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True})
+			chapter['attribute_types'] = process_attributes([], chapter_attributes[0]['results'])
 			return render(request, 'chapter_form.html', {'chapter': chapter})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this chapter.')
@@ -487,7 +515,8 @@ def edit_chapter(request, work_id, id):
 		else:
 			chapter_dict = request.POST.copy()
 			chapter_dict["draft"] = "draft" in chapter_dict
-			response = do_put(f'api/chapters/{id}/', request, data=chapter_dict)
+			chapter_dict["attributes"] = get_attributes_from_form_data(request)
+			response = do_patch(f'api/chapters/{id}/', request, data=chapter_dict)
 			if response[1] == 200:
 				messages.add_message(request, messages.SUCCESS, 'Chapter updated.')
 			elif response[1] == 403:
@@ -502,6 +531,8 @@ def edit_chapter(request, work_id, id):
 			chapter['text'] = chapter['text'].replace('\r\n', '<br/>')
 			chapter['summary'] = sanitize_rich_text(chapter['summary'])
 			chapter['notes'] = sanitize_rich_text(chapter['notes'])
+			chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True})
+			chapter['attribute_types'] = process_attributes(chapter['attributes'], chapter_attributes[0]['results'])
 			return render(request, 'chapter_form.html', {'chapter': chapter})
 		else:
 			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
@@ -510,15 +541,6 @@ def edit_chapter(request, work_id, id):
 
 def edit_work(request, id):
 	if request.method == 'POST':
-		attributes = request.POST.getlist('attributevals')
-		work_attributes = []
-		for attribute in attributes:
-			attribute_vals = attribute.split('|_|')
-			if len(attribute_vals) > 1:
-				work_attributes.append({
-					"attribute_type": attribute_vals[0],
-					"name": attribute_vals[1]
-				})
 		if 'files[]' in request.FILES:
 			service = FileHelperService.get_service()
 			if service is not None:
@@ -555,8 +577,8 @@ def edit_work(request, id):
 		work_dict["draft"] = "draft" in work_dict
 		work_dict = work_dict.dict()
 		work_dict["user"] = str(request.user)
-		work_dict["attributes"] = work_attributes
-		response = do_patch(f'api/works/{id}/draft', request, data=work_dict)
+		work_dict["attributes"] = get_attributes_from_form_data(request)
+		response = do_patch(f'api/works/{id}/', request, data=work_dict)
 		if response[1] == 200:
 			for chapter in chapters:
 				response = do_put(f'api/chapters/{chapter["id"]}/draft', request, data=chapter)
@@ -574,7 +596,6 @@ def edit_work(request, id):
 		if request.user.is_authenticated:
 			work_types = do_get(f'api/worktypes', request)[0]
 			tag_types = do_get(f'api/tagtypes', request)[0]
-			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
 			work = do_get(f'api/works/{id}/draft', request)
 			result_message = process_results(work, 'work')
 			if result_message != 'OK':
@@ -583,6 +604,7 @@ def edit_work(request, id):
 			work = work[0]
 			work['summary'] = sanitize_rich_text(work['summary'])
 			work['notes'] = sanitize_rich_text(work['notes'])
+			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
 			work['attribute_types'] = process_attributes(work['attributes'], work_attributes[0]['results'])
 			chapters = do_get(f'api/works/{id}/chapters/draft', request)[0]
 			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else []
@@ -687,6 +709,8 @@ def new_bookmark(request, work_id):
 		if response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark created.')
 			bookmark = response[0]
+			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True})
+			bookmark['attribute_types'] = process_attributes([], bookmark_attributes[0]['results'])
 			tags = group_tags(bookmark['tags'])
 			return render(request, 'bookmark_form.html', {
 				'tags': tags, 'rating_range': [1,2,3,4,5],
@@ -727,7 +751,8 @@ def edit_bookmark(request, pk):
 		bookmark_dict = bookmark_dict.dict()
 		bookmark_dict["user"] = str(request.user)
 		bookmark_dict["draft"] = 'draft' in bookmark_dict
-		response = do_put(f'api/bookmarks/{pk}/', request, data=bookmark_dict)
+		bookmark_dict["attributes"] = get_attributes_from_form_data(request)
+		response = do_patch(f'api/bookmarks/{pk}/', request, data=bookmark_dict)
 		if response[1] == 200:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark updated.')
 		elif response[1] == 403:
@@ -740,6 +765,8 @@ def edit_bookmark(request, pk):
 			tag_types = do_get(f'api/tagtypes', request)[0]
 			bookmark = do_get(f'api/bookmarks/{pk}/draft', request)[0]
 			bookmark['description'] = sanitize_rich_text(bookmark['description'])
+			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True})
+			bookmark['attribute_types'] = process_attributes(bookmark['attributes'], bookmark_attributes[0]['results'])
 			tags = group_tags_for_edit(bookmark['tags'], tag_types) if 'tags' in bookmark else []
 			return render(request, 'bookmark_form.html', {
 				'rating_range': [1,2,3,4,5],
@@ -865,6 +892,7 @@ def work(request, pk):
 		return redirect('/')
 	work = work[0]
 	tags = group_tags(work['tags']) if 'tags' in work else {}
+	work['attributes'] = get_attributes_for_display(work['attributes'])
 	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else ""}'
 	if chapter_offset > 0:
 		chapter_url_string = f'{chapter_url_string}&offset={chapter_offset}'
@@ -888,6 +916,7 @@ def work(request, pk):
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
 			chapter['comments'] = chapter_comments
 			chapter['comment_offset'] = comment_offset
+			chapter['attributes'] = get_attributes_for_display(chapter['attributes'])
 			chapter['new_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 			chapters.append(chapter)
 	return render(request, 'work.html', {
@@ -1108,6 +1137,7 @@ def bookmark(request, pk):
 	get_url = f'api/bookmarks/{pk}/draft' if request.GET.get('draft') == "True" else f'api/bookmarks/{pk}'
 	bookmark = do_get(get_url, request)[0]
 	tags = group_tags(bookmark['tags']) if 'tags' in bookmark else {}
+	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
 		comment_id = request.GET.get('comment_thread')

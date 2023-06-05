@@ -106,6 +106,11 @@
                         
                     </div>
                 </div>
+
+                <hr id="bookmark-attributes-hr"/>
+                {% include "object_attributes_form.html" with object='Bookmark' attribute_types=bookmark.attribute_types %}
+                <hr id="bookmark-comments-hr"/>
+
                 <div class="uk-margin" id="bookmark-form-draft-parent">
                     <label id="bookmark-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft?</label>
                     <div id="bookmark-form-draft-controls" class="uk-form-controls">

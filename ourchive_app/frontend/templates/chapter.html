@@ -36,7 +36,8 @@
 	    <div id="chapter-summary-div"><span id="chapter-summary-text" class="uk-text-medium">{% autoescape off %}{{ chapter.summary }}{% endautoescape %}</span></div>
 		<div id="chapter-notes-header"><span id="chapter-notes-label" class="uk-text-large">Notes</span></div>
 	    <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.notes }}{% endautoescape %}</span></div>
-	    <div id="chapter-notes-summary-hr"><hr id="chapter-content-hr"/>	</div>
+	    <div id="chapter-notes-summary-hr"><hr id="chapter-content-hr"/></div>
+	    {% include "object_attributes.html" with object='chapter' object_id=chapter.id attributes=chapter.attributes %}
 	</div>
 	{% if chapter.image_url %}<p id="chapter-image-graf"><img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/></p><hr id="chapter-image-hr"/>{% endif %}
 	{% if chapter.audio_url %}<p id="chapter-audio-graf"><audio id="chapter-audio" src="{{ chapter.audio_url }}" controls></audio></p><hr id="chapter-audio-hr"/>{% endif %}
