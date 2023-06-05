@@ -432,6 +432,8 @@ def works(request):
 	works_response = do_get(f'api/works/', request, params=request.GET)[0]
 	works = works_response['results']
 	works = get_object_tags(works)
+	for work in works:
+		work['attributes'] = get_attributes_for_display(work['attributes'])
 	return render(request, 'works.html', {
 		'works': works,
 		'next': f"/works/{works_response['next_params']}" if works_response['next_params'] is not None else None,
@@ -1126,6 +1128,8 @@ def bookmarks(request):
 	previous_param = response['prev_params']
 	next_param = response['next_params']
 	bookmarks = get_object_tags(bookmarks)
+	for bookmark in bookmarks:
+		bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks,
 		'rating_range': [1,2,3,4,5],
