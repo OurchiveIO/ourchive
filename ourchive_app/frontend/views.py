@@ -246,7 +246,7 @@ def edit_user(request, username):
 		profile_id = user_data['userprofile_id']
 		user_data.pop('userprofile_id')
 		if profile_id:
-			response = do_put(f'api/userprofile/{profile_id}/', request, data=user_data)
+			response = do_patch(f'api/userprofile/{profile_id}/', request, data=user_data)
 		else:
 			response = do_post(f'api/userprofiles', request, data=user_data)
 		if response[1] == 200 or response[1] == 201:
