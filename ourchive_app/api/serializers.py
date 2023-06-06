@@ -13,10 +13,43 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
+    attribute_type = serializers.SlugRelatedField(
+        queryset=AttributeType.objects.all(), slug_field='display_name')
+    id = serializers.ReadOnlyField()
+
+    def process_attributes(attr_obj, validated_data, attributes):
+        attr_obj.attributes.clear()
+        attr_types = set()
+        for attribute in attributes:
+            attribute = AttributeValue.objects.filter(name=attribute['name'], attribute_type__name=attribute['attribute_type']).first()
+            if attribute is not None:
+                if attribute.attribute_type.name in attr_types and attribute.attribute_type.allow_multiselect is False:
+                    logger.error(f"Cannot add attribute value {attribute.name}; attribute type {attribute.attribute_type.name} does not allow multi-select.")
+                else:
+                    attr_obj.attributes.add(attribute)
+                    attr_types.add(attribute.attribute_type.name)
+        attr_obj.save()
+        return attr_obj
+
+    class Meta:
+        model = AttributeValue
+        fields = '__all__'
+
+
+class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
+    attribute_values = AttributeValueSerializer(many=True, required=False)
+
+    class Meta:
+        model = AttributeType
+        fields = '__all__'
+
+
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     id = serializers.ReadOnlyField()
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = UserProfile
@@ -123,38 +156,6 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 class TagTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = TagType
-        fields = '__all__'
-
-
-class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
-    attribute_type = serializers.SlugRelatedField(
-        queryset=AttributeType.objects.all(), slug_field='display_name')
-    id = serializers.ReadOnlyField()
-
-    def process_attributes(attr_obj, validated_data, attributes):
-        attr_obj.attributes.clear()
-        attr_types = set()
-        for attribute in attributes:
-            attribute = AttributeValue.objects.filter(name=attribute['name'], attribute_type__name=attribute['attribute_type']).first()
-            if attribute is not None:
-                if attribute.attribute_type.name in attr_types and attribute.attribute_type.allow_multiselect is False:
-                    logger.error(f"Cannot add attribute value {attribute.name}; attribute type {attribute.attribute_type.name} does not allow multi-select.")
-                else:
-                    attr_obj.attributes.add(attribute)
-                    attr_types.add(attribute.attribute_type.name)
-        attr_obj.save()
-        return attr_obj
-
-    class Meta:
-        model = AttributeValue
-        fields = '__all__'
-
-
-class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
-    attribute_values = AttributeValueSerializer(many=True, required=False)
-
-    class Meta:
-        model = AttributeType
         fields = '__all__'
 
 

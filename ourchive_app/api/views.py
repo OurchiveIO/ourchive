@@ -232,8 +232,6 @@ class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer.save(attributes=self.request.data['attributes'])
 
     def perform_update(self, serializer):
-        print("HEWWO")
-        print(self.request.data)
         serializer.save(attributes=self.request.data['attributes'])
 
 
