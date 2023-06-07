@@ -2,7 +2,7 @@
 {% block content %}	
 {% load static %}
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
-<div class="uk-width-1-1 uk-text-left"> 
+<div class="uk-width-1-1 uk-text-left" id="user-form-parent-div"> 
 	<form class="uk-form-horizontal"  method="post" id="userForm" onsubmit="return getProfileText()">
 		<script>
 	        function getProfileText() {
@@ -10,27 +10,27 @@
 	        }
     	</script>
 		{% csrf_token %}
-		<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
-			<div class="uk-width-1-2">
-            	<span class="uk-text-large">Edit Profile Information</span>
+		<div id="user-form-buttons-top-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+			<div class="uk-width-1-2" id="edit-profile-header-parent">
+            	<span id="edit-profile-header-span" class="uk-text-large">Edit Profile Information</span>
         	</div>
-	        <div class="uk-text-right uk-width-1-2">
-	        	<input class="uk-button uk-width-small uk-button-danger" onclick="history.back()" value="Cancel"/>
-            	<button type="submit" disabled style="display: none" aria-hidden="true"></button>
-	            <input class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
+	        <div class="uk-text-right uk-width-1-2" id="user-form-buttons-container">
+	        	<input id="user-form-cancel" class="uk-button uk-width-small uk-button-danger" onclick="history.back()" value="Cancel"/>
+            	<button id="user-form-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+	            <input id="user-form-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
 	        </div>
 	    </div>
-    <hr/>
-		<fieldset class="uk-fieldset">
+    <hr id="user-form-fieldset-hr"/>
+		<fieldset id="user-form-fieldset" class="uk-fieldset">
 		<input type="hidden" id="unaltered_icon" name="unaltered_icon" value="{{ user.userprofile.icon }}">
 		<input type="hidden" id="userprofile_id" name="userprofile_id" value="{{ user.userprofile.id }}">
 		<input type="hidden" id="user" name="user" value="{{ user.username }}">
-        <div class="uk-margin">
-            <label class="uk-form-label" for="form-horizontal-text">User Icon</label>
-            <div class="uk-form-controls">
-                <div class="uk-inline">
-                	<img src="{{ user.userprofile.icon }}" style="border-radius: 50%; max-height: 50px; max-width: 50px;"/>
-                	<div class="js-upload-img uk-placeholder uk-text-center">
+        <div class="uk-margin" id="user-icon-parent-div">
+            <label id="user-icon-label" class="uk-form-label" for="form-horizontal-text">User Icon</label>
+            <div class="uk-form-controls" id="user-icon-controls">
+                <div class="uk-inline" id="user-icon-inline">
+                	<img id="user-icon-img" src="{{ user.userprofile.icon }}" style="border-radius: 50%; max-height: 50px; max-width: 50px;"/>
+                	<div id="user-icon-upload-parent" class="js-upload-img uk-placeholder uk-text-center">
                     <span uk-icon="icon: cloud-upload"></span>
 				    <div uk-form-custom="target: true">
 			            <input type="file">
@@ -119,37 +119,37 @@
             </div>
         </div>
 
-        <div class="uk-margin">
-            <label class="uk-form-label" for="form-horizontal-text">Icon Alt Text</label>
-            <div class="uk-form-controls">
-                <div class="uk-inline">
-                    <textarea class="uk-textarea uk-form-width-large" rows="2" placeholder="Image alt text" name="icon_alt_text" maxlength="600">{{ user.userprofile.icon_alt_text|default_if_none:'' }}</textarea>
+        <div class="uk-margin" id="icon-alt-text-parent">
+            <label id="icon-alt-text-label" class="uk-form-label" for="form-horizontal-text">Icon Alt Text</label>
+            <div class="uk-form-controls" id="icon-alt-text-controls">
+                <div class="uk-inline" id="icon-alt-text-inline">
+                    <textarea id="icon-alt-text-area" class="uk-textarea uk-form-width-large" rows="2" placeholder="Image alt text" name="icon_alt_text" maxlength="600">{{ user.userprofile.icon_alt_text|default_if_none:'' }}</textarea>
                 </div>
             </div>
         </div>   
 
-        <div class="uk-margin">
-            <label class="uk-form-label" for="form-horizontal-text">Default Content</label>
-            <div class="uk-form-controls">
-            	<select class="uk-select uk-form-width-small" name="default_content">
+        <div class="uk-margin" id="default-content-parent">
+            <label id="default-content-label" class="uk-form-label" for="form-horizontal-text">Default Content</label>
+            <div class="uk-form-controls" id="default-content-controls">
+            	<select id="default-content-select" class="uk-select uk-form-width-small" name="default_content">
             	{% if user.userprofile.default_content == "Work" %}
-                    <option value="Work" selected="selected">Work</option>
-                    <option value="Bookmark">Bookmark</option>
+                    <option id="default-content-work-selected" value="Work" selected="selected">Work</option>
+                    <option id="default-content-work-bookmark" value="Bookmark">Bookmark</option>
                 {% elif user.userprofile.default_content == "Bookmark" %} 
-                	<option value="Work">Work</option>
-                    <option value="Bookmark" selected="selected">Bookmark</option>
+                	<option id="default-content-bookmark-work" value="Work">Work</option>
+                    <option id="default-content-bookmark-selected" value="Bookmark" selected="selected">Bookmark</option>
                 {% else %}
-                	<option value="Work">Work</option>
-                    <option value="Bookmark">Bookmark</option>
+                	<option id="default-content-work" value="Work">Work</option>
+                    <option id="default-content-bookmark" value="Bookmark">Bookmark</option>
                 {% endif %}
                 </select>
             </div>
         </div>      
 
-        <div class="uk-margin">
-            <label class="uk-form-label" for="form-horizontal-text">Profile Text</label>
-            <div class="uk-form-controls">
-                <div class="uk-inline">
+        <div class="uk-margin" id="profile-text-parent">
+            <label id="profile-text-label" class="uk-form-label" for="form-horizontal-text">Profile Text</label>
+            <div class="uk-form-controls" id="profile-text-controls">
+                <div class="uk-inline" id="profile-text-inline">
                 	<input type="hidden" id="profile" name="profile" value="{{ user.userprofile.profile|safe|default_if_none:'' }}">
                     <textarea id="profileEditor"></textarea>
                     <script type="text/javascript">

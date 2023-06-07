@@ -10,24 +10,24 @@
     };
 </script>
 {% endif %}
-<div class="uk-width-1">
-    <div class="uk-text-right uk-width-1">
+<div class="uk-width-1" id="user-profile-parent">
+    <div class="uk-text-right uk-width-1" id="user-profile-controls-parent">
         {% if user.username == request.user.username %}
-            <a href="/username/{{ user.username }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
-            <a href="/users/{{ user.username }}/blocklist"><span uk-icon="icon: ban" title="Blocklist"></span> </a>
+            <a id="user-profile-edit-link" href="/username/{{ user.username }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
+            <a id="user-profile-blocklist-link" href="/users/{{ user.username }}/blocklist"><span uk-icon="icon: ban" title="Blocklist"></span> </a>
         {% else %}
-            <a href="/users/{{ user.username }}/block"><span uk-icon="icon: ban" title="Block"></span> </a>
+            <a id="user-block-link" href="/users/{{ user.username }}/block"><span uk-icon="icon: ban" title="Block"></span> </a>
         {% endif %}
     </div>
-	<div class="uk-width-1 uk-align-center">
-        <div class="uk-card uk-card-body"> 
-            <img src="{{ user.userprofile.icon }}" class="uk-align-center uk-height-max-small" style="border-radius: 50%"/> 
-            <h1 class="uk-heading-line uk-text-center"> <span>{{ user.username }}</span> </h1> 
+	<div class="uk-width-1 uk-align-center" id="user-profile-card-parent">
+        <div class="uk-card uk-card-body" id="user-profile-card-body"> 
+            <img id="user-profile-icon" src="{{ user.userprofile.icon }}" class="uk-align-center uk-height-max-small" style="border-radius: 50%"/> 
+            <h1 id="user-profile-username-h1" class="uk-heading-line uk-text-center"> <span id="user-profile-username-span">{{ user.username }}</span> </h1> 
         </div>
         {% if user.userprofile.profile %}
-            <div class="uk-card uk-card-body uk-align-center">
-                <h2> Profile </h2>
-                <span>{% autoescape off %} {{ user.userprofile.profile }} {% endautoescape %}</span> 
+            <div class="uk-card uk-card-body uk-align-center" id="user-profile-text-parent">
+                <h2 id="user-profile-text-h2"> Profile </h2>
+                <span id="user-profile-text-span">{% autoescape off %} {{ user.userprofile.profile }} {% endautoescape %}</span> 
             </div>
         {% endif %}
         <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.userprofile.default_content == 'Work' %}0{% else %}1{% endif %}" id="user_content_switcher_header">

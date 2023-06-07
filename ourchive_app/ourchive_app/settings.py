@@ -86,7 +86,7 @@ ROOT_URLCONF = 'ourchive_app.urls'
 
 MEDIA_ROOT = os.getenv('OURCHIVE_MEDIA_ROOT')
 
-MEDIA_URL = '/files/'
+MEDIA_URL = os.getenv('OURCHIVE_MEDIA_URL')
 
 FILE_PROCESSOR = 'local'
 
