@@ -16,6 +16,12 @@ class User(AbstractUser):
     has_notifications = models.BooleanField(default=False)
     default_content = models.TextField(null=True, blank=True)
     attributes = models.ManyToManyField('AttributeValue')
+    can_upload_audio = models.BooleanField(default=False)
+    can_upload_images = models.BooleanField(default=False)
+    default_post_language = models.CharField(max_length=10, blank=True, null=True)
+    default_search_language = models.CharField(max_length=10, blank=True, null=True)
+    default_editor = models.CharField(max_length=10, blank=True, null=True)
+    attributes = models.ManyToManyField('AttributeValue')
 
 
 class Work(models.Model):
@@ -633,6 +639,29 @@ class ChapterAttribute(models.Model):
 
     def __repr__(self):
         return '<AttributeValue: {}>'.format(self.id)
+
+    class Meta:
+        ordering = ['attribute_value']
+
+
+class UserAttribute(models.Model):
+
+    __tablename__ = 'user_attributes'
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE
+    )
+    attribute_value = models.ForeignKey(
+        'AttributeValue',
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<UserAttribute: {}>'.format(self.id)
 
     class Meta:
         ordering = ['attribute_value']
