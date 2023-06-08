@@ -231,14 +231,6 @@ def edit_account(request, username):
 
 def edit_user(request, username):
 	if request.method == 'POST':
-		if 'files[]' in request.FILES:
-			service = FileHelperService.get_service()
-			if service is not None:
-				final_url = service.handle_uploaded_file(request.FILES['files[]'], request.FILES['files[]'].name, request.user.username)
-				return HttpResponse(final_url)
-			else:
-				messages.add_message(request, messages.ERROR, 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.')
-				return HttpResponse('')
 		user_data = request.POST.copy()
 		if user_data['icon'] == "":
 			user_data['icon'] = user_data['unaltered_icon']

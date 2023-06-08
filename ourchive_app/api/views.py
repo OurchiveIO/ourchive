@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
-from rest_framework.parsers import JSONParser
+from rest_framework.parsers import JSONParser, MultiPartParser
 from .search.search_service import OurchiveSearch
 from .search.search_obj import GlobalSearch
 from django.db.models import Q
@@ -18,6 +18,7 @@ import datetime
 from django.utils.crypto import get_random_string
 from django.conf import settings
 import html
+from .file_helpers import FileHelperService
 
 
 @api_view(['GET'])
@@ -70,6 +71,20 @@ class TagAutocomplete(APIView):
         searcher = OurchiveSearch()
         results = searcher.do_tag_search(request.GET.get('term'), request.GET.get('type'), request.GET.get('fetch_all', False))
         return Response({'results': results})
+
+
+class FileUpload(APIView):
+    parser_classes = [MultiPartParser]
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, format=None):
+        if 'files[]' in request.FILES:
+            service = FileHelperService.get_service()
+            if service is not None:
+                final_url = service.handle_uploaded_file(request.FILES['files[]'], request.FILES['files[]'].name, request.user.username)
+                return Response({'final_url': final_url})
+            else:
+                return Response({'results': 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.'}, status=400)
 
 
 class Invitations(APIView):
