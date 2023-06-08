@@ -213,10 +213,12 @@ class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
         return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
     def perform_create(self, serializer):
-        serializer.save(attributes=self.request.data['attributes'])
+        if 'attributes' in self.request.data:
+            serializer.save(attributes=self.request.data['attributes'])
 
     def perform_update(self, serializer):
-        serializer.save(attributes=self.request.data['attributes'])
+        if 'attributes' in self.request.data:
+            serializer.save(attributes=self.request.data['attributes'])
 
 
 class WorkDraftDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -332,10 +334,12 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
         return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
     def perform_create(self, serializer):
-        serializer.save(attributes=self.request.data['attributes'])
+        if 'attributes' in self.request.data:
+            serializer.save(attributes=self.request.data['attributes'])
 
     def perform_update(self, serializer):
-        serializer.save(attributes=self.request.data['attributes'])
+        if 'attributes' in self.request.data:
+            serializer.save(attributes=self.request.data['attributes'])
 
 
 class WorkChapterDetail(generics.ListCreateAPIView):
@@ -415,10 +419,12 @@ class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
         return Bookmark.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
     def perform_create(self, serializer):
-        serializer.save(attributes=self.request.data['attributes'])
+        if 'attributes' in self.request.data:
+            serializer.save(attributes=self.request.data['attributes'])
 
     def perform_update(self, serializer):
-        serializer.save(attributes=self.request.data['attributes'])
+        if 'attributes' in self.request.data:
+            serializer.save(attributes=self.request.data['attributes'])
 
 
 class BookmarkDraftDetail(generics.RetrieveUpdateDestroyAPIView):
