@@ -243,27 +243,23 @@ def edit_user(request, username):
 		if user_data['icon'] == "":
 			user_data['icon'] = user_data['unaltered_icon']
 		user_data.pop('unaltered_icon')
-		profile_id = user_data['userprofile_id']
-		user_data.pop('userprofile_id')
-		if profile_id:
-			response = do_patch(f'api/userprofile/{profile_id}/', request, data=user_data)
-		else:
-			response = do_post(f'api/userprofiles', request, data=user_data)
+		user_id = user_data.pop('user_id')[0]
+		response = do_patch(f'api/users/{user_id}/', request, data=user_data)
 		if response[1] == 200 or response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'User profile updated.')
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to update this user profile.')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this user profile. Please contact your administrator.')
-		return redirect(f'/username/{username}')
+		return redirect(f'/username/{username}/')
 	else:
 		if request.user.is_authenticated:
 			response = do_get(f'api/users/{username}', request)
 			user = response[0]['results']
 			if len(user) > 0:
 				user = user[0]
-				if user['userprofile'] is not None:
-					user['userprofile']['profile'] = sanitize_rich_text(user['userprofile']['profile'])
+				if user is not None:
+					user['profile'] = sanitize_rich_text(user['profile'])
 				return render(request, 'user_form.html', {'user': user})
 			else:
 				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.')

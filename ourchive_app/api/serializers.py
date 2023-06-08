@@ -1,12 +1,12 @@
-from django.contrib.auth.models import User, Group, AnonymousUser
+from django.contrib.auth.models import Group, AnonymousUser
 from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 import nh3
 from .custom_fields import UserPrivateField
-from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, \
+from api.models import Work, Tag, Chapter, TagType, WorkType, \
     Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, \
     NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
-    Invitation, AttributeType, AttributeValue
+    Invitation, AttributeType, AttributeValue, User
 import datetime
 import logging
 
@@ -45,26 +45,6 @@ class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
-    user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field='username')
-    id = serializers.ReadOnlyField()
-    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-
-    class Meta:
-        model = UserProfile
-        fields = '__all__'
-
-
-class UserProfileCommentSerializer(serializers.HyperlinkedModelSerializer):
-    user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field='username')
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = UserProfile
-        fields = ('id', 'user', 'icon')
-
 
 class UserBlocksSerializer(serializers.HyperlinkedModelSerializer):
     uid = serializers.ReadOnlyField()
@@ -84,16 +64,18 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         many=True, view_name='work-detail', read_only=True)
     bookmark_set = serializers.HyperlinkedRelatedField(
         many=True, view_name='bookmark-detail', read_only=True)
-    userprofile = UserProfileSerializer(
-        read_only=True, required=False, many=False)
     userblocks_set = serializers.HyperlinkedRelatedField(
         many=True, read_only=True, view_name="userblocks-detail")
     email = UserPrivateField()
+    id = serializers.ReadOnlyField()
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = User
         fields = ('id', 'url', 'username', 'password', 'email', 'groups',
-                  'work_set', 'bookmark_set', 'userprofile', 'userblocks_set')
+                  'work_set', 'bookmark_set', 'userblocks_set', 'profile',
+                  'icon', 'icon_alt_text', 'has_notifications', 'default_content',
+                  'attributes')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -114,30 +96,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
         user.set_password(validated_data['password'])
         user.save()
-        userprofile = UserProfile.objects.create(
-            user=user)
-        userprofile.save()
         return user
 
     def update(self, user, validated_data):
         validated_data['password'] = User.objects.filter(
             id=user.id).first().password
         User.objects.filter(id=user.id).update(**validated_data)
-        userprofile = UserProfile.objects.filter(user__id=user.id).first()
-        if userprofile is None:
-            userprofile = UserProfile.objects.create(
-                user=user)
-            userprofile.save()
         return user
-
-
-class UserCommentSerializer(serializers.HyperlinkedModelSerializer):
-    userprofile = UserProfileCommentSerializer(
-        read_only=True, required=False, many=False)
-
-    class Meta:
-        model = User
-        fields = ('username', 'userprofile')
 
 
 class SearchResultsSerializer(serializers.Serializer):
@@ -251,7 +216,7 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         notification = Notification.objects.create(**validated_data)
         user = User.objects.filter(id=notification.user.id).first()
-        user.userprofile.has_notifications = True
+        user.has_notifications = True
         user.save()
         return notification
 
@@ -261,10 +226,8 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
         notification = Notification.objects.get(id=notification.id)
         unread_notifications = Notification.objects.filter(
             user__id=notification.user.id).filter(read=False).first()
-        user = UserProfile.objects.filter(
-            user__id=notification.user.id).first()
-        user.has_notifications = unread_notifications is not None
-        user.save()
+        notification.user.has_notifications = unread_notifications is not None
+        notification.user.save()
         return notification
 
     class Meta:
@@ -273,7 +236,7 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ReplySerializer(serializers.HyperlinkedModelSerializer):
-    user = UserCommentSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     replies = RecursiveField(many=True, required=False)
     id = serializers.ReadOnlyField()
 
@@ -283,7 +246,7 @@ class ReplySerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BookmarkReplySerializer(serializers.HyperlinkedModelSerializer):
-    user = UserCommentSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     replies = RecursiveField(many=True, required=False)
     id = serializers.ReadOnlyField()
 
@@ -293,7 +256,7 @@ class BookmarkReplySerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
-    user = UserCommentSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     replies = ReplySerializer(many=True, required=False, read_only=True)
     id = serializers.ReadOnlyField()
     chapter = serializers.PrimaryKeyRelatedField(
@@ -327,8 +290,8 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Chapter Comment",
                                                    content=f"""A new comment has been left on your chapter! <a href='/works/{comment.chapter.work.id}'>Click here</a> to view.""")
         notification.save()
-        user.userprofile.has_notifications = True
-        user.userprofile.save()
+        user.has_notifications = True
+        user.save()
         return comment
 
     def to_representation(self, instance):
@@ -338,7 +301,7 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
-    user = UserCommentSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     replies = BookmarkReplySerializer(
         many=True, required=False, read_only=True)
     id = serializers.ReadOnlyField()
@@ -368,8 +331,8 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Bookmark Comment",
                                                    content=f"""A new comment has been left on your bookmark! <a href='/bookmarks/{comment.bookmark.id}'>Click here</a> to view.""")
         notification.save()
-        user.userprofile.has_notifications = True
-        user.userprofile.save()
+        user.has_notifications = True
+        user.save()
         comment.bookmark.comment_count = comment.bookmark.comment_count + 1
         comment.bookmark.save()
         return comment
@@ -638,7 +601,7 @@ class InvitationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'url', 'username', 'password', 'email', 'groups',
-                  'work_set', 'bookmark_set', 'userprofile', 'userblocks_set')
+                  'work_set', 'bookmark_set', 'userblocks_set')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -649,7 +612,4 @@ class InvitationSerializer(serializers.HyperlinkedModelSerializer):
 
         user.set_password(validated_data['password'])
         user.save()
-        userprofile = UserProfile.objects.create(
-            user=user)
-        userprofile.save()
         return user

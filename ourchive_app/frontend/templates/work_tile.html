@@ -7,7 +7,7 @@
 	                <img class="uk-border-circle" width="40" height="40" alt="{{work.cover_alt_text}}" src="{{work.cover_url}}" id="work-{{work.id}}-tile-image">
 	            </div>
 	            {% endif %}
-	            <div class="uk-width-expand" id="work-{{work-id}}-tile-title-parent">
+	            <div class="uk-width-expand" id="work-{{work.id}}-tile-title-parent">
 	                {% if work.draft == True %}
 	                	<h3 id="work-{{work.id}}-tile-draft-title" class="uk-card-title uk-margin-remove-bottom"><a id="work-{{work.id}}-tile-draft-title-link" href="/works/{{work.id}}?draft=true">{{work.title}}</a></h3>
 	                {% else %}

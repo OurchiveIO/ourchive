@@ -12,7 +12,7 @@
     <header id="ch-comment-{{comment.id}}-header" class="uk-comment-header uk-grid-medium uk-flex-middle" uk-grid>
         {% if comment.user is not None %}
         <div class="uk-width-auto" id="ch-comment-{{comment.id}}-icon-div">
-            <img id="ch-comment-{{comment.id}}-icon" class="uk-comment-avatar" src="{{ comment.user.userprofile.icon }}" width="80" height="80" alt="">
+            <img id="ch-comment-{{comment.id}}-icon" class="uk-comment-avatar" src="{{ comment.user.icon }}" width="80" height="80" alt="">
         </div>
         {% endif %}
         <div id="ch-comment-{{comment.id}}-parent-div" class="uk-width-expand">

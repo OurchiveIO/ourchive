@@ -7,7 +7,7 @@ class UserBlockViewTests(TestCase):
 	client = APIClient()
 	fixtures = ['user', 'tagtype', 'tag', 'worktype', 'work', 'bookmark', 'bookmarklink', 
 				'bookmarkcomment', 'chapter', 'chaptercomment',
-				'fingergun', 'userblocks', 'userprofile', 'ourchivesetting']
+				'fingergun', 'userblocks', 'ourchivesetting']
 
 	def test_blocked_user_comment_on_work(self):
 		assert False

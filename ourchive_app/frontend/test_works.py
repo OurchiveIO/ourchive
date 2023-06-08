@@ -5,7 +5,7 @@ class WorkViewTests(TestCase):
 	client = APIClient()
 	fixtures = ['user', 'tagtype', 'tag', 'worktype', 'work', 'bookmark', 'bookmarklink', 
 				'bookmarkcomment', 'chapter', 'chaptercomment', 'notificationtype', 'notification', 
-				'fingergun', 'userblocks', 'userprofile', 'ourchivesetting']
+				'fingergun', 'userblocks', 'ourchivesetting']
 
 	def test_get_works(self):
 		assert False

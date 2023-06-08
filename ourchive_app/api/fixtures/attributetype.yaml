@@ -1,0 +1,33 @@
+- model: api.attributetype
+  pk: 1
+  fields:
+    uid: dac213b3-6ea0-4764-b136-b9ba514bc6c5
+    name: rating
+    display_name: Rating
+    allow_on_work: true
+    allow_on_bookmark: true
+    allow_on_chapter: true
+    allow_on_user: false
+    allow_multiselect: true
+- model: api.attributetype
+  pk: 2
+  fields:
+    uid: 7d09374c-bbdd-4f02-a3e5-019e10138cf1
+    name: genre
+    display_name: Genre
+    allow_on_work: true
+    allow_on_bookmark: true
+    allow_on_chapter: true
+    allow_on_user: false
+    allow_multiselect: false
+- model: api.attributetype
+  pk: 3
+  fields:
+    uid: 0f96d320-b0ce-4353-b95a-29f831107482
+    name: bookmark type
+    display_name: Bookmark Type
+    allow_on_work: false
+    allow_on_bookmark: true
+    allow_on_chapter: false
+    allow_on_user: false
+    allow_multiselect: true

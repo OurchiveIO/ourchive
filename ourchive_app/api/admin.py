@@ -1,5 +1,6 @@
 from django.contrib import admin
-from api.models import TagType, WorkType, NotificationType, OurchiveSetting, ContentPage, Tag, Invitation, AttributeType, AttributeValue
+from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, ContentPage, Tag, Invitation, AttributeType, AttributeValue
+from django.contrib.auth.admin import UserAdmin
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -31,3 +32,4 @@ admin.site.register(Tag, TagAdmin)
 admin.site.register(Invitation, InvitationAdmin)
 admin.site.register(AttributeType, AttributeTypeAdmin)
 admin.site.register(AttributeValue, AttributeValueAdmin)
+admin.site.register(User, UserAdmin)

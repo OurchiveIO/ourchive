@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
 from rest_framework import viewsets, generics
-from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, UserProfileSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, SearchResultsSerializer, FingergunSerializer, UserBlocksSerializer
-from api.models import UserProfile, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, AttributeValue
+from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, SearchResultsSerializer, FingergunSerializer, UserBlocksSerializer
+from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, AttributeValue
 from rest_framework import generics, permissions
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, IsUser, RegistrationPermitted
 from rest_framework.response import Response
@@ -38,7 +38,6 @@ def api_root(request, format=None):
         'settings': reverse('ourchive-setting-list', request=request, format=format),
         'searchresults': reverse('search-list', request=request, format=format),
         'fingerguns': reverse('fingergun-list', request=request, format=format),
-        'userprofiles': reverse('user-profile-list', request=request, format=format),
         'userblocks': reverse('user-blocks-list', request=request, format=format),
         'tag-autocomplete': reverse('tag-autocomplete', request=request, format=format),
         'attributetypes': reverse('attribute-type-list', request=request, format=format),
@@ -113,22 +112,6 @@ class PublishWork(APIView):
         return Response({}, status=200)
 
 
-class UserProfileList(generics.ListCreateAPIView):
-    queryset = UserProfile.objects.get_queryset().order_by('id')
-    serializer_class = UserProfileSerializer
-    permission_classes = [IsOwnerOrReadOnly]
-
-
-class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
-    def get_queryset(self):
-        if 'username' in self.kwargs:
-            return UserProfile.objects.filter(user__username=self.kwargs['username']).order_by('id')
-        else:
-            return UserProfile.objects.filter(id=self.kwargs['pk'])
-    serializer_class = UserProfileSerializer
-    permission_classes = [IsOwnerOrReadOnly]
-
-
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
@@ -170,6 +153,7 @@ class UserBookmarkDraftList(generics.ListCreateAPIView):
 
 class UserNameDetail(generics.ListAPIView):
     serializer_class = UserSerializer
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
         username = self.kwargs['username']

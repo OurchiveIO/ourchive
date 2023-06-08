@@ -5,7 +5,7 @@ from unittest import skip
 @skip
 class NotificationViewTests(TestCase):
 	client = APIClient()
-	fixtures = ['user', 'notificationtype', 'notification', 'userprofile', 'ourchivesetting']
+	fixtures = ['user', 'notificationtype', 'notification', 'ourchivesetting']
 
 	def test_load_notifications(self):
 		assert False

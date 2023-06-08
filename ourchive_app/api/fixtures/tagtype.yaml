@@ -1,0 +1,18 @@
+- model: api.tagtype
+  pk: 1
+  fields:
+    label: Pairing
+    admin_administrated: false
+    required: false
+- model: api.tagtype
+  pk: 2
+  fields:
+    label: Fandom
+    admin_administrated: true
+    required: false
+- model: api.tagtype
+  pk: 3
+  fields:
+    label: Trope
+    admin_administrated: false
+    required: false

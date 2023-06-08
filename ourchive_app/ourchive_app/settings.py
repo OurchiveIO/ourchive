@@ -41,7 +41,6 @@ API_PROTOCOL = 'http://' if DEBUG else 'https://'
 # Application definition
 
 INSTALLED_APPS = [
-    'api.apps.ApiConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'corsheaders',
     'anymail',
+    'api'
     #'background_task',
 ]
 
@@ -160,6 +160,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'api.User'
 
 
 # Internationalization

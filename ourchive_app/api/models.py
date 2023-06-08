@@ -1,7 +1,21 @@
 from django.db import models
 from django.db.models.functions import Lower
 import uuid
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+
+
+class User(AbstractUser):
+    __tablename__ = 'user'
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    profile = models.TextField(null=True, blank=True)
+    icon = models.CharField(max_length=600, null=True, blank=True)
+    icon_alt_text = models.CharField(max_length=600, null=True, blank=True)
+    has_notifications = models.BooleanField(default=False)
+    default_content = models.TextField(null=True, blank=True)
+    attributes = models.ManyToManyField('AttributeValue')
 
 
 class Work(models.Model):
@@ -108,32 +122,6 @@ class WorkType(models.Model):
 
     def __str__(self):
         return self.type_name
-
-
-class UserProfile(models.Model):
-
-    __tablename__ = 'userprofiles'
-    id = models.AutoField(primary_key=True)
-    uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
-    profile = models.TextField(null=True, blank=True)
-    icon = models.CharField(max_length=600, null=True, blank=True)
-    icon_alt_text = models.CharField(max_length=600, null=True, blank=True)
-    has_notifications = models.BooleanField(default=False)
-    default_content = models.TextField(null=True, blank=True)
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-    )
-
-    attributes = models.ManyToManyField('AttributeValue')
-
-    def __repr__(self):
-        return '<UserProfile: {}>'.format(self.id)
-
-    def __str__(self):
-        return str(self.id)
 
 
 class Chapter(models.Model):

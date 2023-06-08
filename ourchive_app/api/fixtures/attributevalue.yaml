@@ -1,0 +1,49 @@
+- model: api.attributevalue
+  pk: 1
+  fields:
+    uid: 4446678a-d5c8-4958-824c-c2c73d7d2f16
+    name: general audiences
+    display_name: General Audiences
+    attribute_type: 1
+- model: api.attributevalue
+  pk: 2
+  fields:
+    uid: b45809ef-c905-4287-ba23-950dc6f7b640
+    name: teen
+    display_name: Teen
+    attribute_type: 1
+- model: api.attributevalue
+  pk: 3
+  fields:
+    uid: 9332d3c7-49a8-4391-861a-2dc8a0bd76d9
+    name: mature
+    display_name: Mature
+    attribute_type: 1
+- model: api.attributevalue
+  pk: 4
+  fields:
+    uid: cfd7bff9-ccfb-4e9f-aadc-8dd0fc62ab44
+    name: romance
+    display_name: Romance
+    attribute_type: 2
+- model: api.attributevalue
+  pk: 5
+  fields:
+    uid: 8f761c7a-8aaa-4894-8145-b6501607796f
+    name: adventure
+    display_name: Adventure
+    attribute_type: 2
+- model: api.attributevalue
+  pk: 6
+  fields:
+    uid: ffc9a187-211d-4111-88e1-53acd3f509dc
+    name: rec
+    display_name: Rec
+    attribute_type: 3
+- model: api.attributevalue
+  pk: 7
+  fields:
+    uid: 666203b4-5179-46d7-88a3-0b7f81d7ef21
+    name: anti-rec
+    display_name: Anti-Rec
+    attribute_type: 3

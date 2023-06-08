@@ -6,7 +6,7 @@ from unittest import skip
 class BookmarkViewTests(TestCase):
 	client = APIClient()
 	fixtures = ['user', 'tagtype', 'tag', 'bookmark', 'worktype', 'work', 'bookmarklink', 
-				'bookmarkcomment', 'userprofile', 'ourchivesetting']
+				'bookmarkcomment', 'ourchivesetting']
 
 	def test_get_bookmarks(self):
 		assert False

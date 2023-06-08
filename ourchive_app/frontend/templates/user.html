@@ -21,16 +21,16 @@
     </div>
 	<div class="uk-width-1 uk-align-center" id="user-profile-card-parent">
         <div class="uk-card uk-card-body" id="user-profile-card-body"> 
-            <img id="user-profile-icon" src="{{ user.userprofile.icon }}" class="uk-align-center uk-height-max-small" style="border-radius: 50%"/> 
+            <img id="user-profile-icon" src="{{ user.icon }}" class="uk-align-center uk-height-max-small" style="border-radius: 50%"/> 
             <h1 id="user-profile-username-h1" class="uk-heading-line uk-text-center"> <span id="user-profile-username-span">{{ user.username }}</span> </h1> 
         </div>
-        {% if user.userprofile.profile %}
+        {% if user.profile %}
             <div class="uk-card uk-card-body uk-align-center" id="user-profile-text-parent">
                 <h2 id="user-profile-text-h2"> Profile </h2>
-                <span id="user-profile-text-span">{% autoescape off %} {{ user.userprofile.profile }} {% endautoescape %}</span> 
+                <span id="user-profile-text-span">{% autoescape off %} {{ user.profile }} {% endautoescape %}</span> 
             </div>
         {% endif %}
-        <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.userprofile.default_content == 'Work' %}0{% else %}1{% endif %}" id="user_content_switcher_header">
+        <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.default_content == 'Work' %}0{% else %}1{% endif %}" id="user_content_switcher_header">
             <li><a href="#" id="user_works_selector">Works</a></li>
             <li><a href="#" id="user_bookmarks_selector">Bookmarks</a></li>
         </ul>
