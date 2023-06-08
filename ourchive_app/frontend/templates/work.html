@@ -1,68 +1,68 @@
 {% extends 'index.html' %}
 {% block content %}	
-<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left uk-width-expand" uk-grid>
-<article class="uk-article">
-    <div class="uk-child-width-2-1" uk-grid>
-            <div class="uk-width-3-4">
-                <h1 class="uk-article-title" style="display: inline;"><a class="uk-link-reset" href="/works/{{ id }}">{{ work.title }}</a></h1> <span class="uk-text-large" style="padding-left: 10px;">by <a href="/username/{{ work.user }}">{{ work.user }}</a></span>
+<div id="work-parent-grid" class="uk-child-width-1@m uk-child-width-1@s uk-text-left uk-width-expand" uk-grid>
+<article id="work-article" class="uk-article">
+    <div id="work-article-grid" class="uk-child-width-2-1" uk-grid>
+            <div class="uk-width-3-4" id="work-header-parent">
+                <h1 id="work-title-h1" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="work-title-link" href="/works/{{ id }}">{{ work.title }}</a></h1> <span id="work-user-span" class="uk-text-large" style="padding-left: 10px;">by <a id="work-user-link" href="/username/{{ work.user }}">{{ work.user }}</a></span>
                 {% if work.draft %}
-                <div class="uk-width-auto">
-                    <span class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+                <div class="uk-width-auto" id="work-draft-div">
+                    <span id="work-draft-span" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
                 </div>
                 {% endif %}
             </div>
-            <div class="uk-text-right uk-width-1-4">
+            <div id="work-controls-parent" class="uk-text-right uk-width-1-4">
                 {% if work.user == request.user.username %}
-                <a href="/works/{{ id }}/publish-full"><span uk-icon="icon: world" title="Publish All"></span> </a>
+                <a id="work-publish-all-link" href="/works/{{ id }}/publish-full"><span uk-icon="icon: world" id="work-publish-all-span" title="Publish All"></span> </a>
                 {% if work.draft %}
-                <a href="/works/{{ id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+                <a id="work-publish-link" href="/works/{{ id }}/publish"><span uk-icon="icon: check" id="work-publish-span" title="Publish"></span> </a>
                 {% endif %}
-                <a href="/works/{{ id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
-                <a uk-toggle="target: #work-{{work.id}}-modal-delete"><span uk-icon="icon: trash" title="Delete"></span> </a>
+                <a id="work-edit-link" href="/works/{{ id }}/edit"><span uk-icon="icon: file-edit" id="work-edit-span" title="Edit"></span> </a>
+                <a id="work-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span id="work-delete-span" uk-icon="icon: trash" title="Delete"></span> </a>
                 {% include "delete_modal.html" with object='work' object_id=work.id %}
                 {% endif %}
                 {% if view_full %}
-                <a href="/works/{{ id }}/"><span uk-icon="icon: minus-circle" title="View By Chapter"></span> </a>
+                <a id="work-view-by-chapter-link" href="/works/{{ id }}/"><span id="work-view-by-chapter-span" uk-icon="icon: minus-circle" title="View By Chapter"></span> </a>
                 {% else %}
-                <a href="/works/{{ id }}/?view_full=true"><span uk-icon="icon: plus-circle" title="View All Chapters"></span> </a>
+                <a id="work-view-all-link" href="/works/{{ id }}/?view_full=true"><span uk-icon="icon: plus-circle" id="work-view-all-span" title="View All Chapters"></span> </a>
                 {% endif %}
-                <a href="/bookmarks/new/{{ id }}"><span uk-icon="icon: bookmark" title="Bookmark"></span> </a>
-                <a href="/fingerguns/{{ id }}"><span uk-icon="icon: bolt" title="Add Fingerguns"></span> </a>
+                <a id="work-bookmark-link" href="/bookmarks/new/{{ id }}"><span uk-icon="icon: bookmark" id="work-bookmark-span" title="Bookmark"></span> </a>
+                <a id="work-fingerguns-link" href="/fingerguns/{{ id }}"><span uk-icon="icon: bolt" id="work-fingerguns-span" title="Add Fingerguns"></span> </a>
             </div>
             {% if work.cover_url %}
-                <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
-                    <div><img src="{{work.cover_url}}"/></div>
+                <div id="work-cover-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
+                    <div id="work-cover-child-div"><img id="work-cover-img" src="{{work.cover_url}}"/></div>
                 </div>
             {% endif %}
-            <div class="uk-width-1-1 uk-margin-small-top">
-                <hr/>
+            <div id="work-top-hr-div" class="uk-width-1-1 uk-margin-small-top">
+                <hr id="work-top-hr"/>
             </div>
     </div>
-    <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
-        <div><span class="uk-text-large">Summary</span></div>
-        <div><span class="uk-text-medium">{% autoescape off %}{{ work.summary|default_if_none:'' }}{% endautoescape %}</span></div>
-        <div class="uk-text-right">
-            <p class="uk-article-meta"><span class="uk-inline uk-text-bold">{{ work.fingerguns }} Fingerguns</span> | <span class="uk-inline uk-text-bold">{{ work.word_count }} Words</span> | <span class="uk-inline uk-text-bold">{{ work.comment_count }} Comments</p>
+    <div id="work-intro-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
+        <div id="work-summary-div"><span id="work-summary-span" class="uk-text-large">Summary</span></div>
+        <div id="work-summary-text-div"><span id="work-summary-text-span" class="uk-text-medium">{% autoescape off %}{{ work.summary|default_if_none:'' }}{% endautoescape %}</span></div>
+        <div class="uk-text-right" id="work-metadata-parent">
+            <p id="work-metadata-p" class="uk-article-meta"><span id="work-metadata-fingerguns" class="uk-inline uk-text-bold">{{ work.fingerguns }} Fingerguns</span> | <span class="uk-inline uk-text-bold" id="work-metadata-word-count">{{ work.word_count }} Words</span> | <span id="work-metadata-comment-count" class="uk-inline uk-text-bold">{{ work.comment_count }} Comments</p>
         </div>
         {% if work.notes %} 
-            <div class="uk-margin-top"><hr id="summary-notes-divider-hr"/></div>
-            <div><span class="uk-text-large">Notes</span></div>
-            <div><span class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></div>
+            <div id="summary-notes-divider-div" class="uk-margin-top"><hr id="summary-notes-divider-hr"/></div>
+            <div id="work-notes-div"><span id="work-notes-span" class="uk-text-large">Notes</span></div>
+            <div id="work-notes-text-div"><span id="work-notes-text-span" class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></div>
         {% endif %}
         {% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}
     </div>
     {% if work.notes and tags.items %}
         <div class="uk-margin-top"><hr id="tag-notes-divider-hr"/></div>
     {% endif %}
-    <dl class="uk-description-list">
+    <dl class="uk-description-list" id="work-tags-dl">
     {% for type, tag in tags.items %} 
-        <dt>{{ type }}</dt>
-        <dd>
-        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.display_text|default_if_none:single_tag.text }}</a> {% endfor %}
+        <dt id="work-tag-{{type}}-dt">{{ type }}</dt>
+        <dd id="work-tag-{{type}}-dd">
+        <span id="work-tag-{{type}}-span" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="work-tag-{{type}}-{{single_tag.id}}-link" href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.display_text|default_if_none:single_tag.text }}</a> {% endfor %}
         </dd>
     {% endfor %}
     </dl>
-    <hr class="uk-divider-icon"/>
+    <hr class="uk-divider-icon" id="work-chapter-hr"/>
     {% if chapter %} 
         {% include "chapter.html" %}  
     {% elif chapters %}
