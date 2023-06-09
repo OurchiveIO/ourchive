@@ -31,3 +31,14 @@
     allow_on_chapter: false
     allow_on_user: false
     allow_multiselect: true
+- model: api.attributetype
+  pk: 4
+  fields:
+    uid: 01149db5-347d-4612-96a5-9359a09b8c95
+    name: creates
+    display_name: Creates
+    allow_on_work: false
+    allow_on_bookmark: false
+    allow_on_chapter: false
+    allow_on_user: true
+    allow_multiselect: true

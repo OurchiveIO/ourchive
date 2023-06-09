@@ -47,3 +47,31 @@
     name: anti-rec
     display_name: Anti-Rec
     attribute_type: 3
+- model: api.attributevalue
+  pk: 8
+  fields:
+    uid: ab29f8fe-d6f5-4fb0-ab24-f729250ddb03
+    name: fic
+    display_name: Fic
+    attribute_type: 4
+- model: api.attributevalue
+  pk: 9
+  fields:
+    uid: 3629ffa4-8771-40cf-bb04-2077656edf3e
+    name: podfic
+    display_name: Podfic
+    attribute_type: 4
+- model: api.attributevalue
+  pk: 10
+  fields:
+    uid: 2893a996-4712-4986-9835-7d191c10fbeb
+    name: recs
+    display_name: Recs
+    attribute_type: 4
+- model: api.attributevalue
+  pk: 11
+  fields:
+    uid: 5f17183c-38d1-4e10-af54-23526ff47b73
+    name: trouble
+    display_name: Trouble
+    attribute_type: 4
