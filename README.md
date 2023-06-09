@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/c-e-p/ourchive.svg?branch=travis-ci)](https://travis-ci.org/c-e-p/ourchive)
+[![Deploy Dev App](https://github.com/c-e-p/ourchive/actions/workflows/deploy_dev_app.yml/badge.svg)](https://github.com/c-e-p/ourchive/actions/workflows/deploy_dev_app.yml)
 
 # ourchive
 
