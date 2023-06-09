@@ -22,6 +22,12 @@ class User(AbstractUser):
     default_search_language = models.CharField(max_length=10, blank=True, null=True)
     default_editor = models.CharField(max_length=10, blank=True, null=True)
     attributes = models.ManyToManyField('AttributeValue')
+    display_username = models.CharField(max_length=150, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.display_username = self.username
+        self.username = self.username.lower()
+        super(User, self).save(*args, **kwargs)
 
 
 class Work(models.Model):

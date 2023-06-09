@@ -764,7 +764,7 @@ def delete_bookmark(request, bookmark_id):
 
 def log_in(request):
 	if request.method == 'POST':
-		user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
+		user = authenticate(username=request.POST.get('username').lower(), password=request.POST.get('password'))
 		if user is not None:
 			login(request, user)
 			messages.add_message(request, messages.SUCCESS, 'Login successful.')

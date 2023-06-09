@@ -8,11 +8,6 @@
 			<div class="uk-width-1-2" id="edit-account-header-child">
             	<span id="edit-account-header-span" class="uk-text-large">Edit Account Information</span>
         	</div>
-	        <div class="uk-text-right uk-width-1-2" id="edit-account-controls-parent">
-	        	<input id="edit-account-cancel-button" class="uk-button uk-width-small uk-button-danger" onclick="history.back()" value="Cancel" />
-            	<button id="edit-account-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
-	            <input id="edit-account-submit-button" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
-	        </div>
 	    </div>
     <hr id="edit-account-hr"/>
 	<fieldset id="edit-account-fieldset" class="uk-fieldset" >
@@ -33,9 +28,16 @@
 			        </div>
 			    </div>
 		    </div>
-        </div>        
+		    <div class="uk-width-1-3 uk-margin-medium-top" id="edit-account-controls-parent">
+				<input id="edit-account-cancel-button" class="uk-button uk-width-small uk-button-danger" onclick="history.back()" value="Cancel" />
+				<button id="edit-account-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
+			    <input id="edit-account-submit-button" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
+			</div> 
+        </div>     
     </fieldset>
 	</form>
+	<hr id="destructive-account-actions-divider"/>
 	<a class="uk-link uk-alert-warning uk-button" href="/users/{{user.username}}/delete"><span class="uk-text-medium">I want to delete my account</span></a>
+	<a class="uk-link uk-alert-primary uk-button" href="{% url 'password_change' %}"><span class="uk-text-medium">I want to change my password</span></a>
 </div>
 {% endblock %}

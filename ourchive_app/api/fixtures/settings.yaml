@@ -34,6 +34,12 @@
     name: Invite Queue Limit
     value: 10
     grouping: General
+- model: api.ourchivesetting
+  pk: 7
+  fields:
+    name: Default Icon URL
+    value: "/static/icon-default.png"
+    grouping: General
 - model: api.notificationtype
   pk: 1
   fields:

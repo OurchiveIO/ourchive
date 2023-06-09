@@ -9,6 +9,7 @@ from api.models import Work, Tag, Chapter, TagType, WorkType, \
     Invitation, AttributeType, AttributeValue, User
 import datetime
 import logging
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -89,11 +90,22 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                 invitation.save()
             else:
                 raise serializers.ValidationError("Invite token has expired.")
+        if 'icon' not in validated_data:
+            icon_alt_text = "Default icon"
+            icon = OurchiveSetting.objects.filter(name='Default Icon URL').first()
+            if icon is not None:
+                icon = f"{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{settings.STATIC_URL}{icon.value}"
+            else:
+                icon = ''
+        else:
+            icon_alt_text = validated_data['icon_alt_text'] if 'icon_alt_text' in validated_data else ''
+            icon = validated_data['icon']
         user = User.objects.create(
             username=validated_data['username'],
-            email=validated_data['email']
+            email=validated_data['email'],
+            icon=icon,
+            icon_alt_text=icon_alt_text
         )
-
         user.set_password(validated_data['password'])
         user.save()
         return user
