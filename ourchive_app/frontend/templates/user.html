@@ -21,7 +21,7 @@
     </div>
 	<div class="uk-width-1 uk-align-center" id="user-profile-card-parent">
         <div class="uk-card uk-card-body" id="user-profile-card-body"> 
-            <img id="user-profile-icon" src="{{ user.icon }}" class="uk-align-center uk-height-max-small" style="border-radius: 50%"/> 
+            {% if user.icon and user.icon != "None" %} <img id="user-profile-icon" src="{{ user.icon }}" class="uk-align-center uk-height-max-small" style="border-radius: 50%"/> {% endif %}
             <h1 id="user-profile-username-h1" class="uk-heading-line uk-text-center"> <span id="user-profile-username-span">{{ user.username }}</span> </h1> 
         </div>
         {% if user.profile %}

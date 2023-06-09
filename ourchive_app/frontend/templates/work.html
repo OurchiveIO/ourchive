@@ -29,7 +29,7 @@
                 <a id="work-bookmark-link" href="/bookmarks/new/{{ id }}"><span uk-icon="icon: bookmark" id="work-bookmark-span" title="Bookmark"></span> </a>
                 <a id="work-fingerguns-link" href="/fingerguns/{{ id }}"><span uk-icon="icon: bolt" id="work-fingerguns-span" title="Add Fingerguns"></span> </a>
             </div>
-            {% if work.cover_url %}
+            {% if work.cover_url and work.cover_url != "None" %}
                 <div id="work-cover-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
                     <div id="work-cover-child-div"><img id="work-cover-img" src="{{work.cover_url}}"/></div>
                 </div>

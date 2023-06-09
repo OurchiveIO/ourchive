@@ -6,9 +6,11 @@ import uuid
 import os
 import pathlib
 import audioread
+from api.models import OurchiveSetting
 
 
 logger = logging.getLogger(__name__)
+audio_processing = (OurchiveSetting.objects.filter(name='Audio Processing').first().value is not None and OurchiveSetting.objects.filter(name='Audio Processing').first().value == 'True')
 
 
 class FileHelperService:
@@ -30,9 +32,13 @@ class FileCommon:
         return uuid_str + '_' + original_name + suffix
 
     def calculate_audio_duration(self, filename):
-        with audioread.audio_open(filename) as f:
-            # TODO: move processing to celery/bg task
-            print(f.duration)
+        if audio_processing:
+            try:
+                with audioread.audio_open(filename) as f:
+                    # TODO: move processing to celery/bg task
+                    print(f.duration)
+            except audioread.DecodeError:
+                logging.error(f"File could not be decoded: {filename}")
 
 
 class LocalFileHelper:

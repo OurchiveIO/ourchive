@@ -404,6 +404,9 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
             attributes = validated_data.pop('attributes')
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
         chapter = Chapter.objects.filter(id=chapter.id)
+        if 'audio_url' in validated_data:
+            if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
+                validated_data['audio_url'] = ''
         chapter.update(**validated_data)
         self.update_word_count(chapter.first())
         return chapter.first()
@@ -414,6 +417,9 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
+        if 'audio_url' in validated_data:
+            if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
+                validated_data['audio_url'] = ''
         chapter = Chapter.objects.create(**validated_data)
         self.update_word_count(chapter)
         if attributes is not None:
@@ -478,6 +484,9 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
         work = self.update_word_count(work)
         validated_data['word_count'] = work.word_count
+        if 'cover_url' in validated_data:
+            if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
+                validated_data['cover_url'] = ''
         Work.objects.filter(id=work.id).update(**validated_data)
         return Work.objects.filter(id=work.id).first()
 
@@ -486,6 +495,9 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
+        if 'cover_url' in validated_data:
+            if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
+                validated_data['cover_url'] = ''
         work = Work.objects.create(**validated_data)
         work = self.process_tags(work, validated_data, tags)
         if attributes is not None:
