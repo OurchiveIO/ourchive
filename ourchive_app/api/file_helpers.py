@@ -10,7 +10,7 @@ from api.models import OurchiveSetting
 
 
 logger = logging.getLogger(__name__)
-audio_processing = (OurchiveSetting.objects.filter(name='Audio Processing').first().value is not None and OurchiveSetting.objects.filter(name='Audio Processing').first().value == 'True')
+audio_processing = (OurchiveSetting.objects.filter(name='Audio Processing').first() is not None and OurchiveSetting.objects.filter(name='Audio Processing').first().value == 'True')
 
 
 class FileHelperService:
