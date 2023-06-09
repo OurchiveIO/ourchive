@@ -100,6 +100,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         else:
             icon_alt_text = validated_data['icon_alt_text'] if 'icon_alt_text' in validated_data else ''
             icon = validated_data['icon']
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -108,11 +110,16 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         )
         user.set_password(validated_data['password'])
         user.save()
+        if attributes is not None:
+            user = AttributeValueSerializer.process_attributes(user, validated_data, attributes)
         return user
 
     def update(self, user, validated_data):
         validated_data['password'] = User.objects.filter(
             id=user.id).first().password
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+            user = AttributeValueSerializer.process_attributes(user, validated_data, attributes)
         User.objects.filter(id=user.id).update(**validated_data)
         return user
 
@@ -466,7 +473,6 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, work, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
         work = self.process_tags(work, validated_data, tags)
-        print(validated_data)
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)

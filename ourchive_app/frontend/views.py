@@ -133,6 +133,8 @@ def user_name(request, username):
 		bookmark_next = f'/username/{username}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
 		bookmark_previous = f'/username/{username}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
 		bookmarks = get_object_tags(bookmarks)
+		user = user['results'][0]
+		user['attributes'] = get_attributes_for_display(user['attributes'])
 		return render(request, 'user.html', {
 			'bookmarks': bookmarks,
 			'bookmarks_next': bookmark_next,
@@ -143,7 +145,7 @@ def user_name(request, username):
 			'anchor': anchor,
 			'works_next': work_next,
 			'works_previous': work_previous,
-			'user': user['results'][0]
+			'user': user
 		})
 	else:
 		messages.add_message(request, messages.ERROR, 'User not found.')
@@ -231,10 +233,12 @@ def edit_account(request, username):
 def edit_user(request, username):
 	if request.method == 'POST':
 		user_data = request.POST.copy()
+		print(user_data)
 		if user_data['icon'] == "":
 			user_data['icon'] = user_data['unaltered_icon']
 		user_data.pop('unaltered_icon')
 		user_id = user_data.pop('user_id')[0]
+		user_data["attributes"] = get_attributes_from_form_data(request)
 		response = do_patch(f'api/users/{user_id}/', request, data=user_data)
 		if response[1] == 200 or response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'User profile updated.')
@@ -251,6 +255,8 @@ def edit_user(request, username):
 				user = user[0]
 				if user is not None:
 					user['profile'] = sanitize_rich_text(user['profile'])
+				user_attributes = do_get(f'api/attributetypes', request, params={'allow_on_user': True})
+				user['attribute_types'] = process_attributes(user['attributes'], user_attributes[0]['results'])
 				return render(request, 'user_form.html', {'user': user})
 			else:
 				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.')

@@ -92,6 +92,10 @@
                 </div>
             </div>
         </div>
+        {% if user.attribute_types %}
+            <hr id="chapter-attributes-hr"/>
+            {% include "object_attributes_form.html" with object='User' attribute_types=user.attribute_types %}
+        {% endif %}
     </fieldset>
 	</form>
 </div>

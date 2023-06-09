@@ -141,6 +141,14 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     permission_classes = [RegistrationPermitted]
 
+    def perform_create(self, serializer):
+        if 'attributes' in self.request.data:
+            serializer.save(attributes=self.request.data['attributes'])
+
+    def perform_update(self, serializer):
+        if 'attributes' in self.request.data:
+            serializer.save(attributes=self.request.data['attributes'])
+
 
 class UserWorkList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer
