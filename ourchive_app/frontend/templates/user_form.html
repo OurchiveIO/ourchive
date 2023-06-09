@@ -30,7 +30,7 @@
             <div class="uk-form-controls" id="user-icon-controls">
                 <div class="uk-inline" id="user-icon-inline">
                 	<img id="user-icon-img" src="{{ user.icon }}" style="border-radius: 50%; max-height: 50px; max-width: 50px;"/>
-					{% include 'file_upload.html' with object='user-icon' replace_selector='user-icon-img' object_type='img' %}
+					{% include 'file_upload.html' with object='icon' replace_selector='user-icon-img' object_type='img' upload_placeholder='Upload new icon' original_value=work.cover_url %}
                 </div>
             </div>
         </div>

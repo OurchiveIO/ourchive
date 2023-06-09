@@ -3,7 +3,6 @@ from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
-from .file_helpers import FileHelperService
 from django.http import HttpResponse
 from .search_models import SearchObject
 from html import escape
@@ -494,26 +493,17 @@ def new_chapter(request, work_id):
 
 def edit_chapter(request, work_id, id):
 	if request.method == 'POST':
-		if 'files[]' in request.FILES:
-			service = FileHelperService.get_service()
-			if service is not None:
-				final_url = service.handle_uploaded_file(request.FILES['files[]'], request.FILES['files[]'].name, request.user.username)
-				return HttpResponse(final_url)
-			else:
-				messages.add_message(request, messages.ERROR, 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.')
-				return HttpResponse('')
+		chapter_dict = request.POST.copy()
+		chapter_dict["draft"] = "draft" in chapter_dict
+		chapter_dict["attributes"] = get_attributes_from_form_data(request)
+		response = do_patch(f'api/chapters/{id}/', request, data=chapter_dict)
+		if response[1] == 200:
+			messages.add_message(request, messages.SUCCESS, 'Chapter updated.')
+		elif response[1] == 403:
+			messages.add_message(request, messages.ERROR, 'You are not authorized to update this chapter.')
 		else:
-			chapter_dict = request.POST.copy()
-			chapter_dict["draft"] = "draft" in chapter_dict
-			chapter_dict["attributes"] = get_attributes_from_form_data(request)
-			response = do_patch(f'api/chapters/{id}/', request, data=chapter_dict)
-			if response[1] == 200:
-				messages.add_message(request, messages.SUCCESS, 'Chapter updated.')
-			elif response[1] == 403:
-				messages.add_message(request, messages.ERROR, 'You are not authorized to update this chapter.')
-			else:
-				messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
-			return redirect(f'/works/{work_id}/edit/?show_chapter=true')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
+		return redirect(f'/works/{work_id}/edit/?show_chapter=true')
 	else:
 		if request.user.is_authenticated:
 			chapter = do_get(f'api/chapters/{id}', request)[0]
@@ -531,14 +521,6 @@ def edit_chapter(request, work_id, id):
 
 def edit_work(request, id):
 	if request.method == 'POST':
-		if 'files[]' in request.FILES:
-			service = FileHelperService.get_service()
-			if service is not None:
-				final_url = service.handle_uploaded_file(request.FILES['files[]'], request.FILES['files[]'].name, request.user.username)
-				return HttpResponse(final_url)
-			else:
-				messages.add_message(request, messages.ERROR, 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.')
-				return HttpResponse('')
 		work_dict = request.POST.copy()
 		tags = []
 		tag_types = {}
@@ -571,7 +553,7 @@ def edit_work(request, id):
 		response = do_patch(f'api/works/{id}/', request, data=work_dict)
 		if response[1] == 200:
 			for chapter in chapters:
-				response = do_put(f'api/chapters/{chapter["id"]}/draft', request, data=chapter)
+				response = do_patch(f'api/chapters/{chapter["id"]}/draft', request, data=chapter)
 			messages.add_message(request, messages.SUCCESS, 'Work updated.')
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to update this work.')
@@ -1178,16 +1160,3 @@ def works_by_tag_next(request, tag_id):
 def switch_css_mode(request):
 	request.session['css_mode'] = "dark" if request.session.get('css_mode') == "light" or request.session.get('css_mode') is None else "light"
 	return referrer_redirect(request)
-
-
-def upload_file(request):
-	if request.method == 'POST':
-		# todo
-		# send fic uuid + chapter id
-		# directory structure: media/uuid/chapter_id/files
-		# save file, return location
-		# location client-side in audio_url variable
-		service = FileHelperService.get_service()
-		service.handle_uploaded_file(request.FILES['files[]'], request.FILES['files[]'].name)
-		return redirect('/')
-	return render(request, 'upload.html')
