@@ -84,7 +84,7 @@ class FileUpload(APIView):
                 final_url = service.handle_uploaded_file(request.FILES['files[]'], request.FILES['files[]'].name, request.user.username)
                 return Response({'final_url': final_url})
             else:
-                return Response({'results': 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.'}, status=400)
+                return Response({'final_url': 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.'}, status=400)
 
 
 class Invitations(APIView):

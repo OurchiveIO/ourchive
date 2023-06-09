@@ -2153,11 +2153,11 @@ select.uk-form-width-xsmall {
  *    https://bugzilla.mozilla.org/show_bug.cgi?id=662351
  */
 .uk-progress::-webkit-progress-value {
-  background-color: #55112D;
+  background-color: #FFF;
   transition: width 0.6s ease; }
 
 .uk-progress::-moz-progress-bar {
-  background-color: #55112D;
+  background-color: #FFF;
   /* 1 */
   transition: width 0.6s ease; }
 
