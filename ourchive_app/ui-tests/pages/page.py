@@ -1,3 +1,4 @@
+from logging import Logger
 from pages import locators, element
 from pages.locators import MainPageLocators, MainPageLoginLocators
 from selenium.webdriver.common.by import By
@@ -57,7 +58,7 @@ class MainPageLogin(BasePage):
         submit_button = self.driver.find_element(MainPageLoginLocators.LOGIN_SUBMIT_BUTTON[0], MainPageLoginLocators.LOGIN_SUBMIT_BUTTON[1])
 
 
-        self.take_screenshot(self.validate_page_load.__name__)
+        self.take_screenshot('./output/{!s}'.format(self.validate_page_load.__name__))
 
         assert username_input.is_displayed() is True, f"Expected Username Input Field is_displayed = True, however was: {username_input.is_displayed()}"
         assert username_input.is_enabled() is True, f"Expected Username Input Field is_enabled  = True, however was:  {username_input.is_enabled()}"
@@ -76,7 +77,6 @@ class MainPageLogin(BasePage):
         
         username_input = self.driver.find_element(MainPageLoginLocators.LOGIN_USERNAME_INPUT[0], MainPageLoginLocators.LOGIN_USERNAME_INPUT[1])
         password_input = self.driver.find_element(MainPageLoginLocators.LOGIN_PASSWORD_INPUT[0], MainPageLoginLocators.LOGIN_PASSWORD_INPUT[1])
-        submit_button = self.driver.find_element(MainPageLoginLocators.LOGIN_SUBMIT_BUTTON[0], MainPageLoginLocators.LOGIN_SUBMIT_BUTTON[1])
 
 
         actions = ActionChains(self.driver)
@@ -85,7 +85,28 @@ class MainPageLogin(BasePage):
         actions.send_keys(username)
         actions.perform()
 
-        self.take_screenshot(self.fill_login_form.__name__)
-        username_input = self.driver.find_element(MainPageLoginLocators.LOGIN_USERNAME_INPUT[0], MainPageLoginLocators.LOGIN_USERNAME_INPUT[1])
-        
+        self.take_screenshot('./output/{!s}-username'.format(self.fill_login_form.__name__))
+
+        actions2 = ActionChains(self.driver)
+        actions2.move_to_element(password_input)
+        actions2.click(password_input)
+        actions2.send_keys(password)
+        actions2.perform()
+
+        self.take_screenshot('./output/{!s}-password'.format(self.fill_login_form.__name__))
+
+    def submit_login_form(self):
+        submit_button = self.driver.find_element(MainPageLoginLocators.LOGIN_SUBMIT_BUTTON[0], MainPageLoginLocators.LOGIN_SUBMIT_BUTTON[1])
+
+        self.take_screenshot('./output/{!s}-presubmit'.format(self.submit_login_form.__name__))
+
+        actions = ActionChains(self.driver)
+        actions.move_to_element(submit_button)
+        actions.click(submit_button)
+        actions.perform()
+
+        self.take_screenshot('./output/{!s}-post'.format(self.submit_login_form.__name__))
+
+
+
 
