@@ -594,6 +594,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.HyperlinkedIdentityField(
         view_name='bookmarkcollection-detail', read_only=True)
     tags = TagSerializer(many=True, required=False)
+    bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), many=True, required=False)
 
     class Meta:
         model = BookmarkCollection
@@ -614,17 +615,21 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         return BookmarkCollection.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
-        bookmark = BookmarkCollection.objects.create(**validated_data)
+        bookmark_list = validated_data.pop('bookmarks')
+        tags = None
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
-            for item in tags:
-                tag_id = item['text']
-                tag_type = item['tag_type_id']
-                tag, created = Tag.objects.get_or_create(
-                    text=tag_id, tag_type=tag_type)
-                bookmark.tags.add(tag)
-        bookmark.save()
-        return bookmark
+        bookmark_collection = BookmarkCollection.objects.create(**validated_data)
+        for item in tags:
+            tag_id = item['text']
+            tag_type = item['tag_type_id']
+            tag, created = Tag.objects.get_or_create(
+                text=tag_id, tag_type=tag_type)
+            bookmark_collection.tags.add(tag)
+        for bookmark in bookmark_list:
+            bookmark_collection.bookmarks.add(bookmark)
+        bookmark_collection.save()
+        return bookmark_collection
 
 
 class InvitationSerializer(serializers.HyperlinkedModelSerializer):

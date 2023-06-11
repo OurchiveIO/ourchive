@@ -1,10 +1,8 @@
-from django.shortcuts import render
 from django.contrib.auth.models import Group
-from rest_framework import viewsets, generics
-from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, SearchResultsSerializer, FingergunSerializer, UserBlocksSerializer
+from rest_framework import viewsets, generics, permissions
+from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, UserBlocksSerializer
 from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, AttributeValue
-from rest_framework import generics, permissions
-from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, IsUser, RegistrationPermitted
+from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
@@ -13,12 +11,12 @@ from rest_framework.parsers import JSONParser, MultiPartParser
 from .search.search_service import OurchiveSearch
 from .search.search_obj import GlobalSearch
 from django.db.models import Q
-import json
 import datetime
 from django.utils.crypto import get_random_string
 from django.conf import settings
 import html
 from .file_helpers import FileHelperService
+from django.core.exceptions import ObjectDoesNotExist
 
 
 @api_view(['GET'])
@@ -69,7 +67,8 @@ class TagAutocomplete(APIView):
 
     def get(self, request, format=None):
         searcher = OurchiveSearch()
-        results = searcher.do_tag_search(request.GET.get('term'), request.GET.get('type'), request.GET.get('fetch_all', False))
+        results = searcher.do_tag_search(request.GET.get(
+            'term'), request.GET.get('type'), request.GET.get('fetch_all', False))
         return Response({'results': results})
 
 
@@ -81,7 +80,8 @@ class FileUpload(APIView):
         if 'files[]' in request.FILES:
             service = FileHelperService.get_service()
             if service is not None:
-                final_url = service.handle_uploaded_file(request.FILES['files[]'], request.FILES['files[]'].name, request.user.username)
+                final_url = service.handle_uploaded_file(
+                    request.FILES['files[]'], request.FILES['files[]'].name, request.user.username)
                 return Response({'final_url': final_url})
             else:
                 return Response({'final_url': 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.'}, status=400)
@@ -93,7 +93,8 @@ class Invitations(APIView):
 
     def get(self, request):
         email_decoded = request.GET.get('email').replace('%40', '@').replace('+', '%2B')
-        invitation = Invitation.objects.filter(invite_token=request.GET.get('invite_token'), email=email_decoded).first()
+        invitation = Invitation.objects.filter(
+            invite_token=request.GET.get('invite_token'), email=email_decoded).first()
         if invitation:
             return Response({'invitation': invitation.invite_token}, status=200)
         else:
@@ -134,7 +135,8 @@ class UserList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         if 'invite_code' in self.request.data:
-            serializer.save(invite_code=self.request.data['invite_code'], email=self.request.data['email'])
+            serializer.save(
+                invite_code=self.request.data['invite_code'], email=self.request.data['email'])
         else:
             serializer.save(email=self.request.data['email'])
 
@@ -326,7 +328,8 @@ class TagList(generics.ListCreateAPIView):
         serializer.save(display_text=self.request.data['text'], user=self.request.user)
 
     def perform_update(self, serializer):
-        serializer.save(display_text=self.request.data['display_text'], user=self.request.user)
+        serializer.save(
+            display_text=self.request.data['display_text'], user=self.request.user)
 
 
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -338,7 +341,8 @@ class TagDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer.save(display_text=self.request.data['text'], user=self.request.user)
 
     def perform_update(self, serializer):
-        serializer.save(display_text=self.request.data['display_text'], user=self.request.user)
+        serializer.save(
+            display_text=self.request.data['display_text'], user=self.request.user)
 
 
 class ChapterList(generics.ListCreateAPIView):
@@ -409,7 +413,8 @@ class WorkDraftChapterDetail(generics.ListCreateAPIView):
 
 class ChapterCommentDetail(generics.ListCreateAPIView):
     serializer_class = ChapterCommentSerializer
-    permission_classes = [IsOwnerOrReadOnly, UserAllowsWorkComments, UserAllowsWorkAnonComments]
+    permission_classes = [IsOwnerOrReadOnly,
+                          UserAllowsWorkComments, UserAllowsWorkAnonComments]
 
     def get_queryset(self):
         return ChapterComment.objects.filter(chapter__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
@@ -421,6 +426,34 @@ class ChapterCommentDetail(generics.ListCreateAPIView):
 class BookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
+    # TODO: DRY
+    def get_star_count(self):
+        try:
+            if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
+                star_count = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
+            else:
+                star_count = 5
+        except ObjectDoesNotExist:
+            star_count = 5
+        return star_count
+
+    def list(self, request, *args, **kwargs):
+        response = super(BookmarkList, self).list(request, args, kwargs)
+        try:
+            if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
+                response.data['star_count'] = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
+            else:
+                response.data['star_count'] = [1,2,3,4,5]
+        except ObjectDoesNotExist:
+            response.data['star_count'] = [1,2,3,4,5]
+        return response
+
+    def create(self, request, *args, **kwargs):
+        response = super(BookmarkList, self).create(request, args, kwargs)
+        response.data['star_count'] = self.get_star_count()
+        print(response.data)
+        return response
 
     def get_queryset(self):
         return Bookmark.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
@@ -440,6 +473,21 @@ class BookmarkByTagList(generics.ListCreateAPIView):
 class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
+    def get_star_count(self):
+        try:
+            if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
+                star_count = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
+            else:
+                star_count = 5
+        except ObjectDoesNotExist:
+            star_count = 5
+        return star_count
+
+    def retrieve(self, request, *args, **kwargs):
+        response = super(BookmarkDetail, self).retrieve(request, args, kwargs)
+        response['star_count'] = self.get_star_count()
+        return response
 
     def get_queryset(self):
         return Bookmark.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
@@ -619,9 +667,11 @@ class AttributeTypeList(generics.ListCreateAPIView):
         if 'allow_on_work' in self.request.GET:
             queryset = queryset.filter(allow_on_work=self.request.GET['allow_on_work'])
         elif 'allow_on_bookmark' in self.request.GET:
-            queryset = queryset.filter(allow_on_bookmark=self.request.GET['allow_on_bookmark'])
+            queryset = queryset.filter(
+                allow_on_bookmark=self.request.GET['allow_on_bookmark'])
         elif 'allow_on_chapter' in self.request.GET:
-            queryset = queryset.filter(allow_on_chapter=self.request.GET['allow_on_chapter'])
+            queryset = queryset.filter(
+                allow_on_chapter=self.request.GET['allow_on_chapter'])
         elif 'allow_on_user' in self.request.GET:
             queryset = queryset.filter(allow_on_user=self.request.GET['allow_on_user'])
         else:

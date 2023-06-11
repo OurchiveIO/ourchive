@@ -93,9 +93,9 @@
                                 <div id="bookmark-form-rating-star-toggle" class="uk-animation-toggle uk-inline" tabindex="0">
                                     <div id="bookmark-form-rating-star-animation" class="uk-animation-fade">
                                         {% if stars <= bookmark.rating %}
-                                            <span id="bookmark-form-rating-star-filled" uk-icon="icon: star" onclick="colorStar({{stars}})" id="rating_{{stars}}" class="rating-star"></span>
+                                            <span uk-icon="icon: star" onclick="colorStar({{stars}})" id="rating_{{stars}}" class="rating-star"></span>
                                         {% else %}
-                                            <span id="bookmark-form-rating-star-empty" uk-icon="icon: star" onclick="colorStar({{stars}})" id="rating_{{stars}}"></span>
+                                            <span uk-icon="icon: star" onclick="colorStar({{stars}})" id="rating_{{stars}}"></span>
                                         {% endif %}
                                         
                                     </div>

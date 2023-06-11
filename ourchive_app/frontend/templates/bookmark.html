@@ -17,7 +17,7 @@
 	<article class="uk-article" id="bookmark-uk-article">
 	    <div class="uk-child-width-2-1" id="bookmark-uk-child-grid" uk-grid>
 	        <div class="uk-width-2-3" id="bookmark-title-parent">
-	            <h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bookmark.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large" style="padding-left: 10px;">by <a id="bookmark-user-link" href="/username/{{ bookmark.user }}">{{ bookmark.user }}</a></span>
+	            <h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bookmark.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large" style="padding-left: 10px;"> bookmarked by {{bookmark.user}}</span>
 	            {% if bookmark.draft %}
 	            <div id="bookmark-draft-badge" class="uk-width-auto">
 	                <span id="bookmark-draft-span" class="uk-label uk-label-warning"><strong id="bookmark-draft-text">DRAFT</strong></span>
@@ -35,7 +35,7 @@
 	            {% endif %}
 	        </div>
 	    <div class="uk-width-1" id="bookmark-work-link-parent">
-	    	<span id="bookmark-work-link-span" class="uk-text-medium">Work link: <a id="bookmark-work-link-id" class="uk-link-reset" href="/works/{{ work.id }}">{{ work.title }}</a></span>
+	    	<span id="bookmark-work-link-span" class="uk-text-medium">Work link: <a id="bookmark-work-link-id" class="uk-link-reset" href="/works/{{ work.id }}">{{ work.title }} by {{work.user}}</a></span>
 	    </div>
 	    <div class="uk-width-1" id="bookmark-rating-parent">
 	    	<p id="bookmark-description-hed" class="uk-text-medium"><span>{{bookmark.user}}'s rating:</span>
@@ -54,7 +54,7 @@
 	    </div>	 
 	    {% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}
 	    <div class="uk-width-1" id="bookmark-description-parent">
-	    	<p id="bookmark-description-hed" class="uk-text-medium"><span>{{bookmark.user}}'s description:</span>
+	    	<p id="bookmark-description-hed" class="uk-text-large"><span>{{bookmark.user}} says:</span>
 	    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>
 	    </div>	   
 	    <hr id="bookmark-tag-hr" class="uk-divider-small"/>

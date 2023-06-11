@@ -321,9 +321,11 @@ class BookmarkCollection(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
     is_complete = models.BooleanField(default=False)
-    cover_url = models.CharField(max_length=600, null=True, blank=True)
-    cover_alt_text = models.CharField(max_length=600, null=True, blank=True)
+    header_url = models.CharField(max_length=600, null=True, blank=True)
+    header_alt_text = models.CharField(max_length=600, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    public_notes = models.TextField(null=True, blank=True)
+    private_notes = models.TextField(null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     anon_comments_permitted = models.BooleanField(default=True)
@@ -359,8 +361,14 @@ class Bookmark(models.Model):
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
     comment_count = models.IntegerField(default=0)
+    public_notes = models.TextField(null=True, blank=True)
+    private_notes = models.TextField(null=True, blank=True)
 
-    collection = models.ForeignKey(BookmarkCollection, on_delete=models.CASCADE, null=True, blank=True)
+    collection = models.ForeignKey(
+        BookmarkCollection,
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='bookmarks')
 
     user = models.ForeignKey(
         User,
@@ -476,7 +484,7 @@ class OurchiveSetting(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     value = models.CharField(max_length=200)
-    grouping = models.CharField(max_length=200)
+    grouping = models.CharField(max_length=200, null=True, blank=True)
 
     def __repr__(self):
         return '<OurchiveSettings: {}>'.format(self.id)
@@ -557,6 +565,7 @@ class AttributeValue(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     display_name = models.CharField(max_length=200)
+    order = models.IntegerField(default=1)
 
     attribute_type = models.ForeignKey(
         'AttributeType',
@@ -568,7 +577,7 @@ class AttributeValue(models.Model):
         indexes = [
             models.Index(fields=['name']),
         ]
-        ordering = ('attribute_type__name','name')
+        ordering = ('attribute_type__name','order', 'name')
         constraints = [
             models.UniqueConstraint(Lower('name').desc(), name='unique_attributevalue_name')
         ]

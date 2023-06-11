@@ -3,11 +3,10 @@ from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
-from django.http import HttpResponse
 from .search_models import SearchObject
 from html import escape
 import logging
-from .api_utils import do_get, do_post, do_patch, do_delete, do_put, process_results
+from .api_utils import do_get, do_post, do_patch, do_delete, process_results
 
 logger = logging.getLogger(__name__)
 
@@ -691,7 +690,7 @@ def new_bookmark(request, work_id):
 			bookmark['attribute_types'] = process_attributes([], bookmark_attributes[0]['results'])
 			tags = group_tags(bookmark['tags'])
 			return render(request, 'bookmark_form.html', {
-				'tags': tags, 'rating_range': [1,2,3,4,5],
+				'tags': tags, 'rating_range': bookmark['star_count'],
 				'bookmark': bookmark})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark.')
@@ -747,7 +746,7 @@ def edit_bookmark(request, pk):
 			bookmark['attribute_types'] = process_attributes(bookmark['attributes'], bookmark_attributes[0]['results'])
 			tags = group_tags_for_edit(bookmark['tags'], tag_types) if 'tags' in bookmark else []
 			return render(request, 'bookmark_form.html', {
-				'rating_range': [1,2,3,4,5],
+				'rating_range': bookmark['star_count'],
 				'bookmark': bookmark,
 				'tags': tags})
 		else:
@@ -766,6 +765,26 @@ def delete_bookmark(request, bookmark_id):
 	if str(bookmark_id) in request.META.get('HTTP_REFERER'):
 		return redirect('/bookmarks')
 	return referrer_redirect(request)
+
+
+def bookmark_collections(request):
+	return redirect('/')
+
+
+def new_bookmark_collection(request):
+	return redirect('/')
+
+
+def edit_bookmark_collection(request, pk):
+	return redirect('/')
+
+
+def bookmark_collection(request, pk):
+	return redirect('/')
+
+
+def delete_bookmark_collection(request, pk):
+	return redirect('/')
 
 
 def log_in(request):
@@ -1108,7 +1127,7 @@ def bookmarks(request):
 		bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks,
-		'rating_range': [1,2,3,4,5],
+		'rating_range': bookmarks['star_count'],
 		'next': f"/bookmarks/{next_param}" if next_param is not None else None,
 		'previous': f"/bookmarks/{previous_param}" if previous_param is not None else None})
 
@@ -1140,7 +1159,7 @@ def bookmark(request, pk):
 		'scroll_comment_id': scroll_comment_id,
 		'expand_comments': expand_comments,
 		'user_can_comment': user_can_comment,
-		'rating_range': [1,2,3,4,5],
+		'rating_range': bookmark['star_count'],
 		'work': bookmark['work'] if 'work' in bookmark else {},
 		'comments': comments})
 
