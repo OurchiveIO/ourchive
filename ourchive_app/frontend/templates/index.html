@@ -29,7 +29,7 @@
 	
 	{% endif %}
 	<div class="ourchive-navbar" id="ourchive-navbar-parent">
-		<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small" uk-navbar id="uk-nav-parent">
+		<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small uk-padding-remove-vertical" uk-navbar id="uk-nav-parent">
 		    <div class="uk-navbar-left" id="uk-nav-left">
 		    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
 		        <ul class="uk-navbar-nav uk-visible@s">
@@ -118,7 +118,7 @@
 	</div>
 	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="arrow-up"></span></button>
 	<div class="uk-container uk-margin" id="content-block-parent">	
-		<div uk-grid id="parent-grid" id="content-block-parent-grid">
+		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true">
 			{% block content %}
 				<div class="uk-child-width-1-1" id="index-content-div">
 				        <h1 id="index-content-heading" class="uk-heading-medium">{{ heading_message }}</h1>
