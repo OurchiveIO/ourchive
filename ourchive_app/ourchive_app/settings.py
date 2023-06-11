@@ -41,7 +41,6 @@ API_PROTOCOL = 'http://' if DEBUG else 'https://'
 # Application definition
 
 INSTALLED_APPS = [
-    'api.apps.ApiConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,11 +51,14 @@ INSTALLED_APPS = [
     'frontend',
     'django.contrib.postgres',
     'corsheaders',
+    'anymail',
+    'api'
     #'background_task',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,9 +85,9 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ROOT_URLCONF = 'ourchive_app.urls'
 
-MEDIA_ROOT = '/home/imp/projects/ourchive/ourchive_app/files'
+MEDIA_ROOT = os.getenv('OURCHIVE_MEDIA_ROOT')
 
-MEDIA_URL = '/files/'
+MEDIA_URL = os.getenv('OURCHIVE_MEDIA_URL')
 
 FILE_PROCESSOR = 'local'
 
@@ -93,8 +95,17 @@ S3_BUCKET = 'ourchive_media'
 
 SEARCH_BACKEND = 'POSTGRES'
 
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = BASE_DIR+"/sent_emails"
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+    EMAIL_FILE_PATH = BASE_DIR+"/sent_emails"
+else:
+    ANYMAIL = {
+        "MAILGUN_API_KEY": os.getenv("OURCHIVE_MAILGUN_API_KEY"),
+        "MAILGUN_SENDER_DOMAIN": 'ourchive-mail.stopthatimp.net', 
+    }
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend" 
+    DEFAULT_FROM_EMAIL = "admin@ourchive-dev.stopthatimp.net"  
+    SERVER_EMAIL = "serveradmin@ourchive-dev.stopthatimp.net" 
 
 TEMPLATES = [
     {
@@ -151,6 +162,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'api.User'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -171,6 +184,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'api.custom_exception_handler.custom_exception_handler',
@@ -182,4 +196,32 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'api.custom_pagination.CustomPagination',
     'PAGE_SIZE': 10
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{name} {levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'ourchive.log',
+            'formatter': 'simple',
+        }
+    },
+    'loggers': {
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['file'],
+        },
+    },
 }

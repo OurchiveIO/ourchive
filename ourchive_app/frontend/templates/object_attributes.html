@@ -1,0 +1,7 @@
+<div id="{{object}}-attributes">
+	{% for attribute, attribute_values in attributes.items %}
+	    <span id="{{object}}-attribute-label" class="uk-text-large">{{attribute}}</span>
+        <p><span class="uk-text-medium" id="{{object}}-{{object_id}}-attribute-values">{{ attribute_values|join:", " }}</span>
+        </p>
+	{% endfor %}
+</div>

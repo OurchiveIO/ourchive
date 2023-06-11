@@ -1,9 +1,9 @@
 {% extends 'index.html' %}
 {% block content %}	
-<div class="uk-width-1-1">
+<div class="uk-width-1-1" id="works-list-parent">
 	{% if user_filter %}
-    	<div class="uk-margin">
-			<div class="uk-card"><h1 class="uk-heading-line uk-text-center"> <span id="user_works_header"> Works by {{ user_filter }}</span> </h1> 
+    	<div class="uk-margin" id="works-list-user-filter-parent">
+			<div id="works-list-user-card" class="uk-card"><h1 id="works-list-user-h1" class="uk-heading-line uk-text-center"> <span id="user_works_header"> Works by {{ user_filter }}</span> </h1> 
 			</div>
 		</div>
 	{% endif %}

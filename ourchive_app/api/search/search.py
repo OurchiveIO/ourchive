@@ -118,7 +118,6 @@ class PostgresProvider:
 		work_filters = self.build_filter_query(work_search.filter.work_type, work_search.filter.work_type_filter, work_filters)
 		# todo work type	
 		query = self.get_query(work_search.term, work_search.term_search_fields)
-		print(query)
 		resultset = None
 		if work_filters is not None and query is not None:
 			resultset = Work.objects.filter(work_filters).filter(query)
@@ -196,13 +195,27 @@ class PostgresProvider:
 			result_json.append(result_dict)
 		return result_json
 
+	def autocomplete_tags(self, term, tag_type, fetch_all=False):
+		results = []
+		resultset = None
+		term = term.lower()
+		if tag_type:
+			resultset = Tag.objects.filter(tag_type__label=tag_type).filter(text__contains=term)
+		else:
+			resultset = Tag.objects.filter(text__contains=term)
+		if resultset is None:
+			resultset = Tag.objects.filter(tag_type__label=tag_type) if fetch_all else []
+		for result in resultset:
+			results.append({"tag": result.text, "display_text": result.display_text, "id": result.id, "type": result.tag_type.label})
+		return results
+
 	def search_tags(self, **kwargs):
 		tag_search = TagSearch()
 		tag_search.from_dict(kwargs)
 		tag_filters = None
 		tag_filters = self.build_filter_query(tag_search.filter.tag_type, tag_search.filter.tag_type_filter, tag_filters)
 		tag_filters = self.build_filter_query(tag_search.filter.text, tag_search.filter.text_filter, tag_filters)
-		
+
 		query = self.get_query(tag_search.term, tag_search.term_search_fields)
 		resultset = None
 		if tag_filters is not None and query is not None:

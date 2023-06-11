@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/c-e-p/ourchive.svg?branch=travis-ci)](https://travis-ci.org/c-e-p/ourchive)
+[![Deploy Dev App](https://github.com/c-e-p/ourchive/actions/workflows/deploy_dev_app.yml/badge.svg)](https://github.com/c-e-p/ourchive/actions/workflows/deploy_dev_app.yml)
 
 # ourchive
 
@@ -61,6 +61,8 @@ Please see the [wiki](https://github.com/c-e-p/ourchive/wiki) for more on techni
 Please see [the code of conduct and diversity statement](codeofconduct.md).
 
 ## thanks
+
+We have used Unsplash free images for icon defaults.
 
 This app was instantiated in part from the [flask boilerplate](https://github.com/italomaia/flask-empty) project, as well as [react-flask](https://github.com/bonniee/react-flask). Additionally, all the frameworks and tools we are using are open source, including:
 

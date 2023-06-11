@@ -1,0 +1,30 @@
+{% extends 'index.html' %}
+{% block content %}	
+<div class="uk-width-1-1 uk-text-left" id="account-form-parent"> 
+	<form class="uk-form-horizontal"  method="post" id="delete-account-form" action="/users/{{user.username}}/delete">
+		{% csrf_token %}
+		<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="delete-account-header-parent" uk-grid>
+			<div class="uk-width-1-2" id="delete-account-header-child">
+            	<span id="delete-account-header-span" class="uk-text-large">Delete account</span>
+        	</div>
+	    </div>
+	<fieldset id="delete-account-fieldset" class="uk-fieldset" >
+		<span class="uk-text-medium">Are you sure you want to delete your account? This action is irrevocable and will remove all data associated with your account, including works, comments, and bookmarks.</span>
+        <div class="uk-margin" id="delete-account-password-confirm-parent">
+	    	<label id="delete-account-confirm-password-label" class="uk-form-label" for="form-horizontal-text">Confirm Password</label>
+	        <div id="delete-account-confirm-password-form-controls" class="uk-form-controls">
+		        <div id="delete-account-confirm-password-input-div" class="uk-inline">
+		            <span id="delete-account-confirm-password-span" class="uk-form-icon uk-form-icon" uk-icon="icon: lock"></span>
+		            <input id="delete-account-confirm-password-input" class="uk-input" type="password" name="password">
+		        </div>
+		    </div>
+	    </div>      
+    </fieldset>
+    <div class="uk-text-uk-width-1-2" id="delete-account-controls-parent">
+    	<input id="delete-account-cancel-button" class="uk-button uk-width-small uk-button-primary" onclick="history.back()" value="Cancel" />
+    	<button id="delete-account-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
+        <input id="delete-account-submit-button" class="uk-button uk-width-medium uk-button-danger" type="submit" value="Delete Account"/>
+    </div>
+	</form>
+</div>
+{% endblock %}

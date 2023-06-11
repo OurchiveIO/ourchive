@@ -1,0 +1,76 @@
+<div id="{{ object }}-upload-parent" class="js-upload-{{ object_type }} uk-placeholder uk-text-center">
+	<input id="{{ object }}-file-uk-input-original" class="uk-input uk-form-width-medium" type="text" placeholder="{{ upload_placeholder }}" value="{{ original_value }}" name="{{ object }}" hidden>
+    <span id="{{ object }}-upload-icon" uk-icon="icon: cloud-upload"></span>
+    <div id="{{ object }}-upload-form" uk-form-custom="target: true">
+        <input type="file" id="{{ object }}-file-input">
+        <input id="{{ object }}-file-uk-input" class="uk-input uk-form-width-medium" type="text" placeholder="{{ upload_placeholder }}" name="{{ object }}-upload">
+    </div>
+    <progress id="{{ object }}-progressbar-{{ object_type }}" class="uk-progress" value="0" max="100" hidden></progress>
+    <script>
+	    var bar = document.getElementById('{{ object }}-progressbar-{{ object_type }}');
+	    UIkit.upload('.js-upload-{{ object_type }}', {
+	        url: '{% url 'api-file-upload' %}',
+	        multiple: false,
+	        beforeSend: function () {
+	            function getCookie(name) {
+	                var cookieValue = null;
+	                if (document.cookie && document.cookie !== '') {
+	                    var cookies = document.cookie.split(';');
+	                    cookies.forEach(function (value) { 
+	                        var cookie = value.trim();
+	                        // Does this cookie string begin with the name we want?
+	                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+	                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                            return;
+	                        }
+	                    });
+	                }
+	                return cookieValue;
+	            }
+	            var csrftoken = getCookie('csrftoken');
+	            arguments[0]['headers']['X-CSRFToken'] = csrftoken;
+	        },
+	        beforeAll: function () {
+	        },
+	        load: function () {
+	        },
+	        error: function () {
+	        	var result = JSON.parse(arguments[0].xhr.response)['final_url'];
+	        	UIkit.notification(result, {pos: 'top-center', status: 'danger'});
+	        },
+	        complete: function () {
+	        },
+	        loadStart: function (e) {
+	            bar.removeAttribute('hidden');
+	            bar.max = e.total;
+	            bar.value = e.loaded;
+	        },
+
+	        progress: function (e) {
+	            bar.max = e.total;
+	            bar.value = e.loaded;
+	        },
+
+	        loadEnd: function (e) {
+	            bar.max = e.total;
+	            bar.value = e.loaded;
+	        },
+
+	        completeAll: function () {
+	            //console.log('completeAll', arguments);
+	            setTimeout(function () {
+	                bar.setAttribute('hidden', 'hidden');
+	            }, 1000);
+	            var result = JSON.parse(arguments[0]['response'])['final_url'];
+	            document.getElementById('{{ object }}-file-uk-input').value = result;
+	            document.getElementById('{{ object }}-file-uk-input-original').value = result;
+	            var replace_selector = '{{ replace_selector }}';
+	            {% if object_type == 'img' %}
+	            document.getElementById(replace_selector).src = result;
+	            {% else %}
+	            document.getElementById(replace_selector).style.visibility = "hidden";
+	            {% endif %}
+	        }
+	    });
+	</script>
+</div>

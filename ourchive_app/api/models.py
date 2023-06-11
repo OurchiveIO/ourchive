@@ -1,7 +1,33 @@
 from django.db import models
-import datetime
+from django.db.models.functions import Lower
 import uuid
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+
+
+class User(AbstractUser):
+    __tablename__ = 'user'
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    profile = models.TextField(null=True, blank=True)
+    icon = models.CharField(max_length=600, null=True, blank=True)
+    icon_alt_text = models.CharField(max_length=600, null=True, blank=True)
+    has_notifications = models.BooleanField(default=False)
+    default_content = models.TextField(null=True, blank=True)
+    attributes = models.ManyToManyField('AttributeValue')
+    can_upload_audio = models.BooleanField(default=False)
+    can_upload_images = models.BooleanField(default=False)
+    default_post_language = models.CharField(max_length=10, blank=True, null=True)
+    default_search_language = models.CharField(max_length=10, blank=True, null=True)
+    default_editor = models.CharField(max_length=10, blank=True, null=True)
+    attributes = models.ManyToManyField('AttributeValue')
+    display_username = models.CharField(max_length=150, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.display_username = self.username
+        self.username = self.username.lower()
+        super(User, self).save(*args, **kwargs)
 
 
 class Work(models.Model):
@@ -38,11 +64,14 @@ class Work(models.Model):
 
     tags = models.ManyToManyField('Tag')
 
+    attributes = models.ManyToManyField('AttributeValue')
+
     def __repr__(self):
         return '<Work: {}>'.format(self.id)
 
     def __str__(self):
         return self.title
+
 
 class UserBlocks(models.Model):
 
@@ -51,7 +80,7 @@ class UserBlocks(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE
@@ -68,6 +97,7 @@ class UserBlocks(models.Model):
 
     def __repr__(self):
         return '<UserBlocks: {}>'.format(self.uid)
+
 
 class Fingergun(models.Model):
 
@@ -91,6 +121,7 @@ class Fingergun(models.Model):
     def __str__(self):
         return self.title
 
+
 class WorkType(models.Model):
 
     __tablename__ = 'work_types'
@@ -104,28 +135,6 @@ class WorkType(models.Model):
     def __str__(self):
         return self.type_name
 
-class UserProfile(models.Model):
-
-    __tablename__ = 'userprofiles'
-    id = models.AutoField(primary_key=True)
-    uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
-    profile = models.TextField(null=True, blank=True)
-    icon = models.CharField(max_length=600, null=True, blank=True)
-    icon_alt_text = models.CharField(max_length=600, null=True, blank=True)
-    has_notifications = models.BooleanField(default=False)
-    default_content = models.TextField(null=True, blank=True)
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-    )
-
-    def __repr__(self):
-        return '<UserProfile: {}>'.format(self.id)
-
-    def __str__(self):
-        return str(self.id)
 
 class Chapter(models.Model):
 
@@ -153,7 +162,7 @@ class Chapter(models.Model):
     work = models.ForeignKey(
         'work',
         on_delete=models.CASCADE,
-         related_name='chapters'
+        related_name='chapters'
     )
 
     user = models.ForeignKey(
@@ -161,13 +170,17 @@ class Chapter(models.Model):
         on_delete=models.CASCADE,
     )
 
+    attributes = models.ManyToManyField('AttributeValue')
+
     def __repr__(self):
         return '<Chapter: {}>'.format(self.id)
 
     def __str__(self):
         return str(self.number) if self.title is None else self.title
+
     class Meta:
         ordering = ['number']
+
 
 class BookmarkComment(models.Model):
 
@@ -188,9 +201,9 @@ class BookmarkComment(models.Model):
     parent_comment = models.ForeignKey(
         'BookmarkComment',
         on_delete=models.CASCADE,
-         related_name='replies',
-         null=True,
-         blank=True
+        related_name='replies',
+        null=True,
+        blank=True
     )
 
     bookmark = models.ForeignKey(
@@ -203,8 +216,10 @@ class BookmarkComment(models.Model):
 
     def __repr__(self):
         return '<Comment: {}>'.format(self.id)
+
     def __str__(self):
         return self.text if self.text is not None else str(id)
+
 
 class ChapterComment(models.Model):
 
@@ -225,9 +240,9 @@ class ChapterComment(models.Model):
     parent_comment = models.ForeignKey(
         'ChapterComment',
         on_delete=models.CASCADE,
-         related_name='replies',
-         null=True,
-         blank=True
+        related_name='replies',
+        null=True,
+        blank=True
     )
 
     chapter = models.ForeignKey(
@@ -240,17 +255,28 @@ class ChapterComment(models.Model):
 
     def __repr__(self):
         return '<Comment: {}>'.format(self.id)
+
     def __str__(self):
         return self.text if self.text is not None else str(id)
+
 
 class Tag(models.Model):
 
     __tablename__ = 'tags'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    text = models.CharField(max_length=120)
+    text = models.CharField(max_length=120, db_index=True)
     display_text = models.CharField(max_length=120, default='')
-    
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['text']),
+        ]
+        ordering = ('tag_type__label',)
+        constraints = [
+            models.UniqueConstraint(Lower('text').desc(), 'tag_type_id', name='unique_text_and_type')
+        ]
+
     tag_type = models.ForeignKey(
         'TagType',
         on_delete=models.CASCADE,
@@ -258,22 +284,35 @@ class Tag(models.Model):
 
     def __repr__(self):
         return '<Tag: {}>'.format(self.id)
+
     def __str__(self):
         return self.text
+
+    def save(self, *args, **kwargs):
+        self.text = self.text.lower()
+        super(Tag, self).save(*args, **kwargs)
+
 
 class TagType(models.Model):
 
     __tablename__ = 'tag_types'
     id = models.AutoField(primary_key=True)
-    label = models.CharField(max_length=200)
+    label = models.CharField(max_length=200, db_index=True)
     admin_administrated = models.BooleanField(default=False)
     required = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['label']),
+        ]
+        ordering = ('label',)
 
     def __repr__(self):
         return '<TagType: {}>'.format(self.id)
 
     def __str__(self):
         return self.label
+
 
 class BookmarkCollection(models.Model):
 
@@ -289,7 +328,7 @@ class BookmarkCollection(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
-    
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -302,9 +341,9 @@ class BookmarkCollection(models.Model):
     def __str__(self):
         return self.title
 
-
     def __repr__(self):
         return '<BookmarkCollection: {}>'.format(self.id)
+
 
 class Bookmark(models.Model):
 
@@ -320,9 +359,9 @@ class Bookmark(models.Model):
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
     comment_count = models.IntegerField(default=0)
-    
+
     collection = models.ForeignKey(BookmarkCollection, on_delete=models.CASCADE, null=True, blank=True)
-    
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -337,10 +376,14 @@ class Bookmark(models.Model):
 
     tags = models.ManyToManyField('Tag')
 
+    attributes = models.ManyToManyField('AttributeValue')
+
     def __str__(self):
         return self.title
+
     def __repr__(self):
         return '<Bookmark: {}>'.format(self.id)
+
 
 class BookmarkLink(models.Model):
 
@@ -350,12 +393,10 @@ class BookmarkLink(models.Model):
     link = models.CharField(max_length=200)
     text = models.CharField(max_length=200)
 
-
     bookmark = models.ForeignKey(
         'Bookmark',
         on_delete=models.CASCADE,
     )
-
 
     def __repr__(self):
         return '<BookmarkLink: {}>'.format(self.id)
@@ -385,10 +426,11 @@ class Message(models.Model):
     replies = models.ManyToManyField('self')
 
     def __repr__(self):
-    	return '<Message: {}>'.format(self.id)
+        return '<Message: {}>'.format(self.id)
 
     def __str__(self):
         return self.subject
+
 
 class Notification(models.Model):
 
@@ -411,6 +453,7 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ('read',)
+
 
 class NotificationType(models.Model):
     __tablename__ = 'notification_types'
@@ -441,6 +484,7 @@ class OurchiveSetting(models.Model):
     def __str__(self):
         return self.name
 
+
 class ContentPage(models.Model):
 
     __tablename__ = 'ourchive_settings'
@@ -455,3 +499,175 @@ class ContentPage(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Invitation(models.Model):
+
+    __tablename__ = 'ourchive_settings'
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    email = models.CharField(max_length=200)
+    invite_token = models.CharField(max_length=200)
+    token_expiration = models.DateTimeField()
+    token_used = models.BooleanField(default=False)
+    register_link = models.CharField(max_length=200)
+    send_invite = models.BooleanField(default=False)
+
+    def __repr__(self):
+        return '<Invitation: {}>'.format(self.id)
+
+
+class AttributeType(models.Model):
+
+    __tablename__ = 'ourchive_settings'
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    display_name = models.CharField(max_length=200)
+    allow_on_work = models.BooleanField(default=False)
+    allow_on_bookmark = models.BooleanField(default=False)
+    allow_on_chapter = models.BooleanField(default=False)
+    allow_on_user = models.BooleanField(default=False)
+    allow_multiselect = models.BooleanField(default=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+        ]
+        ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(Lower('name').desc(), name='unique_attributetype_name')
+        ]
+
+    def __repr__(self):
+        return '<AttributeType: {}>'.format(self.name)
+
+    def __str__(self):
+        return self.display_name
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super(AttributeType, self).save(*args, **kwargs)
+
+
+class AttributeValue(models.Model):
+
+    __tablename__ = 'ourchive_settings'
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=200)
+    display_name = models.CharField(max_length=200)
+
+    attribute_type = models.ForeignKey(
+        'AttributeType',
+        on_delete=models.CASCADE,
+        related_name='attribute_values'
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+        ]
+        ordering = ('attribute_type__name','name')
+        constraints = [
+            models.UniqueConstraint(Lower('name').desc(), name='unique_attributevalue_name')
+        ]
+
+    def __str__(self):
+        return self.display_name
+
+    def __repr__(self):
+        return '<AttributeValue: {}>'.format(self.name)
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super(AttributeValue, self).save(*args, **kwargs)
+
+
+class WorkAttribute(models.Model):
+
+    __tablename__ = 'work_attributes'
+    id = models.AutoField(primary_key=True)
+    work = models.ForeignKey(
+        'Work',
+        on_delete=models.CASCADE
+    )
+    attribute_value = models.ForeignKey(
+        'AttributeValue',
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<AttributeValue: {}>'.format(self.id)
+
+
+class BookmarkAttribute(models.Model):
+
+    __tablename__ = 'work_attributes'
+    id = models.AutoField(primary_key=True)
+    bookmark = models.ForeignKey(
+        'Bookmark',
+        on_delete=models.CASCADE
+    )
+    attribute_value = models.ForeignKey(
+        'AttributeValue',
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<AttributeValue: {}>'.format(self.id)
+
+
+class ChapterAttribute(models.Model):
+
+    __tablename__ = 'work_attributes'
+    id = models.AutoField(primary_key=True)
+    chapter = models.ForeignKey(
+        'Chapter',
+        on_delete=models.CASCADE
+    )
+    attribute_value = models.ForeignKey(
+        'AttributeValue',
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<AttributeValue: {}>'.format(self.id)
+
+    class Meta:
+        ordering = ['attribute_value']
+
+
+class UserAttribute(models.Model):
+
+    __tablename__ = 'user_attributes'
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE
+    )
+    attribute_value = models.ForeignKey(
+        'AttributeValue',
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<UserAttribute: {}>'.format(self.id)
+
+    class Meta:
+        ordering = ['attribute_value']

@@ -3,11 +3,11 @@
 {% for notification in notifications %} 
 	{% include "notification_tile.html" %}          
 {% endfor %}
-<div class="uk-width-1-1 uk-text-center">
-    <div>
-        <ul class="uk-pagination">
-        {% if previous is not None %}<li><a href="{{ previous }}"><span class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
-        {% if next is not None %}<li class="uk-margin-auto-left"><a href="{{ next }}">Next <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
+<div class="uk-width-1-1 uk-text-center" id="notifications-pagination-parent">
+    <div id="notifications-pagination-child">
+        <ul class="uk-pagination" id="notifications-pagination-ul">
+        {% if previous is not None %}<li id="notifications-pagination-prev-li"><a id="notifications-pagination-prev-link" href="{{ previous }}"><span class="uk-margin-small-right" uk-pagination-previous id="notifications-pagination-prev-span"></span> Previous</a></li>{% endif %}
+        {% if next is not None %}<li id="notifications-pagination-next-li" class="uk-margin-auto-left"><a href="{{ next }}" id="notifications-pagination-next-link">Next <span class="uk-margin-small-left" uk-pagination-next id="notifications-pagination-next-span"></span></a></li>{% endif %}
     </ul>
     </div>        
 </div>  

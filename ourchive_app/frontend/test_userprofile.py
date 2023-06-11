@@ -1,10 +1,10 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-class UserProfileViewTests(TestCase):
+class UserViewTests(TestCase):
 	fixtures = ['user', 'tagtype', 'tag', 'worktype', 'work', 'bookmark', 'bookmarklink', 
 				'bookmarkcomment', 'chapter', 'chaptercomment',
-				'fingergun', 'userblocks', 'userprofile', 'ourchivesetting']
+				'fingergun', 'userblocks', 'ourchivesetting']
 
 	def test_user_profile_shows_works(self):
 		response = self.client.get("/username/imp/works/")

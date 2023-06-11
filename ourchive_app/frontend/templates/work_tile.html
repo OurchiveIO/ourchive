@@ -1,42 +1,45 @@
-<div class="uk-margin">
-	<div class="uk-card uk-card-default">
-	    <div class="uk-card-header">
-	        <div class="uk-grid-small uk-flex-middle" uk-grid>
+<div class="uk-margin" id="work-{{work.id}}-tile-parent">
+	<div class="uk-card uk-card-default" id="work-{{work.id}}-tile-card">
+	    <div class="uk-card-header" id="work-{{work.id}}-tile-card-header">
+	        <div class="uk-grid-small uk-flex-middle" uk-grid id="work-{{work.id}}-tile-card-header-grid">
 	            {% if work.cover_url != "None" and work.cover_url is not None and work.cover_url != "" %}
-	            <div class="uk-width-auto">
-	                <img class="uk-border-circle" width="40" height="40" alt="{{work.cover_alt_text}}" src="{{work.cover_url}}">
+	            <div class="uk-width-auto" id="work-{{work.id}}-tile-img-parent">
+	                <img class="uk-border-circle" width="40" height="40" alt="{{work.cover_alt_text}}" src="{{work.cover_url}}" id="work-{{work.id}}-tile-image">
 	            </div>
 	            {% endif %}
-	            <div class="uk-width-expand">
+	            <div class="uk-width-expand" id="work-{{work.id}}-tile-title-parent">
 	                {% if work.draft == True %}
-	                	<h3 class="uk-card-title uk-margin-remove-bottom"><a href="/works/{{work.id}}?draft=true">{{work.title}}</a></h3>
+	                	<h3 id="work-{{work.id}}-tile-draft-title" class="uk-card-title uk-margin-remove-bottom"><a id="work-{{work.id}}-tile-draft-title-link" href="/works/{{work.id}}?draft=true">{{work.title}}</a></h3>
 	                {% else %}
-	                	<h3 class="uk-card-title uk-margin-remove-bottom"><a href="/works/{{work.id}}">{{work.title}}</a></h3>
+	                	<h3 id="work-{{work.id}}-tile-title" class="uk-card-title uk-margin-remove-bottom"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{{work.title}}</a></h3>
 	                {% endif %}
-	                <p class="uk-text-meta uk-margin-remove-top">{{ work.user }}</p>
+	                <p id="work-{{work.id}}-tile-user-link" class="uk-text-meta uk-margin-remove-top">{{ work.user }}</p>
 	            </div>
 	        	{% if work.draft %}
-	            <div class="uk-width-auto">
-	                <span class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+	            <div class="uk-width-auto" id="work-{{work.id}}-tile-draft-button-div">
+	                <span class="uk-label uk-label-warning" id="work-{{work.id}}-tile-draft-button-span"><strong>DRAFT</strong></span>
 	            </div>
 	            {% endif %}
 	        </div>
 	    </div>
-	    <div class="uk-card-body">
-	        <p>{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>
+	    <div class="uk-card-body" id="work-{{work.id}}-tile-card-body">
+	        <p id="work-{{work.id}}-tile-summary-p">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>
 		        {% for type, tag in work.tags.items %} 
-			        <dt>{{ type }}</dt>
-			        <dd>
-			        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
+			        <dt id="work-{{work.id}}-tile-tags-{{type}}-dt">{{ type }}</dt>
+			        <dd id="work-{{work.id}}-tile-tags-{{type}}-dd">
+			        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="work-{{work.id}}-tile-tags-{{type}}-{{single_tag.text}}-link" href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
 			        </dd>
 			    {% endfor %}
+			<hr id="work-{{work.id}}-tile-card-body-hr"/>
+			<p id="work-{{work.id}}-tile-attributes-p">{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}</p>
 	    </div>
-	    <div class="uk-card-footer">
-	        <a href="/works/{{work.id}}" class="uk-button uk-button-text">Read more</a>
+	    <div class="uk-card-footer" id="work-{{work.id}}-tile-footer-parent">
+	        <a id="work-{{work.id}}-tile-footer-readmore" href="/works/{{work.id}}" class="uk-button uk-button-text">Read more</a>
 	        {% if work.user == request.user.username %}
-	        <div class="uk-align-right">
-	            <a href="/works/{{ work.id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
-	            <a href="/works/{{ work.id }}/delete"><span uk-icon="icon: trash" title="Delete"></span> </a>
+	        <div class="uk-align-right" id="work-{{work.id}}-footer-user-controls">
+	            <a id="work-{{work.id}}-footer-edit-link" href="/works/{{ work.id }}/edit"><span id="work-{{work.id}}-footer-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
+	            <a id="work-{{work.id}}-footer-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span id="work-{{work.id}}-footer-delete-span" uk-icon="icon: trash" title="Delete"></span> </a>
+	            {% include "delete_modal.html" with object='work' object_id=work.id %}
 	        </div>
 	        {% endif %}
 	    </div>

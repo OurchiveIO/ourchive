@@ -1,0 +1,34 @@
+{% extends 'index.html' %}
+{% block content %}	
+<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid id="request-invite-parent-grid">
+{% if invite_sent %}
+<div><span class="uk-text-lead">Invite Requested</span></div>
+<div><span class="uk-text-medium">Your invitation has been requested. You will receive an email with an invite code after admin approval.</span></div>
+{% else %}
+<div><span class="uk-text-lead">Request Invite</span></div>
+<div><span class="uk-text-medium">Registration is currently invite-only. You can request an invite code below.</span></div>
+<form class="uk-form-horizontal"  method="post" id="request-invite-form">
+	{% csrf_token %}
+    <div class="uk-margin" id="request-invite-email-parent">
+        <label id="request-invite-email-label" class="uk-form-label" for="form-horizontal-text">Email</label>
+        <div id="request-invite-email-controls" class="uk-form-controls">
+            <div class="uk-inline" id="request-invite-email-input-parent">
+                <span class="uk-form-icon" uk-icon="icon: mail" id="request-invite-email-icon"></span>
+                <input class="uk-input" type="email" name="email" id="request-invite-email-input">
+            </div>
+        </div>
+        
+    </div>
+    <div class="uk-margin" id="request-invite-submit-parent">
+    	<label id="request-invite-submit-label" class="uk-form-label" for="form-horizontal-text"></label>
+        <div class="uk-form-controls" id="request-invite-submit-controls">
+        	<div class="uk-inline" id="request-invite-submit-input-parent">
+	    		<input id="request-invite-submit-button" class="uk-button uk-button-default" type="submit" value="Request Invite"/>
+	    	</div>
+        </div>
+    	
+    </div>
+</form>
+{% endif %}
+</div>
+{% endblock %}

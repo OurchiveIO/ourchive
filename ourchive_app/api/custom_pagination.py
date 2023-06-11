@@ -10,6 +10,7 @@ class CustomPagination(LimitOffsetPagination):
             'previous': self.get_previous_link(),
             'next_params': self.get_next_link_params(),
             'prev_params': self.get_previous_link_params(),
+            'current': self.offset,
             'results': data
         })
 

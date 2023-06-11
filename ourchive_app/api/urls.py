@@ -1,12 +1,9 @@
-from django.urls import path, include
+from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 from api import views
-from rest_framework.routers import DefaultRouter
-from django.conf.urls.static import static
-from django.conf import settings
 
 urlpatterns = [
-	path('', views.api_root),
+    path('', views.api_root),
     path('works/', views.WorkList.as_view(), name='work-list'),
     path('works/<int:pk>/', views.WorkDetail.as_view(), name='work-detail'),
     path('works/<int:pk>/publish-full/', views.PublishWork.as_view(), name='publish-work'),
@@ -46,40 +43,28 @@ urlpatterns = [
     path('notificationtypes/<int:pk>/', views.NotificationTypeDetail.as_view(), name='notificationtype-detail'),
     path('settings/', views.OurchiveSettingList.as_view(), name='ourchive-setting-list'),
     path('settings/<int:pk>/', views.OurchiveSettingDetail.as_view(), name='ourchivesetting-detail'),
-	path('users/<int:pk>/',
-        views.UserDetail.as_view(),
-        name='user-detail'),
-    path('users/<str:username>/', views.UserNameDetail.as_view(),
-        name='user-detail'),
-    path('users/<str:username>/works', views.UserWorkList.as_view(),
-        name='user-works-drafts'),
-    path('users/<str:username>/works/drafts', views.UserWorkDraftList.as_view(),
-        name='user-drafts'),
-    path('users/<str:username>/bookmarks', views.UserBookmarkList.as_view(),
-        name='user-bookmarks'),
-    path('users/<str:username>/notifications', views.UserNotificationList.as_view(),
-        name='user-notifications'),
-    path('users/<str:username>/bookmarks/drafts', views.UserBookmarkDraftList.as_view(),
-        name='user-bookmarks-drafts'),
-    path('users/<str:username>/profile',
-        views.UserProfileDetail.as_view(),
-        name='userprofile-detail'),
-    path('userprofile/<int:pk>/',
-        views.UserProfileDetail.as_view(),
-        name='userprofile-detail'),
-    path('userprofiles',
-        views.UserProfileList.as_view(),
-        name='user-profile-list'),
-    path('userblocks',
-        views.UserBlocksList.as_view(),
-        name='user-blocks-list'),
+    path('settings/', views.OurchiveSettingList.as_view()),
+    path('users/<int:pk>/',views.UserDetail.as_view(), name='user-detail'),
+    path('users/<str:username>/', views.UserNameDetail.as_view(), name='user-detail'),
+    path('users/<str:username>/works', views.UserWorkList.as_view(), name='user-works-drafts'),
+    path('users/<str:username>/works/drafts', views.UserWorkDraftList.as_view(), name='user-drafts'),
+    path('users/<str:username>/bookmarks', views.UserBookmarkList.as_view(), name='user-bookmarks'),
+    path('users/<str:username>/notifications', views.UserNotificationList.as_view(), name='user-notifications'),
+    path('users/<str:username>/bookmarks/drafts', views.UserBookmarkDraftList.as_view(), name='user-bookmarks-drafts'),
+    path('userblocks', views.UserBlocksList.as_view(), name='user-blocks-list'),
     path('userblocks/<int:pk>/', views.UserBlocksDetail.as_view(), name='userblocks-detail'),
-    path('users/<str:username>/userblocks', views.UserBlocksList.as_view(),
-        name='user-blocks-list'),
+    path('users/<str:username>/userblocks', views.UserBlocksList.as_view(), name='user-blocks-list'),
     path('search/', views.SearchList.as_view(), name='search-list'),
     path('fingerguns/', views.FingergunList.as_view(), name='fingergun-list'),
     path('fingerguns/<int:pk>/', views.FingergunDetail.as_view(), name='fingergun-detail'),
     path('works/<int:work_id>/fingerguns', views.FingergunByWorkList.as_view(), name='fingergun-by-work-list'),
+    path('tag-autocomplete', views.TagAutocomplete.as_view(), name='tag-autocomplete'),
+    path('invitations/', views.Invitations.as_view(), name='invitations'),
+    path('attributetypes/', views.AttributeTypeList.as_view(), name='attribute-type-list'),
+    path('attributetypes/<int:pk>/', views.AttributeTypeDetail.as_view(), name='attributetype-detail'),
+    path('attributevalues/', views.AttributeValueList.as_view(), name='attribute-value-list'),
+    path('attributevalues/<int:pk>/', views.AttributeValueDetail.as_view(), name='attributevalue-detail'),
+    path('file-upload/', views.FileUpload.as_view(), name='api-file-upload')
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

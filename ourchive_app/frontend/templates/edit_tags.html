@@ -1,0 +1,49 @@
+{% for type, tag_data in tags.items %}
+    {% if tag_data.admin_administrated %}
+        <div class="uk-margin" id="{{ object }}-form-tag-parent">
+            <label id="{{ object }}-form-tag-type-label" class="uk-form-label" for="form-horizontal-text">{{ type }} <sup class="uk-margin-small-left">(admin)</sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop="mode: click">This tag type is administrated by your site admin(s). This means that you can select an existing {{ type }}, but cannot create a new one.</div>
+            </label>
+            <div id="{{ object }}-form-tag-controls" class="uk-form-controls">                
+                <div id="{{ object }}-form-tag-inline" class="uk-inline">
+                    <div id="{{ type }}_tags">
+                    {% if tag_data.tags %}
+                        {% for single_tag in tag_data.tags %}
+                            <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="tags_{{ single_tag.text }}_{{ type }}">
+                            <span class="uk-badge uk-padding-small" id="tags_{{ single_tag.text }}_{{ type }}_txt"><span class="uk-text-bold uk-text-default uk-padding-small">{{ single_tag.display_text }} </span><span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{type}}')" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
+                        {% endfor %}
+                        {% else %}
+                        <span class="uk-text-medium" id="no-tag-prompt-{{type}}">No tags yet. Add some below.</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="uk-margin-top">
+                    <input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="Search for tags..." id="{{ type }}_new_tag" oninput="doAdminAutocomplete(this.value, 'edit', '{{type}}', '{{type}}')">
+                    <div id="tag-autocomplete-dropdown-{{type}}" uk-drop></div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="uk-margin" id="{{ object }}-form-tag-parent">
+            <label id="{{ object }}-form-tag-type-label" class="uk-form-label" for="form-horizontal-text">{{ type }}</label>
+            <div id="{{ object }}-form-tag-controls" class="uk-form-controls">                
+                <div id="{{ object }}-form-tag-inline" class="uk-inline">
+                    <div id="{{ type }}_tags">
+                    {% if tag_data.tags %}
+                        {% for single_tag in tag_data.tags %}
+                            <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="tags_{{ single_tag.text }}_{{ type }}">
+                            <span class="uk-badge uk-padding-small" id="tags_{{ single_tag.text }}_{{ type }}_txt"><span class="uk-text-bold uk-text-default uk-padding-small">{{ single_tag.display_text }} </span><span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{type}}')" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
+                        {% endfor %}
+                        {% else %}
+                        <span class="uk-text-medium" id="no-tag-prompt-{{type}}">No tags yet. Add some below.</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="uk-margin-top">
+                    <input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')" oninput="doAutocomplete(this.value, 'edit', '{{type}}', '{{type}}')">
+                    <div id="tag-autocomplete-dropdown-{{type}}" uk-drop></div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}

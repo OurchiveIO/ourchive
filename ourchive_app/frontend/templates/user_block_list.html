@@ -1,13 +1,13 @@
 {% extends 'index.html' %}
 {% block content %}	
-<div class="uk-width-1-1 uk-text-left" uk-grid>
+<div class="uk-width-1-1 uk-text-left" uk-grid id="user-blocklist-grid">
 	{% if not blocklist %}
-	<p>No users have been blocked. To block a user, navigate to their profile and click the "block" icon.</p>
+	<p id="user-blocklist-none-message">No users have been blocked. To block a user, navigate to their profile and click the "block" icon.</p>
 	{% endif %}
 	{% for block in blocklist %}
-		<div>
-	        <div class="uk-card uk-card-default uk-card-body">
-	            <p>{{block.blocked_user}} (<a href="/users/{{username}}/blocks/{{block.id}}/unblock">Unblock</a>)</p>
+		<div id="user-blocklist-{{block.id}}-parent">
+	        <div id="user-blocklist-{{block.id}}-card" class="uk-card uk-card-default uk-card-body">
+	            <p id="user-blocklist-{{block.id}}-user">{{block.blocked_user}} (<a id="user-blocklist-{{block.id}}-unblock-link" href="/users/{{username}}/blocks/{{block.id}}/unblock">Unblock</a>)</p>
 	        </div>
 	    </div>
 	{% endfor %}

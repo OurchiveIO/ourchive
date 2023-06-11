@@ -1,12 +1,14 @@
 <div id="comment-{{comment.id}}-reply" class="uk-width-1-1" hidden>
-    <form class="uk-form" id="reply-{{comment.id}}-form" action="{{ post_action }}" method="post">
+    <form class="uk-form" id="reply-{{comment.id}}-form" action="{{ post_action }}" method="post" uk-grid>
         {% csrf_token %}
         <div class="uk-width-1-1" id="reply-{{comment.id}}-parent-div">
             <label id="reply-{{comment.id}}-label" class="uk-form-label" for="form-horizontal-text">Reply</label>
             <div id="reply-{{comment.id}}-parent-controls" class="uk-form-controls">
-                <div class="uk-inline" id="reply-{{comment.id}}-hidden-fields">
+                <div class="uk-inline" id="reply-{{comment.id}}-fields">
                     <input type="hidden" id="parent_comment" name="parent_comment" value="{{ comment.id }}">
+                    <input type="hidden" id="parent_comment_next" name="parent_comment_next" value="{{current_offset}}"/>
                     <input type="hidden" id="{{ object_name }}" name="{{ object_name }}" value="{{ object_id }}">
+                    <input type="hidden" id="{{ object_name }}_comment_count" name="{{ object_name }}_comment_count" value="{{ comment_count }}">
                     <textarea class="uk-textarea uk-form-width-large" rows="5" id="text" name="text"></textarea>
                 </div>
             </div>
@@ -24,12 +26,16 @@
             <div id="edit-comment-form-controls" class="uk-form-controls">
                 <div id="edit-comment-input-div" class="uk-inline">
                     <input type="hidden" id="comment_id" name="id" value="{{ comment.id }}">
+                     <input type="hidden" id="parent_comment_val" name="parent_comment_val" value="{{ comment.parent_comment}}">
+                    <input type="hidden" id="parent_comment_next" name="parent_comment_next" value="{{current_offset}}"/>
+                    <input type="hidden" id="{{ object_name }}" name="{{ object_name }}" value="{{ object_id }}">
+                    <input type="hidden" id="{{ object_name }}_comment_count" name="{{ object_name }}_comment_count" value="{{ comment_count }}">
                     <textarea id="edit-comment-textarea" class="uk-textarea uk-form-width-large" rows="5" placeholder="Text" name="text">{{ comment.text|default_if_none:'' }}</textarea>
 
                 </div>
             </div>
         </div>
-        <div class="uk-width-1-1" id="edit-comment-submit-parent">
+        <div class="uk-width-1-1 uk-margin-top" id="edit-comment-submit-parent">
             <input id="edit-comment-submit" class="uk-button uk-button-default" type="submit" value="Edit Comment"/>
         </div>
     </form>    

@@ -1,48 +1,56 @@
 {% extends 'index.html' %}
 {% block content %}	
-<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
-<form class="uk-form-horizontal"  method="post">
+<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid id="register-parent-grid">
+{% if permit_registration %}
+<form class="uk-form-horizontal"  method="post" id="register-form">
 	{% csrf_token %}
-    <div class="uk-margin">
-    	<label class="uk-form-label" for="form-horizontal-text">Username</label>
-        <div class="uk-form-controls">
-            <div class="uk-inline">
-	            <span class="uk-form-icon" uk-icon="icon: user"></span>
-	            <input class="uk-input" type="text" name="username">
+    <input id="invite-code-hidden-id" type="hidden" name="invite_code" value="{{ invite_code }}"/>
+    <div class="uk-margin" id="register-username-parent">
+    	<label id="register-username-label" class="uk-form-label" for="form-horizontal-text">Username</label>
+        <div class="uk-form-controls" id="register-user-controls">
+            <div class="uk-inline" id="register-user-input-parent">
+	            <span class="uk-form-icon" uk-icon="icon: user" id="register-user-icon"></span>
+	            <input class="uk-input" type="text" name="username" id="register-user-name-input">
 	        </div>
         </div>
         
     </div>
 
-    <div class="uk-margin">
-        <label class="uk-form-label" for="form-horizontal-text">Email</label>
-        <div class="uk-form-controls">
-            <div class="uk-inline">
-                <span class="uk-form-icon" uk-icon="icon: mail"></span>
-                <input class="uk-input" type="email" name="email">
+    <div class="uk-margin" id="register-email-parent">
+        <label id="register-email-label" class="uk-form-label" for="form-horizontal-text">Email</label>
+        <div id="register-email-controls" class="uk-form-controls">
+            <div class="uk-inline" id="register-email-input-parent">
+                <span class="uk-form-icon" uk-icon="icon: mail" id="register-email-icon"></span>
+                <input class="uk-input" type="email" name="email" id="register-email-input">
             </div>
         </div>
         
     </div>
 
-    <div class="uk-margin">
-    	<label class="uk-form-label" for="form-horizontal-text">Password</label>
-        <div class="uk-form-controls">
-	        <div class="uk-inline">
-	            <span class="uk-form-icon uk-form-icon" uk-icon="icon: lock"></span>
-	            <input class="uk-input" type="password" name="password">
+    <div class="uk-margin" id="register-password-parent">
+    	<label id="register-password-label" class="uk-form-label" for="form-horizontal-text">Password</label>
+        <div id="register-password-controls" class="uk-form-controls">
+	        <div class="uk-inline" id="register-password-input-parent">
+	            <span class="uk-form-icon uk-form-icon" uk-icon="icon: lock" id="register-password-icon"></span>
+	            <input class="uk-input" type="password" name="password" id="register-password-input">
 	        </div>
 	    </div>
     </div>
-    <div class="uk-margin">
-    	<label class="uk-form-label" for="form-horizontal-text"></label>
-        <div class="uk-form-controls">
-        	<div class="uk-inline">
-	    		<input class="uk-button uk-button-default" type="submit" value="Register"/>
+    <div class="uk-margin" id="register-submit-parent">
+    	<label id="register-submit-label" class="uk-form-label" for="form-horizontal-text"></label>
+        <div class="uk-form-controls" id="register-submit-controls">
+        	<div class="uk-inline" id="register-submit-input-parent">
+	    		<input id="register-submit-button" class="uk-button uk-button-default" type="submit" value="Register"/>
 	    	</div>
         </div>
     	
     </div>
 </form>
+{% else %}
+<div>
+    <p><span id="registration-not-permitted-lead" class="uk-text-lead">Registration Not Permitted</span></p>
+    <p><span id="registration-not-permitted-message" class="uk-text-medium">We're sorry, registration is not permitted at this time. You can still browse as an anonymous user.</span></p>
+</div>
+{% endif %}
 </div>
 {% endblock %}

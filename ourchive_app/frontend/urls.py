@@ -1,11 +1,11 @@
-from django.urls import path, include
+from django.urls import path
 from . import views
 from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-	path('', views.index),
+    path('', views.index),
     path('search/', views.search),
     path('search/filter', views.search_filter),
     path('works/', views.works),
@@ -15,21 +15,22 @@ urlpatterns = [
     path('works/<int:id>/publish-full/', views.publish_work_and_chapters, name='publish-full'),
     path('works/type/<int:type_id>', views.works_by_type),
     path('works/<int:pk>/', views.work),
-    path('works/<int:work_id>/delete', views.delete_work),
-    path('works/<int:work_id>/chapters/<int:chapter_id>/delete', views.delete_chapter),
+    path('works/<int:work_id>/delete', views.delete_work, name='delete-work'),
+    path('works/<int:work_id>/chapters/<int:chapter_id>/delete', views.delete_chapter, name='delete-chapter'),
     path('works/<int:work_id>/chapters/<int:chapter_id>/publish/', views.publish_chapter),
     path('bookmarks/', views.bookmarks),
     path('bookmarks/<int:pk>/', views.bookmark),
     path('bookmarks/<int:pk>/comments', views.render_bookmark_comments),
     path('bookmarks/<int:pk>/comments/new', views.create_bookmark_comment),
     path('bookmarks/<int:pk>/comments/edit', views.edit_bookmark_comment),
-    path('bookmarks/<int:pk>/comments/<int:comment_id>/delete', views.delete_bookmark_comment),
+    path('bookmarks/<int:pk>/comments/<int:comment_id>/delete', views.delete_bookmark_comment, name='delete-bookmark-comment'),
     path('bookmarks/<int:pk>/edit', views.edit_bookmark),
     path('bookmarks/<int:id>/publish/', views.publish_bookmark),
-    path('bookmarks/<int:bookmark_id>/delete', views.delete_bookmark),
+    path('bookmarks/<int:bookmark_id>/delete', views.delete_bookmark, name='delete-bookmark'),
     path('bookmarks/new/<int:work_id>', views.new_bookmark),
     path('login/', views.log_in),
     path('register/', views.register),
+    path('request-invite/', views.request_invite),
     path('logout/', views.log_out),
     path('reset-password/', auth_views.PasswordResetView.as_view(template_name="reset_password.html")),
     path('reset-password/done/', auth_views.PasswordResetDoneView.as_view(template_name="reset_password_done.html"), name='password_reset_done'),
@@ -50,16 +51,17 @@ urlpatterns = [
     path('users/<str:username>/blocklist', views.user_block_list),
     path('users/<str:username>/blocks/<int:pk>/unblock', views.unblock_user),
     path('users/<str:username>/block', views.block_user),
+    path('users/<str:username>/delete', views.delete_user),
     path('works/<int:work_id>/chapters/<int:id>/edit', views.edit_chapter),
     path('works/<int:work_id>/chapters/new', views.new_chapter),
     path('works/<int:work_id>/chapters/<int:chapter_id>/comments', views.render_comments),
     path('works/<int:work_id>/chapters/<int:chapter_id>/comments/new', views.create_chapter_comment),
     path('works/<int:work_id>/chapters/<int:chapter_id>/comments/edit', views.edit_chapter_comment),
-    path('works/<int:work_id>/chapters/<int:chapter_id>/comments/<int:comment_id>/delete', views.delete_chapter_comment),
-    path('upload-test', views.upload_file),
+    path('works/<int:work_id>/chapters/<int:chapter_id>/comments/<int:comment_id>/delete', views.delete_chapter_comment, name='delete-chapter-comment'),
     path('tags/<int:pk>', views.works_by_tag),
     path('tags/<int:tag_id>/next', views.works_by_tag_next),
     path('fingerguns/<int:work_id>', views.new_fingerguns),
     path('switch-css-mode/', views.switch_css_mode),
+    path('tag-autocomplete', views.tag_autocomplete),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
