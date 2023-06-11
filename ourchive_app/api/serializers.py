@@ -102,6 +102,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             icon = validated_data['icon']
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
+        else:
+            attributes = None
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],

@@ -133,7 +133,10 @@ class UserList(generics.ListCreateAPIView):
     permission_classes = [RegistrationPermitted]
 
     def perform_create(self, serializer):
-        serializer.save(invite_code=self.request.data['invite_code'], email=self.request.data['email'])
+        if 'invite_code' in self.request.data:
+            serializer.save(invite_code=self.request.data['invite_code'], email=self.request.data['email'])
+        else:
+            serializer.save(email=self.request.data['email'])
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
