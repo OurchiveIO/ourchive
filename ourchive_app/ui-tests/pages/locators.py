@@ -17,3 +17,11 @@ class SearchResultsPageLocators(object):
     come here"""
 
     pass
+
+
+class MainPageLoginLocators(object):
+
+    LOGIN_USERNAME_INPUT = (By.ID, "login-username-input")
+    LOGIN_PASSWORD_INPUT = (By.ID, "login-password-input")
+    LOGIN_SUBMIT_BUTTON= (By.ID, "login-submit-button")
+    
