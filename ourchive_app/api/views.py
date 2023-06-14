@@ -486,7 +486,7 @@ class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         response = super(BookmarkDetail, self).retrieve(request, args, kwargs)
-        response['star_count'] = self.get_star_count()
+        response.data['star_count'] = self.get_star_count()
         return response
 
     def get_queryset(self):

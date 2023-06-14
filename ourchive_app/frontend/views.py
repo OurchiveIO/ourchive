@@ -780,7 +780,34 @@ def edit_bookmark_collection(request, pk):
 
 
 def bookmark_collection(request, pk):
-	return redirect('/')
+	bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request)[0]
+	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
+	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
+	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
+	if 'comment_thread' in request.GET:
+		comment_id = request.GET.get('comment_thread')
+		comments = do_get(f"api/bookmarkcomments/{comment_id}", request)[0]
+		comment_offset = 0
+		comments = {'results': [comments], 'count': request.GET.get('comment_count')}
+		bookmark_collection['post_action_url'] = f"/bookmarkcollections/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
+		bookmark_collection['edit_action_url'] = f"""/bookmarkcollections/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
+	else:
+		comments = do_get(f'api/bookmarkcollections/{pk}/comments?limit=10&offset={comment_offset}', request)[0]
+		bookmark_collection['post_action_url'] = f"/bookmarkcollections/{pk}/comments/new"
+		bookmark_collection['edit_action_url'] = f"""/bookmarkcollections/{pk}/comments/edit"""
+	for bookmark in bookmark_collection['bookmarks_readonly']:
+		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '')
+	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
+	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
+	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
+	return render(request, 'bookmark_collection.html', {
+		'bkcol': bookmark_collection,
+		'tags': tags,
+		'comment_offset': comment_offset,
+		'scroll_comment_id': scroll_comment_id,
+		'expand_comments': expand_comments,
+		'user_can_comment': user_can_comment,
+		'comments': comments})
 
 
 def delete_bookmark_collection(request, pk):

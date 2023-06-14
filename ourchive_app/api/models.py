@@ -339,6 +339,7 @@ class BookmarkCollection(models.Model):
     is_private = models.BooleanField(default=False)
 
     tags = models.ManyToManyField('Tag')
+    attributes = models.ManyToManyField('AttributeValue')
 
     def __str__(self):
         return self.title

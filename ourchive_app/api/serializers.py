@@ -516,7 +516,7 @@ class BookmarkWorkSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Work
-        fields = ['id', 'user', 'title', 'summary', 'work_link']
+        fields = ['id', 'user', 'title', 'summary', 'work_link', 'cover_url', 'cover_alt_text']
 
 
 class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
@@ -594,7 +594,9 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.HyperlinkedIdentityField(
         view_name='bookmarkcollection-detail', read_only=True)
     tags = TagSerializer(many=True, required=False)
-    bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), many=True, required=False)
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    bookmarks_readonly = BookmarkSerializer(many=True, required=False, source='bookmarks')
+    bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), required=False, many=True)
 
     class Meta:
         model = BookmarkCollection
@@ -610,8 +612,12 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                     text=tag_id, tag_type=tag_type)
                 bookmark.tags.add(tag)
             bookmark.save()
+        bookmarks = validated_data.pop('bookmarks')
         BookmarkCollection.objects.filter(
             id=bookmark.id).update(**validated_data)
+        for bookmark_child in bookmarks:
+            bookmark.bookmarks.add(bookmark_child)
+        bookmark.save()
         return BookmarkCollection.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
