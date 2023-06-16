@@ -30,22 +30,28 @@ function populateBookmarkInput(bookmark_id, bookmark_display) {
     var div = wrapper.firstChild;
     list.appendChild(div);
     var li = document.createElement('li');
-    li.innerHTML = bookmark_display+' (<a onclick="removeBookmark()">Remove</a>)';
+    li.innerHTML = bookmark_display+' (<a onclick="removeBookmark(event, "'+bookmark_id+'"")">Remove</a>)';
     list.appendChild(li);
     document.getElementById("bookmark_entry").value = '';
     document.getElementById("bookmark_entry").focus();
     document.getElementById("bookmark-autocomplete-dropdown").innerHTML = "";
 }
+function removeBookmark(event, bookmark_id) {
+    var li = document.getElementById("bookmarks_"+bookmark_id+"_li");
+    var hidden = document.getElementById("bookmarks_"+bookmark_id);
+    li.remove();
+    hidden.remove();
+}
 </script>
 <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bkcol-form-parent-grid" uk-grid>  
-<form class="uk-form-horizontal" method="post" id="bookmarkForm" onsubmit="return getDescriptionText()">
+<form class="uk-form-horizontal" method="post" id="bookmarkCollectionForm" onsubmit="return getDescriptionText()">
     <script>
         function getDescriptionText() {
             document.getElementById('description').value = tinymce.get("descriptionEditor").getContent().replace(/\r?\n?/g, '');
         }
     </script>
     {% csrf_token %}
-    <input id="bkcol-form-hidden-id" type="hidden" name="bookmark_id" value="{{ bookmark_collection.id }}"/>
+    <input id="bkcol-form-hidden-id" type="hidden" name="bookmark_collection_id" value="{{ bookmark_collection.id }}"/>
     <div id="bkcol-form-actions-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
         <div id="bkcol-form-header-parent" class="uk-width-1-2">
             <span id="bkcol-form-header-span" class="uk-text-large">Edit Bookmark Collection</span>
@@ -66,9 +72,18 @@ function populateBookmarkInput(bookmark_id, bookmark_display) {
                             <input id="bkcol-form-title-input" class="uk-input uk-form-width-large" type="text" name="title" value="{{ bookmark_collection.title|default_if_none:'' }}">
                         </div>
                     </div>
-                    
                 </div>
-
+                <div class="uk-margin" id="bkcol-form-header-parent">
+                    <label id="bkcol-form-header-label" class="uk-form-label" for="form-horizontal-text">Header</label>
+                    {% if bookmark_collection.header_url %}
+                    <img id="bookmark-collection-form-header-img" src="{{ bookmark_collection.header_url }}"/>
+                    {% endif %}
+                    <div id="bookmark-collection-form-header-controls" class="uk-form-controls">
+                        <div id="bookmark-collection-form-header-inline" class="uk-inline">
+                            {% include 'file_upload.html' with object='header_url' replace_selector='bookmark-collection-form-header-img' object_type='img' upload_placeholder='Upload header image' original_value=bookmark_collection.header_url %}
+                        </div>
+                    </div>
+                </div>
                 <div id="bkcol-form-description-parent" class="uk-margin">
                     <label id="bkcol-form-description-label" class="uk-form-label" for="form-horizontal-text">Description</label>
                     <div id="bkcol-form-description-form-controls" class="uk-form-controls">
@@ -104,7 +119,7 @@ function populateBookmarkInput(bookmark_id, bookmark_display) {
                     <ul id="bookmarks_readonly_list"> 
                     {% for bookmark in bookmark_collection.bookmarks_readonly %}
                         <input type="hidden" id="bookmarks_{{bookmark.id}}" name="bookmarks_{{bookmark.id}}" value="bookmarks_{{bookmark.id}}"/>
-                        <li>{{bookmark.title|default:bookmark.work.title}} (<a onclick="removeBookmark()">Remove</a>)</li>
+                        <li id="bookmarks_{{bookmark.id}}_li">{{bookmark.title|default:bookmark.work.title}} (<a onclick="removeBookmark(event, {{bookmark.id}})">Remove</a>)</li>
                     {% endfor %}
                     </ul>
                     <div id="bkcol-form-bookmarks-parent" class="uk-margin">

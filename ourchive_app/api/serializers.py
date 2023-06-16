@@ -46,7 +46,6 @@ class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-
 class UserBlocksSerializer(serializers.HyperlinkedModelSerializer):
     uid = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
@@ -611,17 +610,20 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                     text=tag_id, tag_type=tag_type)
                 bookmark.tags.add(tag)
             bookmark.save()
-        bookmarks = validated_data.pop('bookmarks')
+        if 'bookmarks' in validated_data:
+            bookmarks = validated_data.pop('bookmarks')
+            bookmark = BookmarkCollection.objects.get(id=bookmark.id)
+            bookmark.bookmarks.clear()
+            for bookmark_child in bookmarks:
+                bookmark.bookmarks.add(bookmark_child)
+            bookmark.save()
         BookmarkCollection.objects.filter(
             id=bookmark.id).update(**validated_data)
-        for bookmark_child in bookmarks:
-            bookmark.bookmarks.add(bookmark_child)
-        bookmark.save()
         return BookmarkCollection.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
-        bookmark_list = validated_data.pop('bookmarks')
-        tags = None
+        bookmark_list = validated_data.pop('bookmarks') if 'bookmarks' in validated_data else []
+        tags = []
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
         bookmark_collection = BookmarkCollection.objects.create(**validated_data)

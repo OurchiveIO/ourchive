@@ -1,7 +1,7 @@
 {% extends 'index.html' %}
 {% block content %}	
 {% load static %}
-<div class="uk-width-1-1 uk-text-left" uk-grid id="bk-collection-uk-grid">
+<div class="uk-text-left uk-grid uk-width-expand" uk-grid id="bk-collection-uk-grid">
 	<script>
 		function loadMoreComments(next, chapterId) {
 			fetch(next)
@@ -15,15 +15,32 @@
 			  });
 		}
 	</script>
-	<div class="uk-grid" id="bkcol-uk-article" uk-grid>
-	   	<div id="bkcol-header-image" class="uk-width-expand">
-	   		<img src="{{bkcol.header_url}}" alt="{{bkcol.header_alt_text" class="uk-align-center"/>
+		{% if bkcol.header_url %}
+	   	<div id="bkcol-header-image" class="uk-width-1-1">
+	   		<img src="{{bkcol.header_url}}" alt="{{bkcol.header_alt_text}}" class="uk-align-center"/>
 	   	</div>
-	   	<div id="bkcol-header-title" class="uk-width-1-1">
-	   		<h1 id="bkcol-header-h1" class="uk-heading-divider">{{bkcol.title}}</h1>
+	   	{% endif %}
+	   	<div id="bkcol-header-title" class="uk-width-2-3">
+	   		<h1 id="bkcol-header-h1" class="uk-heading">{{bkcol.title}}</h1>
+	   		{% if bkcol.draft %}
+	            <div id="bkcol-draft-badge" class="uk-width-auto uk-margin-bottom">
+	                <span id="bkcol-draft-span" class="uk-label uk-label-warning"><strong id="bkcol-draft-text">DRAFT</strong></span>
+	            </div>
+	        {% endif %}
 	   	</div>
+	   	<div class="uk-text-right uk-width-1-3" id="bkcol-user-controls-parent">
+	            {% if bkcol.user == request.user.username %}
+	            {% if bkcol.draft %}
+	            <a id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+	            {% endif %}
+	            <a id="bkcol-edit-link" href="/bookmark-collections/{{ bkcol.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
+	            <a id="bookmark-collection-delete-link" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a>
+	            {% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
+	            {% endif %}
+	    </div>
+	   	<div class="uk-margin-remove uk-width-1-1"><hr id="bkcol-title-hr"/></div>
 	   	<div id="bkcol-description-parent" class="uk-width-1-1">
-	   		<span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description}}</span>
+	   		<span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description|safe}}</span>
 	   	</div>
 	   	<div class="uk-width-1-1">
 	   		<div id="bkcol-bookmarks-parent" class="uk-position-relative uk-visible-toggle" tabindex="-1" uk-slideshow="animation: push" uk-slideshow>
@@ -85,7 +102,6 @@
             </form>
         </div>
         {% endif %}
-	</div>
 </div>
 {% if scroll_comment_id %}
     <script>

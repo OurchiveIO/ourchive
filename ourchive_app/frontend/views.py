@@ -790,7 +790,29 @@ def bookmark_collections(request):
 
 
 def new_bookmark_collection(request):
-	return redirect('/')
+	if request.user.is_authenticated and request.method != 'POST':
+		data = {'title': 'New Bookmark Collection', 'description': '', 'user': request.user.username, 'is_private': True, 'is_draft': True}
+		response = do_post(f'api/bookmarkcollections/', request, data=data)
+		if response[1] == 201:
+			messages.add_message(request, messages.SUCCESS, 'Bookmark collection created.')
+			bookmark_collection = response[0]
+			bookmark_collection_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True})
+			bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes[0]['results'])
+			tags = group_tags(bookmark_collection['tags'])
+			return render(request, 'bookmark_collection_form.html', {
+				'tags': tags,
+				'bookmark_collection': bookmark_collection})
+		elif response[1] == 403:
+			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark collection.')
+			return redirect('/')
+		else:
+			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this bookmark collection. Please contact your administrator.')
+			return redirect('/')
+	elif request.user.is_authenticated:
+		return edit_bookmark_collection(request, int(request.POST['bookmark_collection_id']))
+	else:
+		messages.add_message(request, messages.ERROR, 'You must log in to create a bookmark collection.')
+		return redirect('/login')
 
 
 def edit_bookmark_collection(request, pk):
@@ -823,15 +845,15 @@ def edit_bookmark_collection(request, pk):
 		collection_dict = collection_dict.dict()
 		collection_dict["user"] = str(request.user)
 		collection_dict["draft"] = 'draft' in collection_dict
+		collection_dict["is_private"] = False
 		collection_dict["attributes"] = get_attributes_from_form_data(request)
-		print(collection_dict)
 		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict)
 		if response[1] == 200:
-			messages.add_message(request, messages.SUCCESS, 'Bookmark updated.')
+			messages.add_message(request, messages.SUCCESS, 'Bookmark collection updated.')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark collection.')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark collection. Please contact your administrator.')
 		return redirect(f'/bookmark-collections/{pk}')
 	else:
 		if request.user.is_authenticated:
@@ -881,7 +903,30 @@ def bookmark_collection(request, pk):
 
 
 def delete_bookmark_collection(request, pk):
-	return redirect('/')
+	response = do_delete(f'api/bookmarkcollections/{pk}/', request)
+	if response[1] == 204:
+		messages.add_message(request, messages.SUCCESS, 'Bookmark collection deleted.')
+	elif response[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this bookmark collection.')
+	elif response[1] == 404:
+		messages.add_message(request, messages.ERROR, 'Bookmark collection not found.')
+	else:
+		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this bookmark collection. Please contact your administrator.')
+	if request.META is not None and 'HTTP_REFERER' in request.META and str(pk) in request.META.get('HTTP_REFERER'):
+		return redirect('/bookmark-collections')
+	return referrer_redirect(request)
+
+
+def publish_bookmark_collection(request, pk):
+	data = {'id': pk, 'draft': False}
+	response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=data)
+	if response[1] == 200:
+		messages.add_message(request, messages.SUCCESS, 'Bookmark collection published.')
+	elif response[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark collection.')
+	else:
+		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark collection. Please contact your administrator.')
+	return redirect(f'/bookmark-collections/{pk}')
 
 
 def log_in(request):
