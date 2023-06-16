@@ -6,6 +6,7 @@ django
 psycopg2
 requests
 django-background-tasks
+python-dotenv
 pytest
 selenium
 webdriver_manager

@@ -72,6 +72,17 @@ class TagAutocomplete(APIView):
         return Response({'results': results})
 
 
+class BookmarkAutocomplete(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, format=None):
+        searcher = OurchiveSearch()
+        results = searcher.do_bookmark_search(request.GET.get(
+            'term'), request.user.id)
+        return Response({'results': results})
+
+
 class FileUpload(APIView):
     parser_classes = [MultiPartParser]
     permission_classes = [permissions.AllowAny]
@@ -674,6 +685,8 @@ class AttributeTypeList(generics.ListCreateAPIView):
                 allow_on_chapter=self.request.GET['allow_on_chapter'])
         elif 'allow_on_user' in self.request.GET:
             queryset = queryset.filter(allow_on_user=self.request.GET['allow_on_user'])
+        elif 'allow_on_bookmark_collection' in self.request.GET:
+            queryset = queryset.filter(allow_on_bookmark_collection=self.request.GET['allow_on_bookmark_collection'])
         else:
             return AttributeType.objects.order_by('name')
         return queryset.order_by('name')

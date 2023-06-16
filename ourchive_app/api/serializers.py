@@ -591,8 +591,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
 class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
-    id = serializers.HyperlinkedIdentityField(
-        view_name='bookmarkcollection-detail', read_only=True)
+    id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     bookmarks_readonly = BookmarkSerializer(many=True, required=False, source='bookmarks')

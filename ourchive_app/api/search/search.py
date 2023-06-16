@@ -174,7 +174,7 @@ class PostgresProvider:
 				tags.append(tag_dict)
 			result_dict = result.__dict__
 			result_dict["tags"] = tags
-			result_dict["user"] = username			
+			result_dict["user"] = username	
 			for field in bookmark_search.reserved_fields:
 				result_dict.pop(field, None)
 			result_json.append(result_dict)
@@ -207,6 +207,22 @@ class PostgresProvider:
 			resultset = Tag.objects.filter(tag_type__label=tag_type) if fetch_all else []
 		for result in resultset:
 			results.append({"tag": result.text, "display_text": result.display_text, "id": result.id, "type": result.tag_type.label})
+		return results
+
+	def autocomplete_bookmarks(self, term, user):
+		results = []
+		resultset = None
+		term = term.lower()
+		resultset = Bookmark.objects.filter(user__id=user).filter(Q(title__icontains=term) | Q(work__title__icontains=term)).prefetch_related('work')
+		for result in resultset:
+			work_dict = vars(result.work)
+			if '_state' in work_dict:
+				work_dict.pop('_state')
+			bookmark_dict = vars(result)
+			if '_state' in bookmark_dict:
+				bookmark_dict.pop('_state')
+			bookmark_dict['work'] = work_dict
+			results.append({"bookmark": bookmark_dict})
 		return results
 
 	def search_tags(self, **kwargs):

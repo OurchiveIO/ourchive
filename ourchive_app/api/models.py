@@ -324,10 +324,9 @@ class BookmarkCollection(models.Model):
     header_url = models.CharField(max_length=600, null=True, blank=True)
     header_alt_text = models.CharField(max_length=600, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    public_notes = models.TextField(null=True, blank=True)
-    private_notes = models.TextField(null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
+    draft = models.BooleanField(default=False)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
 
@@ -392,6 +391,9 @@ class Bookmark(models.Model):
 
     def __repr__(self):
         return '<Bookmark: {}>'.format(self.id)
+
+    class Meta:
+        ordering = ('id',)
 
 
 class BookmarkLink(models.Model):
@@ -538,6 +540,7 @@ class AttributeType(models.Model):
     allow_on_chapter = models.BooleanField(default=False)
     allow_on_user = models.BooleanField(default=False)
     allow_multiselect = models.BooleanField(default=True)
+    allow_on_bookmark_collection = models.BooleanField(default=False)
 
     class Meta:
         indexes = [

@@ -22,7 +22,7 @@ urlpatterns = [
     path('bookmark-collections/new', views.new_bookmark_collection),
     path('bookmark-collections/<int:pk>/edit', views.edit_bookmark_collection),
     path('bookmark-collections/<int:pk>/', views.bookmark_collection),
-    path('bookmark-collections/<int:pk>/delete', views.delete_bookmark_collection),
+    path('bookmark-collections/<int:pk>/delete', views.delete_bookmark_collection, name='delete-bookmark-collection'),
     path('bookmarks/', views.bookmarks),
     path('bookmarks/<int:pk>/', views.bookmark),
     path('bookmarks/<int:pk>/comments', views.render_bookmark_comments),
@@ -68,5 +68,6 @@ urlpatterns = [
     path('fingerguns/<int:work_id>', views.new_fingerguns),
     path('switch-css-mode/', views.switch_css_mode),
     path('tag-autocomplete', views.tag_autocomplete),
+    path('bookmark-autocomplete', views.bookmark_autocomplete),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

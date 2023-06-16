@@ -372,6 +372,15 @@ def tag_autocomplete(request):
 		'fetch_all': params['fetch_all']})
 
 
+def bookmark_autocomplete(request):
+	term = request.GET.get('text')
+	params = {'term': term}
+	response = do_get(f'api/bookmark-autocomplete', request, params)
+	template = 'bookmark_collection_autocomplete.html'
+	return render(request, template, {
+		'bookmarks': response[0]['results']})
+
+
 def search_filter(request):
 	term = request.POST['term']
 	request_builder = SearchObject()
@@ -768,7 +777,16 @@ def delete_bookmark(request, bookmark_id):
 
 
 def bookmark_collections(request):
-	return redirect('/')
+	response = do_get(f'api/bookmarkcollections/', request)[0]
+	bookmark_collections = response['results']
+	bookmark_collections = get_object_tags(bookmark_collections)
+	for bkcol in bookmark_collections:
+		bkcol['attributes'] = get_attributes_for_display(bkcol['attributes'])
+	return render(request, 'bookmark_collections.html', {
+		'bookmark_collections': bookmark_collections,
+		'next': f"/bookmarkcollections/{response['next_params']}" if response['next_params'] is not None else None,
+		'previous': f"/bookmarkcollections/{response['prev_params']}" if response['prev_params'] is not None else None,
+		'root': settings.ALLOWED_HOSTS[0]})
 
 
 def new_bookmark_collection(request):
@@ -776,7 +794,59 @@ def new_bookmark_collection(request):
 
 
 def edit_bookmark_collection(request, pk):
-	return redirect('/')
+	if request.method == 'POST':
+		collection_dict = request.POST.copy()
+		tags = []
+		bookmarks = []
+		tag_types = {}
+		result = do_get(f'api/tagtypes', request)[0]['results']
+		for item in result:
+			tag_types[item['label']] = item
+		for item in request.POST:
+			if 'tags' in request.POST[item]:
+				tag = {}
+				json_item = request.POST[item].split("_")
+				tag['tag_type'] = json_item[2]
+				tag['text'] = json_item[1]
+				tags.append(tag)
+				collection_dict.pop(item)
+			if 'bookmarks' in request.POST[item]:
+				json_item = request.POST[item].split("_")
+				bookmark_id = json_item[1]
+				bookmarks.append(bookmark_id)
+				collection_dict.pop(item)
+		collection_dict["tags"] = tags
+		collection_dict["bookmarks"] = bookmarks
+		comments_permitted = collection_dict["comments_permitted"]
+		collection_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
+		collection_dict["anon_comments_permitted"] = comments_permitted == "All"
+		collection_dict = collection_dict.dict()
+		collection_dict["user"] = str(request.user)
+		collection_dict["draft"] = 'draft' in collection_dict
+		collection_dict["attributes"] = get_attributes_from_form_data(request)
+		print(collection_dict)
+		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict)
+		if response[1] == 200:
+			messages.add_message(request, messages.SUCCESS, 'Bookmark updated.')
+		elif response[1] == 403:
+			messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark.')
+		else:
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark. Please contact your administrator.')
+		return redirect(f'/bookmark-collections/{pk}')
+	else:
+		if request.user.is_authenticated:
+			tag_types = do_get(f'api/tagtypes', request)[0]
+			bookmark_collection = do_get(f'api/bookmarkcollections/{pk}/', request)[0]
+			bookmark_collection['description'] = sanitize_rich_text(bookmark_collection['description'])
+			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True})
+			bookmark_collection['attribute_types'] = process_attributes(bookmark_collection['attributes'], bookmark_attributes[0]['results'])
+			tags = group_tags_for_edit(bookmark_collection['tags'], tag_types) if 'tags' in bookmark_collection else []
+			return render(request, 'bookmark_collection_form.html', {
+				'bookmark_collection': bookmark_collection,
+				'tags': tags})
+		else:
+			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
+			return redirect('/login')
 
 
 def bookmark_collection(request, pk):
@@ -796,7 +866,7 @@ def bookmark_collection(request, pk):
 		bookmark_collection['post_action_url'] = f"/bookmarkcollections/{pk}/comments/new"
 		bookmark_collection['edit_action_url'] = f"""/bookmarkcollections/{pk}/comments/edit"""
 	for bookmark in bookmark_collection['bookmarks_readonly']:
-		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '')
+		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '').replace('<br/>', '', 1)
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
 	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
@@ -1154,7 +1224,7 @@ def bookmarks(request):
 		bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks,
-		'rating_range': bookmarks['star_count'],
+		'rating_range': response['star_count'],
 		'next': f"/bookmarks/{next_param}" if next_param is not None else None,
 		'previous': f"/bookmarks/{previous_param}" if previous_param is not None else None})
 

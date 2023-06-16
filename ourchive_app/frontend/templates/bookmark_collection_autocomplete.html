@@ -1,0 +1,7 @@
+{% if bookmarks %}
+<div class="uk-card uk-card-body uk-card-default uk-card-small" id="search-bookmark-autocomplete-parent">
+	{% for bookmark in bookmarks %}
+		<p id="search-bookmark-autocomplete-graf-{{bookmark.id}}" class="uk-text-left uk-margin-large-left"><a id="populate-search-bookmark-href-{{bookmark.bookmark.id}}" onclick="populateBookmarkInput('{{bookmark.bookmark.id}}', '{{bookmark.bookmark.title|default:bookmark.bookmark.work.title}}')"><span class="ourchive-autocomplete uk-text-small" id="search-bookmark-autocomplete-span-{{bookmark.id}}">{{bookmark.bookmark.title|default:bookmark.bookmark.work.title}}</span></a></p>
+	{% endfor %}
+</div>
+{% endif %}
