@@ -9,7 +9,7 @@ Required:
 ## Steps
 
 1. Create local [venv](https://docs.python.org/3/library/venv.html) for your repo 
-2. Activate venv and install required packages from [`requirements.txt`](requirements.txt)
+2. Activate venv and install required packages from [`requirements.txt`](requirements.txt): `pip install -r requirements.txt`
 
 	- if you get an install error for `psycopg2` that references `libpq-fe.h` like so:
 	```
