@@ -142,6 +142,11 @@
 	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s">
 	        <span id="footer-created-by" class="uk-text-meta uk-padding">Ourchive is created & maintained by <a href="https://github.com/klreeher">@klreeher</a> and <a href="https://github.com/c-e-p">@c-e-p</a>. Issues with the site? Report <a class="uk-text-uppercase uk-text-meta" target="_blank" href="https://github.com/c-e-p/ourchive/issues/new">here</a>.</span>
 	    </div>
+	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s">
+	        {% for page in content_pages %}
+	        <a href="/content-pages/{{page.id}}" class="uk-link uk-padding-small">{{page.name}}</a>
+	        {% endfor %}
+	    </div>
 	</div>
 </footer>
 </html>

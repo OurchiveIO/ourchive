@@ -66,6 +66,8 @@ urlpatterns = [
     path('attributevalues/<int:pk>/', views.AttributeValueDetail.as_view(), name='attributevalue-detail'),
     path('file-upload/', views.FileUpload.as_view(), name='api-file-upload'),
     path('bookmark-autocomplete', views.BookmarkAutocomplete.as_view(), name='bookmark-autocomplete'),
+    path('contentpages/', views.ContentPageList.as_view(), name='content-page-list'),
+    path('contentpages/<int:pk>', views.ContentPageDetail.as_view(), name='content-page-detail'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

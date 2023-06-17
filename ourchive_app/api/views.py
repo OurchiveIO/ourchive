@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 from rest_framework import viewsets, generics, permissions
-from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, UserBlocksSerializer
-from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, AttributeValue
+from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer
+from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, AttributeValue, ContentPage
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -707,4 +707,16 @@ class AttributeValueList(generics.ListCreateAPIView):
 class AttributeValueDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = AttributeValue.objects.get_queryset().order_by('name')
     serializer_class = AttributeValueSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class ContentPageList(generics.ListCreateAPIView):
+    queryset = ContentPage.objects.get_queryset()
+    serializer_class = ContentPageSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class ContentPageDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ContentPage.objects.get_queryset()
+    serializer_class = ContentPageDetailSerializer
     permission_classes = [IsAdminOrReadOnly]

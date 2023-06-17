@@ -108,6 +108,13 @@ def index(request):
 	})
 
 
+def content_page(request, pk):
+	response = do_get(f'api/contentpages/{pk}', request, params=request.GET)
+	return render(request, 'content_page.html', {
+		'content_page': response[0]
+	})
+
+
 def user_name(request, username):
 	user = do_get(f"api/users/{username}", request)[0]
 	if len(user['results']) > 0:

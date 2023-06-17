@@ -70,5 +70,6 @@ urlpatterns = [
     path('switch-css-mode/', views.switch_css_mode),
     path('tag-autocomplete', views.tag_autocomplete),
     path('bookmark-autocomplete', views.bookmark_autocomplete),
+    path('content-pages/<int:pk>', views.content_page),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

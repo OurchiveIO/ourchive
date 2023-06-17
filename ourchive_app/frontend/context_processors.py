@@ -20,3 +20,9 @@ def set_has_notifications(request):
     else:
         request.session['has_notifications'] = False
     return {}
+
+
+def set_content_pages(request):
+    request_url = f"api/contentpages/"
+    response = do_get(request_url, request)[0]
+    return {'content_pages': response['results']}

@@ -512,7 +512,7 @@ class ContentPage(models.Model):
         return self.name
 
     class Meta:
-        ordering = ('id',)
+        ordering = ('order', 'id',)
 
 
 class Invitation(models.Model):

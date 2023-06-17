@@ -6,7 +6,7 @@ from django.forms.widgets import Input
 
 
 class RichTextEditorWidget(Input):
-    template_name = "rich_text_widget.html"
+    template_name = "admin/rich_text_widget.html"
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -35,7 +35,7 @@ class ContentPageAdmin(admin.ModelAdmin):
         models.TextField: {"widget": RichTextEditorWidget},
     }
     readonly_fields = ["id"]
-    list_display = ('name', 'id')
+    list_display = ('name', 'id', 'order')
 
 
 admin.site.register(TagType)

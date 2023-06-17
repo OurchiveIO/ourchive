@@ -1,0 +1,9 @@
+{% extends 'index.html' %}
+{% block content %}	
+<div id="content-page-{{name}}-grid" class="uk-child-width-1@m uk-child-width-1@s uk-text-left uk-width-expand" uk-grid>
+<article id="content-page-{{name}}-article" class="uk-article">
+    <h1 class="uk-article-title" id="content-page-{{name}}-header">{{content_page.name}}</h1>
+    <p id="content-page-{{name}}-text">{{content_page.value|safe}}</p>
+</article>
+</div>
+{% endblock %}

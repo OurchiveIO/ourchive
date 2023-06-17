@@ -6,7 +6,7 @@ from .custom_fields import UserPrivateField
 from api.models import Work, Tag, Chapter, TagType, WorkType, \
     Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, \
     NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
-    Invitation, AttributeType, AttributeValue, User
+    Invitation, AttributeType, AttributeValue, User, ContentPage
 import datetime
 import logging
 from django.conf import settings
@@ -43,6 +43,25 @@ class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = AttributeType
+        fields = '__all__'
+
+
+class ContentPageSerializer(serializers.Serializer):
+    id = serializers.ReadOnlyField()
+    name = serializers.ReadOnlyField()
+
+    class Meta:
+        model = ContentPage
+        fields = '__all__'
+
+
+class ContentPageDetailSerializer(serializers.Serializer):
+    id = serializers.ReadOnlyField()
+    name = serializers.ReadOnlyField()
+    value = serializers.ReadOnlyField()
+
+    class Meta:
+        model = ContentPage
         fields = '__all__'
 
 
