@@ -1,6 +1,12 @@
 from django.contrib import admin
 from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, ContentPage, Tag, Invitation, AttributeType, AttributeValue
 from django.contrib.auth.admin import UserAdmin
+from django.db import models
+from django.forms.widgets import Input
+
+
+class RichTextEditorWidget(Input):
+    template_name = "rich_text_widget.html"
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -23,11 +29,20 @@ class InvitationAdmin(admin.ModelAdmin):
     search_fields = ('text', 'tag_type__label')
 
 
+class ContentPageAdmin(admin.ModelAdmin):
+    change_form_template = "admin/rich_text_content_page.html"
+    formfield_overrides = {
+        models.TextField: {"widget": RichTextEditorWidget},
+    }
+    readonly_fields = ["id"]
+    list_display = ('name', 'id')
+
+
 admin.site.register(TagType)
 admin.site.register(WorkType)
 admin.site.register(NotificationType)
 admin.site.register(OurchiveSetting)
-admin.site.register(ContentPage)
+admin.site.register(ContentPage, ContentPageAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Invitation, InvitationAdmin)
 admin.site.register(AttributeType, AttributeTypeAdmin)

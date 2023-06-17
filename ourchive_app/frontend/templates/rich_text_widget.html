@@ -1,0 +1,34 @@
+{% load static %}
+<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
+<style type="text/css">
+.tox-promotion {
+	display: none;
+}
+</style>
+<input type="hidden" id="contentpage_{{widget.name}}" name="{{widget.name}}" value="{{ widget.value|safe|default_if_none:'' }}">
+<textarea id="valueEditor" class="uk-margin-top"></textarea>
+<script type="text/javascript">
+      tinymce.init({
+        selector: '#valueEditor',
+        width: '80%',
+        height: 350,
+        autoresize_min_height: 450,
+        autoresize_max_height: 800,
+        plugins: [
+          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak', 
+          'fullscreen', 'insertdatetime',
+          'media', 'table', 'emoticons', 'code'
+        ],
+        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
+          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+          'forecolor backcolor emoticons | help | code',
+        menubar: '',
+        init_instance_callback : function(editor) {
+            var existingValue = document.getElementById('contentpage_{{widget.name}}').value;
+            if (existingValue === "None") {
+                existingValue = '';
+            }
+            editor.setContent(existingValue);
+        }
+      });
+</script>

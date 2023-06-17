@@ -107,10 +107,11 @@ else:
     DEFAULT_FROM_EMAIL = "admin@ourchive-dev.stopthatimp.net"  
     SERVER_EMAIL = "serveradmin@ourchive-dev.stopthatimp.net" 
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [os.path.join(BASE_DIR,"templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
