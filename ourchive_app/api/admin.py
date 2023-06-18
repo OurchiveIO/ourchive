@@ -3,6 +3,8 @@ from api.models import User, TagType, WorkType, NotificationType, OurchiveSettin
 from django.contrib.auth.admin import UserAdmin
 from django.db import models
 from django.forms.widgets import Input
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 class RichTextEditorWidget(Input):
@@ -24,9 +26,25 @@ class AttributeTypeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'display_name')
 
 
+@admin.action(description="Approve selected invitations")
+def approve_invitations(modeladmin, request, queryset):
+    for invitation in queryset:
+        if not invitation.token_used:
+            send_mail(
+                "Your Ourchive invitation",
+                f"Your invite request has been approved. Click this link to register: {settings.API_PROTOCOL}{invitation.register_link}",
+                settings.DEFAULT_FROM_EMAIL,
+                [invitation.email],
+                fail_silently=False,
+            )
+            invitation.approved = True
+            invitation.save()
+
+
 class InvitationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'email', 'register_link', 'token_expiration', 'token_used')
+    list_display = ('id', 'email', 'approved', 'token_expiration', 'token_used')
     search_fields = ('text', 'tag_type__label')
+    actions = [approve_invitations]
 
 
 class ContentPageAdmin(admin.ModelAdmin):

@@ -525,7 +525,7 @@ class Invitation(models.Model):
     token_expiration = models.DateTimeField()
     token_used = models.BooleanField(default=False)
     register_link = models.CharField(max_length=200)
-    send_invite = models.BooleanField(default=False)
+    approved = models.BooleanField(default=False)
 
     def __repr__(self):
         return '<Invitation: {}>'.format(self.id)

@@ -89,6 +89,8 @@ MEDIA_ROOT = os.getenv('OURCHIVE_MEDIA_ROOT')
 
 MEDIA_URL = os.getenv('OURCHIVE_MEDIA_URL')
 
+TMP_ROOT = os.getenv('OURCHIVE_TMP_ROOT')
+
 FILE_PROCESSOR = 'local'
 
 S3_BUCKET = 'ourchive_media'
@@ -226,4 +228,11 @@ LOGGING = {
             'handlers': ['file'],
         },
     },
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": os.getenv('OURCHIVE_DJANGO_CACHE'),
+    }
 }
