@@ -26,25 +26,33 @@ class AttributeTypeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'display_name')
 
 
+def send_invite_email(invitation, approved=False):
+    if invitation.token_used is False and (approved or invitation.approved):
+        send_mail(
+            "Your Ourchive invitation",
+            f"Your invite request has been approved. Click this link to register: {settings.API_PROTOCOL}{invitation.register_link}",
+            settings.DEFAULT_FROM_EMAIL,
+            [invitation.email],
+            fail_silently=False,
+        )
+
+
 @admin.action(description="Approve selected invitations")
 def approve_invitations(modeladmin, request, queryset):
     for invitation in queryset:
-        if not invitation.token_used:
-            send_mail(
-                "Your Ourchive invitation",
-                f"Your invite request has been approved. Click this link to register: {settings.API_PROTOCOL}{invitation.register_link}",
-                settings.DEFAULT_FROM_EMAIL,
-                [invitation.email],
-                fail_silently=False,
-            )
-            invitation.approved = True
-            invitation.save()
+        send_invite_email(invitation, True)
+        invitation.approved = True
+        invitation.save()
 
 
 class InvitationAdmin(admin.ModelAdmin):
     list_display = ('id', 'email', 'approved', 'join_reason', 'token_expiration', 'token_used')
     search_fields = ('text', 'tag_type__label')
     actions = [approve_invitations]
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        send_invite_email(obj)
 
 
 class ContentPageAdmin(admin.ModelAdmin):
