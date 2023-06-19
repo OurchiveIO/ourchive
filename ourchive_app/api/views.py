@@ -17,6 +17,7 @@ from django.conf import settings
 import html
 from .file_helpers import FileHelperService
 from django.core.exceptions import ObjectDoesNotExist
+import nh3
 
 
 @api_view(['GET'])
@@ -117,6 +118,7 @@ class Invitations(APIView):
             return Response({'message': 'User is already registered.'}, status=418)
         invitation = Invitation()
         invitation.email = html.escape(request.data['email']).replace('+', '%2B')
+        invitation.join_reason = nh3.clean(request.data['join_reason'])
         invitation.invite_token = get_random_string(length=100)
         invitation.token_expiration = datetime.datetime.now() + datetime.timedelta(days=7)
         invitation.register_link = f"{settings.ALLOWED_HOSTS[0]}/register?invite_token={invitation.invite_token}&email={invitation.email}"

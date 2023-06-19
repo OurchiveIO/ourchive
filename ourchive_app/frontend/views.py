@@ -1004,8 +1004,7 @@ def register(request):
 
 def request_invite(request):
 	if request.method == 'POST':
-		invite_email = request.POST.get('email')
-		response = do_post(f'api/invitations/', request, data={'email': invite_email})
+		response = do_post(f'api/invitations/', request, data=request.POST.copy())
 		if response[1] == 200 or response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'You have been added to the invite queue.')
 			return render(request, 'request_invite.html', {'invite_sent': True})

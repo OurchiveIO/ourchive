@@ -526,6 +526,7 @@ class Invitation(models.Model):
     token_used = models.BooleanField(default=False)
     register_link = models.CharField(max_length=200)
     approved = models.BooleanField(default=False)
+    join_reason = models.TextField(max_length=400, blank=True, null=True)
 
     def __repr__(self):
         return '<Invitation: {}>'.format(self.id)
