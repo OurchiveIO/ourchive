@@ -6,7 +6,7 @@ from django.contrib import messages
 from .search_models import SearchObject
 from html import escape
 import logging
-from .api_utils import do_get, do_post, do_patch, do_delete, process_results
+from .api_utils import do_get, do_post, do_patch, do_delete, process_results, validate_captcha
 
 logger = logging.getLogger(__name__)
 
@@ -1126,6 +1126,7 @@ def render_bookmark_comments(request, pk):
 
 def create_chapter_comment(request, work_id, chapter_id):
 	if request.method == 'POST':
+
 		comment_dict = request.POST.copy()
 		offset_url = int(request.GET.get('offset', 0))
 		comment_count = int(request.POST.get('chapter_comment_count'))
@@ -1140,6 +1141,11 @@ def create_chapter_comment(request, work_id, chapter_id):
 			comment_dict["user"] = str(request.user)
 		else:
 			comment_dict["user"] = None
+		if settings.USE_CAPTCHA:
+			captcha_passed = validate_captcha(request)
+			if not captcha_passed:
+				messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.')
+				return redirect(f"/works/{work_id}/")
 		response = do_post(f'api/comments/', request, data=comment_dict)
 		comment_id = response[0]['id'] if 'id' in response[0] else None
 		if response[1] == 200 or response[1] == 201:

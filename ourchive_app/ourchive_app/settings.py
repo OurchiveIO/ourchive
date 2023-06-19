@@ -81,6 +81,12 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 
+CAPTCHA_SITE_KEY = os.environ.get('OURCHIVE_CAPTCHA_SITE_KEY')
+CAPTCHA_SECRET = os.environ.get('OURCHIVE_CAPTCHA_SECRET')
+USE_CAPTCHA = os.environ.get('OURCHIVE_USE_CAPTCHA')
+CAPTCHA_PROVIDER = os.environ.get('OURCHIVE_CAPTCHA_PROVIDER')
+CAPTCHA_PARAM = os.environ.get('OURCHIVE_CAPTCHA_PARAM')
+
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ROOT_URLCONF = 'ourchive_app.urls'
@@ -125,6 +131,7 @@ TEMPLATES = [
                 'frontend.context_processors.set_style',
                 'frontend.context_processors.set_has_notifications',
                 'frontend.context_processors.set_content_pages',
+                'frontend.context_processors.set_captcha',
             ],
         },
     },

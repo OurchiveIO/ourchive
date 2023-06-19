@@ -1,4 +1,5 @@
 from .api_utils import do_get
+from django.conf import settings
 
 
 def set_style(request):
@@ -26,3 +27,7 @@ def set_content_pages(request):
     request_url = f"api/contentpages/"
     response = do_get(request_url, request)[0]
     return {'content_pages': response['results']}
+
+
+def set_captcha(request):
+    return {'captcha_site_key': settings.CAPTCHA_SITE_KEY}
