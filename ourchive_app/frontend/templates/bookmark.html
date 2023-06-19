@@ -83,11 +83,20 @@
 	    <div id="bookmark-{{bookmark.id}}-new">
             <form action="/bookmarks/{{bookmark.id}}/comments/new" method="post" class="uk-form uk-grid-small" id="bookmark-comment-form" uk-grid>
                 {% csrf_token %}
+                <label id="post-new-comment-label" class="uk-form-label uk-text-large" for="form-horizontal-text">New Comment</label>
                 <div class="uk-width-1-1" id="bookmark-comment-form-parent">
                 	<input type="hidden" id="bookmark-comment-hidden-input" name="bookmark" value="{{ bookmark.id }}">
                 	<input type="hidden" id="bookmark-comment-count" name="bookmark_comment_count" value="{{comments.count}}"/>
                 	<textarea rows="5" class="uk-textarea" id="bookmark-comment-input" name="text"></textarea>
                 </div>
+                {% if captcha_site_key %}
+		        {% if not request.user.is_authenticated %}
+		        <div class="uk-width-1-1 uk-margin-top">
+		            <div class="h-captcha" data-sitekey="{{captcha_site_key}}"></div>
+		              <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+		        </div>
+		        {% endif %}
+		        {% endif %}
                 <div class="uk-width-1-1" id="bookmark-comment-post-parent">
                 	<button id="bookmark-comment-post-button" class="uk-button uk-button-default uk-align-right">Post Comment</button>
                 </div>
