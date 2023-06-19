@@ -1126,11 +1126,12 @@ def render_bookmark_comments(request, pk):
 
 def create_chapter_comment(request, work_id, chapter_id):
 	if request.method == 'POST':
-		if settings.USE_CAPTCHA:
-			captcha_passed = validate_captcha(request)
-			if not captcha_passed:
-				messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.')
-				return redirect(f"/works/{work_id}/")
+		if not request.user.is_authenticated:
+			if settings.USE_CAPTCHA:
+				captcha_passed = validate_captcha(request)
+				if not captcha_passed:
+					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.')
+					return redirect(f"/works/{work_id}/")
 		comment_dict = request.POST.copy()
 		offset_url = int(request.GET.get('offset', 0))
 		comment_count = int(request.POST.get('chapter_comment_count'))
@@ -1205,11 +1206,12 @@ def delete_chapter_comment(request, work_id, chapter_id, comment_id):
 
 def create_bookmark_comment(request, pk):
 	if request.method == 'POST':
-		if settings.USE_CAPTCHA:
-			captcha_passed = validate_captcha(request)
-			if not captcha_passed:
-				messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.')
-				return redirect(f"/bookmarks/{pk}/")
+		if not request.user.is_authenticated:
+			if settings.USE_CAPTCHA:
+				captcha_passed = validate_captcha(request)
+				if not captcha_passed:
+					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.')
+					return redirect(f"/bookmarks/{pk}/")
 		comment_dict = request.POST.copy()
 		comment_count = int(request.POST.get('bookmark_comment_count'))
 		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
