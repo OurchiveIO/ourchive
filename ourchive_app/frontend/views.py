@@ -470,7 +470,9 @@ def new_work(request):
 			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
 			work['attribute_types'] = process_attributes([], work_attributes[0]['results'])
 			return render(request, 'work_form.html', {
-				'tags': tags, 'work_types': work_types['results'],
+				'tags': tags,
+				'form_title': 'New Work',
+				'work_types': work_types['results'],
 				'work': work})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this work.')
@@ -495,7 +497,9 @@ def new_chapter(request, work_id):
 			chapter = response[0]
 			chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True})
 			chapter['attribute_types'] = process_attributes([], chapter_attributes[0]['results'])
-			return render(request, 'chapter_form.html', {'chapter': chapter})
+			return render(request, 'chapter_form.html', {
+				'chapter': chapter,
+				'form_title': 'New Chapter'})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this chapter.')
 			return redirect(f'/works/{work_id}')
@@ -534,7 +538,9 @@ def edit_chapter(request, work_id, id):
 			chapter['notes'] = sanitize_rich_text(chapter['notes'])
 			chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True})
 			chapter['attribute_types'] = process_attributes(chapter['attributes'], chapter_attributes[0]['results'])
-			return render(request, 'chapter_form.html', {'chapter': chapter})
+			return render(request, 'chapter_form.html', {
+				'chapter': chapter,
+				'form_title': 'Edit Chapter'})
 		else:
 			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
 			return redirect('/login')
@@ -603,6 +609,7 @@ def edit_work(request, id):
 			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else []
 			return render(request, 'work_form.html', {
 				'work_types': work_types['results'],
+				'form_title': 'Edit Work',
 				'work': work,
 				'tags': tags,
 				'show_chapter': request.GET.get('show_chapter') if 'show_chapter' in request.GET else None,
@@ -706,7 +713,9 @@ def new_bookmark(request, work_id):
 			bookmark['attribute_types'] = process_attributes([], bookmark_attributes[0]['results'])
 			tags = group_tags(bookmark['tags'])
 			return render(request, 'bookmark_form.html', {
-				'tags': tags, 'rating_range': bookmark['star_count'],
+				'tags': tags,
+				'rating_range': bookmark['star_count'],
+				'form_title': 'New Bookmark',
 				'bookmark': bookmark})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark.')
@@ -763,6 +772,7 @@ def edit_bookmark(request, pk):
 			tags = group_tags_for_edit(bookmark['tags'], tag_types) if 'tags' in bookmark else []
 			return render(request, 'bookmark_form.html', {
 				'rating_range': bookmark['star_count'],
+				'form_title': 'Edit Bookmark',
 				'bookmark': bookmark,
 				'tags': tags})
 		else:
@@ -808,6 +818,7 @@ def new_bookmark_collection(request):
 			tags = group_tags(bookmark_collection['tags'])
 			return render(request, 'bookmark_collection_form.html', {
 				'tags': tags,
+				'form_title': 'New Bookmark Collection',
 				'bookmark_collection': bookmark_collection})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark collection.')
@@ -872,6 +883,7 @@ def edit_bookmark_collection(request, pk):
 			tags = group_tags_for_edit(bookmark_collection['tags'], tag_types) if 'tags' in bookmark_collection else []
 			return render(request, 'bookmark_collection_form.html', {
 				'bookmark_collection': bookmark_collection,
+				'form_title': 'Edit Bookmark Collection',
 				'tags': tags})
 		else:
 			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')

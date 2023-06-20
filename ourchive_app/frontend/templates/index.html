@@ -11,7 +11,7 @@
     <script src="{% static 'frontend/js/uikit.min.js' %}"></script>
     <script src="{% static 'frontend/js/uikit-icons.min.js' %}"></script>
     <script src="{% static 'frontend/js/ourchive-tags.js' %}"></script>
-    <title>Ourchive</title>
+    <title>{% block title %}Ourchive{% endblock %}</title>
 </head>
 <body>
 	{% if messages %}
