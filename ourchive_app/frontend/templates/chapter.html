@@ -34,12 +34,20 @@
     <div id="chapter-context-parent" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
 		<div id="chapter-summary-header"><span id="chapter-summary-label" class="uk-text-large">Summary</span></div>
 	    <div id="chapter-summary-div"><span id="chapter-summary-text" class="uk-text-medium">{% autoescape off %}{{ chapter.summary }}{% endautoescape %}</span></div>
+		{% if chapter.notes %}
 		<div id="chapter-notes-header"><span id="chapter-notes-label" class="uk-text-large">Notes</span></div>
-	    <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.notes }}{% endautoescape %}</span></div>
+	    <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.notes }}{% endautoescape %}</span></div>{% endif %}
 	    <div id="chapter-notes-summary-hr"><hr id="chapter-content-hr"/></div>
+	    {% if chapter.attributes %}
 	    {% include "object_attributes.html" with object='chapter' object_id=chapter.id attributes=chapter.attributes %}
+	    {% endif %}
 	</div>
-	{% if chapter.image_url and chapter.audio_url != "None" %}<p id="chapter-image-graf"><img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/></p><hr id="chapter-image-hr"/>{% endif %}
+	{% if chapter.image_url and chapter.image_url != "None" %}
+		<p id="chapter-image-graf">
+			<img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/>
+		</p>
+		<hr id="chapter-image-hr"/>
+	{% endif %}
 	{% if chapter.audio_url and chapter.audio_url != "None" %}<p id="chapter-audio-graf"><audio id="chapter-audio" src="{{ chapter.audio_url }}" controls></audio></p><hr id="chapter-audio-hr"/>{% endif %}
 	{% if chapter.text %}<span id="chapter-text" class="uk-text-medium">{% autoescape off %}{{ chapter.text }}{% endautoescape %}</span><hr id="chapter-text-hr"/>{% endif %}
 	<!-- use iconnav for work edit icons -->

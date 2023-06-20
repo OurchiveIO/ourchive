@@ -11,7 +11,7 @@
 html {
   /* 1 */
   font-family: "Jost", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  font-size: 16px;
+  font-size: 18px;
   font-weight: normal;
   line-height: 1.5;
   /* 2 */
@@ -251,11 +251,11 @@ h3, .uk-h3 {
   line-height: 1.4; }
 
 h4, .uk-h4 {
-  font-size: 1.25rem;
+  font-size: 1.33rem;
   line-height: 1.4; }
 
 h5, .uk-h5 {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.4; }
 
 h6, .uk-h6 {
@@ -323,7 +323,7 @@ address {
  ========================================================================== */
 blockquote {
   margin: 0 0 20px 0;
-  font-size: 1.25rem;
+  font-size: 1.33rem;
   line-height: 1.5;
   font-style: italic;
   color: #FFF; }
@@ -1493,7 +1493,7 @@ textarea.uk-form-small,
  * Large
  */
 .uk-form-large {
-  font-size: 1.25rem; }
+  font-size: 1.33rem; }
 
 /* Single-line */
 .uk-form-large:not(textarea):not([multiple]):not([size]) {
@@ -3098,7 +3098,7 @@ select.uk-form-width-xsmall {
 /* Title
  ========================================================================== */
 .uk-comment-title {
-  font-size: 1.25rem;
+  font-size: 1.33rem;
   line-height: 1.4; }
 
 /* Meta
@@ -3365,7 +3365,7 @@ select.uk-form-width-xsmall {
  ========================================================================== */
 .uk-accordion-title {
   display: block;
-  font-size: 1.25rem;
+  font-size: 1.33rem;
   line-height: 1.4;
   color: #FFF;
   overflow: hidden; }
@@ -4226,7 +4226,7 @@ select.uk-form-width-xsmall {
   padding: 15px;
   background: #042325;
   color: #F9F6F1;
-  font-size: 1.25rem;
+  font-size: 1.33rem;
   line-height: 1.4;
   cursor: pointer; }
 
@@ -4902,7 +4902,7 @@ ul.uk-nav-sub {
  * Subtitle
  */
 .uk-nav-primary .uk-nav-subtitle {
-  font-size: 1.25rem; }
+  font-size: 1.33rem; }
 
 /*
  * Header
@@ -4920,7 +4920,7 @@ ul.uk-nav-sub {
  * Sublists
  */
 .uk-nav-primary .uk-nav-sub {
-  font-size: 1.25rem;
+  font-size: 1.33rem;
   line-height: 1.5; }
 
 .uk-nav-primary .uk-nav-sub a {
@@ -4935,7 +4935,7 @@ ul.uk-nav-sub {
 /* Secondary modifier
  ========================================================================== */
 .uk-nav-secondary {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.5; }
   .uk-nav-secondary > :not(.uk-nav-divider) + :not(.uk-nav-header, .uk-nav-divider) {
     margin-top: 0; }
@@ -7111,7 +7111,7 @@ ul.uk-nav-sub {
   line-height: 1.5; }
 
 .uk-text-default {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.5; }
 
 /* Weight modifier

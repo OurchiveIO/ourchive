@@ -53,19 +53,10 @@
     </div>
     <hr id="work-form-title-content-divider"/>
     <div id="work-form-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left">
-    
-        {% if show_chapter %}
-            <ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade; active: 1" id="work-form-chapter-switcher-ul-active">
-        {% else %}
-            <ul id="work-form-chapter-switcher-ul-inactive" class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade; active: 0">
-        {% endif %}
-            <li id="work-form-edit-work-li"><a id="work-form-edit-work-link" href="#" id="edit_work_link">Edit Work</a></li>
-            <li id="work-form-edit-chapters-li"><a id="work-form-edit-chapters-link" href="#" id="toc_link">Edit Chapters</a></li>
-        </ul>   
+    <div class="uk-width-1-3 uk-align-right"><a class="uk-button uk-button-default uk-button-medium uk-align-right" href="#work-form-chapter-content-parent">Jump to chapters</a> </div>
     <input type="hidden" id="redirect_toc" name="redirect_toc">
 
-    <ul class="uk-switcher uk-margin" id="work_switcher">
-        <li id="work-form-work-switcher-li">
+
                 <div class="uk-margin" id="work-form-type-parent">
                     <label id="work-form-type-label" class="uk-form-label" for="form-horizontal-text">Work Type</label>
                     <div id="work-form-type-controls" class="uk-form-controls">
@@ -211,8 +202,9 @@
                         </select>
                     </div>
                 </div>
-        </li>
-        <li id="chapters_toc">
+        </div>
+        <div><hr/></div>
+        <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left">
             <script>
                 var util = UIkit.util;
 
@@ -229,6 +221,7 @@
                     });
                 });
             </script>
+            <h3 id="chapter-section-header">Chapters</h3>
             <ul class="uk-grid-small uk-child-width-1 uk-text-left" uk-sortable="handle: .uk-sortable-handle" uk-grid id="chapters_list">
                 {% for chapter in chapters %}
                 <li id="chapters-list-{{chapter.id}}">
@@ -250,8 +243,7 @@
                 {% endfor %}
                 <input id="work-form-new-chapter-link" class="uk-button uk-button-link" style="width:15em;" onclick="this.form.submitted=this.value;" type="submit" value="New Chapter"/>
             </ul>
-        </li>
-    </ul>
+
     </div>
     <hr/>
     <div id="work-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
