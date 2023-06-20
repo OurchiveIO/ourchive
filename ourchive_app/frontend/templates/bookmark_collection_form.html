@@ -30,7 +30,7 @@ function populateBookmarkInput(bookmark_id, bookmark_display) {
     var div = wrapper.firstChild;
     list.appendChild(div);
     var li = document.createElement('li');
-    li.innerHTML = bookmark_display+' (<a onclick="removeBookmark(event, "'+bookmark_id+'"")">Remove</a>)';
+    li.innerHTML = bookmark_display+' (<a onclick="removeBookmark(event,'+bookmark_id+')">Remove</a>)';
     list.appendChild(li);
     document.getElementById("bookmark_entry").value = '';
     document.getElementById("bookmark_entry").focus();

@@ -43,6 +43,7 @@
 	   		<span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description|safe}}</span>
 	   	</div>
 	   	<div class="uk-width-1-1">
+	   		{% if bkcol.bookmarks_readonly %}
 	   		<div id="bkcol-bookmarks-parent" class="uk-position-relative uk-visible-toggle" tabindex="-1" uk-slideshow="animation: push" uk-slideshow>
 	   			<ul class="uk-slideshow-items">
 		   			{% for bookmark in bkcol.bookmarks_readonly %}
@@ -69,6 +70,7 @@
 			        <a class="uk-position-center-right uk-position-small uk-hidden-hover" href="#" uk-slidenav-next uk-slideshow-item="next"></a>
 			    </div>
 			</div>
+			{% endif %}
 		</div>
 	    {% if comments.count > 0 %}<div id="bkcol-comments-toggle-grid" class="uk-width-1-1">
 	        <div id="bkcol-comments-toggle-row">
