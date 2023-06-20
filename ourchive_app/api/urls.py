@@ -49,6 +49,7 @@ urlpatterns = [
     path('users/<str:username>/works', views.UserWorkList.as_view(), name='user-works-drafts'),
     path('users/<str:username>/works/drafts', views.UserWorkDraftList.as_view(), name='user-drafts'),
     path('users/<str:username>/bookmarks', views.UserBookmarkList.as_view(), name='user-bookmarks'),
+    path('users/<str:username>/bookmarkcollections', views.UserBookmarkCollectionList.as_view(), name='user-bookmark-collections'),
     path('users/<str:username>/notifications', views.UserNotificationList.as_view(), name='user-notifications'),
     path('users/<str:username>/bookmarks/drafts', views.UserBookmarkDraftList.as_view(), name='user-bookmarks-drafts'),
     path('userblocks', views.UserBlocksList.as_view(), name='user-blocks-list'),

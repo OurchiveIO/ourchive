@@ -50,6 +50,7 @@ urlpatterns = [
     path('username/<str:username>/works/', views.user_works),
     path('username/<str:username>/works/drafts/', views.user_works_drafts),
     path('username/<str:username>/bookmarks/', views.user_bookmarks),
+    path('username/<str:username>/bookmark-collections/', views.user_bookmark_collections),
     path('username/<str:username>/bookmarks/drafts/', views.user_bookmarks_drafts),
     path('username/<str:username>/notifications/', views.user_notifications),
     path('username/<str:username>/notifications/<int:notification_id>/read', views.mark_notification_read),

@@ -218,6 +218,7 @@ def user_name(request, username):
 	if len(user['results']) > 0:
 		work_params = {}
 		bookmark_params = {}
+		bookmark_collection_params = {}
 		anchor = None
 		if 'work_offset' in request.GET:
 			work_params['offset'] = request.GET['work_offset']
@@ -227,6 +228,10 @@ def user_name(request, username):
 			bookmark_params['offset'] = request.GET['bookmark_offset']
 			bookmark_params['limit'] = request.GET['bookmark_limit']
 			anchor = "bookmark_tab"
+		if 'bookmark_collection_offset' in request.GET:
+			bookmark_collection_params['offset'] = request.GET['bookmark_collection_offset']
+			bookmark_collection_params['limit'] = request.GET['bookmark_collection_limit']
+			anchor = "bookmark_collection_tab"
 		works_response = do_get(f'api/users/{username}/works', request, params=work_params)[0]
 		works = works_response['results']
 		works = get_object_tags(works)
@@ -237,6 +242,11 @@ def user_name(request, username):
 		bookmark_next = f'/username/{username}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
 		bookmark_previous = f'/username/{username}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
 		bookmarks = get_object_tags(bookmarks)
+		bookmark_collection_response = do_get(f'api/users/{username}/bookmarkcollections', request, params=bookmark_collection_params)[0]
+		bookmark_collection = bookmark_collection_response['results']
+		bookmark_collection_next = f'/username/{username}/{bookmark_collection_response["next_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["next_params"] is not None else None
+		bookmark_collection_previous = f'/username/{username}/{bookmark_collection_response["prev_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["prev_params"] is not None else None
+		bookmark_collection = get_object_tags(bookmark_collection)
 		user = user['results'][0]
 		user['attributes'] = get_attributes_for_display(user['attributes'])
 		return render(request, 'user.html', {
@@ -249,6 +259,9 @@ def user_name(request, username):
 			'anchor': anchor,
 			'works_next': work_next,
 			'works_previous': work_previous,
+			'bookmark_collections': bookmark_collection,
+			'bookmark_collections_next': bookmark_collection_next,
+			'bookmark_collections_previous': bookmark_collection_previous,
 			'user': user
 		})
 	else:
@@ -395,6 +408,17 @@ def user_bookmarks(request, username):
 		'bookmarks': bookmarks,
 		'next': f"/username/{username}/bookmarks/{response['next_params']}" if response["next_params"] is not None else None,
 		'previous': f"/username/{username}/bookmarks/{response['prev_params']}" if response["prev_params"] is not None else None,
+		'user_filter': username})
+
+
+def user_bookmark_collections(request, username):
+	response = do_get(f'api/users/{username}/bookmarkcollections', request, params=request.GET)[0]
+	bookmark_collections = response['results']
+	bookmark_collections = get_object_tags(bookmark_collections)
+	return render(request, 'bookmark_collections.html', {
+		'bookmark_collections': bookmark_collections,
+		'next': f"/username/{username}/bookmarkcollections/{response['next_params']}" if response["next_params"] is not None else None,
+		'previous': f"/username/{username}/bookmarkcollections/{response['prev_params']}" if response["prev_params"] is not None else None,
 		'user_filter': username})
 
 

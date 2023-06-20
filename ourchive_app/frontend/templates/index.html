@@ -36,6 +36,7 @@
 		            <li class="uk-active" id="nav-home"><a href="/">Home</a></li>
 		            <li><a href="/works" id="nav-works">Works</a></li>
 		            <li><a href="/bookmarks" id="nav-bookmarks">Bookmarks</a></li>
+		            <li><a href="/bookmark-collections" id="nav-bookmark-collections">Bookmark Collections</a></li>
 		        </ul>
 		    </div>	    
 		    <div class="uk-navbar-right uk-margin-right" id="uk-nav-right">
@@ -77,6 +78,7 @@
 	                    		<ul class="uk-nav uk-navbar-dropdown-nav" id="nav-user-dropdown-ul">
 	                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
 	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks" id="nav-bookmarks-link">Bookmarks</a></li>
+	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmark-collections" id="nav-bookmark-collecitons-link">Bookmark Collections</a></li>
 	                    			<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">Works</a></li>
 	                    			<li id="nav-edit-profile-li"><a href="/username/{{request.user}}/edit" id="nav-edit-profile-link">Edit Profile</a></li>
 	                    			<li id="nav-edit-account-li"><a href="/username/{{request.user}}/account/edit" id="nav-edit-account-link">Edit Account</a></li>
@@ -102,6 +104,7 @@
 				<li id="sidenav-home-li" class="uk-active"><a id="sidenav-home-link" href="/">Home</a></li>
 	            <li id="sidenav-works-li"><a id="sidenav-works-link" href="/works">Works</a></li>
 	            <li id="sidenav-bookmarks-li"><a id="sidenav-bookmarks-link" href="/bookmarks">Bookmarks</a></li>
+	            <li id="sidenav-bookmark-collections-li"><a id="sidenav-bookmark-collections-link" href="/bookmark-collections">Bookmark Collections</a></li>
 	            <li id="sidenav-search-li"><a id="sidenav-search-link" href="/search">Search Results</a></li>
 	            {% if not request.user.is_authenticated %}
 	            	<li id="sidenav-sign-in-li" class="uk-active">

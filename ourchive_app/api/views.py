@@ -184,6 +184,14 @@ class UserBookmarkList(generics.ListCreateAPIView):
         return Bookmark.objects.filter(user__username=self.kwargs['username']).order_by('id')
 
 
+class UserBookmarkCollectionList(generics.ListCreateAPIView):
+    serializer_class = BookmarkCollectionSerializer
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        return BookmarkCollection.objects.filter(user__username=self.kwargs['username']).order_by('id')
+
+
 class UserBookmarkDraftList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsOwnerOrReadOnly]
