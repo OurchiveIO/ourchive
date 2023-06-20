@@ -130,8 +130,41 @@ def get_bookmark_obj(request):
 	bookmark_dict["user"] = str(request.user)
 	bookmark_dict["draft"] = 'draft' in bookmark_dict
 	bookmark_dict["attributes"] = get_attributes_from_form_data(request)
-	bookmark_dict.pop("attributevals")
 	return bookmark_dict
+
+
+def get_bookmark_collection_obj(request):
+	collection_dict = request.POST.copy()
+	tags = []
+	bookmarks = []
+	tag_types = {}
+	result = do_get(f'api/tagtypes', request)[0]['results']
+	for item in result:
+		tag_types[item['label']] = item
+	for item in request.POST:
+		if 'tags' in request.POST[item]:
+			tag = {}
+			json_item = request.POST[item].split("_")
+			tag['tag_type'] = json_item[2]
+			tag['text'] = json_item[1]
+			tags.append(tag)
+			collection_dict.pop(item)
+		if 'bookmarks' in request.POST[item]:
+			json_item = request.POST[item].split("_")
+			bookmark_id = json_item[1]
+			bookmarks.append(bookmark_id)
+			collection_dict.pop(item)
+	collection_dict["tags"] = tags
+	collection_dict["bookmarks"] = bookmarks
+	comments_permitted = collection_dict["comments_permitted"]
+	collection_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
+	collection_dict["anon_comments_permitted"] = comments_permitted == "All"
+	collection_dict = collection_dict.dict()
+	collection_dict["user"] = str(request.user)
+	collection_dict["draft"] = 'draft' in collection_dict
+	collection_dict["is_private"] = False
+	collection_dict["attributes"] = get_attributes_from_form_data(request)
+	return collection_dict
 
 
 def referrer_redirect(request, alternate_url=None):
@@ -820,26 +853,25 @@ def bookmark_collections(request):
 
 def new_bookmark_collection(request):
 	if request.user.is_authenticated and request.method != 'POST':
-		data = {'title': 'New Bookmark Collection', 'description': '', 'user': request.user.username, 'is_private': True, 'is_draft': True}
-		response = do_post(f'api/bookmarkcollections/', request, data=data)
+		bookmark_collection = {'title': 'New Bookmark Collection', 'description': '', 'user': request.user.username, 'is_private': True, 'is_draft': True}
+		bookmark_collection_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True})
+		bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes[0]['results'])
+		tag_types = do_get(f'api/tagtypes', request)[0]
+		tags = {result['label']:[] for result in tag_types['results']}
+		return render(request, 'bookmark_collection_form.html', {
+			'tags': tags,
+			'form_title': 'New Bookmark Collection',
+			'bookmark_collection': bookmark_collection})
+	elif request.user.is_authenticated:
+		collection_dict = get_bookmark_collection_obj(request)
+		response = do_post(f'api/bookmarkcollections/', request, data=collection_dict)
 		if response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark collection created.')
-			bookmark_collection = response[0]
-			bookmark_collection_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True})
-			bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes[0]['results'])
-			tags = group_tags(bookmark_collection['tags'])
-			return render(request, 'bookmark_collection_form.html', {
-				'tags': tags,
-				'form_title': 'New Bookmark Collection',
-				'bookmark_collection': bookmark_collection})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark collection.')
-			return redirect('/')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this bookmark collection. Please contact your administrator.')
-			return redirect('/')
-	elif request.user.is_authenticated:
-		return edit_bookmark_collection(request, int(request.POST['bookmark_collection_id']))
+		return redirect(f'/bookmark-collections/{response[0]["id"]}')
 	else:
 		messages.add_message(request, messages.ERROR, 'You must log in to create a bookmark collection.')
 		return redirect('/login')
@@ -847,36 +879,7 @@ def new_bookmark_collection(request):
 
 def edit_bookmark_collection(request, pk):
 	if request.method == 'POST':
-		collection_dict = request.POST.copy()
-		tags = []
-		bookmarks = []
-		tag_types = {}
-		result = do_get(f'api/tagtypes', request)[0]['results']
-		for item in result:
-			tag_types[item['label']] = item
-		for item in request.POST:
-			if 'tags' in request.POST[item]:
-				tag = {}
-				json_item = request.POST[item].split("_")
-				tag['tag_type'] = json_item[2]
-				tag['text'] = json_item[1]
-				tags.append(tag)
-				collection_dict.pop(item)
-			if 'bookmarks' in request.POST[item]:
-				json_item = request.POST[item].split("_")
-				bookmark_id = json_item[1]
-				bookmarks.append(bookmark_id)
-				collection_dict.pop(item)
-		collection_dict["tags"] = tags
-		collection_dict["bookmarks"] = bookmarks
-		comments_permitted = collection_dict["comments_permitted"]
-		collection_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
-		collection_dict["anon_comments_permitted"] = comments_permitted == "All"
-		collection_dict = collection_dict.dict()
-		collection_dict["user"] = str(request.user)
-		collection_dict["draft"] = 'draft' in collection_dict
-		collection_dict["is_private"] = False
-		collection_dict["attributes"] = get_attributes_from_form_data(request)
+		collection_dict = get_bookmark_collection_obj(request)
 		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict)
 		if response[1] == 200:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark collection updated.')
