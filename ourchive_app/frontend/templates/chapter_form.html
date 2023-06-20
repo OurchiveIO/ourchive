@@ -143,7 +143,7 @@
         <h3 id="obj-attrs-form-header">Chapter Content</h3>
         <div class="uk-margin" id="chapter-form-image-parent">
             <label id="chapter-form-image-label" class="uk-form-label" for="form-horizontal-text">Chapter Image</label>
-            {% if chapter.image_url %}
+            {% if chapter.image_url and chapter.image_url != "None" %}
                 <img id="chapter-form-image" src="{{ chapter.image_url }}"/>
             {% endif %}
             <div class="uk-form-controls" id="chapter-form-image-upload-controls">

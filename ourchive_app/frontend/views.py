@@ -74,9 +74,74 @@ def sanitize_rich_text(rich_text):
 	return rich_text
 
 
-def referrer_redirect(request):
-	refer = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') is not None and '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER'] else '/'
-	return redirect(refer)
+def get_work_obj(request):
+	work_dict = request.POST.copy()
+	tags = []
+	tag_types = {}
+	chapters = []
+	result = do_get(f'api/tagtypes', request)[0]['results']
+	for item in result:
+		tag_types[item['label']] = item
+	for item in request.POST:
+		if 'tags' in request.POST[item]:
+			tag = {}
+			json_item = request.POST[item].split("_")
+			tag['tag_type'] = json_item[2]
+			tag['text'] = json_item[1]
+			tags.append(tag)
+			work_dict.pop(item)
+		elif 'chapters_' in item:
+			chapter_id = item[9:]
+			chapter_number = request.POST[item]
+			chapters.append({'id': chapter_id, 'number': chapter_number, 'work': id})
+	work_dict["tags"] = tags
+	comments_permitted = work_dict["comments_permitted"]
+	work_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
+	work_dict["anon_comments_permitted"] = comments_permitted == "All"
+	redirect_toc = work_dict.pop('redirect_toc')[0]
+	work_dict["is_complete"] = "is_complete" in work_dict
+	work_dict["draft"] = "draft" in work_dict
+	work_dict = work_dict.dict()
+	work_dict["user"] = str(request.user)
+	work_dict["attributes"] = get_attributes_from_form_data(request)
+	return [work_dict, redirect_toc, chapters]
+
+
+def get_bookmark_obj(request):
+	bookmark_dict = request.POST.copy()
+	tags = []
+	tag_types = {}
+	result = do_get(f'api/tagtypes', request)[0]['results']
+	for item in result:
+		tag_types[item['label']] = item
+	for item in request.POST:
+		if 'tags' in request.POST[item]:
+			tag = {}
+			json_item = request.POST[item].split("_")
+			tag['tag_type'] = json_item[2]
+			tag['text'] = json_item[1]
+			tags.append(tag)
+			bookmark_dict.pop(item)
+	bookmark_dict["tags"] = tags
+	comments_permitted = bookmark_dict["comments_permitted"]
+	bookmark_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
+	bookmark_dict["anon_comments_permitted"] = comments_permitted == "All"
+	bookmark_dict = bookmark_dict.dict()
+	bookmark_dict["user"] = str(request.user)
+	bookmark_dict["draft"] = 'draft' in bookmark_dict
+	bookmark_dict["attributes"] = get_attributes_from_form_data(request)
+	bookmark_dict.pop("attributevals")
+	return bookmark_dict
+
+
+def referrer_redirect(request, alternate_url=None):
+	if request.META.get('HTTP_REFERER') is not None:
+		print(request.META.get('HTTP_REFERER'))
+		if '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER']:
+			return redirect(request.META.get('HTTP_REFERER'))
+		else:
+			refer = alternate_url if alternate_url is not None else '/'
+			return redirect(refer)
 
 
 def get_object_tags(parent):
@@ -461,27 +526,23 @@ def works_by_type(request, type_id):
 def new_work(request):
 	work_types = do_get(f'api/worktypes', request)[0]
 	if request.user.is_authenticated and request.method != 'POST':
-		response = do_post(f'api/works/', request, data={'title': 'Untitled Work', 'user': request.user.username})
-		if response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Work created.')
-			work = response[0]
-			tag_types = do_get(f'api/tagtypes', request)[0]
-			tags = {result['label']:[] for result in tag_types['results']}
-			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
-			work['attribute_types'] = process_attributes([], work_attributes[0]['results'])
-			return render(request, 'work_form.html', {
-				'tags': tags,
-				'form_title': 'New Work',
-				'work_types': work_types['results'],
-				'work': work})
-		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to create this work.')
-			return redirect('/works')
-		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this work. Please contact your administrator.')
-			return redirect('/works')
+		work = {'title': 'Untitled Work', 'user': request.user.username}
+		tag_types = do_get(f'api/tagtypes', request)[0]
+		tags = {result['label']:[] for result in tag_types['results']}
+		work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
+		work['attribute_types'] = process_attributes([], work_attributes[0]['results'])
+		return render(request, 'work_form.html', {
+			'tags': tags,
+			'form_title': 'New Work',
+			'work_types': work_types['results'],
+			'work': work})
 	elif request.user.is_authenticated:
-		return edit_work(request, int(request.POST['work_id']))
+		work_data = get_work_obj(request)
+		work = do_post(f'api/works/', request, work_data[0])[0]
+		if work_data[1] == 'false':
+			return redirect(f'/works/{work["id"]}')
+		else:
+			return redirect(f'/works/{work["id"]}/chapters/new?count=0')
 	else:
 		messages.add_message(request, messages.ERROR, 'You must log in to post a new work.')
 		return redirect('/login')
@@ -490,29 +551,27 @@ def new_work(request):
 def new_chapter(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
 		count = request.GET.get('count') if request.GET.get('count') != '' else 0
-		request_json = {'title': 'Untitled Chapter', 'work': work_id, 'text': '', 'number': int(count) + 1}
-		response = do_post(f'api/chapters/', request, data=request_json)
+		chapter = {'title': 'Untitled Chapter', 'work': work_id, 'text': '', 'number': int(count) + 1}
+		chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True})
+		chapter['attribute_types'] = process_attributes([], chapter_attributes[0]['results'])
+		return render(request, 'chapter_form.html', {
+			'chapter': chapter,
+			'form_title': 'New Chapter'})
+	elif request.user.is_authenticated:
+		chapter_dict = request.POST.copy()
+		chapter_dict["draft"] = "draft" in chapter_dict
+		chapter_dict["attributes"] = get_attributes_from_form_data(request)
+		response = do_post(f'api/chapters/', request, data=chapter_dict)
 		if response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Chapter created.')
-			chapter = response[0]
-			chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True})
-			chapter['attribute_types'] = process_attributes([], chapter_attributes[0]['results'])
-			return render(request, 'chapter_form.html', {
-				'chapter': chapter,
-				'form_title': 'New Chapter'})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this chapter.')
-			return redirect(f'/works/{work_id}')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this chapter. Please contact your administrator.')
-			return redirect(f'/works/{work_id}')
-	elif request.user.is_authenticated:
-		if 'chapter_id' in request.POST:
-			return edit_chapter(request, work_id, request.POST['chapter_id'])
-		else:
-			return edit_chapter(request, work_id, None)
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
+		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit"
+		return redirect(redirect_url)
 	else:
-		messages.add_message(request, messages.ERROR, 'You must log in to post a new work.')
+		messages.add_message(request, messages.ERROR, 'You must log in to post a new chapter.')
 		return redirect('/login')
 
 
@@ -528,7 +587,8 @@ def edit_chapter(request, work_id, id):
 			messages.add_message(request, messages.ERROR, 'You are not authorized to update this chapter.')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
-		return redirect(f'/works/{work_id}/edit/?show_chapter=true')
+		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit"
+		return redirect(redirect_url)
 	else:
 		if request.user.is_authenticated:
 			chapter = do_get(f'api/chapters/{id}', request)[0]
@@ -548,36 +608,9 @@ def edit_chapter(request, work_id, id):
 
 def edit_work(request, id):
 	if request.method == 'POST':
-		work_dict = request.POST.copy()
-		tags = []
-		tag_types = {}
-		chapters = []
-		result = do_get(f'api/tagtypes', request)[0]['results']
-		for item in result:
-			tag_types[item['label']] = item
-		for item in request.POST:
-			if 'tags' in request.POST[item]:
-				tag = {}
-				json_item = request.POST[item].split("_")
-				tag['tag_type'] = json_item[2]
-				tag['text'] = json_item[1]
-				tags.append(tag)
-				work_dict.pop(item)
-			elif 'chapters_' in item:
-				chapter_id = item[9:]
-				chapter_number = request.POST[item]
-				chapters.append({'id': chapter_id, 'number': chapter_number, 'work': id})
-		work_dict["tags"] = tags
-		comments_permitted = work_dict["comments_permitted"]
-		work_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
-		work_dict["anon_comments_permitted"] = comments_permitted == "All"
-		redirect_toc = work_dict.pop('redirect_toc')[0]
-		work_dict["is_complete"] = "is_complete" in work_dict
-		work_dict["draft"] = "draft" in work_dict
-		work_dict = work_dict.dict()
-		work_dict["user"] = str(request.user)
-		work_dict["attributes"] = get_attributes_from_form_data(request)
-		response = do_patch(f'api/works/{id}/', request, data=work_dict)
+		work_dict = get_work_obj(request)
+		chapters = work_dict[2]
+		response = do_patch(f'api/works/{id}/', request, data=work_dict[0])
 		if response[1] == 200:
 			for chapter in chapters:
 				response = do_patch(f'api/chapters/{chapter["id"]}/draft', request, data=chapter)
@@ -586,7 +619,7 @@ def edit_work(request, id):
 			messages.add_message(request, messages.ERROR, 'You are not authorized to update this work.')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this work. Please contact your administrator.')
-		if redirect_toc == 'false' and len(chapters) > 0:
+		if work_dict[1] == 'false':
 			return redirect(f'/works/{id}')
 		else:
 			return redirect(f'/works/{id}/chapters/new?count={len(chapters)}')
@@ -704,27 +737,27 @@ def delete_chapter(request, work_id, chapter_id):
 
 def new_bookmark(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
-		data = {'title': '', 'description': '', 'user': request.user.username, 'work_id': work_id, 'is_private': True, 'rating': 5}
-		response = do_post(f'api/bookmarks/', request, data=data)
+		bookmark = {'title': '', 'description': '', 'user': request.user.username, 'work': {'title': request.GET.get('title'), 'id': work_id}, 'is_private': True, 'rating': 5}
+		bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True})
+		bookmark['attribute_types'] = process_attributes([], bookmark_attributes[0]['results'])
+		tag_types = do_get(f'api/tagtypes', request)[0]
+		tags = {result['label']:[] for result in tag_types['results']}
+		star_count = do_get(f'api/bookmarks', request)[0]['star_count']
+		return render(request, 'bookmark_form.html', {
+			'tags': tags,
+			'rating_range': star_count,
+			'form_title': 'New Bookmark',
+			'bookmark': bookmark})
+	elif request.user.is_authenticated:
+		bookmark_dict = get_bookmark_obj(request)
+		response = do_post(f'api/bookmarks/', request, data=bookmark_dict)
 		if response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark created.')
-			bookmark = response[0]
-			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True})
-			bookmark['attribute_types'] = process_attributes([], bookmark_attributes[0]['results'])
-			tags = group_tags(bookmark['tags'])
-			return render(request, 'bookmark_form.html', {
-				'tags': tags,
-				'rating_range': bookmark['star_count'],
-				'form_title': 'New Bookmark',
-				'bookmark': bookmark})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark.')
-			return redirect('/')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this bookmark. Please contact your administrator.')
-			return redirect('/')
-	elif request.user.is_authenticated:
-		return edit_bookmark(request, int(request.POST['bookmark_id']))
+		return redirect(f'/bookmarks/{response[0]["id"]}')
 	else:
 		messages.add_message(request, messages.ERROR, 'You must log in to create a bookmark.')
 		return redirect('/login')
@@ -732,28 +765,7 @@ def new_bookmark(request, work_id):
 
 def edit_bookmark(request, pk):
 	if request.method == 'POST':
-		bookmark_dict = request.POST.copy()
-		tags = []
-		tag_types = {}
-		result = do_get(f'api/tagtypes', request)[0]['results']
-		for item in result:
-			tag_types[item['label']] = item
-		for item in request.POST:
-			if 'tags' in request.POST[item]:
-				tag = {}
-				json_item = request.POST[item].split("_")
-				tag['tag_type'] = json_item[2]
-				tag['text'] = json_item[1]
-				tags.append(tag)
-				bookmark_dict.pop(item)
-		bookmark_dict["tags"] = tags
-		comments_permitted = bookmark_dict["comments_permitted"]
-		bookmark_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
-		bookmark_dict["anon_comments_permitted"] = comments_permitted == "All"
-		bookmark_dict = bookmark_dict.dict()
-		bookmark_dict["user"] = str(request.user)
-		bookmark_dict["draft"] = 'draft' in bookmark_dict
-		bookmark_dict["attributes"] = get_attributes_from_form_data(request)
+		bookmark_dict = get_bookmark_obj(request)
 		response = do_patch(f'api/bookmarks/{pk}/', request, data=bookmark_dict)
 		if response[1] == 200:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark updated.')

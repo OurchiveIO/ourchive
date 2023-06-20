@@ -27,7 +27,7 @@
                 {% else %}
                 <a id="work-view-all-link" href="/works/{{ id }}/?view_full=true"><span uk-icon="icon: plus-circle" id="work-view-all-span" title="View All Chapters"></span> </a>
                 {% endif %}
-                <a id="work-bookmark-link" href="/bookmarks/new/{{ id }}"><span uk-icon="icon: bookmark" id="work-bookmark-span" title="Bookmark"></span> </a>
+                <a id="work-bookmark-link" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span uk-icon="icon: bookmark" id="work-bookmark-span" title="Bookmark"></span> </a>
                 <a id="work-fingerguns-link" href="/fingerguns/{{ id }}"><span uk-icon="icon: bolt" id="work-fingerguns-span" title="Add Fingerguns"></span> </a>
             </div>
             {% if work.cover_url and work.cover_url != "None" %}

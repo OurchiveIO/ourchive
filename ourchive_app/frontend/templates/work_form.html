@@ -1,5 +1,5 @@
 {% extends 'index.html' %}
-{% block title %}Edit Work{% endblock %}
+{% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
 {% load static %}
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
@@ -44,7 +44,11 @@
     <input type="hidden" id="work-id-hidden" name="work_id" value="{{ work.id }}">
     <div id="work-form-top-controls-parent" class="uk-grid" uk-grid>
         <div id="work-form-title-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
-            <span id="work-form-title-span" class="uk-text-large"><a id="work-form-title-link" href="/works/{{work.id}}">{{ work.title }}</a></span> <span id="work-form-publish-all-span" class="uk-text-meta uk-margin-medium-left">(<a id="work-form-publish-all" class="uk-link" href="/works/{{ work.id }}/publish-full">Publish All</a>)</span>
+            {% if work.id %}
+                <span id="work-form-title-span" class="uk-text-large"><a id="work-form-title-link" href="/works/{{work.id}}">{{ form_title }}</a></span> <span id="work-form-publish-all-span" class="uk-text-meta uk-margin-medium-left">(<a id="work-form-publish-all" class="uk-link" href="/works/{{ work.id }}/publish-full">Publish All</a>)</span>
+            {% else %}
+                <span id="work-form-title-span" class="uk-text-large">{{ work.title }}</span>
+            {% endif %}
         </div>
         <div class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="work-form-top-buttons-group">
              <button id="work-form-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>

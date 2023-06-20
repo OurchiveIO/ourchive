@@ -31,7 +31,7 @@
     <input id="bookmark-form-hidden-id" type="hidden" name="bookmark_id" value="{{ bookmark.id }}"/>
     <div id="bookmark-form-actions-parent" class="uk-grid" uk-grid>
         <div id="bookmark-form-header-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
-            <span id="bookmark-form-header-span" class="uk-text-large">Edit Bookmark</span>
+            <span id="bookmark-form-header-span" class="uk-text-large">{{ form_title }}</span>
         </div>
         <div id="bookmark-form-actions-group" class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right">
             <input id="bookmark-form-cancel" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel"/>

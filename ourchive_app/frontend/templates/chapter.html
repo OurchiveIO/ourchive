@@ -26,7 +26,7 @@
             {% if chapter.draft %}
             <a id="chapter-publish-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/publish"><span id="chapter-publish-span" uk-icon="icon: check" title="Publish"></span> </a>
             {% endif %}
-            <a id="chapter-edit-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/edit"><span uk-icon="icon: file-edit" id="chapter-edit-span"></span> </a>
+            <a id="chapter-edit-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/edit?from_work={{chapter_offset}}"><span uk-icon="icon: file-edit" id="chapter-edit-span"></span> </a>
             <a id="chapter-delete-link" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete"><span uk-icon="icon: trash" id="chapter-delete-span"></span> </a>
             {% include "delete_modal.html" with object='chapter' parent_object_id=work.id object_id=chapter.id %}
             {% endif %}
