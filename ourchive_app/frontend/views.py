@@ -263,7 +263,7 @@ def edit_user(request, username):
 					user['profile'] = sanitize_rich_text(user['profile'])
 				user_attributes = do_get(f'api/attributetypes', request, params={'allow_on_user': True})
 				user['attribute_types'] = process_attributes(user['attributes'], user_attributes[0]['results'])
-				return render(request, 'user_form.html', {'user': user})
+				return render(request, 'user_form.html', {'user': user, 'form_title': 'Edit User'})
 			else:
 				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.')
 				return redirect(f'/username/{username}')
