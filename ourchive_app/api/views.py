@@ -486,7 +486,6 @@ class BookmarkList(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         response = super(BookmarkList, self).create(request, args, kwargs)
         response.data['star_count'] = self.get_star_count()
-        print(response.data)
         return response
 
     def get_queryset(self):

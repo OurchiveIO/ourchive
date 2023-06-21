@@ -1345,8 +1345,7 @@ def bookmarks(request):
 
 
 def bookmark(request, pk):
-	get_url = f'api/bookmarks/{pk}/draft' if request.GET.get('draft') == "True" else f'api/bookmarks/{pk}'
-	bookmark = do_get(get_url, request)[0]
+	bookmark = do_get(f'api/bookmarks/{pk}', request)[0]
 	tags = group_tags(bookmark['tags']) if 'tags' in bookmark else {}
 	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
