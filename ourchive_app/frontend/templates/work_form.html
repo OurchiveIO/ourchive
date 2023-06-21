@@ -158,9 +158,11 @@
         </div>
         <div class="uk-margin" id="work-form-cover-parent">
             <label id="work-form-cover-label" class="uk-form-label" for="form-horizontal-text">Cover</label>
-            {% if work.cover_url %}
-            <img id="work-form-cover-img" src="{{ work.cover_url }}"/>
-            {% endif %}
+            <div id="work-form-existing-image" class="uk-form-controls">
+                {% if work.cover_url %}
+                <img id="work-form-cover-img" src="{{ work.cover_url }}" class="uk-margin-bottom"/>
+                {% endif %}
+            </div>
             <div id="work-form-cover-controls" class="uk-form-controls">
                 <div id="work-form-cover-inline" class="uk-inline">
                     {% include 'file_upload.html' with object='cover_url' replace_selector='work-form-cover-img' object_type='img' upload_placeholder='Upload cover image' original_value=work.cover_url %}
