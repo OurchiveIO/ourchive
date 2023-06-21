@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
 from .search_models import SearchObject
 from html import escape
+from django.http import HttpResponse
 import logging
 from .api_utils import do_get, do_post, do_patch, do_delete, process_results, validate_captcha
 
@@ -204,6 +205,12 @@ def index(request):
 		'stylesheet_name': 'ourchive-light.css',
 		'has_notifications': request.session.get('has_notifications')
 	})
+
+
+def accept_cookies(request):
+	if request.user.is_authenticated:
+		do_patch(f'api/users/{request.user.id}/', request, data={'id': request.user.id, 'cookies_accepted': True})
+	return HttpResponse('')
 
 
 def content_page(request, pk):

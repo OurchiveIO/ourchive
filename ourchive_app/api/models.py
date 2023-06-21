@@ -23,6 +23,7 @@ class User(AbstractUser):
     default_editor = models.CharField(max_length=10, blank=True, null=True)
     attributes = models.ManyToManyField('AttributeValue')
     display_username = models.CharField(max_length=150, blank=True, null=True)
+    cookies_accepted = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.display_username = self.username

@@ -14,6 +14,23 @@
     <title>{% block title %}Ourchive{% endblock %}</title>
 </head>
 <body>
+	{% if 'accept-cookies' not in request.COOKIES and not request.user.cookies_accepted %}
+		<script>
+			UIkit.notification({
+			    message: 'Ourchive uses necessary cookies to allow you to log in and submit data. We do not collect or distribute any tracking information. By continuing to browse the site you are agreeing to allow cookies to be stored and used.',
+			    status: 'danger',
+			    pos: 'top-center',
+			    timeout: 10000
+			});
+			fetch('{{request.build_absolute_uri|slice:":-1"}}{% url 'accept-cookies' %}')
+			  .then((response) => {
+			  	var date = new Date();
+			  	date.setTime(date.getTime() + 86400*1000*7);
+			    const expires = date.toUTCString();
+				document.cookie =  'accept-cookies=true' + '; expires=' + expires + '; path=/'
+			  });
+		</script>
+	{% endif %}
 	{% if messages %}
 		{% for message in messages %}
 			<script>
