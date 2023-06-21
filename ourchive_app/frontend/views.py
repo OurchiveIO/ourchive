@@ -1363,6 +1363,12 @@ def bookmark(request, pk):
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
+	logger.debug(bookmark)
+	logger.debug(tags)
+	logger.debug(comments)
+	logger.debug(scroll_comment_id)
+	logger.debug(expand_comments)
+	logger.debug(user_can_comment)
 	return render(request, 'bookmark.html', {
 		'bookmark': bookmark,
 		'tags': tags,
