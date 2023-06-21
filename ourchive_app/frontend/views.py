@@ -74,7 +74,7 @@ def sanitize_rich_text(rich_text):
 	return rich_text
 
 
-def get_work_obj(request):
+def get_work_obj(request, work_id=None):
 	work_dict = request.POST.copy()
 	tags = []
 	tag_types = {}
@@ -90,10 +90,10 @@ def get_work_obj(request):
 			tag['text'] = json_item[1]
 			tags.append(tag)
 			work_dict.pop(item)
-		elif 'chapters_' in item:
+		elif 'chapters_' in item and work_id is not None:
 			chapter_id = item[9:]
 			chapter_number = request.POST[item]
-			chapters.append({'id': chapter_id, 'number': chapter_number, 'work': id})
+			chapters.append({'id': chapter_id, 'number': chapter_number, 'work': work_id})
 	work_dict["tags"] = tags
 	comments_permitted = work_dict["comments_permitted"]
 	work_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
@@ -625,7 +625,7 @@ def new_chapter(request, work_id):
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this chapter.')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
-		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit"
+		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit/#work-form-chapter-content-parent"
 		return redirect(redirect_url)
 	else:
 		messages.add_message(request, messages.ERROR, 'You must log in to post a new chapter.')
@@ -644,7 +644,7 @@ def edit_chapter(request, work_id, id):
 			messages.add_message(request, messages.ERROR, 'You are not authorized to update this chapter.')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
-		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit"
+		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit/#work-form-chapter-content-parent"
 		return redirect(redirect_url)
 	else:
 		if request.user.is_authenticated:
@@ -665,12 +665,13 @@ def edit_chapter(request, work_id, id):
 
 def edit_work(request, id):
 	if request.method == 'POST':
-		work_dict = get_work_obj(request)
+		work_dict = get_work_obj(request, id)
 		chapters = work_dict[2]
 		response = do_patch(f'api/works/{id}/', request, data=work_dict[0])
 		if response[1] == 200:
 			for chapter in chapters:
-				response = do_patch(f'api/chapters/{chapter["id"]}/draft', request, data=chapter)
+				print(chapter)
+				response = do_patch(f'api/chapters/{chapter["id"]}/', request, data=chapter)
 			messages.add_message(request, messages.SUCCESS, 'Work updated.')
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to update this work.')
@@ -680,7 +681,6 @@ def edit_work(request, id):
 			return redirect(f'/works/{id}')
 		else:
 			return redirect(f'/works/{id}/chapters/new?count={len(chapters)}')
-
 	else:
 		if request.user.is_authenticated:
 			work_types = do_get(f'api/worktypes', request)[0]
@@ -695,7 +695,7 @@ def edit_work(request, id):
 			work['notes'] = sanitize_rich_text(work['notes'])
 			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
 			work['attribute_types'] = process_attributes(work['attributes'], work_attributes[0]['results'])
-			chapters = do_get(f'api/works/{id}/chapters/draft', request)[0]
+			chapters = do_get(f'api/works/{id}/chapters/all', request)[0]
 			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else []
 			return render(request, 'work_form.html', {
 				'work_types': work_types['results'],
@@ -703,7 +703,7 @@ def edit_work(request, id):
 				'work': work,
 				'tags': tags,
 				'show_chapter': request.GET.get('show_chapter') if 'show_chapter' in request.GET else None,
-				'chapters': chapters['results'],
+				'chapters': chapters,
 				'chapter_count': len(chapters)})
 		else:
 			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
@@ -1089,14 +1089,15 @@ def work(request, pk):
 	work = work[0]
 	tags = group_tags(work['tags']) if 'tags' in work else {}
 	work['attributes'] = get_attributes_for_display(work['attributes'])
-	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else ""}'
+	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else "/all"}'
 	if chapter_offset > 0:
 		chapter_url_string = f'{chapter_url_string}&offset={chapter_offset}'
 	chapter_response = do_get(chapter_url_string, request)[0]
+	chapter_json = chapter_response['results'] if 'results' in chapter_response else chapter_response
 	user_can_comment = (work['comments_permitted'] and (work['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in work else False
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	chapters = []
-	for chapter in chapter_response['results']:
+	for chapter in chapter_json:
 		if 'id' in chapter:
 			if 'comment_thread' not in request.GET:
 				comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0

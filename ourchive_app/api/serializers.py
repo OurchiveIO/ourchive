@@ -406,8 +406,6 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Chapter
         fields = '__all__'
-        many = True
-        partial = True
 
     def update_word_count(self, chapter):
         word_count = 0
@@ -427,6 +425,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'audio_url' in validated_data:
             if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
                 validated_data['audio_url'] = ''
+        print(validated_data)
         chapter.update(**validated_data)
         self.update_word_count(chapter.first())
         return chapter.first()
