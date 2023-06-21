@@ -467,9 +467,9 @@ class BookmarkList(generics.ListCreateAPIView):
             if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
                 star_count = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
             else:
-                star_count = 5
+                star_count = list(range(1, 5))
         except ObjectDoesNotExist:
-            star_count = 5
+            star_count = list(range(1, 5))
         return star_count
 
     def list(self, request, *args, **kwargs):
@@ -512,9 +512,9 @@ class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
             if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
                 star_count = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
             else:
-                star_count = 5
+                star_count = list(range(1, 5))
         except ObjectDoesNotExist:
-            star_count = 5
+            star_count = list(range(1, 5))
         return star_count
 
     def retrieve(self, request, *args, **kwargs):
