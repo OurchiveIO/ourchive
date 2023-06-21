@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group
 from rest_framework import viewsets, generics, permissions
-from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer
+from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, ChapterAllSerializer
 from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, AttributeValue, ContentPage
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted
 from rest_framework.response import Response
@@ -434,7 +434,7 @@ class ChapterDraftDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class WorkChapterDetailAll(generics.ListCreateAPIView):
-    serializer_class = ChapterSerializer
+    serializer_class = ChapterAllSerializer
     permission_classes = [IsOwner]
     pagination_class = None
 

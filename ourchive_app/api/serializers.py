@@ -446,6 +446,19 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         return chapter
 
 
+class ChapterAllSerializer(serializers.Serializer):
+    work = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all())
+    user = serializers.HyperlinkedRelatedField(
+        view_name='user-detail', format='html', read_only=True)
+    id = serializers.IntegerField(read_only=True)
+    number = serializers.IntegerField()
+    title = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Chapter
+        fields = ['id', 'number', 'title', 'draft', 'work', 'user']
+
+
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
     user = serializers.SlugRelatedField(
