@@ -132,6 +132,7 @@ TEMPLATES = [
                 'frontend.context_processors.set_has_notifications',
                 'frontend.context_processors.set_content_pages',
                 'frontend.context_processors.set_captcha',
+                'frontend.context_processors.load_settings',
             ],
         },
     },

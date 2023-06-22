@@ -31,3 +31,9 @@ def set_content_pages(request):
 
 def set_captcha(request):
     return {'captcha_site_key': settings.CAPTCHA_SITE_KEY}
+
+
+def load_settings(request):
+    settings = do_get(f'api/settings', request)[0]
+    settings_dict = {x['name'].replace(' ', ''): x['value'] for x in settings['results']}
+    return {'settings': settings_dict}

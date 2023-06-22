@@ -181,6 +181,16 @@
                 </div>
             </div>
         </div>
+        {% if settings.AudioProcessing == 'False' %}
+        <div class="uk-margin" id="chapter-form-audio-length-parent">
+            <label id="chapter-form-audio-length-label" class="uk-form-label" for="form-horizontal-text">Audio Length <sup uk-icon="icon: question"></sup></label>
+            <div id="chapter-form-audio-length-controls" class="uk-form-controls">
+                <div class="uk-inline" id="chapter-form-audio-length-inline">
+                    <input id="chapter-form-audio-length" class="uk-input uk-form-width-large" type="number" name="audio_length" value="{{ chapter.audio_length|default_if_none:0 }}">
+                </div>
+            </div>
+        </div>
+        {% endif %}
         {% endif %}
         <div class="uk-margin" id="chapter-form-text-parent">
             <label id="chapter-form-text-label" class="uk-form-label" for="form-horizontal-text">Chapter Text</label>
