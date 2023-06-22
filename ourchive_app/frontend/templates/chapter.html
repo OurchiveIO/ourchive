@@ -59,6 +59,7 @@
         </ul>
         </div>        
     </div>  
+    {% if settings.AllowComments %}
 	<div id="chapter-comments-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
         <div id="chapter-comments-load-div">
              <button id="chapter-comments-load-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #chapter-{{chapter.id}}-comments">{{ chapter.comments.count}} Comment(s)</button>    		
@@ -92,5 +93,6 @@
             </div>
         </form>
     </div>
+    {% endif %}
     {% endif %}
 </div>

@@ -123,6 +123,7 @@
             </div>
         </div>
     </div>
+    {% if settings.AllowComments %}
     <hr id="bookmark-comments-hr"/>
     <div class="uk-margin" id="bookmark-form-allow-comments-parent">
         <label id="bookmark-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
@@ -135,6 +136,7 @@
             </select>
         </div>
     </div>
+    {% endif %}
     <hr/>
     <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bookmark-form-actions-footer-parent" uk-grid>
         <div class="uk-text-right uk-width-1-1" id="bookmark-form-actions-footer-child">

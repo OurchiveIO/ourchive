@@ -58,8 +58,8 @@
 	    	<p id="bookmark-description-hed" class="uk-text-large"><span>{{bookmark.user}} says:</span>
 	    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>
 	    </div>	   
-	    <hr id="bookmark-tag-hr" class="uk-divider-small"/>
 	    {% if tags.items %}
+	    <hr id="bookmark-tag-hr" class="uk-divider-small"/>
 		    <dl class="uk-description-list" id="bookmark-tag-parent">
 		    {% for type, tag in tags.items %} 
 		        <dt id="bookmark-tag-type">{{ type }}</dt>
@@ -68,8 +68,9 @@
 		        </dd>
 		    {% endfor %}
 		    </dl>
-		    <hr id="bookmark-comments-hr" class="uk-divider-small"/>
+		    {% if settings.AllowComments %}<hr id="bookmark-comments-hr" class="uk-divider-small"/>{% endif %}
 	    {% endif %}
+	    {% if settings.AllowComments %}
 	    <div id="bookmark-comments-toggle-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
 	        <div id="bookmark-comments-toggle-row">
 	             <button id="bookmark-comments-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #bookmark-{{bookmark.id}}-comments">{{ comments.count}} Comments</button>    		
@@ -103,6 +104,7 @@
                 </div>
             </form>
         </div>
+        {% endif %}
         {% endif %}
 	</article>
 	</div>

@@ -151,6 +151,7 @@ function removeBookmark(event, bookmark_id) {
             </div>
         </div>
     </div>
+    {% if settings.AllowComments %}
     <hr id="bkcol-comments-hr"/>
     <h3 id="bkcol-settings-header">Collection Settings</h3>
     <div class="uk-margin" id="bkcol-form-draft-parent">
@@ -172,6 +173,7 @@ function removeBookmark(event, bookmark_id) {
             </select>
         </div>
     </div>
+    {% endif %}
     <hr/>
     <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bkcol-form-actions-footer-parent" uk-grid>
         <div class="uk-text-right uk-width-1-1" id="bkcol-form-actions-footer-child">

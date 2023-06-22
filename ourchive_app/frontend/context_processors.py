@@ -35,5 +35,5 @@ def set_captcha(request):
 
 def load_settings(request):
     settings = do_get(f'api/settings', request)[0]
-    settings_dict = {x['name'].replace(' ', ''): x['value'] for x in settings['results']}
+    settings_dict = {x['name'].replace(' ', ''): x['value'] if x['value'] != 'True' and x['value'] != 'False' else (x['value'] == 'True') for x in settings['results']}
     return {'settings': settings_dict}

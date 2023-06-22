@@ -73,6 +73,7 @@
 			</div>
 			{% endif %}
 		</div>
+		{% if settings.allowComments %}
 	    {% if comments.count > 0 %}<div id="bkcol-comments-toggle-grid" class="uk-width-1-1">
 	        <div id="bkcol-comments-toggle-row">
 	             <button id="bkcol-comments-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #bkcol-{{bkcol.id}}-comments">{{ comments.count}} Comments</button>    		
@@ -104,6 +105,7 @@
                 </div>
             </form>
         </div>
+        {% endif %}
         {% endif %}
 </div>
 {% if scroll_comment_id %}

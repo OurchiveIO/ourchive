@@ -41,7 +41,7 @@
         <div id="work-summary-div"><span id="work-summary-span" class="uk-text-large">Summary</span></div>
         <div id="work-summary-text-div"><span id="work-summary-text-span" class="uk-text-medium">{% autoescape off %}{{ work.summary|default_if_none:'' }}{% endautoescape %}</span></div>
         <div class="uk-text-right" id="work-metadata-parent">
-            <p id="work-metadata-p" class="uk-article-meta"><span id="work-metadata-fingerguns" class="uk-inline uk-text-bold">{{ work.fingerguns }} Fingerguns</span> | <span class="uk-inline uk-text-bold" id="work-metadata-word-count">{{ work.word_count }} Words</span> | <span id="work-metadata-comment-count" class="uk-inline uk-text-bold">{{ work.comment_count }} Comments</p>
+            <p id="work-metadata-p" class="uk-article-meta"><span id="work-metadata-fingerguns" class="uk-inline uk-text-bold">{{ work.fingerguns }} Fingerguns</span> | <span class="uk-inline uk-text-bold" id="work-metadata-word-count">{{ work.word_count }} Words</span> {% if settings.AllowComments %}| <span id="work-metadata-comment-count" class="uk-inline uk-text-bold">{{ work.comment_count }} Comments{% endif %}</p>
         </div>
         {% if work.notes %} 
             <div id="summary-notes-divider-div" class="uk-margin-top"><hr id="summary-notes-divider-hr"/></div>
