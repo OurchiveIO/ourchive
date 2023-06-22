@@ -170,7 +170,6 @@ def get_bookmark_collection_obj(request):
 
 def referrer_redirect(request, alternate_url=None):
 	if request.META.get('HTTP_REFERER') is not None:
-		print(request.META.get('HTTP_REFERER'))
 		if '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER']:
 			return redirect(request.META.get('HTTP_REFERER'))
 		else:
@@ -357,7 +356,6 @@ def edit_account(request, username):
 def edit_user(request, username):
 	if request.method == 'POST':
 		user_data = request.POST.copy()
-		print(user_data)
 		if user_data['icon'] == "":
 			user_data['icon'] = user_data['unaltered_icon']
 		user_data.pop('unaltered_icon')
@@ -677,7 +675,6 @@ def edit_work(request, id):
 		response = do_patch(f'api/works/{id}/', request, data=work_dict[0])
 		if response[1] == 200:
 			for chapter in chapters:
-				print(chapter)
 				response = do_patch(f'api/chapters/{chapter["id"]}/', request, data=chapter)
 			messages.add_message(request, messages.SUCCESS, 'Work updated.')
 		elif response[1] == 403:

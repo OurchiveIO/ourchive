@@ -488,7 +488,7 @@ class OurchiveSetting(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     value = models.CharField(max_length=200)
-    grouping = models.CharField(max_length=200, null=True, blank=True)
+    valtype = models.CharField(max_length=200, null=True, blank=True)
 
     def __repr__(self):
         return '<OurchiveSettings: {}>'.format(self.id)

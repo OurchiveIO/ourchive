@@ -1,10 +1,10 @@
 from django.contrib import admin
 from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, ContentPage, Tag, Invitation, AttributeType, AttributeValue
-#from django.contrib.auth.admin import UserAdmin
 from django.db import models
 from django.forms.widgets import Input
 from django.core.mail import send_mail
 from django.conf import settings
+from django.forms import ModelForm, ChoiceField
 
 
 class RichTextEditorWidget(Input):
@@ -64,6 +64,38 @@ class ContentPageAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'order')
 
 
+SETTING_VALUE_CHOICES = [
+    [('true', 'True'),('false', 'False')],
+    {
+        'Search Provider': [('POSTGRES', 'Database')],
+        'Invite Queue Limit': [('10', '10'), ('20', '20'), ('50', '50'), ('100', '100')],
+        'Rating Star Count': [('1', '1'), ('2', '2'),('3', '3'),('4', '4'),('5', '5'), 
+        ('6', '6'),('7', '7'),('8', '8'),('9', '9'),('10', '10')]
+    }
+
+]
+
+
+class SettingsForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SettingsForm, self).__init__(*args, **kwargs)
+        if self.instance.id:
+            choices = []
+            if self.instance.valtype == 'truefalse':
+                choices = [x for x in SETTING_VALUE_CHOICES[0]]
+                self.fields['value'] = ChoiceField(choices=choices)
+            if self.instance.valtype == 'choice':
+                choices = SETTING_VALUE_CHOICES[1][self.instance.name]
+                self.fields['value'] = ChoiceField(choices=choices)
+
+
+class OurchiveSettingAdmin(admin.ModelAdmin):
+    form = SettingsForm
+    exclude = ('valtype',)
+    readonly_fields=('name', )
+    fields = ('name', 'value',)
+    list_display = ('name', 'value',)
+
 class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'id', 'email', 'is_staff', 'can_upload_images', 'can_upload_audio')
 
@@ -71,7 +103,7 @@ class UserAdmin(admin.ModelAdmin):
 admin.site.register(TagType)
 admin.site.register(WorkType)
 admin.site.register(NotificationType)
-admin.site.register(OurchiveSetting)
+admin.site.register(OurchiveSetting, OurchiveSettingAdmin)
 admin.site.register(ContentPage, ContentPageAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Invitation, InvitationAdmin)
