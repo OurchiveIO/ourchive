@@ -21,7 +21,7 @@ class User(AbstractUser):
     default_post_language = models.CharField(max_length=10, blank=True, null=True)
     default_search_language = models.CharField(max_length=10, blank=True, null=True)
     default_editor = models.CharField(max_length=10, blank=True, null=True)
-    attributes = models.ManyToManyField('AttributeValue')
+    attributes = models.ManyToManyField('AttributeValue', blank=True)
     display_username = models.CharField(max_length=150, blank=True, null=True)
     cookies_accepted = models.BooleanField(default=False)
 

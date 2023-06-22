@@ -147,6 +147,8 @@ class UserList(generics.ListCreateAPIView):
     permission_classes = [RegistrationPermitted]
 
     def perform_create(self, serializer):
+        if not self.request.user.can_upload_images and 'icon' in self.request.data:
+            serializer.pop('icon')
         if 'invite_code' in self.request.data:
             serializer.save(
                 invite_code=self.request.data['invite_code'], email=self.request.data['email'])
@@ -160,12 +162,16 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [RegistrationPermitted]
 
     def perform_create(self, serializer):
+        if not self.request.user.can_upload_images and 'icon' in self.request.data:
+            serializer.pop('icon')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
         serializer.save(attributes=attributes)
 
     def perform_update(self, serializer):
+        if not self.request.user.can_upload_images and 'icon' in self.request.data:
+            serializer.pop('icon')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
@@ -226,6 +232,8 @@ class WorkList(generics.ListCreateAPIView):
         return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id))
 
     def perform_create(self, serializer):
+        if not self.request.user.can_upload_images and 'cover_url' in self.request.data:
+            serializer.pop('cover_url')
         serializer.save(user=self.request.user)
 
 
@@ -266,12 +274,16 @@ class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
         return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
     def perform_create(self, serializer):
+        if not self.request.user.can_upload_images and 'cover_url' in self.request.data:
+            serializer.pop('cover_url')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
         serializer.save(attributes=attributes)
 
     def perform_update(self, serializer):
+        if not self.request.user.can_upload_images and 'cover_url' in self.request.data:
+            serializer.pop('cover_url')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
@@ -382,6 +394,10 @@ class ChapterList(generics.ListCreateAPIView):
         return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
     def perform_create(self, serializer):
+        if not self.request.user.can_upload_images and 'image_url' in self.request.data:
+            serializer.pop('image_url')
+        if not self.request.user.can_upload_audio and 'audio_url' in self.request.data:
+            serializer.pop('aduio_url')
         serializer.save(user=self.request.user)
 
 
@@ -393,12 +409,20 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
         return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
     def perform_create(self, serializer):
+        if not self.request.user.can_upload_images and 'image_url' in self.request.data:
+            serializer.pop('image_url')
+        if not self.request.user.can_upload_audio and 'audio_url' in self.request.data:
+            serializer.pop('audio_url')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
         serializer.save(attributes=attributes)
 
     def perform_update(self, serializer):
+        if not self.request.user.can_upload_images and 'image_url' in self.request.data:
+            serializer.pop('image_url')
+        if not self.request.user.can_upload_images and 'audio_url' in self.request.data:
+            serializer.pop('audio_url')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
@@ -583,6 +607,8 @@ class BookmarkCollectionList(generics.ListCreateAPIView):
         return BookmarkCollection.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
+        if not self.request.user.can_upload_images and 'header_url' in self.request.data:
+            serializer.pop('header_url')
         serializer.save(user=self.request.user)
 
 
@@ -590,6 +616,16 @@ class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = BookmarkCollection.objects.get_queryset().order_by('id')
     serializer_class = BookmarkCollectionSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
+    def perform_update(self, serializer):
+        if not self.request.user.can_upload_images and 'header_url' in self.request.data:
+            serializer.pop('header_url')
+        serializer.save(user=self.request.user)
+
+    def perform_create(self, serializer):
+        if not self.request.user.can_upload_images and 'header_url' in self.request.data:
+            serializer.pop('header_url')
+        serializer.save(user=self.request.user)
 
 
 class CommentList(generics.ListCreateAPIView):

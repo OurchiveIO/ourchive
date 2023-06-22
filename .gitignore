@@ -2,7 +2,7 @@
 uploads/*
 audio/*
 ourchive_app/files/*
-django_cache/*
+ourchive_app/django_cache/*
 venv/*
 ourchive-env/*
 tus-data/*

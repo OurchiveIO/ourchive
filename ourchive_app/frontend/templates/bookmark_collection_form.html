@@ -72,6 +72,7 @@ function removeBookmark(event, bookmark_id) {
             </div>
         </div>
     </div>
+    {% if request.user.can_upload_images %}
     <div class="uk-margin" id="bkcol-form-header-parent">
         <label id="bkcol-form-header-label" class="uk-form-label" for="form-horizontal-text">Header</label>
         <div id="bookmark-collection-form-header-controls" class="uk-form-controls">
@@ -82,8 +83,18 @@ function removeBookmark(event, bookmark_id) {
             <div id="bookmark-collection-form-header-inline" class="uk-inline uk-margin">
                 {% include 'file_upload.html' with object='header_url' replace_selector='bookmark-collection-form-header-img' object_type='img' upload_placeholder='Upload header image' original_value=bookmark_collection.header_url %}
             </div>
+            
         </div>
     </div>
+    <div class="uk-margin" id="bookmark-collection-form-header-alt-text-parent">
+            <label id="bookmark-collection-form-header-alt-text-label" class="uk-form-label" for="form-horizontal-text">Header Alt Text</label>
+            <div id="bookmark-collection-form-header-alt-text-controls" class="uk-form-controls">
+                <div class="uk-inline" id="bookmark-collection-header-alt-text-inline">
+                    <textarea id="bookmark-collection-header-alt-text" class="uk-textarea uk-form-width-large" rows="2" placeholder="Header alt text" name="header_alt_text" maxlength="600">{{ bookmark_collection.header_alt_text|default_if_none:'' }}</textarea>
+                </div>
+            </div>
+        </div>
+    {% endif %}
     <hr/>
     <h3 id="obj-attrs-form-header">Collection Tags</h3>
     {% include "object_attributes_form.html" with object='Bookmark Collection' attribute_types=bookmark_collection.attribute_types show_header=False %}

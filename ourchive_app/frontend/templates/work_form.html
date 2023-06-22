@@ -156,6 +156,7 @@
                 </div>
             </div>
         </div>
+        {% if request.user.can_upload_images %}
         <div class="uk-margin" id="work-form-cover-parent">
             <label id="work-form-cover-label" class="uk-form-label" for="form-horizontal-text">Cover</label>
             <div id="work-form-existing-image" class="uk-form-controls">
@@ -177,6 +178,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
         <hr/>
         <h3 id="obj-attrs-form-header">Work Settings</h3>
         <div class="uk-margin" id="work-form-complete-parent">

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, ContentPage, Tag, Invitation, AttributeType, AttributeValue
-from django.contrib.auth.admin import UserAdmin
+#from django.contrib.auth.admin import UserAdmin
 from django.db import models
 from django.forms.widgets import Input
 from django.core.mail import send_mail
@@ -62,6 +62,10 @@ class ContentPageAdmin(admin.ModelAdmin):
     }
     readonly_fields = ["id"]
     list_display = ('name', 'id', 'order')
+
+
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'id', 'email', 'is_staff', 'can_upload_images', 'can_upload_audio')
 
 
 admin.site.register(TagType)

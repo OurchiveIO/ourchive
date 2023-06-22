@@ -141,18 +141,20 @@
             </div>
         </div>
         <h3 id="obj-attrs-form-header">Chapter Content</h3>
+        {% if request.user.can_upload_images %}
         <div class="uk-margin" id="chapter-form-image-parent">
             <label id="chapter-form-image-label" class="uk-form-label" for="form-horizontal-text">Chapter Image</label>
             {% if chapter.image_url and chapter.image_url != "None" %}
-                <img id="chapter-form-image" src="{{ chapter.image_url }}"/>
+            <div class="uk-form-controls" id="chapter-form-image-controls">
+                <img id="chapter-form-image" src="{{ chapter.image_url }}" class="uk-margin-bottom"/>
             {% endif %}
+            </div>
             <div class="uk-form-controls" id="chapter-form-image-upload-controls">
                 <div class="uk-inline" id="chapter-form-image-upload-inline">
                 	{% include 'file_upload.html' with object='image_url' replace_selector='chapter-form-image' object_type='img' upload_placeholder='Upload chapter image' original_value=chapter.image_url %}
                 </div>
             </div>
         </div>
-
         <div class="uk-margin" id="chapter-form-image-alt-text-parent">
             <label id="chapter-form-image-alt-text-label" class="uk-form-label" for="form-horizontal-text">Image Alt Text</label>
             <div id="chapter-form-image-alt-text-controls" class="uk-form-controls">
@@ -161,7 +163,8 @@
                 </div>
             </div>
         </div>
-
+        {% endif %}
+        {% if request.user.can_upload_audio %}
         <div class="uk-margin" id="chapter-form-audio-parent">
             <label id="chapter-form-audio-label" class="uk-form-label" for="form-horizontal-text">Chapter Audio</label>
             <div class="uk-form-controls" id="chapter-form-audio-controls">
@@ -170,7 +173,6 @@
                 </div>
             </div>
         </div>
-
         <div class="uk-margin" id="chapter-form-audio-description-parent">
             <label id="chapter-form-audio-description-label" class="uk-form-label" for="form-horizontal-text">Audio Description</label>
             <div id="chapter-form-audio-description-controls" class="uk-form-controls">
@@ -179,7 +181,7 @@
                 </div>
             </div>
         </div>
-
+        {% endif %}
         <div class="uk-margin" id="chapter-form-text-parent">
             <label id="chapter-form-text-label" class="uk-form-label" for="form-horizontal-text">Chapter Text</label>
             <div class="uk-form-controls" id="chapter-form-text-controls">

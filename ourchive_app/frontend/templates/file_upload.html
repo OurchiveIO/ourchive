@@ -41,25 +41,25 @@
 	        complete: function () {
 	        },
 	        loadStart: function (e) {
-	            bar.removeAttribute('hidden');
-	            bar.max = e.total;
-	            bar.value = e.loaded;
+	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').removeAttribute('hidden');
+	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').max = e.total;
+	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').value = e.loaded;
 	        },
 
 	        progress: function (e) {
-	            bar.max = e.total;
-	            bar.value = e.loaded;
+	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').max = e.total;
+	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').value = e.loaded;
 	        },
 
 	        loadEnd: function (e) {
-	            bar.max = e.total;
-	            bar.value = e.loaded;
+	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').max = e.total;
+	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').value = e.loaded;
 	        },
 
 	        completeAll: function () {
 	            //console.log('completeAll', arguments);
 	            setTimeout(function () {
-	                bar.setAttribute('hidden', 'hidden');
+	                document.getElementById('{{ object }}-progressbar-{{ object_type }}').setAttribute('hidden', 'hidden');
 	            }, 1000);
 	            var result = JSON.parse(arguments[0]['response'])['final_url'];
 	            document.getElementById('{{ object }}-file-uk-input').value = result;

@@ -26,6 +26,7 @@
 		<input type="hidden" id="unaltered_icon" name="unaltered_icon" value="{{ user.icon }}">
 		<input type="hidden" id="user_id" name="user_id" value="{{ user.id }}">
 		<input type="hidden" id="user" name="user" value="{{ user.username }}">
+        {% if request.user.can_upload_images %}
         <div class="uk-margin" id="user-icon-parent-div">
             <label id="user-icon-label" class="uk-form-label" for="form-horizontal-text">User Icon</label>
             <div class="uk-form-controls" id="user-icon-controls">
@@ -44,7 +45,7 @@
                 </div>
             </div>
         </div>   
-
+        {% endif %}
         <div class="uk-margin" id="default-content-parent">
             <label id="default-content-label" class="uk-form-label" for="form-horizontal-text">Default Content</label>
             <div class="uk-form-controls" id="default-content-controls">
