@@ -1,6 +1,8 @@
 from logging import Logger
 from pages import locators, element
 from pages.locators import MainPageLocators, MainPageLoginLocators
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 
@@ -46,6 +48,8 @@ class MainPage(BasePage):
 class MainPageLogin(BasePage):
     """Home page action methods come here. I.e. Python.org"""
     url_segment = "/login"
+
+    login_unsuccessful_msg = 'Login unsuccessful. Please try again.'
 
     def __init__(self, driver):
       super().__init__(driver)
@@ -106,6 +110,17 @@ class MainPageLogin(BasePage):
         actions.perform()
 
         self.take_screenshot('./output/{!s}-post'.format(self.submit_login_form.__name__))
+
+    def validate_unsuccessful_login(self, logger):
+        try:
+            unsuccess_message = WebDriverWait(self.driver, 20).until(EC.presence_of_element_located((MainPageLoginLocators.LOGIN_UNSUCCESSFUL[0], MainPageLoginLocators.LOGIN_UNSUCCESSFUL[1]))).text
+            logger.getLogger().info(f"Login Success Message: {unsuccess_message}")
+            if unsuccess_message == self.login_unsuccessful_msg:
+                return True
+        except Exception as e: 
+            logger.getLogger().info(f"Failed to find LOGIN_UNSUCCESSFUL.")
+
+        return False
 
 
 

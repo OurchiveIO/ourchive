@@ -24,4 +24,5 @@ class MainPageLoginLocators(object):
     LOGIN_USERNAME_INPUT = (By.ID, "login-username-input")
     LOGIN_PASSWORD_INPUT = (By.ID, "login-password-input")
     LOGIN_SUBMIT_BUTTON= (By.ID, "login-submit-button")
+    LOGIN_UNSUCCESSFUL = (By.ID, "login-unsuccessful-error")
     
