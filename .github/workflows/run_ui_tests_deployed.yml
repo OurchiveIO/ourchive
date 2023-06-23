@@ -8,19 +8,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9"]
+        python-version: ["3.10"]
 
     steps:
       - uses: szenius/set-timezone@v1.2
         with:
           timezoneLinux: "America/Chicago"
       - uses: actions/checkout@v3
+        with:
+          sparse-checkout: 'ourchive-app/ui-tests/*'
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Requirements.txt
-        run: pip install requirements.txt
+        run: pip install -r requirements.txt
       - name: Install dependencies
         run: pip install pytest pytest-md pytest-emoji
       - uses: pavelzw/pytest-action@v2
