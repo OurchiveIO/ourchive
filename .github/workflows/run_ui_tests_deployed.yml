@@ -15,10 +15,10 @@ jobs:
         with:
           timezoneLinux: "America/Chicago"
       - uses: actions/checkout@v3
-        with:
-          sparse-checkout: |
-            'ourchive-app/ui-tests'
-            'ourchive-app/requirements.txt'
+        #with:
+        #  sparse-checkout: |
+        #    'ourchive-app/ui-tests'
+        #    'ourchive-app/requirements.txt'
       - name: test pwd
         run: |
             ls
