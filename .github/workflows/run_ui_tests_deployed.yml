@@ -14,19 +14,20 @@ jobs:
       - uses: szenius/set-timezone@v1.2
         with:
           timezoneLinux: "America/Chicago"
-      - name: see checkout list
-        run: ls
       - uses: actions/checkout@v3
         with:
           sparse-checkout: |
             'ourchive-app/ui-tests'
             'ourchive-app/requirements.txt'
+      - name: test pwd
+        run: |
+            ls
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Requirements.txt
-        run: pip install -r requirements.txt
+        run: pip install -r ourchive-app/requirements.txt
       - name: Install dependencies
         run: pip install pytest pytest-md pytest-emoji
       - uses: pavelzw/pytest-action@v2
