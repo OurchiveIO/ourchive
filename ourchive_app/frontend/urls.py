@@ -13,6 +13,7 @@ urlpatterns = [
     path('works/<int:id>/edit/', views.edit_work, name='edit-work'),
     path('works/<int:id>/publish/', views.publish_work, name='publish-work'),
     path('works/<int:id>/publish-full/', views.publish_work_and_chapters, name='publish-full'),
+    path('works/<int:pk>/export/<str:file_ext>', views.export_work, name='export-work'),
     path('works/type/<int:type_id>', views.works_by_type),
     path('works/<int:pk>/', views.work),
     path('works/<int:work_id>/delete', views.delete_work, name='delete-work'),

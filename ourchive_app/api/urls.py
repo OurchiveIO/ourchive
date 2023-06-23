@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.api_root),
     path('works/', views.WorkList.as_view(), name='work-list'),
     path('works/<int:pk>/', views.WorkDetail.as_view(), name='work-detail'),
+    path('works/<int:pk>/export/', views.ExportWork.as_view(), name='export-work'),
     path('works/<int:pk>/publish-full/', views.PublishWork.as_view(), name='publish-work'),
     path('works/<int:pk>/draft', views.WorkDraftDetail.as_view(), name='work-draft-detail'),
     path('tags/<int:pk>/works', views.WorkByTagList.as_view(), name='work-by-tags'),

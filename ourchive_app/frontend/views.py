@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
 from .search_models import SearchObject
 from html import escape
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 import logging
 from .api_utils import do_get, do_post, do_patch, do_delete, process_results, validate_captcha
 
@@ -724,6 +724,20 @@ def publish_work(request, id):
 	else:
 		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this work. Please contact your administrator.', 'work-publish-error')
 	return redirect(f'/works/{id}')
+
+
+def export_work(request, pk, file_ext):
+	file_url = do_get(f'api/works/{pk}/export/', request, params={'extension': file_ext})
+	if file_url[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to export this work.', 'work-export-unauthorized-error')
+	if file_url[1] == 404:
+		messages.add_message(request, messages.ERROR, 'Work export not found.', 'work-export-not-found-error')
+	elif file_url[1] >= 400:
+		error_message = f'{file_url[0]["message"]}' if 'message' in file_url[0] else 'An error occurred exporting this work. Please contact your administrator.'
+		messages.add_message(request, messages.ERROR, error_message, 'work-export-error')
+		return redirect(f'/works/{pk}')
+	response = FileResponse(open(file_url[0]['media_url'], 'rb'))
+	return response
 
 
 def publish_chapter(request, work_id, chapter_id):

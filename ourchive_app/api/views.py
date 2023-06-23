@@ -18,6 +18,7 @@ import html
 from .file_helpers import FileHelperService
 from django.core.exceptions import ObjectDoesNotExist
 import nh3
+from . import work_export
 
 
 @api_view(['GET'])
@@ -139,6 +140,37 @@ class PublishWork(APIView):
             chapter.save()
         work.save()
         return Response({}, status=200)
+
+
+class ExportWork(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def get(self, request, pk):
+        work = Work.objects.filter(id=pk).first()
+        work_url = ''
+        # get export if it hasn't been created already.
+        # note the archive has no M4B creation capability, so that's going to 
+        # be in preferred download url or nowhere.
+        ext = request.GET.get('extension')
+        if not ext:
+            return Response({'message': "GET param 'extension' must be supplied"}, status=400)
+        if ext.lower() == 'epub':
+            if work.epub_url and work.epub_url != "None":
+                return Response({'message': "EPUB url exists. Use EPUB URL to download work."}, status=400)
+            work_url = work_export.create_epub(work)
+            work.epub_url = work_url
+            work.save()
+            return Response({'media_url': work_url}, status=200)
+        elif ext.lower() == 'zip':
+            if work.zip_url and work.zip_url != "None":
+                return Response({'message': "ZIP url exists. Use ZIP URL to download work."}, status=400)
+            work_url = work_export.create_zip(work)
+            work.zip_url = work_url
+            work.save()
+            return Response({'media_url': work_url}, status=200)
+        else:
+            return Response({'message': 'Format not supported or work does not exist.'}, status=400)
 
 
 class UserList(generics.ListCreateAPIView):
@@ -272,6 +304,11 @@ class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+
+    def retrieve(self, request, *args, **kwargs):
+        response = super(WorkDetail, self).retrieve(request, args, kwargs)
+        response.data['download_choices'] = Work.DOWNLOAD_CHOICES
+        return response
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'cover_url' in self.request.data:

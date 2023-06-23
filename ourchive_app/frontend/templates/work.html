@@ -20,6 +20,14 @@
                 <a id="work-view-all-link" href="/works/{{ id }}/?view_full=true"><span uk-icon="icon: plus-circle" id="work-view-all-span" title="View All Chapters"></span> </a>
                 {% endif %}
                 <a id="work-bookmark-link" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span uk-icon="icon: bookmark" id="work-bookmark-span" title="Bookmark"></span> </a>
+                <div class="uk-inline">
+                    <a id="work-download-drop" href="#"><span uk-icon="icon: download" id="work-download-span" title="Download"></span> </a>
+                    <div class="uk-card uk-card-body uk-card-default uk-text-left" uk-drop><ul class="uk-list uk-list-divider">
+                        <li><a href="{% if work.epub_url %}{{work.epub_url}}{% else %}{% url 'export-work' work.id 'epub' %}{% endif %}">EPUB</a></li>
+                        <li><a href="{% if work.zip_url %}{{work.zip_url}}{% else %}{% url 'export-work' work.id 'zip' %}{% endif %}">ZIP</a></li>
+                        {% if work.preferred_download_url %}<li><a href="{{ work.preferred_download_url }}">{{ work.preferred_download }}</a></li>{% endif %}
+                    </ul></div>
+                </div>
                 <a id="work-fingerguns-link" href="/fingerguns/{{ id }}"><span uk-icon="icon: bolt" id="work-fingerguns-span" title="Add Fingerguns"></span> </a>
             </div>
             <div class="uk-width-1-1 uk-margin-remove-top" id="work-header-parent">

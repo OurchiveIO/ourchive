@@ -425,8 +425,9 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'audio_url' in validated_data:
             if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
                 validated_data['audio_url'] = ''
-        print(validated_data)
         chapter.update(**validated_data)
+        Work.objects.filter(id=chapter.first().work.id).update(
+            **{'zip_url': '', 'epub_url': ''})
         self.update_word_count(chapter.first())
         return chapter.first()
 
@@ -469,6 +470,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     word_count = serializers.IntegerField(read_only=True)
     audio_length = serializers.IntegerField(read_only=True)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES)
 
     class Meta:
         model = Work
@@ -519,6 +521,9 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         if 'cover_url' in validated_data:
             if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
                 validated_data['cover_url'] = ''
+        # always create a fresh file
+        validated_data['epub_url'] = ''
+        validated_data['zip_url'] = ''
         Work.objects.filter(id=work.id).update(**validated_data)
         return Work.objects.filter(id=work.id).first()
 

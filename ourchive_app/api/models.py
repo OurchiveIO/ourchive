@@ -35,6 +35,8 @@ class Work(models.Model):
 
     __tablename__ = 'works'
 
+    DOWNLOAD_CHOICES = [('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP')]
+
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
@@ -44,8 +46,7 @@ class Work(models.Model):
     process_status = models.IntegerField(null=True)
     cover_url = models.CharField(max_length=600, null=True, blank=True)
     cover_alt_text = models.CharField(max_length=600, null=True, blank=True)
-    epub_id = models.CharField(max_length=600, null=True, blank=True)
-    zip_id = models.CharField(max_length=600, null=True, blank=True)
+    preferred_download_url = models.CharField(max_length=600, null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     anon_comments_permitted = models.BooleanField(default=True)
@@ -55,6 +56,10 @@ class Work(models.Model):
     fingerguns = models.IntegerField(default=0)
     draft = models.BooleanField(default=True)
     comment_count = models.IntegerField(default=0)
+    preferred_download = models.CharField(max_length=200, blank=True, null=True, choices=DOWNLOAD_CHOICES)
+    epub_url = models.CharField(max_length=600, null=True, blank=True)
+    m4b_url = models.CharField(max_length=600, null=True, blank=True)
+    zip_url = models.CharField(max_length=600, null=True, blank=True)
 
     user = models.ForeignKey(
         User,

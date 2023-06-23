@@ -211,6 +211,29 @@
             </div>
         </div>
         {% endif %}
+        <div class="uk-margin" id="work-form-preferred-download-parent">
+            <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export</label>
+            <div id="work-form-preferred-download-controls" class="uk-form-controls">
+                <select id="work-form-preferred-download-select" class="uk-select uk-form-width-large" name="preferred_download"> 
+                {% for choice in work.download_choices %}                   
+                    <option id="work-form-preferred-download-{{choice}}" {% if work.preferred_download == choice.0 %} selected {% endif %}>{{choice.1}}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="uk-margin" id="work-export-file-parent">
+            <label id="work-export-file-parent" class="uk-form-label" for="form-horizontal-text">Export File</label>
+            {% if work.preferred_download_url %}
+            <div id="work-export-preferred-download" class="uk-form-controls">
+                <p>Existing file: {{ work.preferred_download_url }}</p>
+            </div>
+            {% endif %}
+            <div id="work-export-file-controls" class="uk-form-controls">
+                <div id="work-export-file-inline" class="uk-inline">
+                    {% include 'file_upload.html' with object='preferred_download_url' replace_selector='preferred-download-url' object_type='download' upload_placeholder='Upload file' original_value=work.preferred_download_url %}
+                </div>
+            </div>
+        </div>
     </div>
     <div><hr/></div>
     <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left">
