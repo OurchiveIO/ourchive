@@ -29,7 +29,6 @@ def return_headless_chrome_driver(path_to_chrome, base_url, request):
     options = webdriver.ChromeOptions()
     options.headless = True
     options.add_experimental_option("excludeSwitches", ["enable-logging"])
-    options.add_experimental_option('w3c', True)
 
     driver = webdriver.Remote(webdriver_service.service_url, options=options)
 

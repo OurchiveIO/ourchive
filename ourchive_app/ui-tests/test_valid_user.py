@@ -37,7 +37,7 @@ class TestValidUserFlows:
     def test_can_login(self):
         login_page = page.MainPageLogin(self.driver)
         self.driver.get(login_page.page_url)
-        assert login_page.is_title_matches("Ourchive") is True, "expected page title to contain 'Ourchive' and it did not."
+        assert login_page.is_title_matches("Log In") is True, "expected page title to contain 'Log In' and it did not."
        
         login_page.validate_page_load()
         login_page.fill_login_form('kate', 'gV7hDHXQmonUgdF')
