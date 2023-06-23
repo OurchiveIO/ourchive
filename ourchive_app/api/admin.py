@@ -96,8 +96,39 @@ class OurchiveSettingAdmin(admin.ModelAdmin):
     fields = ('name', 'value',)
     list_display = ('name', 'value',)
 
+
+@admin.action(description="Allow selected users to upload images")
+def allow_image_upload(modeladmin, request, queryset):
+    for user in queryset:
+        user.can_upload_images = True
+        user.save()
+
+
+@admin.action(description="Allow selected users to upload audio")
+def allow_audio_upload(modeladmin, request, queryset):
+    for user in queryset:
+        user.can_upload_audio = True
+        user.save()
+
+
+@admin.action(description="Allow selected users to upload preferred export files")
+def allow_export_upload(modeladmin, request, queryset):
+    for user in queryset:
+        user.can_upload_export_files = True
+        user.save()
+
+@admin.action(description="Allow selected users to upload all files")
+def allow_all_upload(modeladmin, request, queryset):
+    for user in queryset:
+        user.can_upload_export_files = True
+        user.can_upload_audio = True
+        user.can_upload_images = True
+        user.save()
+
+
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'id', 'email', 'is_staff', 'can_upload_images', 'can_upload_audio')
+    list_display = ('username', 'id', 'email', 'is_staff', 'can_upload_images', 'can_upload_audio', 'can_upload_export_files')
+    actions = [allow_audio_upload, allow_image_upload, allow_export_upload, allow_all_upload]
 
 
 admin.site.register(TagType)
