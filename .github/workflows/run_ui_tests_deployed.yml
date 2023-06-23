@@ -14,6 +14,13 @@ jobs:
       - uses: szenius/set-timezone@v1.2
         with:
           timezoneLinux: "America/Chicago"
+      - uses: actions/github-script@v6
+        id: set-result
+        with:
+          script: ls
+          result-encoding: string
+      - name: Get result
+        run: echo "${{steps.set-result.outputs.result}}"
       - uses: actions/checkout@v3
         with:
           sparse-checkout: |
