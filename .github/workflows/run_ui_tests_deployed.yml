@@ -36,3 +36,4 @@ jobs:
           emoji: false
           verbose: false
           job-summary: true
+          custom-arguments: 'ourchive_app/ui-tests'
