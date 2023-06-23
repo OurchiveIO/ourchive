@@ -16,7 +16,7 @@ jobs:
           timezoneLinux: "America/Chicago"
       - uses: actions/checkout@v3
         with:
-          sparse-checkout: 
+          sparse-checkout: |
             'ourchive-app/ui-tests'
             'ourchive-app/requirements.txt'
       - name: Set up Python ${{ matrix.python-version }}
