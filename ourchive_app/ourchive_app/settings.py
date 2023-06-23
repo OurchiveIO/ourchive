@@ -81,6 +81,12 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 
+CAPTCHA_SITE_KEY = os.environ.get('OURCHIVE_CAPTCHA_SITE_KEY')
+CAPTCHA_SECRET = os.environ.get('OURCHIVE_CAPTCHA_SECRET')
+USE_CAPTCHA = os.environ.get('OURCHIVE_USE_CAPTCHA')
+CAPTCHA_PROVIDER = os.environ.get('OURCHIVE_CAPTCHA_PROVIDER')
+CAPTCHA_PARAM = os.environ.get('OURCHIVE_CAPTCHA_PARAM')
+
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ROOT_URLCONF = 'ourchive_app.urls'
@@ -88,6 +94,8 @@ ROOT_URLCONF = 'ourchive_app.urls'
 MEDIA_ROOT = os.getenv('OURCHIVE_MEDIA_ROOT')
 
 MEDIA_URL = os.getenv('OURCHIVE_MEDIA_URL')
+
+TMP_ROOT = os.getenv('OURCHIVE_TMP_ROOT')
 
 FILE_PROCESSOR = 'local'
 
@@ -107,10 +115,11 @@ else:
     DEFAULT_FROM_EMAIL = "admin@ourchive-dev.stopthatimp.net"  
     SERVER_EMAIL = "serveradmin@ourchive-dev.stopthatimp.net" 
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [os.path.join(BASE_DIR,"templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -120,7 +129,10 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
                 'frontend.context_processors.set_style',
-                'frontend.context_processors.set_has_notifications'
+                'frontend.context_processors.set_has_notifications',
+                'frontend.context_processors.set_content_pages',
+                'frontend.context_processors.set_captcha',
+                'frontend.context_processors.load_settings',
             ],
         },
     },
@@ -195,7 +207,15 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'api.custom_pagination.CustomPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '1000/day',
+        'user': '10000/day'
+    }
 }
 
 LOGGING = {
@@ -224,4 +244,11 @@ LOGGING = {
             'handlers': ['file'],
         },
     },
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": os.getenv('OURCHIVE_DJANGO_CACHE'),
+    }
 }

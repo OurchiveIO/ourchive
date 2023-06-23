@@ -3,11 +3,11 @@ from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
-from django.http import HttpResponse
 from .search_models import SearchObject
 from html import escape
+from django.http import HttpResponse
 import logging
-from .api_utils import do_get, do_post, do_patch, do_delete, do_put, process_results
+from .api_utils import do_get, do_post, do_patch, do_delete, process_results, validate_captcha
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +75,106 @@ def sanitize_rich_text(rich_text):
 	return rich_text
 
 
-def referrer_redirect(request):
-	refer = request.META.get('HTTP_REFERER') if request.META.get('HTTP_REFERER') is not None and '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER'] else '/'
-	return redirect(refer)
+def get_work_obj(request, work_id=None):
+	work_dict = request.POST.copy()
+	tags = []
+	tag_types = {}
+	chapters = []
+	result = do_get(f'api/tagtypes', request)[0]['results']
+	for item in result:
+		tag_types[item['label']] = item
+	for item in request.POST:
+		if 'tags' in request.POST[item]:
+			tag = {}
+			json_item = request.POST[item].split("_")
+			tag['tag_type'] = json_item[2]
+			tag['text'] = json_item[1]
+			tags.append(tag)
+			work_dict.pop(item)
+		elif 'chapters_' in item and work_id is not None:
+			chapter_id = item[9:]
+			chapter_number = request.POST[item]
+			chapters.append({'id': chapter_id, 'number': chapter_number, 'work': work_id})
+	work_dict["tags"] = tags
+	comments_permitted = work_dict["comments_permitted"]
+	work_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
+	work_dict["anon_comments_permitted"] = comments_permitted == "All"
+	redirect_toc = work_dict.pop('redirect_toc')[0]
+	work_dict["is_complete"] = "is_complete" in work_dict
+	work_dict["draft"] = "draft" in work_dict
+	work_dict = work_dict.dict()
+	work_dict["user"] = str(request.user)
+	work_dict["attributes"] = get_attributes_from_form_data(request)
+	return [work_dict, redirect_toc, chapters]
+
+
+def get_bookmark_obj(request):
+	bookmark_dict = request.POST.copy()
+	tags = []
+	tag_types = {}
+	result = do_get(f'api/tagtypes', request)[0]['results']
+	for item in result:
+		tag_types[item['label']] = item
+	for item in request.POST:
+		if 'tags' in request.POST[item]:
+			tag = {}
+			json_item = request.POST[item].split("_")
+			tag['tag_type'] = json_item[2]
+			tag['text'] = json_item[1]
+			tags.append(tag)
+			bookmark_dict.pop(item)
+	bookmark_dict["tags"] = tags
+	comments_permitted = bookmark_dict["comments_permitted"]
+	bookmark_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
+	bookmark_dict["anon_comments_permitted"] = comments_permitted == "All"
+	bookmark_dict = bookmark_dict.dict()
+	bookmark_dict["user"] = str(request.user)
+	bookmark_dict["draft"] = 'draft' in bookmark_dict
+	bookmark_dict["attributes"] = get_attributes_from_form_data(request)
+	return bookmark_dict
+
+
+def get_bookmark_collection_obj(request):
+	collection_dict = request.POST.copy()
+	tags = []
+	bookmarks = []
+	tag_types = {}
+	result = do_get(f'api/tagtypes', request)[0]['results']
+	for item in result:
+		tag_types[item['label']] = item
+	for item in request.POST:
+		if 'tags' in request.POST[item]:
+			tag = {}
+			json_item = request.POST[item].split("_")
+			tag['tag_type'] = json_item[2]
+			tag['text'] = json_item[1]
+			tags.append(tag)
+			collection_dict.pop(item)
+		if 'bookmarks' in request.POST[item]:
+			json_item = request.POST[item].split("_")
+			bookmark_id = json_item[1]
+			bookmarks.append(bookmark_id)
+			collection_dict.pop(item)
+	collection_dict["tags"] = tags
+	collection_dict["bookmarks"] = bookmarks
+	comments_permitted = collection_dict["comments_permitted"]
+	collection_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
+	collection_dict["anon_comments_permitted"] = comments_permitted == "All"
+	collection_dict = collection_dict.dict()
+	collection_dict["user"] = str(request.user)
+	collection_dict["draft"] = 'draft' in collection_dict
+	collection_dict["is_private"] = False
+	collection_dict["attributes"] = get_attributes_from_form_data(request)
+	return collection_dict
+
+
+def referrer_redirect(request, alternate_url=None):
+	if request.META.get('HTTP_REFERER') is not None:
+		if '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER']:
+			return redirect(request.META.get('HTTP_REFERER'))
+		else:
+			refer = alternate_url if alternate_url is not None else '/'
+			return redirect(refer)
 
 
 def get_object_tags(parent):
@@ -109,11 +206,25 @@ def index(request):
 	})
 
 
+def accept_cookies(request):
+	if request.user.is_authenticated:
+		do_patch(f'api/users/{request.user.id}/', request, data={'id': request.user.id, 'cookies_accepted': True})
+	return HttpResponse('')
+
+
+def content_page(request, pk):
+	response = do_get(f'api/contentpages/{pk}', request, params=request.GET)
+	return render(request, 'content_page.html', {
+		'content_page': response[0]
+	})
+
+
 def user_name(request, username):
 	user = do_get(f"api/users/{username}", request)[0]
 	if len(user['results']) > 0:
 		work_params = {}
 		bookmark_params = {}
+		bookmark_collection_params = {}
 		anchor = None
 		if 'work_offset' in request.GET:
 			work_params['offset'] = request.GET['work_offset']
@@ -123,6 +234,10 @@ def user_name(request, username):
 			bookmark_params['offset'] = request.GET['bookmark_offset']
 			bookmark_params['limit'] = request.GET['bookmark_limit']
 			anchor = "bookmark_tab"
+		if 'bookmark_collection_offset' in request.GET:
+			bookmark_collection_params['offset'] = request.GET['bookmark_collection_offset']
+			bookmark_collection_params['limit'] = request.GET['bookmark_collection_limit']
+			anchor = "bookmark_collection_tab"
 		works_response = do_get(f'api/users/{username}/works', request, params=work_params)[0]
 		works = works_response['results']
 		works = get_object_tags(works)
@@ -133,6 +248,11 @@ def user_name(request, username):
 		bookmark_next = f'/username/{username}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
 		bookmark_previous = f'/username/{username}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
 		bookmarks = get_object_tags(bookmarks)
+		bookmark_collection_response = do_get(f'api/users/{username}/bookmarkcollections', request, params=bookmark_collection_params)[0]
+		bookmark_collection = bookmark_collection_response['results']
+		bookmark_collection_next = f'/username/{username}/{bookmark_collection_response["next_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["next_params"] is not None else None
+		bookmark_collection_previous = f'/username/{username}/{bookmark_collection_response["prev_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["prev_params"] is not None else None
+		bookmark_collection = get_object_tags(bookmark_collection)
 		user = user['results'][0]
 		user['attributes'] = get_attributes_for_display(user['attributes'])
 		return render(request, 'user.html', {
@@ -145,6 +265,9 @@ def user_name(request, username):
 			'anchor': anchor,
 			'works_next': work_next,
 			'works_previous': work_previous,
+			'bookmark_collections': bookmark_collection,
+			'bookmark_collections_next': bookmark_collection_next,
+			'bookmark_collections_previous': bookmark_collection_previous,
 			'user': user
 		})
 	else:
@@ -233,7 +356,6 @@ def edit_account(request, username):
 def edit_user(request, username):
 	if request.method == 'POST':
 		user_data = request.POST.copy()
-		print(user_data)
 		if user_data['icon'] == "":
 			user_data['icon'] = user_data['unaltered_icon']
 		user_data.pop('unaltered_icon')
@@ -257,7 +379,7 @@ def edit_user(request, username):
 					user['profile'] = sanitize_rich_text(user['profile'])
 				user_attributes = do_get(f'api/attributetypes', request, params={'allow_on_user': True})
 				user['attribute_types'] = process_attributes(user['attributes'], user_attributes[0]['results'])
-				return render(request, 'user_form.html', {'user': user})
+				return render(request, 'user_form.html', {'user': user, 'form_title': 'Edit User'})
 			else:
 				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.')
 				return redirect(f'/username/{username}')
@@ -291,6 +413,17 @@ def user_bookmarks(request, username):
 		'bookmarks': bookmarks,
 		'next': f"/username/{username}/bookmarks/{response['next_params']}" if response["next_params"] is not None else None,
 		'previous': f"/username/{username}/bookmarks/{response['prev_params']}" if response["prev_params"] is not None else None,
+		'user_filter': username})
+
+
+def user_bookmark_collections(request, username):
+	response = do_get(f'api/users/{username}/bookmarkcollections', request, params=request.GET)[0]
+	bookmark_collections = response['results']
+	bookmark_collections = get_object_tags(bookmark_collections)
+	return render(request, 'bookmark_collections.html', {
+		'bookmark_collections': bookmark_collections,
+		'next': f"/username/{username}/bookmarkcollections/{response['next_params']}" if response["next_params"] is not None else None,
+		'previous': f"/username/{username}/bookmarkcollections/{response['prev_params']}" if response["prev_params"] is not None else None,
 		'user_filter': username})
 
 
@@ -373,6 +506,15 @@ def tag_autocomplete(request):
 		'fetch_all': params['fetch_all']})
 
 
+def bookmark_autocomplete(request):
+	term = request.GET.get('text')
+	params = {'term': term}
+	response = do_get(f'api/bookmark-autocomplete', request, params)
+	template = 'bookmark_collection_autocomplete.html'
+	return render(request, template, {
+		'bookmarks': response[0]['results']})
+
+
 def search_filter(request):
 	term = request.POST['term']
 	request_builder = SearchObject()
@@ -446,25 +588,23 @@ def works_by_type(request, type_id):
 def new_work(request):
 	work_types = do_get(f'api/worktypes', request)[0]
 	if request.user.is_authenticated and request.method != 'POST':
-		response = do_post(f'api/works/', request, data={'title': 'Untitled Work', 'user': request.user.username})
-		if response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Work created.')
-			work = response[0]
-			tag_types = do_get(f'api/tagtypes', request)[0]
-			tags = {result['label']:[] for result in tag_types['results']}
-			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
-			work['attribute_types'] = process_attributes([], work_attributes[0]['results'])
-			return render(request, 'work_form.html', {
-				'tags': tags, 'work_types': work_types['results'],
-				'work': work})
-		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to create this work.')
-			return redirect('/works')
-		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this work. Please contact your administrator.')
-			return redirect('/works')
+		work = {'title': 'Untitled Work', 'user': request.user.username}
+		tag_types = do_get(f'api/tagtypes', request)[0]
+		tags = {result['label']:[] for result in tag_types['results']}
+		work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
+		work['attribute_types'] = process_attributes([], work_attributes[0]['results'])
+		return render(request, 'work_form.html', {
+			'tags': tags,
+			'form_title': 'New Work',
+			'work_types': work_types['results'],
+			'work': work})
 	elif request.user.is_authenticated:
-		return edit_work(request, int(request.POST['work_id']))
+		work_data = get_work_obj(request)
+		work = do_post(f'api/works/', request, work_data[0])[0]
+		if work_data[1] == 'false':
+			return redirect(f'/works/{work["id"]}')
+		else:
+			return redirect(f'/works/{work["id"]}/chapters/new?count=0')
 	else:
 		messages.add_message(request, messages.ERROR, 'You must log in to post a new work.')
 		return redirect('/login')
@@ -473,27 +613,27 @@ def new_work(request):
 def new_chapter(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
 		count = request.GET.get('count') if request.GET.get('count') != '' else 0
-		request_json = {'title': 'Untitled Chapter', 'work': work_id, 'text': '', 'number': int(count) + 1}
-		response = do_post(f'api/chapters/', request, data=request_json)
+		chapter = {'title': 'Untitled Chapter', 'work': work_id, 'text': '', 'number': int(count) + 1}
+		chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True})
+		chapter['attribute_types'] = process_attributes([], chapter_attributes[0]['results'])
+		return render(request, 'chapter_form.html', {
+			'chapter': chapter,
+			'form_title': 'New Chapter'})
+	elif request.user.is_authenticated:
+		chapter_dict = request.POST.copy()
+		chapter_dict["draft"] = "draft" in chapter_dict
+		chapter_dict["attributes"] = get_attributes_from_form_data(request)
+		response = do_post(f'api/chapters/', request, data=chapter_dict)
 		if response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Chapter created.')
-			chapter = response[0]
-			chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True})
-			chapter['attribute_types'] = process_attributes([], chapter_attributes[0]['results'])
-			return render(request, 'chapter_form.html', {'chapter': chapter})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this chapter.')
-			return redirect(f'/works/{work_id}')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this chapter. Please contact your administrator.')
-			return redirect(f'/works/{work_id}')
-	elif request.user.is_authenticated:
-		if 'chapter_id' in request.POST:
-			return edit_chapter(request, work_id, request.POST['chapter_id'])
-		else:
-			return edit_chapter(request, work_id, None)
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
+		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit/#work-form-chapter-content-parent"
+		return redirect(redirect_url)
 	else:
-		messages.add_message(request, messages.ERROR, 'You must log in to post a new work.')
+		messages.add_message(request, messages.ERROR, 'You must log in to post a new chapter.')
 		return redirect('/login')
 
 
@@ -509,7 +649,8 @@ def edit_chapter(request, work_id, id):
 			messages.add_message(request, messages.ERROR, 'You are not authorized to update this chapter.')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
-		return redirect(f'/works/{work_id}/edit/?show_chapter=true')
+		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit/#work-form-chapter-content-parent"
+		return redirect(redirect_url)
 	else:
 		if request.user.is_authenticated:
 			chapter = do_get(f'api/chapters/{id}', request)[0]
@@ -519,7 +660,9 @@ def edit_chapter(request, work_id, id):
 			chapter['notes'] = sanitize_rich_text(chapter['notes'])
 			chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True})
 			chapter['attribute_types'] = process_attributes(chapter['attributes'], chapter_attributes[0]['results'])
-			return render(request, 'chapter_form.html', {'chapter': chapter})
+			return render(request, 'chapter_form.html', {
+				'chapter': chapter,
+				'form_title': 'Edit Chapter'})
 		else:
 			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
 			return redirect('/login')
@@ -527,49 +670,21 @@ def edit_chapter(request, work_id, id):
 
 def edit_work(request, id):
 	if request.method == 'POST':
-		work_dict = request.POST.copy()
-		tags = []
-		tag_types = {}
-		chapters = []
-		result = do_get(f'api/tagtypes', request)[0]['results']
-		for item in result:
-			tag_types[item['label']] = item
-		for item in request.POST:
-			if 'tags' in request.POST[item]:
-				tag = {}
-				json_item = request.POST[item].split("_")
-				tag['tag_type'] = json_item[2]
-				tag['text'] = json_item[1]
-				tags.append(tag)
-				work_dict.pop(item)
-			elif 'chapters_' in item:
-				chapter_id = item[9:]
-				chapter_number = request.POST[item]
-				chapters.append({'id': chapter_id, 'number': chapter_number, 'work': id})
-		work_dict["tags"] = tags
-		comments_permitted = work_dict["comments_permitted"]
-		work_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
-		work_dict["anon_comments_permitted"] = comments_permitted == "All"
-		redirect_toc = work_dict.pop('redirect_toc')[0]
-		work_dict["is_complete"] = "is_complete" in work_dict
-		work_dict["draft"] = "draft" in work_dict
-		work_dict = work_dict.dict()
-		work_dict["user"] = str(request.user)
-		work_dict["attributes"] = get_attributes_from_form_data(request)
-		response = do_patch(f'api/works/{id}/', request, data=work_dict)
+		work_dict = get_work_obj(request, id)
+		chapters = work_dict[2]
+		response = do_patch(f'api/works/{id}/', request, data=work_dict[0])
 		if response[1] == 200:
 			for chapter in chapters:
-				response = do_patch(f'api/chapters/{chapter["id"]}/draft', request, data=chapter)
+				response = do_patch(f'api/chapters/{chapter["id"]}/', request, data=chapter)
 			messages.add_message(request, messages.SUCCESS, 'Work updated.')
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to update this work.')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this work. Please contact your administrator.')
-		if redirect_toc == 'false' and len(chapters) > 0:
+		if work_dict[1] == 'false':
 			return redirect(f'/works/{id}')
 		else:
 			return redirect(f'/works/{id}/chapters/new?count={len(chapters)}')
-
 	else:
 		if request.user.is_authenticated:
 			work_types = do_get(f'api/worktypes', request)[0]
@@ -584,14 +699,15 @@ def edit_work(request, id):
 			work['notes'] = sanitize_rich_text(work['notes'])
 			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True})
 			work['attribute_types'] = process_attributes(work['attributes'], work_attributes[0]['results'])
-			chapters = do_get(f'api/works/{id}/chapters/draft', request)[0]
+			chapters = do_get(f'api/works/{id}/chapters/all', request)[0]
 			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else []
 			return render(request, 'work_form.html', {
 				'work_types': work_types['results'],
+				'form_title': 'Edit Work',
 				'work': work,
 				'tags': tags,
 				'show_chapter': request.GET.get('show_chapter') if 'show_chapter' in request.GET else None,
-				'chapters': chapters['results'],
+				'chapters': chapters,
 				'chapter_count': len(chapters)})
 		else:
 			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
@@ -682,25 +798,27 @@ def delete_chapter(request, work_id, chapter_id):
 
 def new_bookmark(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
-		data = {'title': '', 'description': '', 'user': request.user.username, 'work_id': work_id, 'is_private': True, 'rating': 5}
-		response = do_post(f'api/bookmarks/', request, data=data)
+		bookmark = {'title': '', 'description': '', 'user': request.user.username, 'work': {'title': request.GET.get('title'), 'id': work_id}, 'is_private': True, 'rating': 5}
+		bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True})
+		bookmark['attribute_types'] = process_attributes([], bookmark_attributes[0]['results'])
+		tag_types = do_get(f'api/tagtypes', request)[0]
+		tags = {result['label']:[] for result in tag_types['results']}
+		star_count = do_get(f'api/bookmarks', request)[0]['star_count']
+		return render(request, 'bookmark_form.html', {
+			'tags': tags,
+			'rating_range': star_count,
+			'form_title': 'New Bookmark',
+			'bookmark': bookmark})
+	elif request.user.is_authenticated:
+		bookmark_dict = get_bookmark_obj(request)
+		response = do_post(f'api/bookmarks/', request, data=bookmark_dict)
 		if response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark created.')
-			bookmark = response[0]
-			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True})
-			bookmark['attribute_types'] = process_attributes([], bookmark_attributes[0]['results'])
-			tags = group_tags(bookmark['tags'])
-			return render(request, 'bookmark_form.html', {
-				'tags': tags, 'rating_range': [1,2,3,4,5],
-				'bookmark': bookmark})
 		elif response[1] == 403:
 			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark.')
-			return redirect('/')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this bookmark. Please contact your administrator.')
-			return redirect('/')
-	elif request.user.is_authenticated:
-		return edit_bookmark(request, int(request.POST['bookmark_id']))
+		return redirect(f'/bookmarks/{response[0]["id"]}')
 	else:
 		messages.add_message(request, messages.ERROR, 'You must log in to create a bookmark.')
 		return redirect('/login')
@@ -708,28 +826,7 @@ def new_bookmark(request, work_id):
 
 def edit_bookmark(request, pk):
 	if request.method == 'POST':
-		bookmark_dict = request.POST.copy()
-		tags = []
-		tag_types = {}
-		result = do_get(f'api/tagtypes', request)[0]['results']
-		for item in result:
-			tag_types[item['label']] = item
-		for item in request.POST:
-			if 'tags' in request.POST[item]:
-				tag = {}
-				json_item = request.POST[item].split("_")
-				tag['tag_type'] = json_item[2]
-				tag['text'] = json_item[1]
-				tags.append(tag)
-				bookmark_dict.pop(item)
-		bookmark_dict["tags"] = tags
-		comments_permitted = bookmark_dict["comments_permitted"]
-		bookmark_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
-		bookmark_dict["anon_comments_permitted"] = comments_permitted == "All"
-		bookmark_dict = bookmark_dict.dict()
-		bookmark_dict["user"] = str(request.user)
-		bookmark_dict["draft"] = 'draft' in bookmark_dict
-		bookmark_dict["attributes"] = get_attributes_from_form_data(request)
+		bookmark_dict = get_bookmark_obj(request)
 		response = do_patch(f'api/bookmarks/{pk}/', request, data=bookmark_dict)
 		if response[1] == 200:
 			messages.add_message(request, messages.SUCCESS, 'Bookmark updated.')
@@ -747,7 +844,8 @@ def edit_bookmark(request, pk):
 			bookmark['attribute_types'] = process_attributes(bookmark['attributes'], bookmark_attributes[0]['results'])
 			tags = group_tags_for_edit(bookmark['tags'], tag_types) if 'tags' in bookmark else []
 			return render(request, 'bookmark_form.html', {
-				'rating_range': [1,2,3,4,5],
+				'rating_range': bookmark['star_count'],
+				'form_title': 'Edit Bookmark',
 				'bookmark': bookmark,
 				'tags': tags})
 		else:
@@ -766,6 +864,131 @@ def delete_bookmark(request, bookmark_id):
 	if str(bookmark_id) in request.META.get('HTTP_REFERER'):
 		return redirect('/bookmarks')
 	return referrer_redirect(request)
+
+
+def bookmark_collections(request):
+	response = do_get(f'api/bookmarkcollections/', request)[0]
+	bookmark_collections = response['results']
+	bookmark_collections = get_object_tags(bookmark_collections)
+	for bkcol in bookmark_collections:
+		bkcol['attributes'] = get_attributes_for_display(bkcol['attributes'])
+	return render(request, 'bookmark_collections.html', {
+		'bookmark_collections': bookmark_collections,
+		'next': f"/bookmarkcollections/{response['next_params']}" if response['next_params'] is not None else None,
+		'previous': f"/bookmarkcollections/{response['prev_params']}" if response['prev_params'] is not None else None,
+		'root': settings.ALLOWED_HOSTS[0]})
+
+
+def new_bookmark_collection(request):
+	if request.user.is_authenticated and request.method != 'POST':
+		bookmark_collection = {'title': 'New Bookmark Collection', 'description': '', 'user': request.user.username, 'is_private': True, 'is_draft': True}
+		bookmark_collection_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True})
+		bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes[0]['results'])
+		tag_types = do_get(f'api/tagtypes', request)[0]
+		tags = {result['label']:[] for result in tag_types['results']}
+		return render(request, 'bookmark_collection_form.html', {
+			'tags': tags,
+			'form_title': 'New Bookmark Collection',
+			'bookmark_collection': bookmark_collection})
+	elif request.user.is_authenticated:
+		collection_dict = get_bookmark_collection_obj(request)
+		response = do_post(f'api/bookmarkcollections/', request, data=collection_dict)
+		if response[1] == 201:
+			messages.add_message(request, messages.SUCCESS, 'Bookmark collection created.')
+		elif response[1] == 403:
+			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark collection.')
+		else:
+			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this bookmark collection. Please contact your administrator.')
+		return redirect(f'/bookmark-collections/{response[0]["id"]}')
+	else:
+		messages.add_message(request, messages.ERROR, 'You must log in to create a bookmark collection.')
+		return redirect('/login')
+
+
+def edit_bookmark_collection(request, pk):
+	if request.method == 'POST':
+		collection_dict = get_bookmark_collection_obj(request)
+		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict)
+		if response[1] == 200:
+			messages.add_message(request, messages.SUCCESS, 'Bookmark collection updated.')
+		elif response[1] == 403:
+			messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark collection.')
+		else:
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark collection. Please contact your administrator.')
+		return redirect(f'/bookmark-collections/{pk}')
+	else:
+		if request.user.is_authenticated:
+			tag_types = do_get(f'api/tagtypes', request)[0]
+			bookmark_collection = do_get(f'api/bookmarkcollections/{pk}/', request)[0]
+			bookmark_collection['description'] = sanitize_rich_text(bookmark_collection['description'])
+			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True})
+			bookmark_collection['attribute_types'] = process_attributes(bookmark_collection['attributes'], bookmark_attributes[0]['results'])
+			tags = group_tags_for_edit(bookmark_collection['tags'], tag_types) if 'tags' in bookmark_collection else []
+			return render(request, 'bookmark_collection_form.html', {
+				'bookmark_collection': bookmark_collection,
+				'form_title': 'Edit Bookmark Collection',
+				'tags': tags})
+		else:
+			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
+			return redirect('/login')
+
+
+def bookmark_collection(request, pk):
+	bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request)[0]
+	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
+	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
+	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
+	if 'comment_thread' in request.GET:
+		comment_id = request.GET.get('comment_thread')
+		comments = do_get(f"api/bookmarkcomments/{comment_id}", request)[0]
+		comment_offset = 0
+		comments = {'results': [comments], 'count': request.GET.get('comment_count')}
+		bookmark_collection['post_action_url'] = f"/bookmarkcollections/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
+		bookmark_collection['edit_action_url'] = f"""/bookmarkcollections/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
+	else:
+		comments = do_get(f'api/bookmarkcollections/{pk}/comments?limit=10&offset={comment_offset}', request)[0]
+		bookmark_collection['post_action_url'] = f"/bookmarkcollections/{pk}/comments/new"
+		bookmark_collection['edit_action_url'] = f"""/bookmarkcollections/{pk}/comments/edit"""
+	for bookmark in bookmark_collection['bookmarks_readonly']:
+		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '').replace('<br/>', '', 1)
+	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
+	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
+	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
+	return render(request, 'bookmark_collection.html', {
+		'bkcol': bookmark_collection,
+		'tags': tags,
+		'comment_offset': comment_offset,
+		'scroll_comment_id': scroll_comment_id,
+		'expand_comments': expand_comments,
+		'user_can_comment': user_can_comment,
+		'comments': comments})
+
+
+def delete_bookmark_collection(request, pk):
+	response = do_delete(f'api/bookmarkcollections/{pk}/', request)
+	if response[1] == 204:
+		messages.add_message(request, messages.SUCCESS, 'Bookmark collection deleted.')
+	elif response[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this bookmark collection.')
+	elif response[1] == 404:
+		messages.add_message(request, messages.ERROR, 'Bookmark collection not found.')
+	else:
+		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this bookmark collection. Please contact your administrator.')
+	if request.META is not None and 'HTTP_REFERER' in request.META and str(pk) in request.META.get('HTTP_REFERER'):
+		return redirect('/bookmark-collections')
+	return referrer_redirect(request)
+
+
+def publish_bookmark_collection(request, pk):
+	data = {'id': pk, 'draft': False}
+	response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=data)
+	if response[1] == 200:
+		messages.add_message(request, messages.SUCCESS, 'Bookmark collection published.')
+	elif response[1] == 403:
+		messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark collection.')
+	else:
+		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark collection. Please contact your administrator.')
+	return redirect(f'/bookmark-collections/{pk}')
 
 
 def log_in(request):
@@ -836,8 +1059,7 @@ def register(request):
 
 def request_invite(request):
 	if request.method == 'POST':
-		invite_email = request.POST.get('email')
-		response = do_post(f'api/invitations/', request, data={'email': invite_email})
+		response = do_post(f'api/invitations/', request, data=request.POST.copy())
 		if response[1] == 200 or response[1] == 201:
 			messages.add_message(request, messages.SUCCESS, 'You have been added to the invite queue.')
 			return render(request, 'request_invite.html', {'invite_sent': True})
@@ -871,14 +1093,15 @@ def work(request, pk):
 	work = work[0]
 	tags = group_tags(work['tags']) if 'tags' in work else {}
 	work['attributes'] = get_attributes_for_display(work['attributes'])
-	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else ""}'
+	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else "/all"}'
 	if chapter_offset > 0:
 		chapter_url_string = f'{chapter_url_string}&offset={chapter_offset}'
 	chapter_response = do_get(chapter_url_string, request)[0]
+	chapter_json = chapter_response['results'] if 'results' in chapter_response else chapter_response
 	user_can_comment = (work['comments_permitted'] and (work['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in work else False
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	chapters = []
-	for chapter in chapter_response['results']:
+	for chapter in chapter_json:
 		if 'id' in chapter:
 			if 'comment_thread' not in request.GET:
 				comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
@@ -958,6 +1181,12 @@ def render_bookmark_comments(request, pk):
 
 def create_chapter_comment(request, work_id, chapter_id):
 	if request.method == 'POST':
+		if not request.user.is_authenticated:
+			if settings.USE_CAPTCHA:
+				captcha_passed = validate_captcha(request)
+				if not captcha_passed:
+					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.')
+					return redirect(f"/works/{work_id}/")
 		comment_dict = request.POST.copy()
 		offset_url = int(request.GET.get('offset', 0))
 		comment_count = int(request.POST.get('chapter_comment_count'))
@@ -1032,6 +1261,12 @@ def delete_chapter_comment(request, work_id, chapter_id, comment_id):
 
 def create_bookmark_comment(request, pk):
 	if request.method == 'POST':
+		if not request.user.is_authenticated:
+			if settings.USE_CAPTCHA:
+				captcha_passed = validate_captcha(request)
+				if not captcha_passed:
+					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.')
+					return redirect(f"/bookmarks/{pk}/")
 		comment_dict = request.POST.copy()
 		comment_count = int(request.POST.get('bookmark_comment_count'))
 		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
@@ -1108,14 +1343,13 @@ def bookmarks(request):
 		bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks,
-		'rating_range': [1,2,3,4,5],
+		'rating_range': response['star_count'],
 		'next': f"/bookmarks/{next_param}" if next_param is not None else None,
 		'previous': f"/bookmarks/{previous_param}" if previous_param is not None else None})
 
 
 def bookmark(request, pk):
-	get_url = f'api/bookmarks/{pk}/draft' if request.GET.get('draft') == "True" else f'api/bookmarks/{pk}'
-	bookmark = do_get(get_url, request)[0]
+	bookmark = do_get(f'api/bookmarks/{pk}', request)[0]
 	tags = group_tags(bookmark['tags']) if 'tags' in bookmark else {}
 	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
@@ -1140,7 +1374,7 @@ def bookmark(request, pk):
 		'scroll_comment_id': scroll_comment_id,
 		'expand_comments': expand_comments,
 		'user_can_comment': user_can_comment,
-		'rating_range': [1,2,3,4,5],
+		'rating_range': bookmark['star_count'],
 		'work': bookmark['work'] if 'work' in bookmark else {},
 		'comments': comments})
 

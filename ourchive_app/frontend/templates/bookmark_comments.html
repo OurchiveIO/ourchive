@@ -14,6 +14,11 @@
         <div class="uk-width-auto" id="bk-comment-{{comment.id}}-icon-div">
             <img id="bk-comment-{{comment.id}}-icon" class="uk-comment-avatar" src="{{ comment.user.icon }}" width="80" height="80" alt="">
         </div>
+        {% else %}
+            {% load static %}
+            <div class="uk-width-auto" id="bk-comment-{{comment.id}}-icon-div">
+                <img id="bk-comment-{{comment.id}}-icon" class="uk-comment-avatar" src="{% static 'icon-default.png' %}" width="80" height="80" alt="">
+            </div>
         {% endif %}
         <div id="bk-comment-{{comment.id}}-parent-div" class="uk-width-expand">
             {% if comment.user is not None %}

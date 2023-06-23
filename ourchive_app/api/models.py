@@ -21,8 +21,9 @@ class User(AbstractUser):
     default_post_language = models.CharField(max_length=10, blank=True, null=True)
     default_search_language = models.CharField(max_length=10, blank=True, null=True)
     default_editor = models.CharField(max_length=10, blank=True, null=True)
-    attributes = models.ManyToManyField('AttributeValue')
+    attributes = models.ManyToManyField('AttributeValue', blank=True)
     display_username = models.CharField(max_length=150, blank=True, null=True)
+    cookies_accepted = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.display_username = self.username
@@ -321,11 +322,12 @@ class BookmarkCollection(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
     is_complete = models.BooleanField(default=False)
-    cover_url = models.CharField(max_length=600, null=True, blank=True)
-    cover_alt_text = models.CharField(max_length=600, null=True, blank=True)
+    header_url = models.CharField(max_length=600, null=True, blank=True)
+    header_alt_text = models.CharField(max_length=600, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
+    draft = models.BooleanField(default=False)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
 
@@ -337,6 +339,7 @@ class BookmarkCollection(models.Model):
     is_private = models.BooleanField(default=False)
 
     tags = models.ManyToManyField('Tag')
+    attributes = models.ManyToManyField('AttributeValue')
 
     def __str__(self):
         return self.title
@@ -359,8 +362,14 @@ class Bookmark(models.Model):
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
     comment_count = models.IntegerField(default=0)
+    public_notes = models.TextField(null=True, blank=True)
+    private_notes = models.TextField(null=True, blank=True)
 
-    collection = models.ForeignKey(BookmarkCollection, on_delete=models.CASCADE, null=True, blank=True)
+    collection = models.ForeignKey(
+        BookmarkCollection,
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='bookmarks')
 
     user = models.ForeignKey(
         User,
@@ -383,6 +392,9 @@ class Bookmark(models.Model):
 
     def __repr__(self):
         return '<Bookmark: {}>'.format(self.id)
+
+    class Meta:
+        ordering = ('id',)
 
 
 class BookmarkLink(models.Model):
@@ -476,7 +488,7 @@ class OurchiveSetting(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     value = models.CharField(max_length=200)
-    grouping = models.CharField(max_length=200)
+    valtype = models.CharField(max_length=200, null=True, blank=True)
 
     def __repr__(self):
         return '<OurchiveSettings: {}>'.format(self.id)
@@ -500,6 +512,9 @@ class ContentPage(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ('order', 'id',)
+
 
 class Invitation(models.Model):
 
@@ -511,7 +526,8 @@ class Invitation(models.Model):
     token_expiration = models.DateTimeField()
     token_used = models.BooleanField(default=False)
     register_link = models.CharField(max_length=200)
-    send_invite = models.BooleanField(default=False)
+    approved = models.BooleanField(default=False)
+    join_reason = models.TextField(max_length=400, blank=True, null=True)
 
     def __repr__(self):
         return '<Invitation: {}>'.format(self.id)
@@ -529,6 +545,7 @@ class AttributeType(models.Model):
     allow_on_chapter = models.BooleanField(default=False)
     allow_on_user = models.BooleanField(default=False)
     allow_multiselect = models.BooleanField(default=True)
+    allow_on_bookmark_collection = models.BooleanField(default=False)
 
     class Meta:
         indexes = [
@@ -557,6 +574,7 @@ class AttributeValue(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     display_name = models.CharField(max_length=200)
+    order = models.IntegerField(default=1)
 
     attribute_type = models.ForeignKey(
         'AttributeType',
@@ -568,7 +586,7 @@ class AttributeValue(models.Model):
         indexes = [
             models.Index(fields=['name']),
         ]
-        ordering = ('attribute_type__name','name')
+        ordering = ('attribute_type__name','order', 'name')
         constraints = [
             models.UniqueConstraint(Lower('name').desc(), name='unique_attributevalue_name')
         ]

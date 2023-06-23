@@ -26,7 +26,7 @@
             {% if chapter.draft %}
             <a id="chapter-publish-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/publish"><span id="chapter-publish-span" uk-icon="icon: check" title="Publish"></span> </a>
             {% endif %}
-            <a id="chapter-edit-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/edit"><span uk-icon="icon: file-edit" id="chapter-edit-span"></span> </a>
+            <a id="chapter-edit-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/edit?from_work={{chapter_offset}}"><span uk-icon="icon: file-edit" id="chapter-edit-span"></span> </a>
             <a id="chapter-delete-link" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete"><span uk-icon="icon: trash" id="chapter-delete-span"></span> </a>
             {% include "delete_modal.html" with object='chapter' parent_object_id=work.id object_id=chapter.id %}
             {% endif %}
@@ -34,12 +34,20 @@
     <div id="chapter-context-parent" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
 		<div id="chapter-summary-header"><span id="chapter-summary-label" class="uk-text-large">Summary</span></div>
 	    <div id="chapter-summary-div"><span id="chapter-summary-text" class="uk-text-medium">{% autoescape off %}{{ chapter.summary }}{% endautoescape %}</span></div>
+		{% if chapter.notes %}
 		<div id="chapter-notes-header"><span id="chapter-notes-label" class="uk-text-large">Notes</span></div>
-	    <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.notes }}{% endautoescape %}</span></div>
+	    <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.notes }}{% endautoescape %}</span></div>{% endif %}
 	    <div id="chapter-notes-summary-hr"><hr id="chapter-content-hr"/></div>
+	    {% if chapter.attributes %}
 	    {% include "object_attributes.html" with object='chapter' object_id=chapter.id attributes=chapter.attributes %}
+	    {% endif %}
 	</div>
-	{% if chapter.image_url and chapter.audio_url != "None" %}<p id="chapter-image-graf"><img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/></p><hr id="chapter-image-hr"/>{% endif %}
+	{% if chapter.image_url and chapter.image_url != "None" %}
+		<p id="chapter-image-graf">
+			<img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/>
+		</p>
+		<hr id="chapter-image-hr"/>
+	{% endif %}
 	{% if chapter.audio_url and chapter.audio_url != "None" %}<p id="chapter-audio-graf"><audio id="chapter-audio" src="{{ chapter.audio_url }}" controls></audio></p><hr id="chapter-audio-hr"/>{% endif %}
 	{% if chapter.text %}<span id="chapter-text" class="uk-text-medium">{% autoescape off %}{{ chapter.text }}{% endautoescape %}</span><hr id="chapter-text-hr"/>{% endif %}
 	<!-- use iconnav for work edit icons -->
@@ -51,6 +59,7 @@
         </ul>
         </div>        
     </div>  
+    {% if settings.AllowComments %}
 	<div id="chapter-comments-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
         <div id="chapter-comments-load-div">
              <button id="chapter-comments-load-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #chapter-{{chapter.id}}-comments">{{ chapter.comments.count}} Comment(s)</button>    		
@@ -65,15 +74,25 @@
      <div id="chapter-{{chapter.id}}-new">
         <form id="chapter-comment-form" action="{{chapter.new_action_url}}" method="post" class="uk-form uk-grid-small" uk-grid>
             {% csrf_token %}
+            <label id="post-new-comment-label" class="uk-form-label uk-text-large" for="form-horizontal-text">New Comment</label>
             <div id="chapter-comment-id-div" class="uk-width-1-1">
             	<input type="hidden" id="chapter-comment-id-hidden" name="chapter" value="{{ chapter.id }}">
             	<input type="hidden" id="chapter-comment-count" name="chapter_comment_count" value="{{chapter.comments.count}}"/>
             	<textarea id="chapter-comment-textarea" rows="5" class="uk-textarea" id="text" name="text"></textarea>
             </div>
+            {% if captcha_site_key %}
+	        {% if not request.user.is_authenticated %}
+	        <div class="uk-width-1-1 uk-margin-top">
+	            <div class="h-captcha" data-sitekey="{{captcha_site_key}}"></div>
+	              <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+	        </div>
+	        {% endif %}
+	        {% endif %}
             <div class="uk-width-1-1" id="chapter-post-comment-div">
             	<button id="chapter-post-comment-button" class="uk-button uk-button-default uk-align-right">Post Comment</button>
             </div>
         </form>
     </div>
+    {% endif %}
     {% endif %}
 </div>

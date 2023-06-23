@@ -1,0 +1,11 @@
+{% extends 'index.html' %}
+{% block title %}{{ content_page.name }}{% endblock %}
+{% block content %}	
+<div id="content-page-{{content_page.name}}-grid" class="uk-child-width-1@m uk-child-width-1@s uk-text-left uk-width-expand" uk-grid>
+<article id="content-page-{{content_page.name}}-article" class="uk-article">
+    <h1 class="uk-article-title" id="content-page-{{content_page.name}}-header">{{content_page.name}}</h1>
+    <hr/>
+    <p id="content-page-{{content_page.name}}-text">{{content_page.value|safe}}</p>
+</article>
+</div>
+{% endblock %}

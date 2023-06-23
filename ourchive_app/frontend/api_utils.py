@@ -50,6 +50,10 @@ def do_post(url, request, data={}):
 	return get_results(response)
 
 
+def do_external_post(url, data):
+	return requests.post(url, data=data)
+
+
 def do_put(url, request, data={}):
 	return get_results(requests.put(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)))
 
@@ -61,3 +65,20 @@ def do_delete(url, request):
 def do_get(url, request, params={}):
 	response = requests.get(append_root_url(url), params=params, cookies=request.COOKIES, headers=get_headers(request))
 	return get_results(response)
+
+
+def validate_captcha(request):
+	if settings.CAPTCHA_PROVIDER == 'hcaptcha':
+		return validate_hcaptcha(request)
+	return False
+
+
+def validate_hcaptcha(request):
+	validate_key = request.POST.get(settings.CAPTCHA_PARAM)
+	params = {
+		"secret": settings.CAPTCHA_SECRET,
+		"response": validate_key
+	}
+	response = do_external_post("https://hcaptcha.com/siteverify", params)
+	success = response.json()['success']
+	return success

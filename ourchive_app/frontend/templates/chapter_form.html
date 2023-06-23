@@ -1,4 +1,5 @@
 {% extends 'index.html' %}
+{% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
 {% load static %}
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
@@ -29,17 +30,17 @@
 		{% csrf_token %}
 		<input type="hidden" id="work" name="work" value="{{ chapter.work }}">
 		<input type="hidden" id="work" name="chapter_id" value="{{ chapter.id }}">
-		<div id="chapter-form-title-grid" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
-	        <div class="uk-width-2-3" id="chapter-form-title-div">
+		<div id="chapter-form-title-grid" class="uk-grid" uk-grid>
+	        <div class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom" id="chapter-form-title-div">
 	            <span id="chapter-form-title-span" class="uk-text-large">{{ chapter.title|default_if_none:'' }}</span>
 	        </div>
-	        <div class="uk-text-right uk-width-1-3" id="chapter-form-buttons-parent">
+	        <div class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="chapter-form-top-buttons-group">
+                <button id="chapter-form-top-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
 	        	<input id="chapter-form-cancel-button" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel"/>
 	            <input id="chapter-form-submit-button" class="uk-button uk-button-primary" type="submit" value="Submit"/>
 	        </div>
 	    </div>
     <hr id="chapter-form-hr"/>
-		<fieldset class="uk-fieldset" id="chapter-form-fieldset">
 		<div id="chapter-form-title-parent" class="uk-margin">
             <label id="chapter-form-title-label" class="uk-form-label" for="form-horizontal-text">Title</label>
             <div id="chapter-form-title-controls" class="uk-form-controls">
@@ -49,7 +50,10 @@
             </div>
             
         </div>
-
+        <h3 id="obj-attrs-form-header">Chapter Tags</h3>
+            {% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types show_header=False %}
+        <hr id="chapter-summary-hr"/>
+        <h3 id="obj-attrs-form-header">Chapter Details</h3>
         <div class="uk-margin" id="chapter-form-summary-parent">
             <label id="chapter-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
             <div id="chapter-form-summary-controls" class="uk-form-controls">
@@ -60,9 +64,9 @@
                                       tinymce.init({
                                         selector: '#summaryEditor',
                                         width: '100%',
-										height: 450,
-										autoresize_min_height: 450,
-										autoresize_max_height: 800,
+                                        height: 200,
+                                        autoresize_min_height: 150,
+                                        autoresize_max_height: 800,
                                         plugins: [
                                           'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
                                           'fullscreen', 'insertdatetime',
@@ -72,7 +76,6 @@
                                           'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
                                           'forecolor backcolor emoticons | help',
                                         menubar: '',
-                                        content_css: 'css/content.css',
                                         init_instance_callback : function(editor) {
                                         	var chapterSummary = document.getElementById('summary').value;
                                         	if (chapterSummary === "None") {
@@ -85,25 +88,6 @@
                 </div>
             </div>
         </div>
-
-       <div class="uk-margin" id="chapter-form-number-parent">
-            <label id="chapter-form-number-label" class="uk-form-label" for="form-horizontal-text">Number</label>
-            <div id="chapter-form-number-controls" class="uk-form-controls">
-                <div id="chapter-form-number-inline" class="uk-inline">
-                    <input id="chapter-form-number-input" class="uk-input" type="number" name="number" min="1" value="{{ chapter.number }}">
-                </div>
-            </div>            
-        </div>
-
-        <div class="uk-margin" id="chapter-form-draft-parent">
-            <label id="chapter-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft?</label>
-            <div class="uk-form-controls" id="chapter-form-draft-controls">
-                <div class="uk-inline" id="chapter-form-draft-inline">
-                    <label id="chapter-form-draft-checkbox-label" class="switch"><input class="uk-checkbox" type="checkbox" id="chapter-form-draft" name="draft" {% if chapter.draft %} checked {% endif %}> <span class="slider round"></span></label>
-                </div>
-            </div>
-        </div>
-
         <div class="uk-margin" id="chapter-form-notes-parent">
             <label class="uk-form-label" for="form-horizontal-text" id="chapter-form-notes-label">Notes</label>
             <div class="uk-form-controls" id="chapter-form-notes-controls">
@@ -114,9 +98,9 @@
                                       tinymce.init({
                                         selector: '#notesEditor',
                                         width: '100%',
-										height: 450,
-										autoresize_min_height: 450,
-										autoresize_max_height: 800,
+                                        height: 200,
+                                        autoresize_min_height: 150,
+                                        autoresize_max_height: 800,
                                         plugins: [
                                           'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
                                           'fullscreen', 'insertdatetime',
@@ -127,10 +111,10 @@
                                           'forecolor backcolor emoticons | help',
                                         menubar: '',
                                         init_instance_callback : function(editor) {
-                                        	var chapterNotes = document.getElementById('notes').value;
-                                        	if (chapterNotes === "None") {
-                                        		chapterNotes = '';
-                                        	}
+                                            var chapterNotes = document.getElementById('notes').value;
+                                            if (chapterNotes === "None") {
+                                                chapterNotes = '';
+                                            }
                                             editor.setContent(chapterNotes);
                                         }
                                       });
@@ -139,22 +123,38 @@
             </div>
         </div>
 
-        <hr id="chapter-attributes-hr"/>
-        	{% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types %}
-        <hr id="chapter-comments-hr"/>
-
+       
+        <div class="uk-margin" id="chapter-form-number-parent">
+            <label id="chapter-form-number-label" class="uk-form-label" for="form-horizontal-text">Number</label>
+            <div id="chapter-form-number-controls" class="uk-form-controls">
+                <div id="chapter-form-number-inline" class="uk-inline">
+                    <input id="chapter-form-number-input" class="uk-input" type="number" name="number" min="1" value="{{ chapter.number }}">
+                </div>
+            </div>            
+        </div>
+        <div class="uk-margin" id="chapter-form-draft-parent">
+            <label id="chapter-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft?</label>
+            <div class="uk-form-controls" id="chapter-form-draft-controls">
+                <div class="uk-inline" id="chapter-form-draft-inline">
+                    <label id="chapter-form-draft-checkbox-label" class="switch"><input class="uk-checkbox" type="checkbox" id="chapter-form-draft" name="draft" {% if chapter.draft %} checked {% endif %}> <span class="slider round"></span></label>
+                </div>
+            </div>
+        </div>
+        <h3 id="obj-attrs-form-header">Chapter Content</h3>
+        {% if request.user.can_upload_images %}
         <div class="uk-margin" id="chapter-form-image-parent">
             <label id="chapter-form-image-label" class="uk-form-label" for="form-horizontal-text">Chapter Image</label>
-            {% if chapter.image_url %}
-                <img id="chapter-form-image" src="{{ chapter.image_url }}"/>
+            {% if chapter.image_url and chapter.image_url != "None" %}
+            <div class="uk-form-controls" id="chapter-form-image-controls">
+                <img id="chapter-form-image" src="{{ chapter.image_url }}" class="uk-margin-bottom"/>
             {% endif %}
+            </div>
             <div class="uk-form-controls" id="chapter-form-image-upload-controls">
                 <div class="uk-inline" id="chapter-form-image-upload-inline">
                 	{% include 'file_upload.html' with object='image_url' replace_selector='chapter-form-image' object_type='img' upload_placeholder='Upload chapter image' original_value=chapter.image_url %}
                 </div>
             </div>
         </div>
-
         <div class="uk-margin" id="chapter-form-image-alt-text-parent">
             <label id="chapter-form-image-alt-text-label" class="uk-form-label" for="form-horizontal-text">Image Alt Text</label>
             <div id="chapter-form-image-alt-text-controls" class="uk-form-controls">
@@ -163,7 +163,8 @@
                 </div>
             </div>
         </div>
-
+        {% endif %}
+        {% if request.user.can_upload_audio %}
         <div class="uk-margin" id="chapter-form-audio-parent">
             <label id="chapter-form-audio-label" class="uk-form-label" for="form-horizontal-text">Chapter Audio</label>
             <div class="uk-form-controls" id="chapter-form-audio-controls">
@@ -172,7 +173,6 @@
                 </div>
             </div>
         </div>
-
         <div class="uk-margin" id="chapter-form-audio-description-parent">
             <label id="chapter-form-audio-description-label" class="uk-form-label" for="form-horizontal-text">Audio Description</label>
             <div id="chapter-form-audio-description-controls" class="uk-form-controls">
@@ -181,7 +181,17 @@
                 </div>
             </div>
         </div>
-
+        {% if settings.AudioProcessing == 'False' %}
+        <div class="uk-margin" id="chapter-form-audio-length-parent">
+            <label id="chapter-form-audio-length-label" class="uk-form-label" for="form-horizontal-text">Audio Length <sup uk-icon="icon: question"></sup></label>
+            <div id="chapter-form-audio-length-controls" class="uk-form-controls">
+                <div class="uk-inline" id="chapter-form-audio-length-inline">
+                    <input id="chapter-form-audio-length" class="uk-input uk-form-width-large" type="number" name="audio_length" value="{{ chapter.audio_length|default_if_none:0 }}">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
         <div class="uk-margin" id="chapter-form-text-parent">
             <label id="chapter-form-text-label" class="uk-form-label" for="form-horizontal-text">Chapter Text</label>
             <div class="uk-form-controls" id="chapter-form-text-controls">
@@ -226,7 +236,14 @@
                 </div>
             </div>
         </div>
-    </fieldset>
+        <hr/>
+        <div id="chapter-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
+            <div class="uk-align-right uk-width-1-1@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="chapter-form-bottom-buttons-group">
+                <button id="chapter-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                <input id="chapter-form-cancel-button-bottom" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel"/>
+                <input id="chapter-form-submit-button-bottom" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+            </div>
+        </div>
 	</form>
 </div>
 {% endblock %}

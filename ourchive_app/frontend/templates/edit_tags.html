@@ -1,3 +1,4 @@
+{% if show_header != False %}<h3 id="obj-attrs-form-header">{{ object_friendly|default_if_none:'' }} Tags <sup uk-icon="icon: question"></sup></h3>{% endif %}
 {% for type, tag_data in tags.items %}
     {% if tag_data.admin_administrated %}
         <div class="uk-margin" id="{{ object }}-form-tag-parent">

@@ -1,4 +1,4 @@
-<h3 id="obj-attrs-form-header">{{ object }} Attributes <sup uk-icon="icon: question"></sup></h3>
+{% if show_header != False %}<h3 id="obj-attrs-form-header">{{ object }} Attributes <sup uk-icon="icon: question"></sup></h3>{% endif %}
 {% for attribute in attribute_types %}
 <div class="uk-margin" id="{{attribute}}-attr-form-parent-div">
     <label id="{{attribute}}-attr-form-label" class="uk-form-label" for="form-horizontal-text">{{attribute.display_name}}</label>
