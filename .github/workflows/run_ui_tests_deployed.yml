@@ -21,13 +21,13 @@ jobs:
         #    'ourchive-app/requirements.txt'
       - name: test pwd
         run: |
-            ls
+            ls $GITHUB_WORKSPACE
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Requirements.txt
-        run: pip install -r ourchive-app/requirements.txt
+        run: pip install -r $GITHUB_WORKSPACE/ourchive-app/requirements.txt
       - name: Install dependencies
         run: pip install pytest pytest-md pytest-emoji
       - uses: pavelzw/pytest-action@v2
