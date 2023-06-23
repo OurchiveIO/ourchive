@@ -14,7 +14,7 @@ jobs:
       - uses: szenius/set-timezone@v1.2
         with:
           timezoneLinux: "America/Chicago"
-      - uses: actions/checkout@ui-tests
+      - uses: actions/checkout@v3
         #with:
         #  sparse-checkout: |
         #    'ourchive-app/ui-tests'
