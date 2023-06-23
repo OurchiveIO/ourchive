@@ -211,6 +211,7 @@
             </div>
         </div>
         {% endif %}
+        {% if user.can_upload_export_files %}
         <div class="uk-margin" id="work-form-preferred-download-parent">
             <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export</label>
             <div id="work-form-preferred-download-controls" class="uk-form-controls">
@@ -234,6 +235,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
     <div><hr/></div>
     <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left">

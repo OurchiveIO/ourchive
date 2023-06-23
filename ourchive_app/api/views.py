@@ -91,6 +91,15 @@ class FileUpload(APIView):
 
     def post(self, request, format=None):
         if 'files[]' in request.FILES:
+            if 'image' in request.FILES['files[]'].content_type:
+                if not request.user.can_upload_images:
+                    return Response({'message': 'User does not have permission to upload images.'}, status=403)
+            elif 'audio' in request.FILES['files[]'].content_type:
+                if not request.user.can_upload_audio:
+                    return Response({'message': 'User does not have permission to upload audio.'}, status=403)
+            else:
+                if not request.user.can_upload_export_files:
+                    return Response({'message': 'User does not have permission to upload this file.'}, status=403)
             service = FileHelperService.get_service()
             if service is not None:
                 final_url = service.handle_uploaded_file(

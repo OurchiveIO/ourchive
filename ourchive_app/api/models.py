@@ -18,6 +18,7 @@ class User(AbstractUser):
     attributes = models.ManyToManyField('AttributeValue')
     can_upload_audio = models.BooleanField(default=False)
     can_upload_images = models.BooleanField(default=False)
+    can_upload_export_files = models.BooleanField(default=False)
     default_post_language = models.CharField(max_length=10, blank=True, null=True)
     default_search_language = models.CharField(max_length=10, blank=True, null=True)
     default_editor = models.CharField(max_length=10, blank=True, null=True)
@@ -35,7 +36,8 @@ class Work(models.Model):
 
     __tablename__ = 'works'
 
-    DOWNLOAD_CHOICES = [('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP')]
+    DOWNLOAD_CHOICES = [('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP'), 
+        ('M4A', 'M4A'), ('MOBI', 'MOBI')]
 
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
