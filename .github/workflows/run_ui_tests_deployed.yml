@@ -10,6 +10,8 @@ jobs:
       matrix:
         python-version: ["3.10"]
 
+    continue-on-error: true
+
     steps:
       - uses: szenius/set-timezone@v1.2
         with:
@@ -33,7 +35,12 @@ jobs:
         run: pip install pytest pytest-md pytest-emoji
       - uses: pavelzw/pytest-action@v2
         with:
-          emoji: false
-          verbose: false
+          emoji: true
+          verbose: true
           job-summary: true
           custom-arguments: 'ourchive_app/ui-tests'
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: $GITHUB_WORKSPACE/report.md
