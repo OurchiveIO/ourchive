@@ -13,7 +13,7 @@ from webdriver_manager.core.logger import set_logger
 '''
 tests for a valid user
 '''
-@pytest.mark.usefixtures("return_chrome_driver", "caplog")
+@pytest.mark.usefixtures("return_headless_chrome_driver", "caplog")
 class TestValidUserFlows:
 
 
