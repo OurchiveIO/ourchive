@@ -188,7 +188,7 @@ def get_works_list(request, username=None):
 	response = do_get(url, request, params=request.GET)
 	result_message = process_results(response, 'works')
 	if result_message != 'OK':
-		messages.add_message(request, messages.ERROR, result_message)
+		messages.add_message(request, messages.ERROR, result_message, 'get-works-list-error')
 		return redirect('/')
 	else:
 		works = response[0]['results']
@@ -271,14 +271,14 @@ def user_name(request, username):
 			'user': user
 		})
 	else:
-		messages.add_message(request, messages.ERROR, 'User not found.')
+		messages.add_message(request, messages.ERROR, 'User not found.', 'user-not-found-error')
 		return redirect('/')
 
 
 def user_block_list(request, username):
 	blocklist = do_get(f'api/users/{username}/userblocks', request)
 	if blocklist[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to view this blocklist.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to view this blocklist.', 'blocklist-unauthorized-eror')
 		return redirect(f'/username/{username}')
 	return render(request, 'user_block_list.html', {
 		'blocklist': blocklist[0]['results'],
@@ -290,7 +290,7 @@ def block_user(request, username):
 	data = {'user': request.user.username, 'blocked_user': username}
 	blocklist = do_post(f'api/userblocks', request, data)
 	if blocklist[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to view this blocklist.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to view this blocklist.', 'blocklist-unauthorized-eror')
 	if blocklist[1] >= 200 and blocklist[1] < 300:
 		messages.add_message(request, messages.SUCCESS, 'User blocked.')
 	return redirect(f'/username/{username}')
@@ -299,9 +299,9 @@ def block_user(request, username):
 def unblock_user(request, username, pk):
 	blocklist = do_delete(f'api/userblocks/{pk}', request)
 	if blocklist[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to unblock this user.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to unblock this user.', 'unblock-unauthorized-error')
 	if blocklist[1] >= 200 and blocklist[1] < 300:
-		messages.add_message(request, messages.SUCCESS, 'User unblocked.')
+		messages.add_message(request, messages.SUCCESS, 'User unblocked.', 'unblock-success')
 	return redirect(f'/username/{username}')
 
 
@@ -332,11 +332,11 @@ def edit_account(request, username):
 		user_data.pop('id')
 		response = do_patch(f'api/users/{profile_id}/', request, data=user_data)
 		if response[1] == 200:
-			messages.add_message(request, messages.SUCCESS, 'Account information updated.')
+			messages.add_message(request, messages.SUCCESS, 'Account information updated.', 'account-update-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to update this account.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to update this account.', 'account-update-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this account. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this account. Please contact your administrator.', 'account-update-error')
 		return redirect('/username/{username}')
 	else:
 		if request.user.is_authenticated:
@@ -346,10 +346,10 @@ def edit_account(request, username):
 				user = user[0]
 				return render(request, 'account_form.html', {'user': user})
 			else:
-				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.')
+				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.', 'user-info-not-found-error')
 				return redirect(f'/username/{username}')
 		else:
-			messages.add_message(request, messages.ERROR, 'You must log in as this user to perform this action.')
+			messages.add_message(request, messages.ERROR, 'You must log in as this user to perform this action.', 'user-info-unauthorized-error')
 			return redirect('/login')
 
 
@@ -363,11 +363,11 @@ def edit_user(request, username):
 		user_data["attributes"] = get_attributes_from_form_data(request)
 		response = do_patch(f'api/users/{user_id}/', request, data=user_data)
 		if response[1] == 200 or response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'User profile updated.')
+			messages.add_message(request, messages.SUCCESS, 'User profile updated.', 'user-profile-update-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to update this user profile.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to update this user profile.', 'user-profile-update-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this user profile. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this user profile. Please contact your administrator.', 'user-profile-update-error')
 		return redirect(f'/username/{username}/')
 	else:
 		if request.user.is_authenticated:
@@ -381,10 +381,10 @@ def edit_user(request, username):
 				user['attribute_types'] = process_attributes(user['attributes'], user_attributes[0]['results'])
 				return render(request, 'user_form.html', {'user': user, 'form_title': 'Edit User'})
 			else:
-				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.')
+				messages.add_message(request, messages.ERROR, 'User information not found. Please contact your administrator.', 'user-profile-not-found-error')
 				return redirect(f'/username/{username}')
 		else:
-			messages.add_message(request, messages.ERROR, 'You must log in as this user to perform this action.')
+			messages.add_message(request, messages.ERROR, 'You must log in as this user to perform this action.', 'user-profile-unauthorized-error')
 			return redirect('/login')
 
 
@@ -395,11 +395,11 @@ def delete_user(request, username):
 		else:
 			if 'delete' not in request.META.get('HTTP_REFERER') and 'account/edit' not in request.META.get('HTTP_REFERER'):
 				# you get to the button through the account edit screen, so we don't want to flash a warning if they came through here
-				messages.add_message(request, messages.WARNING, 'You are not authorized to view this page.')
+				messages.add_message(request, messages.WARNING, 'You are not authorized to view this page.', 'account-delete-unauthorized-error')
 			return redirect('/')
 	elif request.method == 'POST':
 		do_delete(f'api/users/{request.user.id}', request)
-		messages.add_message(request, messages.SUCCESS, 'Account deleted successfully.')
+		messages.add_message(request, messages.SUCCESS, 'Account deleted successfully.', 'account-delete-success')
 		return referrer_redirect(request)
 	else:
 		return render(request, 'delete_account.html', {'user': request.user})
@@ -436,9 +436,9 @@ def user_notifications(request, username):
 			'next': f"/username/{username}/notifications/{response[0]['next_params']}" if response[0]['next_params'] is not None else None,
 			'previous': f"/username/{username}/notifications/{response[0]['prev_params']}" if response[0]['prev_params'] is not None else None})
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to view these notifications.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to view these notifications.', 'notification-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while fetching notifications. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while fetching notifications. Please contact your administrator.', 'notification-fetch-error')
 	return redirect(f'/')
 
 
@@ -447,9 +447,9 @@ def delete_notification(request, username, notification_id):
 	if response[1] == 204:
 		messages.add_message(request, messages.SUCCESS, 'Notification deleted.')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this notification.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this notification.', 'notification-delete-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this notification. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this notification. Please contact your administrator.', 'notification-delete-error')
 	return redirect(f'/username/{username}/notifications')
 
 
@@ -457,11 +457,11 @@ def mark_notification_read(request, username, notification_id):
 	data = {'id': notification_id, 'read': True}
 	response = do_patch(f'api/notifications/{notification_id}/', request, data=data)
 	if response[1] == 200:
-		messages.add_message(request, messages.SUCCESS, 'Notification marked as read.')
+		messages.add_message(request, messages.SUCCESS, 'Notification marked as read.', 'notification-read-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to modify this notification.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to modify this notification.', 'notification-read-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while modifying this notification. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while modifying this notification. Please contact your administrator.', 'notification-read-error')
 	return redirect(f'/username/{username}/notifications')
 
 
@@ -606,7 +606,7 @@ def new_work(request):
 		else:
 			return redirect(f'/works/{work["id"]}/chapters/new?count=0')
 	else:
-		messages.add_message(request, messages.ERROR, 'You must log in to post a new work.')
+		messages.add_message(request, messages.ERROR, 'You must log in to post a new work.', 'new-work-unauthorized-error')
 		return redirect('/login')
 
 
@@ -625,15 +625,15 @@ def new_chapter(request, work_id):
 		chapter_dict["attributes"] = get_attributes_from_form_data(request)
 		response = do_post(f'api/chapters/', request, data=chapter_dict)
 		if response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Chapter created.')
+			messages.add_message(request, messages.SUCCESS, 'Chapter created.', 'chapter-created-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to create this chapter.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to create this chapter.', 'chapter-create-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.', 'chapter-create-error')
 		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit/#work-form-chapter-content-parent"
 		return redirect(redirect_url)
 	else:
-		messages.add_message(request, messages.ERROR, 'You must log in to post a new chapter.')
+		messages.add_message(request, messages.ERROR, 'You must log in to post a new chapter.', 'chapter-create-login-error')
 		return redirect('/login')
 
 
@@ -644,11 +644,11 @@ def edit_chapter(request, work_id, id):
 		chapter_dict["attributes"] = get_attributes_from_form_data(request)
 		response = do_patch(f'api/chapters/{id}/', request, data=chapter_dict)
 		if response[1] == 200:
-			messages.add_message(request, messages.SUCCESS, 'Chapter updated.')
+			messages.add_message(request, messages.SUCCESS, 'Chapter updated.', 'chapter-update-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to update this chapter.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to update this chapter.', 'chapter-update-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.', 'chapter-update-error')
 		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit/#work-form-chapter-content-parent"
 		return redirect(redirect_url)
 	else:
@@ -664,7 +664,7 @@ def edit_chapter(request, work_id, id):
 				'chapter': chapter,
 				'form_title': 'Edit Chapter'})
 		else:
-			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
+			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.', 'chapter-update-login-error')
 			return redirect('/login')
 
 
@@ -676,11 +676,11 @@ def edit_work(request, id):
 		if response[1] == 200:
 			for chapter in chapters:
 				response = do_patch(f'api/chapters/{chapter["id"]}/', request, data=chapter)
-			messages.add_message(request, messages.SUCCESS, 'Work updated.')
+			messages.add_message(request, messages.SUCCESS, 'Work updated.', 'work-update-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to update this work.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to update this work.', 'work-update-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this work. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this work. Please contact your administrator.', 'work-update-error')
 		if work_dict[1] == 'false':
 			return redirect(f'/works/{id}')
 		else:
@@ -689,10 +689,10 @@ def edit_work(request, id):
 		if request.user.is_authenticated:
 			work_types = do_get(f'api/worktypes', request)[0]
 			tag_types = do_get(f'api/tagtypes', request)[0]
-			work = do_get(f'api/works/{id}/draft', request)
+			work = do_get(f'api/works/{id}/', request)
 			result_message = process_results(work, 'work')
 			if result_message != 'OK':
-				messages.add_message(request, messages.ERROR, result_message)
+				messages.add_message(request, messages.ERROR, result_message, 'work-update-fetch-error')
 				return redirect('/')
 			work = work[0]
 			work['summary'] = sanitize_rich_text(work['summary'])
@@ -710,7 +710,7 @@ def edit_work(request, id):
 				'chapters': chapters,
 				'chapter_count': len(chapters)})
 		else:
-			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
+			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.', 'work-update-login-error')
 			return redirect('/login')
 
 
@@ -718,11 +718,11 @@ def publish_work(request, id):
 	data = {'id': id, 'draft': False}
 	response = do_patch(f'api/works/{id}/', request, data=data)
 	if response[1] == 200:
-		messages.add_message(request, messages.SUCCESS, 'Work published.')
+		messages.add_message(request, messages.SUCCESS, 'Work published.', 'work-publish-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to update this work.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to update this work.', 'work-publish-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this work. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this work. Please contact your administrator.', 'work-publish-error')
 	return redirect(f'/works/{id}')
 
 
@@ -730,11 +730,11 @@ def publish_chapter(request, work_id, chapter_id):
 	data = {'id': chapter_id, 'draft': False}
 	response = do_patch(f'api/chapters/{chapter_id}/', request, data=data)
 	if response[1] == 200:
-		messages.add_message(request, messages.SUCCESS, 'Chapter published.')
+		messages.add_message(request, messages.SUCCESS, 'Chapter published.', 'chapter-publish-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to update this chapter.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to update this chapter.', 'chapter-publish-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this chapter. Please contact your administrator.', 'chapter-publish-error')
 	return redirect(f'/works/{work_id}')
 
 
@@ -742,11 +742,11 @@ def publish_work_and_chapters(request, id):
 	data = {'id': id, 'draft': False}
 	response = do_patch(f'api/works/{id}/publish-full/', request, data=data)
 	if response[1] == 200:
-		messages.add_message(request, messages.SUCCESS, 'Work and all chapters published.')
+		messages.add_message(request, messages.SUCCESS, 'Work and all chapters published.', 'work-publish-all-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to update this work.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to update this work.', 'work-publish-all-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this work. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this work. Please contact your administrator.', 'work-publish-all-error')
 	return redirect(f'/works/{id}')
 
 
@@ -754,11 +754,11 @@ def publish_bookmark(request, id):
 	data = {'id': id, 'draft': False}
 	response = do_patch(f'api/bookmarks/{id}/', request, data=data)
 	if response[1] == 200:
-		messages.add_message(request, messages.SUCCESS, 'Bookmark published.')
+		messages.add_message(request, messages.SUCCESS, 'Bookmark published.', 'bookmark-publish-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark.', 'bookmark-publish-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark. Please contact your administrator.', 'bookmark-publish-error')
 	return redirect(f'/bookmarks/{id}')
 
 
@@ -766,33 +766,33 @@ def new_fingerguns(request, work_id):
 	data = {'work': str(work_id), 'user': request.user.username}
 	response = do_post(f'api/fingerguns/', request, data=data)
 	if response[1] == 201:
-		messages.add_message(request, messages.SUCCESS, 'Fingerguns added.')
+		messages.add_message(request, messages.SUCCESS, 'Fingerguns added.', 'fingergun-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to add fingerguns to this work.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to add fingerguns to this work.', 'fingergun-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while adding fingerguns to this work. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while adding fingerguns to this work. Please contact your administrator.', 'fingergun-error')
 	return redirect(f'/works/{work_id}')
 
 
 def delete_work(request, work_id):
 	response = do_delete(f'api/works/{work_id}/', request)
 	if response[1] == 204:
-		messages.add_message(request, messages.SUCCESS, 'Work deleted.')
+		messages.add_message(request, messages.SUCCESS, 'Work deleted.', 'work-delete-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this work.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this work.', 'work-delete-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this work. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this work. Please contact your administrator.', 'work-delete-error')
 	return referrer_redirect(request)
 
 
 def delete_chapter(request, work_id, chapter_id):
 	response = do_delete(f'api/chapters/{chapter_id}/', request)
 	if response[1] == 204:
-		messages.add_message(request, messages.SUCCESS, 'Chapter deleted.')
+		messages.add_message(request, messages.SUCCESS, 'Chapter deleted.', 'chapter-delete-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this chapter.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this chapter.', 'chapter-delete-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this chapter. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this chapter. Please contact your administrator.', 'chapter-delete-error')
 	return redirect(f'/works/{work_id}/edit/?show_chapter=true')
 
 
@@ -813,14 +813,14 @@ def new_bookmark(request, work_id):
 		bookmark_dict = get_bookmark_obj(request)
 		response = do_post(f'api/bookmarks/', request, data=bookmark_dict)
 		if response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Bookmark created.')
+			messages.add_message(request, messages.SUCCESS, 'Bookmark created.', 'bookmark-create-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark.', 'bookmark-create-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this bookmark. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this bookmark. Please contact your administrator.', 'bookmark-create-error')
 		return redirect(f'/bookmarks/{response[0]["id"]}')
 	else:
-		messages.add_message(request, messages.ERROR, 'You must log in to create a bookmark.')
+		messages.add_message(request, messages.ERROR, 'You must log in to create a bookmark.', 'bookmark-create-login-error')
 		return redirect('/login')
 
 
@@ -829,11 +829,11 @@ def edit_bookmark(request, pk):
 		bookmark_dict = get_bookmark_obj(request)
 		response = do_patch(f'api/bookmarks/{pk}/', request, data=bookmark_dict)
 		if response[1] == 200:
-			messages.add_message(request, messages.SUCCESS, 'Bookmark updated.')
+			messages.add_message(request, messages.SUCCESS, 'Bookmark updated.', 'bookmark-update-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark.', 'bookmark-update-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark. Please contact your administrator.', 'bookmark-update-error')
 		return redirect(f'/bookmarks/{pk}')
 	else:
 		if request.user.is_authenticated:
@@ -849,18 +849,18 @@ def edit_bookmark(request, pk):
 				'bookmark': bookmark,
 				'tags': tags})
 		else:
-			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
+			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.', 'bookmark-update-login-error')
 			return redirect('/login')
 
 
 def delete_bookmark(request, bookmark_id):
 	response = do_delete(f'api/bookmarks/{bookmark_id}/', request)
 	if response[1] == 204:
-		messages.add_message(request, messages.SUCCESS, 'Bookmark deleted.')
+		messages.add_message(request, messages.SUCCESS, 'Bookmark deleted.', 'bookmark-delete-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this bookmark.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this bookmark.', 'bookmark-delete-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this bookmark. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this bookmark. Please contact your administrator.', 'bookmark-delete-error')
 	if str(bookmark_id) in request.META.get('HTTP_REFERER'):
 		return redirect('/bookmarks')
 	return referrer_redirect(request)
@@ -894,14 +894,14 @@ def new_bookmark_collection(request):
 		collection_dict = get_bookmark_collection_obj(request)
 		response = do_post(f'api/bookmarkcollections/', request, data=collection_dict)
 		if response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Bookmark collection created.')
+			messages.add_message(request, messages.SUCCESS, 'Bookmark collection created.', 'bookmark-collection-create-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark collection.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to create this bookmark collection.', 'bookmark-collection-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this bookmark collection. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while creating this bookmark collection. Please contact your administrator.', 'bookmark-collection-error')
 		return redirect(f'/bookmark-collections/{response[0]["id"]}')
 	else:
-		messages.add_message(request, messages.ERROR, 'You must log in to create a bookmark collection.')
+		messages.add_message(request, messages.ERROR, 'You must log in to create a bookmark collection.', 'bookmark-collection-login-error')
 		return redirect('/login')
 
 
@@ -910,11 +910,11 @@ def edit_bookmark_collection(request, pk):
 		collection_dict = get_bookmark_collection_obj(request)
 		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict)
 		if response[1] == 200:
-			messages.add_message(request, messages.SUCCESS, 'Bookmark collection updated.')
+			messages.add_message(request, messages.SUCCESS, 'Bookmark collection updated.', 'bookmark-collection-update-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark collection.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark collection.', 'bookmark-collection-update-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark collection. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark collection. Please contact your administrator.', 'bookmark-collection-update-error')
 		return redirect(f'/bookmark-collections/{pk}')
 	else:
 		if request.user.is_authenticated:
@@ -929,7 +929,7 @@ def edit_bookmark_collection(request, pk):
 				'form_title': 'Edit Bookmark Collection',
 				'tags': tags})
 		else:
-			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.')
+			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.', 'bookmark-collection-update-login-error')
 			return redirect('/login')
 
 
@@ -967,13 +967,13 @@ def bookmark_collection(request, pk):
 def delete_bookmark_collection(request, pk):
 	response = do_delete(f'api/bookmarkcollections/{pk}/', request)
 	if response[1] == 204:
-		messages.add_message(request, messages.SUCCESS, 'Bookmark collection deleted.')
+		messages.add_message(request, messages.SUCCESS, 'Bookmark collection deleted.', 'bookmark-collection-delete-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this bookmark collection.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this bookmark collection.', 'bookmark-collection-delete-unauthorized-error')
 	elif response[1] == 404:
-		messages.add_message(request, messages.ERROR, 'Bookmark collection not found.')
+		messages.add_message(request, messages.ERROR, 'Bookmark collection not found.', 'bookmark-collection-delete-not-found-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this bookmark collection. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this bookmark collection. Please contact your administrator.', 'bookmark-collection-delete-error')
 	if request.META is not None and 'HTTP_REFERER' in request.META and str(pk) in request.META.get('HTTP_REFERER'):
 		return redirect('/bookmark-collections')
 	return referrer_redirect(request)
@@ -983,11 +983,11 @@ def publish_bookmark_collection(request, pk):
 	data = {'id': pk, 'draft': False}
 	response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=data)
 	if response[1] == 200:
-		messages.add_message(request, messages.SUCCESS, 'Bookmark collection published.')
+		messages.add_message(request, messages.SUCCESS, 'Bookmark collection published.', 'bookmark-collection-publish-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark collection.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to update this bookmark collection.', 'bookmark-collection-publish-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark collection. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while updating this bookmark collection. Please contact your administrator.', 'bookmark-collection-publish-error')
 	return redirect(f'/bookmark-collections/{pk}')
 
 
@@ -996,10 +996,10 @@ def log_in(request):
 		user = authenticate(username=request.POST.get('username').lower(), password=request.POST.get('password'))
 		if user is not None:
 			login(request, user)
-			messages.add_message(request, messages.SUCCESS, 'Login successful.')
+			messages.add_message(request, messages.SUCCESS, 'Login successful.', 'login-success')
 			return referrer_redirect(request)
 		else:
-			messages.add_message(request, messages.ERROR, 'Login unsuccessful. Please try again.')
+			messages.add_message(request, messages.ERROR, 'Login unsuccessful. Please try again.', 'login-unsuccessful-error')
 			return redirect('/login')
 	else:
 		if 'HTTP_REFERER' in request.META:
@@ -1013,10 +1013,10 @@ def reset_password(request):
 		user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
 		if user is not None:
 			login(request, user)
-			messages.add_message(request, messages.SUCCESS, 'Login successful.')
+			messages.add_message(request, messages.SUCCESS, 'Login successful.', 'reset-login-success')
 			return referrer_redirect(request)
 		else:
-			messages.add_message(request, messages.ERROR, 'Login unsuccessful. Please try again.')
+			messages.add_message(request, messages.ERROR, 'Login unsuccessful. Please try again.', 'reset-login-error')
 			return redirect('/login')
 	else:
 		if 'HTTP_REFERER' in request.META:
@@ -1031,13 +1031,13 @@ def register(request):
 	if request.method == 'POST':
 		response = do_post(f'api/users/', request, data=request.POST)
 		if response[1] == 200 or response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Registration successful!')
+			messages.add_message(request, messages.SUCCESS, 'Registration successful!', 'register-success')
 			return redirect('/login')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'Registration is not permitted at this time. Please contact site admin.')
+			messages.add_message(request, messages.ERROR, 'Registration is not permitted at this time. Please contact site admin.', 'register-disabled-error')
 			return redirect('/')
 		else:
-			messages.add_message(request, messages.ERROR, 'Registration unsuccessful. Please try again.')
+			messages.add_message(request, messages.ERROR, 'Registration unsuccessful. Please try again.', 'register-error')
 			return redirect('/login')
 	else:
 		if 'invite_token' in request.GET:
@@ -1045,7 +1045,7 @@ def register(request):
 			if response[1] == 200:
 				return render(request, 'register.html', {'permit_registration': True, 'invite_code': response[0]['invitation']})
 			else:
-				messages.add_message(request, messages.ERROR, 'Your invite code or email is incorrect. Please check your link again and contact site admin.')
+				messages.add_message(request, messages.ERROR, 'Your invite code or email is incorrect. Please check your link again and contact site admin.', 'register-invalid-token-error')
 				return redirect('/')
 		permit_registration = do_get(f'api/settings/', request, params={'setting_name': 'Registration Permitted'})[0]
 		invite_only = do_get(f'api/settings', request, params={'setting_name': 'Invite Only'})[0]
@@ -1061,13 +1061,13 @@ def request_invite(request):
 	if request.method == 'POST':
 		response = do_post(f'api/invitations/', request, data=request.POST.copy())
 		if response[1] == 200 or response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'You have been added to the invite queue.')
+			messages.add_message(request, messages.SUCCESS, 'You have been added to the invite queue.', 'invite-request-success')
 			return render(request, 'request_invite.html', {'invite_sent': True})
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'An error occurred requesting your invite. Please contact site admin.')
+			messages.add_message(request, messages.ERROR, 'An error occurred requesting your invite. Please contact site admin.', 'invite-request-error')
 			return redirect('/')
 		elif response[1] == 418:
-			messages.add_message(request, messages.ERROR, 'Your account already exists. Please log in or reset your password.')
+			messages.add_message(request, messages.ERROR, 'Your account already exists. Please log in or reset your password.', 'invite-request-dupe-error')
 			return redirect('/login')
 	else:
 		return render(request, 'request_invite.html', {'invite_sent': False})
@@ -1075,7 +1075,7 @@ def request_invite(request):
 
 def log_out(request):
 	logout(request)
-	messages.add_message(request, messages.SUCCESS, 'Logout successful.')
+	messages.add_message(request, messages.SUCCESS, 'Logout successful.', 'logout-success')
 	return redirect(request.META['HTTP_REFERER'])
 
 
@@ -1088,7 +1088,7 @@ def work(request, pk):
 	work = do_get(url, request)
 	result_message = process_results(work, 'work')
 	if result_message != 'OK':
-		messages.add_message(request, messages.ERROR, result_message)
+		messages.add_message(request, messages.ERROR, result_message, 'work-fetch-error')
 		return redirect('/')
 	work = work[0]
 	tags = group_tags(work['tags']) if 'tags' in work else {}
@@ -1185,7 +1185,7 @@ def create_chapter_comment(request, work_id, chapter_id):
 			if settings.USE_CAPTCHA:
 				captcha_passed = validate_captcha(request)
 				if not captcha_passed:
-					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.')
+					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.', 'captcha-fail-error')
 					return redirect(f"/works/{work_id}/")
 		comment_dict = request.POST.copy()
 		offset_url = int(request.GET.get('offset', 0))
@@ -1204,11 +1204,11 @@ def create_chapter_comment(request, work_id, chapter_id):
 		response = do_post(f'api/comments/', request, data=comment_dict)
 		comment_id = response[0]['id'] if 'id' in response[0] else None
 		if response[1] == 200 or response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Comment posted.')
+			messages.add_message(request, messages.SUCCESS, 'Comment posted.', 'chapter-comment-post-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.', 'chapter-comment-post-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.', 'chapter-comment-post-error')
 		if comment_thread is None:
 			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_id}&offset={offset_url}&comment_offset={comment_offset}&comment_offset_chapter={chapter_id}")
 		else:
@@ -1234,28 +1234,28 @@ def edit_chapter_comment(request, work_id, chapter_id):
 			comment_dict["user"] = None
 		response = do_patch(f"api/comments/{comment_dict['id']}/", request, data=comment_dict)
 		if response[1] == 200 or response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Comment edited.')
+			messages.add_message(request, messages.SUCCESS, 'Comment edited.', 'chapter-comment-edit-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.', 'chapter-comment-edit-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.', 'chapter-comment-edit-error')
 		if comment_thread is None:
 			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_dict['id']}&offset={offset_url}&comment_offset={comment_offset}&comment_offset_chapter={chapter_id}")
 		else:
 			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_dict['id']}&offset={offset_url}&comment_thread={comment_thread}&comment_count={comment_count}")
 	else:
-		messages.add_message(request, messages.ERROR, 'Invalid URL.')
+		messages.add_message(request, messages.ERROR, 'Invalid URL.', 'chapter-comment-edit-not-found')
 		return redirect(f'/works/{work_id}')
 
 
 def delete_chapter_comment(request, work_id, chapter_id, comment_id):
 	response = do_delete(f'api/comments/{comment_id}/', request)
 	if response[1] == 204:
-		messages.add_message(request, messages.SUCCESS, 'Comment deleted.')
+		messages.add_message(request, messages.SUCCESS, 'Comment deleted.', 'chapter-comment-delete-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this comment.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this comment.', 'chapter-comment-delete-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this comment. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this comment. Please contact your administrator.', 'chapter-comment-delete-error')
 	return redirect(f'/works/{work_id}')
 
 
@@ -1265,7 +1265,7 @@ def create_bookmark_comment(request, pk):
 			if settings.USE_CAPTCHA:
 				captcha_passed = validate_captcha(request)
 				if not captcha_passed:
-					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.')
+					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.', 'bookmark-comment-captcha-error')
 					return redirect(f"/bookmarks/{pk}/")
 		comment_dict = request.POST.copy()
 		comment_count = int(request.POST.get('bookmark_comment_count'))
@@ -1283,11 +1283,11 @@ def create_bookmark_comment(request, pk):
 		response = do_post(f'api/bookmarkcomments/', request, data=comment_dict)
 		comment_id = response[0]['id'] if 'id' in response[0] else None
 		if response[1] == 200 or response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Comment posted.')
+			messages.add_message(request, messages.SUCCESS, 'Comment posted.', 'bookmark-comment-post-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.', 'bookmark-comment-post-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.', 'bookmark-comment-post-error')
 		if comment_thread is None:
 			return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_id}&comment_offset={comment_offset}")
 		else:
@@ -1311,25 +1311,25 @@ def edit_bookmark_comment(request, pk):
 			comment_dict["user"] = None
 		response = do_patch(f"api/bookmarkcomments/{comment_dict['id']}/", request, data=comment_dict)
 		if response[1] == 200 or response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Comment edited.')
+			messages.add_message(request, messages.SUCCESS, 'Comment edited.', 'bookmark-comment-edit-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.')
+			messages.add_message(request, messages.ERROR, 'You are not authorized to post this comment.', 'bookmark-comment-edit-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.')
+			messages.add_message(request, messages.ERROR, 'An error has occurred while posting this comment. Please contact your administrator.', 'bookmark-comment-edit-error')
 		return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_dict['id']}&comment_offset={comment_offset}")
 	else:
-		messages.add_message(request, messages.ERROR, '404 Page Not Found')
+		messages.add_message(request, messages.ERROR, '404 Page Not Found', 'bookmark-comment-not-found-error')
 		return redirect(f'/bookmarks/{pk}')
 
 
 def delete_bookmark_comment(request, pk, comment_id):
 	response = do_delete(f'api/bookmarkcomments/{comment_id}/', request)
 	if response[1] == 204:
-		messages.add_message(request, messages.SUCCESS, 'Comment deleted.')
+		messages.add_message(request, messages.SUCCESS, 'Comment deleted.', 'bookmark-comment-delete-success')
 	elif response[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this comment.')
+		messages.add_message(request, messages.ERROR, 'You are not authorized to delete this comment.', 'bookmark-comment-delete-unauthorized-error')
 	else:
-		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this comment. Please contact your administrator.')
+		messages.add_message(request, messages.ERROR, 'An error has occurred while deleting this comment. Please contact your administrator.', 'bookmark-comment-delete-error')
 	return redirect(f'/bookmarks/{pk}')
 
 
