@@ -112,8 +112,8 @@ else:
         "MAILGUN_SENDER_DOMAIN": 'ourchive-mail.stopthatimp.net', 
     }
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend" 
-    DEFAULT_FROM_EMAIL = "admin@ourchive-dev.stopthatimp.net"  
-    SERVER_EMAIL = "serveradmin@ourchive-dev.stopthatimp.net" 
+DEFAULT_FROM_EMAIL = "admin@ourchive-dev.stopthatimp.net"  
+SERVER_EMAIL = "serveradmin@ourchive-dev.stopthatimp.net" 
 
 
 TEMPLATES = [

@@ -317,7 +317,7 @@ def report_user(request, username):
 			messages.add_message(request, messages.ERROR, 'You are not authorized to report this user.', 'user-report-unauthorized-error')
 		else:
 			messages.add_message(request, messages.ERROR, 'An error has occurred while reporting this user. Please contact your administrator.', 'user-report-error')
-		return referrer_redirect(request)
+		return redirect(f'/username/{username}/')
 	else:
 		if request.user.is_authenticated:
 			report_reasons = do_get(f'api/reportreasons/', request)[0]

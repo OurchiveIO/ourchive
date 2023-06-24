@@ -11,6 +11,7 @@ from api.models import Work, Tag, Chapter, TagType, WorkType, \
 import datetime
 import logging
 from django.conf import settings
+from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +89,20 @@ class UserReportSerializer(serializers.HyperlinkedModelSerializer):
         queryset=User.objects.all(), slug_field='username')
     reason = serializers.SlugRelatedField(queryset=UserReportReason.objects.all(),
         slug_field='reason')
+
+    def create(self, validated_data):
+        report = UserReport.objects.create(**validated_data)
+        to_emails = []
+        for user in User.objects.filter(is_superuser=True):
+            to_emails.append(user.email)
+        send_mail(
+            f"New Reported User",
+            f"{validated_data['user']} has reported {validated_data['reported_user']} for {validated_data['reason']}. Log in to the admin console to review.",
+            settings.DEFAULT_FROM_EMAIL,
+            to_emails,
+            fail_silently=False,
+        )
+        return report
 
     class Meta:
         model = UserReport

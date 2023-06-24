@@ -87,7 +87,7 @@ class UserReport(models.Model):
         return f'{self.user.username} reported {self.reported_user.username} for {self.reason.reason}'
 
     class Meta:
-        ordering = ['resolved', 'updated_on']
+        ordering = ['resolved', '-updated_on']
 
 
 class Work(models.Model):
