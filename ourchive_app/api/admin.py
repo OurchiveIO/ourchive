@@ -1,5 +1,7 @@
 from django.contrib import admin
-from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, ContentPage, Tag, Invitation, AttributeType, AttributeValue
+from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, \
+    ContentPage, Tag, Invitation, AttributeType, AttributeValue, UserReportReason, \
+    UserReport
 from django.db import models
 from django.forms.widgets import Input
 from django.core.mail import send_mail
@@ -131,6 +133,18 @@ class UserAdmin(admin.ModelAdmin):
     actions = [allow_audio_upload, allow_image_upload, allow_export_upload, allow_all_upload]
 
 
+@admin.action(description="Resolve selected reports")
+def resolve_reports(modeladmin, request, queryset):
+    for report in queryset:
+        report.resolved = True
+        report.save()
+
+
+class UserReportAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'resolved')
+    actions = [resolve_reports]
+        
+
 admin.site.register(TagType)
 admin.site.register(WorkType)
 admin.site.register(NotificationType)
@@ -141,3 +155,5 @@ admin.site.register(Invitation, InvitationAdmin)
 admin.site.register(AttributeType, AttributeTypeAdmin)
 admin.site.register(AttributeValue, AttributeValueAdmin)
 admin.site.register(User, UserAdmin)
+admin.site.register(UserReportReason)
+admin.site.register(UserReport, UserReportAdmin)

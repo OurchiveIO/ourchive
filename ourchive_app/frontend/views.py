@@ -305,6 +305,32 @@ def unblock_user(request, username, pk):
 	return redirect(f'/username/{username}')
 
 
+def report_user(request, username):
+	if request.method == 'POST':
+		report_data = request.POST.copy()
+		# we don't want to let the user specify this
+		report_data['user'] = request.user.username
+		response = do_post(f'api/userreports/', request, data=report_data)
+		if response[1] == 201:
+			messages.add_message(request, messages.SUCCESS, 'Report created. You should hear from a mod shortly if any more information is required.', 'user-report-success')
+		elif response[1] == 403:
+			messages.add_message(request, messages.ERROR, 'You are not authorized to report this user.', 'user-report-unauthorized-error')
+		else:
+			messages.add_message(request, messages.ERROR, 'An error has occurred while reporting this user. Please contact your administrator.', 'user-report-error')
+		return referrer_redirect(request)
+	else:
+		if request.user.is_authenticated:
+			report_reasons = do_get(f'api/reportreasons/', request)[0]
+			return render(request, 'user_report_form.html', {
+				'reported_user': username,
+				'form_title': 'Report User',
+				'report_reasons': report_reasons['reasons']
+			})
+		else:
+			messages.add_message(request, messages.ERROR, 'You must log in to perform this action.', 'report-user-unauthorized-error')
+			return redirect('/login')
+
+
 def user_works(request, username):
 	works = get_works_list(request, username)
 	return render(request, 'works.html', {

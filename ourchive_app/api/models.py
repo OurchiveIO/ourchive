@@ -32,6 +32,64 @@ class User(AbstractUser):
         super(User, self).save(*args, **kwargs)
 
 
+class UserReportReason(models.Model):
+
+    __tablename__ = 'user_report_reason'
+
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    reason = models.CharField(max_length=200, blank=False, null=False)
+
+    def __repr__(self):
+        return '<UserReportReason: {}>'.format(self.id)
+
+    def __str__(self):
+        return self.reason
+
+    class Meta:
+        constraints = [
+        models.UniqueConstraint(fields=['reason'], name='unique reportreason')
+    ]
+        ordering = ['reason']
+
+
+class UserReport(models.Model):
+
+    __tablename__ = 'user_report'
+
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    reason = models.ForeignKey(
+        UserReportReason, 
+        on_delete=models.PROTECT
+    )
+    details = models.TextField(blank=True, null=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    reported_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name = 'reported_user'
+    )
+    mod_notes = models.TextField(blank=True, null=True)
+    resolved = models.BooleanField(default=False)
+
+    def __repr__(self):
+        return '<UserReport: {}>'.format(self.id)
+
+    def __str__(self):
+        return f'{self.user.username} reported {self.reported_user.username} for {self.reason.reason}'
+
+    class Meta:
+        ordering = ['resolved', 'updated_on']
+
+
 class Work(models.Model):
 
     __tablename__ = 'works'

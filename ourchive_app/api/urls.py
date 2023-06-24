@@ -55,6 +55,8 @@ urlpatterns = [
     path('users/<str:username>/bookmarks/drafts', views.UserBookmarkDraftList.as_view(), name='user-bookmarks-drafts'),
     path('userblocks', views.UserBlocksList.as_view(), name='user-blocks-list'),
     path('userblocks/<int:pk>/', views.UserBlocksDetail.as_view(), name='userblocks-detail'),
+    path('userreports/', views.UserReportList.as_view(), name='user-report-list'),
+    path('userreports/<int:pk>/', views.UserReportDetail.as_view(), name='userreport-detail'),
     path('users/<str:username>/userblocks', views.UserBlocksList.as_view(), name='user-blocks-list'),
     path('search/', views.SearchList.as_view(), name='search-list'),
     path('fingerguns/', views.FingergunList.as_view(), name='fingergun-list'),
@@ -70,6 +72,7 @@ urlpatterns = [
     path('bookmark-autocomplete', views.BookmarkAutocomplete.as_view(), name='bookmark-autocomplete'),
     path('contentpages/', views.ContentPageList.as_view(), name='content-page-list'),
     path('contentpages/<int:pk>', views.ContentPageDetail.as_view(), name='content-page-detail'),
+    path('reportreasons/', views.ReportReasonList.as_view(), name='report-reasons'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,7 +1,17 @@
 from django.contrib.auth.models import Group
 from rest_framework import viewsets, generics, permissions
-from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, ChapterAllSerializer
-from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, AttributeValue, ContentPage
+from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
+    UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, \
+    BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, \
+    WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, \
+    BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, \
+    NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, \
+    UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
+    ChapterAllSerializer, UserReportSerializer
+from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
+    BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
+    NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
+    AttributeValue, ContentPage, UserReport, UserReportReason
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -61,6 +71,17 @@ class SearchList(APIView):
     def get_queryset(self):
         searcher = OurchiveSearch()
         return searcher.do_search(**self.kwargs)
+
+
+class ReportReasonList(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, format=None):
+        reasons = []
+        for reason in UserReportReason.objects.all():
+            reasons.append(reason.reason)
+        return Response({'reasons': reasons})
 
 
 class TagAutocomplete(APIView):
@@ -305,6 +326,18 @@ class UserBlocksDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return UserBlocks.objects.filter(id=self.kwargs['pk'])
+
+
+class UserReportList(generics.ListCreateAPIView):
+    serializer_class = UserReportSerializer
+    permission_classes = [IsOwner]
+    queryset = UserReport.objects.all().order_by('created_on')
+
+
+class UserReportDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserReportSerializer
+    permission_classes = [IsOwner]
+    queryset = UserReport.objects.all().order_by('created_on')
 
 
 class WorkDetail(generics.RetrieveUpdateDestroyAPIView):

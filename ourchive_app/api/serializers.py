@@ -6,7 +6,8 @@ from .custom_fields import UserPrivateField
 from api.models import Work, Tag, Chapter, TagType, WorkType, \
     Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, \
     NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
-    Invitation, AttributeType, AttributeValue, User, ContentPage
+    Invitation, AttributeType, AttributeValue, User, ContentPage, UserReport, \
+    UserReportReason
 import datetime
 import logging
 from django.conf import settings
@@ -75,6 +76,21 @@ class UserBlocksSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = UserBlocks
+        fields = '__all__'
+
+
+class UserReportSerializer(serializers.HyperlinkedModelSerializer):
+    uid = serializers.ReadOnlyField()
+    id = serializers.ReadOnlyField()
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    reported_user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    reason = serializers.SlugRelatedField(queryset=UserReportReason.objects.all(),
+        slug_field='reason')
+
+    class Meta:
+        model = UserReport
         fields = '__all__'
 
 
