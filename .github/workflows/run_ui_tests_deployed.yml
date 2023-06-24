@@ -21,6 +21,10 @@ jobs:
           sparse-checkout: |
             'ourchive-app/ui-tests'
             'ourchive-app/requirements.txt'
+      - name: test pwd
+        run: |
+            echo "ls $GITHUB_WORKSPACE"
+            ls $GITHUB_WORKSPACE -lt
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
