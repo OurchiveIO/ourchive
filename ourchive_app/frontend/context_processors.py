@@ -26,7 +26,7 @@ def set_has_notifications(request):
 def set_content_pages(request):
     request_url = f"api/contentpages/"
     response = do_get(request_url, request)[0]
-    return {'content_pages': response['results']}
+    return {'content_pages': response['results']} if 'results' in response else {}
 
 
 def set_captcha(request):
@@ -35,5 +35,5 @@ def set_captcha(request):
 
 def load_settings(request):
     settings = do_get(f'api/settings', request)[0]
-    settings_dict = {x['name'].replace(' ', ''): x['value'] if x['value'] != 'True' and x['value'] != 'False' else (x['value'] == 'True') for x in settings['results']}
+    settings_dict = {x['name'].replace(' ', ''): x['value'] if x['value'] != 'True' and x['value'] != 'False' else (x['value'] == 'True') for x in settings['results']} if 'results' in settings else {}
     return {'settings': settings_dict}

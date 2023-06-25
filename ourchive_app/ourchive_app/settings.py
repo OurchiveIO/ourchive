@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 from dotenv import load_dotenv, find_dotenv
+from django.utils.translation import gettext_lazy as _
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -56,18 +57,34 @@ INSTALLED_APPS = [
     #'background_task',
 ]
 
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-]
+if not DEBUG:
+    MIDDLEWARE = [
+        'django.middleware.cache.UpdateCacheMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'whitenoise.middleware.WhiteNoiseMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.locale.LocaleMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
+        'django.middleware.cache.FetchFromCacheMiddleware',
+    ]
+else:
+    MIDDLEWARE = [
+        'django.middleware.security.SecurityMiddleware',
+        'whitenoise.middleware.WhiteNoiseMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.locale.LocaleMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
+    ]
 
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:8000',
@@ -180,7 +197,14 @@ AUTH_USER_MODEL = 'api.User'
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LOCALE_PATHS = [
+    f'{BASE_DIR}/locale/',
+]
+
+LANGUAGES = [
+    ('en', _('English')),
+]
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'UTC'
 
@@ -189,6 +213,10 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+CACHE_MIDDLEWARE_ALIAS = "default"
+CACHE_MIDDLEWARE_SECONDS = 3600
+CACHE_MIDDLEWARE_KEY_PREFIX = ""
 
 
 # Static files (CSS, JavaScript, Images)
@@ -246,9 +274,10 @@ LOGGING = {
     },
 }
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": os.getenv('OURCHIVE_DJANGO_CACHE'),
+if not DEBUG:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": os.getenv('OURCHIVE_DJANGO_CACHE'),
+        }
     }
-}

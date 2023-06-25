@@ -15,6 +15,9 @@ Most updates will not/should not touch all of these objects; however, any broad-
 - Set work as draft
 - Allow only logged-in comments
 - Disallow comments
+- Download work ZIP and EPUB
+- Upload work preferred download
+- Download work preferred download
 
 ## Chapters
 - Create chapter
@@ -62,12 +65,11 @@ Most updates will not/should not touch all of these objects; however, any broad-
 - Register
 - Blocking a user
 - Unblocking a user
-- Delete account (TBD)
-
-## User Profile
+- Delete account
 - Modify profile description
 - Modify icon
 - Modify icon text
+- Report a user
 
 ## Notifications
 - View notifications
@@ -81,3 +83,19 @@ Most updates will not/should not touch all of these objects; however, any broad-
 - Search for work
 - Search for bookmark
 - Search for creator
+
+## Admin Actions
+- Resolve report
+- Send user invite(s)
+- Allow/disallow user image upload
+- Allow/disallow user audio upload
+- Allow/disallow user 'preferred download' upload
+- Allow/disallow all file uploads
+
+## Bookmark Collections
+- Create collection
+- Upload header to collection
+- Add bookmarks to collection
+- Add tags to collection
+- Add attributes to collection
+- Create, edit, and delete comments on a collection

@@ -1,4 +1,5 @@
 {% extends 'index.html' %}
+{% load i18n %}
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
 {% load static %}
@@ -58,13 +59,17 @@
         </div>
     </div>
     <hr id="bookmark-attributes-hr"/>
-    <h3 id="obj-attrs-form-header">Bookmark Tags</h3>
+    <span class="uk-inline"><h3 id="obj-attrs-form-header" class="uk-inline">Bookmark Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question"></sup>    
+        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
+    </span>
     {% include "object_attributes_form.html" with object='Bookmark' attribute_types=bookmark.attribute_types show_header=False %}
     {% include "edit_tags.html" with object='bookmark' show_header=False %}
     <hr/>
     <h3 id="obj-attrs-form-header">Bookmark Details</h3>
     <div class="uk-margin" id="bookmark-form-rating-parent">
-        <label id="bookmark-form-rating-label" class="uk-form-label" for="form-horizontal-text">Rating</label>
+        <label id="bookmark-form-rating-label" class="uk-form-label" for="form-horizontal-text">Rating <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}You decide what a rating means. The number of stars are controlled by your admin.{% endblocktranslate %}</div>
+        </label>
         <div class="uk-form-controls" id="bookmark-form-rating-controls">
             <div class="uk-inline" id="bookmark-form-rating-inline">
                 <input type="hidden" name="rating" id="bookmark_rating" value="{{ bookmark.rating }}">
@@ -116,7 +121,9 @@
     <hr id="bookmark-settings-hr"/>
     <h3 id="obj-attrs-form-header">Bookmark Settings</h3>
     <div class="uk-margin" id="bookmark-form-draft-parent">
-        <label id="bookmark-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft?</label>
+        <label id="bookmark-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
+        </label>
         <div id="bookmark-form-draft-controls" class="uk-form-controls">
             <div id="bookmark-form-draft-inline" class="uk-inline">
                 <label id="bookmark-form-draft-label" class="switch"><input id="bookmark-form-draft-input" class="uk-checkbox" type="checkbox" name="draft" {% if bookmark.draft %} checked {% endif %}> <span class="slider round"></span> </label>

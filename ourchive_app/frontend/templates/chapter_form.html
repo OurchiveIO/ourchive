@@ -1,4 +1,5 @@
 {% extends 'index.html' %}
+{% load i18n %}
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
 {% load static %}
@@ -133,7 +134,9 @@
             </div>            
         </div>
         <div class="uk-margin" id="chapter-form-draft-parent">
-            <label id="chapter-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft?</label>
+            <label id="chapter-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
+            </label>
             <div class="uk-form-controls" id="chapter-form-draft-controls">
                 <div class="uk-inline" id="chapter-form-draft-inline">
                     <label id="chapter-form-draft-checkbox-label" class="switch"><input class="uk-checkbox" type="checkbox" id="chapter-form-draft" name="draft" {% if chapter.draft %} checked {% endif %}> <span class="slider round"></span></label>
@@ -147,8 +150,8 @@
             {% if chapter.image_url and chapter.image_url != "None" %}
             <div class="uk-form-controls" id="chapter-form-image-controls">
                 <img id="chapter-form-image" src="{{ chapter.image_url }}" class="uk-margin-bottom"/>
-            {% endif %}
             </div>
+            {% endif %}
             <div class="uk-form-controls" id="chapter-form-image-upload-controls">
                 <div class="uk-inline" id="chapter-form-image-upload-inline">
                 	{% include 'file_upload.html' with object='image_url' replace_selector='chapter-form-image' object_type='img' upload_placeholder='Upload chapter image' original_value=chapter.image_url %}
@@ -197,7 +200,9 @@
             <div class="uk-form-controls" id="chapter-form-text-controls">
                 <div class="uk-inline uk-width-expand" id="chapter-form-text-inline">
                 	<div class="uk-margin-bottom">
-                	<span width="150" class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text?</span>
+                	<span width="150" class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
+                    </span>
                 	<label id="chapter-text-edit-mode-label" class="switch uk-width-medium"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText()" checked uk-toggle="target: .chapter-text-toggle")> 
                 		<span class="slider round"></span></label>
                 	</div>

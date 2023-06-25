@@ -8,6 +8,7 @@ from html import escape
 from django.http import HttpResponse, FileResponse
 import logging
 from .api_utils import do_get, do_post, do_patch, do_delete, process_results, validate_captcha
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -198,8 +199,8 @@ def get_works_list(request, username=None):
 
 def index(request):
 	return render(request, 'index.html', {
-		'heading_message': 'Welcome to Ourchive',
-		'long_message': 'Ourchive is a configurable, extensible, multimedia archive, meant to serve as a modern alternative to PHP-based archives. You can search for existing works, create your own, or create curated collections of works you\'ve enjoyed. Have fun with it!',
+		'heading_message': _('Welcome to Ourchive'),
+		'long_message': _('Ourchive is a configurable, extensible, multimedia archive, meant to serve as a modern alternative to PHP-based archives. You can search for existing works, create your own, or create curated collections of works you\'ve enjoyed. Have fun with it!'),
 		'root': settings.ALLOWED_HOSTS[0],
 		'stylesheet_name': 'ourchive-light.css',
 		'has_notifications': request.session.get('has_notifications')
@@ -271,14 +272,14 @@ def user_name(request, username):
 			'user': user
 		})
 	else:
-		messages.add_message(request, messages.ERROR, 'User not found.', 'user-not-found-error')
+		messages.add_message(request, messages.ERROR, _('User not found.'), 'user-not-found-error')
 		return redirect('/')
 
 
 def user_block_list(request, username):
 	blocklist = do_get(f'api/users/{username}/userblocks', request)
 	if blocklist[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to view this blocklist.', 'blocklist-unauthorized-eror')
+		messages.add_message(request, messages.ERROR, _('You are not authorized to view this blocklist.'), 'blocklist-unauthorized-eror')
 		return redirect(f'/username/{username}')
 	return render(request, 'user_block_list.html', {
 		'blocklist': blocklist[0]['results'],
@@ -290,18 +291,18 @@ def block_user(request, username):
 	data = {'user': request.user.username, 'blocked_user': username}
 	blocklist = do_post(f'api/userblocks', request, data)
 	if blocklist[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to view this blocklist.', 'blocklist-unauthorized-eror')
+		messages.add_message(request, messages.ERROR, _('You are not authorized to view this blocklist.'), 'blocklist-unauthorized-eror')
 	if blocklist[1] >= 200 and blocklist[1] < 300:
-		messages.add_message(request, messages.SUCCESS, 'User blocked.')
+		messages.add_message(request, messages.SUCCESS, _('User blocked.'))
 	return redirect(f'/username/{username}')
 
 
 def unblock_user(request, username, pk):
 	blocklist = do_delete(f'api/userblocks/{pk}', request)
 	if blocklist[1] == 403:
-		messages.add_message(request, messages.ERROR, 'You are not authorized to unblock this user.', 'unblock-unauthorized-error')
+		messages.add_message(request, messages.ERROR, _('You are not authorized to unblock this user.'), 'unblock-unauthorized-error')
 	if blocklist[1] >= 200 and blocklist[1] < 300:
-		messages.add_message(request, messages.SUCCESS, 'User unblocked.', 'unblock-success')
+		messages.add_message(request, messages.SUCCESS, _('User unblocked.'), 'unblock-success')
 	return redirect(f'/username/{username}')
 
 
@@ -312,11 +313,11 @@ def report_user(request, username):
 		report_data['user'] = request.user.username
 		response = do_post(f'api/userreports/', request, data=report_data)
 		if response[1] == 201:
-			messages.add_message(request, messages.SUCCESS, 'Report created. You should hear from a mod shortly if any more information is required.', 'user-report-success')
+			messages.add_message(request, messages.SUCCESS, _('Report created. You should hear from a mod shortly if any more information is required.'), 'user-report-success')
 		elif response[1] == 403:
-			messages.add_message(request, messages.ERROR, 'You are not authorized to report this user.', 'user-report-unauthorized-error')
+			messages.add_message(request, messages.ERROR, _('You are not authorized to report this user.'), 'user-report-unauthorized-error')
 		else:
-			messages.add_message(request, messages.ERROR, 'An error has occurred while reporting this user. Please contact your administrator.', 'user-report-error')
+			messages.add_message(request, messages.ERROR, _('An error has occurred while reporting this user. Please contact your administrator.'), 'user-report-error')
 		return redirect(f'/username/{username}/')
 	else:
 		if request.user.is_authenticated:
