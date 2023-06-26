@@ -1,5 +1,6 @@
 from .api_utils import do_get
 from django.conf import settings
+from api.utils import convert_boolean
 
 
 def set_style(request):
@@ -35,5 +36,5 @@ def set_captcha(request):
 
 def load_settings(request):
     settings = do_get(f'api/settings', request).response_data
-    settings_dict = {x['name'].replace(' ', ''): x['value'] if x['value'] != 'True' and x['value'] != 'False' else (x['value'] == 'True') for x in settings['results']} if 'results' in settings else {}
+    settings_dict = {x['name'].replace(' ', ''): x['value'] if x['value'].lower() != 'true' and x['value'].lower() != 'false' else (convert_boolean(x['value'])) for x in settings['results']} if 'results' in settings else {}
     return {'settings': settings_dict}

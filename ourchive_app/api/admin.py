@@ -94,7 +94,7 @@ class SettingsForm(ModelForm):
 class OurchiveSettingAdmin(admin.ModelAdmin):
     form = SettingsForm
     exclude = ('valtype',)
-    readonly_fields=('name', )
+    #readonly_fields=('name', )
     fields = ('name', 'value',)
     list_display = ('name', 'value',)
 
