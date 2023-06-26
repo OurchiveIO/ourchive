@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     #'background_task',
 ]
 
-if not DEBUG:
+if DEBUG:
     MIDDLEWARE = [
         'django.middleware.cache.UpdateCacheMiddleware',
         'django.middleware.security.SecurityMiddleware',
@@ -274,7 +274,7 @@ LOGGING = {
     },
 }
 
-if not DEBUG:
+if DEBUG:
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",

@@ -170,15 +170,19 @@ def get_bookmark_collection_obj(request):
 	return collection_dict
 
 
-def referrer_redirect(request, alternate_url=None):
+def referrer_redirect(request, alternate_url=None, clear_cache=False):
+	response = None
 	if request.META.get('HTTP_REFERER') is not None:
 		if '/login' not in request.META['HTTP_REFERER'] and '/register' not in request.META['HTTP_REFERER'] and '/reset' not in request.META['HTTP_REFERER']:
-			return redirect(request.META.get('HTTP_REFERER'))
+			response = redirect(f"{request.META.get('HTTP_REFERER')}?reload={clear_cache}")
 		else:
 			refer = alternate_url if alternate_url is not None else '/'
-			return redirect(refer)
+			response = redirect(f"{refer}?reload={clear_cache}")
 	else:
-		return redirect('/')
+		response = redirect('/?reload={clear_cache}')
+	if clear_cache:
+		response['Clear-Site-Data'] = 'cache'
+	return response
 
 
 def get_object_tags(parent):
@@ -1443,4 +1447,6 @@ def works_by_tag_next(request, tag_id):
 
 def switch_css_mode(request):
 	request.session['css_mode'] = "dark" if request.session.get('css_mode') == "light" or request.session.get('css_mode') is None else "light"
-	return referrer_redirect(request)
+	from django.core.cache import cache
+	cache.clear()
+	return referrer_redirect(request, None, True)
