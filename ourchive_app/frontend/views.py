@@ -1090,9 +1090,9 @@ def register(request):
 				return redirect('/')
 		permit_registration = do_get(f'api/settings/', request, params={'setting_name': 'Registration Permitted'})[0]
 		invite_only = do_get(f'api/settings', request, params={'setting_name': 'Invite Only'})[0]
-		if permit_registration['results'][0]['value'] == "False":
+		if permit_registration['results'][0]['value'].lower() == "false":
 			return render(request, 'register.html', {'permit_registration': False})
-		elif invite_only['results'][0]['value'] == "True":
+		elif invite_only['results'][0]['value'].lower() == "true":
 			return redirect('/request-invite')
 		else:
 			return render(request, 'register.html', {'permit_registration': True})

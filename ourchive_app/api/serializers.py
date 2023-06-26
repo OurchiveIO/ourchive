@@ -131,7 +131,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         require_invite = OurchiveSetting.objects.filter(
             name='Invite Only').first()
-        if require_invite.value == "True":
+        if require_invite.value.lower() == "true":
             invitation = Invitation.objects.filter(
                 invite_token=validated_data['invite_code']).first()
             if invitation.token_expiration.date() >= datetime.datetime.now().date():
