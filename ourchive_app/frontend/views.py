@@ -991,8 +991,8 @@ def register(request):
 			messages.add_message(request, messages.ERROR, _('Registration is not permitted at this time. Please contact site admin.'), 'register-disabled-error')
 			return redirect('/')
 		else:
-			messages.add_message(request, messages.ERROR, _('Registration unsuccessful. Please try again.'), 'register-error')
-			return redirect('/login')
+			messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+			return redirect('/register')
 	else:
 		if 'invite_token' in request.GET:
 			response = do_get(f'api/invitations/', request, params={'email': request.GET.get('email'), 'invite_token': request.GET.get('invite_token')}, object_name='Invite Code')

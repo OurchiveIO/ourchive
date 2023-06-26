@@ -48,7 +48,19 @@ def get_200s_message(status_code, object_name, html_obj_name) -> tuple[str, str]
 
 def get_400s_message(status_code, object_name, html_obj_name, response=None) -> tuple[str, str]:
 	if status_code == 400:
-		return [_(f"Bad request. Please address the following errors: {response.response_data}")]
+		content_json = response.json()
+		content_json.pop('status_code')
+		error_string = ""
+		for error in list(content_json):
+			if error_string:
+				error_string = f"{error_string}; "
+			field_error = ""
+			for field_error_val in content_json[error]:
+				if field_error:
+					field_error = f"{field_error}; "
+				field_error = f"{field_error}{field_error_val}"
+			error_string = f"{error_string}{error}: {field_error}"
+		return [_(f"Bad request. Please address the following errors: {error_string}"), f'{html_obj_name}-bad-request-error']
 	if status_code == 403:
 		return [_(f"You are not authorized to access this {object_name}. Please contact your administrator for more information."), f'{html_obj_name}-unauthorized-error']
 	if status_code == 404:
