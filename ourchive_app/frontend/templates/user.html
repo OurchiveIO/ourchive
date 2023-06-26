@@ -17,7 +17,7 @@
             <a id="user-profile-edit-link" href="/username/{{ user.username }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
             <a id="user-profile-blocklist-link" href="/users/{{ user.username }}/blocklist"><span uk-icon="icon: ban" title="Blocklist"></span> </a>
         {% else %}
-            <a id="user-block-link" href="/users/{{ user.display_username|default_if_none:user.username }}/block"><span uk-icon="icon: ban" title="Block"></span> </a>
+            <a id="user-block-link" href="/users/{{ user.username }}/block"><span uk-icon="icon: ban" title="Block"></span> </a>
             <a id="user-block-link" href="{% url 'report-user' user.username %}"><span uk-icon="icon: warning" title="Report"></span> </a>
         {% endif %}
     </div>

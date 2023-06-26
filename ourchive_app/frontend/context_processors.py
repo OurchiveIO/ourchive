@@ -12,7 +12,7 @@ def set_style(request):
 def set_has_notifications(request):
     if request.user.is_authenticated:
         request_url = f"api/users/{request.user.id}/"
-        response = do_get(request_url, request)[0]
+        response = do_get(request_url, request).response_data
         if 'has_notifications' in response:
             has_notifications = response['has_notifications']
             request.session['has_notifications'] = has_notifications
@@ -25,7 +25,7 @@ def set_has_notifications(request):
 
 def set_content_pages(request):
     request_url = f"api/contentpages/"
-    response = do_get(request_url, request)[0]
+    response = do_get(request_url, request).response_data
     return {'content_pages': response['results']} if 'results' in response else {}
 
 
@@ -34,6 +34,6 @@ def set_captcha(request):
 
 
 def load_settings(request):
-    settings = do_get(f'api/settings', request)[0]
+    settings = do_get(f'api/settings', request).response_data
     settings_dict = {x['name'].replace(' ', ''): x['value'] if x['value'] != 'True' and x['value'] != 'False' else (x['value'] == 'True') for x in settings['results']} if 'results' in settings else {}
     return {'settings': settings_dict}
