@@ -98,8 +98,11 @@ def get_work_obj(request, work_id=None):
 			chapter_number = request.POST[item]
 			chapters.append({'id': chapter_id, 'number': chapter_number, 'work': work_id})
 	work_dict["tags"] = tags
-	comments_permitted = work_dict["comments_permitted"]
-	work_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
+	if 'comments_permitted' not in work_dict:
+		comments_permitted = False
+	else:
+		comments_permitted = work_dict["comments_permitted"]
+		work_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
 	work_dict["anon_comments_permitted"] = comments_permitted == "All"
 	redirect_toc = work_dict.pop('redirect_toc')[0]
 	work_dict["is_complete"] = "is_complete" in work_dict
