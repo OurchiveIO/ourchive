@@ -9,6 +9,7 @@ from django.http import HttpResponse, FileResponse
 import logging
 from .api_utils import do_get, do_post, do_patch, do_delete, process_results, validate_captcha
 from django.utils.translation import gettext as _
+from api import utils
 
 logger = logging.getLogger(__name__)
 
@@ -1090,9 +1091,9 @@ def register(request):
 				return redirect('/')
 		permit_registration = do_get(f'api/settings/', request, params={'setting_name': 'Registration Permitted'})[0]
 		invite_only = do_get(f'api/settings', request, params={'setting_name': 'Invite Only'})[0]
-		if permit_registration['results'][0]['value'].lower() == "false":
+		if not utils.convert_boolean(permit_registration['results'][0]['value']):
 			return render(request, 'register.html', {'permit_registration': False})
-		elif invite_only['results'][0]['value'].lower() == "true":
+		elif utils.convert_boolean(invite_only['results'][0]['value']):
 			return redirect('/request-invite')
 		else:
 			return render(request, 'register.html', {'permit_registration': True})

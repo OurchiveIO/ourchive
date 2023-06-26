@@ -209,13 +209,11 @@ class UserList(generics.ListCreateAPIView):
     permission_classes = [RegistrationPermitted]
 
     def perform_create(self, serializer):
-        if not self.request.user.can_upload_images and 'icon' in self.request.data:
-            serializer.pop('icon')
         if 'invite_code' in self.request.data:
             serializer.save(
                 invite_code=self.request.data['invite_code'], email=self.request.data['email'])
         else:
-            serializer.save(email=self.request.data['email'])
+            serializer.save(email=self.request.data['email'] if 'email' in self.request.data else '')
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -224,8 +222,6 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [RegistrationPermitted]
 
     def perform_create(self, serializer):
-        if not self.request.user.can_upload_images and 'icon' in self.request.data:
-            serializer.pop('icon')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']

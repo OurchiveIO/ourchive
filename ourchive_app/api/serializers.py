@@ -12,6 +12,7 @@ import datetime
 import logging
 from django.conf import settings
 from django.core.mail import send_mail
+from .utils import convert_boolean
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +119,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         many=True, read_only=True, view_name="userblocks-detail")
     email = UserPrivateField()
     id = serializers.ReadOnlyField()
+    can_upload_audio = serializers.ReadOnlyField(required=False)
+    can_upload_images = serializers.ReadOnlyField(required=False)
+    can_upload_export_files = serializers.ReadOnlyField(required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
 
     class Meta:
@@ -125,13 +129,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url', 'username', 'password', 'email', 'groups',
                   'work_set', 'bookmark_set', 'userblocks_set', 'profile',
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
-                  'attributes', 'cookies_accepted')
+                  'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files', 'can_upload_images')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         require_invite = OurchiveSetting.objects.filter(
             name='Invite Only').first()
-        if require_invite.value.lower() == "true":
+        if convert_boolean(require_invite.value):
             invitation = Invitation.objects.filter(
                 invite_token=validated_data['invite_code']).first()
             if invitation.token_expiration.date() >= datetime.datetime.now().date():
