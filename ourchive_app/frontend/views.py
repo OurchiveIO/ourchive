@@ -177,6 +177,8 @@ def referrer_redirect(request, alternate_url=None):
 		else:
 			refer = alternate_url if alternate_url is not None else '/'
 			return redirect(refer)
+	else:
+		return redirect('/')
 
 
 def get_object_tags(parent):
