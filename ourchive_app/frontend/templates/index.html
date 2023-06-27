@@ -15,8 +15,11 @@
 </head>
 <body>
 	<script>
-		if ('{{css_mode}}' !== localStorage.getItem("theme")) {
-			window.location.reload();
+		console.log('{{css_mode}}');
+		if ('{{css_mode}}' == "light" || '{{css_mode}}' == "dark") {
+			if ('{{css_mode}}' !== localStorage.getItem("theme")) {
+				window.location.reload();
+			}
 		}
 		function switchTheme() {
 			fetch('{% url 'switch-css-mode' %}').then((response) => {
