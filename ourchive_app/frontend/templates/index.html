@@ -16,14 +16,14 @@
 <body>
 	<script>
 		console.log('{{css_mode}}');
-		if (('{{css_mode}}' == "light" || '{{css_mode}}' == "dark") && localStorage.getItem("theme") == "light" || localStorage.getItem("theme") == "dark") {
-			if ('{{css_mode}}' !== localStorage.getItem("theme")) {
+		if (('{{css_mode}}' == "light" || '{{css_mode}}' == "dark") && localStorage.getItem("fe-theme") == "light" || localStorage.getItem("fe-theme") == "dark") {
+			if ('{{css_mode}}' !== localStorage.getItem("fe-theme")) {
 				window.location.reload();
 			}
 		}
 		function switchTheme() {
 			fetch('{% url 'switch-css-mode' %}').then((response) => {
-				localStorage.setItem("theme", '{{css_mode}}' == 'dark' ? 'light' : 'dark');
+				localStorage.setItem("fe-theme", '{{css_mode}}' == 'dark' ? 'light' : 'dark');
 				window.location.reload();
 			});
 		}

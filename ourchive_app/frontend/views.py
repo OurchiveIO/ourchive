@@ -592,7 +592,7 @@ def search_filter(request):
 def works(request):
 	response = do_get(f'api/works/', request, params=request.GET, object_name='Work')
 	works_response = response.response_data
-	works = response.response_data['results']
+	works = response.response_data['results'] if 'results' in response.response_data else []
 	works = get_object_tags(works)
 	for work in works:
 		work['attributes'] = get_attributes_for_display(work['attributes'])
@@ -1257,7 +1257,7 @@ def delete_bookmark_comment(request, pk, comment_id):
 
 def bookmarks(request):
 	response = do_get(f'api/bookmarks/', request, params=request.GET, object_name='Bookmark').response_data
-	bookmarks = response['results']
+	bookmarks = response['results'] if 'results' in response else []
 	previous_param = response['prev_params']
 	next_param = response['next_params']
 	bookmarks = get_object_tags(bookmarks)
