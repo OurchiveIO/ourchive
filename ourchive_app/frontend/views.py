@@ -7,9 +7,10 @@ from .search_models import SearchObject
 from html import escape
 from django.http import HttpResponse, FileResponse
 import logging
-from .api_utils import do_get, do_post, do_patch, do_delete, validate_captcha, ResponseFull
+from .api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from django.utils.translation import gettext as _
 from api import utils
+from django.views.decorators.cache import never_cache
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +174,7 @@ def get_bookmark_collection_obj(request):
 	return collection_dict
 
 
-def referrer_redirect(request, alternate_url=None, clear_cache=False):
+def referrer_redirect(request, alternate_url=None):
 	response = None
 	if request.META.get('HTTP_REFERER') is not None:
 		if not any(loc in request.META['HTTP_REFERER'] for loc in ['/login', '/register', '/reset']):
@@ -183,11 +184,6 @@ def referrer_redirect(request, alternate_url=None, clear_cache=False):
 			response = redirect(f"{refer}")
 	else:
 		response = redirect('/')
-	if clear_cache:
-		# tell context processor "hey we need to clear cache"
-		# set this header 
-		# then set cookie false
-		response['Clear-Site-Data'] = 'cache'
 	return response
 
 
@@ -197,7 +193,7 @@ def get_object_tags(parent):
 	return parent
 
 
-def get_unauthorized_message(redirect_url, html_tag):
+def get_unauthorized_message(request, redirect_url, html_tag):
 	messages.add_message(request, messages.WARNING, _('You must log in to perform this action.'), html_tag)
 	return redirect(redirect_url)
 
@@ -732,7 +728,7 @@ def edit_work(request, id):
 				'chapters': chapters,
 				'chapter_count': len(chapters)})
 		else:
-			return get_unauthorized_message('/login', 'work-update-unauthorized-error')
+			return get_unauthorized_message(request, '/login', 'work-update-unauthorized-error')
 
 
 def publish_work(request, id):
@@ -813,7 +809,7 @@ def new_bookmark(request, work_id):
 		process_message(request, response)
 		return redirect(f'/bookmarks/{response.response_data["id"]}')
 	else:
-		return get_unauthorized_message('/login', 'bookmark-create-login-error')
+		return get_unauthorized_message(request, '/login', 'bookmark-create-login-error')
 
 
 def edit_bookmark(request, pk):
@@ -836,7 +832,7 @@ def edit_bookmark(request, pk):
 				'bookmark': bookmark,
 				'tags': tags})
 		else:
-			return get_unauthorized_message('/login', 'bookmark-update-login-error')
+			return get_unauthorized_message(request, '/login', 'bookmark-update-login-error')
 
 
 def delete_bookmark(request, bookmark_id):
@@ -877,7 +873,7 @@ def new_bookmark_collection(request):
 		process_message(request, response)
 		return redirect(f'/bookmark-collections/{response.response_data["id"]}')
 	else:
-		return get_unauthorized_message('/login', 'bookmark-collection-login-error')
+		return get_unauthorized_message(request, '/login', 'bookmark-collection-login-error')
 
 
 def edit_bookmark_collection(request, pk):
@@ -899,7 +895,7 @@ def edit_bookmark_collection(request, pk):
 				'form_title': 'Edit Bookmark Collection',
 				'tags': tags})
 		else:
-			return get_unauthorized_message('/login', 'bookmark-collection-update-login-error')
+			return get_unauthorized_message(request, '/login', 'bookmark-collection-update-login-error')
 
 
 def bookmark_collection(request, pk):
@@ -1323,8 +1319,10 @@ def works_by_tag_next(request, tag_id):
 	return render(request, 'paginated_works.html', {'works': works, 'tag_id': tag_id})
 
 
+@never_cache
 def switch_css_mode(request):
 	request.session['css_mode'] = "dark" if request.session.get('css_mode') == "light" or request.session.get('css_mode') is None else "light"
 	from django.core.cache import cache
+	# TODO: this is awful, should be clearing the cache per-user and only for frontend stuff
 	cache.clear()
-	return referrer_redirect(request, None, True)
+	return HttpResponse("OK")

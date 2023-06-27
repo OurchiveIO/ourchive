@@ -4,7 +4,7 @@
 	{% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static 'frontend/css/' %}ourchive-{{css_mode}}.css" />
+    <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/' %}ourchive-{{css_mode}}.css" />
     <link rel="stylesheet" href="{% static 'frontend/css/scroll-to-top.css' %}" />
     <link rel="stylesheet" href="{% static 'frontend/css/editor.css' %}" />
     <link rel="shortcut icon" href="{% static 'favicon/favicon.ico' %}"/>
@@ -14,6 +14,17 @@
     <title>{% block title %}Ourchive{% endblock %}</title>
 </head>
 <body>
+	<script>
+		if ('{{css_mode}}' !== localStorage.getItem("theme")) {
+			window.location.reload();
+		}
+		function switchTheme() {
+			fetch('{% url 'switch-css-mode' %}').then((response) => {
+				localStorage.setItem("theme", '{{css_mode}}' == 'dark' ? 'light' : 'dark');
+				window.location.reload();
+			});
+		}
+	</script>
 	{% if 'accept-cookies' not in request.COOKIES and not request.user.cookies_accepted %}
 		<script>
 			UIkit.notification({
@@ -51,9 +62,9 @@
 		    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
 		        <ul class="uk-navbar-nav uk-visible@s">
 		            <li class="uk-active" id="nav-home"><a href="/">Home</a></li>
-		            <li><a href="/works" id="nav-works">Works</a></li>
-		            <li><a href="/bookmarks" id="nav-bookmarks">Bookmarks</a></li>
-		            <li><a href="/bookmark-collections" id="nav-bookmark-collections">Bookmark Collections</a></li>
+		            <li><a href="/works/" id="nav-works">Works</a></li>
+		            <li><a href="/bookmarks/" id="nav-bookmarks">Bookmarks</a></li>
+		            <li><a href="/bookmark-collections/" id="nav-bookmark-collections">Bookmark Collections</a></li>
 		        </ul>
 		    </div>	    
 		    <div class="uk-navbar-right uk-margin-right" id="uk-nav-right">
@@ -68,7 +79,7 @@
 			            </div>
 		        	</li>
 		    	 	<li id="theme-switcher-li">
-		    	 		<a href="/switch-css-mode" id="theme-switcher-link">
+		    	 		<a onclick="switchTheme()" id="theme-switcher-link">
 		    	 			{% if request.session.css_mode == "dark" %}
 		    	 			<span class="custom-icon" uk-icon="icon: sun-regular; ratio:1" title="Light Mode" id="theme-switcher-light">
 		    	 			{% else %}
@@ -94,8 +105,8 @@
 			            	<div class="uk-navbar-dropdown" id="nav-user-dropdown-div">
 	                    		<ul class="uk-nav uk-navbar-dropdown-nav" id="nav-user-dropdown-ul">
 	                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
-	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks" id="nav-bookmarks-link">Bookmarks</a></li>
-	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmark-collections" id="nav-bookmark-collecitons-link">Bookmark Collections</a></li>
+	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link">Bookmarks</a></li>
+	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmark-collections/" id="nav-bookmark-collecitons-link">Bookmark Collections</a></li>
 	                    			<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">Works</a></li>
 	                    			<li id="nav-edit-profile-li"><a href="/username/{{request.user}}/edit" id="nav-edit-profile-link">Edit Profile</a></li>
 	                    			<li id="nav-edit-account-li"><a href="/username/{{request.user}}/account/edit" id="nav-edit-account-link">Edit Account</a></li>
@@ -119,9 +130,9 @@
 		<div class="uk-offcanvas-bar" id="sidenav-parent-div">
 			<ul class="uk-nav" id="sidenav-ul">
 				<li id="sidenav-home-li" class="uk-active"><a id="sidenav-home-link" href="/">Home</a></li>
-	            <li id="sidenav-works-li"><a id="sidenav-works-link" href="/works">Works</a></li>
-	            <li id="sidenav-bookmarks-li"><a id="sidenav-bookmarks-link" href="/bookmarks">Bookmarks</a></li>
-	            <li id="sidenav-bookmark-collections-li"><a id="sidenav-bookmark-collections-link" href="/bookmark-collections">Bookmark Collections</a></li>
+	            <li id="sidenav-works-li"><a id="sidenav-works-link" href="/works/">Works</a></li>
+	            <li id="sidenav-bookmarks-li"><a id="sidenav-bookmarks-link" href="/bookmarks/">Bookmarks</a></li>
+	            <li id="sidenav-bookmark-collections-li"><a id="sidenav-bookmark-collections-link" href="/bookmark-collections/">Bookmark Collections</a></li>
 	            <li id="sidenav-search-li"><a id="sidenav-search-link" href="/search">Search Results</a></li>
 	            {% if not request.user.is_authenticated %}
 	            	<li id="sidenav-sign-in-li" class="uk-active">
