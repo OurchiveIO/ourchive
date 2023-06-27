@@ -16,7 +16,7 @@
 <body>
 	<script>
 		console.log('{{css_mode}}');
-		if ('{{css_mode}}' == "light" || '{{css_mode}}' == "dark") {
+		if (('{{css_mode}}' == "light" || '{{css_mode}}' == "dark") && localStorage.getItem("theme") == "light" || localStorage.getItem("theme") == "dark") {
 			if ('{{css_mode}}' !== localStorage.getItem("theme")) {
 				window.location.reload();
 			}
