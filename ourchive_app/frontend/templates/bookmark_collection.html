@@ -28,6 +28,7 @@
 	                <span id="bkcol-draft-span" class="uk-label uk-label-warning"><strong id="bkcol-draft-text">DRAFT</strong></span>
 	            </div>
 	        {% endif %}
+	        <p class="uk-article-meta">{{ bkcol.short_description }}</p>
 	   	</div>
 	   	<div class="uk-text-right uk-width-1-3" id="bkcol-user-controls-parent">
 	            {% if bkcol.user == request.user.username %}
@@ -39,7 +40,7 @@
 	            {% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
 	            {% endif %}
 	    </div>
-	   	<div class="uk-margin-remove uk-width-1-1"><hr id="bkcol-title-hr"/></div>
+	   	<div class="uk-margin-remove-bottom uk-width-1-1"><hr id="bkcol-title-hr"/></div>
 	   	<div id="bkcol-description-parent" class="uk-width-1-1">
 	   		<span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description|safe}}</span>
 	   	</div>

@@ -156,8 +156,10 @@ def get_bookmark_collection_obj(request):
 			tag['text'] = json_item[1]
 			tags.append(tag)
 			collection_dict.pop(item)
-		if 'bookmarks' in request.POST[item]:
+		if 'bookmarksidstoadd' in request.POST[item]:
 			json_item = request.POST[item].split("_")
+			if len(json_item) < 2:
+				continue
 			bookmark_id = json_item[1]
 			bookmarks.append(bookmark_id)
 			collection_dict.pop(item)
@@ -276,6 +278,11 @@ def user_name(request, username):
 	bookmark_collection = get_object_tags(bookmark_collection)
 	user = user.response_data['results'][0]
 	user['attributes'] = get_attributes_for_display(user['attributes'])
+	subscription = do_get(f"api/subscriptions/", request, params={'subscribed_to': username}, object_name='Subscription')
+	if 'results' in subscription.response_data and len(subscription.response_data['results']) > 0:
+		subscription = subscription.response_data['results'][0]
+	else:
+		subscription = None
 	return render(request, 'user.html', {
 		'bookmarks': bookmarks,
 		'bookmarks_next': bookmark_next,
@@ -289,7 +296,8 @@ def user_name(request, username):
 		'bookmark_collections': bookmark_collection,
 		'bookmark_collections_next': bookmark_collection_next,
 		'bookmark_collections_previous': bookmark_collection_previous,
-		'user': user
+		'user': user,
+		'subscription' : subscription
 	})
 
 
@@ -333,7 +341,7 @@ def report_user(request, username):
 		# we don't want to let the user specify this
 		report_data['user'] = request.user.username
 		response = do_post(f'api/userreports/', request, data=report_data, object_name='User Report')
-		message_type = message.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
+		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
 		return redirect(f'/username/{username}/')
 	else:
@@ -496,6 +504,63 @@ def user_bookmarks_drafts(request, username):
 	bookmarks = response.response_data['results']
 	bookmarks = get_object_tags(bookmarks)
 	return render(request, 'bookmarks.html', {'bookmarks': bookmarks, 'user_filter': username})
+
+
+def user_bookmark_subscriptions(request, username):
+	response = do_get(f'api/users/{username}/subscriptions/bookmarks', request)
+	return render(request, 'user_bookmark_subscriptions.html', {
+		'bookmarks': response.response_data
+	})
+
+
+def user_collection_subscriptions(request, username):
+	response = do_get(f'api/users/{username}/subscriptions/collections', request, params=request.GET)
+	print(response.response_data)
+	return render(request, 'user_collection_subscriptions.html', {
+		'bookmark_collections': response.response_data,
+		'next': f"/users/{username}/subscriptions/collections/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
+		'previous': f"/users/{username}/subscriptions/collections/{response.response_data['prev_params']}" if response.response_data['prev_params'] is not None else None,
+	})
+
+
+def user_subscriptions(request, username):
+	response = do_get(f'api/users/{username}/subscriptions', request, 'Subscription')
+	return render(request, 'user_subscriptions.html', {
+		'subscriptions': response.response_data['results'] if 'results' in response.response_data else {}
+	})
+
+
+def unsubscribe(request, username):
+	subscription_id = request.POST.get('subscription_id')
+	if request.POST.get('unsubscribe_all'):
+		response = do_delete(f'api/subscriptions/{subscription_id}/', request, object_name='Subscription')
+		process_message(request, response)
+	else:
+		patch_data = {}
+		if request.POST.get('subscribed_to_bookmark'):
+			patch_data['subscribed_to_bookmark'] = False
+		if request.POST.get('subscribed_to_collection'):
+			patch_data['subscribed_to_collection'] = False
+		print(patch_data)
+		response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
+		process_message(request, response)
+	return referrer_redirect(request)
+
+
+def subscribe(request, username):
+	post_data = {}
+	if 'subscription_id' in request.POST:
+		post_data['id'] = request.POST.get('subscription_id')
+	post_data['subscribed_to_bookmark'] = True if request.POST.get('subscribed_to_bookmark') else False
+	post_data['subscribed_to_collection'] = True if request.POST.get('subscribed_to_collection') else False
+	post_data['user'] = request.user.username
+	post_data['subscribed_user'] = request.POST.get('subscribed_to')
+	if 'subscription_id' in request.POST:
+		response = do_patch(f'api/subscriptions/{post_data["id"]}/', request, data=post_data, object_name='Subscription')
+	else:
+		response = do_post(f'api/subscriptions/', request, data=post_data, object_name='Subscription')
+	process_message(request, response)
+	return referrer_redirect(request)
 
 
 def search(request):

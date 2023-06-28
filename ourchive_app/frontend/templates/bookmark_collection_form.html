@@ -28,7 +28,7 @@ function populateBookmarkInput(bookmark_id, bookmark_display) {
     // bookmark to add
     var final = bookmark_display;
     var wrapper= document.createElement('div');
-    wrapper.innerHTML= '<input type="hidden" id="bookmarks_'+bookmark_id+'" name="bookmarks_'+bookmark_id+'" value="bookmarks_'+bookmark_id+'">';
+    wrapper.innerHTML= '<input type="hidden" id="bookmarks_'+bookmark_id+'" name="bookmarksbookmarksidstoadd_'+bookmark_id+'" value="bookmarksbookmarksidstoadd_'+bookmark_id+'">';
     var div = wrapper.firstChild;
     list.appendChild(div);
     var li = document.createElement('li');
@@ -73,6 +73,14 @@ function removeBookmark(event, bookmark_id) {
             </div>
         </div>
     </div>
+    <div id="bkcol-form-short-desc-parent" class="uk-margin">
+        <label id="bkcol-form-short-desc-label" class="uk-form-label" for="form-horizontal-text">Short Description</label>
+        <div id="bkcol-form-short-desc-form-control" class="uk-form-controls">
+            <div id="bkcol-form-short-desc-inline-div" class="uk-inline">
+                <textarea rows="3" placeholder="Enter a short summary of this collection" id="bkcol-form-short-desc-input" class="uk-textarea uk-form-width-large" type="text" name="short_description">{{ bookmark_collection.short_description|default_if_none:'' }}</textarea>
+            </div>
+        </div>
+    </div>
     {% if request.user.can_upload_images %}
     <div class="uk-margin" id="bkcol-form-header-parent">
         <label id="bkcol-form-header-label" class="uk-form-label" for="form-horizontal-text">Header <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
@@ -110,7 +118,7 @@ function removeBookmark(event, bookmark_id) {
         {% if bookmark_collection.bookmarks_readonly %}<div class="uk-margin-medium-left"><h4 id="obj-attrs-form-header">Bookmarks</h4></div>{% endif %}
         <ul id="bookmarks_readonly_list" class="uk-margin-medium-left"> 
         {% for bookmark in bookmark_collection.bookmarks_readonly %}
-            <input type="hidden" id="bookmarks_{{bookmark.id}}" name="bookmarks_{{bookmark.id}}" value="bookmarks_{{bookmark.id}}"/>
+            <input type="hidden" id="bookmarks_{{bookmark.id}}" name="bookmarksidstoadd_{{bookmark.id}}" value="bookmarksidstoadd_{{bookmark.id}}"/>
             <li id="bookmarks_{{bookmark.id}}_li">{{bookmark.title|default:bookmark.work.title}} (<a onclick="removeBookmark(event, {{bookmark.id}})">Remove</a>)</li>
         {% endfor %}
         </ul>

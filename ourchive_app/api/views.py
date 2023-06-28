@@ -7,11 +7,12 @@ from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
     BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, \
     NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, \
     UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
-    ChapterAllSerializer, UserReportSerializer
+    ChapterAllSerializer, UserReportSerializer, UserSubscriptionSerializer, \
+    BookmarkSummarySerializer, BookmarkCollectionSummarySerializer
 from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
     NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
-    AttributeValue, ContentPage, UserReport, UserReportReason
+    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -180,7 +181,7 @@ class ExportWork(APIView):
         work = Work.objects.filter(id=pk).first()
         work_url = ''
         # get export if it hasn't been created already.
-        # note the archive has no M4B creation capability, so that's going to 
+        # note the archive has no M4B creation capability, so that's going to
         # be in preferred download url or nowhere.
         ext = request.GET.get('extension')
         if not ext:
@@ -334,6 +335,56 @@ class UserReportDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserReportSerializer
     permission_classes = [IsOwner]
     queryset = UserReport.objects.all().order_by('created_on')
+
+
+class SubscriptionList(generics.ListCreateAPIView):
+    serializer_class = UserSubscriptionSerializer
+    permission_classes = [IsOwner]
+
+    def get_queryset(self):
+        if 'subscribed_to' in self.request.GET and self.request.GET.get('subscribed_to') is not None:
+            return UserSubscription.objects.filter(user__id=self.request.user.id, subscribed_user__username=self.request.GET.get('subscribed_to'))
+        return UserSubscription.objects.all().order_by('created_on')
+
+
+class UserSubscriptionList(generics.ListCreateAPIView):
+    serializer_class = UserSubscriptionSerializer
+    permission_classes = [IsOwner]
+
+    def get_queryset(self):
+        return UserSubscription.objects.filter(user__id=self.request.user.id)
+
+
+class UserSubscriptionBookmarkList(generics.ListAPIView):
+    serializer_class = BookmarkSummarySerializer
+    permission_classes = [IsOwner]
+
+    def get_queryset(self):
+        subscriptions = UserSubscription.objects.filter(
+            user__id=self.request.user.id).filter(
+            subscribed_to_bookmark=True)
+        ids = subscriptions.values_list('subscribed_user', flat=True).all()
+        return Bookmark.objects.filter(user__id__in=ids).order_by('created_on')
+
+
+class UserSubscriptionBookmarkCollectionList(generics.ListAPIView):
+    serializer_class = BookmarkCollectionSummarySerializer
+    permission_classes = [IsOwner]
+
+    def get_queryset(self):
+        subscriptions = UserSubscription.objects.filter(
+            user__id=self.request.user.id).filter(
+            subscribed_to_collection=True)
+        ids = subscriptions.values_list('subscribed_user', flat=True).all()
+        return BookmarkCollection.objects.filter(user__id__in=ids).order_by('created_on')
+
+
+class UserSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserSubscriptionSerializer
+    permission_classes = [IsOwner]
+
+    def get_queryset(self):
+        return UserSubscription.objects.filter(user__id=self.request.user.id)
 
 
 class WorkDetail(generics.RetrieveUpdateDestroyAPIView):

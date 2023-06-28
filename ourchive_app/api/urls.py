@@ -52,6 +52,9 @@ urlpatterns = [
     path('users/<str:username>/bookmarks', views.UserBookmarkList.as_view(), name='user-bookmarks'),
     path('users/<str:username>/bookmarkcollections', views.UserBookmarkCollectionList.as_view(), name='user-bookmark-collections'),
     path('users/<str:username>/notifications', views.UserNotificationList.as_view(), name='user-notifications'),
+    path('users/<str:username>/subscriptions', views.UserSubscriptionList.as_view(), name='user-subscriptions'),
+    path('users/<str:username>/subscriptions/bookmarks', views.UserSubscriptionBookmarkList.as_view(), name='user-subscriptions-bookmarks'),
+    path('users/<str:username>/subscriptions/collections', views.UserSubscriptionBookmarkCollectionList.as_view(), name='user-subscriptions-collections'),
     path('users/<str:username>/bookmarks/drafts', views.UserBookmarkDraftList.as_view(), name='user-bookmarks-drafts'),
     path('userblocks', views.UserBlocksList.as_view(), name='user-blocks-list'),
     path('userblocks/<int:pk>/', views.UserBlocksDetail.as_view(), name='userblocks-detail'),
@@ -73,6 +76,8 @@ urlpatterns = [
     path('contentpages/', views.ContentPageList.as_view(), name='content-page-list'),
     path('contentpages/<int:pk>', views.ContentPageDetail.as_view(), name='content-page-detail'),
     path('reportreasons/', views.ReportReasonList.as_view(), name='report-reasons'),
+    path('subscriptions/', views.SubscriptionList.as_view(), name='user-subscriptions'),
+    path('subscriptions/<int:pk>/', views.UserSubscriptionDetail.as_view(), name='usersubscription-detail'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,0 +1,9 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block title %}{% translate 'Bookmark Subscriptions' %}{% endblock %}
+{% block content %}	
+<div class="uk-width-1-1" id="bookmark-subscriptions-view-parent">
+	<h1 id="bookmark-subscriptions-header-h1" class="uk-heading-line uk-text-center uk-margin-large-bottom"> <span id="bookmark-subscriptions-header">{{request.user}}'s Bookmark Subscriptions</span> </h1>
+	{% include "bookmarks_list.html" with bookmarks=bookmarks.results %}
+</div>
+{% endblock %}

@@ -9,6 +9,9 @@
 		    </div>
 		</div>
 		<div id="bkcol-tile-tags" class="uk-card-body">
+			<div id="bkcol-short-desc" class="uk-width-expand">
+				<p class="uk-text-medium">{{ bookmark_collection.short_description }}</p>
+			</div>
 			{% for type, tag in bookmark_collection.tags.items %} 
 		        <dt id="bk-tile-tag-type-{{type}}">{{ type }}</dt>
 		        <dd id="bk-tile-tag-container-{{type}}">

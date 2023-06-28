@@ -1,7 +1,7 @@
 from django.contrib import admin
 from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, \
     ContentPage, Tag, Invitation, AttributeType, AttributeValue, UserReportReason, \
-    UserReport
+    UserReport, UserSubscription
 from django.db import models
 from django.forms.widgets import Input
 from django.core.mail import send_mail
@@ -71,8 +71,10 @@ SETTING_VALUE_CHOICES = [
     {
         'Search Provider': [('POSTGRES', 'Database')],
         'Invite Queue Limit': [('10', '10'), ('20', '20'), ('50', '50'), ('100', '100')],
-        'Rating Star Count': [('1', '1'), ('2', '2'),('3', '3'),('4', '4'),('5', '5'), 
-        ('6', '6'),('7', '7'),('8', '8'),('9', '9'),('10', '10')]
+        'Rating Star Count': [
+            ('1', '1'), ('2', '2'),('3', '3'),('4', '4'),('5', '5'),
+            ('6', '6'),('7', '7'),('8', '8'),('9', '9'),('10', '10')
+        ]
     }
 
 ]
@@ -94,7 +96,7 @@ class SettingsForm(ModelForm):
 class OurchiveSettingAdmin(admin.ModelAdmin):
     form = SettingsForm
     exclude = ('valtype',)
-    #readonly_fields=('name', )
+    # TODO: FIGURE OUT HOW TO DO THIS CONDITIONALL readonly_fields=('name', )
     fields = ('name', 'value',)
     list_display = ('name', 'value',)
 
@@ -118,6 +120,7 @@ def allow_export_upload(modeladmin, request, queryset):
     for user in queryset:
         user.can_upload_export_files = True
         user.save()
+
 
 @admin.action(description="Allow selected users to upload all files")
 def allow_all_upload(modeladmin, request, queryset):
@@ -143,7 +146,11 @@ def resolve_reports(modeladmin, request, queryset):
 class UserReportAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'resolved')
     actions = [resolve_reports]
-        
+
+
+class UserSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'subscribed_user', 'subscribed_to_bookmark', 'subscribed_to_collection')
+
 
 admin.site.register(TagType)
 admin.site.register(WorkType)
@@ -157,3 +164,4 @@ admin.site.register(AttributeValue, AttributeValueAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(UserReportReason)
 admin.site.register(UserReport, UserReportAdmin)
+admin.site.register(UserSubscription, UserSubscriptionAdmin)

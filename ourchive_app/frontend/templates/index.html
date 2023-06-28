@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 	{% load static %}
+	{% load i18n %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/' %}ourchive-{{css_mode}}.css" />
@@ -105,15 +106,27 @@
 			            {% endif %}
 			            {% if request.user.is_authenticated %}
 			            	<a href="/username/{{request.user}}" id="nav-username">{{ request.user }}</a>
-			            	<div class="uk-navbar-dropdown" id="nav-user-dropdown-div">
+			            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div">
 	                    		<ul class="uk-nav uk-navbar-dropdown-nav" id="nav-user-dropdown-ul">
 	                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
+	                    			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
 	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link">Bookmarks</a></li>
-	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmark-collections/" id="nav-bookmark-collecitons-link">Bookmark Collections</a></li>
+	                    			<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link">{% translate 'Collections' %}</a></li>
 	                    			<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">Works</a></li>
-	                    			<li id="nav-edit-profile-li"><a href="/username/{{request.user}}/edit" id="nav-edit-profile-link">Edit Profile</a></li>
-	                    			<li id="nav-edit-account-li"><a href="/username/{{request.user}}/account/edit" id="nav-edit-account-link">Edit Account</a></li>
-	                    			<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">Blocklist</a></li>
+	                    			<li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a>
+		                    			<ul class="uk-nav-sub" id="subscriptions-subnav">
+								            <li id="subscriptions-bookmarks"><a href="{% url 'fe-user-bookmark-subscriptions' request.user %}">{% translate 'Bookmarks' %}</a></li>
+								            <li id="subscriptions-collections">
+								                <a href="#">{% translate 'Collections' %}</a>
+								            </li>
+								        </ul>
+								    </li>
+								    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user %}">{% translate 'Profile' %}</a>
+								    	<ul class="uk-nav-sub" id="profile-subnav">
+	                    				<li id="nav-edit-profile-li"><a href="/username/{{request.user}}/edit" id="nav-edit-profile-link">{% translate 'Edit Profile' %}</a></li>
+	                    				<li id="nav-edit-account-li"><a href="/username/{{request.user}}/account/edit" id="nav-edit-account-link">{% translate 'Edit Account' %}</a></li>
+	                    				<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">{% translate 'Blocklist' %}</a></li>
+	                    			</ul>
 	                    			{% if request.session.has_notifications %}
 	                    			<li id="nav-notifications-unread-li"><a class="uk-text-emphasis uk-text-secondary" href="/username/{{request.user}}/notifications" id="nav-notifications-unread-link">Notifications (Unread)</a></li>
 	                    			{% else %}

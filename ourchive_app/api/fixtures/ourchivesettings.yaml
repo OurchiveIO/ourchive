@@ -59,7 +59,7 @@
   fields:
     uid: af2f38f1-9226-4488-9ba2-b1ae3c99b66f
     name: Rating Star Count
-    value: hello
+    value: '10'
     valtype: choice
 - model: api.ourchivesetting
   pk: 11

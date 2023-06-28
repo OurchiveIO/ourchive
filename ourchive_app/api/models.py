@@ -50,8 +50,7 @@ class UserReportReason(models.Model):
 
     class Meta:
         constraints = [
-        models.UniqueConstraint(fields=['reason'], name='unique reportreason')
-    ]
+            models.UniqueConstraint(fields=['reason'],name='unique reportreason')]
         ordering = ['reason']
 
 
@@ -64,7 +63,7 @@ class UserReport(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     reason = models.ForeignKey(
-        UserReportReason, 
+        UserReportReason,
         on_delete=models.PROTECT
     )
     details = models.TextField(blank=True, null=True)
@@ -75,7 +74,7 @@ class UserReport(models.Model):
     reported_user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name = 'reported_user'
+        related_name='reported_user'
     )
     mod_notes = models.TextField(blank=True, null=True)
     resolved = models.BooleanField(default=False)
@@ -90,12 +89,41 @@ class UserReport(models.Model):
         ordering = ['resolved', '-updated_on']
 
 
+class UserSubscription(models.Model):
+
+    __tablename__ = 'user_subscription'
+
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    subscribed_to_bookmark = models.BooleanField(default=False)
+    subscribed_to_collection = models.BooleanField(default=False)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    subscribed_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscribed_user'
+    )
+
+    def __repr__(self):
+        return '<UserSubscription {}>'.format(self.id)
+
+    class Meta:
+        ordering = ['-updated_on']
+
+
 class Work(models.Model):
 
     __tablename__ = 'works'
 
-    DOWNLOAD_CHOICES = [('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP'), 
-        ('M4A', 'M4A'), ('MOBI', 'MOBI')]
+    DOWNLOAD_CHOICES = [
+        ('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP'), ('M4A', 'M4A'),
+        ('MOBI', 'MOBI')
+    ]
 
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -389,6 +417,7 @@ class BookmarkCollection(models.Model):
     is_complete = models.BooleanField(default=False)
     header_url = models.CharField(max_length=600, null=True, blank=True)
     header_alt_text = models.CharField(max_length=600, null=True, blank=True)
+    short_description = models.CharField(max_length=300, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
