@@ -3,9 +3,6 @@
 {% block title %}Subscriptions{% endblock %}
 {% block content %}	
 <div class="uk-width-1-1 uk-text-left" id="user-subscriptions-grid">
-	{% if not subscriptions %}
-	<p id="user-subscriptions-none-message">{% blocktranslate %}No subscriptions yet. To create a subscription, navigate to a user's profile and click the 'subscribe' button.{% endblocktranslate %}</p>
-	{% endif %}
 	<div id="user-subscriptions-header" class="uk-width-1-1">
 		<h1 id="user-subscriptions-h1">Subscriptions</h1>
 		<hr/>
@@ -22,6 +19,9 @@
 	<hr/>
 	<div id="user-subscriptions-content" class="uk-width-1-1">
 		<h3>{{ request.user.username }}'s Subscriptions</h3>
+		{% if not subscriptions %}
+		<p id="user-subscriptions-none-message">{% blocktranslate %}No subscriptions yet. To create a subscription, navigate to a user's profile and click the 'subscribe' button.{% endblocktranslate %}</p>
+		{% endif %}
 		<table class="uk-table uk-table-striped">
 	    <thead>
 	        <tr>
