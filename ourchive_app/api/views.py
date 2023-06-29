@@ -74,6 +74,18 @@ class SearchList(APIView):
         return searcher.do_search(**self.kwargs)
 
 
+class RegistrationUtils(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, format=None):
+        username = request.GET.get('username')
+        if User.objects.filter(username=username).exists():
+            return Response({'exists': True})
+        else:
+            return Response({'exists': False})
+
+
 class ReportReasonList(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.AllowAny]

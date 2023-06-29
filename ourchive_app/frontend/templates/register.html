@@ -1,27 +1,45 @@
 {% extends 'index.html' %}
+{% load i18n %}
 {% block title %}Register{% endblock %}
 {% block content %}	
 <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid id="register-parent-grid">
 {% if permit_registration %}
 <script>
-    function validateForm() {
-        var password = document.getElementById("register-password-input").value;
-        var confirmedPassword = document.getElementById("register-confirm-password-input").value;
-        if (password != confirmedPassword) {
-            document.getElementById("register-password-input").classList.add("uk-form-danger");
-            document.getElementById("register-password-input-errors").innerHTML = "Passwords must match.";
-            document.getElementById("register-password-input-errors").style.visibility = "visible";
-            return false;
-        }
-        return true;
+    async function checkUsername(username) {
+        const response = await fetch(window.location.origin+"{% url 'registration-utils' %}?username="+username);
+        const json = await response.json();
+        validated = json["exists"];
+        return validated;
+    }
+    function validateForm(event) {
+        event.preventDefault();
+        var username = document.getElementById("register-user-name-input").value;
+        checkUsername(username).then((username_exists) => {
+            if (username_exists) {
+                document.getElementById("register-user-name-input").classList.add("uk-form-danger");
+                document.getElementById("register-user-name-input-errors").innerHTML = "{% translate 'Username exists, please choose another.' %}";
+                document.getElementById("register-user-name-input-errors").style.visibility = "visible";
+                return false;
+            }
+            var password = document.getElementById("register-password-input").value;
+            var confirmedPassword = document.getElementById("register-confirm-password-input").value;
+            if (password != confirmedPassword) {
+                document.getElementById("register-password-input").classList.add("uk-form-danger");
+                document.getElementById("register-password-input-errors").innerHTML = "Passwords must match.";
+                document.getElementById("register-password-input-errors").style.visibility = "visible";
+                return false;
+            }
+            event.target.submit();
+        });  
     }
 </script>
-<form class="uk-form-horizontal"  method="post" onsubmit="return validateForm()" id="register-form">
+<form class="uk-form-horizontal"  method="post" onsubmit="return validateForm(event)" id="register-form">
 	{% csrf_token %}
     <input id="invite-code-hidden-id" type="hidden" name="invite_code" value="{{ invite_code }}"/>
     <div class="uk-margin" id="register-username-parent">
     	<label id="register-username-label" class="uk-form-label" for="form-horizontal-text">Username</label>
         <div class="uk-form-controls" id="register-user-controls">
+            <div><span class="uk-text-small uk-text-danger" id="register-user-name-input-errors"></span></div>
             <div class="uk-inline" id="register-user-input-parent">
 	            <span class="uk-form-icon" uk-icon="icon: user" id="register-user-icon"></span>
 	            <input class="uk-input" type="text" maxlength="150" name="username" id="register-user-name-input" required>
@@ -47,7 +65,7 @@
             <div><span class="uk-text-small uk-text-danger" id="register-password-input-errors"></span></div>
 	        <div class="uk-inline" id="register-password-input-parent">
 	            <span class="uk-form-icon uk-form-icon" uk-icon="icon: lock" id="register-password-icon"></span>
-	            <input class="uk-input" type="password" name="password" id="register-password-input" required>
+	            <input class="uk-input" type="password" name="password" id="register-password-input" pattern=".{8,50}" title="Password must be 8-50 characters." required>
 	        </div>
 	    </div>
     </div>

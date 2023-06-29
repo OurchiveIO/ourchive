@@ -1072,7 +1072,10 @@ def register(request):
 		elif utils.convert_boolean(invite_only['results'][0]['value']):
 			return redirect('/request-invite')
 		else:
-			return render(request, 'register.html', {'permit_registration': True})
+			return render(request, 'register.html', {
+				'permit_registration': True,
+				'username_check_url': 'registration-utils'
+			})
 
 
 def request_invite(request):

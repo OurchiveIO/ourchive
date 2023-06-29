@@ -13,6 +13,8 @@ import logging
 from django.conf import settings
 from django.core.mail import send_mail
 from .utils import convert_boolean
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -183,6 +185,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             icon=icon,
             icon_alt_text=icon_alt_text
         )
+        try:
+            validate_password(validated_data['password'], user)
+        except ValidationError:
+            user.delete()
+            raise serializers.ValidationError({"password": ["Password not valid. Password must be at least 10 character, not a common password, not similar to user's information, and not all numbers."]}, 400)
         user.set_password(validated_data['password'])
         user.save()
         if attributes is not None:
