@@ -5,7 +5,11 @@
 	{% load i18n %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% if css_mode %}
     <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/' %}ourchive-{{css_mode}}.css" />
+    {% else %}
+    <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/' %}ourchive-light.css" />
+    {% endif %}
     <link rel="stylesheet" href="{% static 'frontend/css/scroll-to-top.css' %}" />
     <link rel="stylesheet" href="{% static 'frontend/css/editor.css' %}" />
     <link rel="shortcut icon" href="{% static 'favicon/favicon.ico' %}"/>
@@ -16,8 +20,7 @@
 </head>
 <body>
 	<script>
-		console.log('{{css_mode}}')
-		if (('{{css_mode}}' == "light" || '{{css_mode}}' == "dark") && localStorage.getItem("fe-theme") == "light" || localStorage.getItem("fe-theme") == "dark") {
+		if (('{{css_mode}}' == "light" || '{{css_mode}}' == "dark") && (localStorage.getItem("fe-theme") == "light" || localStorage.getItem("fe-theme") == "dark")) {
 			if ('{{css_mode}}' !== localStorage.getItem("fe-theme")) {
 				window.location.reload();
 			}
