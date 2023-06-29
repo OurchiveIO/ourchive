@@ -59,7 +59,7 @@
 </div>
 <div id="user-subscribe" uk-modal>
     <div class="uk-modal-dialog uk-modal-body" id="user-subscribe-body">
-        <h2 id="user-subscribe-header" class="uk-modal-title">{% blocktranslate %}Subscribe to {{ user.username }}{% endblocktranslate %}</h2>
+        <h2 id="user-subscribe-header" class="uk-modal-title">{% blocktranslate %}Subscribe to {% endblocktranslate %}{{ user.username }}</h2>
         <form class="uk-form-horizontal" action="{% url 'fe-subscribe' request.user.username %}" method="post" id="user-subscribe-form">
             {% csrf_token %}
             {% if subscription %}
