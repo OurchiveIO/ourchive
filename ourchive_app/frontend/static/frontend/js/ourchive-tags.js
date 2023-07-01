@@ -23,11 +23,11 @@ function tagCheck (e, type, bypass_check=false) {
 }
 
 function doAutocomplete(term, source, selector, tag_type='') {
-  var complete_select = 'tag-autocomplete-dropdown-'+selector
   if (term.length < 5)
   {
     return;
   }
+  var complete_select = 'tag-autocomplete-dropdown-'+selector;
   fetch('/tag-autocomplete?text='+term+"&source="+source+"&type="+tag_type)
     .then((response) => {
       return response.text();

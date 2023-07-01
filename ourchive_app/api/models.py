@@ -18,11 +18,13 @@ class User(AbstractUser):
     attributes = models.ManyToManyField('AttributeValue')
     can_upload_audio = models.BooleanField(default=False)
     can_upload_images = models.BooleanField(default=False)
+    can_upload_export_files = models.BooleanField(default=False)
     default_post_language = models.CharField(max_length=10, blank=True, null=True)
     default_search_language = models.CharField(max_length=10, blank=True, null=True)
     default_editor = models.CharField(max_length=10, blank=True, null=True)
-    attributes = models.ManyToManyField('AttributeValue')
+    attributes = models.ManyToManyField('AttributeValue', blank=True)
     display_username = models.CharField(max_length=150, blank=True, null=True)
+    cookies_accepted = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.display_username = self.username
@@ -30,9 +32,98 @@ class User(AbstractUser):
         super(User, self).save(*args, **kwargs)
 
 
+class UserReportReason(models.Model):
+
+    __tablename__ = 'user_report_reason'
+
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    reason = models.CharField(max_length=200, blank=False, null=False)
+
+    def __repr__(self):
+        return '<UserReportReason: {}>'.format(self.id)
+
+    def __str__(self):
+        return self.reason
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['reason'],name='unique reportreason')]
+        ordering = ['reason']
+
+
+class UserReport(models.Model):
+
+    __tablename__ = 'user_report'
+
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    reason = models.ForeignKey(
+        UserReportReason,
+        on_delete=models.PROTECT
+    )
+    details = models.TextField(blank=True, null=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    reported_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reported_user'
+    )
+    mod_notes = models.TextField(blank=True, null=True)
+    resolved = models.BooleanField(default=False)
+
+    def __repr__(self):
+        return '<UserReport: {}>'.format(self.id)
+
+    def __str__(self):
+        return f'{self.user.username} reported {self.reported_user.username} for {self.reason.reason}'
+
+    class Meta:
+        ordering = ['resolved', '-updated_on']
+
+
+class UserSubscription(models.Model):
+
+    __tablename__ = 'user_subscription'
+
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    subscribed_to_bookmark = models.BooleanField(default=False)
+    subscribed_to_collection = models.BooleanField(default=False)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    subscribed_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscribed_user'
+    )
+
+    def __repr__(self):
+        return '<UserSubscription {}>'.format(self.id)
+
+    class Meta:
+        ordering = ['-updated_on']
+
+
 class Work(models.Model):
 
     __tablename__ = 'works'
+
+    DOWNLOAD_CHOICES = [
+        ('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP'), ('M4A', 'M4A'),
+        ('MOBI', 'MOBI')
+    ]
 
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -43,8 +134,7 @@ class Work(models.Model):
     process_status = models.IntegerField(null=True)
     cover_url = models.CharField(max_length=600, null=True, blank=True)
     cover_alt_text = models.CharField(max_length=600, null=True, blank=True)
-    epub_id = models.CharField(max_length=600, null=True, blank=True)
-    zip_id = models.CharField(max_length=600, null=True, blank=True)
+    preferred_download_url = models.CharField(max_length=600, null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     anon_comments_permitted = models.BooleanField(default=True)
@@ -54,6 +144,10 @@ class Work(models.Model):
     fingerguns = models.IntegerField(default=0)
     draft = models.BooleanField(default=True)
     comment_count = models.IntegerField(default=0)
+    preferred_download = models.CharField(max_length=200, blank=True, null=True, choices=DOWNLOAD_CHOICES)
+    epub_url = models.CharField(max_length=600, null=True, blank=True)
+    m4b_url = models.CharField(max_length=600, null=True, blank=True)
+    zip_url = models.CharField(max_length=600, null=True, blank=True)
 
     user = models.ForeignKey(
         User,
@@ -321,11 +415,13 @@ class BookmarkCollection(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
     is_complete = models.BooleanField(default=False)
-    cover_url = models.CharField(max_length=600, null=True, blank=True)
-    cover_alt_text = models.CharField(max_length=600, null=True, blank=True)
+    header_url = models.CharField(max_length=600, null=True, blank=True)
+    header_alt_text = models.CharField(max_length=600, null=True, blank=True)
+    short_description = models.CharField(max_length=300, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
+    draft = models.BooleanField(default=False)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
 
@@ -337,6 +433,7 @@ class BookmarkCollection(models.Model):
     is_private = models.BooleanField(default=False)
 
     tags = models.ManyToManyField('Tag')
+    attributes = models.ManyToManyField('AttributeValue')
 
     def __str__(self):
         return self.title
@@ -359,8 +456,14 @@ class Bookmark(models.Model):
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
     comment_count = models.IntegerField(default=0)
+    public_notes = models.TextField(null=True, blank=True)
+    private_notes = models.TextField(null=True, blank=True)
 
-    collection = models.ForeignKey(BookmarkCollection, on_delete=models.CASCADE, null=True, blank=True)
+    collection = models.ForeignKey(
+        BookmarkCollection,
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='bookmarks')
 
     user = models.ForeignKey(
         User,
@@ -383,6 +486,9 @@ class Bookmark(models.Model):
 
     def __repr__(self):
         return '<Bookmark: {}>'.format(self.id)
+
+    class Meta:
+        ordering = ('id',)
 
 
 class BookmarkLink(models.Model):
@@ -476,7 +582,7 @@ class OurchiveSetting(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     value = models.CharField(max_length=200)
-    grouping = models.CharField(max_length=200)
+    valtype = models.CharField(max_length=200, null=True, blank=True)
 
     def __repr__(self):
         return '<OurchiveSettings: {}>'.format(self.id)
@@ -500,6 +606,9 @@ class ContentPage(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ('order', 'id',)
+
 
 class Invitation(models.Model):
 
@@ -511,7 +620,8 @@ class Invitation(models.Model):
     token_expiration = models.DateTimeField()
     token_used = models.BooleanField(default=False)
     register_link = models.CharField(max_length=200)
-    send_invite = models.BooleanField(default=False)
+    approved = models.BooleanField(default=False)
+    join_reason = models.TextField(max_length=400, blank=True, null=True)
 
     def __repr__(self):
         return '<Invitation: {}>'.format(self.id)
@@ -529,6 +639,7 @@ class AttributeType(models.Model):
     allow_on_chapter = models.BooleanField(default=False)
     allow_on_user = models.BooleanField(default=False)
     allow_multiselect = models.BooleanField(default=True)
+    allow_on_bookmark_collection = models.BooleanField(default=False)
 
     class Meta:
         indexes = [
@@ -557,6 +668,7 @@ class AttributeValue(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     display_name = models.CharField(max_length=200)
+    order = models.IntegerField(default=1)
 
     attribute_type = models.ForeignKey(
         'AttributeType',
@@ -568,7 +680,7 @@ class AttributeValue(models.Model):
         indexes = [
             models.Index(fields=['name']),
         ]
-        ordering = ('attribute_type__name','name')
+        ordering = ('attribute_type__name','order', 'name')
         constraints = [
             models.UniqueConstraint(Lower('name').desc(), name='unique_attributevalue_name')
         ]

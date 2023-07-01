@@ -1,8 +1,10 @@
+{% load i18n %} 
+{% if show_header != False %}<h3 id="obj-tags-form-header">{{ object_friendly|default_if_none:'' }} Tags <sup uk-icon="icon: question"></sup></h3>{% endif %}
 {% for type, tag_data in tags.items %}
     {% if tag_data.admin_administrated %}
         <div class="uk-margin" id="{{ object }}-form-tag-parent">
             <label id="{{ object }}-form-tag-type-label" class="uk-form-label" for="form-horizontal-text">{{ type }} <sup class="uk-margin-small-left">(admin)</sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop="mode: click">This tag type is administrated by your site admin(s). This means that you can select an existing {{ type }}, but cannot create a new one.</div>
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This tag type is administrated by your site admin(s). This means that you can select an existing {{ type }}, but cannot create a new one.{% endblocktranslate %}</div>
             </label>
             <div id="{{ object }}-form-tag-controls" class="uk-form-controls">                
                 <div id="{{ object }}-form-tag-inline" class="uk-inline">

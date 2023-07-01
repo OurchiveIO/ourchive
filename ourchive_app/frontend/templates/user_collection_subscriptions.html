@@ -1,0 +1,12 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block title %}{% translate 'Collection Subscriptions' %}{% endblock %}
+{% block content %}	
+<div class="uk-width-1-1" id="collection-subscriptions-view-parent">
+	<h1 id="collection-subscriptions-header-h1" class="uk-heading-line uk-text-center uk-margin-large-bottom"> <span id="collection-subscriptions-header">{{request.user}}'s Collection Subscriptions</span> </h1>
+	{% for bookmark_collection in bookmark_collections.results %} 
+		{% include "bookmark_collection_tile.html" %}        
+	{% endfor %}
+	{% include 'pagination.html' with previous=bookmark_collections.previous next=bookmark_collections.next object_name='collection' %}
+</div>
+{% endblock %}

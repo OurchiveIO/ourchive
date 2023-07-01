@@ -1,11 +1,12 @@
 {% extends 'index.html' %}
+{% block title %}Request Invite{% endblock %}
 {% block content %}	
-<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid id="request-invite-parent-grid">
+<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="request-invite-parent-grid">
 {% if invite_sent %}
-<div><span class="uk-text-lead">Invite Requested</span></div>
+<div class="uk-margin-bottom"><span class="uk-text-lead">Invite Requested</span></div>
 <div><span class="uk-text-medium">Your invitation has been requested. You will receive an email with an invite code after admin approval.</span></div>
 {% else %}
-<div><span class="uk-text-lead">Request Invite</span></div>
+<div class="uk-margin-bottom"><span class="uk-text-lead">Request Invite</span></div>
 <div><span class="uk-text-medium">Registration is currently invite-only. You can request an invite code below.</span></div>
 <form class="uk-form-horizontal"  method="post" id="request-invite-form">
 	{% csrf_token %}
@@ -15,6 +16,15 @@
             <div class="uk-inline" id="request-invite-email-input-parent">
                 <span class="uk-form-icon" uk-icon="icon: mail" id="request-invite-email-icon"></span>
                 <input class="uk-input" type="email" name="email" id="request-invite-email-input">
+            </div>
+        </div>
+        
+    </div>
+    <div class="uk-margin" id="request-invite-join-reason-parent">
+        <label id="request-invite-join-reason-label" class="uk-form-label" for="form-horizontal-text">Join Reason</label>
+        <div id="request-invite-join-reason-controls" class="uk-form-controls">
+            <div class="uk-inline" id="request-invite-join-reason-input-parent">
+                <textarea class="uk-textarea" rows="3" name="join_reason" id="request-invite-join-reason-input"></textarea>
             </div>
         </div>
         

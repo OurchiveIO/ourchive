@@ -6,10 +6,15 @@ from .custom_fields import UserPrivateField
 from api.models import Work, Tag, Chapter, TagType, WorkType, \
     Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, \
     NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
-    Invitation, AttributeType, AttributeValue, User
+    Invitation, AttributeType, AttributeValue, User, ContentPage, UserReport, \
+    UserReportReason, UserSubscription
 import datetime
 import logging
 from django.conf import settings
+from django.core.mail import send_mail
+from .utils import convert_boolean
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +51,24 @@ class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
+class ContentPageSerializer(serializers.Serializer):
+    id = serializers.ReadOnlyField()
+    name = serializers.ReadOnlyField()
+
+    class Meta:
+        model = ContentPage
+        fields = '__all__'
+
+
+class ContentPageDetailSerializer(serializers.Serializer):
+    id = serializers.ReadOnlyField()
+    name = serializers.ReadOnlyField()
+    value = serializers.ReadOnlyField()
+
+    class Meta:
+        model = ContentPage
+        fields = '__all__'
+
 
 class UserBlocksSerializer(serializers.HyperlinkedModelSerializer):
     uid = serializers.ReadOnlyField()
@@ -60,6 +83,55 @@ class UserBlocksSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
+class UserReportSerializer(serializers.HyperlinkedModelSerializer):
+    uid = serializers.ReadOnlyField()
+    id = serializers.ReadOnlyField()
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    reported_user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    reason = serializers.SlugRelatedField(queryset=UserReportReason.objects.all(),
+        slug_field='reason')
+
+    def create(self, validated_data):
+        report = UserReport.objects.create(**validated_data)
+        to_emails = []
+        for user in User.objects.filter(is_superuser=True):
+            to_emails.append(user.email)
+        send_mail(
+            f"New Reported User",
+            f"{validated_data['user']} has reported {validated_data['reported_user']} for {validated_data['reason']}. Log in to the admin console to review.",
+            settings.DEFAULT_FROM_EMAIL,
+            to_emails,
+            fail_silently=False,
+        )
+        return report
+
+    class Meta:
+        model = UserReport
+        fields = '__all__'
+
+
+class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
+    uid = serializers.ReadOnlyField()
+    id = serializers.ReadOnlyField()
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    subscribed_user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+
+    def update(self, subscription, validated_data):
+        UserSubscription.objects.filter(id=subscription.id).update(**validated_data)
+        subscription = UserSubscription.objects.get(id=subscription.id)
+        if not subscription.subscribed_to_bookmark and not subscription.subscribed_to_collection:
+            subscription.delete()
+        return subscription
+
+    class Meta:
+        model = UserSubscription
+        fields = '__all__'
+
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     work_set = serializers.HyperlinkedRelatedField(
         many=True, view_name='work-detail', read_only=True)
@@ -69,6 +141,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         many=True, read_only=True, view_name="userblocks-detail")
     email = UserPrivateField()
     id = serializers.ReadOnlyField()
+    can_upload_audio = serializers.ReadOnlyField(required=False)
+    can_upload_images = serializers.ReadOnlyField(required=False)
+    can_upload_export_files = serializers.ReadOnlyField(required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
 
     class Meta:
@@ -76,13 +151,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url', 'username', 'password', 'email', 'groups',
                   'work_set', 'bookmark_set', 'userblocks_set', 'profile',
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
-                  'attributes')
+                  'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files', 'can_upload_images')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         require_invite = OurchiveSetting.objects.filter(
             name='Invite Only').first()
-        if require_invite.value == "True":
+        if convert_boolean(require_invite.value):
             invitation = Invitation.objects.filter(
                 invite_token=validated_data['invite_code']).first()
             if invitation.token_expiration.date() >= datetime.datetime.now().date():
@@ -102,12 +177,19 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             icon = validated_data['icon']
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
+        else:
+            attributes = None
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
             icon=icon,
             icon_alt_text=icon_alt_text
         )
+        try:
+            validate_password(validated_data['password'], user)
+        except ValidationError:
+            user.delete()
+            raise serializers.ValidationError({"password": ["Password not valid. Password must be at least 10 character, not a common password, not similar to user's information, and not all numbers."]}, 400)
         user.set_password(validated_data['password'])
         user.save()
         if attributes is not None:
@@ -386,8 +468,6 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Chapter
         fields = '__all__'
-        many = True
-        partial = True
 
     def update_word_count(self, chapter):
         word_count = 0
@@ -408,6 +488,8 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
             if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
                 validated_data['audio_url'] = ''
         chapter.update(**validated_data)
+        Work.objects.filter(id=chapter.first().work.id).update(
+            **{'zip_url': '', 'epub_url': ''})
         self.update_word_count(chapter.first())
         return chapter.first()
 
@@ -427,6 +509,19 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         return chapter
 
 
+class ChapterAllSerializer(serializers.Serializer):
+    work = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all())
+    user = serializers.HyperlinkedRelatedField(
+        view_name='user-detail', format='html', read_only=True)
+    id = serializers.IntegerField(read_only=True)
+    number = serializers.IntegerField()
+    title = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Chapter
+        fields = ['id', 'number', 'title', 'draft', 'work', 'user']
+
+
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
     user = serializers.SlugRelatedField(
@@ -437,6 +532,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     word_count = serializers.IntegerField(read_only=True)
     audio_length = serializers.IntegerField(read_only=True)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
 
     class Meta:
         model = Work
@@ -487,6 +583,9 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         if 'cover_url' in validated_data:
             if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
                 validated_data['cover_url'] = ''
+        # always create a fresh file
+        validated_data['epub_url'] = ''
+        validated_data['zip_url'] = ''
         Work.objects.filter(id=work.id).update(**validated_data)
         return Work.objects.filter(id=work.id).first()
 
@@ -514,7 +613,7 @@ class BookmarkWorkSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Work
-        fields = ['id', 'user', 'title', 'summary', 'work_link']
+        fields = ['id', 'user', 'title', 'summary', 'work_link', 'cover_url', 'cover_alt_text']
 
 
 class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
@@ -586,12 +685,33 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         return bookmark
 
 
+class BookmarkSummarySerializer(serializers.HyperlinkedModelSerializer):
+    work = serializers.SlugRelatedField(
+        queryset=Work.objects.all(), slug_field='title')
+    work_id = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all())
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    collection = serializers.HyperlinkedRelatedField(
+        view_name='bookmarkcollection-detail', queryset=BookmarkCollection.objects.all(), required=False, allow_null=True)
+    bookmark_id = serializers.HyperlinkedIdentityField(
+        view_name='work-detail', read_only=True)
+    id = serializers.ReadOnlyField()
+    tags = TagSerializer(many=True, required=False)
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+
+    class Meta:
+        model = Bookmark
+        fields = '__all__'
+
+
 class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
-    id = serializers.HyperlinkedIdentityField(
-        view_name='bookmarkcollection-detail', read_only=True)
+    id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    bookmarks_readonly = BookmarkSerializer(many=True, required=False, source='bookmarks')
+    bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), required=False, many=True)
 
     class Meta:
         model = BookmarkCollection
@@ -600,29 +720,66 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, bookmark, validated_data):
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
+            bookmark.tags.clear()
+            required_tag_types = list(TagType.objects.filter(required=True))
             for item in tags:
-                tag_id = item['text']
-                tag_type = item['tag_type_id']
+                tag_id = item['text'].lower()
+                tag_friendly_name = item['text']
+                tag_type = item['tag_type']
+                tag_type_id = TagType.objects.filter(label=tag_type).first().id
+                if tag_type in required_tag_types:
+                    if tag_id is None or tag_id == '':
+                        # todo: error
+                        return None
+                    else:
+                        required_tag_types.pop()
+
                 tag, created = Tag.objects.get_or_create(
-                    text=tag_id, tag_type=tag_type)
+                    text=tag_id, tag_type_id=tag_type_id)
+                if tag.display_text == '':
+                    tag.display_text = tag_friendly_name
+                    tag.save()
                 bookmark.tags.add(tag)
+            bookmark.save()
+        if 'bookmarks' in validated_data:
+            bookmarks = validated_data.pop('bookmarks')
+            bookmark = BookmarkCollection.objects.get(id=bookmark.id)
+            bookmark.bookmarks.clear()
+            for bookmark_child in bookmarks:
+                bookmark.bookmarks.add(bookmark_child)
             bookmark.save()
         BookmarkCollection.objects.filter(
             id=bookmark.id).update(**validated_data)
         return BookmarkCollection.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
-        bookmark = BookmarkCollection.objects.create(**validated_data)
+        bookmark_list = validated_data.pop('bookmarks') if 'bookmarks' in validated_data else []
+        tags = []
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
-            for item in tags:
-                tag_id = item['text']
-                tag_type = item['tag_type_id']
-                tag, created = Tag.objects.get_or_create(
-                    text=tag_id, tag_type=tag_type)
-                bookmark.tags.add(tag)
-        bookmark.save()
-        return bookmark
+        bookmark_collection = BookmarkCollection.objects.create(**validated_data)
+        for item in tags:
+            tag_id = item['text']
+            tag_type = item['tag_type_id']
+            tag, created = Tag.objects.get_or_create(
+                text=tag_id, tag_type=tag_type)
+            bookmark_collection.tags.add(tag)
+        for bookmark in bookmark_list:
+            bookmark_collection.bookmarks.add(bookmark)
+        bookmark_collection.save()
+        return bookmark_collection
+
+
+class BookmarkCollectionSummarySerializer(serializers.HyperlinkedModelSerializer):
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    id = serializers.ReadOnlyField()
+    tags = TagSerializer(many=True, required=False)
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+
+    class Meta:
+        model = BookmarkCollection
+        fields = '__all__'
 
 
 class InvitationSerializer(serializers.HyperlinkedModelSerializer):

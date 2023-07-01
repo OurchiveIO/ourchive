@@ -1,0 +1,119 @@
+{% extends 'index.html' %}
+{% block title %}Bookmark Collection - {{ bkcol.title }}{% endblock %}
+{% block content %}	
+{% load static %}
+<div class="uk-text-left uk-grid uk-width-expand" uk-grid id="bk-collection-uk-grid">
+	<script>
+		function loadMoreComments(next, chapterId) {
+			fetch(next)
+			  .then((response) => {
+			    return response.text();
+			  })
+			  .then((myText) => {			 
+				document.getElementById('bkcol-{{bkcol.id}}-comments-child-container').innerHTML = "";
+				document.getElementById('bkcol-{{bkcol.id}}-comments-child-container').innerHTML = myText;
+				document.getElementById('bkcol-{{bokcol.id}}-comments-child-container').scrollIntoView();
+			  });
+		}
+	</script>
+		{% if bkcol.header_url %}
+	   	<div id="bkcol-header-image" class="uk-width-1-1">
+	   		<img src="{{bkcol.header_url}}" title="{{bkcol.header_alt_text}}" alt="{{bkcol.header_alt_text}}" class="uk-align-center"/>
+	   	</div>
+	   	{% endif %}
+	   	<div id="bkcol-header-title" class="uk-width-2-3">
+	   		<h1 id="bkcol-header-h1" class="uk-heading">{{bkcol.title}}</h1>
+	   		{% if bkcol.draft %}
+	            <div id="bkcol-draft-badge" class="uk-width-auto uk-margin-bottom">
+	                <span id="bkcol-draft-span" class="uk-label uk-label-warning"><strong id="bkcol-draft-text">DRAFT</strong></span>
+	            </div>
+	        {% endif %}
+	        <p class="uk-article-meta">{{ bkcol.short_description }}</p>
+	   	</div>
+	   	<div class="uk-text-right uk-width-1-3" id="bkcol-user-controls-parent">
+	            {% if bkcol.user == request.user.username %}
+	            {% if bkcol.draft %}
+	            <a id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+	            {% endif %}
+	            <a id="bkcol-edit-link" href="/bookmark-collections/{{ bkcol.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
+	            <a id="bookmark-collection-delete-link" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a>
+	            {% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
+	            {% endif %}
+	    </div>
+	   	<div class="uk-margin-remove-bottom uk-width-1-1"><hr id="bkcol-title-hr"/></div>
+	   	<div id="bkcol-description-parent" class="uk-width-1-1">
+	   		<span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description|safe}}</span>
+	   	</div>
+	   	<div class="uk-width-1-1">
+	   		{% if bkcol.bookmarks_readonly %}
+	   		<div id="bkcol-bookmarks-parent" class="uk-position-relative uk-visible-toggle" tabindex="-1" uk-slideshow="animation: push" uk-slideshow>
+	   			<ul class="uk-slideshow-items">
+		   			{% for bookmark in bkcol.bookmarks_readonly %}
+		   			<li>
+			   			{% if bookmark.work.cover_url %}
+			            <img src="{{bookmark.work.cover_url}}" alt="{{bookmark.work.cover_alt_text}}" uk-cover>
+			            {% else %}
+			            <img src="{% static 'default_cover.jpg' %}" alt="Default blank cover" uk-cover>
+			            {% endif %}
+			            <div class="uk-overlay uk-overlay-default uk-position-center uk-position-small uk-text-center uk-dark">
+		                	<h3 class="uk-margin-remove"><a href="/bookmarks/{{bookmark.id}}">{{bookmark.work.title}}</h3></a> <span class="uk-text-meta"> by {{bookmark.work.user}}</span>
+		                	{% if bookmark.description %}
+		                		<p class="uk-margin-remove uk-width-medium uk-text-large"><a href="/bookmarks/{{bookmark.id}}">{{bookmark.user}} says:</a></p> 
+		                		<p class="uk-margin-remove uk-width-medium uk-text-left"><span style="transform: rotateY(0deg) rotate(180deg);opacity: .5" class="uk-inline" uk-icon="icon: quote-right; ratio: 3"></span></p>
+		            			<p class="uk-margin-remove uk-width-medium uk-text-center">{{bookmark.description|safe}}</p>
+		            			<p class="uk-margin-remove uk-width-medium uk-text-right"><span style="opacity: .5" class="uk-inline uk-" uk-icon="icon: quote-right; ratio: 3"></span></p>
+		            		{% endif %}
+	            		</div>
+		        	</li>
+		   			{% endfor %}
+	   			</ul>
+			   	<div class="uk-dark">
+			        <a class="uk-position-center-left uk-position-small uk-hidden-hover" href="#" uk-slidenav-previous uk-slideshow-item="previous"></a>
+			        <a class="uk-position-center-right uk-position-small uk-hidden-hover" href="#" uk-slidenav-next uk-slideshow-item="next"></a>
+			    </div>
+			</div>
+			{% endif %}
+		</div>
+		{% if settings.allowComments %}
+	    {% if comments.count > 0 %}<div id="bkcol-comments-toggle-grid" class="uk-width-1-1">
+	        <div id="bkcol-comments-toggle-row">
+	             <button id="bkcol-comments-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #bkcol-{{bkcol.id}}-comments">{{ comments.count}} Comments</button>    		
+	        </div>
+	    </div>
+	    {% else %}
+	    <div id="bkcol-comments-toggle-grid" class="uk-width-1-1">
+	        <div id="bkcol-comments-toggle-row">
+	             <span class="uk-button-text">0 Comments</span>    		
+	        </div>
+	    </div>
+	    {% endif %}
+	    <div class="uk-width-expand" id="bkcol-{{bkcol.id}}-comments" {% if not expand_comments %} hidden {% endif %} uk-grid>
+	        <div id="bkcol-{{bkcol.id}}-comments-child-container">
+	        		{% include "bookmark_comments.html" with post_action_url=bkcol.post_action_url edit_action_url=bkcol.edit_action_url next=comments.next next_params=comments.next_params prev_params=comments.prev_params comments=comments.results comment_count=comments.count top_level="true" depth=1 current_offset=comment_offset %}
+	        </div>
+	    </div>
+	    {% if user_can_comment %}
+	    <div id="bkcol-{{bkcol.id}}-new" class="uk-width-1-1">
+            <form action="/bkcols/{{bkcol.id}}/comments/new" method="post" class="uk-width-expand" id="bkcol-comment-form">
+                {% csrf_token %}
+                <div class="uk-width-1-1" id="bkcol-comment-form-parent">
+                	<input type="hidden" id="bkcol-comment-hidden-input" name="bkcol" value="{{ bkcol.id }}">
+                	<input type="hidden" id="bkcol-comment-count" name="bkcol_comment_count" value="{{comments.count}}"/>
+                	<textarea rows="5" class="uk-textarea" id="bkcol-comment-input" name="text"></textarea>
+                </div>
+                <div class="uk-width-1-1 uk-margin-top" id="bkcol-comment-post-parent">
+                	<button id="bkcol-comment-post-button" class="uk-button uk-button-default uk-align-right">Post Comment</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+        {% endif %}
+</div>
+{% if scroll_comment_id %}
+    <script>
+        window.onload = function(){
+            document.getElementById("bkcol-comment-{{scroll_comment_id}}-icon-div").scrollIntoView();
+        }
+    </script>
+{% endif %}
+{% endblock %}

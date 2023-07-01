@@ -1,0 +1,54 @@
+{% extends 'index.html' %}
+{% load i18n %} 
+{% block title %}{{ form_title }}{% endblock %}
+{% block content %}	
+<div class="uk-width-1-1 uk-text-left" id="user-report-parent-div"> 
+	<form class="uk-form-horizontal"  method="post" id="user-report-form">
+		{% csrf_token %}
+		<div id="user-report-buttons-top-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+			<div class="uk-width-1-2" id="report-user-header-parent">
+            	<span id="report-user-header-span" class="uk-text-large">Report User</span>
+        	</div>
+	        <div class="uk-text-right uk-width-1-2" id="user-form-buttons-container">
+	        	<input id="report-user-cancel" class="uk-button uk-width-small uk-button-danger" onclick="history.back()" value="Cancel"/>
+            	<button id="report-user-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+	            <input id="report-user-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
+	        </div>
+	    </div>
+        <hr id="user-form-fieldset-hr"/>
+		<input type="hidden" id="user-report-reported-user" name="reported_user" value="{{ reported_user }}">
+        <div class="uk-grid" uk-grid>
+            <div class="uk-width-1-1" id="report-user-parent">
+                <label id="report-user-label" class="uk-form-label" for="form-horizontal-text">User to report <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The user you are reporting. They will not be notified of your report.{% endblocktranslate %}</div>
+                </label>
+                <div class="uk-form-controls" id="report-user-controls">
+                    <p><input id="report-user-user" class="uk-input uk-width-small uk-disabled" value="{{ reported_user }}" disabled></p>
+                </div>
+            </div>
+            <div class="uk-width-1-1" id="report-user-reason-parent">
+                <label id="report-user-reason-label" class="uk-form-label" for="form-horizontal-text">Report Reason <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}These reasons are configured by your admin. Pick the one that most closely matches why you are reporting this user.{% endblocktranslate %}</div>
+                </label>
+                <div class="uk-form-controls" id="report-user-reason-controls">
+                    <select id="report-user-reason-select" class="uk-select uk-form-width-large" name="reason"> 
+                    {% for choice in report_reasons %}                   
+                        <option id="report-user-reason-{{choice}}">{{choice}}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="uk-width-1-1" id="report-reason-details-parent">
+                <label id="report-details-label" class="uk-form-label" for="form-horizontal-text">Additional Details <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Add any context for the report here. Reports are reviewed by site admins.{% endblocktranslate %}</div>
+                </label>
+                <div class="uk-form-controls" id="report-details-controls">
+                    <div class="uk-inline" id="report-details-inline">
+                        <textarea class="uk-textarea uk-form-width-large" id="report-details-text" name="details" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</form>
+</div>
+{% endblock %}

@@ -13,6 +13,14 @@
                 </div>
             </div>
         </div>
+        {% if captcha_site_key %}
+        {% if not request.user.is_authenticated %}
+        <div class="uk-width-1-1 uk-margin-top">
+            <div class="h-captcha" data-sitekey="{{captcha_site_key}}"></div>
+              <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+        </div>
+        {% endif %}
+        {% endif %}
         <div class="uk-width-1-1 uk-margin-top" id="post-comment-parent-div">
             <input id="post-comment-input" class="uk-button uk-button-default" type="submit" value="Post Comment"/>
         </div>

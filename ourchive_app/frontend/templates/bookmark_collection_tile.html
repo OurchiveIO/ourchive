@@ -1,0 +1,33 @@
+<div id="bkcol-tile-parent" class="uk-margin">
+	<div id="bkcol-tile-card" class="uk-card uk-card-default">
+	    <div id="bkcol-tile-header-parent" class="uk-card-header">
+	        <div id="bkcol-tile-header-grid" class="uk-grid-small uk-flex-middle" uk-grid>
+		        <div id="bkcol-tile-header-content" class="uk-width-expand">
+	                <a id="bkcol-tile-title-link" href="/bookmark-collections/{{bookmark_collection.id}}" class="uk-inline"><h3 id="bkcol-tile-title" class="uk-card-title uk-margin-remove-bottom">{{bookmark_collection.title}}</h3></a>
+	                <p id="bkcol-tile-creator" class="uk-text-meta uk-margin-remove-top">{{ bookmark_collection.user }}</p>
+		        </div>
+		    </div>
+		</div>
+		<div id="bkcol-tile-tags" class="uk-card-body">
+			<div id="bkcol-short-desc" class="uk-width-expand">
+				<p class="uk-text-medium">{{ bookmark_collection.short_description }}</p>
+			</div>
+			{% for type, tag in bookmark_collection.tags.items %} 
+		        <dt id="bk-tile-tag-type-{{type}}">{{ type }}</dt>
+		        <dd id="bk-tile-tag-container-{{type}}">
+		        <span id="bk-tile-tag-icon-{{type}}" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="bk-tile-tag-{{single_tag.id}}-link" href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.display_text|default_if_none:single_tag.text }}</a> {% endfor %}
+		        </dd>
+		    {% endfor %}
+		</div>
+	    <div class="uk-card-footer" id="bkcol-tile-footer-parent">
+	        <a id="bkcol-tile-readmore-link" href="/bookmark-collections/{{bookmark_collection.id}}" class="uk-button uk-button-text">Read more</a>
+	        {% if bookmark_collection.user == request.user.username %}
+	        <div id="bkcol-tile-actions-parent" class="uk-align-right">
+	            <a id="bkcol-tile-edit-link" href="/bookmark-collections/{{bookmark_collection.id}}/edit"><span id="bkcol-tile-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
+	            <a id="bkcol-tile-delete-link" uk-toggle="target: #bookmark-collection-{{bookmark_collection.id}}-modal-delete"><span uk-icon="icon: trash" id="bkcol-tile-delete-span" title="Delete"></span> </a>
+		    <p>{% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bookmark_collection.id %}</p>
+	        </div>
+	        {% endif %}
+	    </div>
+	</div>  
+</div>
