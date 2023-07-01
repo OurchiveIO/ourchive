@@ -74,6 +74,8 @@ class UserAllowsBookmarkComments(permissions.BasePermission):
             return True
         if request.user.is_superuser:
             return True
+        if 'bookmark' not in request.data:
+            return False
         bookmark = Bookmark.objects.filter(id=request.data['bookmark']).first()
         return (bookmark.comments_permitted and Common.user_is_blocked(bookmark.user.id, request.user.id) is False)
 
