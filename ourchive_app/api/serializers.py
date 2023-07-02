@@ -388,7 +388,7 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
-    user = CommentUserSerializer()
+    user = CommentUserSerializer(read_only=True)
     replies = RecursiveField(many=True, required=False)
     id = serializers.ReadOnlyField()
     parent_comment = serializers.PrimaryKeyRelatedField(

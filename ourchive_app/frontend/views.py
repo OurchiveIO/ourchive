@@ -1192,10 +1192,15 @@ def render_bookmark_comments(request, pk):
 	comments = do_get(f'api/bookmarks/{pk}/comments?limit={limit}&offset={offset}', request, 'Bookmark Comments').response_data
 	post_action_url = f"/bookmarks/{pk}/comments/new"
 	edit_action_url = f"""/bookmarks/{pk}/comments/edit"""
-	return render(request, 'bookmark_comments.html', {
+	return render(request, 'comments.html', {
 		'comments': comments['results'],
 		'current_offset': comments['current'],
 		'bookmark': {'id': pk},
+		'load_more_base': f"/bookmarks/{pk}",
+		'view_thread_base': f"/bookmarks/{pk}",
+		'delete_obj': 'bookmark-comment',
+		'object_name': 'bookmark',
+		'object': {'id': pk},
 		'top_level': 'true',
 		'depth': int(depth),
 		'comment_count': comments['count'],
@@ -1361,10 +1366,13 @@ def bookmark(request, pk):
 		bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new"
 		bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit"""
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
+	bookmark['new_action_url'] = f"/bookmarks/{pk}/comments/new"
 	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
 	return render(request, 'bookmark.html', {
 		'bookmark': bookmark,
+		'load_more_base': f"/bookmarks/{pk}",
+		'view_thread_base': f"/bookmarks/{pk}",
 		'tags': tags,
 		'comment_offset': comment_offset,
 		'scroll_comment_id': scroll_comment_id,

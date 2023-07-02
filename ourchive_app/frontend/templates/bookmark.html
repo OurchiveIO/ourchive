@@ -70,48 +70,14 @@
 		    </dl>
 		    {% if settings.AllowComments %}<hr id="bookmark-comments-hr" class="uk-divider-small"/>{% endif %}
 	    {% endif %}
-	    {% if settings.AllowComments %}
-	    <div id="bookmark-comments-toggle-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
-	        <div id="bookmark-comments-toggle-row">
-	             <button id="bookmark-comments-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #bookmark-{{bookmark.id}}-comments">{{ comments.count}} Comments</button>    		
-	        </div>
-	    </div>
-	    <div class="uk-child-width-expand" id="bookmark-{{bookmark.id}}-comments" {% if not expand_comments %} hidden {% endif %} uk-grid>
-	        <div id="bookmark-{{bookmark.id}}-comments-child-container">
-	        		{% include "bookmark_comments.html" with post_action_url=bookmark.post_action_url edit_action_url=bookmark.edit_action_url next=comments.next next_params=comments.next_params prev_params=comments.prev_params comments=comments.results comment_count=comments.count top_level="true" depth=1 current_offset=comment_offset %}
-	        </div>
-	    </div>
-	    {% if user_can_comment %}
-	    <div id="bookmark-{{bookmark.id}}-new">
-            <form action="/bookmarks/{{bookmark.id}}/comments/new" method="post" class="uk-form uk-grid-small" id="bookmark-comment-form" uk-grid>
-                {% csrf_token %}
-                <label id="post-new-comment-label" class="uk-form-label uk-text-large" for="form-horizontal-text">New Comment</label>
-                <div class="uk-width-1-1" id="bookmark-comment-form-parent">
-                	<input type="hidden" id="bookmark-comment-hidden-input" name="bookmark" value="{{ bookmark.id }}">
-                	<input type="hidden" id="bookmark-comment-count" name="bookmark_comment_count" value="{{comments.count}}"/>
-                	<textarea rows="5" class="uk-textarea" id="bookmark-comment-input" name="text"></textarea>
-                </div>
-                {% if captcha_site_key %}
-		        {% if not request.user.is_authenticated %}
-		        <div class="uk-width-1-1 uk-margin-top">
-		            <div class="h-captcha" data-sitekey="{{captcha_site_key}}"></div>
-		              <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-		        </div>
-		        {% endif %}
-		        {% endif %}
-                <div class="uk-width-1-1" id="bookmark-comment-post-parent">
-                	<button id="bookmark-comment-post-button" class="uk-button uk-button-default uk-align-right">Post Comment</button>
-                </div>
-            </form>
-        </div>
-        {% endif %}
-        {% endif %}
+	    {{bookmark.comments}}
+	    {% include 'comments_parent.html' with object_name='bookmark' comments=comments object=bookmark edit_action_url=bookmark.edit_action_url post_action_url=bookmark.post_action_url comment_offset=comment_offset delete_obj='bookmark-comment' load_more_base=load_more_base view_thread_base=view_thread_base %}
 	</article>
 	</div>
 	{% if scroll_comment_id %}
 	    <script>
 	        window.onload = function(){
-	            document.getElementById("bk-comment-{{scroll_comment_id}}-icon-div").scrollIntoView();
+	            document.getElementById("bookmark-comment-{{scroll_comment_id}}-icon-div").scrollIntoView();
 	        }
 	    </script>
 {% endif %}

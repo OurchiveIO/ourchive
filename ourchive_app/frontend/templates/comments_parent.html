@@ -3,7 +3,7 @@
         <div id="{{object_name}}-comments-load-div">
              <button id="{{object_name}}-comments-load-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #{{object_name}}-{{object.id}}-comments">{{ comments.count}} Comment(s)</button>    		
         </div>
-    </div>  
+    </div>
     <div id="{{object_name}}-{{object.id}}-comments" {% if not expand_comments %} hidden {% endif %} class="uk-child-width-expand" uk-grid>
         <div id="{{object_name}}-{{object.id}}-comments-child-container" uk-width-1-1>
         	{% include "comments.html" with post_action_url=post_action_url edit_action_url=edit_action_url next=comments.next next_params=comments.next_params prev_params=comments.prev_params comments=comments.results comment_count=comments.count top_level="true" current_offset=comment_offset depth=0 object=object object_name=object_name delete_obj=delete_obj load_more_base=load_more_base root_obj_id=root_obj_id view_thread_base=view_thread_base %}     
@@ -16,7 +16,7 @@
             <label id="post-new-comment-label" class="uk-form-label uk-text-large" for="form-horizontal-text">New Comment</label>
             <div id="{{object_name}}-comment-id-div" class="uk-width-1-1">
             	<input type="hidden" id="{{object_name}}-comment-id-hidden" name="{{object_name}}" value="{{ object.id }}">
-            	<input type="hidden" id="{{object_name}}-comment-count" name="{{object_name}}_comment_count" value="{{comments.count}}"/>
+            	<input type="hidden" id="{{object_name}}-comment-count" name="{{object_name}}_comment_count" value="{{comments.count|default:0}}"/>
             	<textarea id="{{object_name}}-comment-textarea" rows="5" class="uk-textarea" id="text" name="text"></textarea>
             </div>
             {% if captcha_site_key %}
