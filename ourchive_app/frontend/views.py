@@ -970,21 +970,24 @@ def bookmark_collection(request, pk):
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
 		comment_id = request.GET.get('comment_thread')
-		comments = do_get(f"api/bookmarkcomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
+		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
 		comment_offset = 0
 		comments = {'results': [comments], 'count': request.GET.get('comment_count')}
-		bookmark_collection['post_action_url'] = f"/bookmarkcollections/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
-		bookmark_collection['edit_action_url'] = f"""/bookmarkcollections/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
+		bookmark_collection['post_action_url'] = f"/bookmark-collections/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
+		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
 	else:
 		comments = do_get(f'api/bookmarkcollections/{pk}/comments?limit=10&offset={comment_offset}', request, 'Bookmark Collection Comments').response_data
-		bookmark_collection['post_action_url'] = f"/bookmarkcollections/{pk}/comments/new"
-		bookmark_collection['edit_action_url'] = f"""/bookmarkcollections/{pk}/comments/edit"""
+		bookmark_collection['post_action_url'] = f"/bookmark-collections/{pk}/comments/new"
+		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit"""
 	for bookmark in bookmark_collection['bookmarks_readonly']:
 		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '').replace('<br/>', '', 1)
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
 	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
+	bookmark_collection['new_action_url'] = f"/bookmark-collections/{pk}/comments/new"
 	return render(request, 'bookmark_collection.html', {
+		'load_more_base': f"/bookmark-collections/{pk}",
+		'view_thread_base': f"/bookmark-collections/{pk}",
 		'bkcol': bookmark_collection,
 		'tags': tags,
 		'comment_offset': comment_offset,
@@ -1197,6 +1200,16 @@ def render_chapter_comments(request, work_id, chapter_id, chapter_offset):
 		'chapter-comment', post_action_url, edit_action_url, work_id, {'chapter-offset': chapter_offset})
 
 
+def render_collection_comments(request, pk):
+	post_action_url = f'/bookmark-collections/{pk}/comments/new'
+	edit_action_url = f'/bookmark-collections/{pk}/comments/edit'
+	get_comment_base = f'api/bookmarkcollections/{pk}'
+	common_base = f'/bookmark-collections/{pk}'
+	return render_comments_common(
+		request, get_comment_base, 'collection', pk, common_base, common_base,
+		'collection-comment', post_action_url, edit_action_url)
+
+
 def render_bookmark_comments(request, pk):
 	common_base = f"/bookmarks/{pk}"
 	get_comment_base = f'api/bookmarks/{pk}'
@@ -1308,6 +1321,24 @@ def edit_bookmark_comment(request, pk):
 
 def delete_bookmark_comment(request, pk, comment_id):
 	return delete_comment_common(request, f'/bookmarks/{pk}', 'bookmark', comment_id)
+
+
+def create_collection_comment(request, pk):
+	captcha_redirect_url = f'/bookmark-collections/{pk}/'
+	object_name = 'collection'
+	redirect_url = f'/bookmark-collections/{pk}/?'
+	return create_comment_common(request, captcha_redirect_url, object_name, redirect_url, redirect_url)
+
+
+def edit_collection_comment(request, pk):
+	object_name = 'collection'
+	error_redirect = f'/bookmark-collections/{pk}'
+	redirect_url = f'/bookmark-collections/{pk}/?'
+	return edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url)
+
+
+def delete_collection_comment(request, pk, comment_id):
+	return delete_comment_common(request, f'/bookmark-collections/{pk}', 'collection', comment_id)
 
 
 def bookmarks(request):

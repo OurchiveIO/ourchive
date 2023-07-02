@@ -3,6 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def custom_exception_handler(exc, context):
     logger.warning(exc)
 

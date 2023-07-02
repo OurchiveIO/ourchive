@@ -70,7 +70,6 @@
 		    </dl>
 		    {% if settings.AllowComments %}<hr id="bookmark-comments-hr" class="uk-divider-small"/>{% endif %}
 	    {% endif %}
-	    {{bookmark.comments}}
 	    {% include 'comments_parent.html' with object_name='bookmark' comments=comments object=bookmark edit_action_url=bookmark.edit_action_url post_action_url=bookmark.post_action_url comment_offset=comment_offset delete_obj='bookmark-comment' load_more_base=load_more_base view_thread_base=view_thread_base %}
 	</article>
 	</div>

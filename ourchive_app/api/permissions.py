@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from api.models import OurchiveSetting, Chapter, UserBlocks, Bookmark
+from api.models import OurchiveSetting, Chapter, UserBlocks, Bookmark, BookmarkCollection
 from django.contrib.auth.models import AnonymousUser
 
 
@@ -87,6 +87,46 @@ class UserAllowsBookmarkComments(permissions.BasePermission):
 
 
 class UserAllowsBookmarkAnonComments(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if request.user.is_superuser:
+            return True
+        if isinstance(request.user, AnonymousUser):
+            bookmark = Bookmark.objects.filter(id=request.data['bookmark']).first()
+            return bookmark.anon_comments_permitted
+        else:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if isinstance(request.user, AnonymousUser):
+            bookmark = Bookmark.objects.filter(id=request.data['bookmark']).first()
+            return bookmark.anon_comments_permitted
+        else:
+            return True
+
+
+class UserAllowsCollectionComments(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if request.user.is_superuser:
+            return True
+        if 'collection' not in request.data:
+            return False
+        collection = BookmarkCollection.objects.filter(id=request.data['collection']).first()
+        return (collection.comments_permitted and Common.user_is_blocked(collection.user.id, request.user.id) is False)
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        collection = BookmarkCollection.objects.filter(id=request.data['collection']).first()
+        return (collection.comments_permitted and Common.user_is_blocked(collection.user.id, request.user.id) is False)
+
+
+class UserAllowsCollectionAnonComments(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True

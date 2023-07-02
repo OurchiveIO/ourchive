@@ -8,12 +8,14 @@ from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
     NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, \
     UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
     ChapterAllSerializer, UserReportSerializer, UserSubscriptionSerializer, \
-    BookmarkSummarySerializer, BookmarkCollectionSummarySerializer
+    BookmarkSummarySerializer, BookmarkCollectionSummarySerializer, CollectionCommentSerializer
 from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
     NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
-    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription
-from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted
+    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment
+from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
+    UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
+    UserAllowsCollectionComments, UserAllowsCollectionAnonComments
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
@@ -806,6 +808,46 @@ class BookmarkCommentList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return BookmarkComment.objects.get_queryset().order_by('id')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CollectionCommentList(generics.ListCreateAPIView):
+    serializer_class = CollectionCommentSerializer
+    permission_classes = [UserAllowsCollectionComments, UserAllowsCollectionAnonComments]
+
+    def get_queryset(self):
+        return CollectionComment.objects.get_queryset().order_by('id')
+
+    def perform_create(self, serializer):
+        print("hewwo")
+        serializer.save(user=self.request.user)
+
+
+class CollectionCommentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CollectionComment.objects.get_queryset().order_by('id')
+    serializer_class = CollectionCommentSerializer
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def perform_destroy(self, instance):
+        instance.collection.comment_count = instance.collection.comment_count - 1
+        instance.collection.comment_count = instance.collection.comment_count - 1
+        instance.collection.save()
+        if instance.parent_comment is not None:
+            instance.user = None
+            instance.text = "This comment has been deleted."
+            instance.save()
+        else:
+            instance.delete()
+
+
+class BookmarkCollectionCommentDetail(generics.ListCreateAPIView):
+    serializer_class = CollectionCommentSerializer
+    permission_classes = [UserAllowsCollectionComments, UserAllowsCollectionAnonComments]
+
+    def get_queryset(self):
+        return CollectionComment.objects.filter(collection__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

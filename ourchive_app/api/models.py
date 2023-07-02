@@ -334,6 +334,20 @@ class ChapterComment(Comment):
         return '<ChapterComment: {}>'.format(self.id)
 
 
+class CollectionComment(Comment):
+
+    __tablename__ = 'collection_comments'
+
+    collection = models.ForeignKey(
+        'BookmarkCollection',
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+
+    def __repr__(self):
+        return '<CollectionComment: {}>'.format(self.id)
+
+
 class Tag(models.Model):
 
     __tablename__ = 'tags'
@@ -404,6 +418,7 @@ class BookmarkCollection(models.Model):
     draft = models.BooleanField(default=False)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
+    comment_count = models.IntegerField(default=0)
 
     user = models.ForeignKey(
         User,

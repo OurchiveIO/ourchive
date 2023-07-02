@@ -10,7 +10,7 @@
         </div>    
     </div>
     {% if user_can_comment %}
-     <div id="{{object_name}}-{{object.id}}-new">
+     <div id="{{object_name}}-{{object.id}}-new" class="uk-width-1-1 uk-margin-top">
         <form id="{{object_name}}-comment-form" action="{{object.new_action_url}}" method="post" class="uk-form uk-grid-small" uk-grid>
             {% csrf_token %}
             <label id="post-new-comment-label" class="uk-form-label uk-text-large" for="form-horizontal-text">New Comment</label>

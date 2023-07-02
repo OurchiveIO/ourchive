@@ -7,7 +7,7 @@ from api.models import Work, Tag, Chapter, TagType, WorkType, \
     Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, \
     NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
     Invitation, AttributeType, AttributeValue, User, ContentPage, UserReport, \
-    UserReportReason, UserSubscription
+    UserReportReason, UserSubscription, CollectionComment
 import datetime
 import logging
 from django.conf import settings
@@ -421,6 +421,49 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         user.save()
         comment.bookmark.comment_count = comment.bookmark.comment_count + 1
         comment.bookmark.save()
+        return comment
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['text'] = nh3.clean(ret['text'])
+        return ret
+
+
+class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
+    user = CommentUserSerializer(read_only=True)
+    replies = RecursiveField(many=True, required=False)
+    id = serializers.ReadOnlyField()
+    parent_comment = serializers.PrimaryKeyRelatedField(
+        queryset=CollectionComment.objects.all(), required=False, allow_null=True)
+    collection = serializers.PrimaryKeyRelatedField(
+        queryset=BookmarkCollection.objects.all(), required=False)
+
+    class Meta:
+        model = CollectionComment
+        fields = '__all__'
+
+    def update(self, comment, validated_data):
+        if isinstance(serializers.CurrentUserDefault(), AnonymousUser):
+            validated_data.pop('user')
+        CollectionComment.objects.filter(id=comment.id).update(**validated_data)
+        return CollectionComment.objects.filter(id=comment.id).first()
+
+    def create(self, validated_data):
+        if 'user' in validated_data and isinstance(validated_data['user'], AnonymousUser):
+            validated_data.pop('user')
+        validated_data['text'] = nh3.clean(validated_data['text'])
+        print(validated_data)
+        comment = CollectionComment.objects.create(**validated_data)
+        user = User.objects.filter(id=comment.collection.user.id).first()
+        notification_type = NotificationType.objects.filter(
+            type_label="Comment Notification").first()
+        notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Collection Comment",
+                                                   content=f"""A new comment has been left on your collection! <a href='/bookmark-collections/{comment.collection.id}'>Click here</a> to view.""")
+        notification.save()
+        user.has_notifications = True
+        user.save()
+        comment.collection.comment_count = comment.collection.comment_count + 1
+        comment.collection.save()
         return comment
 
     def to_representation(self, instance):
