@@ -69,7 +69,7 @@ urlpatterns = [
     path('users/<str:username>/subscriptions/collections', views.user_collection_subscriptions, name='fe-user-collection-subscriptions'),
     path('works/<int:work_id>/chapters/<int:id>/edit', views.edit_chapter),
     path('works/<int:work_id>/chapters/new', views.new_chapter),
-    path('works/<int:work_id>/chapters/<int:chapter_id>/<int:chapter_offset>/comments', views.render_comments),
+    path('works/<int:work_id>/chapters/<int:chapter_id>/<int:chapter_offset>/comments', views.render_chapter_comments),
     path('works/<int:work_id>/chapters/<int:chapter_id>/comments/new', views.create_chapter_comment),
     path('works/<int:work_id>/chapters/<int:chapter_id>/comments/edit', views.edit_chapter_comment),
     path('works/<int:work_id>/chapters/<int:chapter_id>/comments/<int:comment_id>/delete', views.delete_chapter_comment, name='delete-chapter-comment'),

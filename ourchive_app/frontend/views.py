@@ -1156,182 +1156,154 @@ def work(request, pk, chapter_offset=0):
 		'next_chapter': f'/works/{pk}?offset={chapter_offset + 1}' if 'next' in chapter_response and chapter_response['next'] else None,
 		'previous_chapter': f'/works/{pk}?offset={chapter_offset - 1}' if 'previous' in chapter_response and chapter_response['previous'] else None,})
 
-
-def render_comments(request, work_id, chapter_id, chapter_offset):
+def render_comments_common(request, get_comment_base, object_name, object_id, load_more_base, view_thread_base,
+		delete_obj, post_action_url, edit_action_url, root_obj_id=None, additional_params={}):
 	limit = request.GET.get('limit', '')
 	offset = request.GET.get('offset', '')
 	depth = request.GET.get('depth', 0)
-	comments = do_get(f'api/chapters/{chapter_id}/comments?limit={limit}&offset={offset}', request, 'Chapter Comments').response_data
-	post_action_url = f"/works/{work_id}/chapters/{chapter_id}/comments/new?offset={chapter_offset}"
-	edit_action_url = f"""/works/{work_id}/chapters/{chapter_id}/comments/edit?offset={chapter_offset}"""
-	return render(request, 'comments.html', {
+	comments = do_get(f'{get_comment_base}/comments?limit={limit}&offset={offset}', request, 'Comments').response_data
+	response_dict = {
 		'comments': comments['results'],
 		'current_offset': comments['current'],
 		'top_level': 'true',
 		'depth': int(depth),
-		'chapter_offset': chapter_offset,
-		'chapter': {'id': chapter_id},
-		'load_more_base': f"/works/{work_id}/chapters/{chapter_id}/{chapter_offset}",
+		 object_name: {'id': object_id},
+		'load_more_base': load_more_base,
 		'comment_count': comments['count'],
-		'view_thread_base': f"/works/{work_id}/{chapter_offset}",
-		'delete_obj': 'chapter-comment',
-		'root_obj_id': work_id,
-		'object_name': 'chapter',
-		'object': {'id': chapter_id},
+		'view_thread_base': view_thread_base,
+		'delete_obj': delete_obj,
+		'object_name': object_name,
+		'object': {'id': object_id},
 		'next_params': comments['next_params'],
 		'prev_params': comments['prev_params'],
-		'work': {'id': work_id},
 		'post_action_url': post_action_url,
-		'edit_action_url': edit_action_url})
+		'edit_action_url': edit_action_url
+	}
+	if root_obj_id:
+		response_dict['root_obj_id'] = root_obj_id
+	response_dict = response_dict | additional_params
+	print(response_dict)
+	return render(request, 'comments.html', response_dict)
+
+
+def render_chapter_comments(request, work_id, chapter_id, chapter_offset):
+	post_action_url = f"/works/{work_id}/chapters/{chapter_id}/comments/new?offset={chapter_offset}"
+	edit_action_url = f"""/works/{work_id}/chapters/{chapter_id}/comments/edit?offset={chapter_offset}"""
+	get_comment_base = f'api/chapters/{chapter_id}'
+	view_thread_base = f"/works/{work_id}/{chapter_offset}"
+	load_more_base = f"/works/{work_id}/chapters/{chapter_id}/{chapter_offset}"
+	return render_comments_common(request, get_comment_base, 'chapter', chapter_id, load_more_base, view_thread_base,
+		'chapter-comment', post_action_url, edit_action_url, work_id, {'chapter-offset': chapter_offset})
 
 
 def render_bookmark_comments(request, pk):
-	limit = request.GET.get('limit', '')
-	offset = request.GET.get('offset', '')
-	depth = request.GET.get('depth', 0)
-	comments = do_get(f'api/bookmarks/{pk}/comments?limit={limit}&offset={offset}', request, 'Bookmark Comments').response_data
-	post_action_url = f"/bookmarks/{pk}/comments/new"
-	edit_action_url = f"""/bookmarks/{pk}/comments/edit"""
-	return render(request, 'comments.html', {
-		'comments': comments['results'],
-		'current_offset': comments['current'],
-		'bookmark': {'id': pk},
-		'load_more_base': f"/bookmarks/{pk}",
-		'view_thread_base': f"/bookmarks/{pk}",
-		'delete_obj': 'bookmark-comment',
-		'object_name': 'bookmark',
-		'object': {'id': pk},
-		'top_level': 'true',
-		'depth': int(depth),
-		'comment_count': comments['count'],
-		'next_params': comments['next_params'],
-		'prev_params': comments['prev_params'],
-		'post_action_url': post_action_url,
-		'edit_action_url': edit_action_url})
+	common_base = f"/bookmarks/{pk}"
+	get_comment_base = f'api/bookmarks/{pk}'
+	post_action_url = f'/bookmarks/{pk}/comments/new'
+	edit_action_url = f'/bookmarks/{pk}/comments/edit'
+	return render_comments_common(request, get_comment_base, 'bookmark', pk, common_base, common_base,
+		'bookmark-comment', post_action_url, edit_action_url)
+
+
+def create_comment_common(request, captcha_fail_redirect, object_name, redirect_url, redirect_url_threaded):
+	if not request.method == 'POST':
+		return None
+	if not request.user.is_authenticated:
+		if settings.USE_CAPTCHA:
+			captcha_passed = validate_captcha(request)
+			if not captcha_passed:
+				messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.', 'captcha-fail-error')
+				return redirect(captcha_fail_redirect)
+	comment_dict = request.POST.copy()
+	comment_count = int(request.POST.get(f'{object_name}_comment_count'))
+	comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
+	if comment_count > 10 and request.POST.get('parent_comment') is None:
+		comment_offset = int(int(request.POST.get(f'{object_name}_comment_count')) / 10) * 10
+	elif comment_count > 10 and request.POST.get('parent_comment') is not None:
+		comment_offset = request.POST.get('parent_comment_next')
+	else:
+		comment_offset = 0
+	if request.user.is_authenticated:
+		comment_dict["user"] = str(request.user)
+	else:
+		comment_dict["user"] = None
+	response = do_post(f'api/{object_name}comments/', request, data=comment_dict, object_name='Comment')
+	comment_id = response.response_data['id'] if 'id' in response.response_data else None
+	redirect_url = f'{redirect_url}expandComments=true&scrollCommentId={comment_id}&comment_offset={comment_offset}'
+	redirect_url_threaded = f'{redirect_url_threaded}expandComments=true&scrollCommentId={comment_id}&comment_thread={comment_thread}&comment_count={comment_count}'
+	process_message(request, response)
+	if comment_thread is None:
+		return redirect(redirect_url)
+	else:
+		return redirect(redirect_url_threaded)
+
+def edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url_threaded):
+	if not request.method == 'POST':
+		messages.add_message(request, messages.ERROR, _('Invalid URL.'), f'{object_name}-comment-edit-not-found')
+		return redirect(error_redirect)
+	comment_dict = request.POST.copy()
+	comment_count = int(request.POST.get(f'{object_name}_comment_count'))
+	comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
+	if comment_count > 10 and request.POST.get('parent_comment_val') is None:
+		comment_offset = int(int(request.POST.get(f'{object_name}_comment_count')) / 10) * 10
+	elif comment_count > 10 and request.POST.get('parent_comment_val') is not None:
+		comment_offset = request.POST.get('parent_comment_next')
+	else:
+		comment_offset = 0
+	comment_dict.pop('parent_comment_val')
+	if request.user.is_authenticated:
+		comment_dict["user"] = str(request.user)
+	else:
+		comment_dict["user"] = None
+	response = do_patch(f"api/{object_name}comments/{comment_dict['id']}/", request, data=comment_dict, object_name='Comment')
+	process_message(request, response)
+	redirect_url = f'{redirect_url}expandComments=true&scrollCommentId={comment_dict["id"]}&comment_offset={comment_offset}'
+	if comment_thread is None:
+		return redirect(redirect_url)
+	else:
+		redirect_url_threaded = f'{redirect_url_threaded}expandComments=true&scrollCommentId={comment_dict["id"]}&offset={offset_url}&comment_thread={comment_thread}&comment_count={comment_count}'
+		return redirect(redirect_url_threaded)
+
+def delete_comment_common(request, redirect_url, object_name, comment_id):
+	response = do_delete(f'api/{object_name}comments/{comment_id}/', request, 'Comment')
+	process_message(request, response)
+	return redirect(redirect_url)
 
 
 def create_chapter_comment(request, work_id, chapter_id):
-	if request.method == 'POST':
-		if not request.user.is_authenticated:
-			if settings.USE_CAPTCHA:
-				captcha_passed = validate_captcha(request)
-				if not captcha_passed:
-					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.', 'captcha-fail-error')
-					return redirect(f"/works/{work_id}/")
-		comment_dict = request.POST.copy()
-		offset_url = int(request.GET.get('offset', 0))
-		comment_count = int(request.POST.get('chapter_comment_count'))
-		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
-		if comment_count > 10 and request.POST.get('parent_comment') is None:
-			comment_offset = int(int(request.POST.get('chapter_comment_count')) / 10) * 10
-		elif comment_count > 10 and request.POST.get('parent_comment') is not None:
-			comment_offset = request.POST.get('parent_comment_next')
-		else:
-			comment_offset = 0
-		if request.user.is_authenticated:
-			comment_dict["user"] = str(request.user)
-		else:
-			comment_dict["user"] = None
-		response = do_post(f'api/comments/', request, data=comment_dict, object_name='Comment')
-		comment_id = response.response_data['id'] if 'id' in response.response_data else None
-		process_message(request, response)
-		if comment_thread is None:
-			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_id}&offset={offset_url}&comment_offset={comment_offset}&comment_offset_chapter={chapter_id}")
-		else:
-			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_id}&offset={offset_url}&comment_thread={comment_thread}&comment_count={comment_count}")
+	captcha_redirect_url = f'/works/{work_id}/'
+	object_name = 'chapter'
+	redirect_url = f'/works/{work_id}/{int(request.GET.get("offset", 0))}?'
+	return create_comment_common(request, captcha_redirect_url, object_name, redirect_url, redirect_url)
 
 
 def edit_chapter_comment(request, work_id, chapter_id):
-	if request.method == 'POST':
-		comment_dict = request.POST.copy()
-		offset_url = int(request.GET.get('offset', 0))
-		comment_count = int(request.POST.get('chapter_comment_count'))
-		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
-		if comment_count > 10 and request.POST.get('parent_comment_val') is None:
-			comment_offset = int(int(request.POST.get('chapter_comment_count')) / 10) * 10
-		elif comment_count > 10 and request.POST.get('parent_comment_val') is not None:
-			comment_offset = request.POST.get('parent_comment_next')
-		else:
-			comment_offset = 0
-		comment_dict.pop('parent_comment_val')
-		if request.user.is_authenticated:
-			comment_dict["user"] = str(request.user)
-		else:
-			comment_dict["user"] = None
-		response = do_patch(f"api/comments/{comment_dict['id']}/", request, data=comment_dict, object_name='Comment')
-		process_message(request, response)
-		if comment_thread is None:
-			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_dict['id']}&offset={offset_url}&comment_offset={comment_offset}&comment_offset_chapter={chapter_id}")
-		else:
-			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_dict['id']}&offset={offset_url}&comment_thread={comment_thread}&comment_count={comment_count}")
-	else:
-		messages.add_message(request, messages.ERROR, _('Invalid URL.'), 'chapter-comment-edit-not-found')
-		return redirect(f'/works/{work_id}')
+	object_name = 'chapter'
+	redirect_url = f'/works/{work_id}/{int(request.GET.get("offset", 0))}?'
+	error_redirect = f'/works/{work_id}'
+	return edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url)
 
 
 def delete_chapter_comment(request, work_id, chapter_id, comment_id):
-	response = do_delete(f'api/comments/{comment_id}/', request, 'Chapter Comment')
-	process_message(request, response)
-	return redirect(f'/works/{work_id}')
+	return delete_comment_common(request, f'/works/{work_id}/chapters/{chapter_id}', 'chapter', comment_id)
 
 
 def create_bookmark_comment(request, pk):
-	if request.method == 'POST':
-		if not request.user.is_authenticated:
-			if settings.USE_CAPTCHA:
-				captcha_passed = validate_captcha(request)
-				if not captcha_passed:
-					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.', 'bookmark-comment-captcha-error')
-					return redirect(f"/bookmarks/{pk}/")
-		comment_dict = request.POST.copy()
-		comment_count = int(request.POST.get('bookmark_comment_count'))
-		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
-		if comment_count > 10 and request.POST.get('parent_comment') is None:
-			comment_offset = int(int(request.POST.get('bookmark_comment_count')) / 10) * 10
-		elif comment_count > 10 and request.POST.get('parent_comment') is not None:
-			comment_offset = request.POST.get('parent_comment_next')
-		else:
-			comment_offset = 0
-		if request.user.is_authenticated:
-			comment_dict["user"] = str(request.user)
-		else:
-			comment_dict["user"] = None
-		response = do_post(f'api/bookmarkcomments/', request, data=comment_dict, object_name='Bookmark Comment')
-		comment_id = response.response_data['id'] if 'id' in response.response_data else None
-		process_message(request, response)
-		if comment_thread is None:
-			return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_id}&comment_offset={comment_offset}")
-		else:
-			return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_id}&comment_thread={comment_thread}&comment_count={comment_count}")
+	captcha_redirect_url = f'/bookmarks/{pk}/'
+	object_name = 'bookmark'
+	redirect_url = f'/bookmarks/{pk}/?'
+	return create_comment_common(request, captcha_redirect_url, object_name, redirect_url, redirect_url)
 
 
 def edit_bookmark_comment(request, pk):
-	if request.method == 'POST':
-		comment_dict = request.POST.copy()
-		comment_count = int(request.POST.get('bookmark_comment_count'))
-		if comment_count > 10 and request.POST.get('parent_comment_val') is None:
-			comment_offset = int(int(request.POST.get('bookmark_comment_count')) / 10) * 10
-		elif comment_count > 10 and request.POST.get('parent_comment_val') is not None:
-			comment_offset = request.POST.get('parent_comment_next')
-		else:
-			comment_offset = 0
-		comment_dict.pop('parent_comment_val')
-		if request.user.is_authenticated:
-			comment_dict["user"] = str(request.user)
-		else:
-			comment_dict["user"] = None
-		response = do_patch(f"api/bookmarkcomments/{comment_dict['id']}/", request, data=comment_dict, object_name='Bookmark Comment')
-		process_message(request, response)
-		return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_dict['id']}&comment_offset={comment_offset}")
-	else:
-		messages.add_message(request, messages.ERROR, '404 Page Not Found', 'bookmark-comment-not-found-error')
-		return redirect(f'/bookmarks/{pk}')
+	object_name = 'bookmark'
+	error_redirect = f'/bookmarks/{pk}'
+	redirect_url = f'/bookmarks/{pk}/?'
+	return edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url)
 
 
 def delete_bookmark_comment(request, pk, comment_id):
-	response = do_delete(f'api/bookmarkcomments/{comment_id}/', request, 'Bookmark Comments')
-	process_message(request, response)
-	return redirect(f'/bookmarks/{pk}')
+	return delete_comment_common(request, f'/bookmarks/{pk}', 'bookmark', comment_id)
 
 
 def bookmarks(request):

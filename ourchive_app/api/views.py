@@ -734,9 +734,12 @@ class BookmarkPrimaryCommentDetail(generics.RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         instance.bookmark.comment_count = instance.bookmark.comment_count - 1
         instance.bookmark.save()
-        instance.user = None
-        instance.text = "This comment has been deleted"
-        instance.save()
+        if instance.parent_comment is not None:
+            instance.user = None
+            instance.text = "This comment has been deleted."
+            instance.save()
+        else:
+            instance.delete()
 
 
 class BookmarkCollectionList(generics.ListCreateAPIView):
@@ -789,9 +792,12 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
         instance.chapter.comment_count = instance.chapter.comment_count - 1
         instance.chapter.work.save()
         instance.chapter.save()
-        instance.user = None
-        instance.text = "This comment has been deleted"
-        instance.save()
+        if instance.parent_comment is not None:
+            instance.user = None
+            instance.text = "This comment has been deleted."
+            instance.save()
+        else:
+            instance.delete()
 
 
 class BookmarkCommentList(generics.ListCreateAPIView):
