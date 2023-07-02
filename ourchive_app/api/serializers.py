@@ -336,29 +336,15 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class ReplySerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer(read_only=True)
-    replies = RecursiveField(many=True, required=False)
-    id = serializers.ReadOnlyField()
-
+class CommentUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = ChapterComment
-        fields = '__all__'
-
-
-class BookmarkReplySerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer(read_only=True)
-    replies = RecursiveField(many=True, required=False)
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = BookmarkComment
-        fields = '__all__'
+        model = User
+        fields = ['username', 'icon', 'icon_alt_text']
 
 
 class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer(read_only=True)
-    replies = ReplySerializer(many=True, required=False, read_only=True)
+    user = CommentUserSerializer(read_only=True)
+    replies = RecursiveField(many=True, required=False)
     id = serializers.ReadOnlyField()
     chapter = serializers.PrimaryKeyRelatedField(
         queryset=Chapter.objects.all(), required=False)
@@ -402,9 +388,8 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer(read_only=True)
-    replies = BookmarkReplySerializer(
-        many=True, required=False, read_only=True)
+    user = CommentUserSerializer()
+    replies = RecursiveField(many=True, required=False)
     id = serializers.ReadOnlyField()
     parent_comment = serializers.PrimaryKeyRelatedField(
         queryset=BookmarkComment.objects.all(), required=False, allow_null=True)

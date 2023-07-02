@@ -616,6 +616,8 @@ class ChapterCommentDetail(generics.ListCreateAPIView):
         return ChapterComment.objects.filter(chapter__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
 
     def perform_create(self, serializer):
+        print("hello")
+        print(self.request.content)
         serializer.save(user=self.request.user)
 
 

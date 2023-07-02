@@ -1101,8 +1101,7 @@ def log_out(request):
 
 
 @require_http_methods(["GET"])
-def work(request, pk):
-	chapter_offset = int(request.GET.get('offset', 0))
+def work(request, pk, chapter_offset=0):
 	view_full = request.GET.get('view_full', False)
 	work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
 	url = f'api/works/{pk}/'
@@ -1137,6 +1136,8 @@ def work(request, pk):
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
 			chapter['comments'] = chapter_comments
 			chapter['comment_offset'] = comment_offset
+			chapter['load_more_base'] = f"/works/{pk}/chapters/{chapter['id']}/{chapter_offset}"
+			chapter['view_thread_base'] = f"/works/{pk}/{chapter_offset}"
 			chapter['attributes'] = get_attributes_for_display(chapter['attributes'])
 			chapter['new_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 			chapters.append(chapter)
@@ -1156,22 +1157,27 @@ def work(request, pk):
 		'previous_chapter': f'/works/{pk}?offset={chapter_offset - 1}' if 'previous' in chapter_response and chapter_response['previous'] else None,})
 
 
-def render_comments(request, work_id, chapter_id):
+def render_comments(request, work_id, chapter_id, chapter_offset):
 	limit = request.GET.get('limit', '')
 	offset = request.GET.get('offset', '')
 	depth = request.GET.get('depth', 0)
-	chapter_offset = request.GET.get('chapter_offset', '')
 	comments = do_get(f'api/chapters/{chapter_id}/comments?limit={limit}&offset={offset}', request, 'Chapter Comments').response_data
 	post_action_url = f"/works/{work_id}/chapters/{chapter_id}/comments/new?offset={chapter_offset}"
 	edit_action_url = f"""/works/{work_id}/chapters/{chapter_id}/comments/edit?offset={chapter_offset}"""
-	return render(request, 'chapter_comments.html', {
+	return render(request, 'comments.html', {
 		'comments': comments['results'],
 		'current_offset': comments['current'],
 		'top_level': 'true',
 		'depth': int(depth),
 		'chapter_offset': chapter_offset,
 		'chapter': {'id': chapter_id},
+		'load_more_base': f"/works/{work_id}/chapters/{chapter_id}/{chapter_offset}",
 		'comment_count': comments['count'],
+		'view_thread_base': f"/works/{work_id}/{chapter_offset}",
+		'delete_obj': 'chapter-comment',
+		'root_obj_id': work_id,
+		'object_name': 'chapter',
+		'object': {'id': chapter_id},
 		'next_params': comments['next_params'],
 		'prev_params': comments['prev_params'],
 		'work': {'id': work_id},
