@@ -1153,8 +1153,9 @@ def work(request, pk, chapter_offset=0):
 		'root': settings.ALLOWED_HOSTS[0],
 		'chapters': chapters,
 		'chapter_offset': chapter_offset,
-		'next_chapter': f'/works/{pk}?offset={chapter_offset + 1}' if 'next' in chapter_response and chapter_response['next'] else None,
-		'previous_chapter': f'/works/{pk}?offset={chapter_offset - 1}' if 'previous' in chapter_response and chapter_response['previous'] else None,})
+		'next_chapter': f'/works/{pk}/{chapter_offset + 1}' if 'next' in chapter_response and chapter_response['next'] else None,
+		'previous_chapter': f'/works/{pk}/{chapter_offset - 1}' if 'previous' in chapter_response and chapter_response['previous'] else None,})
+
 
 def render_comments_common(request, get_comment_base, object_name, object_id, load_more_base, view_thread_base,
 		delete_obj, post_action_url, edit_action_url, root_obj_id=None, additional_params={}):
@@ -1167,7 +1168,7 @@ def render_comments_common(request, get_comment_base, object_name, object_id, lo
 		'current_offset': comments['current'],
 		'top_level': 'true',
 		'depth': int(depth),
-		 object_name: {'id': object_id},
+		object_name: {'id': object_id},
 		'load_more_base': load_more_base,
 		'comment_count': comments['count'],
 		'view_thread_base': view_thread_base,
@@ -1182,7 +1183,6 @@ def render_comments_common(request, get_comment_base, object_name, object_id, lo
 	if root_obj_id:
 		response_dict['root_obj_id'] = root_obj_id
 	response_dict = response_dict | additional_params
-	print(response_dict)
 	return render(request, 'comments.html', response_dict)
 
 
@@ -1192,7 +1192,8 @@ def render_chapter_comments(request, work_id, chapter_id, chapter_offset):
 	get_comment_base = f'api/chapters/{chapter_id}'
 	view_thread_base = f"/works/{work_id}/{chapter_offset}"
 	load_more_base = f"/works/{work_id}/chapters/{chapter_id}/{chapter_offset}"
-	return render_comments_common(request, get_comment_base, 'chapter', chapter_id, load_more_base, view_thread_base,
+	return render_comments_common(
+		request, get_comment_base, 'chapter', chapter_id, load_more_base, view_thread_base,
 		'chapter-comment', post_action_url, edit_action_url, work_id, {'chapter-offset': chapter_offset})
 
 
@@ -1201,7 +1202,8 @@ def render_bookmark_comments(request, pk):
 	get_comment_base = f'api/bookmarks/{pk}'
 	post_action_url = f'/bookmarks/{pk}/comments/new'
 	edit_action_url = f'/bookmarks/{pk}/comments/edit'
-	return render_comments_common(request, get_comment_base, 'bookmark', pk, common_base, common_base,
+	return render_comments_common(
+		request, get_comment_base, 'bookmark', pk, common_base, common_base,
 		'bookmark-comment', post_action_url, edit_action_url)
 
 
@@ -1237,6 +1239,7 @@ def create_comment_common(request, captcha_fail_redirect, object_name, redirect_
 	else:
 		return redirect(redirect_url_threaded)
 
+
 def edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url_threaded):
 	if not request.method == 'POST':
 		messages.add_message(request, messages.ERROR, _('Invalid URL.'), f'{object_name}-comment-edit-not-found')
@@ -1261,8 +1264,9 @@ def edit_comment_common(request, object_name, error_redirect, redirect_url, redi
 	if comment_thread is None:
 		return redirect(redirect_url)
 	else:
-		redirect_url_threaded = f'{redirect_url_threaded}expandComments=true&scrollCommentId={comment_dict["id"]}&offset={offset_url}&comment_thread={comment_thread}&comment_count={comment_count}'
+		redirect_url_threaded = f'{redirect_url_threaded}expandComments=true&scrollCommentId={comment_dict["id"]}&comment_thread={comment_thread}&comment_count={comment_count}'
 		return redirect(redirect_url_threaded)
+
 
 def delete_comment_common(request, redirect_url, object_name, comment_id):
 	response = do_delete(f'api/{object_name}comments/{comment_id}/', request, 'Comment')
