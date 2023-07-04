@@ -64,10 +64,9 @@ class SearchList(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, format=None):
-        print(request.data)
         searcher = OurchiveSearch()
+        print(request.data)
         results = searcher.do_search(**request.data)
-        #print(results)
         return Response({'results': results})
 
     def get(self, request, format=None):

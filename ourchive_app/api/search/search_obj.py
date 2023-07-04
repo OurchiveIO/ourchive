@@ -87,8 +87,6 @@ class TagFilter(object):
 
     def to_dict(self):
         self_dict = self.__dict__
-        self_dict.pop('tag_type_filter')
-        self_dict.pop('text_filter')
         return self_dict
 
 
@@ -122,6 +120,7 @@ class BookmarkSearch(object):
         self.term = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'description']
+        self.page = 1
 
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['filter'])
@@ -141,6 +140,7 @@ class CollectionSearch(object):
         self.term = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'short_description']
+        self.page = 1
 
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['filter'])
@@ -160,6 +160,7 @@ class TagSearch(object):
         self.term = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['text']
+        self.page = 1
 
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['filter'])
@@ -180,6 +181,7 @@ class UserSearch(object):
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on', 'password', 'is_superuser', 'first_name',
                                 'last_name', 'is_staff', 'email', 'date_joined', 'last_login', 'is_active']
         self.term_search_fields = ['username']
+        self.page = 1
 
     def from_dict(self, dict_obj):
         self.term = dict_obj['term']
@@ -199,6 +201,7 @@ class WorkSearch(object):
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'summary',
                                    'chapters__title', 'chapters__summary']
+        self.page = 1
 
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['filter'])

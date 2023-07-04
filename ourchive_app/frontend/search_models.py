@@ -2,7 +2,7 @@ class WorkSearch(object):
 	def from_json(self, json_obj):
 		self.id = json_obj["id"]
 		self.title = json_obj["title"]
-		self.summary= json_obj["summary"]
+		self.summary = json_obj["summary"]
 		self.notes = None if json_obj["notes"] is "null" else json_obj["notes"]
 		self.is_complete = self.convert_bool(json_obj["is_complete"])
 		self.process_status = None if json_obj["process_status"] is "null" else json_obj["process_status"]
@@ -17,14 +17,17 @@ class WorkSearch(object):
 		self.user_id = json_obj["user_id"]
 		self.work_type = None if json_obj["work_type"] is "null" else json_obj["work_type"]
 		self.user = json_obj["user"]
+
 	def convert_bool(string_bool):
 		return False if string_bool == "false" else True
 
+
 class SearchObject(object):
-	def with_term(self, term):
+	def with_term(self, term, pagination=None):
 		return_obj = {}
 		work_search = {}
 		work_search["term"] = term
+		work_search["page"] = 1
 		work_search["filter"] = {}
 		work_search["filter"]["complete"] = []
 		work_search["filter"]["image_formats"] = []
@@ -38,6 +41,7 @@ class SearchObject(object):
 
 		bookmark_search = {}
 		bookmark_search["term"] = term
+		bookmark_search["page"] = 1
 		bookmark_search["filter"] = {}
 		bookmark_search["filter"]["complete"] = []
 		bookmark_search["filter"]["tags"] = []
@@ -47,6 +51,7 @@ class SearchObject(object):
 
 		collection_search = {}
 		collection_search["term"] = term
+		collection_search["page"] = 1
 		collection_search["filter"] = {}
 		collection_search["filter"]["complete"] = []
 		collection_search["filter"]["tags"] = []
@@ -55,15 +60,28 @@ class SearchObject(object):
 
 		user_search = {}
 		user_search["term"] = term
+		user_search["page"] = 1
 		user_search["filter"] = {}
 		return_obj["user_search"] = user_search
 
 		tag_search = {}
 		tag_search["term"] = term
+		tag_search["page"] = 1
 		tag_search["filter"] = {}
 		tag_search["filter"]["tag_type"] = []
 		tag_search["filter"]["text"] = []
 		return_obj["tag_search"] = tag_search
+
+		if pagination:
+			obj = pagination['obj'].lower()
+			if obj == 'work':
+				return_obj['work_search']['page'] = pagination['page']
+			elif obj == 'bookmark':
+				return_obj['bookmark_search']['page'] = pagination['page']
+			elif obj == 'tag':
+				return_obj['tag_search']['page'] = pagination['page']
+			elif obj == 'bookmarkcollection':
+				return_obj['collection_search']['page'] = pagination['page']
 
 		return return_obj
 

@@ -7,6 +7,8 @@ from django.db.models import Q
 from .search_obj import WorkSearch, BookmarkSearch, TagSearch, UserSearch, CollectionSearch
 from django.contrib.postgres.search import TrigramDistance, TrigramWordDistance
 from api.utils import get_star_count
+from django.core.paginator import Paginator
+from django.conf import settings
 
 
 class ElasticSearchProvider:
@@ -146,8 +148,9 @@ class PostgresProvider:
                     full_filters & join_filters)
         return full_filters
 
-    def run_queries(self, filters, query, obj, trigram_fields, term, trigram_max=0.85, require_distinct=True):
+    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, trigram_max=0.85, require_distinct=True):
         resultset = None
+        page = int(page)
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
             if filters is not None:
@@ -167,17 +170,27 @@ class PostgresProvider:
                         one_distance__lte=trigram_max)
                 resultset = resultset.order_by('zero_distance', 'one_distance')
             else:
-                resultset = obj.objects.annotate(zero_distance=TrigramWordDistance(term, trigram_fields[0]))
+                resultset = obj.objects.annotate(
+                    zero_distance=TrigramWordDistance(term, trigram_fields[0]))
                 if filters:
-                    resultset = resultset.filter(Q((Q(zero_distance__lte=trigram_max) & filters)))
+                    resultset = resultset.filter(
+                        Q((Q(zero_distance__lte=trigram_max) & filters)))
                 else:
                     resultset = resultset.filter(zero_distance__lte=trigram_max)
                 resultset = resultset.order_by('zero_distance')
             require_distinct = False
         if require_distinct:
             # remove any dupes
+            resultset = resultset.order_by('id', '-updated_on')
             resultset = resultset.distinct('id')
-        return resultset
+        print(f"PAGE: {page}")
+        page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
+        paginator = Paginator(resultset, page_size)
+        count = paginator.count
+        resultset = paginator.get_page(page)
+        next_params = None if not resultset.has_next() else f"/search/?limit={page_size}&page={page+1}&object_type={obj.__name__}"
+        prev_params = None if not resultset.has_previous() else f"/search/?limit={page_size}&page={page-1}&object_type={obj.__name__}"
+        return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
 
     def search_works(self, **kwargs):
         work_search = WorkSearch()
@@ -188,10 +201,10 @@ class PostgresProvider:
         if not query and not work_filters:
             return []
         resultset = self.run_queries(work_filters, query, Work, [
-                                     'title', 'summary'], kwargs['term'])
+                                     'title', 'summary'], kwargs['term'], kwargs['page'])
         # build final resultset
         result_json = []
-        for result in resultset:
+        for result in resultset[0]:
             username = result.user.username
             tags = []
             for tag in result.tags.all():
@@ -207,7 +220,7 @@ class PostgresProvider:
             result_dict["work_type"] = work_type
             result_dict["tags"] = tags
             result_json.append(result_dict)
-        return result_json
+        return {'data': result_json, 'page': resultset[1]}
 
     def search_bookmarks(self, **kwargs):
         bookmark_search = BookmarkSearch()
@@ -219,7 +232,7 @@ class PostgresProvider:
         resultset = self.run_queries(bookmark_filters, query, Bookmark, [
                                      'title', 'description'], kwargs['term'])
         result_json = []
-        for result in resultset:
+        for result in resultset[0]:
             username = result.user.username
             tags = []
             for tag in result.tags.all():
@@ -233,7 +246,7 @@ class PostgresProvider:
             for field in bookmark_search.reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
-        return result_json
+        return {'data': result_json, 'page': resultset[1]}
 
     def search_collections(self, **kwargs):
         collection_search = CollectionSearch()
@@ -246,7 +259,7 @@ class PostgresProvider:
         resultset = self.run_queries(collection_filters, query, BookmarkCollection, [
                                      'title', 'short_description'], kwargs['term'])
         result_json = []
-        for result in resultset:
+        for result in resultset[0]:
             username = result.user.username
             tags = []
             for tag in result.tags.all():
@@ -260,7 +273,7 @@ class PostgresProvider:
             for field in collection_search.reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
-        return result_json
+        return {'data': result_json, 'page': resultset[1]}
 
     def search_users(self, **kwargs):
         user_search = UserSearch()
@@ -275,7 +288,7 @@ class PostgresProvider:
             for field in user_search.reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
-        return result_json
+        return {'data': result_json, 'page': {}}
 
     def autocomplete_tags(self, term, tag_type, fetch_all=False):
         results = []
@@ -318,18 +331,19 @@ class PostgresProvider:
         query = self.get_query(tag_search.term, tag_search.term_search_fields)
         if not query and not tag_filters:
             return []
-        resultset = self.run_queries(tag_filters, query, Tag, ['text'], kwargs['term'], 0.7, False)
+        resultset = self.run_queries(tag_filters, query, Tag, [
+                                     'text'], kwargs['term'], kwargs['page'], 0.7, False)
         result_json = []
         if resultset is None:
             return result_json
-        for result in resultset:
+        for result in resultset[0]:
             tag_type = result.tag_type.label
             result_dict = result.__dict__
             for field in tag_search.reserved_fields:
                 result_dict.pop(field, None)
             result_dict['tag_type'] = tag_type
             result_json.append(result_dict)
-        return result_json
+        return {'data': result_json, 'page': resultset[1]}
 
     def get_result_facets(self, results):
         result_json = []
@@ -379,17 +393,17 @@ class PostgresProvider:
         tags_dict = {}
         for tag_type in TagType.objects.all():
             tags_dict[tag_type.label] = []
-        for result in results['work']:
+        for result in results['work']['data']:
             if len(result['tags']) > 0:
                 for tag in result['tags']:
                     if tag['text'] not in tags_dict[tag['tag_type']]:
                         tags_dict[tag['tag_type']].append(tag['text'])
-        for result in results['bookmark']:
+        for result in results['bookmark']['data']:
             if len(result['tags']) > 0:
                 for tag in result['tags']:
                     if tag['text'] not in tags_dict[tag['tag_type']]:
                         tags_dict[tag['tag_type']].append(tag['text'])
-        for result in results['tag']:
+        for result in results['tag']['data']:
             if result['text'] not in tags_dict[result['tag_type']]:
                 tags_dict[result['tag_type']].append(result['text'])
         for key in tags_dict:

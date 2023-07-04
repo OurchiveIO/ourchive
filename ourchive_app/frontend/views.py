@@ -176,6 +176,16 @@ def get_bookmark_collection_obj(request):
 	return collection_dict
 
 
+def get_default_search_result_tab(resultsets):
+	most_results = 0
+	default_tab = ''
+	for results in resultsets:
+		if len(results[0]) > most_results:
+			most_results = len(results[0])
+			default_tab = results[1]
+	return default_tab
+
+
 def referrer_redirect(request, alternate_url=None):
 	response = None
 	if request.META.get('HTTP_REFERER') is not None:
@@ -515,7 +525,6 @@ def user_bookmark_subscriptions(request, username):
 
 def user_collection_subscriptions(request, username):
 	response = do_get(f'api/users/{username}/subscriptions/collections', request, params=request.GET)
-	print(response.response_data)
 	return render(request, 'user_collection_subscriptions.html', {
 		'bookmark_collections': response.response_data,
 		'next': f"/users/{username}/subscriptions/collections/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
@@ -541,7 +550,6 @@ def unsubscribe(request, username):
 			patch_data['subscribed_to_bookmark'] = False
 		if request.POST.get('subscribed_to_collection'):
 			patch_data['subscribed_to_collection'] = False
-		print(patch_data)
 		response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
 		process_message(request, response)
 	return referrer_redirect(request)
@@ -563,54 +571,7 @@ def subscribe(request, username):
 	return referrer_redirect(request)
 
 
-def search(request):
-	if 'term' in request.GET:
-		term = request.GET['term']
-	else:
-		term = request.POST['term']
-	request_builder = SearchObject()
-	request_object = request_builder.with_term(term)
-	response_json = do_post(f'api/search/', request, data=request_object).response_data
-	works = response_json['results']['work']
-	works = get_object_tags(works)
-	bookmarks = response_json['results']['bookmark']
-	bookmarks = get_object_tags(bookmarks)
-	tags = group_tags(response_json['results']['tag'])
-	tag_count = len(response_json['results']['tag'])
-	users = response_json['results']['user']
-	collections = response_json['results']['collection']
-	return render(request, 'search_results.html', {
-		'works': works, 'bookmarks': bookmarks,
-		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
-		'facets': response_json['results']['facet'],
-		'root': settings.ALLOWED_HOSTS[0], 'term': term})
-
-
-def tag_autocomplete(request):
-	term = request.GET.get('text')
-	params = {'term': term}
-	params['type'] = request.GET.get('type') if 'type' in request.GET else ''
-	params['fetch_all'] = request.GET.get('fetch_all') if 'fetch_all' in request.GET else ''
-	response = do_get(f'api/tag-autocomplete', request, params, 'Tag')
-	template = 'tag_autocomplete.html' if request.GET.get('source') == 'search' else 'edit_tag_autocomplete.html'
-	return render(request, template, {
-		'tags': response.response_data['results'],
-		'fetch_all': params['fetch_all']})
-
-
-def bookmark_autocomplete(request):
-	term = request.GET.get('text')
-	params = {'term': term}
-	response = do_get(f'api/bookmark-autocomplete', request, params, 'Bookmark')
-	template = 'bookmark_collection_autocomplete.html'
-	return render(request, template, {
-		'bookmarks': response.response_data['results']})
-
-
-def search_filter(request):
-	term = request.POST['term']
-	request_builder = SearchObject()
-	request_object = request_builder.with_term(term)
+def get_search_request(request, request_object, request_builder):
 	return_keys = []
 	for key in request.POST:
 		filter_val = request.POST[key]
@@ -649,20 +610,99 @@ def search_filter(request):
 					else:
 						request_object['bookmark_search']['filter'][filter_details[0]] = []
 						request_object['bookmark_search']['filter'][filter_details[0]].append(filter_details[1])
-	response_json = do_post(f'api/search/', request, data=request_object, object_name='Search')
-	works = response_json.response_data['results']['work']
-	works = get_object_tags(works)
-	bookmarks = response_json.response_data['results']['bookmark']
-	bookmarks = get_object_tags(bookmarks)
-	tags = group_tags(response_json.response_data['results']['tag'])
-	tag_count = len(response_json.response_data['results']['tag'])
-	users = response_json.response_data['results']['user']
+	return [request_object, return_keys]
+
+
+def search(request):
+	if 'term' in request.GET:
+		term = request.GET['term']
+	elif 'term' in request.POST:
+		term = request.POST['term']
+	else:
+		return redirect('/')
+	request_builder = SearchObject()
+	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
+	request_object = request_builder.with_term(term, pagination)
+	request_object = get_search_request(request, request_object, request_builder)[0]
+	response_json = do_post(f'api/search/', request, data=request_object).response_data
+	works = response_json['results']['work']
+	works['data'] = get_object_tags(works['data'])
+	bookmarks = response_json['results']['bookmark']
+	bookmarks['data'] = get_object_tags(bookmarks['data'])
+	tags = response_json['results']['tag']
+	tags['data'] = group_tags(tags['data'])
+	tag_count = len(response_json['results']['tag']['data'])
+	users = response_json['results']['user']
+	collections = response_json['results']['collection']
+	default_tab = get_default_search_result_tab(
+		[
+			[works['data'], 0],
+			[bookmarks['data'], 1],
+			[tags['data'], 3],
+			[users['data'], 4],
+			[collections['data'], 2]
+		])
 	return render(request, 'search_results.html', {
 		'works': works, 'bookmarks': bookmarks,
-		'tags': tags, 'users': users, 'tag_count': tag_count,
-		'facets': response_json.response_data['results']['facet'],
+		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
+		'facets': response_json['results']['facet'],
+		'default_tab': default_tab,
+		'click_func': 'getFormVals(event)',
+		'root': settings.ALLOWED_HOSTS[0], 'term': term})
+
+
+def tag_autocomplete(request):
+	term = request.GET.get('text')
+	params = {'term': term}
+	params['type'] = request.GET.get('type') if 'type' in request.GET else ''
+	params['fetch_all'] = request.GET.get('fetch_all') if 'fetch_all' in request.GET else ''
+	response = do_get(f'api/tag-autocomplete', request, params, 'Tag')
+	template = 'tag_autocomplete.html' if request.GET.get('source') == 'search' else 'edit_tag_autocomplete.html'
+	return render(request, template, {
+		'tags': response.response_data['results'],
+		'fetch_all': params['fetch_all']})
+
+
+def bookmark_autocomplete(request):
+	term = request.GET.get('text')
+	params = {'term': term}
+	response = do_get(f'api/bookmark-autocomplete', request, params, 'Bookmark')
+	template = 'bookmark_collection_autocomplete.html'
+	return render(request, template, {
+		'bookmarks': response.response_data['results']})
+
+
+def search_filter(request):
+	term = request.POST['term']
+	request_builder = SearchObject()
+	request_object = request_builder.with_term(term)
+	request_object = get_search_request(request, request_object, request_builder)
+	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
+	works = response_json['results']['work']
+	works['data'] = get_object_tags(works['data'])
+	bookmarks = response_json['results']['bookmark']
+	bookmarks['data'] = get_object_tags(bookmarks['data'])
+	tags = response_json['results']['tag']
+	tags['data'] = group_tags(tags['data'])
+	tag_count = len(response_json['results']['tag']['data'])
+	users = response_json['results']['user']
+	collections = response_json['results']['collection']
+	default_tab = get_default_search_result_tab(
+		[
+			[works['data'], 0],
+			[bookmarks['data'], 1],
+			[tags['data'], 3],
+			[users['data'], 4],
+			[collections['data'], 2]
+		])
+	return render(request, 'search_results.html', {
+		'works': works, 'bookmarks': bookmarks,
+		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
+		'facets': response_json['results']['facet'],
 		'root': settings.ALLOWED_HOSTS[0], 'term': term,
-		'keys': return_keys})
+		'default_tab': default_tab,
+		'click_func': 'getFormVals(event)',
+		'keys': request_object[1]})
 
 
 @require_http_methods(["GET"])
@@ -882,6 +922,8 @@ def new_bookmark(request, work_id):
 			'bookmark': bookmark})
 	elif request.user.is_authenticated:
 		bookmark_dict = get_bookmark_obj(request)
+		if len(bookmark_dict['rating']) > 1:
+			bookmark_dict['rating'] = 0
 		response = do_post(f'api/bookmarks/', request, data=bookmark_dict, object_name='Bookmark')
 		process_message(request, response)
 		return redirect(f'/bookmarks/{response.response_data["id"]}')
