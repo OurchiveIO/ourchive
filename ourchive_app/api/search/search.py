@@ -146,8 +146,8 @@ class PostgresProvider:
                     full_filters & join_filters)
         return full_filters
 
-    def run_queries(self, filters, query, obj, trigram_fields, term):
-        require_distinct = True
+    def run_queries(self, filters, query, obj, trigram_fields, term, trigram_max=0.85, require_distinct=True):
+        resultset = None
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
             if filters is not None:
@@ -156,16 +156,23 @@ class PostgresProvider:
                 resultset = obj.objects.filter(query)
         if resultset is not None and len(resultset) == 0:
             # if exact matching & filtering produced no results, let's do limited trigram searching
-            resultset = obj.objects.annotate(
-                zero_distance=TrigramWordDistance(term, trigram_fields[0])).annotate(
-                one_distance=TrigramWordDistance(term, trigram_fields[1]))
-            if filters:
-                resultset = resultset.filter(
-                    Q((Q(zero_distance__lte=0.85) | Q(one_distance__lte=0.85)) & filters))
+            if len(trigram_fields) > 1:
+                resultset = obj.objects.annotate(zero_distance=TrigramWordDistance(
+                    term, trigram_fields[0])).annotate(one_distance=TrigramWordDistance(term, trigram_fields[1]))
+                if filters:
+                    resultset = resultset.filter(
+                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max)) & filters))
+                else:
+                    resultset = resultset.filter(zero_distance__lte=trigram_max).filter(
+                        one_distance__lte=trigram_max)
+                resultset = resultset.order_by('zero_distance', 'one_distance')
             else:
-                resultset = resultset.filter(zero_distance__lte=0.85).filter(
-                    one_distance__lte=0.85)
-            resultset = resultset.order_by('zero_distance', 'one_distance')
+                resultset = obj.objects.annotate(zero_distance=TrigramWordDistance(term, trigram_fields[0]))
+                if filters:
+                    resultset = resultset.filter(Q((Q(zero_distance__lte=trigram_max) & filters)))
+                else:
+                    resultset = resultset.filter(zero_distance__lte=trigram_max)
+                resultset = resultset.order_by('zero_distance')
             require_distinct = False
         if require_distinct:
             # remove any dupes
@@ -180,8 +187,8 @@ class PostgresProvider:
         query = self.get_query(work_search.term, work_search.term_search_fields)
         if not query and not work_filters:
             return []
-        resultset = None
-        resultset = self.run_queries(work_filters, query, Work, ['title', 'summary'], kwargs['term'])
+        resultset = self.run_queries(work_filters, query, Work, [
+                                     'title', 'summary'], kwargs['term'])
         # build final resultset
         result_json = []
         for result in resultset:
@@ -207,7 +214,10 @@ class PostgresProvider:
         bookmark_search.from_dict(kwargs)
         bookmark_filters = self.build_filters(bookmark_search)
         query = self.get_query(bookmark_search.term, bookmark_search.term_search_fields)
-        resultset = self.run_queries(bookmark_filters, query, Bookmark, ['title', 'description'], kwargs['term'])
+        if not query and not bookmark_filters:
+            return []
+        resultset = self.run_queries(bookmark_filters, query, Bookmark, [
+                                     'title', 'description'], kwargs['term'])
         result_json = []
         for result in resultset:
             username = result.user.username
@@ -228,26 +238,13 @@ class PostgresProvider:
     def search_collections(self, **kwargs):
         collection_search = CollectionSearch()
         collection_search.from_dict(kwargs)
-        collection_filters = None
-        collection_filters = self.build_filter_query(
-            collection_search.filter.complete, collection_search.filter.complete_filter, collection_filters)
-        collection_filters = self.build_filter_query(
-            collection_search.filter.rating_gte, collection_search.filter.rating_filter_gte, collection_filters)
-        collection_filters = self.build_filter_query(
-            collection_search.filter.rating_lte, collection_search.filter.rating_filter_lte, collection_filters)
-        collection_filters = self.build_filter_query(
-            collection_search.filter.tags, collection_search.filter.tag_filter, collection_filters)
-
+        collection_filters = self.build_filters(collection_search)
         query = self.get_query(collection_search.term,
                                collection_search.term_search_fields)
-        resultset = None
-        if collection_filters is not None and query is not None:
-            resultset = BookmarkCollection.objects.filter(
-                collection_filters).filter(query)
-        elif collection_filters is not None:
-            resultset = BookmarkCollection.objects.filter(collection_filters)
-        else:
-            resultset = BookmarkCollection.objects.filter(query)
+        if not query and not collection_filters:
+            return []
+        resultset = self.run_queries(collection_filters, query, BookmarkCollection, [
+                                     'title', 'short_description'], kwargs['term'])
         result_json = []
         for result in resultset:
             username = result.user.username
@@ -317,20 +314,11 @@ class PostgresProvider:
     def search_tags(self, **kwargs):
         tag_search = TagSearch()
         tag_search.from_dict(kwargs)
-        tag_filters = None
-        tag_filters = self.build_filter_query(
-            tag_search.filter.tag_type, tag_search.filter.tag_type_filter, tag_filters)
-        tag_filters = self.build_filter_query(
-            tag_search.filter.text, tag_search.filter.text_filter, tag_filters)
-
+        tag_filters = self.build_filters(tag_search)
         query = self.get_query(tag_search.term, tag_search.term_search_fields)
-        resultset = None
-        if tag_filters is not None and query is not None:
-            resultset = Tag.objects.filter(tag_filters).filter(query)
-        elif tag_filters is not None:
-            resultset = Tag.objects.filter(tag_filters)
-        elif query is not None:
-            resultset = Tag.objects.filter(query)
+        if not query and not tag_filters:
+            return []
+        resultset = self.run_queries(tag_filters, query, Tag, ['text'], kwargs['term'], 0.7, False)
         result_json = []
         if resultset is None:
             return result_json

@@ -6,6 +6,7 @@
 			<ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade;connect: .search-switcher" id="search-results-switcher-controls">
 	            <li id="results-switcher-li-works"><a href="#" id="works_tab">Works ({{ works|length }})</a></li>
 	            <li id="results-switcher-li-bookmarks"><a href="#" id="bookmarks_tab">Bookmarks ({{ bookmarks|length }})</a></li>
+	            <li id="results-switcher-li-users"><a href="#" id="users_tab">Collections ({{ collections|length }})</a></li>
 	            <li id="results-switcher-li-tags"><a href="#" id="tags_tab">Tags ({{ tag_count }})</a></li>
 	            <li id="results-switcher-li-users"><a href="#" id="users_tab">Users ({{ users|length }})</a></li>
         	</ul>
@@ -84,6 +85,41 @@
 		        </div>
 		        {% for bookmark in bookmarks %} 
 					{% include "bookmark_tile.html" %}     
+			    {% endfor %}
+			</div>     
+		</li>
+
+		<li id="search-results-collections-li"> 
+			<div uk-grid id="search-results-collections-facet-grid">
+	    		<div class="uk-width-1-4" id="search-results-collections-facet-parent"> 
+		        	<div class="uk-card uk-card-default uk-card-body" id="search-results-collections-facet-card">
+		        	<form class="uk-form-horizontal"  method="post" id="searchResultsForm" action="/search/filter">	
+		        			{% csrf_token %}
+				        	<dl class="uk-description-list uk-description-list-divider " id="search-results-collections-facet-dl">	
+						        {% for facet in facets %} 
+									{% include "facet_tile.html" %}     
+							    {% endfor %}		        
+							</dl>
+							<input type="hidden" id="term" name="term" value="{{ term }}">
+							<input class="uk-button uk-button-default" type="submit" value="Submit" id="search-results-collections-facet-submit"/>
+						</form>
+				</div>
+			</div>
+			<div class="uk-width-3-4" id="search-results-collections-content">
+				<div uk-form-custom="target: > * > span:last-child" id="search-results-collections-sort-parent">
+		            <select id="search-results-collections-sort-select">
+		                <option id="search-results-collections-sort-placeholder" value="">Sort by...</option>
+		                <option id="search-results-collections-sort-fingerguns" value="2">Fingerguns</option>
+		                <option id="search-results-collections-sort-newest" value="3">Newest</option>
+		                <option id="search-results-collections-sort-oldest" value="4">Oldest</option>
+		            </select>
+		            <span class="uk-link" id="search-results-collections-sort-link">
+		                <span uk-icon="icon: plus"></span>
+		                <span></span>
+		            </span>
+		        </div>
+		        {% for bookmark_collection in collections %} 
+					{% include "bookmark_collection_tile.html" %}     
 			    {% endfor %}
 			</div>     
 		</li>

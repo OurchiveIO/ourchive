@@ -578,9 +578,10 @@ def search(request):
 	tags = group_tags(response_json['results']['tag'])
 	tag_count = len(response_json['results']['tag'])
 	users = response_json['results']['user']
+	collections = response_json['results']['collection']
 	return render(request, 'search_results.html', {
 		'works': works, 'bookmarks': bookmarks,
-		'tags': tags, 'users': users, 'tag_count': tag_count,
+		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
 		'facets': response_json['results']['facet'],
 		'root': settings.ALLOWED_HOSTS[0], 'term': term})
 

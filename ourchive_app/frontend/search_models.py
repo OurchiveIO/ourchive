@@ -45,6 +45,14 @@ class SearchObject(object):
 		bookmark_search["filter"]["rating_lte"] = []
 		return_obj["bookmark_search"] = bookmark_search
 
+		collection_search = {}
+		collection_search["term"] = term
+		collection_search["filter"] = {}
+		collection_search["filter"]["complete"] = []
+		collection_search["filter"]["tags"] = []
+		collection_search["filter"]["attributes"] = []
+		return_obj["collection_search"] = collection_search
+
 		user_search = {}
 		user_search["term"] = term
 		user_search["filter"] = {}

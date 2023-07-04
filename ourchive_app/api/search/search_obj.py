@@ -72,14 +72,18 @@ class BookmarkFilter(object):
 
 class TagFilter(object):
     def __init__(self):
-        self.tag_type = []
-        self.text = []
-        self.tag_type_filter = 'tag_type__label__exact'
-        self.text_filter = 'text__icontains'
+        self.filters = {
+            'tag_type': {
+                'tag_type__label__exact': [],
+            },
+            'text': {
+                'text__icontains': [],
+            }
+        }
 
     def from_dict(self, dict_obj):
-        self.tag_type = dict_obj['tag_type']
-        self.text = dict_obj['text']
+        self.filters['tag_type']['tag_type__label__exact'] = dict_obj['tag_type']
+        self.filters['text']['text__icontains'] = dict_obj['text']
 
     def to_dict(self):
         self_dict = self.__dict__
@@ -90,22 +94,25 @@ class TagFilter(object):
 
 class CollectionFilter(object):
     def __init__(self):
-        self.complete = []
-        self.tags = []
-        self.complete_filter = 'is_complete__exact'
-        self.tag_filter = 'tags__text__icontains'
-        self.attribute_filter = 'attributes__name__icontains'
+        self.filters = {
+            'attributes': {
+                'attributes__name__icontains': [],
+            },
+            'complete': {
+                'is_complete__exact': [],
+            },
+            'tags': {
+                'tags__text__icontains': [],
+            }
+        }
 
     def from_dict(self, dict_obj):
-        self.complete = dict_obj['complete']
-        self.tags = dict_obj['tags']
-        self.attributes = dict_obj['attributes']
+        self.filters['complete']['is_complete__exact'] = dict_obj['complete']
+        self.filters['tags']['tags__text__icontains'] = dict_obj['tags']
+        self.filters['attributes']['attributes__name__icontains'] = dict_obj['attributes']
 
     def to_dict(self):
         self_dict = self.__dict__
-        self_dict.pop('complete_filter')
-        self_dict.pop('tag_filter')
-        self_dict.pop('attribute_filter')
         return self_dict
 
 
