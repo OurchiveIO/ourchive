@@ -6,6 +6,7 @@ import re
 from django.db.models import Q
 from .search_obj import WorkSearch, BookmarkSearch, TagSearch, UserSearch, CollectionSearch
 from django.contrib.postgres.search import TrigramDistance, TrigramWordDistance
+from api.utils import get_star_count
 
 
 class ElasticSearchProvider:
@@ -129,47 +130,58 @@ class PostgresProvider:
     def init_provider():
         print('init provider')
 
+    def build_filters(self, search_obj):
+        full_filters = None
+        for field in search_obj.filter.filters:
+            join_filters = None
+            if '_range' in field:
+                join_filters = self.build_range_query(
+                    search_obj.filter.filters[field], join_filters)
+            else:
+                for key in search_obj.filter.filters[field]:
+                    join_filters = self.build_filter_query(
+                        search_obj.filter.filters[field][key], key, join_filters)
+            if join_filters:
+                full_filters = join_filters if full_filters is None else Q(
+                    full_filters & join_filters)
+        return full_filters
+
+    def run_queries(self, filters, query, obj, trigram_fields, term):
+        require_distinct = True
+        # filter on query first, then use filters (more exact, used when searching within) to narrow
+        if query is not None:
+            if filters is not None:
+                resultset = obj.objects.filter(Q(query & filters))
+            else:
+                resultset = obj.objects.filter(query)
+        if resultset is not None and len(resultset) == 0:
+            # if exact matching & filtering produced no results, let's do limited trigram searching
+            resultset = obj.objects.annotate(
+                zero_distance=TrigramWordDistance(term, trigram_fields[0])).annotate(
+                one_distance=TrigramWordDistance(term, trigram_fields[1]))
+            if filters:
+                resultset = resultset.filter(
+                    Q((Q(zero_distance__lte=0.85) | Q(one_distance__lte=0.85)) & filters))
+            else:
+                resultset = resultset.filter(zero_distance__lte=0.85).filter(
+                    one_distance__lte=0.85)
+            resultset = resultset.order_by('zero_distance', 'one_distance')
+            require_distinct = False
+        if require_distinct:
+            # remove any dupes
+            resultset = resultset.distinct('id')
+        return resultset
+
     def search_works(self, **kwargs):
         work_search = WorkSearch()
         work_search.from_dict(kwargs)
-        work_filters = None
-        # build filters
-        for field in work_search.filter.filters:
-            if '_range' in field:
-                work_filters = self.build_range_query(
-                    work_search.filter.filters[field], work_filters)
-                continue
-            for key in work_search.filter.filters[field]:
-                work_filters = self.build_filter_query(
-                    work_search.filter.filters[field][key], key, work_filters)
+        work_filters = self.build_filters(work_search)
         # build query
         query = self.get_query(work_search.term, work_search.term_search_fields)
         if not query and not work_filters:
             return []
         resultset = None
-        require_distinct = True
-        # filter on query first, then use filters (more exact, used when searching within) to narrow
-        if query is not None:
-            if work_filters is not None:
-                resultset = Work.objects.filter(Q(query & work_filters))
-            else:
-                resultset = Work.objects.filter(query)
-        if resultset is not None and len(resultset) == 0:
-            # if exact matching & filtering produced no results, let's do limited trigram searching
-            resultset = Work.objects.annotate(
-                title_distance=TrigramWordDistance(kwargs['term'], 'title')).annotate(
-                summary_distance=TrigramWordDistance(kwargs['term'], 'summary'))
-            if work_filters:
-                resultset = resultset.filter(
-                    Q((Q(title_distance__lte=0.85) | Q(summary_distance__lte=0.85)) & work_filters))
-            else:
-                resultset = resultset.filter(title_distance__lte=0.85).filter(
-                    summary_distance__lte=0.85)
-            resultset = resultset.order_by('title_distance', 'summary_distance')
-            require_distinct = False
-        if require_distinct:
-            # remove any dupes
-            resultset = resultset.distinct('id')
+        resultset = self.run_queries(work_filters, query, Work, ['title', 'summary'], kwargs['term'])
         # build final resultset
         result_json = []
         for result in resultset:
@@ -193,24 +205,9 @@ class PostgresProvider:
     def search_bookmarks(self, **kwargs):
         bookmark_search = BookmarkSearch()
         bookmark_search.from_dict(kwargs)
-        bookmark_filters = None
-        bookmark_filters = self.build_filter_query(
-            bookmark_search.filter.complete, bookmark_search.filter.complete_filter, bookmark_filters)
-        bookmark_filters = self.build_filter_query(
-            bookmark_search.filter.rating_gte, bookmark_search.filter.rating_filter_gte, bookmark_filters)
-        bookmark_filters = self.build_filter_query(
-            bookmark_search.filter.rating_lte, bookmark_search.filter.rating_filter_lte, bookmark_filters)
-        bookmark_filters = self.build_filter_query(
-            bookmark_search.filter.tags, bookmark_search.filter.tag_filter, bookmark_filters)
-
+        bookmark_filters = self.build_filters(bookmark_search)
         query = self.get_query(bookmark_search.term, bookmark_search.term_search_fields)
-        resultset = None
-        if bookmark_filters is not None and query is not None:
-            resultset = Bookmark.objects.filter(bookmark_filters).filter(query)
-        elif bookmark_filters is not None:
-            resultset = Bookmark.objects.filter(bookmark_filters)
-        else:
-            resultset = Bookmark.objects.filter(query)
+        resultset = self.run_queries(bookmark_filters, query, Bookmark, ['title', 'description'], kwargs['term'])
         result_json = []
         for result in resultset:
             username = result.user.username
@@ -361,27 +358,27 @@ class PostgresProvider:
         # todo move to db setting
         word_count_dict = {}
         word_count_dict["label"] = "Word Count"
-        word_count_dict["values"] = [{"label": "Under 20,000", "filter_val": "word_count_lte$20000"},
+        word_count_dict["values"] = [{"label": "Under 20,000", "filter_val": "word_count_range|ranges|20000|0"},
                                      {"label": "20,000 - 50,000",
                                          "filter_val": "word_count_range|ranges|20000|50000"},
                                      {"label": "50,000 - 80,000",
                                          "filter_val": "word_count_range|ranges|50000|80000"},
                                      {"label": "80,000 - 100,000",
                                       "filter_val": "word_count_range|ranges|80000|100000"},
-                                     {"label": "100,000+", "filter_val": "word_count_gte$100000"}]
+                                     {"label": "100,000+", "filter_val": "word_count_range|ranges|10000000|100000"}]
         result_json.append(word_count_dict)
 
         # todo move to db setting
         audio_length_dict = {}
         audio_length_dict["label"] = "Audio Length"
-        audio_length_dict["values"] = [{"label": "Under 30:00", "filter_val": "audio_length_gte$30"},
+        audio_length_dict["values"] = [{"label": "Under 30:00", "filter_val": "audio_length_range|ranges|30|0"},
                                        {"label": "30:00 - 1:00:00",
                                            "filter_val": "audio_length_range|ranges|30|60"},
                                        {"label": "1:00:00 - 2:00:00",
                                            "filter_val": "audio_length_range|ranges|60|120"},
                                        {"label": "2:00:00 - 3:00:00",
                                         "filter_val": "audio_length_range|ranges|120|180"},
-                                       {"label": "3:00:00+", "filter_val": "audio_length_gte$180"}]
+                                       {"label": "3:00:00+", "filter_val": "audio_length_range|ranges|20000|180"}]
         result_json.append(audio_length_dict)
 
         # todo move to db setting
@@ -415,13 +412,14 @@ class PostgresProvider:
                     tag_filter_vals.append({"label": val, "filter_val": filter_val})
                 result_json.append({'label': key, 'values': tag_filter_vals})
 
+        stars = OurchiveSetting.objects.filter(name='Rating Star Count').first()
         bookmark_rating_dict = {}
         bookmark_rating_dict["label"] = "Rating"
-        bookmark_rating_dict["values"] = [{"label": "1", "filter_val": "rating_gte$1"},
-                                          {"label": "2", "filter_val": "rating_gte$2"},
-                                          {"label": "3", "filter_val": "rating_gte$3"},
-                                          {"label": "4", "filter_val": "rating_gte$4"},
-                                          {"label": "5", "filter_val": "rating_gte$5"}]
+        bookmark_rating_dict["values"] = []
+        stars = get_star_count()
+        for star in stars:
+            bookmark_rating_dict["values"].append(
+                {"label": f"{star}", "filter_val": f"rating_gte${star}"})
         result_json.append(bookmark_rating_dict)
 
         return result_json

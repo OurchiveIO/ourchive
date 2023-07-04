@@ -37,7 +37,7 @@ class WorkFilter(object):
             self.filters['audio_length_range']['ranges'].append(range_tuple)
         self.filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
         self.filters['word_count']['word_count__gte'] = dict_obj.get('word_count_gte', [])
-        self.filters['type']['work_type__type_name__icontains'] = dict_obj.get('work_type', [])
+        self.filters['type']['work_type__type_name__exact'] = dict_obj.get('work_type', [])
         for range_tuple in dict_obj.get('word_count_range', []):
             self.filters['word_count_range']['ranges'].append(range_tuple)
 
@@ -48,27 +48,25 @@ class WorkFilter(object):
 
 class BookmarkFilter(object):
     def __init__(self):
-        self.complete = []
-        self.rating_gte = []
-        self.rating_lte = []
-        self.tags = []
-        self.rating_filter_gte = 'rating__gte'
-        self.rating_filter_lte = 'rating__lte'
-        self.complete_filter = 'is_complete__exact'
-        self.tag_filter = 'tags__text__icontains'
+        self.filters = {
+            'rating': {
+                'rating__gte': [],
+            },
+            'complete': {
+                'is_complete__exact': [],
+            },
+            'tags': {
+                'tags__text__icontains': [],
+            }
+        }
 
     def from_dict(self, dict_obj):
-        self.complete = dict_obj['complete']
-        self.rating_gte = dict_obj['rating_gte']
-        self.rating_lte = dict_obj['rating_lte']
-        self.tags = dict_obj['tags']
+        self.filters['complete']['is_complete__exact'] = dict_obj['complete']
+        self.filters['rating']['rating__exact'] = dict_obj['rating_gte']
+        self.filters['tags']['is_complete__exact'] = dict_obj['tags']
 
     def to_dict(self):
         self_dict = self.__dict__
-        self_dict.pop('rating_filter_lte')
-        self_dict.pop('rating_filter_gte')
-        self_dict.pop('complete_filter')
-        self_dict.pop('tag_filter')
         return self_dict
 
 

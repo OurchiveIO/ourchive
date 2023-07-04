@@ -610,11 +610,14 @@ def search_filter(request):
 	term = request.POST['term']
 	request_builder = SearchObject()
 	request_object = request_builder.with_term(term)
+	return_keys = []
 	for key in request.POST:
 		filter_val = request.POST[key]
 		if filter_val == 'csrfmiddlewaretoken':
 			continue
-		elif filter_val == 'term':
+		else:
+			return_keys.append(key)
+		if filter_val == 'term':
 			continue
 		elif 'ranges' in key:
 			filter_details = key.split('|')
@@ -657,7 +660,8 @@ def search_filter(request):
 		'works': works, 'bookmarks': bookmarks,
 		'tags': tags, 'users': users, 'tag_count': tag_count,
 		'facets': response_json.response_data['results']['facet'],
-		'root': settings.ALLOWED_HOSTS[0], 'term': term})
+		'root': settings.ALLOWED_HOSTS[0], 'term': term,
+		'keys': return_keys})
 
 
 @require_http_methods(["GET"])
