@@ -106,7 +106,24 @@ class PostgresProvider:
             if existing_query is None:
                 existing_query = or_query
             else:
-                existing_query = existing_query & or_query
+                existing_query = existing_query | or_query
+        return existing_query
+
+    def build_range_query(self, filter_obj, existing_query):
+        if len(filter_obj['ranges']) < 1:
+            return existing_query
+        or_query = None
+        for array_item in filter_obj['ranges']:
+            q_high = Q(**{filter_obj['less_than']: array_item[0]})
+            q_low = Q(**{filter_obj['greater_than']: array_item[1]})
+            if or_query is None:
+                or_query = (q_high & q_low)
+            else:
+                or_query = or_query | (q_high & q_low)
+        if existing_query is None:
+            existing_query = or_query
+        else:
+            existing_query = existing_query | or_query
         return existing_query
 
     def init_provider():
@@ -116,42 +133,45 @@ class PostgresProvider:
         work_search = WorkSearch()
         work_search.from_dict(kwargs)
         work_filters = None
-        work_filters = self.build_filter_query(
-            work_search.filter.complete, work_search.filter.complete_filter, work_filters)
-        work_filters = self.build_filter_query(
-            work_search.filter.audio_length_gte, work_search.filter.audio_filter_gte, work_filters)
-        work_filters = self.build_filter_query(
-            work_search.filter.audio_length_lte, work_search.filter.audio_filter_lte, work_filters)
-        work_filters = self.build_filter_query(
-            work_search.filter.image_formats, work_search.filter.image_filter, work_filters)
-        work_filters = self.build_filter_query(
-            work_search.filter.tags, work_search.filter.tag_filter, work_filters)
-        work_filters = self.build_filter_query(
-            work_search.filter.word_count_gte, work_search.filter.word_count_gte_filter, work_filters)
-        work_filters = self.build_filter_query(
-            work_search.filter.word_count_lte, work_search.filter.word_count_lte_filter, work_filters)
-        work_filters = self.build_filter_query(
-            work_search.filter.work_type, work_search.filter.work_type_filter, work_filters)
+        # build filters
+        for field in work_search.filter.filters:
+            if '_range' in field:
+                work_filters = self.build_range_query(
+                    work_search.filter.filters[field], work_filters)
+                continue
+            for key in work_search.filter.filters[field]:
+                work_filters = self.build_filter_query(
+                    work_search.filter.filters[field][key], key, work_filters)
+        # build query
         query = self.get_query(work_search.term, work_search.term_search_fields)
+        if not query and not work_filters:
+            return []
         resultset = None
-        if work_filters is not None:
-            resultset = Work.objects.filter(work_filters)
+        require_distinct = True
+        # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
-            if resultset is None:
-                resultset = Work.objects.filter(query)
+            if work_filters is not None:
+                resultset = Work.objects.filter(Q(query & work_filters))
             else:
-                resultset = resultset.filter(query)
-        result_json = []
-        if resultset is None:
-            return result_json
-        else:
-            resultset = resultset.distinct('id')
-        if len(resultset) == 0:
+                resultset = Work.objects.filter(query)
+        if resultset is not None and len(resultset) == 0:
             # if exact matching & filtering produced no results, let's do limited trigram searching
             resultset = Work.objects.annotate(
                 title_distance=TrigramWordDistance(kwargs['term'], 'title')).annotate(
-                summary_distance=TrigramWordDistance(kwargs['term'], 'summary')).filter(
-                title_distance__lte=0.85).filter(summary_distance__lte=0.85).order_by('title_distance', 'summary_distance')
+                summary_distance=TrigramWordDistance(kwargs['term'], 'summary'))
+            if work_filters:
+                resultset = resultset.filter(
+                    Q((Q(title_distance__lte=0.85) | Q(summary_distance__lte=0.85)) & work_filters))
+            else:
+                resultset = resultset.filter(title_distance__lte=0.85).filter(
+                    summary_distance__lte=0.85)
+            resultset = resultset.order_by('title_distance', 'summary_distance')
+            require_distinct = False
+        if require_distinct:
+            # remove any dupes
+            resultset = resultset.distinct('id')
+        # build final resultset
+        result_json = []
         for result in resultset:
             username = result.user.username
             tags = []
@@ -343,11 +363,11 @@ class PostgresProvider:
         word_count_dict["label"] = "Word Count"
         word_count_dict["values"] = [{"label": "Under 20,000", "filter_val": "word_count_lte$20000"},
                                      {"label": "20,000 - 50,000",
-                                         "filter_val": "word_count_lte$50000|word_count_gte$20000"},
+                                         "filter_val": "word_count_range|ranges|20000|50000"},
                                      {"label": "50,000 - 80,000",
-                                         "filter_val": "word_count_lte$80000|word_count_gte$50000"},
+                                         "filter_val": "word_count_range|ranges|50000|80000"},
                                      {"label": "80,000 - 100,000",
-                                      "filter_val": "word_count_lte$100000|word_count_gte$80000"},
+                                      "filter_val": "word_count_range|ranges|80000|100000"},
                                      {"label": "100,000+", "filter_val": "word_count_gte$100000"}]
         result_json.append(word_count_dict)
 
@@ -356,11 +376,11 @@ class PostgresProvider:
         audio_length_dict["label"] = "Audio Length"
         audio_length_dict["values"] = [{"label": "Under 30:00", "filter_val": "audio_length_gte$30"},
                                        {"label": "30:00 - 1:00:00",
-                                           "filter_val": "audio_length_lte$60|audio_length_gte$30"},
+                                           "filter_val": "audio_length_range|ranges|30|60"},
                                        {"label": "1:00:00 - 2:00:00",
-                                           "filter_val": "audio_length_lte$120|audio_length_gte$60"},
+                                           "filter_val": "audio_length_range|ranges|60|120"},
                                        {"label": "2:00:00 - 3:00:00",
-                                        "filter_val": "audio_length_lte$180|audio_length_gte$120"},
+                                        "filter_val": "audio_length_range|ranges|120|180"},
                                        {"label": "3:00:00+", "filter_val": "audio_length_gte$180"}]
         result_json.append(audio_length_dict)
 

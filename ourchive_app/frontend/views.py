@@ -614,9 +614,16 @@ def search_filter(request):
 		filter_val = request.POST[key]
 		if filter_val == 'csrfmiddlewaretoken':
 			continue
-		if filter_val == 'term':
+		elif filter_val == 'term':
 			continue
+		elif 'ranges' in key:
+			filter_details = key.split('|')
+			if filter_details[0] not in request_object['work_search']['filter']:
+				request_object['work_search']['filter'][filter_details[0]] = [([filter_details[2], filter_details[3]])]
+			else:
+				request_object['work_search']['filter'][filter_details[0]].append((filter_details[2], filter_details[3]))
 		else:
+			# TODO evaluate if this can be gotten rid of; do we have legitimate use cases that aren't a range?
 			filter_options = key.split('|')
 			for option in filter_options:
 				filter_details = option.split('$')
@@ -649,7 +656,7 @@ def search_filter(request):
 	return render(request, 'search_results.html', {
 		'works': works, 'bookmarks': bookmarks,
 		'tags': tags, 'users': users, 'tag_count': tag_count,
-		'facets': response_json['results']['facet'],
+		'facets': response_json.response_data['results']['facet'],
 		'root': settings.ALLOWED_HOSTS[0], 'term': term})
 
 

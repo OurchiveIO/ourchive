@@ -1,44 +1,48 @@
 class WorkFilter(object):
     def __init__(self):
-        self.complete = []
-        self.image_formats = []
-        self.tags = []
-        self.audio_length_gte = []
-        self.audio_length_lte = []
-        self.word_count_gte = []
-        self.word_count_lte = []
-        self.work_type = []
-        self.work_chapter_title = []
-        self.work_chapter_summary = []
-        self.audio_filter_gte = 'chapters__audio_length__gte'
-        self.audio_filter_lte = 'chapters__audio_length__lte'
-        self.image_filter = 'chapters__image_format__icontains'
-        self.complete_filter = 'is_complete__exact'
-        self.tag_filter = 'tags__text__icontains'
-        self.word_count_gte_filter = 'word_count__gte'
-        self.word_count_lte_filter = 'word_count__lte'
-        self.work_type_filter = 'work_type__type_name__icontains'
+        self.filters = {
+            'audio_length_range': {
+                'ranges': [],
+                'greater_than': 'chapters__audio_length__gte',
+                'less_than': 'chapters__audio_length__lte',
+            },
+            'image_formats': {
+                'chapters__image_format__icontains': [],
+            },
+            'complete': {
+                'is_complete__exact': [],
+            },
+            'tags': {
+                'tags__text__icontains': [],
+            },
+            'word_count': {
+                'word_count__gte': [],
+                'word_count__lte': [],
+            },
+            'word_count_range': {
+                'ranges': [],
+                'greater_than': 'word_count__gte',
+                'less_than': 'word_count__lte'
+            },
+            'type': {
+                'work_type__type_name__icontains': []
+            }
+        }
 
     def from_dict(self, dict_obj):
-        self.complete = dict_obj['complete']
-        self.image_formats = dict_obj['image_formats']
-        self.tags = dict_obj['tags']
-        self.audio_length_gte = dict_obj['audio_length_gte']
-        self.audio_length_lte = dict_obj['audio_length_lte']
-        self.word_count_lte = dict_obj['word_count_lte']
-        self.word_count_gte = dict_obj['word_count_gte']
-        self.work_type = dict_obj['work_type']
+        self.filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+        self.filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
+        self.filters['tags']['tags__text__icontains'] = dict_obj.get('tags', [])
+        for range_tuple in dict_obj.get('audio_length_range', []):
+            self.filters['audio_length_range']['ranges'].append(range_tuple)
+        self.filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
+        self.filters['word_count']['word_count__gte'] = dict_obj.get('word_count_gte', [])
+        self.filters['type']['work_type__type_name__icontains'] = dict_obj.get('work_type', [])
+        for range_tuple in dict_obj.get('word_count_range', []):
+            self.filters['word_count_range']['ranges'].append(range_tuple)
 
     def to_dict(self):
         self_dict = self.__dict__
-        self_dict.pop('audio_filter_lte')
-        self_dict.pop('audio_filter_gte')
-        self_dict.pop('complete_filter')
-        self_dict.pop('tag_filter')
-        self_dict.pop('image_filter')
-        self_dict.pop('word_count_lte_filter')
-        self_dict.pop('word_count_gte_filter')
-        self_dict.pop('work_type_filter')
         return self_dict
 
 
@@ -188,7 +192,8 @@ class WorkSearch(object):
         self.filter = WorkFilter()
         self.term = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
-        self.term_search_fields = ['title', 'summary', 'chapters__title', 'chapters__summary']
+        self.term_search_fields = ['title', 'summary',
+                                   'chapters__title', 'chapters__summary']
 
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['filter'])
