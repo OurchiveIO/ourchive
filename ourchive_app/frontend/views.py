@@ -623,8 +623,8 @@ def search(request):
 	request_builder = SearchObject()
 	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
 	request_object = request_builder.with_term(term, pagination)
-	request_object = get_search_request(request, request_object, request_builder)[0]
-	response_json = do_post(f'api/search/', request, data=request_object).response_data
+	request_object = get_search_request(request, request_object, request_builder)
+	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
 	works = response_json['results']['work']
 	works['data'] = get_object_tags(works['data'])
 	bookmarks = response_json['results']['bookmark']
@@ -648,7 +648,8 @@ def search(request):
 		'facets': response_json['results']['facet'],
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
-		'root': settings.ALLOWED_HOSTS[0], 'term': term})
+		'root': settings.ALLOWED_HOSTS[0], 'term': term,
+		'keys': request_object[1]})
 
 
 def tag_autocomplete(request):
