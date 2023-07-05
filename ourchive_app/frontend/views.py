@@ -675,8 +675,9 @@ def bookmark_autocomplete(request):
 
 def search_filter(request):
 	term = request.POST['term']
+	filter_any = 'any' if request.POST.get('any_all') == 'on' else 'all'
 	request_builder = SearchObject()
-	request_object = request_builder.with_term(term)
+	request_object = request_builder.with_term(term, None, filter_any)
 	request_object = get_search_request(request, request_object, request_builder)
 	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
 	works = response_json['results']['work']

@@ -9,6 +9,18 @@
 		vals_form.action = link;
 		document.forms["searchResultsForm_work"].submit();
 	}
+
+	function toggleAnyAll() {
+		var toggle = document.getElementById("any-toggle-label").style.visibility;
+		if (toggle === "hidden") {
+			document.getElementById("any-toggle-label").style.visibility = "visible";
+			document.getElementById("all-toggle-label").style.visibility = "hidden";
+		}
+		else {
+			document.getElementById("any-toggle-label").style.visibility = "hidden";
+			document.getElementById("all-toggle-label").style.visibility = "visible";
+		}
+	}
 </script>
 <div uk-grid id="search-results-grid">
 	<div class="uk-width-1-4" id="search-results-work-facet-child"> 
@@ -20,6 +32,16 @@
 						{% include "facet_tile.html" %}     
 				    {% endfor %}		        
 				</dl>
+				<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl">	
+					<dt><span class="uk-text-bold">Filter all/any</span></dt>
+					<dr>
+						<label id="all-toggle-label" {% if 'any_all' in keys %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+		                <div id="any-all-toggle-inline" class="uk-inline">
+		                    <label id="any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="any-all-toggle" type="checkbox" {% if 'any_all' in keys %}checked{%endif%} name="any_all" onclick="toggleAnyAll()"> <span id="any-all-slider" class="slider round"></span></label>
+		                </div>
+		                <label id="any-toggle-label" {% if 'any_all' not in keys %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+		            </dr>
+		        </dl>
 				<input type="hidden" id="term" name="term" value="{{ term }}">
 				<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default" type="submit" value="Submit"/>
 			</form>

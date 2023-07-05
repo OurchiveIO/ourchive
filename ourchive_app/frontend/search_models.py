@@ -23,10 +23,11 @@ class WorkSearch(object):
 
 
 class SearchObject(object):
-	def with_term(self, term, pagination=None):
+	def with_term(self, term, pagination=None, mode='all'):
 		return_obj = {}
 		work_search = {}
 		work_search["term"] = term
+		work_search["mode"] = mode
 		work_search["page"] = 1
 		work_search["filter"] = {}
 		work_search["filter"]["complete"] = []
@@ -42,6 +43,7 @@ class SearchObject(object):
 		bookmark_search = {}
 		bookmark_search["term"] = term
 		bookmark_search["page"] = 1
+		bookmark_search["mode"] = mode
 		bookmark_search["filter"] = {}
 		bookmark_search["filter"]["complete"] = []
 		bookmark_search["filter"]["tags"] = []
@@ -51,6 +53,7 @@ class SearchObject(object):
 
 		collection_search = {}
 		collection_search["term"] = term
+		collection_search["mode"] = mode
 		collection_search["page"] = 1
 		collection_search["filter"] = {}
 		collection_search["filter"]["complete"] = []
@@ -66,6 +69,7 @@ class SearchObject(object):
 
 		tag_search = {}
 		tag_search["term"] = term
+		tag_search["mode"] = mode
 		tag_search["page"] = 1
 		tag_search["filter"] = {}
 		tag_search["filter"]["tag_type"] = []

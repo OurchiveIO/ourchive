@@ -118,6 +118,7 @@ class BookmarkSearch(object):
     def __init__(self):
         self.filter = BookmarkFilter()
         self.term = ""
+        self.mode = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'description']
         self.page = 1
@@ -125,6 +126,7 @@ class BookmarkSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['filter'])
         self.term = dict_obj['term']
+        self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -138,6 +140,7 @@ class CollectionSearch(object):
     def __init__(self):
         self.filter = CollectionFilter()
         self.term = ""
+        self.mode = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'short_description']
         self.page = 1
@@ -145,6 +148,7 @@ class CollectionSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['filter'])
         self.term = dict_obj['term']
+        self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -158,6 +162,7 @@ class TagSearch(object):
     def __init__(self):
         self.filter = TagFilter()
         self.term = ""
+        self.mode = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['text']
         self.page = 1
@@ -165,6 +170,7 @@ class TagSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['filter'])
         self.term = dict_obj['term']
+        self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -198,6 +204,7 @@ class WorkSearch(object):
     def __init__(self):
         self.filter = WorkFilter()
         self.term = ""
+        self.mode = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'summary',
                                    'chapters__title', 'chapters__summary']
@@ -206,6 +213,7 @@ class WorkSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['filter'])
         self.term = dict_obj['term']
+        self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all' if 'mode' in dict_obj else 'all'
 
     def to_dict(self):
         self.filter = self.filter.to_dict()

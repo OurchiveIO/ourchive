@@ -144,8 +144,15 @@ class PostgresProvider:
                     join_filters = self.build_filter_query(
                         search_obj.filter.filters[field][key], key, join_filters)
             if join_filters:
-                full_filters = join_filters if full_filters is None else Q(
-                    full_filters & join_filters)
+                if full_filters is None:
+                    full_filters = join_filters
+                else:
+                    if search_obj.mode == "all":
+                        full_filters = Q(full_filters & join_filters)
+                    elif search_obj.mode == "any":
+                        full_filters = Q(full_filters | join_filters)
+                    else:
+                        full_filters = Q(full_filters & join_filters)
         return full_filters
 
     def run_queries(self, filters, query, obj, trigram_fields, term, page=1, trigram_max=0.85, require_distinct=True):
@@ -183,13 +190,14 @@ class PostgresProvider:
             # remove any dupes
             resultset = resultset.order_by('id', '-updated_on')
             resultset = resultset.distinct('id')
-        print(f"PAGE: {page}")
         page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
         paginator = Paginator(resultset, page_size)
         count = paginator.count
         resultset = paginator.get_page(page)
-        next_params = None if not resultset.has_next() else f"/search/?limit={page_size}&page={page+1}&object_type={obj.__name__}"
-        prev_params = None if not resultset.has_previous() else f"/search/?limit={page_size}&page={page-1}&object_type={obj.__name__}"
+        next_params = None if not resultset.has_next(
+        ) else f"/search/?limit={page_size}&page={page+1}&object_type={obj.__name__}"
+        prev_params = None if not resultset.has_previous(
+        ) else f"/search/?limit={page_size}&page={page-1}&object_type={obj.__name__}"
         return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
 
     def search_works(self, **kwargs):
