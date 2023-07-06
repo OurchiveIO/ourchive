@@ -572,21 +572,23 @@ def subscribe(request, username):
 
 
 def get_search_request(request, request_object, request_builder):
-	return_keys = []
+	return_keys = {'include': [], 'exclude': []}
 	for key in request.POST:
 		filter_val = request.POST[key]
+		include_exclude = 'exclude' if 'exclude_' in key else 'include'
+		key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
 		if filter_val == 'csrfmiddlewaretoken':
 			continue
 		else:
-			return_keys.append(key)
+			return_keys[include_exclude].append(key)
 		if filter_val == 'term':
 			continue
-		elif 'ranges' in key:
+		if 'ranges' in key:
 			filter_details = key.split('|')
-			if filter_details[0] not in request_object['work_search']['filter']:
-				request_object['work_search']['filter'][filter_details[0]] = [([filter_details[2], filter_details[3]])]
+			if filter_details[0] not in request_object['work_search'][f'{include_exclude}_filter']:
+				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]] = [([filter_details[2], filter_details[3]])]
 			else:
-				request_object['work_search']['filter'][filter_details[0]].append((filter_details[2], filter_details[3]))
+				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append((filter_details[2], filter_details[3]))
 		else:
 			# TODO evaluate if this can be gotten rid of; do we have legitimate use cases that aren't a range?
 			filter_options = key.split('|')
@@ -594,22 +596,22 @@ def get_search_request(request, request_object, request_builder):
 				filter_details = option.split('$')
 				filter_type = request_builder.get_object_type(filter_details[0])
 				if filter_type == 'work':
-					if len(request_object['work_search']['filter'][filter_details[0]]) > 0:
-						request_object['work_search']['filter'][filter_details[0]].append(filter_details[1])
+					if filter_details[0] in request_object['work_search'][f'{include_exclude}_filter'] and len(request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
+						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
 					else:
-						request_object['work_search']['filter'][filter_details[0]] = []
-						request_object['work_search']['filter'][filter_details[0]].append(filter_details[1])
+						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]] = []
+						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
 				elif filter_type == 'tag':
 					tag_type = filter_details[0].split(',')[1]
 					tag_text = filter_details[1].split(',')[1]
-					request_object['tag_search']['filter']['tag_type'].append(tag_type)
-					request_object['tag_search']['filter']['text'].append(tag_text)
+					request_object['tag_search'][f'{include_exclude}_filter']['tag_type'].append(tag_type)
+					request_object['tag_search'][f'{include_exclude}_filter']['text'].append(tag_text)
 				elif filter_type == 'bookmark':
-					if len(request_object['bookmark_search']['filter'][filter_details[0]]) > 0:
-						request_object['bookmark_search']['filter'][filter_details[0]].append(filter_details[1])
+					if len(request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
+						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
 					else:
-						request_object['bookmark_search']['filter'][filter_details[0]] = []
-						request_object['bookmark_search']['filter'][filter_details[0]].append(filter_details[1])
+						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]] = []
+						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
 	return [request_object, return_keys]
 
 
@@ -649,7 +651,8 @@ def search(request):
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
 		'root': settings.ALLOWED_HOSTS[0], 'term': term,
-		'keys': request_object[1]})
+		'keys_include': request_object[1]['include'],
+		'keys_exclude': request_object[1]['exclude']})
 
 
 def tag_autocomplete(request):
@@ -704,7 +707,8 @@ def search_filter(request):
 		'root': settings.ALLOWED_HOSTS[0], 'term': term,
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
-		'keys': request_object[1]})
+		'keys_include': request_object[1]['include'],
+		'keys_exclude': request_object[1]['exclude']})
 
 
 @require_http_methods(["GET"])

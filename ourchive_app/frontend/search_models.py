@@ -29,36 +29,24 @@ class SearchObject(object):
 		work_search["term"] = term
 		work_search["mode"] = mode
 		work_search["page"] = 1
-		work_search["filter"] = {}
-		work_search["filter"]["complete"] = []
-		work_search["filter"]["image_formats"] = []
-		work_search["filter"]["tags"] = []
-		work_search["filter"]["audio_length_gte"] = []
-		work_search["filter"]["audio_length_lte"] = []
-		work_search["filter"]["word_count_gte"] = []
-		work_search["filter"]["word_count_lte"] = []
-		work_search["filter"]["work_type"] = []
+		work_search["include_filter"] = {}
+		work_search["exclude_filter"] = {}
 		return_obj["work_search"] = work_search
 
 		bookmark_search = {}
 		bookmark_search["term"] = term
 		bookmark_search["page"] = 1
 		bookmark_search["mode"] = mode
-		bookmark_search["filter"] = {}
-		bookmark_search["filter"]["complete"] = []
-		bookmark_search["filter"]["tags"] = []
-		bookmark_search["filter"]["rating_gte"] = []
-		bookmark_search["filter"]["rating_lte"] = []
+		bookmark_search["include_filter"] = {}
+		bookmark_search["exclude_filter"] = {}
 		return_obj["bookmark_search"] = bookmark_search
 
 		collection_search = {}
 		collection_search["term"] = term
 		collection_search["mode"] = mode
 		collection_search["page"] = 1
-		collection_search["filter"] = {}
-		collection_search["filter"]["complete"] = []
-		collection_search["filter"]["tags"] = []
-		collection_search["filter"]["attributes"] = []
+		collection_search["include_filter"] = {}
+		collection_search["exclude_filter"] = {}
 		return_obj["collection_search"] = collection_search
 
 		user_search = {}
@@ -71,9 +59,8 @@ class SearchObject(object):
 		tag_search["term"] = term
 		tag_search["mode"] = mode
 		tag_search["page"] = 1
-		tag_search["filter"] = {}
-		tag_search["filter"]["tag_type"] = []
-		tag_search["filter"]["text"] = []
+		tag_search["include_filter"] = {}
+		tag_search["exclude_filter"] = {}
 		return_obj["tag_search"] = tag_search
 
 		if pagination:

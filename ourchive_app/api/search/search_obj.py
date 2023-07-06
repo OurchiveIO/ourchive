@@ -1,6 +1,34 @@
 class WorkFilter(object):
     def __init__(self):
-        self.filters = {
+        self.include_filters = {
+            'audio_length_range': {
+                'ranges': [],
+                'greater_than': 'chapters__audio_length__gte',
+                'less_than': 'chapters__audio_length__lte',
+            },
+            'image_formats': {
+                'chapters__image_format__icontains': [],
+            },
+            'complete': {
+                'is_complete__exact': [],
+            },
+            'tags': {
+                'tags__text__icontains': [],
+            },
+            'word_count': {
+                'word_count__gte': [],
+                'word_count__lte': [],
+            },
+            'word_count_range': {
+                'ranges': [],
+                'greater_than': 'word_count__gte',
+                'less_than': 'word_count__lte'
+            },
+            'type': {
+                'work_type__type_name__icontains': []
+            }
+        }
+        self.exclude_filters = {
             'audio_length_range': {
                 'ranges': [],
                 'greater_than': 'chapters__audio_length__gte',
@@ -29,17 +57,29 @@ class WorkFilter(object):
             }
         }
 
-    def from_dict(self, dict_obj):
-        self.filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
-        self.filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
-        self.filters['tags']['tags__text__icontains'] = dict_obj.get('tags', [])
-        for range_tuple in dict_obj.get('audio_length_range', []):
-            self.filters['audio_length_range']['ranges'].append(range_tuple)
-        self.filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
-        self.filters['word_count']['word_count__gte'] = dict_obj.get('word_count_gte', [])
-        self.filters['type']['work_type__type_name__exact'] = dict_obj.get('work_type', [])
-        for range_tuple in dict_obj.get('word_count_range', []):
-            self.filters['word_count_range']['ranges'].append(range_tuple)
+    def from_dict(self, dict_obj, include=True):
+        if include:
+            self.include_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+            self.include_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
+            self.include_filters['tags']['tags__text__icontains'] = dict_obj.get('tags', [])
+            for range_tuple in dict_obj.get('audio_length_range', []):
+                self.include_filters['audio_length_range']['ranges'].append(range_tuple)
+            self.include_filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
+            self.include_filters['word_count']['word_count__gte'] = dict_obj.get('word_count_gte', [])
+            self.include_filters['type']['work_type__type_name__exact'] = dict_obj.get('work_type', [])
+            for range_tuple in dict_obj.get('word_count_range', []):
+                self.include_filters['word_count_range']['ranges'].append(range_tuple)
+        else:
+            self.exclude_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+            self.exclude_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
+            self.exclude_filters['tags']['tags__text__icontains'] = dict_obj.get('tags', [])
+            for range_tuple in dict_obj.get('audio_length_range', []):
+                self.exclude_filters['audio_length_range']['ranges'].append(range_tuple)
+            self.exclude_filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
+            self.exclude_filters['word_count']['word_count__gte'] = dict_obj.get('word_count_gte', [])
+            self.exclude_filters['type']['work_type__type_name__exact'] = dict_obj.get('work_type', [])
+            for range_tuple in dict_obj.get('word_count_range', []):
+                self.exclude_filters['word_count_range']['ranges'].append(range_tuple)
 
     def to_dict(self):
         self_dict = self.__dict__
@@ -48,7 +88,18 @@ class WorkFilter(object):
 
 class BookmarkFilter(object):
     def __init__(self):
-        self.filters = {
+        self.include_filters = {
+            'rating': {
+                'rating__gte': [],
+            },
+            'complete': {
+                'is_complete__exact': [],
+            },
+            'tags': {
+                'tags__text__icontains': [],
+            }
+        }
+        self.exclude_filters = {
             'rating': {
                 'rating__gte': [],
             },
@@ -60,10 +111,15 @@ class BookmarkFilter(object):
             }
         }
 
-    def from_dict(self, dict_obj):
-        self.filters['complete']['is_complete__exact'] = dict_obj['complete']
-        self.filters['rating']['rating__exact'] = dict_obj['rating_gte']
-        self.filters['tags']['is_complete__exact'] = dict_obj['tags']
+    def from_dict(self, dict_obj, include=True):
+        if include:
+            self.include_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+            self.include_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
+            self.include_filters['tags']['is_complete__exact'] = dict_obj.get('tags', [])
+        else:
+            self.exclude_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+            self.exclude_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
+            self.exclude_filters['tags']['is_complete__exact'] = dict_obj.get('tags', [])
 
     def to_dict(self):
         self_dict = self.__dict__
@@ -72,7 +128,15 @@ class BookmarkFilter(object):
 
 class TagFilter(object):
     def __init__(self):
-        self.filters = {
+        self.include_filters = {
+            'tag_type': {
+                'tag_type__label__exact': [],
+            },
+            'text': {
+                'text__icontains': [],
+            }
+        }
+        self.exclude_filters = {
             'tag_type': {
                 'tag_type__label__exact': [],
             },
@@ -81,9 +145,13 @@ class TagFilter(object):
             }
         }
 
-    def from_dict(self, dict_obj):
-        self.filters['tag_type']['tag_type__label__exact'] = dict_obj['tag_type']
-        self.filters['text']['text__icontains'] = dict_obj['text']
+    def from_dict(self, dict_obj, include=True):
+        if include:
+            self.include_filters['tag_type']['tag_type__label__exact'] = dict_obj.get('tag_type', [])
+            self.include_filters['text']['text__icontains'] = dict_obj.get('text', [])
+        else:
+            self.exclude_filters['tag_type']['tag_type__label__exact'] = dict_obj.get('tag_type', [])
+            self.exclude_filters['text']['text__icontains'] = dict_obj.get('text', [])
 
     def to_dict(self):
         self_dict = self.__dict__
@@ -92,7 +160,18 @@ class TagFilter(object):
 
 class CollectionFilter(object):
     def __init__(self):
-        self.filters = {
+        self.include_filters = {
+            'attributes': {
+                'attributes__name__icontains': [],
+            },
+            'complete': {
+                'is_complete__exact': [],
+            },
+            'tags': {
+                'tags__text__icontains': [],
+            }
+        }
+        self.exclude_filters = {
             'attributes': {
                 'attributes__name__icontains': [],
             },
@@ -104,10 +183,15 @@ class CollectionFilter(object):
             }
         }
 
-    def from_dict(self, dict_obj):
-        self.filters['complete']['is_complete__exact'] = dict_obj['complete']
-        self.filters['tags']['tags__text__icontains'] = dict_obj['tags']
-        self.filters['attributes']['attributes__name__icontains'] = dict_obj['attributes']
+    def from_dict(self, dict_obj, include=True):
+        if include:
+            self.include_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+            self.include_filters['tags']['tags__text__icontains'] = dict_obj.get('tags', [])
+            self.include_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
+        else:
+            self.exclude_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+            self.exclude_filters['tags']['tags__text__icontains'] = dict_obj.get('tags', [])
+            self.exclude_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
 
     def to_dict(self):
         self_dict = self.__dict__
@@ -124,7 +208,8 @@ class BookmarkSearch(object):
         self.page = 1
 
     def from_dict(self, dict_obj):
-        self.filter.from_dict(dict_obj['filter'])
+        self.filter.from_dict(dict_obj['include_filter'])
+        self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
         self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
 
@@ -146,7 +231,8 @@ class CollectionSearch(object):
         self.page = 1
 
     def from_dict(self, dict_obj):
-        self.filter.from_dict(dict_obj['filter'])
+        self.filter.from_dict(dict_obj['include_filter'])
+        self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
         self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
 
@@ -168,7 +254,8 @@ class TagSearch(object):
         self.page = 1
 
     def from_dict(self, dict_obj):
-        self.filter.from_dict(dict_obj['filter'])
+        self.filter.from_dict(dict_obj['include_filter'])
+        self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
         self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
 
@@ -211,7 +298,8 @@ class WorkSearch(object):
         self.page = 1
 
     def from_dict(self, dict_obj):
-        self.filter.from_dict(dict_obj['filter'])
+        self.filter.from_dict(dict_obj['include_filter'])
+        self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
         self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all' if 'mode' in dict_obj else 'all'
 

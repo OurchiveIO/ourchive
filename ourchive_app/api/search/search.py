@@ -132,24 +132,26 @@ class PostgresProvider:
     def init_provider():
         print('init provider')
 
-    def build_filters(self, search_obj):
+    def build_filters(self, filters, mode, include):
         full_filters = None
-        for field in search_obj.filter.filters:
+        for field in filters:
             join_filters = None
             if '_range' in field:
                 join_filters = self.build_range_query(
-                    search_obj.filter.filters[field], join_filters)
+                    filters[field], join_filters)
             else:
-                for key in search_obj.filter.filters[field]:
+                for key in filters[field]:
                     join_filters = self.build_filter_query(
-                        search_obj.filter.filters[field][key], key, join_filters)
+                        filters[field][key], key, join_filters)
             if join_filters:
+                if not include:
+                    join_filters = ~join_filters
                 if full_filters is None:
                     full_filters = join_filters
                 else:
-                    if search_obj.mode == "all":
+                    if mode == "all":
                         full_filters = Q(full_filters & join_filters)
-                    elif search_obj.mode == "any":
+                    elif mode == "any":
                         full_filters = Q(full_filters | join_filters)
                     else:
                         full_filters = Q(full_filters & join_filters)
@@ -200,10 +202,23 @@ class PostgresProvider:
         ) else f"/search/?limit={page_size}&page={page-1}&object_type={obj.__name__}"
         return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
 
+    def get_filters(self, search_object):
+        final_filters = None
+        include_filters = self.build_filters(
+            search_object.filter.include_filters, search_object.mode, True)
+        exclude_filters = self.build_filters(
+            search_object.filter.exclude_filters, search_object.mode, False)
+        if exclude_filters and include_filters:
+            final_filters = Q(include_filters & exclude_filters)
+        elif exclude_filters:
+            final_filters = exclude_filters
+        return final_filters
+
     def search_works(self, **kwargs):
         work_search = WorkSearch()
         work_search.from_dict(kwargs)
-        work_filters = self.build_filters(work_search)
+        work_filters = self.get_filters(work_search)
+        print(work_filters)
         # build query
         query = self.get_query(work_search.term, work_search.term_search_fields)
         if not query and not work_filters:
@@ -233,7 +248,7 @@ class PostgresProvider:
     def search_bookmarks(self, **kwargs):
         bookmark_search = BookmarkSearch()
         bookmark_search.from_dict(kwargs)
-        bookmark_filters = self.build_filters(bookmark_search)
+        bookmark_filters = self.get_filters(bookmark_search)
         query = self.get_query(bookmark_search.term, bookmark_search.term_search_fields)
         if not query and not bookmark_filters:
             return []
@@ -259,7 +274,7 @@ class PostgresProvider:
     def search_collections(self, **kwargs):
         collection_search = CollectionSearch()
         collection_search.from_dict(kwargs)
-        collection_filters = self.build_filters(collection_search)
+        collection_filters = self.get_filters(collection_search)
         query = self.get_query(collection_search.term,
                                collection_search.term_search_fields)
         if not query and not collection_filters:
@@ -335,7 +350,7 @@ class PostgresProvider:
     def search_tags(self, **kwargs):
         tag_search = TagSearch()
         tag_search.from_dict(kwargs)
-        tag_filters = self.build_filters(tag_search)
+        tag_filters = self.get_filters(tag_search)
         query = self.get_query(tag_search.term, tag_search.term_search_fields)
         if not query and not tag_filters:
             return []
