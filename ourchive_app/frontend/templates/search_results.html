@@ -22,8 +22,67 @@
 		}
 	}
 </script>
+<div id="flyover-results" uk-offcanvas="flip: true" class="uk-offcanvas">
+	<div class="uk-offcanvas-bar" id="flyover-results-child">
+		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form-flyover">	
+		<ul uk-tab="animation: uk-animation-fade;" class="uk-inline" id="search-filter-switcher-controls-flyover">
+            <li id="filter-switcher-li-include" class="uk-inline"><a href="#" id="include_tab_flyover">Include</a></li>
+            <li id="filter-switcher-li-exclude" class="uk-inline"><a href="#" id="exclude_tab_flyover">Exclude</a></li>
+		</ul>
+		{% csrf_token %}
+		<ul class="uk-switcher uk-margin-remove filter-switcher" id="search-results-filter-switcher-flyover">
+			<li id="search-results-include-switcher-li-flyover" class="uk-width-expand ourchive-li-flyover"> 
+	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl-flyover">	
+			        {% for facet in facets %} 
+						{% include "facet_tile.html" with include='include' keys=keys_include %}     
+				    {% endfor %}		        
+				</dl>
+				<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl-flyover">	
+					<dt><span class="uk-text-bold">Include all/any</span></dt>
+					<dr>
+						<label id="all-toggle-label-flyover" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+		                <div id="any-all-toggle-inline-flyover" class="uk-inline">
+		                    <label id="any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="any-all-toggle-flyover" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="any_all" onclick="toggleAnyAll()"> <span id="any-all-slider-flyover" class="slider round"></span></label>
+		                </div>
+		                <label id="any-toggle-label-flyover" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+		            </dr>
+		        </dl>
+		    </li>
+		    <li id="search-results-exclude-switcher-li-flyover" class="uk-width-expand ourchive-li-flyover"> 
+	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-facet-dl-flyover">	
+			        {% for facet in facets %} 
+						{% include "facet_tile.html" with include='exclude' keys=keys_exclude %}     
+				    {% endfor %}		        
+				</dl>
+				<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-type-dl-flyover">	
+					<dt><span class="uk-text-bold">Exclude all/any</span></dt>
+					<dr>
+						<label id="exclude-all-toggle-label-flyover" {% if 'any_all' in keys_exclude %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+		                <div id="exclude-any-all-toggle-inline-flyover" class="uk-inline">
+		                    <label id="exclude-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll()"> <span id="exclude-any-all-slider-flyover" class="slider round"></span></label>
+		                </div>
+		                <label id="exclude-any-toggle-label-flyover" {% if 'any_all' not in keys_exclude %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+		            </dr>
+		        </dl>
+		    </li>
+	    </ul>
+	    <dl class="uk-description-list uk-description-list-divider" id="order-by-dl">
+	    	<dt><span class="uk-text-bold">Sort by...</span></dt>
+            <dr>
+	            <select id="search-results-sort-select" name="order_by" class="uk-select">
+	                <option id="search-results-sort-newest" value="-updated_on">Newest</option>
+	                <option id="search-results-sort-oldest" value="created_on">Oldest</option>
+	            </select>
+	        </dr>
+	    </dl>
+		<input type="hidden" id="term" name="term" value="{{ term }}">
+		<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default uk-margin-top" type="submit" value="Submit"/>
+	</form>
+	</div>
+</div>
 <div uk-grid id="search-results-grid">
-	<div class="uk-width-1-4" id="search-results-work-facet-child"> 
+	<div class="uk-width-1-1 uk-text-right uk-align-right uk-hidden@s"><a class="uk-button uk-button-default uk-button-small uk-hidden@s" uk-toggle="target: #flyover-results" id="show-filters-link">Toggle Filters</a></div> 
+	<div class="uk-width-1-4@s uk-visible@s" id="search-results-work-facet-child"> 
 		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">	
 			<ul uk-tab="animation: uk-animation-fade;" class="uk-inline" id="search-filter-switcher-controls">
 	            <li id="filter-switcher-li-include" class="uk-inline"><a href="#" id="include_tab">Include</a></li>
@@ -79,7 +138,8 @@
 			<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default uk-margin-top" type="submit" value="Submit"/>
 		</form>
 	</div>
-	<div class="uk-width-3-4 uk-margin-remove" id="search-results-tab-parent">
+	
+	<div class="uk-width-3-4@s uk-width-1-1@xs uk-margin-remove" id="search-results-tab-parent">
 		<ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade;connect: .search-switcher;active: {{default_tab}}" id="search-results-switcher-controls">
             <li id="results-switcher-li-works"><a href="#" id="works_tab">Works ({{ works.page.count }})</a></li>
             <li id="results-switcher-li-bookmarks"><a href="#" id="bookmarks_tab">Bookmarks ({{ bookmarks.page.count }})</a></li>
@@ -99,18 +159,6 @@
 			</li>
 			<li id="search-results-bookmarks-li" class="uk-width-expand"> 
 				<div class="uk-width-expand" id="search-results-bookmarks-content">
-					<div uk-form-custom="target: > * > span:last-child" id="search-results-bookmarks-sort-parent">
-			            <select id="search-results-bookmarks-sort-select">
-			                <option id="search-results-bookmarks-sort-placeholder" value="">Sort by...</option>
-			                <option id="search-results-bookmarks-sort-fingerguns" value="2">Fingerguns</option>
-			                <option id="search-results-bookmarks-sort-newest" value="3">Newest</option>
-			                <option id="search-results-bookmarks-sort-oldest" value="4">Oldest</option>
-			            </select>
-			            <span class="uk-link" id="search-results-bookmarks-sort-link">
-			                <span uk-icon="icon: plus"></span>
-			                <span></span>
-			            </span>
-			        </div>
 			        {% for bookmark in bookmarks.data %} 
 						{% include "bookmark_tile.html" %}     
 				    {% endfor %}
@@ -119,18 +167,6 @@
 			</li>
 			<li id="search-results-collections-li" class="uk-width-expand"> 
 				<div class="uk-width-expand" id="search-results-collections-content">
-					<div uk-form-custom="target: > * > span:last-child" id="search-results-collections-sort-parent">
-			            <select id="search-results-collections-sort-select">
-			                <option id="search-results-collections-sort-placeholder" value="">Sort by...</option>
-			                <option id="search-results-collections-sort-fingerguns" value="2">Fingerguns</option>
-			                <option id="search-results-collections-sort-newest" value="3">Newest</option>
-			                <option id="search-results-collections-sort-oldest" value="4">Oldest</option>
-			            </select>
-			            <span class="uk-link" id="search-results-collections-sort-link">
-			                <span uk-icon="icon: plus"></span>
-			                <span></span>
-			            </span>
-			        </div>
 			        {% for bookmark_collection in collections.data %} 
 						{% include "bookmark_collection_tile.html" %}     
 				    {% endfor %}
@@ -139,19 +175,6 @@
 			</li>
 			<li id="search-results-tags-li" class="uk-width-expand"> 
 				<div class="uk-width-expand" id="search-results-tags-content">
-					<div uk-form-custom="target: > * > span:last-child" id="search-results-tags-sort-parent">
-			            <select id="search-results-tags-sort-select">
-			                <option id="search-results-tags-sort-placeholder" value="">Sort by...</option>
-			                <option id="search-results-tags-sort-works" value="2">Work count</option>
-			                <option id="search-results-tags-sort-bookmarks" value="3">Bookmark count</option>
-			                <option id="search-results-tags-sort-newest" value="4">Newest</option>
-			                <option id="search-results-tags-sort-oldest" value="5">Oldest</option>
-			            </select>
-			            <span class="uk-link" id="search-results-tags-sort-link">
-			                <span uk-icon="icon: plus"></span>
-			                <span></span>
-			            </span>
-			        </div>
 			        <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
 			        {% for type, tag in tags.data.items %} 
 				        <dt id="search-results-tags-{{type}}-dt">{{ type }}</dt>
@@ -166,18 +189,6 @@
 			<li id="search-results-users-parent" class="uk-width-expand"> 
 				<div uk-grid id="search-results-users-grid">
 				<div class="uk-width-expand" id="search-results-users-content-parent">
-					<div uk-form-custom="target: > * > span:last-child" id="search-results-users-sort-parent">
-			            <select id="search-results-users-sort-select">
-			                <option id="search-results-users-sort-placeholder" value="">Sort by...</option>
-			                <option id="search-results-users-sort-alpha" value="2">Alphabetical</option>
-			                <option id="search-results-users-sort-newest" value="3">Newest</option>
-			                <option id="search-results-users-sort-oldest" value="4">Oldest</option>
-			            </select>
-			            <span class="uk-link" id="search-results-users-sort-link">
-			                <span uk-icon="icon: plus"></span>
-			                <span></span>
-			            </span>
-			        </div>
 			        {% for user in users.data %} 
 						<p id="search-results-user-{{user.id}}"> <a id="search-results-user-{{user.id}}-link" href="/username/{{ user.username }}">{{ user.username }}</a> </p>
 				    {% endfor %}

@@ -677,7 +677,9 @@ def bookmark_autocomplete(request):
 
 
 def search_filter(request):
-	term = request.POST['term']
+	term = request.POST.get('term', '')
+	if not term:
+		return redirect('/')
 	filter_any = 'any' if request.POST.get('any_all') == 'on' else 'all'
 	order_by = request.POST['order_by'] if 'order_by' in request.POST else None
 	request_builder = SearchObject()
