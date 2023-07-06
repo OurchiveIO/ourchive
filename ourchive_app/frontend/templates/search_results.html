@@ -40,11 +40,11 @@
 					<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl">	
 						<dt><span class="uk-text-bold">Include all/any</span></dt>
 						<dr>
-							<label id="all-toggle-label" {% if 'any_all' in keys %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+							<label id="all-toggle-label" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
 			                <div id="any-all-toggle-inline" class="uk-inline">
-			                    <label id="any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="any-all-toggle" type="checkbox" {% if 'any_all' in keys %}checked{%endif%} name="any_all" onclick="toggleAnyAll()"> <span id="any-all-slider" class="slider round"></span></label>
+			                    <label id="any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="any-all-toggle" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="any_all" onclick="toggleAnyAll()"> <span id="any-all-slider" class="slider round"></span></label>
 			                </div>
-			                <label id="any-toggle-label" {% if 'any_all' not in keys %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+			                <label id="any-toggle-label" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
 			            </dr>
 			        </dl>
 			    </li>
@@ -57,15 +57,24 @@
 					<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-type-dl">	
 						<dt><span class="uk-text-bold">Exclude all/any</span></dt>
 						<dr>
-							<label id="exclude-all-toggle-label" {% if 'exclude_any_all' in keys %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+							<label id="exclude-all-toggle-label" {% if 'any_all' in keys_exclude %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
 			                <div id="exclude-any-all-toggle-inline" class="uk-inline">
-			                    <label id="exclude-any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'exclude_any_all' in keys %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll()"> <span id="exclude-any-all-slider" class="slider round"></span></label>
+			                    <label id="exclude-any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll()"> <span id="exclude-any-all-slider" class="slider round"></span></label>
 			                </div>
-			                <label id="exclude-any-toggle-label" {% if 'exclude_any_all' not in keys %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+			                <label id="exclude-any-toggle-label" {% if 'any_all' not in keys_exclude %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
 			            </dr>
 			        </dl>
 			    </li>
 		    </ul>
+		    <dl class="uk-description-list uk-description-list-divider" id="order-by-dl">
+		    	<dt><span class="uk-text-bold">Sort by...</span></dt>
+	            <dr>
+		            <select id="search-results-sort-select" name="order_by" class="uk-select">
+		                <option id="search-results-sort-newest" value="-updated_on">Newest</option>
+		                <option id="search-results-sort-oldest" value="created_on">Oldest</option>
+		            </select>
+		        </dr>
+		    </dl>
 			<input type="hidden" id="term" name="term" value="{{ term }}">
 			<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default uk-margin-top" type="submit" value="Submit"/>
 		</form>
@@ -81,22 +90,7 @@
 	
 		<ul class="uk-switcher uk-margin-remove search-switcher" id="search-results-work-facet-switcher">
 			<li id="search-results-work-facet-switcher-li" class="uk-width-expand"> 
-				<div class="uk-width-expand" id="search-results-works-parent">
-			    	<div class="uk-margin" id="search-results-works-sort-child">
-				        <div uk-form-custom="target: > * > span:last-child" id="search-results-works-sort-ukform">
-				            <select id="search-results-works-sort-select">
-				                <option id="search-results-works-sort-placeholder" value="">Sort by...</option>
-				                <option id="search-results-works-sort-fingerguns" value="2">Fingerguns</option>
-				                <option id="search-results-works-sort-newest" value="3">Newest</option>
-				                <option id="search-results-works-sort-oldest" value="4">Oldest</option>
-				            </select>
-				            <span class="uk-link" id="search-results-works-sort-link">
-				                <span uk-icon="icon: plus"></span>
-				                <span></span>
-				            </span>
-				        </div>
-				    </div>			
-
+				<div class="uk-width-expand" id="search-results-works-parent">		
 					{% for work in works.data %} 
 						{% include "work_tile.html" %}     
 				    {% endfor %}

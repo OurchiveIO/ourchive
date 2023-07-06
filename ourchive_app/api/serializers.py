@@ -452,7 +452,6 @@ class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
         if 'user' in validated_data and isinstance(validated_data['user'], AnonymousUser):
             validated_data.pop('user')
         validated_data['text'] = nh3.clean(validated_data['text'])
-        print(validated_data)
         comment = CollectionComment.objects.create(**validated_data)
         user = User.objects.filter(id=comment.collection.user.id).first()
         notification_type = NotificationType.objects.filter(

@@ -157,7 +157,7 @@ class PostgresProvider:
                         full_filters = Q(full_filters & join_filters)
         return full_filters
 
-    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, trigram_max=0.85, require_distinct=True):
+    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', trigram_max=0.85, require_distinct=True):
         resultset = None
         page = int(page)
         # filter on query first, then use filters (more exact, used when searching within) to narrow
@@ -177,7 +177,8 @@ class PostgresProvider:
                 else:
                     resultset = resultset.filter(zero_distance__lte=trigram_max).filter(
                         one_distance__lte=trigram_max)
-                resultset = resultset.order_by('zero_distance', 'one_distance')
+                resultset = resultset.order_by(
+                    'zero_distance', 'one_distance', order_by)
             else:
                 resultset = obj.objects.annotate(
                     zero_distance=TrigramWordDistance(term, trigram_fields[0]))
@@ -186,12 +187,11 @@ class PostgresProvider:
                         Q((Q(zero_distance__lte=trigram_max) & filters)))
                 else:
                     resultset = resultset.filter(zero_distance__lte=trigram_max)
-                resultset = resultset.order_by('zero_distance')
+                resultset = resultset.order_by('zero_distance', order_by)
             require_distinct = False
         if require_distinct:
-            # remove any dupes
-            resultset = resultset.order_by('id', '-updated_on')
-            resultset = resultset.distinct('id')
+            # remove any dupes & apply order_by
+            resultset = resultset.order_by(order_by).distinct()
         page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
         paginator = Paginator(resultset, page_size)
         count = paginator.count
@@ -212,19 +212,20 @@ class PostgresProvider:
             final_filters = Q(include_filters & exclude_filters)
         elif exclude_filters:
             final_filters = exclude_filters
+        elif include_filters:
+            final_filters = include_filters
         return final_filters
 
     def search_works(self, **kwargs):
         work_search = WorkSearch()
         work_search.from_dict(kwargs)
         work_filters = self.get_filters(work_search)
-        print(work_filters)
         # build query
         query = self.get_query(work_search.term, work_search.term_search_fields)
         if not query and not work_filters:
             return []
         resultset = self.run_queries(work_filters, query, Work, [
-                                     'title', 'summary'], kwargs['term'], kwargs['page'])
+                                     'title', 'summary'], work_search.term, kwargs['page'], work_search.order_by)
         # build final resultset
         result_json = []
         for result in resultset[0]:
@@ -253,7 +254,7 @@ class PostgresProvider:
         if not query and not bookmark_filters:
             return []
         resultset = self.run_queries(bookmark_filters, query, Bookmark, [
-                                     'title', 'description'], kwargs['term'])
+                                     'title', 'description'], bookmark_search.term, kwargs.get('page', 1), bookmark_search.order_by)
         result_json = []
         for result in resultset[0]:
             username = result.user.username
@@ -280,7 +281,7 @@ class PostgresProvider:
         if not query and not collection_filters:
             return []
         resultset = self.run_queries(collection_filters, query, BookmarkCollection, [
-                                     'title', 'short_description'], kwargs['term'])
+                                     'title', 'short_description'], collection_search.term, kwargs.get('page', 1), collection_search.order_by)
         result_json = []
         for result in resultset[0]:
             username = result.user.username
@@ -355,7 +356,7 @@ class PostgresProvider:
         if not query and not tag_filters:
             return []
         resultset = self.run_queries(tag_filters, query, Tag, [
-                                     'text'], kwargs['term'], kwargs['page'], 0.7, False)
+                                     'text'], tag_search.term, kwargs.get('page', 1), tag_search.order_by, 0.7, False)
         result_json = []
         if resultset is None:
             return result_json

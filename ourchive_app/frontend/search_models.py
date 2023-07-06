@@ -3,19 +3,19 @@ class WorkSearch(object):
 		self.id = json_obj["id"]
 		self.title = json_obj["title"]
 		self.summary = json_obj["summary"]
-		self.notes = None if json_obj["notes"] is "null" else json_obj["notes"]
+		self.notes = None if json_obj["notes"] == "null" else json_obj["notes"]
 		self.is_complete = self.convert_bool(json_obj["is_complete"])
-		self.process_status = None if json_obj["process_status"] is "null" else json_obj["process_status"]
-		self.cover_url = None if json_obj["cover_url"] is "null" else json_obj["cover_url"]
-		self.cover_alt_text = None if json_obj["cover_alt_text"] is "null" else json_obj["cover_alt_text"]
-		self.epub_id = None if json_obj["epub_id"] is "null" else json_obj["epub_id"]
-		self.zip_id = None if json_obj["zip_id"] is "null" else json_obj["zip_id"]
+		self.process_status = None if json_obj["process_status"] == "null" else json_obj["process_status"]
+		self.cover_url = None if json_obj["cover_url"] == "null" else json_obj["cover_url"]
+		self.cover_alt_text = None if json_obj["cover_alt_text"] == "null" else json_obj["cover_alt_text"]
+		self.epub_id = None if json_obj["epub_id"] == "null" else json_obj["epub_id"]
+		self.zip_id = None if json_obj["zip_id"] == "null" else json_obj["zip_id"]
 		self.anon_comments_permitted = self.convert_bool(json_obj["anon_comments_permitted"])
 		self.comments_permitted = self.convert_bool(json_obj["comments_permitted"])
 		self.word_count = json_obj["word_count"]
 		self.audio_length = json_obj["audio_length"]
 		self.user_id = json_obj["user_id"]
-		self.work_type = None if json_obj["work_type"] is "null" else json_obj["work_type"]
+		self.work_type = None if json_obj["work_type"] == "null" else json_obj["work_type"]
 		self.user = json_obj["user"]
 
 	def convert_bool(string_bool):
@@ -23,12 +23,13 @@ class WorkSearch(object):
 
 
 class SearchObject(object):
-	def with_term(self, term, pagination=None, mode='all'):
+	def with_term(self, term, pagination=None, mode='all', order_by='-updated_on'):
 		return_obj = {}
 		work_search = {}
 		work_search["term"] = term
 		work_search["mode"] = mode
 		work_search["page"] = 1
+		work_search["order_by"] = order_by
 		work_search["include_filter"] = {}
 		work_search["exclude_filter"] = {}
 		return_obj["work_search"] = work_search
@@ -37,6 +38,7 @@ class SearchObject(object):
 		bookmark_search["term"] = term
 		bookmark_search["page"] = 1
 		bookmark_search["mode"] = mode
+		bookmark_search["order_by"] = order_by
 		bookmark_search["include_filter"] = {}
 		bookmark_search["exclude_filter"] = {}
 		return_obj["bookmark_search"] = bookmark_search
@@ -45,6 +47,7 @@ class SearchObject(object):
 		collection_search["term"] = term
 		collection_search["mode"] = mode
 		collection_search["page"] = 1
+		collection_search["order_by"] = order_by
 		collection_search["include_filter"] = {}
 		collection_search["exclude_filter"] = {}
 		return_obj["collection_search"] = collection_search
@@ -59,6 +62,7 @@ class SearchObject(object):
 		tag_search["term"] = term
 		tag_search["mode"] = mode
 		tag_search["page"] = 1
+		tag_search["order_by"] = order_by
 		tag_search["include_filter"] = {}
 		tag_search["exclude_filter"] = {}
 		return_obj["tag_search"] = tag_search

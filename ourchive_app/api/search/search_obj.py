@@ -203,6 +203,7 @@ class BookmarkSearch(object):
         self.filter = BookmarkFilter()
         self.term = ""
         self.mode = ""
+        self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'description']
         self.page = 1
@@ -212,6 +213,7 @@ class BookmarkSearch(object):
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
         self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
+        self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -226,6 +228,7 @@ class CollectionSearch(object):
         self.filter = CollectionFilter()
         self.term = ""
         self.mode = ""
+        self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'short_description']
         self.page = 1
@@ -235,6 +238,7 @@ class CollectionSearch(object):
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
         self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
+        self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -249,6 +253,7 @@ class TagSearch(object):
         self.filter = TagFilter()
         self.term = ""
         self.mode = ""
+        self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['text']
         self.page = 1
@@ -258,6 +263,7 @@ class TagSearch(object):
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
         self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
+        self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -271,6 +277,7 @@ class UserSearch(object):
     def __init__(self):
         self.filter = None
         self.term = ""
+        self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on', 'password', 'is_superuser', 'first_name',
                                 'last_name', 'is_staff', 'email', 'date_joined', 'last_login', 'is_active']
         self.term_search_fields = ['username']
@@ -292,6 +299,7 @@ class WorkSearch(object):
         self.filter = WorkFilter()
         self.term = ""
         self.mode = ""
+        self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'summary',
                                    'chapters__title', 'chapters__summary']
@@ -301,7 +309,8 @@ class WorkSearch(object):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
-        self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all' if 'mode' in dict_obj else 'all'
+        self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
+        self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
         self.filter = self.filter.to_dict()

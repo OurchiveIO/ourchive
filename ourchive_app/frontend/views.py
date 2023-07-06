@@ -607,7 +607,7 @@ def get_search_request(request, request_object, request_builder):
 					request_object['tag_search'][f'{include_exclude}_filter']['tag_type'].append(tag_type)
 					request_object['tag_search'][f'{include_exclude}_filter']['text'].append(tag_text)
 				elif filter_type == 'bookmark':
-					if len(request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
+					if filter_details[0] in request_object['bookmark_search'][f'{include_exclude}_filter'] and len(request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
 						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
 					else:
 						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]] = []
@@ -679,8 +679,9 @@ def bookmark_autocomplete(request):
 def search_filter(request):
 	term = request.POST['term']
 	filter_any = 'any' if request.POST.get('any_all') == 'on' else 'all'
+	order_by = request.POST['order_by'] if 'order_by' in request.POST else None
 	request_builder = SearchObject()
-	request_object = request_builder.with_term(term, None, filter_any)
+	request_object = request_builder.with_term(term, None, filter_any, order_by)
 	request_object = get_search_request(request, request_object, request_builder)
 	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
 	works = response_json['results']['work']
