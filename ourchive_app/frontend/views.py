@@ -1008,7 +1008,6 @@ def new_bookmark_collection(request):
 def edit_bookmark_collection(request, pk):
 	if request.method == 'POST':
 		collection_dict = get_bookmark_collection_obj(request)
-		print(collection_dict)
 		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict, object_name='Bookmark Collection')
 		process_message(request, response)
 		return redirect(f'/bookmark-collections/{pk}')

@@ -25,8 +25,6 @@ class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
 
     def process_attributes(attr_obj, validated_data, attributes):
-        print(attr_obj)
-        print(validated_data)
         attr_obj.attributes.clear()
         attr_types = set()
         for attribute in attributes:
@@ -747,8 +745,6 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
     def update(self, bookmark, validated_data):
-        print("HEWWO?")
-        print(validated_data)
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
             bookmark.tags.clear()
