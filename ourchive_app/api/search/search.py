@@ -235,6 +235,7 @@ class PostgresProvider:
                 tag_dict = {}
                 tag_dict["tag_type"] = tag.tag_type.label
                 tag_dict["text"] = tag.text
+                tag_dict["display_text"] = tag.display_text
                 tags.append(tag_dict)
             work_type = None if result.work_type is None else result.work_type.type_name
             result_dict = result.__dict__

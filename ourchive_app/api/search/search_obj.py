@@ -134,6 +134,9 @@ class TagFilter(object):
             },
             'text': {
                 'text__icontains': [],
+            },
+            'id': {
+                'id__exact': [],
             }
         }
         self.exclude_filters = {
@@ -149,6 +152,7 @@ class TagFilter(object):
         if include:
             self.include_filters['tag_type']['tag_type__label__exact'] = dict_obj.get('tag_type', [])
             self.include_filters['text']['text__icontains'] = dict_obj.get('text', [])
+            self.include_filters['id']['id__exact'] = dict_obj.get('id', [])
         else:
             self.exclude_filters['tag_type']['tag_type__label__exact'] = dict_obj.get('tag_type', [])
             self.exclude_filters['text']['text__icontains'] = dict_obj.get('text', [])
@@ -206,7 +210,7 @@ class BookmarkSearch(object):
         self.exclude_mode = ""
         self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
-        self.term_search_fields = ['title', 'description']
+        self.term_search_fields = ['title', 'description', 'tags__text']
         self.page = 1
 
     def from_dict(self, dict_obj):
@@ -233,7 +237,7 @@ class CollectionSearch(object):
         self.exclude_mode = ""
         self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
-        self.term_search_fields = ['title', 'short_description']
+        self.term_search_fields = ['title', 'short_description', 'tags__text', 'attributes__name']
         self.page = 1
 
     def from_dict(self, dict_obj):
@@ -309,7 +313,7 @@ class WorkSearch(object):
         self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'summary',
-                                   'chapters__title', 'chapters__summary']
+                                   'chapters__title', 'chapters__summary', 'tags__text', 'attributes__name']
         self.page = 1
 
     def from_dict(self, dict_obj):

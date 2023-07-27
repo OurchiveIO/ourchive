@@ -761,14 +761,20 @@ class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def perform_update(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
             serializer.pop('header_url')
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, attributes=attributes)
 
     def perform_create(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
             serializer.pop('header_url')
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, attributes=attributes)
 
 
 class CommentList(generics.ListCreateAPIView):

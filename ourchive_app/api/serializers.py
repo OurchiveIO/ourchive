@@ -25,6 +25,8 @@ class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
 
     def process_attributes(attr_obj, validated_data, attributes):
+        print(attr_obj)
+        print(validated_data)
         attr_obj.attributes.clear()
         attr_types = set()
         for attribute in attributes:
@@ -745,6 +747,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
     def update(self, bookmark, validated_data):
+        print("HEWWO?")
+        print(validated_data)
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
             bookmark.tags.clear()
@@ -768,6 +772,9 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                     tag.save()
                 bookmark.tags.add(tag)
             bookmark.save()
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+            bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
         if 'bookmarks' in validated_data:
             bookmarks = validated_data.pop('bookmarks')
             bookmark = BookmarkCollection.objects.get(id=bookmark.id)
@@ -784,6 +791,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         tags = []
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
         bookmark_collection = BookmarkCollection.objects.create(**validated_data)
         for item in tags:
             tag_id = item['text']
@@ -794,6 +803,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         for bookmark in bookmark_list:
             bookmark_collection.bookmarks.add(bookmark)
         bookmark_collection.save()
+        if attributes is not None:
+            bookmark_collection = AttributeValueSerializer.process_attributes(bookmark_collection, validated_data, attributes)
         return bookmark_collection
 
 

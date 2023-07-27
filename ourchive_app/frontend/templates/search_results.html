@@ -182,12 +182,7 @@
 			<li id="search-results-tags-li" class="uk-width-expand"> 
 				<div class="uk-width-expand" id="search-results-tags-content">
 			        <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
-			        {% for type, tag in tags.data.items %} 
-				        <dt id="search-results-tags-{{type}}-dt">{{ type }}</dt>
-				        <dd id="search-results-tags-{{type}}-dd">
-				        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="search-results-tags-{{single_tag.id}}-link" href="/tags/{{single_tag.id}}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
-				        </dd>
-				    {% endfor %}
+			        {% include "tag_partial.html" with obj_name='tag' tags=tags.data.items %}
 				    {% include 'pagination.html' with previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' %}
 					</dl>
 				</div>     

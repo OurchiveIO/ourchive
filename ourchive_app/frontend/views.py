@@ -1008,6 +1008,7 @@ def new_bookmark_collection(request):
 def edit_bookmark_collection(request, pk):
 	if request.method == 'POST':
 		collection_dict = get_bookmark_collection_obj(request)
+		print(collection_dict)
 		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict, object_name='Bookmark Collection')
 		process_message(request, response)
 		return redirect(f'/bookmark-collections/{pk}')
@@ -1030,6 +1031,7 @@ def edit_bookmark_collection(request, pk):
 def bookmark_collection(request, pk):
 	bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request, 'Bookmark Collection').response_data
 	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
+	bookmark_collection['tags'] = tags
 	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
@@ -1053,7 +1055,6 @@ def bookmark_collection(request, pk):
 		'load_more_base': f"/bookmark-collections/{pk}",
 		'view_thread_base': f"/bookmark-collections/{pk}",
 		'bkcol': bookmark_collection,
-		'tags': tags,
 		'comment_offset': comment_offset,
 		'scroll_comment_id': scroll_comment_id,
 		'expand_comments': expand_comments,
@@ -1454,12 +1455,10 @@ def bookmark(request, pk):
 		'comments': comments})
 
 
-def works_by_tag(request, pk):
-	tagged_works = do_get(f'api/tags/{pk}/works', request, 'Work').response_data
-	tagged_works['results'] = get_object_tags(tagged_works['results'])
-	tagged_bookmarks = do_get(f'api/tags/{pk}/bookmarks', request, 'Bookmark').response_data
-	tagged_bookmarks['results'] = get_object_tags(tagged_bookmarks['results'])
-	return render(request, 'tag_results.html', {'tag_id': pk, 'works': tagged_works, 'bookmarks': tagged_bookmarks})
+def works_by_tag(request, tag):
+	request.GET = request.GET.copy()
+	request.GET['term'] = tag
+	return search(request)
 
 
 def works_by_tag_next(request, tag_id):

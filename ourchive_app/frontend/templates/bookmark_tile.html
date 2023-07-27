@@ -22,12 +22,7 @@
 		<div id="bk-tile-body" class="uk-card-body">
 	    	<p id="bk-tile-work"><strong id="bk-tile-work-label">Work</strong>: {{ bookmark.work.title }}</p>
 	        <p id="bk-tile-rating-body"><strong id="bk-tile-rating-body-label">Rating</strong>: {{ bookmark.rating }} stars</p>
-	        {% for type, tag in bookmark.tags.items %} 
-		        <dt id="bk-tile-tag-type-{{type}}">{{ type }}</dt>
-		        <dd id="bk-tile-tag-container-{{type}}">
-		        <span id="bk-tile-tag-icon-{{type}}" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="bk-tile-tag-{{single_tag.id}}-link" href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.display_text|default_if_none:single_tag.text }}</a> {% endfor %}
-		        </dd>
-		    {% endfor %}
+	        {% include "tag_partial.html" with obj_name='bookmark' tags=bookmark.tags.items %}
 		    <hr/>
 		    <p>{% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}</p>
 
