@@ -133,7 +133,6 @@ class PostgresProvider:
         print('init provider')
 
     def build_filters(self, filters, mode, include):
-        print(mode)
         full_filters = None
         for field in filters:
             join_filters = None
@@ -220,7 +219,6 @@ class PostgresProvider:
     def search_works(self, **kwargs):
         work_search = WorkSearch()
         work_search.from_dict(kwargs)
-        print(work_search.include_mode)
         work_filters = self.get_filters(work_search)
         # build query
         query = self.get_query(work_search.term, work_search.term_search_fields)

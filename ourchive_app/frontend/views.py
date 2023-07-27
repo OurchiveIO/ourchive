@@ -686,7 +686,6 @@ def search_filter(request):
 	request_builder = SearchObject()
 	request_object = request_builder.with_term(term, None, (include_filter_any, exclude_filter_any), order_by)
 	request_object = get_search_request(request, request_object, request_builder)
-	print(request_object[1])
 	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
 	works = response_json['results']['work']
 	works['data'] = get_object_tags(works['data'])
