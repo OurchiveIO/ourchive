@@ -680,11 +680,13 @@ def search_filter(request):
 	term = request.POST.get('term', '')
 	if not term:
 		return redirect('/')
-	filter_any = 'any' if request.POST.get('any_all') == 'on' else 'all'
+	include_filter_any = 'any' if request.POST.get('include_any_all') == 'on' else 'all'
+	exclude_filter_any = 'any' if request.POST.get('exclude_any_all') == 'on' else 'all'
 	order_by = request.POST['order_by'] if 'order_by' in request.POST else None
 	request_builder = SearchObject()
-	request_object = request_builder.with_term(term, None, filter_any, order_by)
+	request_object = request_builder.with_term(term, None, (include_filter_any, exclude_filter_any), order_by)
 	request_object = get_search_request(request, request_object, request_builder)
+	print(request_object[1])
 	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
 	works = response_json['results']['work']
 	works['data'] = get_object_tags(works['data'])

@@ -202,7 +202,8 @@ class BookmarkSearch(object):
     def __init__(self):
         self.filter = BookmarkFilter()
         self.term = ""
-        self.mode = ""
+        self.include_mode = ""
+        self.exclude_mode = ""
         self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'description']
@@ -212,7 +213,8 @@ class BookmarkSearch(object):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
-        self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
+        self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
+        self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
@@ -227,7 +229,8 @@ class CollectionSearch(object):
     def __init__(self):
         self.filter = CollectionFilter()
         self.term = ""
-        self.mode = ""
+        self.include_mode = ""
+        self.exclude_mode = ""
         self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'short_description']
@@ -237,7 +240,8 @@ class CollectionSearch(object):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
-        self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
+        self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
+        self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
@@ -252,7 +256,8 @@ class TagSearch(object):
     def __init__(self):
         self.filter = TagFilter()
         self.term = ""
-        self.mode = ""
+        self.include_mode = ""
+        self.exclude_mode = ""
         self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['text']
@@ -262,7 +267,8 @@ class TagSearch(object):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
-        self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
+        self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
+        self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
@@ -298,7 +304,8 @@ class WorkSearch(object):
     def __init__(self):
         self.filter = WorkFilter()
         self.term = ""
-        self.mode = ""
+        self.include_mode = ""
+        self.exclude_mode = ""
         self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['title', 'summary',
@@ -306,10 +313,12 @@ class WorkSearch(object):
         self.page = 1
 
     def from_dict(self, dict_obj):
+        print(dict_obj)
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']
-        self.mode = dict_obj['mode'].lower() if 'mode' in dict_obj else 'all'
+        self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
+        self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):

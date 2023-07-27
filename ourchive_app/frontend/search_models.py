@@ -23,11 +23,12 @@ class WorkSearch(object):
 
 
 class SearchObject(object):
-	def with_term(self, term, pagination=None, mode='all', order_by='-updated_on'):
+	def with_term(self, term, pagination=None, mode=('all', 'all'), order_by='-updated_on'):
 		return_obj = {}
 		work_search = {}
 		work_search["term"] = term
-		work_search["mode"] = mode
+		work_search["include_mode"] = mode[0]
+		work_search["exclude_mode"] = mode[1]
 		work_search["page"] = 1
 		work_search["order_by"] = order_by
 		work_search["include_filter"] = {}
@@ -37,7 +38,8 @@ class SearchObject(object):
 		bookmark_search = {}
 		bookmark_search["term"] = term
 		bookmark_search["page"] = 1
-		bookmark_search["mode"] = mode
+		bookmark_search["include_mode"] = mode[0]
+		bookmark_search["exclude_mode"] = mode[1]
 		bookmark_search["order_by"] = order_by
 		bookmark_search["include_filter"] = {}
 		bookmark_search["exclude_filter"] = {}
@@ -45,7 +47,8 @@ class SearchObject(object):
 
 		collection_search = {}
 		collection_search["term"] = term
-		collection_search["mode"] = mode
+		collection_search["include_mode"] = mode[0]
+		collection_search["exclude_mode"] = mode[1]
 		collection_search["page"] = 1
 		collection_search["order_by"] = order_by
 		collection_search["include_filter"] = {}
@@ -60,7 +63,8 @@ class SearchObject(object):
 
 		tag_search = {}
 		tag_search["term"] = term
-		tag_search["mode"] = mode
+		tag_search["include_mode"] = mode[0]
+		tag_search["exclude_mode"] = mode[1]
 		tag_search["page"] = 1
 		tag_search["order_by"] = order_by
 		tag_search["include_filter"] = {}

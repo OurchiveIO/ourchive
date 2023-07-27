@@ -10,15 +10,21 @@
 		document.forms["searchResultsForm_work"].submit();
 	}
 
-	function toggleAnyAll() {
-		var toggle = document.getElementById("any-toggle-label").style.visibility;
+	function toggleAnyAll(include_exclude, flyover) {
+		var all_toggle_label = include_exclude + "-all-toggle-label";
+		var any_toggle_label = include_exclude + "-any-toggle-label";
+		if (flyover != null) {
+			all_toggle_label = all_toggle_label + "-flyover";
+			any_toggle_label = any_toggle_label + "-flyover";
+		}
+		var toggle = document.getElementById(any_toggle_label).style.visibility;
 		if (toggle === "hidden") {
-			document.getElementById("any-toggle-label").style.visibility = "visible";
-			document.getElementById("all-toggle-label").style.visibility = "hidden";
+			document.getElementById(any_toggle_label).style.visibility = "visible";
+			document.getElementById(all_toggle_label).style.visibility = "hidden";
 		}
 		else {
-			document.getElementById("any-toggle-label").style.visibility = "hidden";
-			document.getElementById("all-toggle-label").style.visibility = "visible";
+			document.getElementById(any_toggle_label).style.visibility = "hidden";
+			document.getElementById(all_toggle_label).style.visibility = "visible";
 		}
 	}
 </script>
@@ -42,9 +48,9 @@
 					<dr>
 						<label id="all-toggle-label-flyover" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
 		                <div id="any-all-toggle-inline-flyover" class="uk-inline">
-		                    <label id="any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="any-all-toggle-flyover" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="any_all" onclick="toggleAnyAll()"> <span id="any-all-slider-flyover" class="slider round"></span></label>
+		                    <label id="include-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="any-all-toggle-flyover" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="include_any_all" onclick="toggleAnyAll('include', 'flyover')"> <span id="any-all-slider-flyover" class="slider round"></span></label>
 		                </div>
-		                <label id="any-toggle-label-flyover" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+		                <label id="include-any-toggle-label-flyover" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
 		            </dr>
 		        </dl>
 		    </li>
@@ -59,7 +65,7 @@
 					<dr>
 						<label id="exclude-all-toggle-label-flyover" {% if 'any_all' in keys_exclude %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
 		                <div id="exclude-any-all-toggle-inline-flyover" class="uk-inline">
-		                    <label id="exclude-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll()"> <span id="exclude-any-all-slider-flyover" class="slider round"></span></label>
+		                    <label id="exclude-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll('exclude', 'flyover')"> <span id="exclude-any-all-slider-flyover" class="slider round"></span></label>
 		                </div>
 		                <label id="exclude-any-toggle-label-flyover" {% if 'any_all' not in keys_exclude %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
 		            </dr>
@@ -99,11 +105,11 @@
 					<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl">	
 						<dt><span class="uk-text-bold">Include all/any</span></dt>
 						<dr>
-							<label id="all-toggle-label" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+							<label id="include-all-toggle-label" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
 			                <div id="any-all-toggle-inline" class="uk-inline">
-			                    <label id="any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="any-all-toggle" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="any_all" onclick="toggleAnyAll()"> <span id="any-all-slider" class="slider round"></span></label>
+			                    <label id="any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="any-all-toggle" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="include_any_all" onclick="toggleAnyAll('include', null)"> <span id="any-all-slider" class="slider round"></span></label>
 			                </div>
-			                <label id="any-toggle-label" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+			                <label id="include-any-toggle-label" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
 			            </dr>
 			        </dl>
 			    </li>
@@ -118,7 +124,7 @@
 						<dr>
 							<label id="exclude-all-toggle-label" {% if 'any_all' in keys_exclude %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
 			                <div id="exclude-any-all-toggle-inline" class="uk-inline">
-			                    <label id="exclude-any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll()"> <span id="exclude-any-all-slider" class="slider round"></span></label>
+			                    <label id="exclude-any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll('exclude', null)"> <span id="exclude-any-all-slider" class="slider round"></span></label>
 			                </div>
 			                <label id="exclude-any-toggle-label" {% if 'any_all' not in keys_exclude %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
 			            </dr>
