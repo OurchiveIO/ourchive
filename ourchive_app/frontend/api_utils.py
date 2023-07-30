@@ -29,12 +29,12 @@ def get_headers(request):
 	headers = {}
 	headers['X-CSRFToken'] = request.COOKIES['csrftoken'] if 'csrftoken' in request.COOKIES else None
 	headers['content-type'] = 'application/json'
-	headers['Origin'] = f'{settings.API_PROTOCOL}{settings.OURCHIVE_ROOT_URL}'
+	headers['Origin'] = f'{settings.API_PROTOCOL}{settings.ROOT_URL}'
 	return headers
 
 
 def append_root_url(url):
-	return f"{settings.API_PROTOCOL}{settings.OURCHIVE_ROOT_URL}/{url}"
+	return f"{settings.API_PROTOCOL}{settings.ROOT_URL}/{url}"
 
 
 def get_200s_message(status_code, object_name, html_obj_name) -> tuple[str, str]:
