@@ -332,7 +332,6 @@ class PostgresProvider:
         for result in resultset:
             results.append({"tag": result.text, "display_text": result.display_text,
                             "id": result.id, "type": result.tag_type.label})
-        print(results)
         return results
 
     def autocomplete_bookmarks(self, term, user):
