@@ -10054,6 +10054,9 @@ a:hover {
 .rating-star > svg {
   color: gold; }
 
+.ourchive-li-flyover > dl > dt {
+  color: #F9F6F1 !important; }
+
 @media (min-width: 960px) {
   .uk-navbar-nav {
     gap: 5px; } }

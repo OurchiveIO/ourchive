@@ -24,12 +24,7 @@
 	    </div>
 	    <div class="uk-card-body" id="work-{{work.id}}-tile-card-body">
 	        <p id="work-{{work.id}}-tile-summary-p">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>
-		        {% for type, tag in work.tags.items %} 
-			        <dt id="work-{{work.id}}-tile-tags-{{type}}-dt">{{ type }}</dt>
-			        <dd id="work-{{work.id}}-tile-tags-{{type}}-dd">
-			        <span uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="work-{{work.id}}-tile-tags-{{type}}-{{single_tag.text}}-link" href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.text }}</a> {% endfor %}
-			        </dd>
-			    {% endfor %}
+		        {% include "tag_partial.html" with obj_name='work' tags=work.tags.items %}
 			<hr id="work-{{work.id}}-tile-card-body-hr"/>
 			<p id="work-{{work.id}}-tile-attributes-p">{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}</p>
 	    </div>

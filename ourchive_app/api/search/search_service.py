@@ -1,6 +1,6 @@
 from . import search
-from django.conf import settings
 from api.models import OurchiveSetting
+
 
 class OurchiveSearch:
 	def __init__(self):
@@ -18,6 +18,8 @@ class OurchiveSearch:
 			results['tag'] = self.searcher.search_tags(**kwargs['tag_search'])
 		if ('user_search') in kwargs:
 			results['user'] = self.searcher.search_users(**kwargs['user_search'])
+		if ('collection_search') in kwargs:
+			results['collection'] = self.searcher.search_collections(**kwargs['collection_search'])
 		results['facet'] = self.searcher.get_result_facets(results)
 		return results
 

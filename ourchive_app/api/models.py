@@ -355,6 +355,8 @@ class Tag(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     text = models.CharField(max_length=120, db_index=True)
     display_text = models.CharField(max_length=120, default='')
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
 
     class Meta:
         indexes = [

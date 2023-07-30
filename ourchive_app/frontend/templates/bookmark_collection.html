@@ -29,6 +29,8 @@
 	            </div>
 	        {% endif %}
 	        <p class="uk-article-meta">{{ bkcol.short_description }}</p>
+	        <p id="bkcol-{{bkcol.id}}-tile-attributes-p">{% include "object_attributes.html" with object='bkcol' object_id=bkcol.id attributes=bkcol.attributes %}</p>
+	        {% include "tag_partial.html" with obj_name='bkcol' tags=bkcol.tags.items %}
 	   	</div>
 	   	<div class="uk-text-right uk-width-1-3" id="bkcol-user-controls-parent">
 	            {% if bkcol.user == request.user.username %}

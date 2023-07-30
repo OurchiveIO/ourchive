@@ -176,6 +176,16 @@ def get_bookmark_collection_obj(request):
 	return collection_dict
 
 
+def get_default_search_result_tab(resultsets):
+	most_results = 0
+	default_tab = ''
+	for results in resultsets:
+		if len(results[0]) > most_results:
+			most_results = len(results[0])
+			default_tab = results[1]
+	return default_tab
+
+
 def referrer_redirect(request, alternate_url=None):
 	response = None
 	if request.META.get('HTTP_REFERER') is not None:
@@ -515,7 +525,6 @@ def user_bookmark_subscriptions(request, username):
 
 def user_collection_subscriptions(request, username):
 	response = do_get(f'api/users/{username}/subscriptions/collections', request, params=request.GET)
-	print(response.response_data)
 	return render(request, 'user_collection_subscriptions.html', {
 		'bookmark_collections': response.response_data,
 		'next': f"/users/{username}/subscriptions/collections/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
@@ -541,7 +550,6 @@ def unsubscribe(request, username):
 			patch_data['subscribed_to_bookmark'] = False
 		if request.POST.get('subscribed_to_collection'):
 			patch_data['subscribed_to_collection'] = False
-		print(patch_data)
 		response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
 		process_message(request, response)
 	return referrer_redirect(request)
@@ -563,26 +571,88 @@ def subscribe(request, username):
 	return referrer_redirect(request)
 
 
+def get_search_request(request, request_object, request_builder):
+	return_keys = {'include': [], 'exclude': []}
+	for key in request.POST:
+		filter_val = request.POST[key]
+		include_exclude = 'exclude' if 'exclude_' in key else 'include'
+		key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
+		if filter_val == 'csrfmiddlewaretoken':
+			continue
+		else:
+			return_keys[include_exclude].append(key)
+		if filter_val == 'term':
+			continue
+		if 'ranges' in key:
+			filter_details = key.split('|')
+			if filter_details[0] not in request_object['work_search'][f'{include_exclude}_filter']:
+				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]] = [([filter_details[2], filter_details[3]])]
+			else:
+				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append((filter_details[2], filter_details[3]))
+		else:
+			# TODO evaluate if this can be gotten rid of; do we have legitimate use cases that aren't a range?
+			filter_options = key.split('|')
+			for option in filter_options:
+				filter_details = option.split('$')
+				filter_type = request_builder.get_object_type(filter_details[0])
+				if filter_type == 'work':
+					if filter_details[0] in request_object['work_search'][f'{include_exclude}_filter'] and len(request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
+						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
+					else:
+						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]] = []
+						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
+				elif filter_type == 'tag':
+					tag_type = filter_details[0].split(',')[1]
+					tag_text = filter_details[1].split(',')[1]
+					request_object['tag_search'][f'{include_exclude}_filter']['tag_type'].append(tag_type)
+					request_object['tag_search'][f'{include_exclude}_filter']['text'].append(tag_text)
+				elif filter_type == 'bookmark':
+					if filter_details[0] in request_object['bookmark_search'][f'{include_exclude}_filter'] and len(request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
+						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
+					else:
+						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]] = []
+						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
+	return [request_object, return_keys]
+
+
 def search(request):
 	if 'term' in request.GET:
 		term = request.GET['term']
-	else:
+	elif 'term' in request.POST:
 		term = request.POST['term']
+	else:
+		return redirect('/')
 	request_builder = SearchObject()
-	request_object = request_builder.with_term(term)
-	response_json = do_post(f'api/search/', request, data=request_object).response_data
+	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
+	request_object = request_builder.with_term(term, pagination)
+	request_object = get_search_request(request, request_object, request_builder)
+	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
 	works = response_json['results']['work']
-	works = get_object_tags(works)
+	works['data'] = get_object_tags(works['data'])
 	bookmarks = response_json['results']['bookmark']
-	bookmarks = get_object_tags(bookmarks)
-	tags = group_tags(response_json['results']['tag'])
-	tag_count = len(response_json['results']['tag'])
+	bookmarks['data'] = get_object_tags(bookmarks['data'])
+	tags = response_json['results']['tag']
+	tags['data'] = group_tags(tags['data'])
+	tag_count = len(response_json['results']['tag']['data'])
 	users = response_json['results']['user']
+	collections = response_json['results']['collection']
+	default_tab = get_default_search_result_tab(
+		[
+			[works['data'], 0],
+			[bookmarks['data'], 1],
+			[tags['data'], 3],
+			[users['data'], 4],
+			[collections['data'], 2]
+		])
 	return render(request, 'search_results.html', {
 		'works': works, 'bookmarks': bookmarks,
-		'tags': tags, 'users': users, 'tag_count': tag_count,
+		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
 		'facets': response_json['results']['facet'],
-		'root': settings.ALLOWED_HOSTS[0], 'term': term})
+		'default_tab': default_tab,
+		'click_func': 'getFormVals(event)',
+		'root': settings.ALLOWED_HOSTS[0], 'term': term,
+		'keys_include': request_object[1]['include'],
+		'keys_exclude': request_object[1]['exclude']})
 
 
 def tag_autocomplete(request):
@@ -607,50 +677,42 @@ def bookmark_autocomplete(request):
 
 
 def search_filter(request):
-	term = request.POST['term']
+	term = request.POST.get('term', '')
+	if not term:
+		return redirect('/')
+	include_filter_any = 'any' if request.POST.get('include_any_all') == 'on' else 'all'
+	exclude_filter_any = 'any' if request.POST.get('exclude_any_all') == 'on' else 'all'
+	order_by = request.POST['order_by'] if 'order_by' in request.POST else None
 	request_builder = SearchObject()
-	request_object = request_builder.with_term(term)
-	for key in request.POST:
-		filter_val = request.POST[key]
-		if filter_val == 'csrfmiddlewaretoken':
-			continue
-		if filter_val == 'term':
-			continue
-		else:
-			filter_options = key.split('|')
-			for option in filter_options:
-				filter_details = option.split('$')
-				filter_type = request_builder.get_object_type(filter_details[0])
-				if filter_type == 'work':
-					if len(request_object['work_search']['filter'][filter_details[0]]) > 0:
-						request_object['work_search']['filter'][filter_details[0]].append(filter_details[1])
-					else:
-						request_object['work_search']['filter'][filter_details[0]] = []
-						request_object['work_search']['filter'][filter_details[0]].append(filter_details[1])
-				elif filter_type == 'tag':
-					tag_type = filter_details[0].split(',')[1]
-					tag_text = filter_details[1].split(',')[1]
-					request_object['tag_search']['filter']['tag_type'].append(tag_type)
-					request_object['tag_search']['filter']['text'].append(tag_text)
-				elif filter_type == 'bookmark':
-					if len(request_object['bookmark_search']['filter'][filter_details[0]]) > 0:
-						request_object['bookmark_search']['filter'][filter_details[0]].append(filter_details[1])
-					else:
-						request_object['bookmark_search']['filter'][filter_details[0]] = []
-						request_object['bookmark_search']['filter'][filter_details[0]].append(filter_details[1])
-	response_json = do_post(f'api/search/', request, data=request_object, object_name='Search')
-	works = response_json.response_data['results']['work']
-	works = get_object_tags(works)
-	bookmarks = response_json.response_data['results']['bookmark']
-	bookmarks = get_object_tags(bookmarks)
-	tags = group_tags(response_json.response_data['results']['tag'])
-	tag_count = len(response_json.response_data['results']['tag'])
-	users = response_json.response_data['results']['user']
+	request_object = request_builder.with_term(term, None, (include_filter_any, exclude_filter_any), order_by)
+	request_object = get_search_request(request, request_object, request_builder)
+	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
+	works = response_json['results']['work']
+	works['data'] = get_object_tags(works['data'])
+	bookmarks = response_json['results']['bookmark']
+	bookmarks['data'] = get_object_tags(bookmarks['data'])
+	tags = response_json['results']['tag']
+	tags['data'] = group_tags(tags['data'])
+	tag_count = len(response_json['results']['tag']['data'])
+	users = response_json['results']['user']
+	collections = response_json['results']['collection']
+	default_tab = get_default_search_result_tab(
+		[
+			[works['data'], 0],
+			[bookmarks['data'], 1],
+			[tags['data'], 3],
+			[users['data'], 4],
+			[collections['data'], 2]
+		])
 	return render(request, 'search_results.html', {
 		'works': works, 'bookmarks': bookmarks,
-		'tags': tags, 'users': users, 'tag_count': tag_count,
+		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
 		'facets': response_json['results']['facet'],
-		'root': settings.ALLOWED_HOSTS[0], 'term': term})
+		'root': settings.ALLOWED_HOSTS[0], 'term': term,
+		'default_tab': default_tab,
+		'click_func': 'getFormVals(event)',
+		'keys_include': request_object[1]['include'],
+		'keys_exclude': request_object[1]['exclude']})
 
 
 @require_http_methods(["GET"])
@@ -870,6 +932,8 @@ def new_bookmark(request, work_id):
 			'bookmark': bookmark})
 	elif request.user.is_authenticated:
 		bookmark_dict = get_bookmark_obj(request)
+		if len(bookmark_dict['rating']) > 1:
+			bookmark_dict['rating'] = 0
 		response = do_post(f'api/bookmarks/', request, data=bookmark_dict, object_name='Bookmark')
 		process_message(request, response)
 		return redirect(f'/bookmarks/{response.response_data["id"]}')
@@ -966,6 +1030,7 @@ def edit_bookmark_collection(request, pk):
 def bookmark_collection(request, pk):
 	bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request, 'Bookmark Collection').response_data
 	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
+	bookmark_collection['tags'] = tags
 	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
@@ -989,7 +1054,6 @@ def bookmark_collection(request, pk):
 		'load_more_base': f"/bookmark-collections/{pk}",
 		'view_thread_base': f"/bookmark-collections/{pk}",
 		'bkcol': bookmark_collection,
-		'tags': tags,
 		'comment_offset': comment_offset,
 		'scroll_comment_id': scroll_comment_id,
 		'expand_comments': expand_comments,
@@ -1390,12 +1454,10 @@ def bookmark(request, pk):
 		'comments': comments})
 
 
-def works_by_tag(request, pk):
-	tagged_works = do_get(f'api/tags/{pk}/works', request, 'Work').response_data
-	tagged_works['results'] = get_object_tags(tagged_works['results'])
-	tagged_bookmarks = do_get(f'api/tags/{pk}/bookmarks', request, 'Bookmark').response_data
-	tagged_bookmarks['results'] = get_object_tags(tagged_bookmarks['results'])
-	return render(request, 'tag_results.html', {'tag_id': pk, 'works': tagged_works, 'bookmarks': tagged_bookmarks})
+def works_by_tag(request, tag):
+	request.GET = request.GET.copy()
+	request.GET['term'] = tag
+	return search(request)
 
 
 def works_by_tag_next(request, tag_id):

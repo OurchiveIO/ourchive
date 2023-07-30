@@ -618,8 +618,6 @@ class ChapterCommentDetail(generics.ListCreateAPIView):
         return ChapterComment.objects.filter(chapter__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
 
     def perform_create(self, serializer):
-        print("hello")
-        print(self.request.content)
         serializer.save(user=self.request.user)
 
 
@@ -763,14 +761,20 @@ class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def perform_update(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
             serializer.pop('header_url')
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, attributes=attributes)
 
     def perform_create(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
             serializer.pop('header_url')
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, attributes=attributes)
 
 
 class CommentList(generics.ListCreateAPIView):
@@ -821,7 +825,6 @@ class CollectionCommentList(generics.ListCreateAPIView):
         return CollectionComment.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
-        print("hewwo")
         serializer.save(user=self.request.user)
 
 
