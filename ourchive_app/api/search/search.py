@@ -323,13 +323,16 @@ class PostgresProvider:
             resultset = Tag.objects.filter(
                 tag_type__label=tag_type).filter(text__contains=term)
         else:
-            resultset = Tag.objects.filter(text__contains=term)
+            resultset = Tag.objects.annotate(zero_distance=TrigramWordDistance(term, 'text'))
+            resultset = resultset.filter(zero_distance__lte=.85)
+            resultset = resultset.order_by('zero_distance', 'text')
         if resultset is None:
             resultset = Tag.objects.filter(
                 tag_type__label=tag_type) if fetch_all else []
         for result in resultset:
             results.append({"tag": result.text, "display_text": result.display_text,
                             "id": result.id, "type": result.tag_type.label})
+        print(results)
         return results
 
     def autocomplete_bookmarks(self, term, user):
