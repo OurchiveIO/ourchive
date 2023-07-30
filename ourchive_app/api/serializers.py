@@ -507,6 +507,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'text' in validated_data:
             validated_data['word_count'] = 0 if not validated_data['text'] else len(
                 validated_data['text'].split())
+        validated_data['text'] = nh3.clean(validated_data['text']) if validated_data['text'] is not None else ''
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
@@ -523,6 +524,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         validated_data['word_count'] = 0 if not (
             'text' in validated_data and validated_data['text']) else len(validated_data['text'].split())
+        validated_data['text'] = nh3.clean(validated_data['text']) if validated_data['text'] is not None else ''
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -607,6 +609,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
         work = self.update_word_count(work)
         validated_data['word_count'] = work.word_count
+        validated_data['summary'] = nh3.clean(validated_data['summary']) if validated_data['summary'] is not None else ''
+        validated_data['notes'] = nh3.clean(validated_data['notes']) if validated_data['notes'] is not None else ''
         if 'cover_url' in validated_data:
             if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
                 validated_data['cover_url'] = ''
@@ -624,6 +628,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         if 'cover_url' in validated_data:
             if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
                 validated_data['cover_url'] = ''
+        validated_data['summary'] = nh3.clean(validated_data['summary']) if validated_data['summary'] is not None else ''
+        validated_data['notes'] = nh3.clean(validated_data['notes']) if validated_data['notes'] is not None else ''
         work = Work.objects.create(**validated_data)
         work = self.process_tags(work, validated_data, tags)
         if attributes is not None:
@@ -691,6 +697,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, bookmark, validated_data):
         if 'title' in validated_data and validated_data['title'] == '':
             validated_data['title'] = f'Bookmark: {bookmark.work.title}'
+        validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -701,6 +708,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -771,6 +779,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
+        validated_data['short_description'] = nh3.clean(validated_data['short_description']) if validated_data['short_description'] is not None else ''
+        validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         if 'bookmarks' in validated_data:
             bookmarks = validated_data.pop('bookmarks')
             bookmark = BookmarkCollection.objects.get(id=bookmark.id)
