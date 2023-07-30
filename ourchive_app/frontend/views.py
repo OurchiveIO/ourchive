@@ -231,7 +231,7 @@ def index(request):
 	return render(request, 'index.html', {
 		'heading_message': _('Welcome to Ourchive'),
 		'long_message': _('Ourchive is a configurable, extensible, multimedia archive, meant to serve as a modern alternative to PHP-based archives. You can search for existing works, create your own, or create curated collections of works you\'ve enjoyed. Have fun with it!'),
-		'root': settings.ALLOWED_HOSTS[0],
+		'root': settings.ROOT_URL,
 		'stylesheet_name': 'ourchive-light.css',
 		'has_notifications': request.session.get('has_notifications')
 	})
@@ -298,7 +298,7 @@ def user_name(request, username):
 		'bookmarks_next': bookmark_next,
 		'bookmarks_previous': bookmark_previous,
 		'user_filter': username,
-		'root': settings.ALLOWED_HOSTS[0],
+		'root': settings.ROOT_URL,
 		'works': works,
 		'anchor': anchor,
 		'works_next': work_next,
@@ -374,7 +374,7 @@ def user_works(request, username):
 		'next': f"/username/{username}/works/{works['next_params']}" if works["next_params"] is not None else None,
 		'previous': f"/username/{username}/works/{works['prev_params']}" if works["prev_params"] is not None else None,
 		'user_filter': username,
-		'root': settings.ALLOWED_HOSTS[0]})
+		'root': settings.ROOT_URL})
 
 
 def user_works_drafts(request, username):
@@ -384,7 +384,7 @@ def user_works_drafts(request, username):
 	return render(request, 'works.html', {
 		'works': works,
 		'user_filter': username,
-		'root': settings.ALLOWED_HOSTS[0]})
+		'root': settings.ROOT_URL})
 
 
 def edit_account(request, username):
@@ -650,7 +650,7 @@ def search(request):
 		'facets': response_json['results']['facet'],
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
-		'root': settings.ALLOWED_HOSTS[0], 'term': term,
+		'root': settings.ROOT_URL, 'term': term,
 		'keys_include': request_object[1]['include'],
 		'keys_exclude': request_object[1]['exclude']})
 
@@ -708,7 +708,7 @@ def search_filter(request):
 		'works': works, 'bookmarks': bookmarks,
 		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
 		'facets': response_json['results']['facet'],
-		'root': settings.ALLOWED_HOSTS[0], 'term': term,
+		'root': settings.ROOT_URL, 'term': term,
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
 		'keys_include': request_object[1]['include'],
@@ -727,7 +727,7 @@ def works(request):
 		'works': works,
 		'next': f"/works/{works_response['next_params']}" if works_response['next_params'] is not None else None,
 		'previous': f"/works/{works_response['prev_params']}" if works_response['prev_params'] is not None else None,
-		'root': settings.ALLOWED_HOSTS[0]})
+		'root': settings.ROOT_URL})
 
 
 def works_by_type(request, type_id):
@@ -736,7 +736,7 @@ def works_by_type(request, type_id):
 	works = get_object_tags(works)
 	return render(request, 'works.html', {
 		'works': works,
-		'root': settings.ALLOWED_HOSTS[0]})
+		'root': settings.ROOT_URL})
 
 
 def new_work(request):
@@ -982,7 +982,7 @@ def bookmark_collections(request):
 		'bookmark_collections': bookmark_collections,
 		'next': f"/bookmarkcollections/{response['next_params']}" if response['next_params'] is not None else None,
 		'previous': f"/bookmarkcollections/{response['prev_params']}" if response['prev_params'] is not None else None,
-		'root': settings.ALLOWED_HOSTS[0]})
+		'root': settings.ROOT_URL})
 
 
 def new_bookmark_collection(request):
@@ -1217,7 +1217,7 @@ def work(request, pk, chapter_offset=0):
 		'id': pk,
 		'tags': tags,
 		'view_full': view_full,
-		'root': settings.ALLOWED_HOSTS[0],
+		'root': settings.ROOT_URL,
 		'chapters': chapters,
 		'chapter_offset': chapter_offset,
 		'next_chapter': f'/works/{pk}/{chapter_offset + 1}' if 'next' in chapter_response and chapter_response['next'] else None,
