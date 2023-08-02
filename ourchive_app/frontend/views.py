@@ -1207,6 +1207,7 @@ def work(request, pk, chapter_offset=0):
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	chapters = []
 	for chapter in chapter_json:
+		chapter['updated_on'] = parse(chapter['updated_on']).date()
 		if 'id' in chapter:
 			if 'comment_thread' not in request.GET:
 				comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
