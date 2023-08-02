@@ -12,7 +12,7 @@
     {% endif %}
     <link rel="stylesheet" href="{% static 'frontend/css/scroll-to-top.css' %}" />
     <link rel="stylesheet" href="{% static 'frontend/css/editor.css' %}" />
-    <link rel="shortcut icon" href="{% static 'favicon/favicon.ico' %}"/>
+    <link rel="shortcut icon" href="{% static 'favicon/favicon.svg' %}"/>
     <script src="{% static 'frontend/js/uikit.min.js' %}"></script>
     <script src="{% static 'frontend/js/uikit-icons.min.js' %}"></script>
     <script src="{% static 'frontend/js/ourchive-tags.js' %}"></script>
@@ -68,7 +68,7 @@
 		    <div class="uk-navbar-left" id="uk-nav-left">
 		    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
 		        <ul class="uk-navbar-nav uk-visible@s">
-		            <li class="uk-active" id="nav-home"><a href="/">Home</a></li>
+		            <li class="uk-active" id="nav-home"><a href="/">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav"/>{% endif %}</a></li>
 		            <li><a href="/works/" id="nav-works">Works</a></li>
 		            <li><a href="/bookmarks/" id="nav-bookmarks">Bookmarks</a></li>
 		            <li><a href="/bookmark-collections/" id="nav-bookmark-collections">Bookmark Collections</a></li>
@@ -168,7 +168,7 @@
 		</div>
 	</div>
 	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="arrow-up"></span></button>
-	<div class="uk-container uk-margin" id="content-block-parent">	
+	<div class="uk-container uk-margin content-block-parent" id="content-block-parent">	
 		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true">
 			{% block content %}
 				<div class="uk-child-width-1-1" id="index-content-div">

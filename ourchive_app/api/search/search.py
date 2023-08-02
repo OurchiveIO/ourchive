@@ -237,6 +237,15 @@ class PostgresProvider:
                 tag_dict["text"] = tag.text
                 tag_dict["display_text"] = tag.display_text
                 tags.append(tag_dict)
+            attributes = []
+            for attribute in result.attributes.all():
+                attribute_dict = {}
+                attribute_dict["attribute_type"] = attribute.attribute_type.display_name
+                attribute_dict["name"] = attribute.name
+                attribute_dict["display_name"] = attribute.display_name
+                attribute_dict["id"] = attribute.id
+                attribute_dict["order"] = attribute.order
+                attributes.append(attribute_dict)
             work_type = None if result.work_type is None else result.work_type.type_name
             result_dict = result.__dict__
             for field in work_search.reserved_fields:
@@ -244,6 +253,7 @@ class PostgresProvider:
             result_dict["user"] = username
             result_dict["work_type"] = work_type
             result_dict["tags"] = tags
+            result_dict["attributes"] = attributes
             result_json.append(result_dict)
         return {'data': result_json, 'page': resultset[1]}
 
@@ -264,10 +274,21 @@ class PostgresProvider:
                 tag_dict = {}
                 tag_dict["tag_type"] = tag.tag_type.label
                 tag_dict["text"] = tag.text
+                tag_dict["display_text"] = tag.display_text
                 tags.append(tag_dict)
+            attributes = []
+            for attribute in result.attributes.all():
+                attribute_dict = {}
+                attribute_dict["attribute_type"] = attribute.attribute_type.display_name
+                attribute_dict["name"] = attribute.name
+                attribute_dict["display_name"] = attribute.display_name
+                attribute_dict["id"] = attribute.id
+                attribute_dict["order"] = attribute.order
+                attributes.append(attribute_dict)
             result_dict = result.__dict__
             result_dict["tags"] = tags
             result_dict["user"] = username
+            result_dict["attributes"] = attributes
             for field in bookmark_search.reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
@@ -291,9 +312,20 @@ class PostgresProvider:
                 tag_dict = {}
                 tag_dict["tag_type"] = tag.tag_type.label
                 tag_dict["text"] = tag.text
+                tag_dict["display_text"] = tag.display_text
                 tags.append(tag_dict)
+            attributes = []
+            for attribute in result.attributes.all():
+                attribute_dict = {}
+                attribute_dict["attribute_type"] = attribute.attribute_type.display_name
+                attribute_dict["name"] = attribute.name
+                attribute_dict["display_name"] = attribute.display_name
+                attribute_dict["id"] = attribute.id
+                attribute_dict["order"] = attribute.order
+                attributes.append(attribute_dict)
             result_dict = result.__dict__
             result_dict["tags"] = tags
+            result_dict["attributes"] = attributes
             result_dict["user"] = username
             for field in collection_search.reserved_fields:
                 result_dict.pop(field, None)
@@ -386,7 +418,7 @@ class PostgresProvider:
 
         # todo move to db setting
         word_count_dict = {}
-        word_count_dict["label"] = "Word Count"
+        word_count_dict["label"] = "Work Word Count"
         word_count_dict["values"] = [{"label": "Under 20,000", "filter_val": "word_count_range|ranges|20000|0"},
                                      {"label": "20,000 - 50,000",
                                          "filter_val": "word_count_range|ranges|20000|50000"},
@@ -417,22 +449,29 @@ class PostgresProvider:
                                    {"label": "Work In Progress", "filter_val": "complete$0"}]
         result_json.append(complete_dict)
 
+        # TODO: DRY
+
         tags_dict = {}
         for tag_type in TagType.objects.all():
             tags_dict[tag_type.label] = []
         for result in results['work']['data']:
             if len(result['tags']) > 0:
                 for tag in result['tags']:
-                    if tag['text'] not in tags_dict[tag['tag_type']]:
-                        tags_dict[tag['tag_type']].append(tag['text'])
+                    if tag['display_text'] not in tags_dict[tag['tag_type']]:
+                        tags_dict[tag['tag_type']].append(tag['display_text'])
         for result in results['bookmark']['data']:
             if len(result['tags']) > 0:
                 for tag in result['tags']:
-                    if tag['text'] not in tags_dict[tag['tag_type']]:
-                        tags_dict[tag['tag_type']].append(tag['text'])
+                    if tag['display_text'] not in tags_dict[tag['tag_type']]:
+                        tags_dict[tag['tag_type']].append(tag['display_text'])
+        for result in results['collection']['data']:
+            if len(result['tags']) > 0:
+                for tag in result['tags']:
+                    if tag['display_text'] not in tags_dict[tag['tag_type']]:
+                        tags_dict[tag['tag_type']].append(tag['display_text'])
         for result in results['tag']['data']:
-            if result['text'] not in tags_dict[result['tag_type']]:
-                tags_dict[result['tag_type']].append(result['text'])
+            if result['display_text'] not in tags_dict[result['tag_type']]:
+                tags_dict[result['tag_type']].append(result['display_text'])
         for key in tags_dict:
             if len(tags_dict[key]) > 0:
                 tag_filter_vals = []
@@ -440,6 +479,36 @@ class PostgresProvider:
                     filter_val = "tag_type," + str(key) + "$tag_text," + val
                     tag_filter_vals.append({"label": val, "filter_val": filter_val})
                 result_json.append({'label': key, 'values': tag_filter_vals})
+
+        attributes_dict = {}
+        for result in results['work']['data']:
+            if len(result['attributes']) > 0:
+                for attribute in result['attributes']:
+                    if attribute['attribute_type'] not in attributes_dict:
+                        attributes_dict[attribute['attribute_type']] = [attribute['display_name']]
+                    elif attribute['display_name'] not in attributes_dict[attribute['attribute_type']]:
+                        attributes_dict[attribute['attribute_type']].append(attribute['display_name'])
+        for result in results['bookmark']['data']:
+            if len(result['attributes']) > 0:
+                for attribute in result['attributes']:
+                    if attribute['attribute_type'] not in attributes_dict:
+                        attributes_dict[attribute['attribute_type']] = [attribute['display_name']]
+                    elif attribute['display_name'] not in attributes_dict[attribute['attribute_type']]:
+                        attributes_dict[attribute['attribute_type']].append(attribute['display_name'])
+        for result in results['collection']['data']:
+            if len(result['attributes']) > 0:
+                for attribute in result['attributes']:
+                    if attribute['attribute_type'] not in attributes_dict:
+                        attributes_dict[attribute['attribute_type']] = [attribute['display_name']]
+                    elif attribute['display_name'] not in attributes_dict[attribute['attribute_type']]:
+                        attributes_dict[attribute['attribute_type']].append(attribute['display_name'])
+        for key in attributes_dict:
+            if len(attributes_dict[key]) > 0:
+                attribute_filter_vals = []
+                for val in attributes_dict[key]:
+                    filter_val = "attribute_type," + str(key) + "$attribute_text," + val
+                    attribute_filter_vals.append({"label": val, "filter_val": filter_val})
+                result_json.append({'label': key, 'values': attribute_filter_vals})
 
         stars = OurchiveSetting.objects.filter(name='Rating Star Count').first()
         bookmark_rating_dict = {}

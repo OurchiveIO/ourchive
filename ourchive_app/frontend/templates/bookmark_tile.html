@@ -23,8 +23,7 @@
 	    	<p id="bk-tile-work"><strong id="bk-tile-work-label">Work</strong>: {{ bookmark.work.title }}</p>
 	        <p id="bk-tile-rating-body"><strong id="bk-tile-rating-body-label">Rating</strong>: {{ bookmark.rating }} stars</p>
 	        {% include "tag_partial.html" with obj_name='bookmark' tags=bookmark.tags.items %}
-		    <hr/>
-		    <p>{% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}</p>
+		    {% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}
 
 		</div>
 	    <div class="uk-card-footer" id="bk-tile-footer-parent">

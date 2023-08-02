@@ -70,6 +70,12 @@ def get_attributes_for_display(obj_attrs):
 	return attrs
 
 
+def get_array_attributes_for_display(dict_array, attr_key):
+	for obj in dict_array:
+		obj[attr_key] = get_attributes_for_display(obj[attr_key])
+	return dict_array
+
+
 def sanitize_rich_text(rich_text):
 	if rich_text is not None:
 		rich_text = escape(rich_text)
@@ -593,6 +599,7 @@ def get_search_request(request, request_object, request_builder):
 			# TODO evaluate if this can be gotten rid of; do we have legitimate use cases that aren't a range?
 			filter_options = key.split('|')
 			for option in filter_options:
+				print(option)
 				filter_details = option.split('$')
 				filter_type = request_builder.get_object_type(filter_details[0])
 				if filter_type == 'work':
@@ -603,9 +610,11 @@ def get_search_request(request, request_object, request_builder):
 						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
 				elif filter_type == 'tag':
 					tag_type = filter_details[0].split(',')[1]
-					tag_text = filter_details[1].split(',')[1]
+					tag_text = (filter_details[1].split(',')[1]).lower() if filter_details[1].split(',')[1] else ''
 					request_object['tag_search'][f'{include_exclude}_filter']['tag_type'].append(tag_type)
 					request_object['tag_search'][f'{include_exclude}_filter']['text'].append(tag_text)
+					request_object['work_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
+					request_object['bookmark_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
 				elif filter_type == 'bookmark':
 					if filter_details[0] in request_object['bookmark_search'][f'{include_exclude}_filter'] and len(request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
 						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
@@ -629,13 +638,16 @@ def search(request):
 	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
 	works = response_json['results']['work']
 	works['data'] = get_object_tags(works['data'])
+	works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
 	bookmarks = response_json['results']['bookmark']
 	bookmarks['data'] = get_object_tags(bookmarks['data'])
+	bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
 	tags = response_json['results']['tag']
 	tags['data'] = group_tags(tags['data'])
 	tag_count = len(response_json['results']['tag']['data'])
 	users = response_json['results']['user']
 	collections = response_json['results']['collection']
+	collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
 	default_tab = get_default_search_result_tab(
 		[
 			[works['data'], 0],
@@ -687,15 +699,20 @@ def search_filter(request):
 	request_object = request_builder.with_term(term, None, (include_filter_any, exclude_filter_any), order_by)
 	request_object = get_search_request(request, request_object, request_builder)
 	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
+	# todo DRY - this is redundant w search method - move processing to its own method
 	works = response_json['results']['work']
 	works['data'] = get_object_tags(works['data'])
+	works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
 	bookmarks = response_json['results']['bookmark']
 	bookmarks['data'] = get_object_tags(bookmarks['data'])
+	bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
 	tags = response_json['results']['tag']
 	tags['data'] = group_tags(tags['data'])
 	tag_count = len(response_json['results']['tag']['data'])
 	users = response_json['results']['user']
 	collections = response_json['results']['collection']
+	collections['data'] = get_object_tags(collections['data'])
+	collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
 	default_tab = get_default_search_result_tab(
 		[
 			[works['data'], 0],
@@ -721,8 +738,7 @@ def works(request):
 	works_response = response.response_data
 	works = response.response_data['results'] if 'results' in response.response_data else []
 	works = get_object_tags(works)
-	for work in works:
-		work['attributes'] = get_attributes_for_display(work['attributes'])
+	works = get_array_attributes_for_display(works, 'attributes')
 	return render(request, 'works.html', {
 		'works': works,
 		'next': f"/works/{works_response['next_params']}" if works_response['next_params'] is not None else None,

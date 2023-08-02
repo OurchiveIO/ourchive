@@ -25,8 +25,7 @@
 	    <div class="uk-card-body" id="work-{{work.id}}-tile-card-body">
 	        <p id="work-{{work.id}}-tile-summary-p">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>
 		        {% include "tag_partial.html" with obj_name='work' tags=work.tags.items %}
-			<hr id="work-{{work.id}}-tile-card-body-hr"/>
-			<p id="work-{{work.id}}-tile-attributes-p">{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}</p>
+			{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}
 	    </div>
 	    <div class="uk-card-footer" id="work-{{work.id}}-tile-footer-parent">
 	        <a id="work-{{work.id}}-tile-footer-readmore" href="/works/{{work.id}}" class="uk-button uk-button-text">Read more</a>

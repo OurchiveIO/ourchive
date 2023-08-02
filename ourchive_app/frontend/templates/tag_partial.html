@@ -1,6 +1,8 @@
+<dl class="uk-description-list uk-margin-small-top" id="{{obj_name}}-tags-dl">
 {% for type, tag in tags %}
     <dt id="{{obj_name}}-tile-tag-type-{{type}}">{{ type }}</dt>
     <dd id="{{obj_name}}-tile-tag-container-{{type}}">
     <span id="{{obj_name}}-tile-tag-icon-{{type}}" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link" href="{% url 'tag-results' single_tag.text %}" style="padding-left:5px;">{{ single_tag.display_text|default:single_tag.text }}</a> {% endfor %}
     </dd>
 {% endfor %}
+</dl>

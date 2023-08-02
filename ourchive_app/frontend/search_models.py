@@ -31,8 +31,8 @@ class SearchObject(object):
 		work_search["exclude_mode"] = mode[1]
 		work_search["page"] = 1
 		work_search["order_by"] = order_by
-		work_search["include_filter"] = {}
-		work_search["exclude_filter"] = {}
+		work_search["include_filter"] = {'tags': [], 'attributes': []}
+		work_search["exclude_filter"] = {'tags': [], 'attributes': []}
 		return_obj["work_search"] = work_search
 
 		bookmark_search = {}
@@ -41,8 +41,8 @@ class SearchObject(object):
 		bookmark_search["include_mode"] = mode[0]
 		bookmark_search["exclude_mode"] = mode[1]
 		bookmark_search["order_by"] = order_by
-		bookmark_search["include_filter"] = {}
-		bookmark_search["exclude_filter"] = {}
+		bookmark_search["include_filter"] = {'tags': [], 'attributes': []}
+		bookmark_search["exclude_filter"] = {'tags': [], 'attributes': []}
 		return_obj["bookmark_search"] = bookmark_search
 
 		collection_search = {}
@@ -51,8 +51,8 @@ class SearchObject(object):
 		collection_search["exclude_mode"] = mode[1]
 		collection_search["page"] = 1
 		collection_search["order_by"] = order_by
-		collection_search["include_filter"] = {}
-		collection_search["exclude_filter"] = {}
+		collection_search["include_filter"] = {'tags': [], 'attributes': []}
+		collection_search["exclude_filter"] = {'tags': [], 'attributes': []}
 		return_obj["collection_search"] = collection_search
 
 		user_search = {}
@@ -67,8 +67,8 @@ class SearchObject(object):
 		tag_search["exclude_mode"] = mode[1]
 		tag_search["page"] = 1
 		tag_search["order_by"] = order_by
-		tag_search["include_filter"] = {}
-		tag_search["exclude_filter"] = {}
+		tag_search["include_filter"] = {'tag_type': [], 'text': []}
+		tag_search["exclude_filter"] = {'tag_type': [], 'text': []}
 		return_obj["tag_search"] = tag_search
 
 		if pagination:

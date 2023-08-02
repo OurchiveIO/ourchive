@@ -42,6 +42,7 @@ class WorkFilter(object):
             },
             'tags': {
                 'tags__text__icontains': [],
+                # 'tags__text__exact': [],
             },
             'word_count': {
                 'word_count__gte': [],
@@ -92,9 +93,6 @@ class BookmarkFilter(object):
             'rating': {
                 'rating__gte': [],
             },
-            'complete': {
-                'is_complete__exact': [],
-            },
             'tags': {
                 'tags__text__icontains': [],
             }
@@ -103,9 +101,6 @@ class BookmarkFilter(object):
             'rating': {
                 'rating__gte': [],
             },
-            'complete': {
-                'is_complete__exact': [],
-            },
             'tags': {
                 'tags__text__icontains': [],
             }
@@ -113,13 +108,11 @@ class BookmarkFilter(object):
 
     def from_dict(self, dict_obj, include=True):
         if include:
-            self.include_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
             self.include_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
-            self.include_filters['tags']['is_complete__exact'] = dict_obj.get('tags', [])
+            self.include_filters['tags']['tags__text__icontains'] = dict_obj.get('tags', [])
         else:
-            self.exclude_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
             self.exclude_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
-            self.exclude_filters['tags']['is_complete__exact'] = dict_obj.get('tags', [])
+            self.exclude_filters['tags']['tags__text__icontains'] = dict_obj.get('tags', [])
 
     def to_dict(self):
         self_dict = self.__dict__
@@ -317,7 +310,6 @@ class WorkSearch(object):
         self.page = 1
 
     def from_dict(self, dict_obj):
-        print(dict_obj)
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         self.term = dict_obj['term']

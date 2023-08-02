@@ -1,7 +1,8 @@
-<div id="{{object}}-attributes">
+<dl class="uk-description-list uk-margin-small-top" id="{{object}}-tags-dl">
 	{% for attribute, attribute_values in attributes.items %}
-	    <span id="{{object}}-attribute-label" class="uk-text-large">{{attribute}}</span>
-        <p><span class="uk-text-medium" id="{{object}}-{{object_id}}-attribute-values">{{ attribute_values|join:", " }}</span>
-        </p>
+	    <dt id="{{object}}-attribute-label">{{attribute}}</dt>
+	    <dd id="{{object}}-tile-tag-container-{{attribute}}">
+	    <span id="{{object}}-tile-tag-icon-{{attribute}}" uk-icon="icon: tag"></span> {% for single_attr in attribute_values %}{{ single_attr }}</a> {% endfor %}
+	    </dd>
 	{% endfor %}
-</div>
+</dl>

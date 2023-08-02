@@ -13,6 +13,7 @@
 				<p class="uk-text-medium">{{ bookmark_collection.short_description }}</p>
 			</div>
 			{% include "tag_partial.html" with obj_name='bk' tags=bookmark_collection.tags.items %}
+			{% include "object_attributes.html" with object='bkcol' object_id=bookmark_collection.id attributes=bookmark_collection.attributes %}
 		</div>
 	    <div class="uk-card-footer" id="bkcol-tile-footer-parent">
 	        <a id="bkcol-tile-readmore-link" href="/bookmark-collections/{{bookmark_collection.id}}" class="uk-button uk-button-text">Read more</a>

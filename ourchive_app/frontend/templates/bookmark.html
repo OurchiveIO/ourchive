@@ -53,23 +53,13 @@
 	            </div>
 	        {% endfor %}
 	    </div>	 
-	    {% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}
 	    <div class="uk-width-1" id="bookmark-description-parent">
 	    	<p id="bookmark-description-hed" class="uk-text-large"><span>{{bookmark.user}} says:</span>
 	    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>
 	    </div>	   
-	    {% if tags.items %}
-	    <hr id="bookmark-tag-hr" class="uk-divider-small"/>
-		    <dl class="uk-description-list" id="bookmark-tag-parent">
-		    {% for type, tag in tags.items %} 
-		        <dt id="bookmark-tag-type">{{ type }}</dt>
-		        <dd id="bookmark-tag-container">
-		        <span id="bookmark-tag-icon" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a href="{{single_tag.url}}" id="bookmark-tag-link" style="padding-left:5px;">{{ single_tag.display_text|default_if_none:single_tag.text }}</a> {% endfor %}
-		        </dd>
-		    {% endfor %}
-		    </dl>
-		    {% if settings.AllowComments %}<hr id="bookmark-comments-hr" class="uk-divider-small"/>{% endif %}
-	    {% endif %}
+	    {% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}
+	    {% include "tag_partial.html" with obj_name='bookmark-tag' tags=tags.items %}
+	    {% if settings.AllowComments %}<hr id="bookmark-comments-hr" class="uk-divider-small"/>{% endif %}
 	    {% include 'comments_parent.html' with object_name='bookmark' comments=comments object=bookmark edit_action_url=bookmark.edit_action_url post_action_url=bookmark.post_action_url comment_offset=comment_offset delete_obj='bookmark-comment' load_more_base=load_more_base view_thread_base=view_thread_base %}
 	</article>
 	</div>
