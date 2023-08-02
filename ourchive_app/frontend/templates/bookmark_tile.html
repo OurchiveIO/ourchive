@@ -16,13 +16,14 @@
 						{% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
 			        </div>
 			        {% endif %}
-	                <span id="bk-tile-rating-span" class="uk-inline uk-align-right">{% for stars in rating_range %}
+	                {% if settings.RatingsEnabled %}<span id="bk-tile-rating-span" class="uk-inline uk-align-right">{% for stars in rating_range %}
 	                    {% if stars <= bookmark.rating %}
 	                        <span id="bk-tile-rating-star-filled" uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}" class="rating-star uk-text-middle"></span>
 	                    {% else %}
 	                        <span id="bk-tile-rating-star-unfilled" uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}"></span>
 	                    {% endif %}
 				    {% endfor %}</span>
+				    {% endif %}
 	                <p id="bk-tile-creator" class="uk-text-meta uk-margin-remove-top">{{ bookmark.user }}</p>
 		        </div>
 		    </div>

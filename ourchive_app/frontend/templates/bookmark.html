@@ -38,6 +38,7 @@
 	    <div class="uk-width-1" id="bookmark-work-link-parent">
 	    	<span id="bookmark-work-link-span" class="uk-text-medium">Work link: <a id="bookmark-work-link-id" class="uk-link-reset" href="/works/{{ work.id }}">{{ work.title }} by {{work.user}}</a></span>
 	    </div>
+	    {% if settings.RatingsEnabled %}
 	    <div class="uk-width-1" id="bookmark-rating-parent">
 	    	<p id="bookmark-description-hed" class="uk-text-medium"><span>{{bookmark.user}}'s rating:</span>
 	    	{% for stars in rating_range %}
@@ -52,7 +53,8 @@
 	                </div>
 	            </div>
 	        {% endfor %}
-	    </div>	 
+	    </div>	
+	    {% endif %} 
 	    <div class="uk-width-1" id="bookmark-description-parent">
 	    	<p id="bookmark-description-hed" class="uk-text-large"><span>{{bookmark.user}} says:</span>
 	    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>

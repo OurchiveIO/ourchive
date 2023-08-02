@@ -662,9 +662,17 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
 
+    # TODO: gotta be a better way to do this
     class Meta:
         model = Bookmark
-        fields = '__all__'
+        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'false'):
+            fields = [
+                'id', 'uid', 'title', 'description', 'created_on', 'updated_on', 'draft', 'anon_comments_permitted',
+                'comments_permitted', 'comment_count', 'public_notes', 'private_notes', 'tags',
+                'collection', 'bookmark_id', 'user', 'attributes', 'work', 'work_id'
+            ]
+        else:
+            fields = '__all__'
 
     def process_tags(self, bookmark, validated_data, tags):
         bookmark.tags.clear()
@@ -697,6 +705,9 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, bookmark, validated_data):
         if 'title' in validated_data and validated_data['title'] == '':
             validated_data['title'] = f'Bookmark: {bookmark.work.title}'
+        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
+            if 'rating' in validated_data:
+                validated_data.pop('rating')
         validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
         if 'attributes' in validated_data:
@@ -707,6 +718,9 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         return Bookmark.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
+        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
+            if 'rating' in validated_data:
+                validated_data.pop('rating')
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
         validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         attributes = None

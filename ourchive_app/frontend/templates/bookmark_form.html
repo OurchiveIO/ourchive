@@ -66,6 +66,7 @@
     {% include "edit_tags.html" with object='bookmark' show_header=False %}
     <hr/>
     <h3 id="obj-attrs-form-header">Bookmark Details</h3>
+    {% if settings.RatingsEnabled %}
     <div class="uk-margin" id="bookmark-form-rating-parent">
         <label id="bookmark-form-rating-label" class="uk-form-label" for="form-horizontal-text">Rating <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}You decide what a rating means. The number of stars are controlled by your admin.{% endblocktranslate %}</div>
@@ -87,6 +88,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     <div id="bookmark-form-description-parent" class="uk-margin">
         <label id="bookmark-form-description-label" class="uk-form-label" for="form-horizontal-text">Description</label>
         <div id="bookmark-form-description-form-controls" class="uk-form-controls">

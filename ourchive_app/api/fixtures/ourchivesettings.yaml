@@ -3,14 +3,14 @@
   fields:
     uid: ede4e7de-ea94-4817-b971-ad17b721ebca
     name: Search Provider
-    value: Default
+    value: 'Default'
     valtype: choice
 - model: api.ourchivesetting
   pk: 2
   fields:
     uid: ee2ebbfc-99ba-43b9-ad20-cb94533dfb82
     name: Upload Endpoint
-    value: https://uploads.stopthatimp.net
+    value: 'https://uploads.stopthatimp.net'
     valtype: generic
 - model: api.ourchivesetting
   pk: 3
@@ -24,7 +24,7 @@
   fields:
     uid: e3d806ae-106f-4822-b65e-ba8a3f52cdd7
     name: Invite Only
-    value: 'False'
+    value: 'True'
     valtype: truefalse
 - model: api.ourchivesetting
   pk: 5
@@ -45,26 +45,33 @@
   fields:
     uid: 932ae848-f37d-41cc-a168-3f3cd61f423b
     name: Default Icon URL
-    value: icon-default.png
+    value: 'icon-default.png'
     valtype: generic
 - model: api.ourchivesetting
   pk: 8
   fields:
     uid: 398c31c8-44a6-43ab-ac56-2d3210d3479e
     name: Audio Processing
-    value: 'True'
+    value: 'False'
     valtype: choice
 - model: api.ourchivesetting
   pk: 10
   fields:
     uid: af2f38f1-9226-4488-9ba2-b1ae3c99b66f
     name: Rating Star Count
-    value: '10'
+    value: '5'
     valtype: choice
 - model: api.ourchivesetting
   pk: 11
   fields:
     uid: 12b47873-71f8-4b84-a9df-3b6a3e7f238c
     name: Allow Comments
+    value: 'true'
+    valtype: truefalse
+- model: api.ourchivesetting
+  pk: 12
+  fields:
+    uid: 4b7ea84c-7cb8-49de-9152-653758d1cf40
+    name: Ratings Enabled
     value: 'true'
     valtype: truefalse

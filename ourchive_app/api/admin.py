@@ -98,7 +98,7 @@ class OurchiveSettingAdmin(admin.ModelAdmin):
     exclude = ('valtype',)
     readonly_fields = ('name', )
     fields = ('name', 'value',)
-    list_display = ('name', 'value',)
+    list_display = ('id', 'name', 'value', 'uid')
 
 
 @admin.action(description="Allow selected users to upload images")

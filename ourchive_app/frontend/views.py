@@ -1443,7 +1443,7 @@ def bookmarks(request):
 def bookmark(request, pk):
 	bookmark = do_get(f'api/bookmarks/{pk}', request, 'Bookmark').response_data
 	tags = group_tags(bookmark['tags']) if 'tags' in bookmark else {}
-	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
+	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes']) if 'attributes' in bookmark else {}
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
 		comment_id = request.GET.get('comment_thread')
@@ -1469,7 +1469,7 @@ def bookmark(request, pk):
 		'scroll_comment_id': scroll_comment_id,
 		'expand_comments': expand_comments,
 		'user_can_comment': user_can_comment,
-		'rating_range': bookmark['star_count'],
+		'rating_range': bookmark['star_count'] if 'star_count' in bookmark else [],
 		'work': bookmark['work'] if 'work' in bookmark else {},
 		'comments': comments})
 
