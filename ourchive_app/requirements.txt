@@ -25,3 +25,4 @@ django-cors-headers
 django-anymail[mailgun]
 nh3
 whitenoise
+python-dateutil

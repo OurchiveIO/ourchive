@@ -9,17 +9,20 @@
 	            {% endif %}
 	            <div class="uk-width-expand" id="work-{{work.id}}-tile-title-parent">
 	                {% if work.draft == True %}
-	                	<h3 id="work-{{work.id}}-tile-draft-title" class="uk-card-title uk-margin-remove-bottom"><a id="work-{{work.id}}-tile-draft-title-link" href="/works/{{work.id}}?draft=true">{{work.title}}</a></h3>
+	                	<h3 id="work-{{work.id}}-tile-draft-title" class="uk-card-title uk-margin-remove-bottom uk-inline"><a id="work-{{work.id}}-tile-draft-title-link" href="/works/{{work.id}}?draft=true">{{work.title}}</a></h3>
+		                <span class="uk-label uk-inline uk-label-warning uk-margin-left" id="work-{{work.id}}-tile-draft-button-span"><strong>DRAFT</strong></span>
 	                {% else %}
 	                	<h3 id="work-{{work.id}}-tile-title" class="uk-card-title uk-margin-remove-bottom"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{{work.title}}</a></h3>
 	                {% endif %}
 	                <p id="work-{{work.id}}-tile-user-link" class="uk-text-meta uk-margin-remove-top">{{ work.user }}</p>
 	            </div>
-	        	{% if work.draft %}
-	            <div class="uk-width-auto" id="work-{{work.id}}-tile-draft-button-div">
-	                <span class="uk-label uk-label-warning" id="work-{{work.id}}-tile-draft-button-span"><strong>DRAFT</strong></span>
-	            </div>
-	            {% endif %}
+	            {% if work.user == request.user.username %}
+		        <div class="uk-align-right" id="work-{{work.id}}-footer-user-controls">
+		            <a id="work-{{work.id}}-footer-edit-link" href="/works/{{ work.id }}/edit"><span id="work-{{work.id}}-footer-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
+		            <a id="work-{{work.id}}-footer-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span id="work-{{work.id}}-footer-delete-span" uk-icon="icon: trash" title="Delete"></span> </a>
+		            {% include "delete_modal.html" with object='work' object_id=work.id %}
+		        </div>
+		        {% endif %}
 	        </div>
 	    </div>
 	    <div class="uk-card-body" id="work-{{work.id}}-tile-card-body">
@@ -29,13 +32,7 @@
 	    </div>
 	    <div class="uk-card-footer" id="work-{{work.id}}-tile-footer-parent">
 	        <a id="work-{{work.id}}-tile-footer-readmore" href="/works/{{work.id}}" class="uk-button uk-button-text">Read more</a>
-	        {% if work.user == request.user.username %}
-	        <div class="uk-align-right" id="work-{{work.id}}-footer-user-controls">
-	            <a id="work-{{work.id}}-footer-edit-link" href="/works/{{ work.id }}/edit"><span id="work-{{work.id}}-footer-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
-	            <a id="work-{{work.id}}-footer-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span id="work-{{work.id}}-footer-delete-span" uk-icon="icon: trash" title="Delete"></span> </a>
-	            {% include "delete_modal.html" with object='work' object_id=work.id %}
-	        </div>
-	        {% endif %}
+	        <div class="uk-align-right">{% include 'work_metadata.html' %}</div>
 	    </div>
 
 	</div>  

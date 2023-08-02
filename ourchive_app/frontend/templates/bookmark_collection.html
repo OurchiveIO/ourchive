@@ -28,20 +28,23 @@
 	                <span id="bkcol-draft-span" class="uk-label uk-label-warning"><strong id="bkcol-draft-text">DRAFT</strong></span>
 	            </div>
 	        {% endif %}
-	        <p class="uk-article-meta">{{ bkcol.short_description }}</p>
-	        <p id="bkcol-{{bkcol.id}}-tile-attributes-p">{% include "object_attributes.html" with object='bkcol' object_id=bkcol.id attributes=bkcol.attributes %}</p>
-	        {% include "tag_partial.html" with obj_name='bkcol' tags=bkcol.tags.items %}
-	   	</div>
-	   	<div class="uk-text-right uk-width-1-3" id="bkcol-user-controls-parent">
-	            {% if bkcol.user == request.user.username %}
-	            {% if bkcol.draft %}
-	            <a id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
-	            {% endif %}
-	            <a id="bkcol-edit-link" href="/bookmark-collections/{{ bkcol.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
-	            <a id="bookmark-collection-delete-link" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a>
-	            {% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
-	            {% endif %}
 	    </div>
+	    <div class="uk-text-right uk-width-1-3" id="bkcol-user-controls-parent">
+        {% if bkcol.user == request.user.username %}
+	        {% if bkcol.draft %}
+	        <a id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+	        {% endif %}
+	        <a id="bkcol-edit-link" href="/bookmark-collections/{{ bkcol.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
+	        <a id="bookmark-collection-delete-link" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a>
+	        {% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
+        {% endif %}
+	    </div>
+	    <div id="bkcol-content" class="uk-width-1-1">
+	        <p class="uk-article-meta uk-width-1-1">{{ bkcol.short_description }}</p>
+	        <p class="uk-width-1-1" id="bkcol-{{bkcol.id}}-tile-attributes-p">{% include "object_attributes.html" with object='bkcol' object_id=bkcol.id attributes=bkcol.attributes %}</p>
+	        {% include "tag_partial.html" with obj_name='bkcol' tags=bkcol.tags.items %}
+	        <div class="uk-align-right">{% include 'bookmark_collection_metadata.html' with bookmark_collection=bkcol %}</div>
+	   	</div>
 	   	<div class="uk-margin-remove-bottom uk-width-1-1"><hr id="bkcol-title-hr"/></div>
 	   	<div id="bkcol-description-parent" class="uk-width-1-1">
 	   		<span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description|safe}}</span>

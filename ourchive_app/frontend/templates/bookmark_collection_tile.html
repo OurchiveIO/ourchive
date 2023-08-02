@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="bkcol-tile-parent" class="uk-margin">
 	<div id="bkcol-tile-card" class="uk-card uk-card-default">
 	    <div id="bkcol-tile-header-parent" class="uk-card-header">
@@ -6,6 +7,13 @@
 	                <a id="bkcol-tile-title-link" href="/bookmark-collections/{{bookmark_collection.id}}" class="uk-inline"><h3 id="bkcol-tile-title" class="uk-card-title uk-margin-remove-bottom">{{bookmark_collection.title}}</h3></a>
 	                <p id="bkcol-tile-creator" class="uk-text-meta uk-margin-remove-top">{{ bookmark_collection.user }}</p>
 		        </div>
+		        {% if bookmark_collection.user == request.user.username %}
+		        <div id="bkcol-tile-actions-parent" class="uk-align-right">
+		            <a id="bkcol-tile-edit-link" href="/bookmark-collections/{{bookmark_collection.id}}/edit"><span id="bkcol-tile-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
+		            <a id="bkcol-tile-delete-link" uk-toggle="target: #bookmark-collection-{{bookmark_collection.id}}-modal-delete"><span uk-icon="icon: trash" id="bkcol-tile-delete-span" title="Delete"></span> </a>
+			    <p>{% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bookmark_collection.id %}</p>
+		        </div>
+		        {% endif %}
 		    </div>
 		</div>
 		<div id="bkcol-tile-tags" class="uk-card-body">
@@ -17,13 +25,7 @@
 		</div>
 	    <div class="uk-card-footer" id="bkcol-tile-footer-parent">
 	        <a id="bkcol-tile-readmore-link" href="/bookmark-collections/{{bookmark_collection.id}}" class="uk-button uk-button-text">Read more</a>
-	        {% if bookmark_collection.user == request.user.username %}
-	        <div id="bkcol-tile-actions-parent" class="uk-align-right">
-	            <a id="bkcol-tile-edit-link" href="/bookmark-collections/{{bookmark_collection.id}}/edit"><span id="bkcol-tile-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
-	            <a id="bkcol-tile-delete-link" uk-toggle="target: #bookmark-collection-{{bookmark_collection.id}}-modal-delete"><span uk-icon="icon: trash" id="bkcol-tile-delete-span" title="Delete"></span> </a>
-		    <p>{% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bookmark_collection.id %}</p>
-	        </div>
-	        {% endif %}
+	        {% include 'bookmark_collection_metadata.html' %}
 	    </div>
 	</div>  
 </div>

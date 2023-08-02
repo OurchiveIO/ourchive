@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="bk-tile-parent" class="uk-margin">
 	<div id="bk-tile-card" class="uk-card uk-card-default">
 	    <div id="bk-tile-header-parent" class="uk-card-header">
@@ -8,6 +9,13 @@
 	                {% else %}
 	                <a id="bk-tile-work-link" href="/bookmarks/{{bookmark.id}}?draft={{bookmark.draft}}" class="uk-inline"><h3 id="bk-tile-work-title" class="uk-card-title uk-margin-remove-bottom">Bookmark - {{bookmark.work.title}}</h3></a>
 	                {% endif %}
+	                {% if bookmark.user == request.user.username %}
+			        <div id="bk-tile-actions-parent" class="uk-align-right">
+			            <a id="bk-tile-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span id="bk-tile-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
+			            <a id="bk-tile-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: trash" id="bk-tile-delete-span" title="Delete"></span> </a>
+						{% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
+			        </div>
+			        {% endif %}
 	                <span id="bk-tile-rating-span" class="uk-inline uk-align-right">{% for stars in rating_range %}
 	                    {% if stars <= bookmark.rating %}
 	                        <span id="bk-tile-rating-star-filled" uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}" class="rating-star uk-text-middle"></span>
@@ -28,13 +36,7 @@
 		</div>
 	    <div class="uk-card-footer" id="bk-tile-footer-parent">
 	        <a id="bk-tile-readmore-link" href="/bookmarks/{{bookmark.id}}" class="uk-button uk-button-text">Read more</a>
-	        {% if bookmark.user == request.user.username %}
-	        <div id="bk-tile-actions-parent" class="uk-align-right">
-	            <a id="bk-tile-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span id="bk-tile-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
-	            <a id="bk-tile-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: trash" id="bk-tile-delete-span" title="Delete"></span> </a>
-				{% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
-	        </div>
-	        {% endif %}
+			<div class="uk-align-right"><p id="bk-metadata-p" class="uk-article-meta">{% if settings.AllowComments %}<span id="bk-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span></p></div>
 	    </div>
 	</div>  
 </div>

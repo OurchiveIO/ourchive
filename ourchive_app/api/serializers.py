@@ -507,7 +507,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'text' in validated_data:
             validated_data['word_count'] = 0 if not validated_data['text'] else len(
                 validated_data['text'].split())
-        validated_data['text'] = nh3.clean(validated_data['text']) if validated_data['text'] is not None else ''
+        validated_data['text'] = nh3.clean(validated_data['text']) if 'text' in validated_data and validated_data['text'] is not None else ''
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)

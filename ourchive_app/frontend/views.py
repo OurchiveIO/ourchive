@@ -11,6 +11,7 @@ from .api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from django.utils.translation import gettext as _
 from api import utils
 from django.views.decorators.cache import never_cache
+from dateutil.parser import *
 
 logger = logging.getLogger(__name__)
 
@@ -739,6 +740,8 @@ def works(request):
 	works = response.response_data['results'] if 'results' in response.response_data else []
 	works = get_object_tags(works)
 	works = get_array_attributes_for_display(works, 'attributes')
+	for work in works:
+		work['updated_on'] = parse(work['updated_on']).date()
 	return render(request, 'works.html', {
 		'works': works,
 		'next': f"/works/{works_response['next_params']}" if works_response['next_params'] is not None else None,
