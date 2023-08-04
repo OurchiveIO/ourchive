@@ -1,8 +1,8 @@
 {% if settings.AllowComments %}
 	<div id="{{object_name}}-comments-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
-        <div id="{{object_name}}-comments-load-div">
+        {% if comments.count > 0 %}<div id="{{object_name}}-comments-load-div">
              <button id="{{object_name}}-comments-load-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #{{object_name}}-{{object.id}}-comments">{{ comments.count}} Comment(s)</button>    		
-        </div>
+        </div>{% endif %}
     </div>
     <div id="{{object_name}}-{{object.id}}-comments" {% if not expand_comments %} hidden {% endif %} class="uk-child-width-expand" uk-grid>
         <div id="{{object_name}}-{{object.id}}-comments-child-container" uk-width-1-1>
