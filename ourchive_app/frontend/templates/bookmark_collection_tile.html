@@ -17,15 +17,14 @@
 		    </div>
 		</div>
 		<div id="bkcol-tile-tags" class="uk-card-body">
-			<div id="bkcol-short-desc" class="uk-width-expand">
+			{% if bookmark_collection.short_description %}<div id="bkcol-short-desc" class="uk-width-expand">
 				<p class="uk-text-medium">{{ bookmark_collection.short_description }}</p>
-			</div>
-			{% include "tag_partial.html" with obj_name='bk' tags=bookmark_collection.tags.items %}
-			{% include "object_attributes.html" with object='bkcol' object_id=bookmark_collection.id attributes=bookmark_collection.attributes %}
+			</div>{% endif %}
+			{% if bookmark_collection.tags.items %}{% include "tag_partial.html" with obj_name='bk' tags=bookmark_collection.tags.items %}{% endif %}
+			{% if bookmark_collection.attributes %}{% include "object_attributes.html" with object='bkcol' object_id=bookmark_collection.id attributes=bookmark_collection.attributes %}{% endif %}
 		</div>
 	    <div class="uk-card-footer" id="bkcol-tile-footer-parent">
-	        <a id="bkcol-tile-readmore-link" href="/bookmark-collections/{{bookmark_collection.id}}" class="uk-button uk-button-text">Read more</a>
-	        {% include 'bookmark_collection_metadata.html' %}
+	        <div class="uk-align-right uk-text-right uk-width-1-1">{% include 'bookmark_collection_metadata.html' %}</div>
 	    </div>
 	</div>  
 </div>

@@ -26,13 +26,12 @@
 	        </div>
 	    </div>
 	    <div class="uk-card-body" id="work-{{work.id}}-tile-card-body">
-	        <p id="work-{{work.id}}-tile-summary-p">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>
-		        {% include "tag_partial.html" with obj_name='work' tags=work.tags.items %}
-			{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}
+	        {% if work.summary %}<p id="work-{{work.id}}-tile-summary-p">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>{% endif %}
+		    {% if work.tags.items %}{% include "tag_partial.html" with obj_name='work' tags=work.tags.items %}{% endif %}
+			{% if work.attributes %}{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}{% endif %}
 	    </div>
 	    <div class="uk-card-footer" id="work-{{work.id}}-tile-footer-parent">
-	        <a id="work-{{work.id}}-tile-footer-readmore" href="/works/{{work.id}}" class="uk-button uk-button-text">Read more</a>
-	        <div class="uk-align-right">{% include 'work_metadata.html' %}</div>
+	        <div class="uk-align-right uk-text-right uk-width-1-1">{% include 'work_metadata.html' %}</div>
 	    </div>
 
 	</div>  

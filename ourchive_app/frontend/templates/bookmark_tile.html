@@ -29,15 +29,13 @@
 		    </div>
 		</div>
 		<div id="bk-tile-body" class="uk-card-body">
-	    	<p id="bk-tile-work"><strong id="bk-tile-work-label">Work</strong>: {{ bookmark.work.title }}</p>
-	        <p id="bk-tile-rating-body"><strong id="bk-tile-rating-body-label">Rating</strong>: {{ bookmark.rating }} stars</p>
-	        {% include "tag_partial.html" with obj_name='bookmark' tags=bookmark.tags.items %}
-		    {% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}
-
+	    	{% if bookmark.work.title %}<p id="bk-tile-work"><strong id="bk-tile-work-label">Work</strong>: {{ bookmark.work.title }}</p>{% endif %}
+	        {% if settings.RatingsEnabled %}<p id="bk-tile-rating-body"><strong id="bk-tile-rating-body-label">Rating</strong>: {{ bookmark.rating }} stars</p>{% endif %}
+	        {% if bookmark.tags.items %}{% include "tag_partial.html" with obj_name='bookmark' tags=bookmark.tags.items %}{% endif %}
+		   	{% if bookmark.attributes %}{% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}{% endif %}
 		</div>
 	    <div class="uk-card-footer" id="bk-tile-footer-parent">
-	        <a id="bk-tile-readmore-link" href="/bookmarks/{{bookmark.id}}" class="uk-button uk-button-text">Read more</a>
-			<div class="uk-align-right"><p id="bk-metadata-p" class="uk-article-meta">{% if settings.AllowComments %}<span id="bk-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span></p></div>
+			<div class="uk-align-right uk-text-right uk-width-1-1"><p id="bk-metadata-p" class="uk-article-meta">{% if settings.AllowComments %}<span id="bk-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span></p></div>
 	    </div>
 	</div>  
 </div>
