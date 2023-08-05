@@ -596,6 +596,7 @@ class ContentPage(models.Model):
     name = models.CharField(max_length=200)
     value = models.TextField(null=True, blank=True)
     order = models.IntegerField(default=1)
+    locked_to_users = models.BooleanField(default=False)
 
     def __repr__(self):
         return '<ContentPage: {}>'.format(self.id)

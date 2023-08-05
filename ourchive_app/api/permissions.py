@@ -10,6 +10,17 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         return obj.user == request.user or request.user.is_superuser
 
 
+class ObjectIsLocked(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_superuser:
+            return True
+        if request.method not in permissions.SAFE_METHODS:
+            return False
+        if isinstance(request.user, AnonymousUser):
+            return obj.locked_to_users == False
+        return True
+
+
 class RegistrationPermitted(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:

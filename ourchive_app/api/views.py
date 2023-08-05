@@ -15,7 +15,7 @@ from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
     UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
-    UserAllowsCollectionComments, UserAllowsCollectionAnonComments
+    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
@@ -32,6 +32,7 @@ from .file_helpers import FileHelperService
 from django.core.exceptions import ObjectDoesNotExist
 import nh3
 from . import work_export
+from django.contrib.auth.models import AnonymousUser
 
 
 @api_view(['GET'])
@@ -964,12 +965,16 @@ class AttributeValueDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ContentPageList(generics.ListCreateAPIView):
-    queryset = ContentPage.objects.get_queryset()
     serializer_class = ContentPageSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [ObjectIsLocked]
+    def get_queryset(self):
+        if isinstance(self.request.user, AnonymousUser):
+            return ContentPage.objects.filter(locked_to_users=False)
+        else:
+            return ContentPage.objects.all()
 
 
 class ContentPageDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ContentPage.objects.get_queryset()
     serializer_class = ContentPageDetailSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [ObjectIsLocked]

@@ -252,6 +252,9 @@ def accept_cookies(request):
 
 def content_page(request, pk):
 	response = do_get(f'api/contentpages/{pk}', request, params=request.GET)
+	if response.response_info.status_code == 403:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
 	return render(request, 'content_page.html', {
 		'content_page': response.response_data
 	})
