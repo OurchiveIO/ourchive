@@ -1,0 +1,27 @@
+work:
+  title: title
+  summary: summary
+  notes: notes
+  is_complete: complete
+  process_status: 0
+  created_on: created
+  updated_on: updated
+  anon_comments_permitted: False
+  comments_permitted: True
+  word_count: wordcount
+  fingerguns: kudos
+  comment_count: comments
+chapter:
+  title: title
+  summary: summary
+  notes: notes
+  number: chapternumber
+  text: text
+  created_on: created
+  updated_on: updated
+  word_count: wordcount
+  comment_count: comments
+comment:
+  text: text
+  user: user
+  parent_comment: parent

@@ -219,6 +219,14 @@ class ExportWork(APIView):
             return Response({'message': 'Format not supported or work does not exist.'}, status=400)
 
 
+class ImportWorks(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        pass
+
+
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer

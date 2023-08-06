@@ -1,0 +1,112 @@
+- model: etl.objectmapping
+  pk: 1
+  fields:
+    uid: 71b44af2-764e-47e7-99b6-4f1195f8a93b
+    import_type: ao3
+    object_type: work
+    origin_field: title
+    destination_field: title
+- model: etl.objectmapping
+  pk: 2
+  fields:
+    uid: ae01567c-ad38-43d2-9d3d-45825ec48d54
+    import_type: ao3
+    object_type: work
+    origin_field: summary
+    destination_field: summary
+- model: etl.objectmapping
+  pk: 3
+  fields:
+    uid: 580766c8-8350-4aba-b0d7-9758a52a6532
+    import_type: ao3
+    object_type: work
+    origin_field: rating
+    destination_field: attribute.Rating
+- model: etl.objectmapping
+  pk: 4
+  fields:
+    uid: 9e761138-1657-4a0d-a04d-22cb39b9f14a
+    import_type: ao3
+    object_type: work
+    origin_field: warnings
+    destination_field: tag.Warnings
+- model: etl.objectmapping
+  pk: 5
+  fields:
+    uid: 655810b8-b794-4a6c-8973-546bbb664b9a
+    import_type: ao3
+    object_type: work
+    origin_field: category
+    destination_field: attribute.Pairing Type
+- model: etl.objectmapping
+  pk: 6
+  fields:
+    uid: 13ade2f1-e2a8-4d97-b5b7-d6e97416aeba
+    import_type: ao3
+    object_type: work
+    origin_field: fandoms
+    destination_field: tag.Fandom
+- model: etl.objectmapping
+  pk: 7
+  fields:
+    uid: 97da8600-83a0-402c-ad5d-0bf36d611bd0
+    import_type: ao3
+    object_type: work
+    origin_field: relationship
+    destination_field: tag.Pairing
+- model: etl.objectmapping
+  pk: 8
+  fields:
+    uid: 712d8489-6535-4a55-bfdc-dee80af5a2e4
+    import_type: ao3
+    object_type: work
+    origin_field: characters
+    destination_field: tag.Characters
+- model: etl.objectmapping
+  pk: 9
+  fields:
+    uid: 369e4495-1c38-479d-8c7d-d12b0e164006
+    import_type: ao3
+    object_type: work
+    origin_field: additional_tags
+    destination_field: tag.Additional Tags
+- model: etl.objectmapping
+  pk: 10
+  fields:
+    uid: 1a922575-c2be-4141-bd79-0ba1a017db8a
+    import_type: ao3
+    object_type: work
+    origin_field: language
+    destination_field: tag.Language
+- model: etl.objectmapping
+  pk: 11
+  fields:
+    uid: 1bea93ac-d715-4220-ad86-e5c7979964c1
+    import_type: ao3
+    object_type: work
+    origin_field: stats.completed
+    destination_field: updated_on
+- model: etl.objectmapping
+  pk: 12
+  fields:
+    uid: 1236dbb6-94f9-45fc-a9a7-42fd4ffb67d7
+    import_type: ao3
+    object_type: work
+    origin_field: stats.words
+    destination_field: word_count
+- model: etl.objectmapping
+  pk: 13
+  fields:
+    uid: 71344b01-b54f-4cea-b22c-f82dfbd7eac2
+    import_type: ao3
+    object_type: chapter
+    origin_field: title
+    destination_field: title
+- model: etl.objectmapping
+  pk: 14
+  fields:
+    uid: 4739abbb-a59c-4437-8d6d-db7832152f01
+    import_type: ao3
+    object_type: chapter
+    origin_field: content
+    destination_field: content
