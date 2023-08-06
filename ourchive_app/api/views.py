@@ -33,6 +33,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import nh3
 from . import work_export
 from django.contrib.auth.models import AnonymousUser
+from etl import ao3
 
 
 @api_view(['GET'])
@@ -224,7 +225,16 @@ class ImportWorks(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        pass
+        print(request.data)
+        if 'save_as_draft' not in request.data or 'allow_anon_comments' not in request.data or 'allow_comments' not in request.data:
+            return Response({'message': 'save_as_draft, allow_anon_comments, and allow_comments required for work import.'}, status=400)
+        importer = ao3.work_import.EtlWorkImport(
+            request.user.id, 
+            request.data['save_as_draft'], 
+            request.data['allow_anon_comments'],
+            request.data['allow_comments'])
+        importer.get_single_work(32687341)
+        return Response({'importer': importer.save_as_draft})
 
 
 class UserList(generics.ListCreateAPIView):
@@ -905,7 +915,7 @@ class UserNotificationList(generics.ListCreateAPIView):
     permission_classes = [IsOwner, permissions.IsAdminUser]
 
     def get_queryset(self):
-        return Notification.objects.filter(user__id=self.request.user.id)
+        return Notification.objects.filter(user__id=self.request.user.id).order_by('read', '-created_on')
 
 
 class NotificationDetail(generics.RetrieveUpdateDestroyAPIView):

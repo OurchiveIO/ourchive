@@ -1,10 +1,12 @@
-from ourchiveao3importer.work_list import WorkList#, Work, Chapters
+from ourchiveao3importer.work_list import WorkList
+from ourchiveao3importer.works import Work
+from ourchiveao3importer.chapters import Chapters
 import uuid
 from etl.models import WorkImport, ObjectMapping
 from api import models as api
 from django.utils.translation import gettext as _
 
-class WorkImport(object):
+class EtlWorkImport(object):
 
 	def __init__(self, user_id, save_as_draft=False, allow_anon_comments=False, allow_comments=True):
 		self.save_as_draft = save_as_draft
@@ -15,14 +17,15 @@ class WorkImport(object):
 		self.success_message = 'Your work(s) have finished importing.'
 
 	def get_works_by_username(self, username):
-		work_list = WorkList(username)
-		work_list.find_work_ids()
-		for work_id in work_list.work_ids:
+		self.work_list = WorkList(username)
+		self.work_list.find_work_ids()
+		for work_id in self.work_list.work_ids:
 			self.get_single_work(work_id)
 
 	def get_single_work(self, work_id):
 		import_job = self.create_import_job(work_id)
-		self.import_work(import_job.job_uid)
+		if import_job:
+			self.import_work(self.import_job.job_uid)
 
 	def create_import_job(self, work_id):
 		job_uid = uuid.uuid4()
@@ -34,21 +37,24 @@ class WorkImport(object):
 			user_id=self.user_id
 		)
 		import_job.save()
-		return import_job
+		self.import_job = import_job
+		return True
 
 	def import_work(self, job_uid):
 		import_job = WorkImport.objects.filter(job_uid=job_uid).first()
 		work_id = import_job.work_id
+		# handle restricted & 404 errors here
 		work_importer = Work(work_id)
 		work_dict = work_importer.__dict__()
-		work_processed = self.process_work_data(work_dict)
-		if work_processed is None:
+		work_processed_id = self.process_work_data(work_dict)
+		if work_processed_id is None:
 			self.handle_job_fail(import_job)
 			return
+		print("processing chapters")
 		chapters = Chapters(work_id)
 		chapters.chapter_contents()
 		chapter_dict = chapters.__dict__() if chapters else {}
-		chapters_processed = self.process_chapter_data(chapter_dict)
+		chapters_processed = self.process_chapter_data(chapter_dict, work_processed_id)
 		if chapters_processed is None:
 			self.handle_job_fail(import_job)
 			return
@@ -141,20 +147,20 @@ class WorkImport(object):
 		return chapter_ids
 
 	def create_fail_notification(self):
-		user = User.objects.filter(id=self.user_id).first()
-		notification_type = NotificationType.objects.filter(
+		user = api.User.objects.filter(id=self.user_id).first()
+		notification_type = api.NotificationType.objects.filter(
 		type_label="System Notification").first()
-		notification = Notification.objects.create(notification_type=notification_type, user=user, title=_("Work Import Processed"),
+		notification = api.Notification.objects.create(notification_type=notification_type, user=user, title=_("Work Import Processed"),
 			content=_("Your work import has been processed. You can view your works in your profile."))
 		notification.save()
 		user.has_notifications = True
 		user.save()
 
 	def create_success_notification(self):
-		user = User.objects.filter(id=self.user_id).first()
-		notification_type = NotificationType.objects.filter(
+		user = api.User.objects.filter(id=self.user_id).first()
+		notification_type = api.NotificationType.objects.filter(
 		type_label="System Notification").first()
-		notification = Notification.objects.create(notification_type=notification_type, user=user, title=_("Work Import Processed"),
+		notification = api.Notification.objects.create(notification_type=notification_type, user=user, title=_("Work Import Processed"),
 			content=_("Your work import has been processed. You can view your works in your profile."))
 		notification.save()
 		user.has_notifications = True
