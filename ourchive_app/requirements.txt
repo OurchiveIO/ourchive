@@ -78,4 +78,3 @@ webdriver-manager==4.0.0
 whitenoise==6.5.0
 win32-setctime==1.1.0
 wsproto==1.2.0
-ourchive-ao3-importer @ git+https://@github.com/c-e-p/ao3importer.git@v0.1.0
