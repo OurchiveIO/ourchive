@@ -20,12 +20,17 @@ class EtlWorkImport(object):
 		self.work_list = WorkList(username)
 		self.work_list.find_work_ids()
 		for work_id in self.work_list.work_ids:
-			self.get_single_work(work_id)
+			chapters_processed = self.get_single_work(work_id, True)
+		self.handle_job_complete(1, self.import_job)
 
-	def get_single_work(self, work_id):
+	def get_single_work(self, work_id, as_batch=False):
 		import_job = self.create_import_job(work_id)
 		if import_job:
-			self.import_work(self.import_job.job_uid)
+			chapters_processed = self.import_work(self.import_job.job_uid)
+			if not as_batch or not chapters_processed:
+				# if it's a single import or the import failed, let's go ahead and create a notif.
+				# this prevents spamming on success of a username import
+				self.handle_job_complete(chapters_processed, self.import_job)
 
 	def create_import_job(self, work_id):
 		job_uid = uuid.uuid4()
@@ -40,6 +45,14 @@ class EtlWorkImport(object):
 		self.import_job = import_job
 		return True
 
+	def handle_job_complete(self, process_signal, import_job):
+		if process_signal is None:
+			self.handle_job_fail(import_job)
+			print("work import failed. returning")
+			return
+		self.handle_job_success(import_job)
+		print("work import complete")
+
 	def import_work(self, job_uid):
 		import_job = WorkImport.objects.filter(job_uid=job_uid).first()
 		work_id = import_job.work_id
@@ -50,15 +63,11 @@ class EtlWorkImport(object):
 		if work_processed_id is None:
 			self.handle_job_fail(import_job)
 			return
-		print("processing chapters")
 		chapters = Chapters(work_id)
 		chapters.chapter_contents()
 		chapter_dict = chapters.__dict__() if chapters else {}
 		chapters_processed = self.process_chapter_data(chapter_dict, work_processed_id)
-		if chapters_processed is None:
-			self.handle_job_fail(import_job)
-			return
-		self.handle_job_success(import_job)
+		return chapters_processed
 
 	def process_mappings(self, obj, mappings, origin_json):
 		for mapping in mappings:
@@ -132,7 +141,8 @@ class EtlWorkImport(object):
 			user_id=self.user_id, 
 			comments_permitted=self.allow_comments, 
 			anon_comments_permitted=self.allow_anon_comments, 
-			draft=self.save_as_draft)
+			draft=self.save_as_draft,
+			is_complete=True)
 		work.save()
 		return self.process_mappings(work, mappings, work_json)
 		
@@ -140,12 +150,15 @@ class EtlWorkImport(object):
 	def process_chapter_data(self, chapter_json, work_id):
 		mappings = ObjectMapping.objects.filter(import_type='ao3', object_type='chapter').all()
 		chapter_ids = []
+		chapter_num = 1
 		for chapter_content in chapter_json['content']:
-			chapter = api.Chapter(work_id=work_id, user_id=self.user_id)
+			chapter = api.Chapter(work_id=work_id, user_id=self.user_id, number=chapter_num)
 			chapter.save()
 			chapter_ids.append(self.process_mappings(chapter, mappings, chapter_content))
+			chapter_num += 1
 		return chapter_ids
 
+	# TODO handle failure
 	def create_fail_notification(self):
 		user = api.User.objects.filter(id=self.user_id).first()
 		notification_type = api.NotificationType.objects.filter(
