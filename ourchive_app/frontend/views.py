@@ -321,6 +321,32 @@ def user_name(request, username):
 	})
 
 
+def import_works(request, username):
+	if not request.user.is_authenticated:
+		messages.add_message(request, messages.ERROR, _('You must be logged in to import works.'), 'Import')
+		return redirect('/')
+	if request.method == 'POST':
+		allow_anon_comments = request.POST.get('allow_anon_comments') == 'on'
+		allow_comments = request.POST.get('allow_comments') == 'on'
+		save_as_draft = request.POST.get('save_as_draft') == 'on'
+		data = {
+			'allow_anon_comments': allow_anon_comments,
+			'allow_comments': allow_comments,
+			'save_as_draft': save_as_draft
+		}
+		if 'mode' in request.POST:
+			data['work_id'] = request.POST.get('work_id', '')
+		else:
+			data['username'] = request.POST.get('username', '')
+		response = do_post(f'api/users/import-works/', request, data, 'Import')
+		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
+		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
+		referrer_redirect(request)
+	return render(request, 'work_import_form.html', {
+		'form_title': _('Import Work(s)')
+		})
+
+
 def user_block_list(request, username):
 	blocklist = do_get(f'api/users/{username}/userblocks', request, 'Blocklist')
 	if blocklist.response_info.status_code >= 400:

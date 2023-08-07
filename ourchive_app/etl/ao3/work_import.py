@@ -51,6 +51,7 @@ class EtlWorkImport(object):
 			work_id=work_id, 
 			allow_comments=self.allow_comments, 
 			allow_anon_comments=self.allow_anon_comments,
+			save_as_draft=self.save_as_draft,
 			user_id=self.user_id
 		)
 		import_job.save()
@@ -68,6 +69,8 @@ class EtlWorkImport(object):
 	def import_work(self, job_uid):
 		import_job = WorkImport.objects.filter(job_uid=job_uid).first()
 		work_id = import_job.work_id
+		if api.Work.objects.filter(external_id=work_id).first() is not None:
+			return 0
 		# handle restricted & 404 errors here
 		work_importer = Work(work_id)
 		work_dict = work_importer.__dict__()
@@ -154,7 +157,8 @@ class EtlWorkImport(object):
 			comments_permitted=self.allow_comments, 
 			anon_comments_permitted=self.allow_anon_comments, 
 			draft=self.save_as_draft,
-			is_complete=True)
+			is_complete=True,
+			external_id=self.import_job.work_id)
 		work.save()
 		return self.process_mappings(work, mappings, work_json)
 		

@@ -237,9 +237,9 @@ class ImportWorks(APIView):
             request.data['allow_comments'])
         if 'work_id' in request.data:
             t = threading.Thread(target=importer.get_single_work,args=[request.data['work_id']],daemon=True)   
-            t.start()
         elif 'username' in request.data:
-            importer.get_works_by_username(request.data['username'])
+            t = threading.Thread(target=importer.get_works_by_username,args=[request.data['username']],daemon=True)
+        t.start()
         return Response({'message': "Import started"}, status=200)
 
 
