@@ -14,6 +14,8 @@ class WorkImport(models.Model):
     job_message = models.TextField()
     job_success = models.BooleanField(default=True)
     job_finished = models.BooleanField(default=False)
+    job_processing = models.BooleanField(default=False)
+    created_on = models.DateTimeField(auto_now_add=True)
     save_as_draft = models.BooleanField(default=True)
     allow_anon_comments = models.BooleanField(default=True)
     allow_comments = models.BooleanField(default=True)

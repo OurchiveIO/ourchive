@@ -148,6 +148,7 @@ class Work(models.Model):
     epub_url = models.CharField(max_length=600, null=True, blank=True)
     m4b_url = models.CharField(max_length=600, null=True, blank=True)
     zip_url = models.CharField(max_length=600, null=True, blank=True)
+    external_id = models.CharField(max_length=100, null=True, blank=True)
 
     user = models.ForeignKey(
         User,

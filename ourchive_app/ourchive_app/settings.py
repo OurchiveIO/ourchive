@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'anymail',
     'api',
-    'etl'
+    'etl',
+    'django_apscheduler'
     #'background_task',
 ]
 

@@ -20,11 +20,23 @@ class EtlWorkImport(object):
 		self.work_list = WorkList(username)
 		self.work_list.find_work_ids()
 		for work_id in self.work_list.work_ids:
-			chapters_processed = self.get_single_work(work_id, True)
+			import_job = self.create_import_job(work_id)
+		return True
+
+	def run_unprocessed_jobs(self):
+		import_jobs = WorkImport.objects.filter(job_finished=False).filter(job_processing=False).order_by('created_on')[:100]
+		for job in import_jobs:
+			self.import_job = job
+			self.user_id = job.user.id 
+			self.save_as_draft = job.save_as_draft
+			self.allow_anon_comments = job.allow_anon_comments
+			self.allow_comments = job.allow_comments
+			self.get_single_work(job.work_id, True, job)
 		self.handle_job_complete(1, self.import_job)
 
-	def get_single_work(self, work_id, as_batch=False):
-		import_job = self.create_import_job(work_id)
+	def get_single_work(self, work_id, as_batch=False, import_job=None):
+		if not as_batch:
+			import_job = self.create_import_job(work_id)
 		if import_job:
 			chapters_processed = self.import_work(self.import_job.job_uid)
 			if not as_batch or not chapters_processed:
@@ -180,15 +192,19 @@ class EtlWorkImport(object):
 		user.save()
 
 	def handle_job_fail(self, import_job):
+		import_job = WorkImport.objects.get(pk=import_job.id)
 		import_job.job_message = self.error_message
 		import_job.job_success = False
-		import_job.finished = True
+		import_job.job_processing = False
+		import_job.job_finished = True
 		import_job.save()
 		self.create_fail_notification()
 
 	def handle_job_success(self, import_job):
+		import_job = WorkImport.objects.get(pk=import_job.id)
 		import_job.job_message = self.success_message
 		import_job.job_success = True
-		import_job.finished = True
+		import_job.job_finished = True
+		import_job.job_processing = False
 		import_job.save()
 		self.create_success_notification()
