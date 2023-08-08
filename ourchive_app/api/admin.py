@@ -1,7 +1,7 @@
 from django.contrib import admin
 from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, \
     ContentPage, Tag, Invitation, AttributeType, AttributeValue, UserReportReason, \
-    UserReport, UserSubscription
+    UserReport, UserSubscription, AdminAnnouncement
 from django.db import models
 from django.forms.widgets import Input
 from django.core.mail import send_mail
@@ -152,6 +152,10 @@ class UserSubscriptionAdmin(admin.ModelAdmin):
     list_display = ('user', 'subscribed_user', 'subscribed_to_bookmark', 'subscribed_to_collection')
 
 
+class AdminAnnouncementAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title')
+
+
 admin.site.register(TagType)
 admin.site.register(WorkType)
 admin.site.register(NotificationType)
@@ -165,3 +169,4 @@ admin.site.register(User, UserAdmin)
 admin.site.register(UserReportReason)
 admin.site.register(UserReport, UserReportAdmin)
 admin.site.register(UserSubscription, UserSubscriptionAdmin)
+admin.site.register(AdminAnnouncement, AdminAnnouncementAdmin)

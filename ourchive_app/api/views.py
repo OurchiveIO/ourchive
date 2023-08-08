@@ -33,6 +33,8 @@ from django.core.exceptions import ObjectDoesNotExist
 import nh3
 from . import work_export
 from django.contrib.auth.models import AnonymousUser
+from etl import ao3
+import threading
 
 
 @api_view(['GET'])
@@ -217,6 +219,28 @@ class ExportWork(APIView):
             return Response({'media_url': work_url}, status=200)
         else:
             return Response({'message': 'Format not supported or work does not exist.'}, status=400)
+
+
+class ImportWorks(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if 'work_id' not in request.data and 'username' not in request.data:
+            return Response({'message': 'work_id or username required for import.'}, status=400)
+        if 'save_as_draft' not in request.data or 'allow_anon_comments' not in request.data or 'allow_comments' not in request.data:
+            return Response({'message': 'save_as_draft, allow_anon_comments, and allow_comments required for work import.'}, status=400)
+        importer = ao3.work_import.EtlWorkImport(
+            request.user.id, 
+            request.data['save_as_draft'], 
+            request.data['allow_anon_comments'],
+            request.data['allow_comments'])
+        if 'work_id' in request.data:
+            t = threading.Thread(target=importer.get_single_work,args=[request.data['work_id']],daemon=True)   
+        elif 'username' in request.data:
+            t = threading.Thread(target=importer.get_works_by_username,args=[request.data['username']],daemon=True)
+        t.start()
+        return Response({'message': "Import started"}, status=200)
 
 
 class UserList(generics.ListCreateAPIView):
@@ -897,7 +921,7 @@ class UserNotificationList(generics.ListCreateAPIView):
     permission_classes = [IsOwner, permissions.IsAdminUser]
 
     def get_queryset(self):
-        return Notification.objects.filter(user__id=self.request.user.id)
+        return Notification.objects.filter(user__id=self.request.user.id).order_by('read', '-created_on')
 
 
 class NotificationDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -49,7 +49,8 @@ def get_200s_message(status_code, object_name, html_obj_name) -> tuple[str, str]
 def get_400s_message(status_code, object_name, html_obj_name, response=None) -> tuple[str, str]:
 	if status_code == 400:
 		content_json = response.json()
-		content_json.pop('status_code')
+		if 'status_code' in content_json:
+			content_json.pop('status_code')
 		error_string = ""
 		for error in list(content_json):
 			if error_string:

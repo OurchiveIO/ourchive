@@ -148,6 +148,7 @@ class Work(models.Model):
     epub_url = models.CharField(max_length=600, null=True, blank=True)
     m4b_url = models.CharField(max_length=600, null=True, blank=True)
     zip_url = models.CharField(max_length=600, null=True, blank=True)
+    external_id = models.CharField(max_length=100, null=True, blank=True)
 
     user = models.ForeignKey(
         User,
@@ -556,6 +557,21 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ('read',)
+
+
+class AdminAnnouncement(models.Model):
+
+    __tablename__ = 'admin_announcements'
+
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=200, default='')
+    content = models.TextField(blank=True, default='')
+    expires_on = models.DateTimeField(null=True)
+
+    def __repr__(self):
+        return '<AdminAnnouncement: {}>'.format(self.id)
 
 
 class NotificationType(models.Model):
