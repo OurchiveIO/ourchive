@@ -8,12 +8,14 @@ from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
     NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, \
     UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
     ChapterAllSerializer, UserReportSerializer, UserSubscriptionSerializer, \
-    BookmarkSummarySerializer, BookmarkCollectionSummarySerializer
+    BookmarkSummarySerializer, BookmarkCollectionSummarySerializer, CollectionCommentSerializer
 from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
     NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
-    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription
-from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted
+    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment
+from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
+    UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
+    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
@@ -30,6 +32,7 @@ from .file_helpers import FileHelperService
 from django.core.exceptions import ObjectDoesNotExist
 import nh3
 from . import work_export
+from django.contrib.auth.models import AnonymousUser
 
 
 @api_view(['GET'])
@@ -732,9 +735,12 @@ class BookmarkPrimaryCommentDetail(generics.RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         instance.bookmark.comment_count = instance.bookmark.comment_count - 1
         instance.bookmark.save()
-        instance.user = None
-        instance.text = "This comment has been deleted"
-        instance.save()
+        if instance.parent_comment is not None:
+            instance.user = None
+            instance.text = "This comment has been deleted."
+            instance.save()
+        else:
+            instance.delete()
 
 
 class BookmarkCollectionList(generics.ListCreateAPIView):
@@ -756,14 +762,20 @@ class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def perform_update(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
             serializer.pop('header_url')
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, attributes=attributes)
 
     def perform_create(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
             serializer.pop('header_url')
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, attributes=attributes)
 
 
 class CommentList(generics.ListCreateAPIView):
@@ -787,9 +799,12 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
         instance.chapter.comment_count = instance.chapter.comment_count - 1
         instance.chapter.work.save()
         instance.chapter.save()
-        instance.user = None
-        instance.text = "This comment has been deleted"
-        instance.save()
+        if instance.parent_comment is not None:
+            instance.user = None
+            instance.text = "This comment has been deleted."
+            instance.save()
+        else:
+            instance.delete()
 
 
 class BookmarkCommentList(generics.ListCreateAPIView):
@@ -798,6 +813,45 @@ class BookmarkCommentList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return BookmarkComment.objects.get_queryset().order_by('id')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CollectionCommentList(generics.ListCreateAPIView):
+    serializer_class = CollectionCommentSerializer
+    permission_classes = [UserAllowsCollectionComments, UserAllowsCollectionAnonComments]
+
+    def get_queryset(self):
+        return CollectionComment.objects.get_queryset().order_by('id')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CollectionCommentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CollectionComment.objects.get_queryset().order_by('id')
+    serializer_class = CollectionCommentSerializer
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def perform_destroy(self, instance):
+        instance.collection.comment_count = instance.collection.comment_count - 1
+        instance.collection.comment_count = instance.collection.comment_count - 1
+        instance.collection.save()
+        if instance.parent_comment is not None:
+            instance.user = None
+            instance.text = "This comment has been deleted."
+            instance.save()
+        else:
+            instance.delete()
+
+
+class BookmarkCollectionCommentDetail(generics.ListCreateAPIView):
+    serializer_class = CollectionCommentSerializer
+    permission_classes = [UserAllowsCollectionComments, UserAllowsCollectionAnonComments]
+
+    def get_queryset(self):
+        return CollectionComment.objects.filter(collection__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -911,12 +965,16 @@ class AttributeValueDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ContentPageList(generics.ListCreateAPIView):
-    queryset = ContentPage.objects.get_queryset()
     serializer_class = ContentPageSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [ObjectIsLocked]
+    def get_queryset(self):
+        if isinstance(self.request.user, AnonymousUser):
+            return ContentPage.objects.filter(locked_to_users=False)
+        else:
+            return ContentPage.objects.all()
 
 
 class ContentPageDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ContentPage.objects.get_queryset()
     serializer_class = ContentPageDetailSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [ObjectIsLocked]

@@ -1,6 +1,8 @@
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 from api import views
+from rest_framework.schemas import get_schema_view
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('', views.api_root),
@@ -32,8 +34,11 @@ urlpatterns = [
     path('bookmarks/<int:pk>/comments', views.BookmarkCommentDetail.as_view(), name='bookmarkcomment-detail'),
     path('bookmarkcollections/', views.BookmarkCollectionList.as_view(), name='bookmark-collection-list'),
     path('bookmarkcollections/<int:pk>/', views.BookmarkCollectionDetail.as_view(), name='bookmarkcollection-detail'),
-    path('comments/', views.CommentList.as_view(), name='comment-list'),
-    path('comments/<int:pk>/', views.CommentDetail.as_view(), name='comment-detail'),
+    path('bookmarkcollections/<int:pk>/comments', views.BookmarkCollectionCommentDetail.as_view(), name='bookmarkcollectioncomment-detail'),
+    path('collectioncomments/', views.CollectionCommentList.as_view(), name='collection-comment-list'),
+    path('collectioncomments/<int:pk>/', views.CollectionCommentDetail.as_view(), name='collectioncomment-detail'),
+    path('chaptercomments/', views.CommentList.as_view(), name='comment-list'),
+    path('chaptercomments/<int:pk>/', views.CommentDetail.as_view(), name='comment-detail'),
     path('bookmarkcomments/', views.BookmarkCommentList.as_view(), name='bookmarkcomment-list'),
     path('bookmarkcomments/<int:pk>/', views.BookmarkPrimaryCommentDetail.as_view(), name='bookmarkprimarycomment-detail'),
     path('messages/', views.MessageList.as_view(), name='message-list'),
@@ -79,6 +84,10 @@ urlpatterns = [
     path('reportreasons/', views.ReportReasonList.as_view(), name='report-reasons'),
     path('subscriptions/', views.SubscriptionList.as_view(), name='user-subscriptions'),
     path('subscriptions/<int:pk>/', views.UserSubscriptionDetail.as_view(), name='usersubscription-detail'),
+    path('redoc/', TemplateView.as_view(
+        template_name='redoc.html',
+        extra_context={'schema_url':'openapi-schema'}
+    ), name='redoc'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

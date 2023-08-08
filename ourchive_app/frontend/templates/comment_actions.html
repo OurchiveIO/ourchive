@@ -1,8 +1,9 @@
+{% load i18n %}
 <div id="comment-{{comment.id}}-reply" class="uk-width-1-1" hidden>
     <form class="uk-form" id="reply-{{comment.id}}-form" action="{{ post_action }}" method="post" uk-grid>
         {% csrf_token %}
         <div class="uk-width-1-1" id="reply-{{comment.id}}-parent-div">
-            <label id="reply-{{comment.id}}-label" class="uk-form-label" for="form-horizontal-text">Reply</label>
+            <label id="reply-{{comment.id}}-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Reply' %}</label>
             <div id="reply-{{comment.id}}-parent-controls" class="uk-form-controls">
                 <div class="uk-inline" id="reply-{{comment.id}}-fields">
                     <input type="hidden" id="parent_comment" name="parent_comment" value="{{ comment.id }}">
@@ -30,7 +31,7 @@
     <form class="uk-form" method="post" id="commentEditForm" action="{{ edit_action }}" uk-grid>
         {% csrf_token %}
         <div class="uk-width-1-1" id="edit-comment-parent-div">
-            <label id="edit-comment-label" class="uk-form-label" for="form-horizontal-text">Edit Comment</label>
+            <label id="edit-comment-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Edit Comment' %}</label>
             <div id="edit-comment-form-controls" class="uk-form-controls">
                 <div id="edit-comment-input-div" class="uk-inline">
                     <input type="hidden" id="comment_id" name="id" value="{{ comment.id }}">

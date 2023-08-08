@@ -4,13 +4,14 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
 from .search_models import SearchObject
-from html import escape
+from html import escape, unescape
 from django.http import HttpResponse, FileResponse
 import logging
 from .api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from django.utils.translation import gettext as _
 from api import utils
 from django.views.decorators.cache import never_cache
+from dateutil.parser import *
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +69,12 @@ def get_attributes_for_display(obj_attrs):
 			attrs[attribute['attribute_type']] = []
 		attrs[attribute['attribute_type']].append(attribute['display_name'])
 	return attrs
+
+
+def get_array_attributes_for_display(dict_array, attr_key):
+	for obj in dict_array:
+		obj[attr_key] = get_attributes_for_display(obj[attr_key])
+	return dict_array
 
 
 def sanitize_rich_text(rich_text):
@@ -176,6 +183,16 @@ def get_bookmark_collection_obj(request):
 	return collection_dict
 
 
+def get_default_search_result_tab(resultsets):
+	most_results = 0
+	default_tab = ''
+	for results in resultsets:
+		if len(results[0]) > most_results:
+			most_results = len(results[0])
+			default_tab = results[1]
+	return default_tab
+
+
 def referrer_redirect(request, alternate_url=None):
 	response = None
 	if request.META.get('HTTP_REFERER') is not None:
@@ -221,7 +238,7 @@ def index(request):
 	return render(request, 'index.html', {
 		'heading_message': _('Welcome to Ourchive'),
 		'long_message': _('Ourchive is a configurable, extensible, multimedia archive, meant to serve as a modern alternative to PHP-based archives. You can search for existing works, create your own, or create curated collections of works you\'ve enjoyed. Have fun with it!'),
-		'root': settings.ALLOWED_HOSTS[0],
+		'root': settings.ROOT_URL,
 		'stylesheet_name': 'ourchive-light.css',
 		'has_notifications': request.session.get('has_notifications')
 	})
@@ -235,6 +252,9 @@ def accept_cookies(request):
 
 def content_page(request, pk):
 	response = do_get(f'api/contentpages/{pk}', request, params=request.GET)
+	if response.response_info.status_code == 403:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
 	return render(request, 'content_page.html', {
 		'content_page': response.response_data
 	})
@@ -288,7 +308,7 @@ def user_name(request, username):
 		'bookmarks_next': bookmark_next,
 		'bookmarks_previous': bookmark_previous,
 		'user_filter': username,
-		'root': settings.ALLOWED_HOSTS[0],
+		'root': settings.ROOT_URL,
 		'works': works,
 		'anchor': anchor,
 		'works_next': work_next,
@@ -364,7 +384,7 @@ def user_works(request, username):
 		'next': f"/username/{username}/works/{works['next_params']}" if works["next_params"] is not None else None,
 		'previous': f"/username/{username}/works/{works['prev_params']}" if works["prev_params"] is not None else None,
 		'user_filter': username,
-		'root': settings.ALLOWED_HOSTS[0]})
+		'root': settings.ROOT_URL})
 
 
 def user_works_drafts(request, username):
@@ -374,7 +394,7 @@ def user_works_drafts(request, username):
 	return render(request, 'works.html', {
 		'works': works,
 		'user_filter': username,
-		'root': settings.ALLOWED_HOSTS[0]})
+		'root': settings.ROOT_URL})
 
 
 def edit_account(request, username):
@@ -515,7 +535,6 @@ def user_bookmark_subscriptions(request, username):
 
 def user_collection_subscriptions(request, username):
 	response = do_get(f'api/users/{username}/subscriptions/collections', request, params=request.GET)
-	print(response.response_data)
 	return render(request, 'user_collection_subscriptions.html', {
 		'bookmark_collections': response.response_data,
 		'next': f"/users/{username}/subscriptions/collections/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
@@ -541,7 +560,6 @@ def unsubscribe(request, username):
 			patch_data['subscribed_to_bookmark'] = False
 		if request.POST.get('subscribed_to_collection'):
 			patch_data['subscribed_to_collection'] = False
-		print(patch_data)
 		response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
 		process_message(request, response)
 	return referrer_redirect(request)
@@ -563,26 +581,94 @@ def subscribe(request, username):
 	return referrer_redirect(request)
 
 
+def get_search_request(request, request_object, request_builder):
+	return_keys = {'include': [], 'exclude': []}
+	for key in request.POST:
+		filter_val = request.POST[key]
+		include_exclude = 'exclude' if 'exclude_' in key else 'include'
+		key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
+		if filter_val == 'csrfmiddlewaretoken':
+			continue
+		else:
+			return_keys[include_exclude].append(key)
+		if filter_val == 'term':
+			continue
+		if 'ranges' in key:
+			filter_details = key.split('|')
+			if filter_details[0] not in request_object['work_search'][f'{include_exclude}_filter']:
+				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]] = [([filter_details[2], filter_details[3]])]
+			else:
+				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append((filter_details[2], filter_details[3]))
+		else:
+			# TODO evaluate if this can be gotten rid of; do we have legitimate use cases that aren't a range?
+			filter_options = key.split('|')
+			for option in filter_options:
+				print(option)
+				filter_details = option.split('$')
+				filter_type = request_builder.get_object_type(filter_details[0])
+				if filter_type == 'work':
+					if filter_details[0] in request_object['work_search'][f'{include_exclude}_filter'] and len(request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
+						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
+					else:
+						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]] = []
+						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
+				elif filter_type == 'tag':
+					tag_type = filter_details[0].split(',')[1]
+					tag_text = (filter_details[1].split(',')[1]).lower() if filter_details[1].split(',')[1] else ''
+					request_object['tag_search'][f'{include_exclude}_filter']['tag_type'].append(tag_type)
+					request_object['tag_search'][f'{include_exclude}_filter']['text'].append(tag_text)
+					request_object['work_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
+					request_object['bookmark_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
+				elif filter_type == 'bookmark':
+					if filter_details[0] in request_object['bookmark_search'][f'{include_exclude}_filter'] and len(request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
+						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
+					else:
+						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]] = []
+						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
+	return [request_object, return_keys]
+
+
 def search(request):
 	if 'term' in request.GET:
 		term = request.GET['term']
-	else:
+	elif 'term' in request.POST:
 		term = request.POST['term']
+	else:
+		return redirect('/')
 	request_builder = SearchObject()
-	request_object = request_builder.with_term(term)
-	response_json = do_post(f'api/search/', request, data=request_object).response_data
+	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
+	request_object = request_builder.with_term(term, pagination)
+	request_object = get_search_request(request, request_object, request_builder)
+	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
 	works = response_json['results']['work']
-	works = get_object_tags(works)
+	works['data'] = get_object_tags(works['data'])
+	works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
 	bookmarks = response_json['results']['bookmark']
-	bookmarks = get_object_tags(bookmarks)
-	tags = group_tags(response_json['results']['tag'])
-	tag_count = len(response_json['results']['tag'])
+	bookmarks['data'] = get_object_tags(bookmarks['data'])
+	bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
+	tags = response_json['results']['tag']
+	tags['data'] = group_tags(tags['data'])
+	tag_count = len(response_json['results']['tag']['data'])
 	users = response_json['results']['user']
+	collections = response_json['results']['collection']
+	collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
+	default_tab = get_default_search_result_tab(
+		[
+			[works['data'], 0],
+			[bookmarks['data'], 1],
+			[tags['data'], 3],
+			[users['data'], 4],
+			[collections['data'], 2]
+		])
 	return render(request, 'search_results.html', {
 		'works': works, 'bookmarks': bookmarks,
-		'tags': tags, 'users': users, 'tag_count': tag_count,
+		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
 		'facets': response_json['results']['facet'],
-		'root': settings.ALLOWED_HOSTS[0], 'term': term})
+		'default_tab': default_tab,
+		'click_func': 'getFormVals(event)',
+		'root': settings.ROOT_URL, 'term': term,
+		'keys_include': request_object[1]['include'],
+		'keys_exclude': request_object[1]['exclude']})
 
 
 def tag_autocomplete(request):
@@ -607,50 +693,47 @@ def bookmark_autocomplete(request):
 
 
 def search_filter(request):
-	term = request.POST['term']
+	term = request.POST.get('term', '')
+	if not term:
+		return redirect('/')
+	include_filter_any = 'any' if request.POST.get('include_any_all') == 'on' else 'all'
+	exclude_filter_any = 'any' if request.POST.get('exclude_any_all') == 'on' else 'all'
+	order_by = request.POST['order_by'] if 'order_by' in request.POST else None
 	request_builder = SearchObject()
-	request_object = request_builder.with_term(term)
-	for key in request.POST:
-		filter_val = request.POST[key]
-		if filter_val == 'csrfmiddlewaretoken':
-			continue
-		if filter_val == 'term':
-			continue
-		else:
-			filter_options = key.split('|')
-			for option in filter_options:
-				filter_details = option.split('$')
-				filter_type = request_builder.get_object_type(filter_details[0])
-				if filter_type == 'work':
-					if len(request_object['work_search']['filter'][filter_details[0]]) > 0:
-						request_object['work_search']['filter'][filter_details[0]].append(filter_details[1])
-					else:
-						request_object['work_search']['filter'][filter_details[0]] = []
-						request_object['work_search']['filter'][filter_details[0]].append(filter_details[1])
-				elif filter_type == 'tag':
-					tag_type = filter_details[0].split(',')[1]
-					tag_text = filter_details[1].split(',')[1]
-					request_object['tag_search']['filter']['tag_type'].append(tag_type)
-					request_object['tag_search']['filter']['text'].append(tag_text)
-				elif filter_type == 'bookmark':
-					if len(request_object['bookmark_search']['filter'][filter_details[0]]) > 0:
-						request_object['bookmark_search']['filter'][filter_details[0]].append(filter_details[1])
-					else:
-						request_object['bookmark_search']['filter'][filter_details[0]] = []
-						request_object['bookmark_search']['filter'][filter_details[0]].append(filter_details[1])
-	response_json = do_post(f'api/search/', request, data=request_object, object_name='Search')
-	works = response_json.response_data['results']['work']
-	works = get_object_tags(works)
-	bookmarks = response_json.response_data['results']['bookmark']
-	bookmarks = get_object_tags(bookmarks)
-	tags = group_tags(response_json.response_data['results']['tag'])
-	tag_count = len(response_json.response_data['results']['tag'])
-	users = response_json.response_data['results']['user']
+	request_object = request_builder.with_term(term, None, (include_filter_any, exclude_filter_any), order_by)
+	request_object = get_search_request(request, request_object, request_builder)
+	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
+	# todo DRY - this is redundant w search method - move processing to its own method
+	works = response_json['results']['work']
+	works['data'] = get_object_tags(works['data'])
+	works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
+	bookmarks = response_json['results']['bookmark']
+	bookmarks['data'] = get_object_tags(bookmarks['data'])
+	bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
+	tags = response_json['results']['tag']
+	tags['data'] = group_tags(tags['data'])
+	tag_count = len(response_json['results']['tag']['data'])
+	users = response_json['results']['user']
+	collections = response_json['results']['collection']
+	collections['data'] = get_object_tags(collections['data'])
+	collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
+	default_tab = get_default_search_result_tab(
+		[
+			[works['data'], 0],
+			[bookmarks['data'], 1],
+			[tags['data'], 3],
+			[users['data'], 4],
+			[collections['data'], 2]
+		])
 	return render(request, 'search_results.html', {
 		'works': works, 'bookmarks': bookmarks,
-		'tags': tags, 'users': users, 'tag_count': tag_count,
+		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
 		'facets': response_json['results']['facet'],
-		'root': settings.ALLOWED_HOSTS[0], 'term': term})
+		'root': settings.ROOT_URL, 'term': term,
+		'default_tab': default_tab,
+		'click_func': 'getFormVals(event)',
+		'keys_include': request_object[1]['include'],
+		'keys_exclude': request_object[1]['exclude']})
 
 
 @require_http_methods(["GET"])
@@ -659,13 +742,14 @@ def works(request):
 	works_response = response.response_data
 	works = response.response_data['results'] if 'results' in response.response_data else []
 	works = get_object_tags(works)
+	works = get_array_attributes_for_display(works, 'attributes')
 	for work in works:
-		work['attributes'] = get_attributes_for_display(work['attributes'])
+		work['updated_on'] = parse(work['updated_on']).date()
 	return render(request, 'works.html', {
 		'works': works,
 		'next': f"/works/{works_response['next_params']}" if works_response['next_params'] is not None else None,
 		'previous': f"/works/{works_response['prev_params']}" if works_response['prev_params'] is not None else None,
-		'root': settings.ALLOWED_HOSTS[0]})
+		'root': settings.ROOT_URL})
 
 
 def works_by_type(request, type_id):
@@ -674,7 +758,7 @@ def works_by_type(request, type_id):
 	works = get_object_tags(works)
 	return render(request, 'works.html', {
 		'works': works,
-		'root': settings.ALLOWED_HOSTS[0]})
+		'root': settings.ROOT_URL})
 
 
 def new_work(request):
@@ -870,6 +954,8 @@ def new_bookmark(request, work_id):
 			'bookmark': bookmark})
 	elif request.user.is_authenticated:
 		bookmark_dict = get_bookmark_obj(request)
+		if len(bookmark_dict['rating']) > 1:
+			bookmark_dict['rating'] = 0
 		response = do_post(f'api/bookmarks/', request, data=bookmark_dict, object_name='Bookmark')
 		process_message(request, response)
 		return redirect(f'/bookmarks/{response.response_data["id"]}')
@@ -918,7 +1004,7 @@ def bookmark_collections(request):
 		'bookmark_collections': bookmark_collections,
 		'next': f"/bookmarkcollections/{response['next_params']}" if response['next_params'] is not None else None,
 		'previous': f"/bookmarkcollections/{response['prev_params']}" if response['prev_params'] is not None else None,
-		'root': settings.ALLOWED_HOSTS[0]})
+		'root': settings.ROOT_URL})
 
 
 def new_bookmark_collection(request):
@@ -966,27 +1052,30 @@ def edit_bookmark_collection(request, pk):
 def bookmark_collection(request, pk):
 	bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request, 'Bookmark Collection').response_data
 	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
+	bookmark_collection['tags'] = tags
 	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
 		comment_id = request.GET.get('comment_thread')
-		comments = do_get(f"api/bookmarkcomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
+		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
 		comment_offset = 0
 		comments = {'results': [comments], 'count': request.GET.get('comment_count')}
-		bookmark_collection['post_action_url'] = f"/bookmarkcollections/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
-		bookmark_collection['edit_action_url'] = f"""/bookmarkcollections/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
+		bookmark_collection['post_action_url'] = f"/bookmark-collections/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
+		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
 	else:
 		comments = do_get(f'api/bookmarkcollections/{pk}/comments?limit=10&offset={comment_offset}', request, 'Bookmark Collection Comments').response_data
-		bookmark_collection['post_action_url'] = f"/bookmarkcollections/{pk}/comments/new"
-		bookmark_collection['edit_action_url'] = f"""/bookmarkcollections/{pk}/comments/edit"""
+		bookmark_collection['post_action_url'] = f"/bookmark-collections/{pk}/comments/new"
+		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit"""
 	for bookmark in bookmark_collection['bookmarks_readonly']:
 		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '').replace('<br/>', '', 1)
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
 	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
+	bookmark_collection['new_action_url'] = f"/bookmark-collections/{pk}/comments/new"
 	return render(request, 'bookmark_collection.html', {
+		'load_more_base': f"/bookmark-collections/{pk}",
+		'view_thread_base': f"/bookmark-collections/{pk}",
 		'bkcol': bookmark_collection,
-		'tags': tags,
 		'comment_offset': comment_offset,
 		'scroll_comment_id': scroll_comment_id,
 		'expand_comments': expand_comments,
@@ -1101,8 +1190,7 @@ def log_out(request):
 
 
 @require_http_methods(["GET"])
-def work(request, pk):
-	chapter_offset = int(request.GET.get('offset', 0))
+def work(request, pk, chapter_offset=0):
 	view_full = request.GET.get('view_full', False)
 	work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
 	url = f'api/works/{pk}/'
@@ -1122,6 +1210,7 @@ def work(request, pk):
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	chapters = []
 	for chapter in chapter_json:
+		chapter['updated_on'] = parse(chapter['updated_on']).date()
 		if 'id' in chapter:
 			if 'comment_thread' not in request.GET:
 				comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
@@ -1137,6 +1226,8 @@ def work(request, pk):
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
 			chapter['comments'] = chapter_comments
 			chapter['comment_offset'] = comment_offset
+			chapter['load_more_base'] = f"/works/{pk}/chapters/{chapter['id']}/{chapter_offset}"
+			chapter['view_thread_base'] = f"/works/{pk}/{chapter_offset}"
 			chapter['attributes'] = get_attributes_for_display(chapter['attributes'])
 			chapter['new_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 			chapters.append(chapter)
@@ -1149,178 +1240,192 @@ def work(request, pk):
 		'id': pk,
 		'tags': tags,
 		'view_full': view_full,
-		'root': settings.ALLOWED_HOSTS[0],
+		'root': settings.ROOT_URL,
 		'chapters': chapters,
 		'chapter_offset': chapter_offset,
-		'next_chapter': f'/works/{pk}?offset={chapter_offset + 1}' if 'next' in chapter_response and chapter_response['next'] else None,
-		'previous_chapter': f'/works/{pk}?offset={chapter_offset - 1}' if 'previous' in chapter_response and chapter_response['previous'] else None,})
+		'next_chapter': f'/works/{pk}/{chapter_offset + 1}' if 'next' in chapter_response and chapter_response['next'] else None,
+		'previous_chapter': f'/works/{pk}/{chapter_offset - 1}' if 'previous' in chapter_response and chapter_response['previous'] else None,})
 
 
-def render_comments(request, work_id, chapter_id):
+def render_comments_common(request, get_comment_base, object_name, object_id, load_more_base, view_thread_base,
+		delete_obj, post_action_url, edit_action_url, root_obj_id=None, additional_params={}):
 	limit = request.GET.get('limit', '')
 	offset = request.GET.get('offset', '')
 	depth = request.GET.get('depth', 0)
-	chapter_offset = request.GET.get('chapter_offset', '')
-	comments = do_get(f'api/chapters/{chapter_id}/comments?limit={limit}&offset={offset}', request, 'Chapter Comments').response_data
-	post_action_url = f"/works/{work_id}/chapters/{chapter_id}/comments/new?offset={chapter_offset}"
-	edit_action_url = f"""/works/{work_id}/chapters/{chapter_id}/comments/edit?offset={chapter_offset}"""
-	return render(request, 'chapter_comments.html', {
+	comments = do_get(f'{get_comment_base}/comments?limit={limit}&offset={offset}', request, 'Comments').response_data
+	response_dict = {
 		'comments': comments['results'],
 		'current_offset': comments['current'],
 		'top_level': 'true',
 		'depth': int(depth),
-		'chapter_offset': chapter_offset,
-		'chapter': {'id': chapter_id},
+		object_name: {'id': object_id},
+		'load_more_base': load_more_base,
 		'comment_count': comments['count'],
+		'view_thread_base': view_thread_base,
+		'delete_obj': delete_obj,
+		'object_name': object_name,
+		'object': {'id': object_id},
 		'next_params': comments['next_params'],
 		'prev_params': comments['prev_params'],
-		'work': {'id': work_id},
 		'post_action_url': post_action_url,
-		'edit_action_url': edit_action_url})
+		'edit_action_url': edit_action_url
+	}
+	if root_obj_id:
+		response_dict['root_obj_id'] = root_obj_id
+	response_dict = response_dict | additional_params
+	return render(request, 'comments.html', response_dict)
+
+
+def render_chapter_comments(request, work_id, chapter_id, chapter_offset):
+	post_action_url = f"/works/{work_id}/chapters/{chapter_id}/comments/new?offset={chapter_offset}"
+	edit_action_url = f"""/works/{work_id}/chapters/{chapter_id}/comments/edit?offset={chapter_offset}"""
+	get_comment_base = f'api/chapters/{chapter_id}'
+	view_thread_base = f"/works/{work_id}/{chapter_offset}"
+	load_more_base = f"/works/{work_id}/chapters/{chapter_id}/{chapter_offset}"
+	return render_comments_common(
+		request, get_comment_base, 'chapter', chapter_id, load_more_base, view_thread_base,
+		'chapter-comment', post_action_url, edit_action_url, work_id, {'chapter-offset': chapter_offset})
+
+
+def render_collection_comments(request, pk):
+	post_action_url = f'/bookmark-collections/{pk}/comments/new'
+	edit_action_url = f'/bookmark-collections/{pk}/comments/edit'
+	get_comment_base = f'api/bookmarkcollections/{pk}'
+	common_base = f'/bookmark-collections/{pk}'
+	return render_comments_common(
+		request, get_comment_base, 'collection', pk, common_base, common_base,
+		'collection-comment', post_action_url, edit_action_url)
 
 
 def render_bookmark_comments(request, pk):
-	limit = request.GET.get('limit', '')
-	offset = request.GET.get('offset', '')
-	depth = request.GET.get('depth', 0)
-	comments = do_get(f'api/bookmarks/{pk}/comments?limit={limit}&offset={offset}', request, 'Bookmark Comments').response_data
-	post_action_url = f"/bookmarks/{pk}/comments/new"
-	edit_action_url = f"""/bookmarks/{pk}/comments/edit"""
-	return render(request, 'bookmark_comments.html', {
-		'comments': comments['results'],
-		'current_offset': comments['current'],
-		'bookmark': {'id': pk},
-		'top_level': 'true',
-		'depth': int(depth),
-		'comment_count': comments['count'],
-		'next_params': comments['next_params'],
-		'prev_params': comments['prev_params'],
-		'post_action_url': post_action_url,
-		'edit_action_url': edit_action_url})
+	common_base = f"/bookmarks/{pk}"
+	get_comment_base = f'api/bookmarks/{pk}'
+	post_action_url = f'/bookmarks/{pk}/comments/new'
+	edit_action_url = f'/bookmarks/{pk}/comments/edit'
+	return render_comments_common(
+		request, get_comment_base, 'bookmark', pk, common_base, common_base,
+		'bookmark-comment', post_action_url, edit_action_url)
+
+
+def create_comment_common(request, captcha_fail_redirect, object_name, redirect_url, redirect_url_threaded):
+	if not request.method == 'POST':
+		return None
+	if not request.user.is_authenticated:
+		if settings.USE_CAPTCHA:
+			captcha_passed = validate_captcha(request)
+			if not captcha_passed:
+				messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.', 'captcha-fail-error')
+				return redirect(captcha_fail_redirect)
+	comment_dict = request.POST.copy()
+	comment_count = int(request.POST.get(f'{object_name}_comment_count'))
+	comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
+	if comment_count > 10 and request.POST.get('parent_comment') is None:
+		comment_offset = int(int(request.POST.get(f'{object_name}_comment_count')) / 10) * 10
+	elif comment_count > 10 and request.POST.get('parent_comment') is not None:
+		comment_offset = request.POST.get('parent_comment_next')
+	else:
+		comment_offset = 0
+	if request.user.is_authenticated:
+		comment_dict["user"] = str(request.user)
+	else:
+		comment_dict["user"] = None
+	response = do_post(f'api/{object_name}comments/', request, data=comment_dict, object_name='Comment')
+	comment_id = response.response_data['id'] if 'id' in response.response_data else None
+	redirect_url = f'{redirect_url}expandComments=true&scrollCommentId={comment_id}&comment_offset={comment_offset}'
+	redirect_url_threaded = f'{redirect_url_threaded}expandComments=true&scrollCommentId={comment_id}&comment_thread={comment_thread}&comment_count={comment_count}'
+	process_message(request, response)
+	if comment_thread is None:
+		return redirect(redirect_url)
+	else:
+		return redirect(redirect_url_threaded)
+
+
+def edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url_threaded):
+	if not request.method == 'POST':
+		messages.add_message(request, messages.ERROR, _('Invalid URL.'), f'{object_name}-comment-edit-not-found')
+		return redirect(error_redirect)
+	comment_dict = request.POST.copy()
+	comment_count = int(request.POST.get(f'{object_name}_comment_count'))
+	comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
+	if comment_count > 10 and request.POST.get('parent_comment_val') is None:
+		comment_offset = int(int(request.POST.get(f'{object_name}_comment_count')) / 10) * 10
+	elif comment_count > 10 and request.POST.get('parent_comment_val') is not None:
+		comment_offset = request.POST.get('parent_comment_next')
+	else:
+		comment_offset = 0
+	comment_dict.pop('parent_comment_val')
+	if request.user.is_authenticated:
+		comment_dict["user"] = str(request.user)
+	else:
+		comment_dict["user"] = None
+	response = do_patch(f"api/{object_name}comments/{comment_dict['id']}/", request, data=comment_dict, object_name='Comment')
+	process_message(request, response)
+	redirect_url = f'{redirect_url}expandComments=true&scrollCommentId={comment_dict["id"]}&comment_offset={comment_offset}'
+	if comment_thread is None:
+		return redirect(redirect_url)
+	else:
+		redirect_url_threaded = f'{redirect_url_threaded}expandComments=true&scrollCommentId={comment_dict["id"]}&comment_thread={comment_thread}&comment_count={comment_count}'
+		return redirect(redirect_url_threaded)
+
+
+def delete_comment_common(request, redirect_url, object_name, comment_id):
+	response = do_delete(f'api/{object_name}comments/{comment_id}/', request, 'Comment')
+	process_message(request, response)
+	return redirect(redirect_url)
 
 
 def create_chapter_comment(request, work_id, chapter_id):
-	if request.method == 'POST':
-		if not request.user.is_authenticated:
-			if settings.USE_CAPTCHA:
-				captcha_passed = validate_captcha(request)
-				if not captcha_passed:
-					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.', 'captcha-fail-error')
-					return redirect(f"/works/{work_id}/")
-		comment_dict = request.POST.copy()
-		offset_url = int(request.GET.get('offset', 0))
-		comment_count = int(request.POST.get('chapter_comment_count'))
-		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
-		if comment_count > 10 and request.POST.get('parent_comment') is None:
-			comment_offset = int(int(request.POST.get('chapter_comment_count')) / 10) * 10
-		elif comment_count > 10 and request.POST.get('parent_comment') is not None:
-			comment_offset = request.POST.get('parent_comment_next')
-		else:
-			comment_offset = 0
-		if request.user.is_authenticated:
-			comment_dict["user"] = str(request.user)
-		else:
-			comment_dict["user"] = None
-		response = do_post(f'api/comments/', request, data=comment_dict, object_name='Comment')
-		comment_id = response.response_data['id'] if 'id' in response.response_data else None
-		process_message(request, response)
-		if comment_thread is None:
-			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_id}&offset={offset_url}&comment_offset={comment_offset}&comment_offset_chapter={chapter_id}")
-		else:
-			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_id}&offset={offset_url}&comment_thread={comment_thread}&comment_count={comment_count}")
+	captcha_redirect_url = f'/works/{work_id}/'
+	object_name = 'chapter'
+	redirect_url = f'/works/{work_id}/{int(request.GET.get("offset", 0))}?'
+	return create_comment_common(request, captcha_redirect_url, object_name, redirect_url, redirect_url)
 
 
 def edit_chapter_comment(request, work_id, chapter_id):
-	if request.method == 'POST':
-		comment_dict = request.POST.copy()
-		offset_url = int(request.GET.get('offset', 0))
-		comment_count = int(request.POST.get('chapter_comment_count'))
-		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
-		if comment_count > 10 and request.POST.get('parent_comment_val') is None:
-			comment_offset = int(int(request.POST.get('chapter_comment_count')) / 10) * 10
-		elif comment_count > 10 and request.POST.get('parent_comment_val') is not None:
-			comment_offset = request.POST.get('parent_comment_next')
-		else:
-			comment_offset = 0
-		comment_dict.pop('parent_comment_val')
-		if request.user.is_authenticated:
-			comment_dict["user"] = str(request.user)
-		else:
-			comment_dict["user"] = None
-		response = do_patch(f"api/comments/{comment_dict['id']}/", request, data=comment_dict, object_name='Comment')
-		process_message(request, response)
-		if comment_thread is None:
-			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_dict['id']}&offset={offset_url}&comment_offset={comment_offset}&comment_offset_chapter={chapter_id}")
-		else:
-			return redirect(f"/works/{work_id}/?expandComments=true&scrollCommentId={comment_dict['id']}&offset={offset_url}&comment_thread={comment_thread}&comment_count={comment_count}")
-	else:
-		messages.add_message(request, messages.ERROR, _('Invalid URL.'), 'chapter-comment-edit-not-found')
-		return redirect(f'/works/{work_id}')
+	object_name = 'chapter'
+	redirect_url = f'/works/{work_id}/{int(request.GET.get("offset", 0))}?'
+	error_redirect = f'/works/{work_id}'
+	return edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url)
 
 
 def delete_chapter_comment(request, work_id, chapter_id, comment_id):
-	response = do_delete(f'api/comments/{comment_id}/', request, 'Chapter Comment')
-	process_message(request, response)
-	return redirect(f'/works/{work_id}')
+	return delete_comment_common(request, f'/works/{work_id}/chapters/{chapter_id}', 'chapter', comment_id)
 
 
 def create_bookmark_comment(request, pk):
-	if request.method == 'POST':
-		if not request.user.is_authenticated:
-			if settings.USE_CAPTCHA:
-				captcha_passed = validate_captcha(request)
-				if not captcha_passed:
-					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.', 'bookmark-comment-captcha-error')
-					return redirect(f"/bookmarks/{pk}/")
-		comment_dict = request.POST.copy()
-		comment_count = int(request.POST.get('bookmark_comment_count'))
-		comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
-		if comment_count > 10 and request.POST.get('parent_comment') is None:
-			comment_offset = int(int(request.POST.get('bookmark_comment_count')) / 10) * 10
-		elif comment_count > 10 and request.POST.get('parent_comment') is not None:
-			comment_offset = request.POST.get('parent_comment_next')
-		else:
-			comment_offset = 0
-		if request.user.is_authenticated:
-			comment_dict["user"] = str(request.user)
-		else:
-			comment_dict["user"] = None
-		response = do_post(f'api/bookmarkcomments/', request, data=comment_dict, object_name='Bookmark Comment')
-		comment_id = response.response_data['id'] if 'id' in response.response_data else None
-		process_message(request, response)
-		if comment_thread is None:
-			return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_id}&comment_offset={comment_offset}")
-		else:
-			return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_id}&comment_thread={comment_thread}&comment_count={comment_count}")
+	captcha_redirect_url = f'/bookmarks/{pk}/'
+	object_name = 'bookmark'
+	redirect_url = f'/bookmarks/{pk}/?'
+	return create_comment_common(request, captcha_redirect_url, object_name, redirect_url, redirect_url)
 
 
 def edit_bookmark_comment(request, pk):
-	if request.method == 'POST':
-		comment_dict = request.POST.copy()
-		comment_count = int(request.POST.get('bookmark_comment_count'))
-		if comment_count > 10 and request.POST.get('parent_comment_val') is None:
-			comment_offset = int(int(request.POST.get('bookmark_comment_count')) / 10) * 10
-		elif comment_count > 10 and request.POST.get('parent_comment_val') is not None:
-			comment_offset = request.POST.get('parent_comment_next')
-		else:
-			comment_offset = 0
-		comment_dict.pop('parent_comment_val')
-		if request.user.is_authenticated:
-			comment_dict["user"] = str(request.user)
-		else:
-			comment_dict["user"] = None
-		response = do_patch(f"api/bookmarkcomments/{comment_dict['id']}/", request, data=comment_dict, object_name='Bookmark Comment')
-		process_message(request, response)
-		return redirect(f"/bookmarks/{pk}/?expandComments=true&scrollCommentId={comment_dict['id']}&comment_offset={comment_offset}")
-	else:
-		messages.add_message(request, messages.ERROR, '404 Page Not Found', 'bookmark-comment-not-found-error')
-		return redirect(f'/bookmarks/{pk}')
+	object_name = 'bookmark'
+	error_redirect = f'/bookmarks/{pk}'
+	redirect_url = f'/bookmarks/{pk}/?'
+	return edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url)
 
 
 def delete_bookmark_comment(request, pk, comment_id):
-	response = do_delete(f'api/bookmarkcomments/{comment_id}/', request, 'Bookmark Comments')
-	process_message(request, response)
-	return redirect(f'/bookmarks/{pk}')
+	return delete_comment_common(request, f'/bookmarks/{pk}', 'bookmark', comment_id)
+
+
+def create_collection_comment(request, pk):
+	captcha_redirect_url = f'/bookmark-collections/{pk}/'
+	object_name = 'collection'
+	redirect_url = f'/bookmark-collections/{pk}/?'
+	return create_comment_common(request, captcha_redirect_url, object_name, redirect_url, redirect_url)
+
+
+def edit_collection_comment(request, pk):
+	object_name = 'collection'
+	error_redirect = f'/bookmark-collections/{pk}'
+	redirect_url = f'/bookmark-collections/{pk}/?'
+	return edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url)
+
+
+def delete_collection_comment(request, pk, comment_id):
+	return delete_comment_common(request, f'/bookmark-collections/{pk}', 'collection', comment_id)
 
 
 def bookmarks(request):
@@ -1341,7 +1446,7 @@ def bookmarks(request):
 def bookmark(request, pk):
 	bookmark = do_get(f'api/bookmarks/{pk}', request, 'Bookmark').response_data
 	tags = group_tags(bookmark['tags']) if 'tags' in bookmark else {}
-	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
+	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes']) if 'attributes' in bookmark else {}
 	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
 		comment_id = request.GET.get('comment_thread')
@@ -1355,26 +1460,25 @@ def bookmark(request, pk):
 		bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new"
 		bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit"""
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
+	bookmark['new_action_url'] = f"/bookmarks/{pk}/comments/new"
 	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
 	return render(request, 'bookmark.html', {
 		'bookmark': bookmark,
+		'load_more_base': f"/bookmarks/{pk}",
+		'view_thread_base': f"/bookmarks/{pk}",
 		'tags': tags,
 		'comment_offset': comment_offset,
 		'scroll_comment_id': scroll_comment_id,
 		'expand_comments': expand_comments,
 		'user_can_comment': user_can_comment,
-		'rating_range': bookmark['star_count'],
+		'rating_range': bookmark['star_count'] if 'star_count' in bookmark else [],
 		'work': bookmark['work'] if 'work' in bookmark else {},
 		'comments': comments})
 
 
-def works_by_tag(request, pk):
-	tagged_works = do_get(f'api/tags/{pk}/works', request, 'Work').response_data
-	tagged_works['results'] = get_object_tags(tagged_works['results'])
-	tagged_bookmarks = do_get(f'api/tags/{pk}/bookmarks', request, 'Bookmark').response_data
-	tagged_bookmarks['results'] = get_object_tags(tagged_bookmarks['results'])
-	return render(request, 'tag_results.html', {'tag_id': pk, 'works': tagged_works, 'bookmarks': tagged_bookmarks})
+def works_by_tag(request, tag):
+	return search(request)
 
 
 def works_by_tag_next(request, tag_id):

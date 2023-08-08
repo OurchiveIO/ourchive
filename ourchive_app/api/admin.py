@@ -96,9 +96,9 @@ class SettingsForm(ModelForm):
 class OurchiveSettingAdmin(admin.ModelAdmin):
     form = SettingsForm
     exclude = ('valtype',)
-    # TODO: FIGURE OUT HOW TO DO THIS CONDITIONALL readonly_fields=('name', )
+    readonly_fields = ('name', )
     fields = ('name', 'value',)
-    list_display = ('name', 'value',)
+    list_display = ('id', 'name', 'value', 'uid')
 
 
 @admin.action(description="Allow selected users to upload images")

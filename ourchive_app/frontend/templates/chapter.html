@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="chapter-grid-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
 	<script>
 		function loadMoreComments(next, chapterId) {
@@ -37,11 +38,12 @@
 		{% if chapter.notes %}
 		<div id="chapter-notes-header"><span id="chapter-notes-label" class="uk-text-large">Notes</span></div>
 	    <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.notes }}{% endautoescape %}</span></div>{% endif %}
-	    <div id="chapter-notes-summary-hr"><hr id="chapter-content-hr"/></div>
 	    {% if chapter.attributes %}
 	    {% include "object_attributes.html" with object='chapter' object_id=chapter.id attributes=chapter.attributes %}
-	    {% endif %}
+	    {% endif %} 
 	</div>
+	<div class="uk-align-right uk-text-right uk-margin-remove" id="chapter-metadata-div"><p id="chapter-metadata-p" class="uk-article-meta"><span id="chapter-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Last Updated' %}: {{chapter.updated_on|date:'d M Y'}}</span> {% if chapter.word_count %}| <span id="chapter-metadata-length" class="uk-inline uk-text-bold">{% blocktranslate with wc=chapter.word_count %}{{ wc }} Words{% endblocktranslate %}</span>{% endif %} {% if chapter.audio_length %}| <span class="uk-inline uk-text-bold" id="chapter-metadata-audio-length">{% blocktranslate with al=chapter.audio_length %}Audio Length: {{ al }}{% endblocktranslate %}</span>{% endif %} {% if chapter.image_size %}| <span class="uk-inline uk-text-bold" id="chapter-metadata-image-size">{% blocktranslate with imgs=chapter.image_size|default:0 %}Image Size: {{ imgs }}{% endblocktranslate %}</span>{% endif %} {% if settings.AllowComments %}| <span id="chapter-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=chapter.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span></p></div>
+	    <div id="chapter-notes-summary-hr"><hr id="chapter-content-hr"/></div>
 	{% if chapter.image_url and chapter.image_url != "None" %}
 		<p id="chapter-image-graf">
 			<img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/>
@@ -59,40 +61,5 @@
         </ul>
         </div>        
     </div>  
-    {% if settings.AllowComments %}
-	<div id="chapter-comments-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
-        <div id="chapter-comments-load-div">
-             <button id="chapter-comments-load-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #chapter-{{chapter.id}}-comments">{{ chapter.comments.count}} Comment(s)</button>    		
-        </div>
-    </div>  
-    <div id="chapter-{{chapter.id}}-comments" {% if not expand_comments %} hidden {% endif %} class="uk-child-width-expand" uk-grid>
-        <div id="chapter-{{chapter.id}}-comments-child-container" uk-width-1-1>
-        	{% include "chapter_comments.html" with post_action_url=chapter.post_action_url edit_action_url=chapter.edit_action_url next=chapter.comments.next next_params=chapter.comments.next_params prev_params=chapter.comments.prev_params comments=chapter.comments.results chapter_offset=chapter_offset comment_count=chapter.comments.count top_level="true" current_offset=chapter.comment_offset depth=0 %}     
-        </div>    
-    </div>
-    {% if user_can_comment %}
-     <div id="chapter-{{chapter.id}}-new">
-        <form id="chapter-comment-form" action="{{chapter.new_action_url}}" method="post" class="uk-form uk-grid-small" uk-grid>
-            {% csrf_token %}
-            <label id="post-new-comment-label" class="uk-form-label uk-text-large" for="form-horizontal-text">New Comment</label>
-            <div id="chapter-comment-id-div" class="uk-width-1-1">
-            	<input type="hidden" id="chapter-comment-id-hidden" name="chapter" value="{{ chapter.id }}">
-            	<input type="hidden" id="chapter-comment-count" name="chapter_comment_count" value="{{chapter.comments.count}}"/>
-            	<textarea id="chapter-comment-textarea" rows="5" class="uk-textarea" id="text" name="text"></textarea>
-            </div>
-            {% if captcha_site_key %}
-	        {% if not request.user.is_authenticated %}
-	        <div class="uk-width-1-1 uk-margin-top">
-	            <div class="h-captcha" data-sitekey="{{captcha_site_key}}"></div>
-	              <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-	        </div>
-	        {% endif %}
-	        {% endif %}
-            <div class="uk-width-1-1" id="chapter-post-comment-div">
-            	<button id="chapter-post-comment-button" class="uk-button uk-button-default uk-align-right">Post Comment</button>
-            </div>
-        </form>
-    </div>
-    {% endif %}
-    {% endif %}
+    {% include 'comments_parent.html' with object_name='chapter' comments=chapter.comments object=chapter edit_action_url=chapter.edit_action_url post_action_url=chapter.post_action_url comment_offset=chapter.comment_offset delete_obj='chapter-comment' load_more_base=chapter.load_more_base root_obj_id=work.id view_thread_base=chapter.view_thread_base %}
 </div>

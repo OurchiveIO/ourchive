@@ -1,0 +1,2 @@
+{% load i18n %}
+<div class="uk-align-right"><p id="bk-metadata-p" class="uk-article-meta"><span id="bkcol-metadata-complete" class="uk-inline uk-text-bold">{% if bookmark_collection.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span> | {% if settings.AllowComments %}<span id="bk-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark_collection.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span></p></div>

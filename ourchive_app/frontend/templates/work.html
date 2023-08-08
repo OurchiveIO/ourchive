@@ -49,26 +49,16 @@
         <div id="work-summary-div"><span id="work-summary-span" class="uk-text-large">Summary</span></div>
         <div id="work-summary-text-div"><span id="work-summary-text-span" class="uk-text-medium">{% autoescape off %}{{ work.summary|default_if_none:'' }}{% endautoescape %}</span></div>
         <div class="uk-text-right" id="work-metadata-parent">
-            <p id="work-metadata-p" class="uk-article-meta"><span id="work-metadata-fingerguns" class="uk-inline uk-text-bold">{{ work.fingerguns }} Fingerguns</span> | <span class="uk-inline uk-text-bold" id="work-metadata-word-count">{{ work.word_count }} Words</span> {% if settings.AllowComments %}| <span id="work-metadata-comment-count" class="uk-inline uk-text-bold">{{ work.comment_count }} Comments{% endif %}</p>
+        {% include 'work_metadata.html' %}
         </div>
         {% if work.notes %} 
             <div id="summary-notes-divider-div" class="uk-margin-top"><hr id="summary-notes-divider-hr"/></div>
             <div id="work-notes-div"><span id="work-notes-span" class="uk-text-large">Notes</span></div>
             <div id="work-notes-text-div"><span id="work-notes-text-span" class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></div>
-        {% endif %}
-        {% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}
+        {% endif %} 
     </div>
-    {% if work.notes and tags.items %}
-        <div class="uk-margin-top"><hr id="tag-notes-divider-hr"/></div>
-    {% endif %}
-    <dl class="uk-description-list" id="work-tags-dl">
-    {% for type, tag in tags.items %} 
-        <dt id="work-tag-{{type}}-dt">{{ type }}</dt>
-        <dd id="work-tag-{{type}}-dd">
-        <span id="work-tag-{{type}}-span" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="work-tag-{{type}}-{{single_tag.id}}-link" href="/tags/{{ single_tag.id }}" style="padding-left:5px;">{{ single_tag.display_text|default_if_none:single_tag.text }}</a> {% endfor %}
-        </dd>
-    {% endfor %}
-    </dl>
+    {% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}
+    {% include "tag_partial.html" with obj_name='work-tag' tags=tags.items %}
     <hr class="uk-divider-icon" id="work-chapter-hr"/>
     {% if chapter %} 
         {% include "chapter.html" %}  
@@ -82,7 +72,7 @@
 {% if scroll_comment_id %}
     <script>
         window.onload = function(){
-            document.getElementById("ch-comment-{{scroll_comment_id}}-icon-div").scrollIntoView();
+            document.getElementById("chapter-comment-{{scroll_comment_id}}-icon-div").scrollIntoView();
         }
     </script>
 {% endif %}

@@ -13,6 +13,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 load_dotenv(find_dotenv())
 
+APPEND_SLASH = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('OURCHIVE_SECRET_KEY')
@@ -22,13 +23,14 @@ DEBUG = os.getenv('OURCHIVE_DEBUG') == 'True'
 
 hosts = []
 if os.getenv('OURCHIVE_DEV') == 'True':
-    hosts = ["127.0.0.1:8000", "127.0.0.1", "host.docker.internal", "localhost", "http://localhost:8000",]
+    hosts = ["127.0.0.1:8000", "*",]
 else:
     hosts = ["ourchive-dev.stopthatimp.net", "45.79.159.247"]
 
 ALLOWED_HOSTS = hosts
 
 API_PROTOCOL = 'http://' if DEBUG else 'https://'
+ROOT_URL = os.getenv('OURCHIVE_ROOT_URL')
 
 # Application definition
 
@@ -158,7 +160,7 @@ DATABASES = {
         'NAME': 'ourchive_db',
         'USER': 'ourchive',
         'PASSWORD': os.getenv('OURCHIVE_DB_PW'),
-        'HOST': 'localhost',
+        'HOST': os.getenv('OURCHIVE_DB_HOST'),
         'PORT': '5432',
     }
 }

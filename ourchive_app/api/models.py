@@ -276,16 +276,15 @@ class Chapter(models.Model):
         ordering = ['number']
 
 
-class BookmarkComment(models.Model):
-
-    __tablename__ = 'bookmark_comments'
+class Comment(models.Model):
+    __tablename__ = 'comments'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     text = models.TextField(null=True, blank=True)
 
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True, blank=True
     )
 
@@ -293,65 +292,60 @@ class BookmarkComment(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
 
     parent_comment = models.ForeignKey(
-        'BookmarkComment',
-        on_delete=models.CASCADE,
+        'Comment',
+        on_delete=models.RESTRICT,
         related_name='replies',
         null=True,
         blank=True
     )
+
+    def __repr__(self):
+        return '<Comment: {}>'.format(self.id)
+
+    def __str__(self):
+        return self.text if self.text is not None else str(id)
+
+
+class BookmarkComment(Comment):
+
+    __tablename__ = 'bookmark_comments'
 
     bookmark = models.ForeignKey(
         'Bookmark',
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
         related_name='comments'
     )
 
     def __repr__(self):
-        return '<Comment: {}>'.format(self.id)
-
-    def __str__(self):
-        return self.text if self.text is not None else str(id)
+        return '<BookmarkComment: {}>'.format(self.id)
 
 
-class ChapterComment(models.Model):
+class ChapterComment(Comment):
 
     __tablename__ = 'chapter_comments'
-    id = models.AutoField(primary_key=True)
-    uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    text = models.TextField(null=True, blank=True)
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        null=True, blank=True
-    )
-
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
-
-    parent_comment = models.ForeignKey(
-        'ChapterComment',
-        on_delete=models.CASCADE,
-        related_name='replies',
-        null=True,
-        blank=True
-    )
 
     chapter = models.ForeignKey(
         'Chapter',
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
         related_name='comments'
     )
 
     def __repr__(self):
-        return '<Comment: {}>'.format(self.id)
+        return '<ChapterComment: {}>'.format(self.id)
 
-    def __str__(self):
-        return self.text if self.text is not None else str(id)
+
+class CollectionComment(Comment):
+
+    __tablename__ = 'collection_comments'
+
+    collection = models.ForeignKey(
+        'BookmarkCollection',
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+
+    def __repr__(self):
+        return '<CollectionComment: {}>'.format(self.id)
 
 
 class Tag(models.Model):
@@ -361,6 +355,8 @@ class Tag(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     text = models.CharField(max_length=120, db_index=True)
     display_text = models.CharField(max_length=120, default='')
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
 
     class Meta:
         indexes = [
@@ -424,6 +420,7 @@ class BookmarkCollection(models.Model):
     draft = models.BooleanField(default=False)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
+    comment_count = models.IntegerField(default=0)
 
     user = models.ForeignKey(
         User,
@@ -599,6 +596,7 @@ class ContentPage(models.Model):
     name = models.CharField(max_length=200)
     value = models.TextField(null=True, blank=True)
     order = models.IntegerField(default=1)
+    locked_to_users = models.BooleanField(default=False)
 
     def __repr__(self):
         return '<ContentPage: {}>'.format(self.id)

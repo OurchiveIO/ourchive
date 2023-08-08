@@ -7,7 +7,7 @@ from api.models import Work, Tag, Chapter, TagType, WorkType, \
     Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, \
     NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
     Invitation, AttributeType, AttributeValue, User, ContentPage, UserReport, \
-    UserReportReason, UserSubscription
+    UserReportReason, UserSubscription, CollectionComment
 import datetime
 import logging
 from django.conf import settings
@@ -336,29 +336,15 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class ReplySerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer(read_only=True)
-    replies = RecursiveField(many=True, required=False)
-    id = serializers.ReadOnlyField()
-
+class CommentUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = ChapterComment
-        fields = '__all__'
-
-
-class BookmarkReplySerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer(read_only=True)
-    replies = RecursiveField(many=True, required=False)
-    id = serializers.ReadOnlyField()
-
-    class Meta:
-        model = BookmarkComment
-        fields = '__all__'
+        model = User
+        fields = ['username', 'icon', 'icon_alt_text']
 
 
 class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer(read_only=True)
-    replies = ReplySerializer(many=True, required=False, read_only=True)
+    user = CommentUserSerializer(read_only=True)
+    replies = RecursiveField(many=True, required=False)
     id = serializers.ReadOnlyField()
     chapter = serializers.PrimaryKeyRelatedField(
         queryset=Chapter.objects.all(), required=False)
@@ -402,9 +388,8 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
-    user = UserSerializer(read_only=True)
-    replies = BookmarkReplySerializer(
-        many=True, required=False, read_only=True)
+    user = CommentUserSerializer(read_only=True)
+    replies = RecursiveField(many=True, required=False)
     id = serializers.ReadOnlyField()
     parent_comment = serializers.PrimaryKeyRelatedField(
         queryset=BookmarkComment.objects.all(), required=False, allow_null=True)
@@ -436,6 +421,48 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         user.save()
         comment.bookmark.comment_count = comment.bookmark.comment_count + 1
         comment.bookmark.save()
+        return comment
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['text'] = nh3.clean(ret['text'])
+        return ret
+
+
+class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
+    user = CommentUserSerializer(read_only=True)
+    replies = RecursiveField(many=True, required=False)
+    id = serializers.ReadOnlyField()
+    parent_comment = serializers.PrimaryKeyRelatedField(
+        queryset=CollectionComment.objects.all(), required=False, allow_null=True)
+    collection = serializers.PrimaryKeyRelatedField(
+        queryset=BookmarkCollection.objects.all(), required=False)
+
+    class Meta:
+        model = CollectionComment
+        fields = '__all__'
+
+    def update(self, comment, validated_data):
+        if isinstance(serializers.CurrentUserDefault(), AnonymousUser):
+            validated_data.pop('user')
+        CollectionComment.objects.filter(id=comment.id).update(**validated_data)
+        return CollectionComment.objects.filter(id=comment.id).first()
+
+    def create(self, validated_data):
+        if 'user' in validated_data and isinstance(validated_data['user'], AnonymousUser):
+            validated_data.pop('user')
+        validated_data['text'] = nh3.clean(validated_data['text'])
+        comment = CollectionComment.objects.create(**validated_data)
+        user = User.objects.filter(id=comment.collection.user.id).first()
+        notification_type = NotificationType.objects.filter(
+            type_label="Comment Notification").first()
+        notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Collection Comment",
+                                                   content=f"""A new comment has been left on your collection! <a href='/bookmark-collections/{comment.collection.id}'>Click here</a> to view.""")
+        notification.save()
+        user.has_notifications = True
+        user.save()
+        comment.collection.comment_count = comment.collection.comment_count + 1
+        comment.collection.save()
         return comment
 
     def to_representation(self, instance):
@@ -480,6 +507,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'text' in validated_data:
             validated_data['word_count'] = 0 if not validated_data['text'] else len(
                 validated_data['text'].split())
+        validated_data['text'] = nh3.clean(validated_data['text']) if 'text' in validated_data and validated_data['text'] is not None else ''
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
@@ -496,6 +524,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         validated_data['word_count'] = 0 if not (
             'text' in validated_data and validated_data['text']) else len(validated_data['text'].split())
+        validated_data['text'] = nh3.clean(validated_data['text']) if validated_data['text'] is not None else ''
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -580,6 +609,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
         work = self.update_word_count(work)
         validated_data['word_count'] = work.word_count
+        validated_data['summary'] = nh3.clean(validated_data['summary']) if validated_data['summary'] is not None else ''
+        validated_data['notes'] = nh3.clean(validated_data['notes']) if validated_data['notes'] is not None else ''
         if 'cover_url' in validated_data:
             if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
                 validated_data['cover_url'] = ''
@@ -597,6 +628,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         if 'cover_url' in validated_data:
             if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
                 validated_data['cover_url'] = ''
+        validated_data['summary'] = nh3.clean(validated_data['summary']) if validated_data['summary'] is not None else ''
+        validated_data['notes'] = nh3.clean(validated_data['notes']) if validated_data['notes'] is not None else ''
         work = Work.objects.create(**validated_data)
         work = self.process_tags(work, validated_data, tags)
         if attributes is not None:
@@ -629,9 +662,17 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
 
+    # TODO: gotta be a better way to do this
     class Meta:
         model = Bookmark
-        fields = '__all__'
+        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first() is not None and OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'false'):
+            fields = [
+                'id', 'uid', 'title', 'description', 'created_on', 'updated_on', 'draft', 'anon_comments_permitted',
+                'comments_permitted', 'comment_count', 'public_notes', 'private_notes', 'tags',
+                'collection', 'bookmark_id', 'user', 'attributes', 'work', 'work_id'
+            ]
+        else:
+            fields = '__all__'
 
     def process_tags(self, bookmark, validated_data, tags):
         bookmark.tags.clear()
@@ -664,6 +705,10 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, bookmark, validated_data):
         if 'title' in validated_data and validated_data['title'] == '':
             validated_data['title'] = f'Bookmark: {bookmark.work.title}'
+        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
+            if 'rating' in validated_data:
+                validated_data.pop('rating')
+        validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -673,7 +718,11 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         return Bookmark.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
+        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
+            if 'rating' in validated_data:
+                validated_data.pop('rating')
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -741,6 +790,11 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                     tag.save()
                 bookmark.tags.add(tag)
             bookmark.save()
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+            bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
+        validated_data['short_description'] = nh3.clean(validated_data['short_description']) if validated_data['short_description'] is not None else ''
+        validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         if 'bookmarks' in validated_data:
             bookmarks = validated_data.pop('bookmarks')
             bookmark = BookmarkCollection.objects.get(id=bookmark.id)
@@ -757,6 +811,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         tags = []
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
         bookmark_collection = BookmarkCollection.objects.create(**validated_data)
         for item in tags:
             tag_id = item['text']
@@ -767,6 +823,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         for bookmark in bookmark_list:
             bookmark_collection.bookmarks.add(bookmark)
         bookmark_collection.save()
+        if attributes is not None:
+            bookmark_collection = AttributeValueSerializer.process_attributes(bookmark_collection, validated_data, attributes)
         return bookmark_collection
 
 
