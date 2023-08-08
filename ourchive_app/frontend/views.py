@@ -236,8 +236,8 @@ def get_works_list(request, username=None):
 
 def index(request):
 	return render(request, 'index.html', {
-		'heading_message': _('Welcome to Ourchive'),
-		'long_message': _('Ourchive is a configurable, extensible, multimedia archive, meant to serve as a modern alternative to PHP-based archives. You can search for existing works, create your own, or create curated collections of works you\'ve enjoyed. Have fun with it!'),
+		'heading_message': _('ourchive_welcome'),
+		'long_message': _('ourchive_intro_copy'),
 		'root': settings.ROOT_URL,
 		'stylesheet_name': 'ourchive-light.css',
 		'has_notifications': request.session.get('has_notifications')

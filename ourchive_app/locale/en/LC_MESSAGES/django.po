@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-25 14:37-0500\n"
+"POT-Creation-Date: 2023-08-08 18:08-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,65 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: etl/ao3/work_import.py:20
+msgid "Your work(s) have finished importing."
+msgstr ""
+
+#: etl/ao3/work_import.py:233 etl/ao3/work_import.py:243
+msgid "Work Import Processed"
+msgstr ""
+
+#: etl/ao3/work_import.py:234 etl/ao3/work_import.py:244
+msgid ""
+"Your work import has been processed. You can view your works in your profile."
+msgstr ""
+
+#: frontend/api_utils.py:42
+#, python-brace-format
+msgid "{object_name}(s) updated successfully."
+msgstr ""
+
+#: frontend/api_utils.py:44
+#, python-brace-format
+msgid "{object_name}(s) created successfully."
+msgstr ""
+
+#: frontend/api_utils.py:46
+#, python-brace-format
+msgid "{object_name}(s) deleted successfully."
+msgstr ""
+
+#: frontend/api_utils.py:64
+#, python-brace-format
+msgid "Bad request. Please address the following errors: {error_string}"
+msgstr ""
+
+#: frontend/api_utils.py:66
+#, python-brace-format
+msgid ""
+"You are not authorized to access this {object_name}. Please contact your "
+"administrator for more information."
+msgstr ""
+
+#: frontend/api_utils.py:68
+#, python-brace-format
+msgid ""
+"We could not find this {object_name}. You may not have access to it, or it "
+"may not exist."
+msgstr ""
+
+#: frontend/api_utils.py:73
+#, fuzzy, python-brace-format
+#| msgid ""
+#| "An error has occurred while reporting this user. Please contact your "
+#| "administrator."
+msgid ""
+"An error occurred while accessing this {object_name}. Please contact your "
+"administrator for more information."
+msgstr ""
+"An error has occurred while reporting this user. Please contact your "
+"administrator."
 
 #: frontend/templates/admin/rich_text_content_page.html:19
 msgid "Home"
@@ -33,39 +92,84 @@ msgid_plural "Please correct the errors below."
 msgstr[0] "Please correct the error below."
 msgstr[1] "Please correct the errors below."
 
-#: frontend/templates/bookmark_collection_form.html:79
+#: frontend/templates/bookmark_collection_form.html:87
 msgid ""
 "This image will show directly below site nav. We recommend a rectangular "
 "image with width:height ratio of 2:1 or higher."
-msgstr "This image will show directly below site nav. We recommend a rectangular image with width:height ratio of 2:1 or higher."
+msgstr ""
+"This image will show directly below site nav. We recommend a rectangular "
+"image with width:height ratio of 2:1 or higher."
 
-#: frontend/templates/bookmark_collection_form.html:103
+#: frontend/templates/bookmark_collection_form.html:111
 #: frontend/templates/bookmark_form.html:63
 #: frontend/templates/work_form.html:90
 msgid ""
 "Tags are used in searching and filtering. Tags let other people find your "
 "work, so don't hesitate to be creative! Existing tags will be shown in a "
 "dropdown after you start typing."
-msgstr "Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing."
+msgstr ""
+"Tags are used in searching and filtering. Tags let other people find your "
+"work, so don't hesitate to be creative! Existing tags will be shown in a "
+"dropdown after you start typing."
 
-#: frontend/templates/bookmark_collection_form.html:119
+#: frontend/templates/bookmark_collection_form.html:127
 msgid "Search for your bookmarks by title."
 msgstr "Search for your bookmarks by title."
 
-#: frontend/templates/bookmark_collection_form.html:166
-#: frontend/templates/bookmark_form.html:125
+#: frontend/templates/bookmark_collection_form.html:174
+#: frontend/templates/bookmark_form.html:127
 #: frontend/templates/chapter_form.html:138
 #: frontend/templates/work_form.html:199
 msgid ""
 "A draft will not be seen by any user except you. You can publish your drafts "
 "at any time."
-msgstr "A draft will not be seen by any user except you. You can publish your drafts at any time."
+msgstr ""
+"A draft will not be seen by any user except you. You can publish your drafts "
+"at any time."
 
-#: frontend/templates/bookmark_form.html:71
+#: frontend/templates/bookmark_collection_metadata.html:2
+#: frontend/templates/work_metadata.html:2
+msgid "Complete"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_metadata.html:2
+#: frontend/templates/work_metadata.html:2
+msgid "Incomplete"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_metadata.html:2
+#: frontend/templates/bookmark_tile.html:38 frontend/templates/chapter.html:45
+#: frontend/templates/work_metadata.html:2
+#, python-format
+msgid "%(cc)s Comments"
+msgstr ""
+
+#: frontend/templates/bookmark_form.html:72
 msgid ""
 "You decide what a rating means. The number of stars are controlled by your "
 "admin."
-msgstr "You decide what a rating means. The number of stars are controlled by your admin."
+msgstr ""
+"You decide what a rating means. The number of stars are controlled by your "
+"admin."
+
+#: frontend/templates/chapter.html:45 frontend/templates/work_metadata.html:2
+msgid "Last Updated"
+msgstr ""
+
+#: frontend/templates/chapter.html:45 frontend/templates/work_metadata.html:2
+#, python-format
+msgid "%(wc)s Words"
+msgstr ""
+
+#: frontend/templates/chapter.html:45
+#, python-format
+msgid "Audio Length: %(al)s"
+msgstr ""
+
+#: frontend/templates/chapter.html:45
+#, python-format
+msgid "Image Size: %(imgs)s"
+msgstr ""
 
 #: frontend/templates/chapter_form.html:204
 msgid ""
@@ -73,7 +177,47 @@ msgid ""
 "Google Docs, or create your own formatting in the text box. The plain text "
 "editor takes HTML tags for italics, bold, and other formatting. We recommend "
 "picking one for this chapter. Don't switch between them!"
-msgstr "The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!"
+msgstr ""
+"The rich text editor allows you to copy-paste directly from platforms like "
+"Google Docs, or create your own formatting in the text box. The plain text "
+"editor takes HTML tags for italics, bold, and other formatting. We recommend "
+"picking one for this chapter. Don't switch between them!"
+
+#: frontend/templates/comment_actions.html:6
+#: frontend/templates/comments.html:31
+msgid "Reply"
+msgstr ""
+
+#: frontend/templates/comment_actions.html:34
+msgid "Edit Comment"
+msgstr ""
+
+#: frontend/templates/comments.html:28
+msgid "Anonymous"
+msgstr ""
+
+#: frontend/templates/comments.html:54
+msgid "View Thread..."
+msgstr ""
+
+#: frontend/templates/comments.html:60
+msgid "Previous Comments"
+msgstr ""
+
+#: frontend/templates/comments.html:61
+msgid "Next Comments"
+msgstr ""
+
+#: frontend/templates/delete_account.html:13
+msgid ""
+"Are you sure you want to delete your account? This action is irrevocable and "
+"will remove all data associated with your account, including works, "
+"comments, and bookmarks."
+msgstr ""
+
+#: frontend/templates/delete_account.html:15
+msgid "Confirm Password"
+msgstr ""
 
 #: frontend/templates/edit_tags.html:7
 #, python-format
@@ -84,10 +228,87 @@ msgstr ""
 "This tag type is administrated by your site admin(s). This means that you "
 "can select an existing %(type)s, but you cannot create a new one."
 
+#: frontend/templates/index.html:115 frontend/views.py:347
+msgid "Import Work(s)"
+msgstr ""
+
+#: frontend/templates/index.html:116
+msgid "New Collection"
+msgstr ""
+
+#: frontend/templates/index.html:118 frontend/templates/index.html:124
+#: frontend/templates/user_subscriptions.html:15
+#: frontend/templates/user_subscriptions.html:37
+msgid "Collections"
+msgstr ""
+
+#: frontend/templates/index.html:120
+msgid "Subscriptions"
+msgstr ""
+
+#: frontend/templates/index.html:122
+#: frontend/templates/user_subscriptions.html:14
+#: frontend/templates/user_subscriptions.html:37
+msgid "Bookmarks"
+msgstr ""
+
+#: frontend/templates/index.html:128
+msgid "Profile"
+msgstr ""
+
+#: frontend/templates/index.html:130
+msgid "Edit Profile"
+msgstr ""
+
+#: frontend/templates/index.html:131
+msgid "Edit Account"
+msgstr ""
+
+#: frontend/templates/index.html:132
+msgid "Blocklist"
+msgstr ""
+
+#: frontend/templates/pagination.html:5
+msgid "Previous"
+msgstr ""
+
+#: frontend/templates/pagination.html:6
+msgid "Next"
+msgstr ""
+
+#: frontend/templates/register.html:20
+msgid "Username exists, please choose another."
+msgstr ""
+
+#: frontend/templates/user.html:24
+msgid "Subscribe"
+msgstr ""
+
+#: frontend/templates/user.html:62
+msgid "Subscribe to "
+msgstr ""
+
+#: frontend/templates/user.html:71
+msgid "Subscribe to bookmarks"
+msgstr ""
+
+#: frontend/templates/user.html:78
+msgid "Subscribe to collections"
+msgstr ""
+
+#: frontend/templates/user_bookmark_subscriptions.html:3
+msgid "Bookmark Subscriptions"
+msgstr ""
+
+#: frontend/templates/user_collection_subscriptions.html:3
+msgid "Collection Subscriptions"
+msgstr ""
+
 #: frontend/templates/user_form.html:52
 msgid ""
 "This determines the content a user sees first when visiting your profile."
-msgstr "This determines the content a user sees first when visiting your profile."
+msgstr ""
+"This determines the content a user sees first when visiting your profile."
 
 #: frontend/templates/user_report_form.html:23
 msgid "The user you are reporting. They will not be notified of your report."
@@ -97,80 +318,233 @@ msgstr "The user you are reporting. They will not be notified of your report."
 msgid ""
 "These reasons are configured by your admin. Pick the one that most closely "
 "matches why you are reporting this user."
-msgstr "These reasons are configured by your admin. Pick the one that most closely matches why you are reporting this user."
+msgstr ""
+"These reasons are configured by your admin. Pick the one that most closely "
+"matches why you are reporting this user."
 
 #: frontend/templates/user_report_form.html:43
 msgid ""
 "Add any context for the report here. Reports are reviewed by site admins."
-msgstr "Add any context for the report here. Reports are reviewed by site admins."
+msgstr ""
+"Add any context for the report here. Reports are reviewed by site admins."
+
+#: frontend/templates/user_subscriptions.html:11
+msgid ""
+"Welcome to your subscriptions page. You can access your subscription feeds "
+"by clicking the links below, or manage your subscriptions in the table."
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:16
+msgid "Works"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:16
+#: frontend/templates/user_subscriptions.html:17
+msgid "Coming Soon!"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:17
+msgid "Anthologies"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:23
+msgid ""
+"No subscriptions yet. To create a subscription, navigate to a user's profile "
+"and click the 'subscribe' button."
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:28
+msgid "User"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:29
+msgid "Subscribed to"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:30
+msgid "Actions"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:48
+msgid "Unsubscribe All"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:57
+msgid "Unsubscribe Bookmarks"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:66
+msgid "Unsubscribe Collections"
+msgstr ""
 
 #: frontend/templates/work_form.html:68
 msgid ""
 "Work types are admin-configured. Select the one that best matches what kind "
 "of work you're posting."
-msgstr "Work types are admin-configured. Select the one that best matches what kind of work you're posting."
+msgstr ""
+"Work types are admin-configured. Select the one that best matches what kind "
+"of work you're posting."
 
 #: frontend/templates/work_form.html:223
 msgid ""
 "If you have a file for your work that you'd prefer users download, you can "
 "upload here and it will display at the top of the download list."
-msgstr "If you have a file for your work that you'd prefer users download, you can upload here and it will display at the top of the download list."
+msgstr ""
+"If you have a file for your work that you'd prefer users download, you can "
+"upload here and it will display at the top of the download list."
 
-#: frontend/views.py:202
-msgid "Welcome to Ourchive"
+#: frontend/templates/work_import_form.html:15
+msgid ""
+"Input an AO3 username or single work ID below. The work ID can be found in "
+"the work URL."
+msgstr ""
+
+#: frontend/templates/work_import_form.html:44
+msgid "Save work(s) as draft"
+msgstr ""
+
+#: frontend/templates/work_import_form.html:52
+msgid "Allow any comments on work(s)"
+msgstr ""
+
+#: frontend/templates/work_import_form.html:60
+msgid "Allow anon comments on work(s)"
+msgstr ""
+
+#: frontend/templates/work_metadata.html:2
+#, python-format
+msgid "%(fg)s Fingerguns"
+msgstr ""
+
+#: frontend/views.py:216 frontend/views.py:404 frontend/views.py:863
+msgid "You must log in to perform this action."
+msgstr ""
+
+#: frontend/views.py:239
+msgid "ourchive_welcome"
 msgstr "Welcome to Ourchive"
 
-#: frontend/views.py:203
-msgid ""
-"Ourchive is a configurable, extensible, multimedia archive, meant to serve "
-"as a modern alternative to PHP-based archives. You can search for existing "
-"works, create your own, or create curated collections of works you've "
-"enjoyed. Have fun with it!"
-msgstr "Ourchive is a website."
+#: frontend/views.py:240
+msgid "ourchive_intro_copy"
+msgstr "Ourchive is fan-created archive software with work posting and curation capabilities, written in Django and deployable with a standard stack. Ourchive.io is a website."
 
-#: frontend/views.py:275
-msgid "User not found."
-msgstr "User not found."
+#: frontend/views.py:326
+msgid "You must be logged in to import works."
+msgstr ""
 
-#: frontend/views.py:282 frontend/views.py:294
-msgid "You are not authorized to view this blocklist."
+#: frontend/views.py:344
+msgid "Import has started. You will receive a notification when it completes."
+msgstr ""
+
+#: frontend/views.py:448 frontend/views.py:478
+msgid "You must log in as this user to perform this action."
+msgstr ""
+
+#: frontend/views.py:489
+#, fuzzy
+#| msgid "You are not authorized to view this blocklist."
+msgid "You are not authorized to view this page."
 msgstr "You are not authorized to view this blocklist."
 
-#: frontend/views.py:296
-msgid "User blocked."
-msgstr "User blocked."
-
-#: frontend/views.py:303
-msgid "You are not authorized to unblock this user."
-msgstr "You are not authorized to unblock this user."
-
-#: frontend/views.py:305
-msgid "User unblocked."
-msgstr "User unblocked."
-
-#: frontend/views.py:316
-msgid ""
-"Report created. You should hear from a mod shortly if any more information "
-"is required."
+#: frontend/views.py:813
+msgid "You must log in to post a new work."
 msgstr ""
-"Report created. You should hear from a mod shortly if any more information "
-"is required."
 
-#: frontend/views.py:318
-msgid "You are not authorized to report this user."
-msgstr "You are not authorized to report this user."
+#: frontend/views.py:836
+msgid "You must log in to post a new chapter."
+msgstr ""
 
-#: frontend/views.py:320
+#: frontend/views.py:1134
+msgid "Login successful."
+msgstr ""
+
+#: frontend/views.py:1137
+msgid "Login unsuccessful. Please try again."
+msgstr ""
+
+#: frontend/views.py:1151
+msgid "Reset successful."
+msgstr ""
+
+#: frontend/views.py:1154
+msgid "Reset unsuccessful. Please try again."
+msgstr ""
+
+#: frontend/views.py:1169
+msgid "Registration successful!"
+msgstr ""
+
+#: frontend/views.py:1172
+msgid "Registration is not permitted at this time. Please contact site admin."
+msgstr ""
+
+#: frontend/views.py:1183
 msgid ""
+"Your invite code or email is incorrect. Please check your link again and "
+"contact site admin."
+msgstr ""
+
+#: frontend/views.py:1202
+msgid "You have been added to the invite queue."
+msgstr ""
+
+#: frontend/views.py:1205
+#, fuzzy
+#| msgid ""
+#| "An error has occurred while reporting this user. Please contact your "
+#| "administrator."
+msgid "An error occurred requesting your invite. Please contact site admin."
+msgstr ""
 "An error has occurred while reporting this user. Please contact your "
 "administrator."
-msgstr ""
-"An error has occurred while reporting this user. Please contact your "
-"administrator."
 
-#: ourchive_app/settings.py:205
+#: frontend/views.py:1208
+msgid "Your account already exists. Please log in or reset your password."
+msgstr ""
+
+#: frontend/views.py:1216
+msgid "Logout successful."
+msgstr ""
+
+#: frontend/views.py:1373
+msgid "Invalid URL."
+msgstr ""
+
+#: ourchive_app/settings.py:199
 msgid "English"
 msgstr "English"
+
+#~ msgid "Welcome to Ourchive"
+#~ msgstr "Welcome to Ourchive"
+
+#~ msgid ""
+#~ "Ourchive is a configurable, extensible, multimedia archive, meant to "
+#~ "serve as a modern alternative to PHP-based archives. You can search for "
+#~ "existing works, create your own, or create curated collections of works "
+#~ "you've enjoyed. Have fun with it!"
+#~ msgstr "Ourchive is a website."
+
+#~ msgid "User not found."
+#~ msgstr "User not found."
+
+#~ msgid "User blocked."
+#~ msgstr "User blocked."
+
+#~ msgid "You are not authorized to unblock this user."
+#~ msgstr "You are not authorized to unblock this user."
+
+#~ msgid "User unblocked."
+#~ msgstr "User unblocked."
+
+#~ msgid ""
+#~ "Report created. You should hear from a mod shortly if any more "
+#~ "information is required."
+#~ msgstr ""
+#~ "Report created. You should hear from a mod shortly if any more "
+#~ "information is required."
+
+#~ msgid "You are not authorized to report this user."
+#~ msgstr "You are not authorized to report this user."
 
 #~ msgid "Spanish"
 #~ msgstr "Spanish"

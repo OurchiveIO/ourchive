@@ -5,7 +5,7 @@
 	display: none;
 }
 </style>
-<input type="hidden" id="contentpage_{{widget.name}}" name="{{widget.name}}" value="{{ widget.value|safe|default_if_none:'' }}">
+<input type="hidden" id="contentpage_{{widget.name}}" name="{{widget.name}}" value="{{ widget.value|escape }}">
 <textarea id="valueEditor" class="uk-margin-top"></textarea>
 <script type="text/javascript">
       tinymce.init({

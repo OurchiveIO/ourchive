@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.functions import Lower
 import uuid
 from django.contrib.auth.models import AbstractUser
+import nh3
 
 
 class User(AbstractUser):
@@ -622,6 +623,10 @@ class ContentPage(models.Model):
 
     class Meta:
         ordering = ('order', 'id',)
+
+    def save(self, *args, **kwargs):
+        self.value = nh3.clean(self.value)
+        super(ContentPage, self).save(*args, **kwargs)
 
 
 class Invitation(models.Model):
