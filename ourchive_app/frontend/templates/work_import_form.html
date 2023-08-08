@@ -6,6 +6,7 @@
 <div class="uk-width-1-1 uk-text-left" id="work-import-form-parent"> 
 <form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
     {% csrf_token %}
+    <input type="hidden" id="referer-hidden" name="referer" value="{{ referer }}">
     <div id="work-import-form-top-controls-parent" class="uk-grid" uk-grid>
         <div id="work-import-form-title-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
             <span id="work-import-form-title-span" class="uk-text-large">{{form_title}}</span>

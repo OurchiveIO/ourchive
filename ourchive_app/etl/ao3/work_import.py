@@ -2,9 +2,12 @@ from ourchiveao3importer.work_list import WorkList
 from ourchiveao3importer.works import Work
 from ourchiveao3importer.chapters import Chapters
 import uuid
+import logging
 from etl.models import WorkImport, ObjectMapping
 from api import models as api
 from django.utils.translation import gettext as _
+
+logger = logging.getLogger(__name__)
 
 class EtlWorkImport(object):
 
@@ -14,31 +17,43 @@ class EtlWorkImport(object):
 		self.allow_comments = allow_comments
 		self.user_id = user_id
 		self.error_message = ''
-		self.success_message = 'Your work(s) have finished importing.'
+		self.success_message = _('Your work(s) have finished importing.')
 
 	def get_works_by_username(self, username):
 		self.work_list = WorkList(username)
 		self.work_list.find_work_ids()
 		for work_id in self.work_list.work_ids:
-			import_job = self.create_import_job(work_id)
+			try:
+				import_job = self.create_import_job(work_id)
+			except Exception as err:
+				logger.error(f'Work import: Exception creating import job for: {work_id} username: {username}. Error: {err}')
 		return True
 
 	def run_unprocessed_jobs(self):
 		import_jobs = WorkImport.objects.filter(job_finished=False).filter(job_processing=False).order_by('created_on')[:100]
 		for job in import_jobs:
-			self.import_job = job
-			self.user_id = job.user.id 
-			self.save_as_draft = job.save_as_draft
-			self.allow_anon_comments = job.allow_anon_comments
-			self.allow_comments = job.allow_comments
-			self.get_single_work(job.work_id, True, job)
+			try:
+				self.import_job = job
+				self.user_id = job.user.id 
+				self.save_as_draft = job.save_as_draft
+				self.allow_anon_comments = job.allow_anon_comments
+				self.allow_comments = job.allow_comments
+				self.get_single_work(job.work_id, True, job)
+			except Exception as err:
+				logger.error(f'Work import: Exception executing import job {job.job_uid}. Error: {err}')
 		self.handle_job_complete(1, self.import_job)
 
 	def get_single_work(self, work_id, as_batch=False, import_job=None):
 		if not as_batch:
-			import_job = self.create_import_job(work_id)
+			try:
+				import_job = self.create_import_job(work_id)
+			except Exception as err:
+				logger.error(f'Work import: Exception creating import job for {work_id}. Error: {err}')
 		if import_job:
-			chapters_processed = self.import_work(self.import_job.job_uid)
+			try:
+				chapters_processed = self.import_work(self.import_job.job_uid)
+			except Exception as err:
+				logger.error(f'Work import: Exception in get_single_work for {import_job.job_uid}. Error: {err}')
 			if not as_batch or not chapters_processed:
 				# if it's a single import or the import failed, let's go ahead and create a notif.
 				# this prevents spamming on success of a username import
@@ -61,28 +76,65 @@ class EtlWorkImport(object):
 	def handle_job_complete(self, process_signal, import_job):
 		if process_signal is None:
 			self.handle_job_fail(import_job)
-			print("work import failed. returning")
+			logger.error(f'Work import failed for {import_job.job_uid}.')
 			return
 		self.handle_job_success(import_job)
-		print("work import complete")
+		logger.info(f'Work import complete: {import_job.job_uid}.')
 
 	def import_work(self, job_uid):
 		import_job = WorkImport.objects.filter(job_uid=job_uid).first()
+		if not import_job:
+			logger.error(f'Tried to import work for job that does not exist. Job uid: {job_uid}')
+			return
 		work_id = import_job.work_id
-		if api.Work.objects.filter(external_id=work_id).first() is not None:
+		if api.Work.objects.filter(user=import_job.user).filter(external_id=work_id).first() is not None:
+			logger.info(f'Work {work_id} for user {import_job.user} already exists. Job {job_uid} is stale.')
 			return 0
 		# handle restricted & 404 errors here
-		work_importer = Work(work_id)
-		work_dict = work_importer.__dict__()
-		work_processed_id = self.process_work_data(work_dict)
+		work_importer = None
+		try:
+			work_importer = Work(work_id)
+		except Exception as err:
+			logger.error(f'Work import scraping for {work_id} in job {job_uid} failed: {err}')
+			self.handle_job_fail(import_job)
+			return
+		work_dict = {}
+		try:
+			work_dict = work_importer.__dict__()
+		except Exception as err:
+			logger.error(f'Work dict for {work_id} in job {job_uid} failed: {err}')
+			self.handle_job_fail(import_job)
+			return
+		work_processed_id = None
+		try:
+			work_processed_id = self.process_work_data(work_dict)
+		except Exception as err:
+			logger.error(f'Process work data failed for {work_id} in job {job_uid}: {err}. Work dict: {work_dict}')
+			self.handle_job_fail(import_job)
+			return
 		if work_processed_id is None:
 			self.handle_job_fail(import_job)
 			return
-		chapters = Chapters(work_id)
-		chapters.chapter_contents()
-		chapter_dict = chapters.__dict__() if chapters else {}
-		chapters_processed = self.process_chapter_data(chapter_dict, work_processed_id)
-		return chapters_processed
+		try:
+			chapters = Chapters(work_id)
+		except Exception as err:
+			logger.error(f'Chapter import for {work_id} failed: {err}.')
+			self.handle_job_fail(import_job)
+			return
+		try:
+			chapters.chapter_contents()
+		except Exception as err:
+			logger.error(f'Scraping chapter contents failed for {job_uid}: {err}.')
+			self.handle_job_fail(import_job)
+			return
+		try:
+			chapter_dict = chapters.__dict__() if chapters else {}
+			chapters_processed = self.process_chapter_data(chapter_dict, work_processed_id)
+			return chapters_processed
+		except Exception as err:
+			logger.error(f'Process chapter data failed for {work_id} in job {job_uid}: {err}. Chapter dict: {chapter_dict}')
+			self.handle_job_fail(import_job)
+			return
 
 	def process_mappings(self, obj, mappings, origin_json):
 		for mapping in mappings:
@@ -174,7 +226,6 @@ class EtlWorkImport(object):
 			chapter_num += 1
 		return chapter_ids
 
-	# TODO handle failure
 	def create_fail_notification(self):
 		user = api.User.objects.filter(id=self.user_id).first()
 		notification_type = api.NotificationType.objects.filter(
