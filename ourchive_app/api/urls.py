@@ -52,6 +52,7 @@ urlpatterns = [
     path('settings/<int:pk>/', views.OurchiveSettingDetail.as_view(), name='ourchivesetting-detail'),
     path('settings/', views.OurchiveSettingList.as_view()),
     path('users/<int:pk>/',views.UserDetail.as_view(), name='user-detail'),
+    path('users/import-works/', views.ImportWorks.as_view(), name='import-works'),
     path('users/<str:username>/', views.UserNameDetail.as_view(), name='user-detail'),
     path('users/<str:username>/works', views.UserWorkList.as_view(), name='user-works-drafts'),
     path('users/<str:username>/works/drafts', views.UserWorkDraftList.as_view(), name='user-drafts'),
