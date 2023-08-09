@@ -593,7 +593,10 @@ def unsubscribe(request, username):
 	return referrer_redirect(request)
 
 
-def subscribe(request, username):
+def subscribe(request):
+	if not request.user.is_authenticated:
+		messages.add_message(request, messages.ERROR, _('You must be logged in to subscribe to users.'), f'subscribe-not-logged-in')
+		return redirect('/login')
 	post_data = {}
 	if 'subscription_id' in request.POST:
 		post_data['id'] = request.POST.get('subscription_id')

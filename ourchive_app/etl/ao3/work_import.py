@@ -18,6 +18,7 @@ class EtlWorkImport(object):
 		self.user_id = user_id
 		self.error_message = ''
 		self.success_message = _('Your work(s) have finished importing.')
+		self.import_job = None
 
 	def get_works_by_username(self, username):
 		self.work_list = WorkList(username)
@@ -31,9 +32,10 @@ class EtlWorkImport(object):
 
 	def run_unprocessed_jobs(self):
 		import_jobs = WorkImport.objects.filter(job_finished=False).filter(job_processing=False).order_by('created_on')[:100]
+		tracking_job = None
 		for job in import_jobs:
 			try:
-				self.import_job = job
+				tracking_job = job
 				self.user_id = job.user.id 
 				self.save_as_draft = job.save_as_draft
 				self.allow_anon_comments = job.allow_anon_comments
@@ -41,7 +43,8 @@ class EtlWorkImport(object):
 				self.get_single_work(job.work_id, True, job)
 			except Exception as err:
 				logger.error(f'Work import: Exception executing import job {job.job_uid}. Error: {err}')
-		self.handle_job_complete(1, self.import_job)
+		if tracking_job is not None:
+			self.handle_job_complete(1, tracking_job)
 
 	def get_single_work(self, work_id, as_batch=False, import_job=None):
 		if not as_batch:
