@@ -365,7 +365,7 @@ class Tag(models.Model):
         indexes = [
             models.Index(fields=['text']),
         ]
-        ordering = ('tag_type__label',)
+        ordering = ('tag_type__sort_order', 'tag_type__label',)
         constraints = [
             models.UniqueConstraint(Lower('text').desc(), 'tag_type_id', name='unique_text_and_type')
         ]
