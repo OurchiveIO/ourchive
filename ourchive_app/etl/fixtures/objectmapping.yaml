@@ -109,4 +109,4 @@
     import_type: ao3
     object_type: chapter
     origin_field: content
-    destination_field: content
+    destination_field: text
