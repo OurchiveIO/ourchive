@@ -673,14 +673,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     # TODO: gotta be a better way to do this
     class Meta:
         model = Bookmark
-        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first() is not None and OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'false'):
-            fields = [
-                'id', 'uid', 'title', 'description', 'created_on', 'updated_on', 'draft', 'anon_comments_permitted',
-                'comments_permitted', 'comment_count', 'public_notes', 'private_notes', 'tags',
-                'collection', 'bookmark_id', 'user', 'attributes', 'work', 'work_id'
-            ]
-        else:
-            fields = '__all__'
+        fields = '__all__'
 
     def process_tags(self, bookmark, validated_data, tags):
         bookmark.tags.clear()
