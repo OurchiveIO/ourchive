@@ -82,6 +82,9 @@
 	        </dr>
 	    </dl>
 		<input type="hidden" id="term" name="term" value="{{ term }}">
+		{% if tag_id %}
+		<input type="hidden" id="tag_id" name="tag_id" value="{{ tag_id }}">
+		{% endif %}
 		<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default uk-margin-top" type="submit" value="Submit"/>
 	</form>
 	</div>
@@ -141,6 +144,9 @@
 		        </dr>
 		    </dl>
 			<input type="hidden" id="term" name="term" value="{{ term }}">
+			{% if tag_id %}
+			<input type="hidden" id="tag_id" name="tag_id" value="{{ tag_id }}">
+			{% endif %}
 			<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default uk-margin-top" type="submit" value="Submit"/>
 		</form>
 	</div>

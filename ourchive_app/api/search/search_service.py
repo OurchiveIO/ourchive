@@ -10,6 +10,8 @@ class OurchiveSearch:
 
 	def do_search(self, **kwargs):
 		results = {}
+		if 'tag_id' in kwargs:
+			return self.filter_by_tag(**kwargs)
 		if ('work_search') in kwargs:
 			results['work'] = self.searcher.search_works(**kwargs['work_search'])
 		if ('bookmark_search') in kwargs:
@@ -20,6 +22,11 @@ class OurchiveSearch:
 			results['user'] = self.searcher.search_users(**kwargs['user_search'])
 		if ('collection_search') in kwargs:
 			results['collection'] = self.searcher.search_collections(**kwargs['collection_search'])
+		results['facet'] = self.searcher.get_result_facets(results)
+		return results
+
+	def filter_by_tag(self, **kwargs):
+		results = self.searcher.filter_by_tag(**kwargs)
 		results['facet'] = self.searcher.get_result_facets(results)
 		return results
 

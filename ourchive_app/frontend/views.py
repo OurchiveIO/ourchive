@@ -660,15 +660,21 @@ def get_search_request(request, request_object, request_builder):
 
 
 def search(request):
+	tag_id = None
 	if 'term' in request.GET:
 		term = request.GET['term']
 	elif 'term' in request.POST:
 		term = request.POST['term']
+	elif 'tag_id' in request.GET:
+		tag_id  = request.GET['tag_id']
+		term = ""
 	else:
 		return redirect('/')
 	request_builder = SearchObject()
 	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
 	request_object = request_builder.with_term(term, pagination)
+	if tag_id:
+		request_object["tag_id"] = tag_id
 	request_object = get_search_request(request, request_object, request_builder)
 	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
 	works = response_json['results']['work']
@@ -691,7 +697,7 @@ def search(request):
 			[users['data'], 4],
 			[collections['data'], 2]
 		])
-	return render(request, 'search_results.html', {
+	template_data = {
 		'works': works, 'bookmarks': bookmarks,
 		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
 		'facets': response_json['results']['facet'],
@@ -699,7 +705,10 @@ def search(request):
 		'click_func': 'getFormVals(event)',
 		'root': settings.ROOT_URL, 'term': term,
 		'keys_include': request_object[1]['include'],
-		'keys_exclude': request_object[1]['exclude']})
+		'keys_exclude': request_object[1]['exclude']}
+	if tag_id:
+		template_data['tag_id'] = tag_id
+	return render(request, 'search_results.html', template_data)
 
 
 def tag_autocomplete(request):
@@ -725,13 +734,19 @@ def bookmark_autocomplete(request):
 
 def search_filter(request):
 	term = request.POST.get('term', '')
-	if not term:
+	tag_id = None
+	if 'tag_id' in request.POST:
+		tag_id  = request.POST['tag_id']
+		term = ""
+	if not term and not tag_id:
 		return redirect('/')
 	include_filter_any = 'any' if request.POST.get('include_any_all') == 'on' else 'all'
 	exclude_filter_any = 'any' if request.POST.get('exclude_any_all') == 'on' else 'all'
 	order_by = request.POST['order_by'] if 'order_by' in request.POST else None
 	request_builder = SearchObject()
 	request_object = request_builder.with_term(term, None, (include_filter_any, exclude_filter_any), order_by)
+	if tag_id:
+		request_object["tag_id"] = tag_id
 	request_object = get_search_request(request, request_object, request_builder)
 	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
 	# todo DRY - this is redundant w search method - move processing to its own method
@@ -756,7 +771,7 @@ def search_filter(request):
 			[users['data'], 4],
 			[collections['data'], 2]
 		])
-	return render(request, 'search_results.html', {
+	template_data = {
 		'works': works, 'bookmarks': bookmarks,
 		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
 		'facets': response_json['results']['facet'],
@@ -764,7 +779,10 @@ def search_filter(request):
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
 		'keys_include': request_object[1]['include'],
-		'keys_exclude': request_object[1]['exclude']})
+		'keys_exclude': request_object[1]['exclude']}
+	if tag_id:
+		template_data['tag_id'] = tag_id
+	return render(request, 'search_results.html', template_data)
 
 
 @require_http_methods(["GET"])

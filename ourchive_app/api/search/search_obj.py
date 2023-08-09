@@ -211,7 +211,8 @@ class BookmarkSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
-        self.term = unidecode.unidecode(dict_obj['term'])
+        if 'term' in dict_obj:
+            self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
@@ -238,7 +239,8 @@ class CollectionSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
-        self.term = unidecode.unidecode(dict_obj['term'])
+        if 'term' in dict_obj:
+            self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
@@ -265,7 +267,8 @@ class TagSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
-        self.term = unidecode.unidecode(dict_obj['term'])
+        if 'term' in dict_obj:
+            self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
@@ -312,9 +315,11 @@ class WorkSearch(object):
         self.page = 1
 
     def from_dict(self, dict_obj):
+        print(dict_obj)
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
-        self.term = unidecode.unidecode(dict_obj['term'])
+        if 'term' in dict_obj:
+            self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
