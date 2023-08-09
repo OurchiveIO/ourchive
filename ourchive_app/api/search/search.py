@@ -360,6 +360,7 @@ class PostgresProvider:
             resultset = Tag.objects.annotate(zero_distance=TrigramWordDistance(term, 'text'))
             resultset = resultset.filter(zero_distance__lte=.85)
             resultset = resultset.order_by('zero_distance', 'text')
+            resultset = resultset[:15]
         if resultset is None:
             resultset = Tag.objects.filter(
                 tag_type__label=tag_type) if fetch_all else []

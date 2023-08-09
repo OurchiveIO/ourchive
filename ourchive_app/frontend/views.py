@@ -377,7 +377,7 @@ def unblock_user(request, username, pk):
 	message_type = messages.WARNING
 	if blocklist.response_info.status_code >= 400:
 		message_type = messages.ERROR
-	elif blocklist[1] >= 200:
+	elif blocklist.response_info.status_code >= 200:
 		message_type = messages.SUCCESS
 	messages.add_message(request, message_type, blocklist.response_info.message, blocklist.response_info.type_label)
 	return redirect(f'/username/{username}')
@@ -792,7 +792,10 @@ def works_by_type(request, type_id):
 def new_work(request):
 	work_types = do_get(f'api/worktypes', request, 'Work').response_data
 	if request.user.is_authenticated and request.method != 'POST':
-		work = {'title': 'Untitled Work', 'user': request.user.username}
+		work = {'title': 'Untitled Work', 'user': request.user.username, 'download_choices': [
+	        ('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP'), ('M4A', 'M4A'),
+	        ('MOBI', 'MOBI')
+	    ]}
 		tag_types = do_get(f'api/tagtypes', request, 'Tag').response_data
 		tags = {result['label']:[] for result in tag_types['results']}
 		work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Work Attributes')
@@ -1044,7 +1047,7 @@ def new_bookmark_collection(request):
 		tags = {result['label']:[] for result in tag_types['results']}
 		return render(request, 'bookmark_collection_form.html', {
 			'tags': tags,
-			'form_title': 'New Bookmark Collection',
+			'form_title': _('New Collection'),
 			'bookmark_collection': bookmark_collection})
 	elif request.user.is_authenticated:
 		collection_dict = get_bookmark_collection_obj(request)

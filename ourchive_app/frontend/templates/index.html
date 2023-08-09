@@ -80,7 +80,7 @@
 			            <div id="nav-search-div" class="uk-drop" uk-drop="mode: click; pos: left-center; offset: 0">
 			                <form class="uk-search uk-search-navbar uk-width-1-1" action="/search/" method="post" id="nav-search-form">
 			                	{% csrf_token %}
-			                    <input class="uk-search-input" autocomplete="off" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
+			                    <input class="uk-search-input ourchive-nav-search" autocomplete="off" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
 							<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
 			                </form>
 			            </div>
@@ -121,7 +121,7 @@
 		                    			<ul class="uk-nav-sub" id="subscriptions-subnav">
 								            <li id="subscriptions-bookmarks"><a href="{% url 'fe-user-bookmark-subscriptions' request.user %}">{% translate 'Bookmarks' %}</a></li>
 								            <li id="subscriptions-collections">
-								                <a href="#">{% translate 'Collections' %}</a>
+								                <a href="{% url 'fe-user-collection-subscriptions' request.user %}">{% translate 'Collections' %}</a>
 								            </li>
 								        </ul>
 								    </li>
