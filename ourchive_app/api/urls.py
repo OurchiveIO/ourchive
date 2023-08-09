@@ -85,6 +85,11 @@ urlpatterns = [
     path('reportreasons/', views.ReportReasonList.as_view(), name='report-reasons'),
     path('subscriptions/', views.SubscriptionList.as_view(), name='user-subscriptions'),
     path('subscriptions/<int:pk>/', views.UserSubscriptionDetail.as_view(), name='usersubscription-detail'),
+    path('openapi', get_schema_view(
+            title="Ourchive",
+            description="A fan-created archive software package",
+            version="1.0.0"
+        ), name='openapi-schema'),
     path('redoc/', TemplateView.as_view(
         template_name='redoc.html',
         extra_context={'schema_url':'openapi-schema'}
