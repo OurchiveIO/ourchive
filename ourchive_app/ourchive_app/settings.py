@@ -54,9 +54,9 @@ INSTALLED_APPS = [
 
 if not DEBUG:
     MIDDLEWARE = [
-        'django.middleware.cache.UpdateCacheMiddleware',
         'django.middleware.security.SecurityMiddleware',
         'whitenoise.middleware.WhiteNoiseMiddleware',
+        #'django.middleware.cache.UpdateCacheMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.locale.LocaleMiddleware',
         'django.middleware.common.CommonMiddleware',
@@ -65,7 +65,7 @@ if not DEBUG:
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'corsheaders.middleware.CorsMiddleware',
-        'django.middleware.cache.FetchFromCacheMiddleware',
+        #'django.middleware.cache.FetchFromCacheMiddleware',
     ]
 else:
     MIDDLEWARE = [
