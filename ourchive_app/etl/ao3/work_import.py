@@ -225,7 +225,7 @@ class EtlWorkImport(object):
 		chapter_ids = []
 		chapter_num = 1
 		for chapter_content in chapter_json['content']:
-			chapter = api.Chapter(work_id=work_id, user_id=self.user_id, number=chapter_num)
+			chapter = api.Chapter(work_id=work_id, user_id=self.user_id, number=chapter_num, draft=False)
 			chapter.save()
 			chapter_ids.append(self.process_mappings(chapter, mappings, chapter_content))
 			chapter_num += 1
