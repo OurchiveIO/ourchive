@@ -1,3 +1,5 @@
+import unidecode
+
 class WorkFilter(object):
     def __init__(self):
         self.include_filters = {
@@ -209,7 +211,7 @@ class BookmarkSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
-        self.term = dict_obj['term']
+        self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
@@ -236,7 +238,7 @@ class CollectionSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
-        self.term = dict_obj['term']
+        self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
@@ -263,7 +265,7 @@ class TagSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
-        self.term = dict_obj['term']
+        self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
@@ -287,7 +289,7 @@ class UserSearch(object):
         self.page = 1
 
     def from_dict(self, dict_obj):
-        self.term = dict_obj['term']
+        self.term = unidecode.unidecode(dict_obj['term'])
 
     def to_dict(self):
         self.filter = self.filter
@@ -312,7 +314,7 @@ class WorkSearch(object):
     def from_dict(self, dict_obj):
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
-        self.term = dict_obj['term']
+        self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
         self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''

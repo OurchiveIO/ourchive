@@ -3,6 +3,7 @@ from django.db.models.functions import Lower
 import uuid
 from django.contrib.auth.models import AbstractUser
 import nh3
+import unidecode
 
 
 class User(AbstractUser):
@@ -381,7 +382,8 @@ class Tag(models.Model):
         return self.text
 
     def save(self, *args, **kwargs):
-        self.text = self.text.lower()
+        self.text = nh3.clean(self.text.lower())
+        self.text = unidecode.unidecode(self.text)
         super(Tag, self).save(*args, **kwargs)
 
 

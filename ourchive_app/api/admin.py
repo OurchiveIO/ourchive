@@ -15,7 +15,7 @@ class RichTextEditorWidget(Input):
 
 class TagAdmin(admin.ModelAdmin):
     list_display = ('id', 'text', 'display_text', 'tag_type')
-    search_fields = ('text', 'tag_type__label')
+    search_fields = ('text', 'display_text', 'tag_type__label')
 
 
 class AttributeValueAdmin(admin.ModelAdmin):

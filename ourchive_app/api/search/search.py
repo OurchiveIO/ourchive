@@ -239,6 +239,7 @@ class PostgresProvider:
                 tag_dict["tag_type"] = tag.tag_type.label
                 tag_dict["text"] = tag.text
                 tag_dict["display_text"] = tag.display_text
+                tag_dict["id"] = tag.id
                 tags.append(tag_dict)
             attributes = []
             for attribute in result.attributes.all():
@@ -279,6 +280,7 @@ class PostgresProvider:
                 tag_dict["tag_type"] = tag.tag_type.label
                 tag_dict["text"] = tag.text
                 tag_dict["display_text"] = tag.display_text
+                tag_dict["id"] = tag.id
                 tags.append(tag_dict)
             attributes = []
             for attribute in result.attributes.all():
@@ -317,6 +319,7 @@ class PostgresProvider:
                 tag_dict["tag_type"] = tag.tag_type.label
                 tag_dict["text"] = tag.text
                 tag_dict["display_text"] = tag.display_text
+                tag_dict["id"] = tag.id
                 tags.append(tag_dict)
             attributes = []
             for attribute in result.attributes.all():

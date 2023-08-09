@@ -15,6 +15,7 @@ from django.core.mail import send_mail
 from .utils import convert_boolean
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+import unidecode
 
 logger = logging.getLogger(__name__)
 
@@ -576,7 +577,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         required_tag_types = list(TagType.objects.filter(required=True))
         has_any_required = len(required_tag_types) > 0
         for item in tags:
-            tag_id = item['text'].lower()
+            tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
             tag_friendly_name = item['text']
             tag_type = item['tag_type']
             tag_type_id = TagType.objects.filter(label=tag_type).first().id
@@ -606,8 +607,9 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         return work
 
     def update(self, work, validated_data):
-        tags = validated_data.pop('tags') if 'tags' in validated_data else []
-        work = self.process_tags(work, validated_data, tags)
+        if 'tags' in validated_data:
+            tags = validated_data.pop('tags') if 'tags' in validated_data else []
+            work = self.process_tags(work, validated_data, tags)
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
@@ -685,7 +687,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         required_tag_types = list(TagType.objects.filter(required=True))
         has_any_required = len(required_tag_types) > 0
         for item in tags:
-            tag_id = item['text'].lower()
+            tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
             tag_friendly_name = item['text']
             tag_type = item['tag_type']
             tag_type_id = TagType.objects.filter(label=tag_type).first().id
@@ -716,13 +718,15 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
                 validated_data.pop('rating')
         if 'description' in validated_data:
             validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
-        tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        if 'tags' in validated_data:
+            tags = validated_data.pop('tags') if 'tags' in validated_data else []
+            bookmark = self.process_tags(bookmark, validated_data, tags)
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
-        bookmark = self.process_tags(bookmark, validated_data, tags)
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)
         return Bookmark.objects.filter(id=bookmark.id).first()
+
 
     def create(self, validated_data):
         if (OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
@@ -779,7 +783,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             bookmark.tags.clear()
             required_tag_types = list(TagType.objects.filter(required=True))
             for item in tags:
-                tag_id = item['text'].lower()
+                tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
                 tag_friendly_name = item['text']
                 tag_type = item['tag_type']
                 tag_type_id = TagType.objects.filter(label=tag_type).first().id
@@ -824,7 +828,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             attributes = validated_data.pop('attributes')
         bookmark_collection = BookmarkCollection.objects.create(**validated_data)
         for item in tags:
-            tag_id = item['text']
+            tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
             tag_type = item['tag_type_id']
             tag, created = Tag.objects.get_or_create(
                 text=tag_id, tag_type=tag_type)
