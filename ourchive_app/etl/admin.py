@@ -14,7 +14,7 @@ def process_imports(modeladmin, request, queryset):
 
 class WorkImportAdmin(admin.ModelAdmin):
     list_display = ('id', 'work_id', 'job_uid', 'job_success', 'job_finished', 'created_on', 'job_processing')
-    actions = [process_imports]
+    # actions = [process_imports]
 
 class ObjectMappingAdmin(admin.ModelAdmin):
     list_display = ('id', 'object_type', 'origin_field', 'destination_field')

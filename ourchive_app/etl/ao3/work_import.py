@@ -34,6 +34,7 @@ class EtlWorkImport(object):
 		import_jobs = WorkImport.objects.filter(job_finished=False).filter(job_processing=False).order_by('created_on')[:100]
 		tracking_job = None
 		for job in import_jobs:
+			self.import_job = job
 			try:
 				tracking_job = job
 				self.user_id = job.user.id 
