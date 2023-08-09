@@ -25,7 +25,7 @@ class AttributeValueAdmin(admin.ModelAdmin):
 
 class AttributeTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'display_name', 'allow_on_work', 'allow_on_user', 'allow_on_chapter', 'allow_on_bookmark', 'allow_multiselect')
-    search_fields = ('name', 'display_name')
+    search_fields = ('name', 'display_name', 'sort_order')
 
 
 def send_invite_email(invitation, approved=False):
@@ -155,8 +155,11 @@ class UserSubscriptionAdmin(admin.ModelAdmin):
 class AdminAnnouncementAdmin(admin.ModelAdmin):
     list_display = ('id', 'title')
 
+class TagTypeAdmin(admin.ModelAdmin):
+    list_display = ('label', 'sort_order')
 
-admin.site.register(TagType)
+
+admin.site.register(TagType, TagTypeAdmin)
 admin.site.register(WorkType)
 admin.site.register(NotificationType)
 admin.site.register(OurchiveSetting, OurchiveSettingAdmin)

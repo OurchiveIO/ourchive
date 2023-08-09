@@ -394,12 +394,13 @@ class TagType(models.Model):
     label = models.CharField(max_length=200, db_index=True)
     admin_administrated = models.BooleanField(default=False)
     required = models.BooleanField(default=False)
+    sort_order = models.IntegerField(default=1)
 
     class Meta:
         indexes = [
             models.Index(fields=['label']),
         ]
-        ordering = ('label',)
+        ordering = ('sort_order', 'label',)
 
     def __repr__(self):
         return '<TagType: {}>'.format(self.id)
@@ -661,12 +662,13 @@ class AttributeType(models.Model):
     allow_on_user = models.BooleanField(default=False)
     allow_multiselect = models.BooleanField(default=True)
     allow_on_bookmark_collection = models.BooleanField(default=False)
+    sort_order = models.IntegerField(default=1)
 
     class Meta:
         indexes = [
             models.Index(fields=['name']),
         ]
-        ordering = ['name']
+        ordering = ['sort_order', 'name']
         constraints = [
             models.UniqueConstraint(Lower('name').desc(), name='unique_attributetype_name')
         ]

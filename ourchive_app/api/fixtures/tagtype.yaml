@@ -1,18 +1,49 @@
 - model: api.tagtype
   pk: 1
   fields:
-    label: Pairing
+    label: Fandom
     admin_administrated: false
     required: false
+    sort_order: 1
 - model: api.tagtype
   pk: 2
   fields:
-    label: Fandom
+    label: Trope
     admin_administrated: true
     required: false
+    sort_order: 4
 - model: api.tagtype
-  pk: 3
+  pk: 169
   fields:
-    label: Trope
+    label: Language
     admin_administrated: false
     required: false
+    sort_order: 5
+- model: api.tagtype
+  pk: 170
+  fields:
+    label: Pairing
+    admin_administrated: false
+    required: false
+    sort_order: 2
+- model: api.tagtype
+  pk: 171
+  fields:
+    label: Warnings
+    admin_administrated: false
+    required: false
+    sort_order: 6
+- model: api.tagtype
+  pk: 172
+  fields:
+    label: Additional Tags
+    admin_administrated: false
+    required: false
+    sort_order: 7
+- model: api.tagtype
+  pk: 173
+  fields:
+    label: Characters
+    admin_administrated: false
+    required: false
+    sort_order: 3
