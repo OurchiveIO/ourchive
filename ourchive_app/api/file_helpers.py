@@ -46,7 +46,9 @@ class LocalFileHelper:
 
     def handle_uploaded_file(self, file, name, username):
         filename = self.common.get_filename(name)
-        content_type = 'image/' if 'image' in file.content_type else 'audio/' if 'audio' in file.content_type else ''
+        content_type = 'image/' if 'image' in file.content_type else 'audio/' if 'audio' in file.content_type else None
+        if not content_type:
+            return None
         full_name = settings.MEDIA_ROOT + '/' + content_type + username + "/" + filename
         logging.debug(f"File upload: {full_name}")
         os.makedirs(os.path.dirname(full_name), exist_ok=True)

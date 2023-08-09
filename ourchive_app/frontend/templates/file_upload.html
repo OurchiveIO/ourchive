@@ -35,7 +35,7 @@
 	        load: function () {
 	        },
 	        error: function () {
-	        	var result = JSON.parse(arguments[0].xhr.response)['final_url'];
+	        	var result = JSON.parse(arguments[0].xhr.response)['message'];
 	        	UIkit.notification(result, {pos: 'top-center', status: 'danger'});
 	        },
 	        complete: function () {

@@ -143,6 +143,8 @@ class FileUpload(APIView):
             if service is not None:
                 final_url = service.handle_uploaded_file(
                     request.FILES['files[]'], request.FILES['files[]'].name, request.user.username)
+                if final_url is None:
+                    return Response({'message': 'Filetype not permitted.'}, status=403)
                 return Response({'final_url': final_url})
             else:
                 return Response({'final_url': 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.'}, status=400)
