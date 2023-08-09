@@ -231,6 +231,7 @@ class PostgresProvider:
         # build final resultset
         result_json = []
         for result in resultset[0]:
+            chapters = list(result.chapters.all())
             username = result.user.username
             tags = []
             for tag in result.tags.all():
@@ -256,6 +257,7 @@ class PostgresProvider:
             result_dict["work_type"] = work_type
             result_dict["tags"] = tags
             result_dict["attributes"] = attributes
+            result_dict["chapter_count"] = len(chapters)
             result_json.append(result_dict)
         return {'data': result_json, 'page': resultset[1]}
 

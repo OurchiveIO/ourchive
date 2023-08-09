@@ -562,6 +562,10 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     audio_length = serializers.IntegerField(read_only=True)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
+    chapter_count = serializers.IntegerField(
+        source='chapters.count', 
+        read_only=True
+    )
 
     class Meta:
         model = Work
