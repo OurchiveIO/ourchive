@@ -53,14 +53,15 @@ class EtlWorkImport(object):
 			except Exception as err:
 				logger.error(f'Work import: Exception creating import job for {work_id}. Error: {err}')
 		if import_job:
+			chapters_processed = None
 			try:
-				chapters_processed = self.import_work(self.import_job.job_uid)
+				chapters_processed = self.import_work(import_job.job_uid)
 			except Exception as err:
 				logger.error(f'Work import: Exception in get_single_work for {import_job.job_uid}. Error: {err}')
 			if not as_batch or not chapters_processed:
 				# if it's a single import or the import failed, let's go ahead and create a notif.
 				# this prevents spamming on success of a username import
-				self.handle_job_complete(chapters_processed, self.import_job)
+				self.handle_job_complete(chapters_processed, import_job)
 
 	def create_import_job(self, work_id):
 		job_uid = uuid.uuid4()
