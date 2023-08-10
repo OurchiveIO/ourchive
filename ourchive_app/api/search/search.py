@@ -466,7 +466,7 @@ class PostgresProvider:
             result_dict.pop(field, None)
         result_dict['tag_type'] = tag_type
         result_json.append(result_dict)
-        tag_results = {'data': result_json, 'page': {'count': 1}}
+        tag_results = {'data': result_json, 'page': {}}
 
         work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
         bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}

@@ -121,7 +121,7 @@ if DEBUG:
 else:
     ANYMAIL = {
         "MAILGUN_API_KEY": os.getenv("OURCHIVE_MAILGUN_API_KEY"),
-        "MAILGUN_SENDER_DOMAIN": 'ourchive-mail.stopthatimp.net', 
+        "MAILGUN_SENDER_DOMAIN": os.getenv("OURCHIVE_MAILGUN_SENDER_DOMAIN"), 
     }
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend" 
 DEFAULT_FROM_EMAIL = "admin@ourchive-dev.stopthatimp.net"  
