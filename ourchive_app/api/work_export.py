@@ -100,7 +100,7 @@ def create_zip(work):
             shutil.rmtree(temp_dir)
         # clean up parent folder
         shutil.rmtree(get_temp_directory(work.uid))
-    return zip_url
+    return [location, zip_url]
 
 
 def create_epub(work):
@@ -199,4 +199,4 @@ def create_epub(work):
     os.makedirs(get_media_directory(work.uid), exist_ok=True)
     location = get_epub_dir(work)
     epub.write_epub(location, book, {})
-    return get_epub_url(work)
+    return [location, get_epub_url(work)]

@@ -33,8 +33,8 @@
             {% endif %}
     </div>
     <div id="chapter-context-parent" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
-		<div id="chapter-summary-header"><span id="chapter-summary-label" class="uk-text-large">Summary</span></div>
-	    <div id="chapter-summary-div"><span id="chapter-summary-text" class="uk-text-medium">{% autoescape off %}{{ chapter.summary }}{% endautoescape %}</span></div>
+		<{% if chapter.summary %}div id="chapter-summary-header"><span id="chapter-summary-label" class="uk-text-large">Summary</span></div>
+	    <div id="chapter-summary-div"><span id="chapter-summary-text" class="uk-text-medium">{% autoescape off %}{{ chapter.summary }}{% endautoescape %}</span></div>{% endif %}
 		{% if chapter.notes %}
 		<div id="chapter-notes-header"><span id="chapter-notes-label" class="uk-text-large">Notes</span></div>
 	    <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.notes }}{% endautoescape %}</span></div>{% endif %}

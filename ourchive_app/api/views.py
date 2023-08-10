@@ -209,17 +209,17 @@ class ExportWork(APIView):
             if work.epub_url and work.epub_url != "None":
                 return Response({'message': "EPUB url exists. Use EPUB URL to download work."}, status=400)
             work_url = work_export.create_epub(work)
-            work.epub_url = work_url
+            work.epub_url = work_url[1]
+            #full_url = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{work_url}'
             work.save()
-            return Response({'media_url': work_url}, status=200)
+            return Response({'media_url': work_url[0]}, status=200)
         elif ext.lower() == 'zip':
             if work.zip_url and work.zip_url != "None":
                 return Response({'message': "ZIP url exists. Use ZIP URL to download work."}, status=400)
             work_url = work_export.create_zip(work)
-            work.zip_url = work_url
+            work.zip_url = work_url[1]
             work.save()
-            full_url = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}'
-            return Response({'media_url': work_url}, status=200)
+            return Response({'media_url': work_url[0]}, status=200)
         else:
             return Response({'message': 'Format not supported or work does not exist.'}, status=400)
 
