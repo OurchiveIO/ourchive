@@ -546,10 +546,11 @@ class ChapterAllSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     number = serializers.IntegerField()
     title = serializers.ReadOnlyField()
+    updated_on = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Chapter
-        fields = ['id', 'number', 'title', 'draft', 'work', 'user']
+        fields = ['id', 'number', 'title', 'draft', 'work', 'user', 'updated_on']
 
 
 class WorkSerializer(serializers.HyperlinkedModelSerializer):

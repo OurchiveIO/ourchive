@@ -625,7 +625,7 @@ class ChapterDraftDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class WorkChapterDetailAll(generics.ListCreateAPIView):
-    serializer_class = ChapterAllSerializer
+    serializer_class = ChapterSerializer
     permission_classes = [IsOwner]
     pagination_class = None
 
