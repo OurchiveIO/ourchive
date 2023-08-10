@@ -12,6 +12,7 @@ from django.utils.translation import gettext as _
 from api import utils
 from django.views.decorators.cache import never_cache
 from dateutil.parser import *
+from urllib.parse import unquote, quote
 
 logger = logging.getLogger(__name__)
 
@@ -261,7 +262,7 @@ def content_page(request, pk):
 
 
 def user_name(request, username):
-	user = do_get(f"api/users/{username}", request, 'User')
+	user = do_get(f"api/users/profile/{request.user.id}", request, params=request.GET, object_name='User')
 	if user.response_info.status_code >= 400:
 		messages.add_message(request, messages.ERROR, user.response_info.message, user.response_info.type_label)
 		return redirect('/')
@@ -436,7 +437,7 @@ def edit_account(request, username):
 		return redirect('/username/{username}')
 	else:
 		if request.user.is_authenticated:
-			response = do_get(f'api/users/{username}', request)
+			response = do_get(f"api/users/profile/{request.user.id}", request)
 			user = response.response_data['results']
 			if len(user) > 0:
 				user = user[0]
@@ -463,7 +464,7 @@ def edit_user(request, username):
 		return redirect(f'/username/{username}/')
 	else:
 		if request.user.is_authenticated:
-			response = do_get(f'api/users/{username}', request, 'User Profile')
+			response = do_get(f"api/users/profile/{request.user.id}", request, 'User Profile')
 			if response.response_info.status_code >= 400:
 				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
 				return redirect(f'/username/{username}')

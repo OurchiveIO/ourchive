@@ -35,6 +35,7 @@ from . import work_export
 from django.contrib.auth.models import AnonymousUser
 from etl import ao3
 import threading
+from urllib.parse import unquote
 
 
 @api_view(['GET'])
@@ -316,8 +317,7 @@ class UserNameDetail(generics.ListAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        username = self.kwargs['username']
-        return User.objects.filter(username=username)
+        return User.objects.filter(pk=self.request.user.id)
 
 
 class GroupViewSet(viewsets.ModelViewSet):
