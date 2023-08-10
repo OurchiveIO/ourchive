@@ -218,6 +218,7 @@ class ExportWork(APIView):
             work_url = work_export.create_zip(work)
             work.zip_url = work_url
             work.save()
+            full_url = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}'
             return Response({'media_url': work_url}, status=200)
         else:
             return Response({'message': 'Format not supported or work does not exist.'}, status=400)

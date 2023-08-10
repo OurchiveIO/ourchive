@@ -942,7 +942,8 @@ def publish_work(request, id):
 
 def export_work(request, pk, file_ext):
 	file_url = do_get(f'api/works/{pk}/export/', request, params={'extension': file_ext}, object_name='Work')
-	process_message(file_url)
+	message_type = messages.ERROR if file_url.response_info.status_code >= 400 else messages.SUCCESS
+	messages.add_message(request, message_type, file_url.response_info.message, file_url.response_info.type_label)
 	if file_url.response_info.status_code >= 400:
 		return redirect(f'/works/{pk}')
 	response = FileResponse(open(file_url.response_data['media_url'], 'rb'))
