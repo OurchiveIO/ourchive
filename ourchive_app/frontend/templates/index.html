@@ -108,7 +108,7 @@
 			            	</li>
 			            {% endif %}
 			            {% if request.user.is_authenticated %}
-			            	<a href="/username/{{request.user}}" id="nav-username">{{ request.user }}</a>
+			            	<a href="{% url 'user-profile-parent' request.user.id %}" id="nav-username">{{ request.user }}</a>
 			            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div">
 	                    		<ul class="uk-nav uk-navbar-dropdown-nav" id="nav-user-dropdown-ul">
 	                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
@@ -125,10 +125,10 @@
 								            </li>
 								        </ul>
 								    </li>
-								    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user %}">{% translate 'Profile' %}</a>
+								    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a>
 								    	<ul class="uk-nav-sub" id="profile-subnav">
-	                    				<li id="nav-edit-profile-li"><a href="/username/{{request.user}}/edit" id="nav-edit-profile-link">{% translate 'Edit Profile' %}</a></li>
-	                    				<li id="nav-edit-account-li"><a href="/username/{{request.user}}/account/edit" id="nav-edit-account-link">{% translate 'Edit Account' %}</a></li>
+	                    				<li id="nav-edit-profile-li"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-edit-profile-link">{% translate 'Edit Profile' %}</a></li>
+	                    				<li id="nav-edit-account-li"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-edit-account-link">{% translate 'Edit Account' %}</a></li>
 	                    				<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">{% translate 'Blocklist' %}</a></li>
 	                    			</ul>
 	                    			{% if request.session.has_notifications %}

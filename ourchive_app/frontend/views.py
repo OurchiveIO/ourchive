@@ -261,11 +261,12 @@ def content_page(request, pk):
 	})
 
 
-def user_name(request, username):
-	user = do_get(f"api/users/profile/{request.user.id}", request, params=request.GET, object_name='User')
+def user_name(request, pk):
+	user = do_get(f"api/users/profile/{pk}", request, params=request.GET, object_name='User')
 	if user.response_info.status_code >= 400:
 		messages.add_message(request, messages.ERROR, user.response_info.message, user.response_info.type_label)
 		return redirect('/')
+	username = user.response_data['results'][0]['username']
 	work_params = {}
 	bookmark_params = {}
 	bookmark_collection_params = {}
@@ -426,7 +427,7 @@ def user_works_drafts(request, username):
 		'root': settings.ROOT_URL})
 
 
-def edit_account(request, username):
+def edit_account(request, pk):
 	if request.method == 'POST':
 		user_data = request.POST.copy()
 		profile_id = user_data['id']
@@ -434,26 +435,26 @@ def edit_account(request, username):
 		response = do_patch(f'api/users/{profile_id}/', request, data=user_data, object_name='Account')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
-		return redirect('/username/{username}')
+		return redirect('/username/{pk}')
 	else:
 		if request.user.is_authenticated:
-			response = do_get(f"api/users/profile/{request.user.id}", request)
+			response = do_get(f"api/users/profile/{pk}", request)
 			user = response.response_data['results']
 			if len(user) > 0:
 				user = user[0]
 				return render(request, 'account_form.html', {'user': user})
 			else:
 				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
-				return redirect(f'/username/{username}')
+				return redirect(f'/username/{pk}')
 		else:
 			messages.add_message(request, messages.ERROR, _('You must log in as this user to perform this action.'), 'user-info-unauthorized-error')
 			return redirect('/login')
 
 
-def edit_user(request, username):
+def edit_user(request, pk):
 	if request.method == 'POST':
 		user_data = request.POST.copy()
-		if user_data['icon'] == "":
+		if 'icon' not in user_data or user_data['icon'] == "":
 			user_data['icon'] = user_data['unaltered_icon']
 		user_data.pop('unaltered_icon')
 		user_id = user_data.pop('user_id')[0]
@@ -461,13 +462,13 @@ def edit_user(request, username):
 		response = do_patch(f'api/users/{user_id}/', request, data=user_data, object_name='User Profile')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
-		return redirect(f'/username/{username}/')
+		return redirect(f'/username/{pk}/')
 	else:
 		if request.user.is_authenticated:
 			response = do_get(f"api/users/profile/{request.user.id}", request, 'User Profile')
 			if response.response_info.status_code >= 400:
 				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
-				return redirect(f'/username/{username}')
+				return redirect(f'/username/{pk}')
 			user = response.response_data['results']
 			user = user[0]
 			if user is not None:
@@ -1008,7 +1009,9 @@ def new_bookmark(request, work_id):
 			'bookmark': bookmark})
 	elif request.user.is_authenticated:
 		bookmark_dict = get_bookmark_obj(request)
-		if len(bookmark_dict['rating']) > 1:
+		if 'rating' not in bookmark_dict:
+			bookmark_dict['rating'] = 0
+		elif len(bookmark_dict['rating']) > 1:
 			bookmark_dict['rating'] = 0
 		response = do_post(f'api/bookmarks/', request, data=bookmark_dict, object_name='Bookmark')
 		process_message(request, response)

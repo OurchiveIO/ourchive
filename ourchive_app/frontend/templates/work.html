@@ -31,7 +31,7 @@
                 <a id="work-fingerguns-link" href="/fingerguns/{{ id }}"><span uk-icon="icon: bolt" id="work-fingerguns-span" title="Add Fingerguns"></span> </a>
             </div>
             <div class="uk-width-1-1 uk-margin-remove-top" id="work-header-parent">
-                <h1 id="work-title-h1" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="work-title-link" href="/works/{{ id }}">{{ work.title }}</a></h1> <span id="work-user-span" class="uk-text-large" style="padding-left: 10px;">by <a id="work-user-link" href="/username/{{ work.user }}">{{ work.user }}</a></span>
+                <h1 id="work-title-h1" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="work-title-link" href="/works/{{ id }}">{{ work.title }}</a></h1> <span id="work-user-span" class="uk-text-large" style="padding-left: 10px;">by <a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a></span>
                 {% if work.draft %}
                 <div class="uk-width-auto" id="work-draft-div">
                     <span id="work-draft-span" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>

@@ -120,6 +120,7 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
         queryset=User.objects.all(), slug_field='username')
     subscribed_user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
+    subscribed_user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     def update(self, subscription, validated_data):
         UserSubscription.objects.filter(id=subscription.id).update(**validated_data)
@@ -557,6 +558,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     work_id = serializers.HyperlinkedIdentityField(
         view_name='work-detail', read_only=True)
     id = serializers.ReadOnlyField()

@@ -273,7 +273,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         if not self.request.user.can_upload_images and 'icon' in self.request.data:
-            serializer.pop('icon')
+            self.request.data.pop('icon')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
