@@ -196,7 +196,7 @@
 				<div uk-grid id="search-results-users-grid">
 				<div class="uk-width-expand" id="search-results-users-content-parent">
 			        {% for user in users.data %} 
-						<p id="search-results-user-{{user.id}}"> <a id="search-results-user-{{user.id}}-link" href="/username/{{ user.username }}">{{ user.username }}</a> </p>
+						<p id="search-results-user-{{user.id}}"> <a id="search-results-user-{{user.id}}-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a> </p>
 				    {% endfor %}
 				</div>     
 			</li>
