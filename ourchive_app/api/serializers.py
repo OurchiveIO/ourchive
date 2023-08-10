@@ -120,7 +120,7 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
         queryset=User.objects.all(), slug_field='username')
     subscribed_user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
-    subscribed_user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    subscribed_user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), read_only=True)
 
     def update(self, subscription, validated_data):
         UserSubscription.objects.filter(id=subscription.id).update(**validated_data)
