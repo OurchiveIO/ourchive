@@ -317,7 +317,7 @@ class UserNameDetail(generics.ListAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return User.objects.filter(pk=self.request.user.id)
+        return User.objects.filter(pk=self.kwargs['pk'])
 
 
 class GroupViewSet(viewsets.ModelViewSet):
