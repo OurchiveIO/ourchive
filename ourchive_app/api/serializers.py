@@ -715,7 +715,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         if 'description' in validated_data:
             validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         if 'tags' in validated_data:
-            tags = validated_data.pop('tags') if 'tags' in validated_data else []
+            tags = validated_data.pop('tags')
             bookmark = self.process_tags(bookmark, validated_data, tags)
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -728,7 +728,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         if (OurchiveSetting.objects.filter(name='Ratings Enabled') and OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
             if 'rating' in validated_data:
                 validated_data.pop('rating')
-        tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        if 'tags' in validated_data:
+            tags = validated_data.pop('tags')
         validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         attributes = None
         if 'attributes' in validated_data:
