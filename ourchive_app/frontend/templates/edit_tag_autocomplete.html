@@ -1,7 +1,5 @@
 {% if tags %}
-<div class="uk-card uk-card-body uk-card-default uk-card-small" id="edit-tag-autocorrect-parent">
 	{% for tag in tags %}
-		<p id="edit-tag-autocorrect-graf-{{tag.tag}}" class="uk-text-left uk-margin-large-left"><a id="populate-edit-tag-href-{{tag.tag}}" onclick="populateTagInput('{{tag.display_text}}', '{{tag.type}}', '{{fetch_all}}')"><span class="ourchive-autocomplete uk-text-small" id="edit-tag-autocorrect-span-{{tag.tag}}">{{tag.display_text}}</span></a></p>
+		<div id="populate-edit-tag-href-{{tag.tag}}" class="uk-background-default uk-padding-small" onclick="populateTagInput('{{tag.display_text}}', '{{tag.type}}', '{{fetch_all}}')"><span class="ourchive-autocomplete uk-text-small" id="edit-tag-autocorrect-span-{{tag.tag}}">{{tag.display_text}}</span></div>
 	{% endfor %}
-</div>
 {% endif %}
