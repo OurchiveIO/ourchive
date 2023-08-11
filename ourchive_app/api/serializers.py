@@ -709,7 +709,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, bookmark, validated_data):
         if 'title' in validated_data and validated_data['title'] == '':
             validated_data['title'] = f'Bookmark: {bookmark.work.title}'
-        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
+        if (OurchiveSetting.objects.filter(name='Ratings Enabled') and OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
             if 'rating' in validated_data:
                 validated_data.pop('rating')
         if 'description' in validated_data:
@@ -725,7 +725,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
 
 
     def create(self, validated_data):
-        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
+        if (OurchiveSetting.objects.filter(name='Ratings Enabled') and OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
             if 'rating' in validated_data:
                 validated_data.pop('rating')
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
