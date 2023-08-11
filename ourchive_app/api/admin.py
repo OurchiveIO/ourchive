@@ -155,12 +155,17 @@ class UserSubscriptionAdmin(admin.ModelAdmin):
 class AdminAnnouncementAdmin(admin.ModelAdmin):
     list_display = ('id', 'title')
 
+
 class TagTypeAdmin(admin.ModelAdmin):
     list_display = ('label', 'sort_order')
 
 
+class WorkTypeAdmin(admin.ModelAdmin):
+    list_display = ('type_name', 'sort_order')
+
+
 admin.site.register(TagType, TagTypeAdmin)
-admin.site.register(WorkType)
+admin.site.register(WorkType, WorkTypeAdmin)
 admin.site.register(NotificationType)
 admin.site.register(OurchiveSetting, OurchiveSettingAdmin)
 admin.site.register(ContentPage, ContentPageAdmin)

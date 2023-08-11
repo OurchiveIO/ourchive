@@ -501,7 +501,7 @@ class WorkTypeDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class WorkTypeList(generics.ListCreateAPIView):
-    queryset = WorkType.objects.get_queryset().order_by('id')
+    queryset = WorkType.objects.get_queryset().order_by('sort_order')
     serializer_class = WorkTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
 
