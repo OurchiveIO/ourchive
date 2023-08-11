@@ -1097,7 +1097,10 @@ def new_bookmark_collection(request):
 		collection_dict = get_bookmark_collection_obj(request)
 		response = do_post(f'api/bookmarkcollections/', request, data=collection_dict, object_name='Bookmark Collection')
 		process_message(request, response)
-		return redirect(f'/bookmark-collections/{response.response_data["id"]}')
+		if 'id' in response.response_data:
+			return redirect(f'/bookmark-collections/{response.response_data["id"]}')
+		else:
+			return redirect(f'/bookmark-collections/new')
 	else:
 		return get_unauthorized_message(request, '/login', 'bookmark-collection-login-error')
 

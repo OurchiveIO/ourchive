@@ -27,7 +27,7 @@ class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
 
     def process_attributes(attr_obj, validated_data, attributes):
-        attr_obj.attributes.clear()
+        attrs_to_add = []
         attr_types = set()
         for attribute in attributes:
             attribute = AttributeValue.objects.filter(name=attribute['name'], attribute_type__name=attribute['attribute_type']).first()
@@ -35,8 +35,11 @@ class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
                 if attribute.attribute_type.name in attr_types and attribute.attribute_type.allow_multiselect is False:
                     logger.error(f"Cannot add attribute value {attribute.name}; attribute type {attribute.attribute_type.name} does not allow multi-select.")
                 else:
-                    attr_obj.attributes.add(attribute)
+                    attrs_to_add.append(attribute)
                     attr_types.add(attribute.attribute_type.name)
+        attr_obj.attributes.clear()
+        for attr in attrs_to_add:
+            attr_obj.attributes.add(attr)
         attr_obj.save()
         return attr_obj
 
@@ -590,7 +593,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
     def process_tags(self, work, validated_data, tags):
-        work.tags.clear()
+        tags_to_add = []
         required_tag_types = list(TagType.objects.filter(required=True))
         has_any_required = len(required_tag_types) > 0
         for item in tags:
@@ -609,10 +612,13 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             if tag.display_text == '':
                 tag.display_text = tag_friendly_name
                 tag.save()
-            work.tags.add(tag)
+            tags_to_add.append(tag)
         if has_any_required and len(required_tag_types) > 0:
             # todo: error
             return None
+        work.tags.clear()
+        for tag in tags_to_add:
+            work.tags.add(tag)
         work.save()
         return work
 
@@ -693,7 +699,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
     def process_tags(self, bookmark, validated_data, tags):
-        bookmark.tags.clear()
+        tags_to_add = []
         required_tag_types = list(TagType.objects.filter(required=True))
         has_any_required = len(required_tag_types) > 0
         for item in tags:
@@ -713,10 +719,13 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
             if tag.display_text == '':
                 tag.display_text = tag_friendly_name
                 tag.save()
-            bookmark.tags.add(tag)
+            tags_to_add.append(tag)
         if has_any_required and len(required_tag_types) > 0:
             # todo: error
             return None
+        bookmark.tags.clear()
+        for tag in tags_to_add:
+            bookmark.tags.add(tag)
         bookmark.save()
         return bookmark
 
@@ -791,7 +800,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, bookmark, validated_data):
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
-            bookmark.tags.clear()
+            tags_to_add = []
             required_tag_types = list(TagType.objects.filter(required=True))
             for item in tags:
                 tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
@@ -810,6 +819,9 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                 if tag.display_text == '':
                     tag.display_text = tag_friendly_name
                     tag.save()
+                tags_to_add.append(tag)
+            bookmark.tags.clear()
+            for tag in tags_to_add:
                 bookmark.tags.add(tag)
             bookmark.save()
         if 'attributes' in validated_data:
@@ -833,6 +845,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         bookmark_list = validated_data.pop('bookmarks') if 'bookmarks' in validated_data else []
         tags = []
+        attributes = None
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
         if 'attributes' in validated_data:
@@ -840,9 +853,14 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         bookmark_collection = BookmarkCollection.objects.create(**validated_data)
         for item in tags:
             tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
-            tag_type = item['tag_type_id']
+            tag_friendly_name = item['text']
+            tag_type = item['tag_type']
+            tag_type_id = TagType.objects.filter(label=tag_type).first().id
             tag, created = Tag.objects.get_or_create(
-                text=tag_id, tag_type=tag_type)
+                text=tag_id, tag_type_id=tag_type_id)
+            if tag.display_text == '':
+                tag.display_text = tag_friendly_name
+                tag.save()
             bookmark_collection.tags.add(tag)
         for bookmark in bookmark_list:
             bookmark_collection.bookmarks.add(bookmark)
