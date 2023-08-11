@@ -346,7 +346,7 @@ def import_works(request, username):
 		messages.add_message(request, message_type, _('Import has started. You will receive a notification when it completes.'), response.response_info.type_label)
 		return redirect(referer)
 	return render(request, 'work_import_form.html', {
-		'form_title': _('Import Work(s)'),
+		'form_title': _('Import AO3 Work(s)'),
 		'referer': request.META.get('HTTP_REFERER')
 		})
 
