@@ -84,7 +84,11 @@
             <div id="work-form-type-controls" class="uk-form-controls">
                 <select id="work-form-type-select" class="uk-select uk-form-width-small" name="work_type">
                     {% for item in work_types %}
-                        <option id="type_{{item.type_name}}" value="{{item.url}}" {% if work.work_type == item.url %} selected="selected" {% endif %}>{{ item.type_name }}</option>
+                        {% if work.id %}
+                            <option id="type_{{item.type_name}}" value="{{item.url}}" {% if work.work_type == item.url %} selected="selected" {% endif %}>{{ item.type_name }}</option>
+                        {% else %}
+                            <option id="type_{{item.type_name}}" value="{{item.url}}" {% if user.default_work_type.type_name == item.type_name %} selected="selected" {% endif %}>{{ item.type_name }}</option>
+                        {% endif %}
                     {% endfor %}
                 </select>
             </div>

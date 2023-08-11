@@ -465,6 +465,7 @@ def edit_user(request, pk):
 		return redirect(f'/username/{pk}/')
 	else:
 		if request.user.is_authenticated:
+			work_types = do_get(f'api/worktypes', request, 'Work').response_data['results']
 			response = do_get(f"api/users/profile/{request.user.id}", request, 'User Profile')
 			if response.response_info.status_code >= 400:
 				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
@@ -475,7 +476,10 @@ def edit_user(request, pk):
 				user['profile'] = sanitize_rich_text(user['profile'])
 			user_attributes = do_get(f'api/attributetypes', request, params={'allow_on_user': True}, object_name='Attribute')
 			user['attribute_types'] = process_attributes(user['attributes'], user_attributes.response_data['results'])
-			return render(request, 'user_form.html', {'user': user, 'form_title': 'Edit User'})
+			return render(request, 'user_form.html', {
+				'user': user, 'form_title': 'Edit User',
+				'work_types': work_types,
+				})
 		else:
 			messages.add_message(request, messages.ERROR, _('You must log in as this user to perform this action.'), 'user-profile-unauthorized-error')
 			return redirect('/login')

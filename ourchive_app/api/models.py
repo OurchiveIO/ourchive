@@ -28,6 +28,8 @@ class User(AbstractUser):
     display_username = models.CharField(max_length=150, blank=True, null=True)
     cookies_accepted = models.BooleanField(default=False)
 
+    default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True)
+
     def save(self, *args, **kwargs):
         self.display_username = self.username
         self.username = self.username.lower()
@@ -225,12 +227,16 @@ class WorkType(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     type_name = models.CharField(max_length=200)
+    sort_order = models.IntegerField(default=1)
 
     def __repr__(self):
         return '<WorkType: {}>'.format(self.id)
 
     def __str__(self):
         return self.type_name
+
+    class Meta:
+        ordering = ['sort_order']
 
 
 class Chapter(models.Model):

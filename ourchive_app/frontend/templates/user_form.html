@@ -64,7 +64,19 @@
                 {% endif %}
                 </select>
             </div>
-        </div>      
+        </div> 
+
+        <div class="uk-margin" id="default-content-parent">
+            <label id="default-content-label" class="uk-form-label" for="form-horizontal-text">Default Work Type <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This determines the default work type shown on the work form.{% endblocktranslate %}</div></label>
+            <div class="uk-form-controls" id="default-content-controls">
+                <select id="work-form-type-select" class="uk-select uk-form-width-small" name="default_work_type">
+                    {% for item in work_types %}
+                        <option id="type_{{item.type_name}}" value="{{item.type_name}}" {% if user.default_work_type == item.type_name %} selected="selected" {% endif %}>{{ item.type_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>        
 
         <div class="uk-margin" id="profile-text-parent">
             <label id="profile-text-label" class="uk-form-label" for="form-horizontal-text">Profile Text</label>

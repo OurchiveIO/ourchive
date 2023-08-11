@@ -209,7 +209,29 @@ class EtlWorkImport(object):
 
 	def process_work_data(self, work_json):
 		mappings = ObjectMapping.objects.filter(import_type='ao3', object_type='work').all()
+		work_type_mapping = None
+		work_type = None
+		work_type_mapping = ObjectMapping.objects.filter(import_type='ao3', object_type='work_type')
+		if work_type_mapping is None:
+			logger.error('Work type mapping not found. Trying to find Fic work type...')
+			work_type_mapping = api.WorkType.objects.filter(type_name__iexact='Fic')
+			if work_type_mapping is not None:
+				work_type = work_type_mapping.first()
+			else:
+				work_type_mapping = api.WorkTypes.objects.all()
+				if work_type_mapping is not None:
+					work_type = work_type_mapping.first()
+				else:
+					logger.error('No work types found. Configure work types.')
+					return None
+		else:
+			type_name = work_type_mapping.first().destination_field
+			try:
+				work_type = api.WorkType.objects.filter(type_name__iexact=type_name).first()
+			except Exception as err:
+				logger.error(f'No work type found for mapping: {type_name} Error: {err}')
 		work = api.Work(
+			work_type=work_type,
 			user_id=self.user_id, 
 			comments_permitted=self.allow_comments, 
 			anon_comments_permitted=self.allow_anon_comments, 

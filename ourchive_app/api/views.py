@@ -921,7 +921,7 @@ class NotificationList(generics.ListCreateAPIView):
 
 class UserNotificationList(generics.ListCreateAPIView):
     serializer_class = NotificationSerializer
-    permission_classes = [IsOwner, permissions.IsAdminUser]
+    permission_classes = [IsOwner]
 
     def get_queryset(self):
         return Notification.objects.filter(user__id=self.request.user.id).order_by('read', '-created_on')

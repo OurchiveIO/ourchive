@@ -147,13 +147,16 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     can_upload_images = serializers.ReadOnlyField(required=False)
     can_upload_export_files = serializers.ReadOnlyField(required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    default_work_type = serializers.SlugRelatedField(queryset=WorkType.objects.all(), 
+        slug_field='type_name', required=False)
 
     class Meta:
         model = User
         fields = ('id', 'url', 'username', 'password', 'email', 'groups',
                   'work_set', 'bookmark_set', 'userblocks_set', 'profile',
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
-                  'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files', 'can_upload_images')
+                  'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files', 
+                  'can_upload_images', 'default_work_type')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -568,6 +571,10 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
     chapter_count = serializers.IntegerField(
         source='chapters.count', 
+        read_only=True
+    )
+    work_type_name = serializers.CharField(
+        source='work_type.type_name',
         read_only=True
     )
 
