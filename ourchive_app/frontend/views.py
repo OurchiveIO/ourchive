@@ -12,6 +12,7 @@ from django.utils.translation import gettext as _
 from api import utils
 from django.views.decorators.cache import never_cache
 from dateutil.parser import *
+from dateutil import tz
 from urllib.parse import unquote, quote
 
 logger = logging.getLogger(__name__)
@@ -326,7 +327,7 @@ def user_name(request, pk):
 def import_works(request, username):
 	if not request.user.is_authenticated:
 		messages.add_message(request, messages.ERROR, _('You must be logged in to import works.'), 'Import')
-		return redirect('/')
+		return redirect('/login')
 	if request.method == 'POST':
 		referer = request.POST.get('referer')
 		allow_anon_comments = request.POST.get('allow_anon_comments') == 'on'
@@ -348,6 +349,19 @@ def import_works(request, username):
 	return render(request, 'work_import_form.html', {
 		'form_title': _('Import AO3 Work(s)'),
 		'referer': request.META.get('HTTP_REFERER')
+		})
+
+
+def import_works_status(request, pk):
+	if not request.user.is_authenticated:
+		messages.add_message(request, messages.ERROR, _('You must be logged in to import works.'), 'Import')
+		return redirect('/login')
+	user_imports = do_get(f'api/users/{pk}/importstatus', request, params=request.GET, object_name='Imports')
+	for job in user_imports.response_data['results']:
+		job['created_on'] = parse(job['created_on'])
+	return render(request, 'user_import_status.html', {
+		'page_title': _('Pending Imports'),
+		'user_imports': user_imports.response_data
 		})
 
 

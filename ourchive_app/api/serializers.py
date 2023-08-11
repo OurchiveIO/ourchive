@@ -16,6 +16,7 @@ from .utils import convert_boolean
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 import unidecode
+from etl.models import WorkImport
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +132,12 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = UserSubscription
+        fields = '__all__'
+
+
+class ImportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkImport
         fields = '__all__'
 
 

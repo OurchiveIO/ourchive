@@ -8,7 +8,8 @@ from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
     NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, \
     UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
     ChapterAllSerializer, UserReportSerializer, UserSubscriptionSerializer, \
-    BookmarkSummarySerializer, BookmarkCollectionSummarySerializer, CollectionCommentSerializer
+    BookmarkSummarySerializer, BookmarkCollectionSummarySerializer, CollectionCommentSerializer, \
+    ImportSerializer
 from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
     NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
@@ -36,6 +37,7 @@ from django.contrib.auth.models import AnonymousUser
 from etl import ao3
 import threading
 from urllib.parse import unquote
+from etl.models import WorkImport
 
 
 @api_view(['GET'])
@@ -245,6 +247,14 @@ class ImportWorks(APIView):
             t = threading.Thread(target=importer.get_works_by_username,args=[request.data['username']],daemon=True)
         t.start()
         return Response({'message': "Import started"}, status=200)
+
+
+class ImportStatus(generics.ListAPIView):
+    serializer_class = ImportSerializer
+    permission_classes = [IsOwner]
+    def get_queryset(self):
+        return WorkImport.objects.filter(job_finished=False, user__id=self.request.user.id).order_by('-created_on')
+    
 
 
 class UserList(generics.ListCreateAPIView):

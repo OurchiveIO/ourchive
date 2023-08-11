@@ -53,6 +53,7 @@ urlpatterns = [
     path('settings/', views.OurchiveSettingList.as_view()),
     path('users/<int:pk>/',views.UserDetail.as_view(), name='user-detail'),
     path('users/import-works/', views.ImportWorks.as_view(), name='import-works'),
+    path('users/<int:pk>/importstatus/', views.ImportStatus.as_view(), name='import-status'),
     path('users/profile/<int:pk>', views.UserNameDetail.as_view(), name='user-detail'),
     path('users/<str:username>/works', views.UserWorkList.as_view(), name='user-works-drafts'),
     path('users/<str:username>/works/drafts', views.UserWorkDraftList.as_view(), name='user-drafts'),
