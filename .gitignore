@@ -23,6 +23,8 @@ assets
 output
 .vscode
 .idea
+# ignore my vim temp files
+*.swp
 # ignore any .env folder
 **/.env
 
