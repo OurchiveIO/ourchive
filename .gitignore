@@ -16,7 +16,6 @@ Pipfile.lock
 *.pyc
 server/flask_app/uploads/*
 *.epub
-*.jpg
 *.log
 drivers
 assets
