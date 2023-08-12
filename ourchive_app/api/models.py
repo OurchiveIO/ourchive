@@ -28,7 +28,7 @@ class User(AbstractUser):
     display_username = models.CharField(max_length=150, blank=True, null=True)
     cookies_accepted = models.BooleanField(default=False)
 
-    default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True)
+    default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.display_username = self.username
