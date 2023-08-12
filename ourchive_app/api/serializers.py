@@ -1,5 +1,6 @@
 from django.contrib.auth.models import Group, AnonymousUser
 from rest_framework import serializers
+from django.db import IntegrityError
 from rest_framework_recursive.fields import RecursiveField
 import nh3
 from .custom_fields import UserPrivateField
@@ -157,7 +158,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     can_upload_images = serializers.ReadOnlyField(required=False)
     can_upload_export_files = serializers.ReadOnlyField(required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-    default_work_type = serializers.SlugRelatedField(queryset=WorkType.objects.all(), 
+    default_work_type = serializers.SlugRelatedField(
+        queryset=WorkType.objects.all(),
         slug_field='type_name', required=False)
 
     class Meta:
@@ -165,7 +167,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url', 'username', 'password', 'email', 'groups',
                   'work_set', 'bookmark_set', 'userblocks_set', 'profile',
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
-                  'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files', 
+                  'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files',
                   'can_upload_images', 'default_work_type')
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -580,7 +582,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
     chapter_count = serializers.IntegerField(
-        source='chapters.count', 
+        source='chapters.count',
         read_only=True
     )
     work_type_name = serializers.CharField(
@@ -607,8 +609,11 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                     return None
                 else:
                     required_tag_types.pop()
-            tag, created = Tag.objects.get_or_create(
-                text=tag_id, tag_type_id=tag_type_id)
+            try:
+                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+            except IntegrityError:
+                logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Work: {work.id}')
+                continue
             if tag.display_text == '':
                 tag.display_text = tag_friendly_name
                 tag.save()
@@ -713,9 +718,11 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
                     return None
                 else:
                     required_tag_types.pop()
-
-            tag, created = Tag.objects.get_or_create(
-                text=tag_id, tag_type_id=tag_type_id)
+            try:
+                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+            except IntegrityError:
+                logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Bookmark: {bookmark.id}')
+                continue
             if tag.display_text == '':
                 tag.display_text = tag_friendly_name
                 tag.save()
@@ -745,7 +752,6 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
             bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)
         return Bookmark.objects.filter(id=bookmark.id).first()
-
 
     def create(self, validated_data):
         if (OurchiveSetting.objects.filter(name='Ratings Enabled') and OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
@@ -813,9 +819,11 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                         return None
                     else:
                         required_tag_types.pop()
-
-                tag, created = Tag.objects.get_or_create(
-                    text=tag_id, tag_type_id=tag_type_id)
+                try:
+                    tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+                except IntegrityError:
+                    logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Collection: {bookmark.id}')
+                    continue
                 if tag.display_text == '':
                     tag.display_text = tag_friendly_name
                     tag.save()
@@ -856,8 +864,11 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             tag_friendly_name = item['text']
             tag_type = item['tag_type']
             tag_type_id = TagType.objects.filter(label=tag_type).first().id
-            tag, created = Tag.objects.get_or_create(
-                text=tag_id, tag_type_id=tag_type_id)
+            try:
+                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+            except IntegrityError:
+                logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Collection: {bookmark_collection.id}')
+                continue
             if tag.display_text == '':
                 tag.display_text = tag_friendly_name
                 tag.save()
