@@ -1,7 +1,7 @@
 {% extends 'index.html' %}
 {% block title %}Bookmark - {{ bookmark.title }}{% endblock %}
 {% block content %}	
-<div class="uk-width-1-1 uk-text-left" uk-grid id="bookmark-uk-grid">
+<div class="uk-width-1-1 uk-text-left" id="bookmark-uk-grid">
 	<script>
 		function loadMoreComments(next, chapterId) {
 			fetch(next)
@@ -15,7 +15,7 @@
 			  });
 		}
 	</script>
-	<article class="uk-article" id="bookmark-uk-article">
+	<article class="uk-article uk-padding" id="bookmark-uk-article">
 	    <div class="uk-child-width-2-1" id="bookmark-uk-child-grid" uk-grid>
 	        <div class="uk-width-2-3" id="bookmark-title-parent">
 	            <h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bookmark.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large" style="padding-left: 10px;"> bookmarked by {{bookmark.user}}</span>
@@ -35,8 +35,10 @@
 	            {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
 	            {% endif %}
 	        </div>
+	    
 	    <div class="uk-width-1" id="bookmark-work-link-parent">
-	    	<span id="bookmark-work-link-span" class="uk-text-medium">Work link: <a id="bookmark-work-link-id" class="uk-link-reset" href="/works/{{ work.id }}">{{ work.title }} by {{work.user}}</a></span>
+	    	<hr/>
+	    	<span id="bookmark-work-link-span" class="uk-text-uppercase">Work:</span> <a id="bookmark-work-link-id" class="uk-link-reset uk-text-medium" href="/works/{{ work.id }}">{{ work.title }} by {{work.user}}</a></span>
 	    </div>
 	    {% if settings.RatingsEnabled %}
 	    <div class="uk-width-1" id="bookmark-rating-parent">
@@ -55,10 +57,12 @@
 	        {% endfor %}
 	    </div>	
 	    {% endif %} 
+	    {% if bookmark.description %}
 	    <div class="uk-width-1" id="bookmark-description-parent">
 	    	<p id="bookmark-description-hed" class="uk-text-large"><span>{{bookmark.user}} says:</span>
 	    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>
 	    </div>	   
+	    {% endif %}
 	    {% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}
 	    {% include "tag_partial.html" with obj_name='bookmark-tag' tags=tags.items %}
 	    {% if settings.AllowComments %}<hr id="bookmark-comments-hr" class="uk-divider-small"/>{% endif %}
