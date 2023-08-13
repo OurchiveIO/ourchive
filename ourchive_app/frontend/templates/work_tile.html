@@ -1,23 +1,22 @@
 <div class="uk-margin" id="work-{{work.id}}-tile-parent">
 	<div class="uk-card uk-card-default" id="work-{{work.id}}-tile-card">
-	    <div class="uk-card-header" id="work-{{work.id}}-tile-card-header">
+	    <div class="uk-card-header uk-padding-remove-vertical ourchive-card-head" id="work-{{work.id}}-tile-card-header">
 	        <div class="uk-grid-small uk-flex-middle" uk-grid id="work-{{work.id}}-tile-card-header-grid">
 	            {% if work.cover_url != "None" and work.cover_url is not None and work.cover_url != "" %}
 	            <div class="uk-width-auto" id="work-{{work.id}}-tile-img-parent">
 	                <img class="uk-border-circle" width="40" height="40" alt="{{work.cover_alt_text}}" src="{{work.cover_url}}" id="work-{{work.id}}-tile-image">
 	            </div>
 	            {% endif %}
-	            <div class="uk-width-expand" id="work-{{work.id}}-tile-title-parent">
+	            <div class="uk-width-expand uk-padding-remove-horizontal" id="work-{{work.id}}-tile-title-parent">
 	                {% if work.draft == True %}
-	                	<h3 id="work-{{work.id}}-tile-draft-title" class="uk-card-title uk-margin-remove-bottom uk-inline"><a id="work-{{work.id}}-tile-draft-title-link" href="/works/{{work.id}}?draft=true">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a></h3>
-		                <span class="uk-label uk-inline uk-label-warning uk-margin-left" id="work-{{work.id}}-tile-draft-button-span"><strong>DRAFT</strong></span>
+	                	<span id="work-{{work.id}}-tile-draft-title" class="uk-text-medium uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-draft-title-link" href="/works/{{work.id}}?draft=true">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {{ work.user }}</span>
+		                <p class="uk-label uk-margin-remove-top uk-margin-remove-right uk-margin-remove-left uk-text-small uk-inline uk-label-warning" id="work-{{work.id}}-tile-draft-button-span"><strong>DRAFT</strong></p>
 	                {% else %}
-	                	<h3 id="work-{{work.id}}-tile-title" class="uk-card-title uk-margin-remove-bottom"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a></h3>
+	                	<span id="work-{{work.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {{ work.user }}</span>
 	                {% endif %}
-	                <p id="work-{{work.id}}-tile-user-link" class="uk-text-meta uk-margin-remove-top">{{ work.user }}</p>
 	            </div>
 	            {% if work.user == request.user.username %}
-		        <div class="uk-align-right" id="work-{{work.id}}-footer-user-controls">
+		        <div class="uk-align-right uk-margin-small-top" id="work-{{work.id}}-footer-user-controls">
 		            <a id="work-{{work.id}}-footer-edit-link" href="/works/{{ work.id }}/edit"><span id="work-{{work.id}}-footer-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
 		            <a id="work-{{work.id}}-footer-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span id="work-{{work.id}}-footer-delete-span" uk-icon="icon: trash" title="Delete"></span> </a>
 		            {% include "delete_modal.html" with object='work' object_id=work.id %}
@@ -25,13 +24,13 @@
 		        {% endif %}
 	        </div>
 	    </div>
-	    <div class="uk-card-body" id="work-{{work.id}}-tile-card-body">
-	        {% if work.summary %}<p id="work-{{work.id}}-tile-summary-p">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>{% endif %}
+	    {% if work.summary or work.attributes or work.tags %}<div class="uk-card-body ourchive-card-body uk-padding-remove-top" id="work-{{work.id}}-tile-card-body">
+	        {% if work.summary %}<p id="work-{{work.id}}-tile-summary-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>{% endif %}
+	        {% if work.attributes %}{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}{% endif %}
 		    {% if work.tags.items %}{% include "tag_partial.html" with obj_name='work' tags=work.tags.items %}{% endif %}
-			{% if work.attributes %}{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}{% endif %}
-	    </div>
-	    <div class="uk-card-footer uk-padding-remove" id="work-{{work.id}}-tile-footer-parent">
-	        <div class="uk-width-1-1 uk-padding-remove uk-margin-small-top uk-margin-small-left uk-margin-small-right">{% include 'work_metadata.html' %}</div>
+	    </div>{% endif %}
+	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="work-{{work.id}}-tile-footer-parent">
+	        <div class="uk-width-1-1 uk-padding-small uk-margin-small">{% include 'work_metadata.html' %}</div>
 	    </div>
 
 	</div>  
