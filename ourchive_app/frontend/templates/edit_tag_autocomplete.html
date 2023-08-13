@@ -2,7 +2,7 @@
 {% if tags %}
 <div class="uk-background-muted">
 	{% for tag in tags %}
-		<div id="populate-edit-tag-href-{{tag.tag}}" class="uk-background-default uk-padding-small" onclick="populateTagInput('{{tag.display_text}}', '{{tag.type}}', '{{fetch_all}}')"><span class="ourchive-autocomplete uk-text-small uk-link uk-text-bold" id="edit-tag-autocorrect-span-{{tag.tag}}">{{tag.display_text}}</span></div>
+		<div id="populate-edit-tag-href-{{tag.tag}}" class="uk-background-default uk-padding-small" onclick="populateTagInput('{{tag.display_text_clean}}', '{{tag.type}}', '{{fetch_all}}')"><span class="ourchive-autocomplete uk-text-small uk-link uk-text-bold" id="edit-tag-autocorrect-span-{{tag.tag}}">{{tag.display_text}}</span></div>
 	{% endfor %}
 </div>
 {% else %}

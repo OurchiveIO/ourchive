@@ -55,12 +55,19 @@
             	{% if user.default_content == "Work" %}
                     <option id="default-content-work-selected" value="Work" selected="selected">Work</option>
                     <option id="default-content-work-bookmark" value="Bookmark">Bookmark</option>
+                    <option id="default-content-collection" value="Collection">Collection</option>
                 {% elif user.default_content == "Bookmark" %} 
                 	<option id="default-content-bookmark-work" value="Work">Work</option>
                     <option id="default-content-bookmark-selected" value="Bookmark" selected="selected">Bookmark</option>
+                    <option id="default-content-collection" value="Collection">Collection</option>
+                {% elif user.default_content == "Collection" %} 
+                    <option id="default-content-collection-work" value="Work">Work</option>
+                    <option id="default-content-collection-bookmark" value="Bookmark" selected="selected">Bookmark</option>
+                    <option id="default-content-collection-selected" value="Collection" selected="selected">Collection</option>
                 {% else %}
                 	<option id="default-content-work" value="Work">Work</option>
                     <option id="default-content-bookmark" value="Bookmark">Bookmark</option>
+                    <option id="default-content-collection" value="Collection">Collection</option>
                 {% endif %}
                 </select>
             </div>
