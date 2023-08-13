@@ -24,7 +24,7 @@
 		        {% endif %}
 	        </div>
 	    </div>
-	    {% if work.summary or work.attributes or work.tags %}<div class="uk-card-body ourchive-card-body uk-padding-remove-top" id="work-{{work.id}}-tile-card-body">
+	    {% if work.summary or work.attributes or work.tags %}<div class="uk-card-body ourchive-card-body uk-padding-small" id="work-{{work.id}}-tile-card-body">
 	        {% if work.summary %}<p id="work-{{work.id}}-tile-summary-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>{% endif %}
 	        {% if work.attributes %}{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}{% endif %}
 		    {% if work.tags.items %}{% include "tag_partial.html" with obj_name='work' tags=work.tags.items %}{% endif %}
