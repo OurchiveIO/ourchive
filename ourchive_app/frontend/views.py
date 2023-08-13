@@ -1282,6 +1282,7 @@ def work(request, pk, chapter_offset=0):
 	work = work_response.response_data
 	tags = group_tags(work['tags']) if 'tags' in work else {}
 	work['attributes'] = get_attributes_for_display(work['attributes'])
+	work['updated_on'] = parse(work['updated_on']).date()
 	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else "/all"}'
 	if chapter_offset > 0:
 		chapter_url_string = f'{chapter_url_string}&offset={chapter_offset}'

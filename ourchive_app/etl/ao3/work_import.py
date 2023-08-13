@@ -231,7 +231,7 @@ class EtlWorkImport(object):
         work_type = None
         work_type_mapping = ObjectMapping.objects.filter(
             import_type='ao3', object_type='work_type')
-        if work_type_mapping is None:
+        if not work_type_mapping:
             logger.error('Work type mapping not found. Trying to find Fic work type...')
             work_type_mapping = api.WorkType.objects.filter(type_name__iexact='Fic')
             if work_type_mapping is not None:
