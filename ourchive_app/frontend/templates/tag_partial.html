@@ -14,6 +14,5 @@
     {% for single_tag in tag %}
         <a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link-mb" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}" class="uk-hidden@s ourchive-mobile-tag-list uk-inline">{{ single_tag.display_text|default:single_tag.text }}{% if not forloop.last %},{% endif %}</a>
     {% endfor %}
-
 </div>
 {% endfor %}
