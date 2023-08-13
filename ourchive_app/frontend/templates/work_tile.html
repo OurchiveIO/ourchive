@@ -7,7 +7,7 @@
 	                <img class="uk-border-circle" width="40" height="40" alt="{{work.cover_alt_text}}" src="{{work.cover_url}}" id="work-{{work.id}}-tile-image">
 	            </div>
 	            {% endif %}
-	            <div class="uk-width-expand uk-padding-remove-horizontal" id="work-{{work.id}}-tile-title-parent">
+	            <div class="uk-width-expand" id="work-{{work.id}}-tile-title-parent">
 	                {% if work.draft == True %}
 	                	<span id="work-{{work.id}}-tile-draft-title" class="uk-text-medium uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-draft-title-link" href="/works/{{work.id}}?draft=true">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {{ work.user }}</span>
 		                <p class="uk-label uk-margin-remove-top uk-margin-remove-right uk-margin-remove-left uk-text-small uk-inline uk-label-warning" id="work-{{work.id}}-tile-draft-button-span"><strong>DRAFT</strong></p>
