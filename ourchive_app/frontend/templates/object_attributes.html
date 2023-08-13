@@ -1,8 +1,18 @@
-<dl class="uk-description-list uk-margin-small-top" id="{{object}}-tags-dl">
-	{% for attribute, attribute_values in attributes.items %}
-	    <dt id="{{object}}-attribute-label" class="uk-margin-small"><span class="uk-text-bold">{{attribute}}</span></dt>
-	    <dd id="{{object}}-tile-tag-container-{{attribute}}">
-	    <span id="{{object}}-tile-tag-icon-{{attribute}}" uk-icon="icon: tag"></span> {% for single_attr in attribute_values %}<div class="uk-margin-small uk-inline"><a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link" class="uk-button-primary uk-button-small uk-border-rounded ourchive-tag-list" href="#" uk-toggle="target: #coming-soon">{{ single_attr }}</a><span id="coming-soon" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span></div> {% endfor %}
-	    </dd>
-	{% endfor %}
+<dl class="uk-description-list uk-margin-small-top uk-visible@s" id="{{object}}-attributes-dl">
+{% for attribute, attribute_values in attributes.items %}
+    <dt id="{{object}}-attribute-tag-type-{{type}}" class="uk-margin-small uk-visible@s"><span class="uk-text-bold">{{attribute}}</span></dt>
+    <dd id="{{object}}-tile-tag-container-{{type}}" class="uk-visible@s">
+    <span id="{{object}}-tile-tag-icon-{{type}}" uk-icon="icon: tag"></span> {% for single_attr in attribute_values %}
+        <div class="uk-margin-small uk-inline"><a id="{{object}}-attribute-{{single_tag.id}}-link" class="uk-button-primary uk-border-rounded ourchive-tag-list" href="#" uk-toggle="target: #coming-soon">{{ single_attr }}</a><span id="coming-soon" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span></div> 
+    {% endfor %}
+    </dd>
+{% endfor %}
 </dl>
+{% for attribute, attribute_values in attributes.items %}
+<div class="uk-margin-small-top uk-hidden@s" id="{{object}}-attributes-dl-mb">
+    <span class="uk-text-bold uk-margin-small uk-hidden@s">{{ attribute }}: </span>
+    {% for single_attr in attribute_values %}
+        <a id="{{object}}-attribute-{{single_attr}}-link-mb" href="#" class="uk-hidden@s ourchive-mobile-tag-list uk-inline" uk-toggle="target: #coming-soon-mb">{{ single_attr }}{% if not forloop.last %},{% endif %}</a><span id="coming-soon-mb" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
+    {% endfor %}
+</div>
+{% endfor %}
