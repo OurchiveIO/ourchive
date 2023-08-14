@@ -25,7 +25,7 @@ hosts = []
 if os.getenv('OURCHIVE_DEV') == 'True':
     hosts = ["127.0.0.1:8000", "*",]
 else:
-    hosts = ["ourchive-dev.stopthatimp.net", "45.79.159.247"]
+    hosts = [os.getenv("OURCHIVE_ROOT_URL"), os.getenv("OURCHIVE_SERVER_IP")]
 
 ALLOWED_HOSTS = hosts
 
@@ -124,8 +124,8 @@ else:
         "MAILGUN_SENDER_DOMAIN": os.getenv("OURCHIVE_MAILGUN_SENDER_DOMAIN"), 
     }
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend" 
-DEFAULT_FROM_EMAIL = "admin@ourchive-dev.stopthatimp.net"  
-SERVER_EMAIL = "serveradmin@ourchive-dev.stopthatimp.net" 
+DEFAULT_FROM_EMAIL = os.getenv("OURCHIVE_DEFAULT_FROM_EMAIL")
+SERVER_EMAIL = os.getenv("OURCHIVE_SERVER_EMAIL")
 
 
 TEMPLATES = [

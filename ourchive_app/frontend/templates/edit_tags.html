@@ -42,8 +42,10 @@
                     </div>
                 </div>
                 <div class="uk-margin-top">
-                    <div class="uk-inline"><input autocomplete="off" pattern="^[a-zA-Z0-9]+$" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')" oninput="doAutocomplete(this.value, 'edit', '{{type}}', '{{type}}')"> <span uk-icon="plus" onclick="tagCheck(event, '{{type}}', true)"></span></div>
-                    <div class="uk-card-small" id="tag-autocomplete-dropdown-{{type}}" uk-drop="target: #{{ type }}_new_tag"></div>
+                    <div><input autocomplete="off" pattern="^[a-zA-Z0-9]+$" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')" oninput="doAutocomplete(this.value, 'edit', '{{type}}', '{{type}}')"> <span uk-icon="plus" onclick="tagCheck(event, '{{type}}', true)"></span>
+                        <div class="uk-card-small" id="tag-autocomplete-dropdown-{{type}}" uk-drop="target: #{{ type }}_new_tag"></div>
+                    </div>
+                    
                 </div>
             </div>
         </div>

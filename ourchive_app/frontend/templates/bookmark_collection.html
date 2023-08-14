@@ -2,7 +2,7 @@
 {% block title %}Bookmark Collection - {{ bkcol.title }}{% endblock %}
 {% block content %}	
 {% load static %}
-<div class="uk-text-left uk-grid" id="bk-collection-uk-grid" uk-grid>
+<div class="uk-text-left uk-width-1-1" id="bk-collection-uk-grid">
 	<script>
 		function loadMoreComments(next, chapterId) {
 			fetch(next)
@@ -16,42 +16,58 @@
 			  });
 		}
 	</script>
+	<article class="uk-article uk-padding" id="bookmark-uk-article" uk-grid>
 		{% if bkcol.header_url %}
-	   	<div id="bkcol-header-image" class="uk-width-1-1">
+	   	<div id="bkcol-header-image" class="uk-width-1-1 uk-padding-remove">
 	   		<img src="{{bkcol.header_url}}" title="{{bkcol.header_alt_text}}" alt="{{bkcol.header_alt_text}}" class="uk-align-center"/>
 	   	</div>
 	   	{% endif %}
-	   	<div id="bkcol-header-title" class="uk-width-2-3">
-	   		<h1 id="bkcol-header-h1" class="uk-heading">{{bkcol.title}}</h1>
+	   	<div id="bkcol-header-title" class="uk-width-2-3 uk-padding-remove">
+	   		<h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bkcol.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large" style="padding-left: 10px;"> by {{bkcol.user}}</span>
 	   		{% if bkcol.draft %}
 	            <div id="bkcol-draft-badge" class="uk-width-auto uk-margin-bottom">
 	                <span id="bkcol-draft-span" class="uk-label uk-label-warning"><strong id="bkcol-draft-text">DRAFT</strong></span>
 	            </div>
 	        {% endif %}
 	    </div>
-	    <div class="uk-text-right uk-width-1-3" id="bkcol-user-controls-parent">
+	    <div class="uk-text-right uk-width-1-3 uk-padding-remove" id="bkcol-user-controls-parent">
         {% if bkcol.user == request.user.username %}
 	        {% if bkcol.draft %}
 	        <a id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
 	        {% endif %}
 	        <a id="bkcol-edit-link" href="/bookmark-collections/{{ bkcol.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
-	        <a id="bookmark-collection-delete-link" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a>
-	        {% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
+	        <a id="bookmark-collection-delete-link" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a> 
         {% endif %}
 	    </div>
-	    <div id="bkcol-content" class="uk-width-1-1">
+	    <div id="bkcol-content" class="uk-width-1-1 uk-padding-remove">
+	    	<hr/>
 	        <p class="uk-article-meta uk-width-1-1">{{ bkcol.short_description }}</p>
 	        <p class="uk-width-1-1" id="bkcol-{{bkcol.id}}-tile-attributes-p">{% include "object_attributes.html" with object='bkcol' object_id=bkcol.id attributes=bkcol.attributes %}</p>
 	        {% include "tag_partial.html" with obj_name='bkcol' tags=bkcol.tags.items %}
 	        <div class="uk-align-right">{% include 'bookmark_collection_metadata.html' with bookmark_collection=bkcol %}</div>
 	   	</div>
-	   	<div class="uk-margin-remove-bottom uk-width-1-1"><hr id="bkcol-title-hr"/></div>
-	   	<div id="bkcol-description-parent" class="uk-width-1-1">
+	   	<div class="uk-margin-remove-bottom uk-margin-remove-top uk-width-1-1 uk-padding-remove"><hr id="bkcol-title-hr"/></div>
+	   	<div id="bkcol-description-parent" class="uk-width-1-1 uk-padding-remove">
 	   		<span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description|safe}}</span>
 	   	</div>
-	   	<div class="uk-width-1-1 uk-margin-bottom">
+	   	<div class="uk-width-1-1 uk-margin-bottom uk-padding-remove" id="bkcol-slideshow-parent">
 	   		{% if bkcol.bookmarks_readonly %}
-	   		<div id="bkcol-bookmarks-parent" class="uk-position-relative uk-visible-toggle" tabindex="-1" uk-slideshow="animation: push" uk-slideshow>
+	   		<div id="bkcol-bookmarks-parent-sm" class="uk-hidden@s">
+	   			<ul class="uk-list uk-list-divider">
+	   			{% for bookmark in bkcol.bookmarks_readonly %} 
+					<li class="ourchive-mobile-list">
+	                	<span class="uk-inline uk-text-uppercase uk-text-medium"><a href="/bookmarks/{{bookmark.id}}">{{bookmark.work.title}}</a> by {{bookmark.work.user}}</span>
+	                	{% if bookmark.description %}
+	                		<p class="uk-margin-remove uk-width-medium uk-text-large"><a href="/bookmarks/{{bookmark.id}}">{{bookmark.user}} says:</a></p> 
+	                		<p class="uk-margin-remove uk-width-medium uk-text-left"><span style="transform: rotateY(0deg) rotate(180deg);opacity: .5" class="uk-inline" uk-icon="icon: quote-right; ratio: 1"></span></p>
+	            			<p class="uk-margin-remove uk-width-medium uk-text-center ourchive-collection-sm-desc">{{bookmark.description|safe}}</p>
+	            			<p class="uk-margin-remove uk-width-medium uk-text-right"><span style="opacity: .5" class="uk-inline uk-" uk-icon="icon: quote-right; ratio: 1"></span></p>
+	            		{% endif %}
+            		</li>       
+				{% endfor %}
+			</ul>
+	   		</div>
+	   		<div id="bkcol-bookmarks-parent" class="uk-position-relative uk-visible-toggle uk-visible@s" tabindex="-1" uk-slideshow="animation: push" uk-slideshow>
 	   			<ul class="uk-slideshow-items">
 		   			{% for bookmark in bkcol.bookmarks_readonly %}
 		   			<li>
@@ -65,8 +81,8 @@
 		                	{% if bookmark.description %}
 		                		<p class="uk-margin-remove uk-width-medium uk-text-large"><a href="/bookmarks/{{bookmark.id}}">{{bookmark.user}} says:</a></p> 
 		                		<p class="uk-margin-remove uk-width-medium uk-text-left"><span style="transform: rotateY(0deg) rotate(180deg);opacity: .5" class="uk-inline" uk-icon="icon: quote-right; ratio: 3"></span></p>
-		            			<p class="uk-margin-remove uk-width-medium uk-text-center">{{bookmark.description|safe}}</p>
-		            			<p class="uk-margin-remove uk-width-medium uk-text-right"><span style="opacity: .5" class="uk-inline uk-" uk-icon="icon: quote-right; ratio: 3"></span></p>
+		            			<p class="uk-margin-remove uk-width-medium uk-text-center ourchive-collection-lg-desc">{{bookmark.description|safe}}</p>
+		            			<p class="uk-margin-remove uk-width-medium uk-text-right uk-align-right"><span style="opacity: .5" class="uk-inline uk-" uk-icon="icon: quote-right; ratio: 3"></span></p>
 		            		{% endif %}
 	            		</div>
 		        	</li>
@@ -79,10 +95,11 @@
 			</div>
 			{% endif %}
 		</div>
-		{% if comments %}<div class="uk-width-1-1"><hr/></div>{% endif %}
-		<div class="uk-width-1-1">
+		{% if comments %}<div class="uk-width-1-1 uk-padding-remove"><hr/></div>{% endif %}
+		<div class="uk-width-1-1 uk-padding-remove">
 			{% include 'comments_parent.html' with object_name='collection' comments=comments object=bkcol edit_action_url=bkcol.edit_action_url post_action_url=bkcol.post_action_url comment_offset=comment_offset delete_obj='collection-comment' load_more_base=load_more_base view_thread_base=view_thread_base %}
 		</div>
+	</article>
 </div>
 {% if scroll_comment_id %}
     <script>
@@ -91,4 +108,5 @@
         }
     </script>
 {% endif %}
+{% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
 {% endblock %}

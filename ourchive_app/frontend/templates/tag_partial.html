@@ -1,8 +1,20 @@
-<dl class="uk-description-list uk-margin-small-top" id="{{obj_name}}-tags-dl">
+<div class="uk-margin-small-top uk-visible@s ourchive-tag-text" id="{{obj_name}}-tags-dl">
+    <hr class="uk-margin-remove uk-padding-remove ourchive-divider"/>
 {% for type, tag in tags %}
-    <dt id="{{obj_name}}-tile-tag-type-{{type}}">{{ type }}</dt>
-    <dd id="{{obj_name}}-tile-tag-container-{{type}}">
-    <span id="{{obj_name}}-tile-tag-icon-{{type}}" uk-icon="icon: tag"></span> {% for single_tag in tag %}<a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}" style="padding-left:5px;">{{ single_tag.display_text|default:single_tag.text }}</a> {% endfor %}
-    </dd>
+    <div id="{{obj_name}}-tile-tag-type-{{type}}" class="uk-margin-small uk-visible@s">
+        <span class="uk-text-bold uk-margin-right">{{ type }}</span>
+        {% for single_tag in tag %}
+            <div class="uk-inline uk-margin"><a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link" class="uk-button-primary uk-border-rounded ourchive-tag-list" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}">{{ single_tag.display_text|default:single_tag.text }}</a></div> 
+        {% endfor %}
+    </div>
+    {% if not forloop.last %}<hr class="uk-margin-remove uk-padding-remove ourchive-divider"/>{% endif %}
 {% endfor %}
-</dl>
+</div>
+{% for type, tag in tags %}
+<div class="uk-margin-small-top uk-hidden@s" id="{{obj_name}}-tags-dl-mb">
+    <span class="uk-text-bold uk-margin-small uk-hidden@s">{{ type }}: </span>
+    {% for single_tag in tag %}
+        <a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link-mb" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}" class="uk-hidden@s ourchive-mobile-tag-list uk-inline">{{ single_tag.display_text|default:single_tag.text }}{% if not forloop.last %},{% endif %}</a>
+    {% endfor %}
+</div>
+{% endfor %}

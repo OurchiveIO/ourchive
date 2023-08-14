@@ -250,6 +250,7 @@ class Chapter(models.Model):
     number = models.IntegerField(default=1)
     text = models.TextField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
+    end_notes = models.TextField(null=True, blank=True)
     word_count = models.IntegerField(default=0)
     audio_url = models.CharField(max_length=600, null=True, blank=True)
     audio_description = models.CharField(max_length=600, null=True, blank=True)

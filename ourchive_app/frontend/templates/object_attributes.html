@@ -1,8 +1,20 @@
-<dl class="uk-description-list uk-margin-small-top" id="{{object}}-tags-dl">
-	{% for attribute, attribute_values in attributes.items %}
-	    <dt id="{{object}}-attribute-label">{{attribute}}</dt>
-	    <dd id="{{object}}-tile-tag-container-{{attribute}}">
-	    <span id="{{object}}-tile-tag-icon-{{attribute}}" uk-icon="icon: tag"></span> {% for single_attr in attribute_values %}{{ single_attr }}</a> {% endfor %}
-	    </dd>
-	{% endfor %}
-</dl>
+<div class="uk-margin-small-top uk-visible@s ourchive-tag-text" id="attribute-tags-dl">
+{% for attribute, attribute_values in attributes.items %}
+    <div id="{{attribute}}-tile-attribute-type-{{type}}" class="uk-margin-small uk-visible@s">
+        <span class="uk-text-bold uk-margin-right">{{ attribute }}</span>
+        {% for single_attr in attribute_values %}
+            <div class="uk-margin uk-inline"><a id="{{single_attr}}-tile-attr-{{single_attr}}-link" class="uk-button-primary uk-border-rounded ourchive-tag-list" href="#" uk-toggle="target: #coming-soon">{{ single_attr }}</a><span id="coming-soon" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
+</div> 
+        {% endfor %}
+    </div>
+    {% if not forloop.last %}<hr class="uk-margin-remove uk-padding-remove ourchive-divider"/>{% endif %}
+{% endfor %}
+</div>
+{% for attribute, attribute_values in attributes.items %}
+<div class="uk-margin-small-top uk-hidden@s" id="{{object}}-attributes-dl-mb">
+    <span class="uk-text-bold uk-margin-small uk-hidden@s">{{ attribute }}: </span>
+    {% for single_attr in attribute_values %}
+        <a id="{{object}}-attribute-{{single_attr}}-link-mb" href="#" class="uk-hidden@s ourchive-mobile-tag-list uk-inline" uk-toggle="target: #coming-soon-mb">{{ single_attr }}{% if not forloop.last %},{% endif %}</a><span id="coming-soon-mb" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
+    {% endfor %}
+</div>
+{% endfor %}
