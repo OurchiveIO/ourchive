@@ -836,10 +836,15 @@ def works_by_type(request, type_id):
 def new_work(request):
 	work_types = do_get(f'api/worktypes', request, 'Work').response_data
 	if request.user.is_authenticated and request.method != 'POST':
-		work = {'title': 'Untitled Work', 'user': request.user.username, 'download_choices': [
-	        ('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP'), ('M4A', 'M4A'),
-	        ('MOBI', 'MOBI')
-	    ]}
+		work = {
+			'title': 'Untitled Work',
+			'user': request.user.username,
+			'download_choices': [
+				('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP'), ('M4A', 'M4A'),
+				('MOBI', 'MOBI')],
+			'anon_comments_permitted': True,
+			'comments_permitted': True
+		}
 		tag_types = do_get(f'api/tagtypes', request, 'Tag').response_data
 		tags = {result['label']:[] for result in tag_types['results']}
 		work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Work Attributes')
@@ -1015,7 +1020,15 @@ def delete_chapter(request, work_id, chapter_id):
 
 def new_bookmark(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
-		bookmark = {'title': '', 'description': '', 'user': request.user.username, 'work': {'title': request.GET.get('title'), 'id': work_id}, 'is_private': True}
+		bookmark = {
+			'title': '',
+			'description': '',
+			'user': request.user.username,
+			'work': {'title': request.GET.get('title'), 'id': work_id},
+			'is_private': True,
+			'anon_comments_permitted': True,
+			'comments_permitted': True
+		}
 		bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
 		bookmark['attribute_types'] = process_attributes([], bookmark_attributes.response_data['results'])
 		tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
@@ -1087,7 +1100,15 @@ def bookmark_collections(request):
 
 def new_bookmark_collection(request):
 	if request.user.is_authenticated and request.method != 'POST':
-		bookmark_collection = {'title': 'New Bookmark Collection', 'description': '', 'user': request.user.username, 'is_private': True, 'is_draft': True}
+		bookmark_collection = {
+			'title': 'New Bookmark Collection',
+			'description': '',
+			'user': request.user.username,
+			'is_private': True,
+			'is_draft': True,
+			'anon_comments_permitted': True,
+			'comments_permitted': True
+		}
 		bookmark_collection_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
 		bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes.response_data['results'])
 		tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
