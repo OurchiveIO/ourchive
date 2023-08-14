@@ -22,7 +22,7 @@ SECRET_KEY = os.getenv('OURCHIVE_SECRET_KEY')
 DEBUG = os.getenv('OURCHIVE_DEBUG') == 'True'
 
 hosts = []
-if os.getenv('OURCHIVE_DEV') == 'True':
+if os.getenv('OURCHIVE_DEV') == 'True' or DEBUG:
     hosts = ["127.0.0.1:8000", "*",]
 else:
     hosts = [os.getenv("OURCHIVE_ROOT_URL"), os.getenv("OURCHIVE_SERVER_IP")]
