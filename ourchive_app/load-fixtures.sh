@@ -7,3 +7,4 @@ python manage.py loaddata api/fixtures/attributevalue.yaml
 python manage.py loaddata api/fixtures/notificationtypes.yaml
 python manage.py loaddata api/fixtures/tagtype.yaml
 python manage.py loaddata api/fixtures/worktype.yaml
+python manage.py loaddata etl/fixtures/objectmapping.yaml
