@@ -803,7 +803,7 @@ class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
-            serializer.pop('header_url')
+            self.request.data.pop('header_url')
         serializer.save(user=self.request.user, attributes=attributes)
 
     def perform_create(self, serializer):
@@ -811,7 +811,7 @@ class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
-            serializer.pop('header_url')
+            self.request.data.pop('header_url')
         serializer.save(user=self.request.user, attributes=attributes)
 
 

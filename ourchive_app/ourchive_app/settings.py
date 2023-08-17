@@ -164,9 +164,6 @@ DATABASES = {
         'PASSWORD': os.getenv('OURCHIVE_DB_PW'),
         'HOST': os.getenv('OURCHIVE_DB_HOST'),
         'PORT': '5432',
-        'TEST': {
-            'MIRROR': 'default',
-        },
     }
 }
 
