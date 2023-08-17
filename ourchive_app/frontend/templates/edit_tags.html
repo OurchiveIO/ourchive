@@ -12,7 +12,7 @@
                     {% if tag_data.tags %}
                         {% for single_tag in tag_data.tags %}
                             <input type="hidden" id="tags_{{ single_tag.text }}_{{ tag_data.type_name }}" name="tags_{{ single_tag.text }}_{{ tag_data.type_name }}" value="tags_{{ single_tag.text }}_{{ tag_data.type_name }}">
-                            <span class="uk-button-primary uk-border-rounded  ourchive-tag-list uk-text-bold" id="tags_{{ single_tag.text }}_{{ tag_data.type_name }}_txt">{{ single_tag.display_text }} <span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{ tag_data.type_name }}')" id="tags_{{ single_tag.text }}_{{ tag_data.type_name }}_delete"></span></span>
+                            <span class="uk-button-primary uk-border-rounded  ourchive-tag-list" id="tags_{{ single_tag.text }}_{{ tag_data.type_name }}_txt">{{ single_tag.display_text }} <span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{ tag_data.type_name }}')" id="tags_{{ single_tag.text }}_{{ tag_data.type_name }}_delete"></span></span>
                         {% endfor %}
                         {% else %}
                         <span class="uk-text-medium" id="no-tag-prompt-{{ tag_data.type_name }}">No tags yet. Add some below.</span>
@@ -34,7 +34,7 @@
                     {% if tag_data.tags %}
                         {% for single_tag in tag_data.tags %}
                             <input type="hidden" id="tags_{{ single_tag.text }}_{{ tag_data.type_name }}" name="tags_{{ single_tag.text }}_{{ tag_data.type_name }}" value="tags_{{ single_tag.text }}_{{ tag_data.type_name }}">
-                            <span class="uk-button-primary uk-border-rounded  ourchive-tag-list uk-text-bold uk-margin-small-right" id="tags_{{ single_tag.text }}_{{ tag_data.type_name }}_txt">{{ single_tag.display_text }} <span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{ tag_data.type_name }}')" id="tags_{{ single_tag.text }}_{{ tag_data.type_name }}_delete"></span></span>
+                            <span class="uk-button-primary uk-border-rounded  ourchive-tag-list uk-margin-small-right" id="tags_{{ single_tag.text }}_{{ tag_data.type_name }}_txt">{{ single_tag.display_text }} <span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{ tag_data.type_name }}')" id="tags_{{ single_tag.text }}_{{ tag_data.type_name }}_delete"></span></span>
                         {% endfor %}
                         {% else %}
                         <span class="uk-text-medium" id="no-tag-prompt-{{ tag_data.type_name }}">No tags yet. Add some below.</span>
