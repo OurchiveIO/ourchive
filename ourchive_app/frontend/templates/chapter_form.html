@@ -229,6 +229,9 @@
 										      ed.getContainer().classList.add("chapter-text-toggle");
 										    });
 										},
+										paste_preprocess: function(editor, args) {
+											args.content = args.content.replaceAll("<br />", "");
+										},
                                         init_instance_callback : function(editor) {
                                         	var chapterText = document.getElementById('chapter_text').value;
                                             editor.setContent(chapterText);
