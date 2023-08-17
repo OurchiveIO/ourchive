@@ -6,7 +6,7 @@
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
 <script>
 function doBookmarkAutocomplete(term) {
-  if (term.length < 5)
+  if (term.length < 2)
   {
     return;
   }
@@ -28,10 +28,11 @@ function populateBookmarkInput(bookmark_id, bookmark_display) {
     // bookmark to add
     var final = bookmark_display;
     var wrapper= document.createElement('div');
-    wrapper.innerHTML= '<input type="hidden" id="bookmarks_'+bookmark_id+'" name="bookmarksbookmarksidstoadd_'+bookmark_id+'" value="bookmarksbookmarksidstoadd_'+bookmark_id+'">';
+    wrapper.innerHTML= '<input type="hidden" id="bookmarks_'+bookmark_id+'" name="bookmarksidstoadd_'+bookmark_id+'" value="bookmarksidstoadd_'+bookmark_id+'">';
     var div = wrapper.firstChild;
     list.appendChild(div);
     var li = document.createElement('li');
+    li.setAttribute('id', 'bookmarks_'+bookmark_id+'_li');
     li.innerHTML = bookmark_display+' (<a onclick="removeBookmark(event,'+bookmark_id+')">Remove</a>)';
     list.appendChild(li);
     document.getElementById("bookmark_entry").value = '';
