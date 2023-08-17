@@ -29,7 +29,7 @@ def group_tags(tags):
 
 
 def group_tags_for_edit(tags, tag_types=None):
-	tag_parent = {tag_type['label']:{'admin_administrated': tag_type['admin_administrated']} for tag_type in tag_types['results']}
+	tag_parent = {tag_type['label']:{'admin_administrated': tag_type['admin_administrated'], 'type_name': tag_type['type_name']} for tag_type in tag_types['results']}
 	for tag in tags:
 		tag['text'] = escape(tag['text'])
 		if 'tags' not in tag_parent[tag['tag_type']]:
@@ -94,12 +94,12 @@ def get_work_obj(request, work_id=None):
 	chapters = []
 	result = do_get(f'api/tagtypes', request)
 	for item in result.response_data['results']:
-		tag_types[item['label']] = item
+		tag_types[item['type_name']] = item
 	for item in request.POST:
 		if 'tags' in request.POST[item]:
 			tag = {}
 			json_item = request.POST[item].split("_")
-			tag['tag_type'] = json_item[2]
+			tag['tag_type'] = tag_types[json_item[2]]['label']
 			tag['text'] = json_item[1]
 			tags.append(tag)
 			work_dict.pop(item)
@@ -129,12 +129,12 @@ def get_bookmark_obj(request):
 	tag_types = {}
 	result = do_get(f'api/tagtypes', request)
 	for item in result.response_data['results']:
-		tag_types[item['label']] = item
+		tag_types[item['type_name']] = item
 	for item in request.POST:
 		if 'tags' in request.POST[item]:
 			tag = {}
 			json_item = request.POST[item].split("_")
-			tag['tag_type'] = json_item[2]
+			tag['tag_type'] = tag_types[json_item[2]]['label']
 			tag['text'] = json_item[1]
 			tags.append(tag)
 			bookmark_dict.pop(item)
@@ -156,12 +156,12 @@ def get_bookmark_collection_obj(request):
 	tag_types = {}
 	result = do_get(f'api/tagtypes', request)
 	for item in result.response_data['results']:
-		tag_types[item['label']] = item
+		tag_types[item['type_name']] = item
 	for item in request.POST:
 		if 'tags' in request.POST[item]:
 			tag = {}
 			json_item = request.POST[item].split("_")
-			tag['tag_type'] = json_item[2]
+			tag['tag_type'] = tag_types[json_item[2]]['label']
 			tag['text'] = json_item[1]
 			tags.append(tag)
 			collection_dict.pop(item)
@@ -921,8 +921,8 @@ def edit_work(request, id):
 		work_dict = get_work_obj(request, id)
 		chapters = work_dict[2]
 		response = do_patch(f'api/works/{id}/', request, data=work_dict[0], object_name='Work')
-		messages.add_message(request, messages.SUCCESS, response.response_info.message, response.response_info.type_label)
 		if response.response_info.status_code == 200:
+			messages.add_message(request, messages.SUCCESS, response.response_info.message, response.response_info.type_label)
 			for chapter in chapters:
 				response = do_patch(f'api/chapters/{chapter["id"]}/', request, data=chapter, object_name='Work')
 				if response.response_info.status_code >= 400:

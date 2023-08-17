@@ -26,7 +26,7 @@ function tagCheck (e, type, bypass_check=false) {
         wrapper.innerHTML= '<input type="hidden" id="tags_'+final.value+'_'+type+'" name="tags_'+final.value+'_'+type+'" value="tags_'+final.value+'_'+type+'">';
         var div= wrapper.firstChild;
         section.appendChild(div);
-        wrapper.innerHTML = '<span class="uk-badge uk-padding-small uk-margin-right" id="tags_'+final.value+'_'+type+'_txt"><span class="uk-text-bold uk-text-default uk-padding-small">'+unescaped+' </span><span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\')" id="tags_'+final.value+'_'+type+'_delete"></span></span>  ';
+        wrapper.innerHTML = '<span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-text-bold uk-margin-small-right" id="tags_'+final.value+'_'+type+'_txt"><span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-text-bold">'+unescaped+' </span><span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\')" id="tags_'+final.value+'_'+type+'_delete"></span></span>  ';
         div = wrapper.firstChild;
         section.appendChild(div);
         final.value = '';
@@ -37,6 +37,8 @@ function tagCheck (e, type, bypass_check=false) {
 }
 
 function doAutocomplete(term, source, selector, tag_type='') {
+  console.log(term);
+  console.log(source);
   if (term.length < 2)
   {
     return;

@@ -382,6 +382,10 @@ class Tag(models.Model):
         on_delete=models.CASCADE,
     )
 
+    @property
+    def type_label(self):
+        return self.tag_type.type_name if self.tag_type.type_name else self.tag_type.label.lower().replace(" ", "_")
+
     def __repr__(self):
         return '<Tag: {}>'.format(self.id)
 
@@ -398,14 +402,15 @@ class TagType(models.Model):
 
     __tablename__ = 'tag_types'
     id = models.AutoField(primary_key=True)
-    label = models.CharField(max_length=200, db_index=True)
+    label = models.CharField(max_length=200)
+    type_name = models.CharField(max_length=200, db_index=True, null=True, blank=True)
     admin_administrated = models.BooleanField(default=False)
     required = models.BooleanField(default=False)
     sort_order = models.IntegerField(default=1)
 
     class Meta:
         indexes = [
-            models.Index(fields=['label']),
+            models.Index(fields=['type_name']),
         ]
         ordering = ('sort_order', 'label',)
 
@@ -414,6 +419,10 @@ class TagType(models.Model):
 
     def __str__(self):
         return self.label
+
+    def save(self, *args, **kwargs):
+        self.type_name = unidecode.unidecode(nh3.clean(self.label.lower().replace(" ", "")))
+        super(TagType, self).save(*args, **kwargs)
 
 
 class BookmarkCollection(models.Model):

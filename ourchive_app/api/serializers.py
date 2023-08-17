@@ -278,6 +278,7 @@ class FingergunSerializer(serializers.HyperlinkedModelSerializer):
 class TagSerializer(serializers.HyperlinkedModelSerializer):
     tag_type = serializers.SlugRelatedField(
         queryset=TagType.objects.all(), slug_field='label')
+    tag_type_label = serializers.CharField(source='type_label', read_only=True)
     id = serializers.ReadOnlyField()
 
     class Meta:
@@ -602,7 +603,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
             tag_friendly_name = item['text']
             tag_type = item['tag_type']
-            tag_type_id = TagType.objects.filter(label=tag_type).first().id
+            tag_type_id = tag_type.id
             if tag_type in required_tag_types:
                 if tag_id is None or tag_id == '':
                     # todo: error

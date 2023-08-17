@@ -15,45 +15,6 @@
             document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
             document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
         }
-        
-        function removetag(tag, type) {
-            document.getElementById("tags_"+tag+"_"+type).remove();
-            document.getElementById("tags_"+tag+"_"+type+"_txt").remove();
-        }
-
-        function sanitize(string) {
-          const map = {
-              '&': '&amp;',
-              '<': '&lt;',
-              '>': '&gt;',
-              '"': '&quot;',
-              "'": '&#x27;',
-              "/": '&#x2F;',
-          };
-          const reg = /[&<>"'/]/ig;
-          return string.replace(reg, (match)=>(map[match]));
-        }
-
-        function tagCheck (e, type, bypass_check=false) {
-            if (e.keyCode == 188 || e.keyCode == 13 || bypass_check) {
-                var section = document.getElementById(type+"_tags");
-                var final = document.getElementById(type+"_new_tag");
-                final.value = sanitize(final.value.replace(/,\s*$/, ""));
-                unescaped = final.value.replace(/,\s*$/, "");
-                var wrapper= document.createElement('div');
-                wrapper.innerHTML= '<input type="hidden" id="tags_'+final.value+'_'+type+'" name="tags_'+final.value+'_'+type+'" value="tags_'+final.value+'_'+type+'">';
-                var div= wrapper.firstChild;
-                section.appendChild(div);
-                wrapper.innerHTML = '<span class="uk-badge uk-padding-small uk-margin-right" id="tags_'+final.value+'_'+type+'_txt"><span class="uk-text-bold uk-text-default uk-padding-small">'+unescaped+' </span><span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\')" id="tags_'+final.value+'_'+type+'_delete"></span></span>  ';
-                div = wrapper.firstChild;
-                section.appendChild(div);
-                final.value = '';
-                final.focus();
-                document.getElementById('tag-autocomplete-dropdown-'+type).innerHTML = "";
-                document.getElementById('no-tag-prompt-'+type).style.display = "none";
-            }
-        }
-        
     </script>
     {% csrf_token %}
     <input type="hidden" id="work-id-hidden" name="work_id" value="{{ work.id }}">
