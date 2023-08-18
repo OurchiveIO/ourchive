@@ -201,3 +201,22 @@ class ApiTests(TestCase):
         created_fingergun = models.Fingergun.objects.get(id=created_fingergun_id)
         self.assertEquals(created_fingergun.user.id, 1)
         self.assertEquals(created_fingergun.work.id, 1)
+
+    def test_parse_work_url(self):
+        from etl.ao3 import util
+        expected_id = '33568501'
+        work_multichapter_url = 'https://archiveofourown.org/works/33568501/chapters/83411257'
+        work_single_url = 'https://archiveofourown.org/works/33568501'
+        work_single_url_trailing = 'https://archiveofourown.org/works/33568501/'
+        work_view_full_url = 'https://archiveofourown.org/works/33568501?view_full_work=true'
+        plain_id = '33568501'
+        work_id = util.parse_work_id_from_ao3_url(work_multichapter_url)
+        self.assertEquals(expected_id, work_id)
+        work_id = util.parse_work_id_from_ao3_url(work_single_url)
+        self.assertEquals(expected_id, work_id)
+        work_id = util.parse_work_id_from_ao3_url(work_single_url_trailing)
+        self.assertEquals(expected_id, work_id)
+        work_id = util.parse_work_id_from_ao3_url(work_view_full_url)
+        self.assertEquals(expected_id, work_id)
+        work_id = util.parse_work_id_from_ao3_url(plain_id)
+        self.assertEquals(expected_id, work_id)

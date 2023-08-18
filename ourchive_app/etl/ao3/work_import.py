@@ -30,6 +30,7 @@ class EtlWorkImport(object):
             except Exception as err:
                 logger.error(
                     f'Work import: Exception creating import job for: {work_id} username: {username}. Error: {err}')
+                return False
         return True
 
     def run_unprocessed_jobs(self):

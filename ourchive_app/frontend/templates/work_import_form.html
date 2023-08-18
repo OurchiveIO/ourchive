@@ -12,7 +12,12 @@
             <span id="work-import-form-title-span" class="uk-text-large">{{form_title}}</span>
         </div>
         <div id="work-import-form-directions" class="uk-width-1-1">
-            <p class="uk-text">{% blocktranslate %}Input an AO3 username or single work ID below. The work ID can be found in the work URL.{%endblocktranslate%}</p>
+            <p class="uk-text">{% blocktranslate %}Input an AO3 username or single work (ID or URL) below. The work ID can be found in the work URL.{% endblocktranslate %}</p>
+            <p>{% blocktranslate %}Accepted work URL formats:{% endblocktranslate %}</p>
+            <ul><li>https://archiveofourown.org/works/33568501/chapters/83411257</li>
+            <li>https://archiveofourown.org/works/33568501</li>
+            <li>https://archiveofourown.org/works/33568501/</li>
+            <li>https://archiveofourown.org/works/33568501?view_full_work=true</li></ul>
             <p class="uk-text uk-text-bold">{% blocktranslate %}To ensure account security, restricted works will not be imported. We recommend temporarily making restricted works public or manually recreating them.{%endblocktranslate%}</p>
         </div>
     </div>

@@ -38,6 +38,7 @@ from etl import ao3
 import threading
 from urllib.parse import unquote
 from etl.models import WorkImport
+from etl.ao3 import util
 
 
 @api_view(['GET'])
@@ -242,7 +243,9 @@ class ImportWorks(APIView):
             request.data['allow_anon_comments'],
             request.data['allow_comments'])
         if 'work_id' in request.data:
-            t = threading.Thread(target=importer.get_single_work,args=[request.data['work_id']],daemon=True)   
+            id_or_url = request.data['work_id']
+            parsed_id = util.parse_work_id_from_ao3_url(id_or_url)
+            t = threading.Thread(target=importer.get_single_work,args=[parsed_id],daemon=True)   
         elif 'username' in request.data:
             t = threading.Thread(target=importer.get_works_by_username,args=[request.data['username']],daemon=True)
         t.start()
