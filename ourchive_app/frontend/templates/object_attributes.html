@@ -3,7 +3,7 @@
     <div id="{{attribute}}-tile-attribute-type-{{type}}" class="uk-margin-small uk-visible@s">
         <span class="uk-text-bold uk-margin-right">{{ attribute }}</span>
         {% for single_attr in attribute_values %}
-            <div class="uk-margin uk-inline"><a id="{{single_attr}}-tile-attr-{{single_attr}}-link" class="uk-button-primary uk-border-rounded ourchive-tag-list" href="#" uk-toggle="target: #coming-soon">{{ single_attr }}</a><span id="coming-soon" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
+            <div class="uk-margin uk-inline"><a id="{{single_attr}}-tile-attr-{{single_attr}}-link" class="uk-button-primary uk-button-tag uk-border-rounded ourchive-tag-list" href="#" uk-toggle="target: #coming-soon">{{ single_attr }}</a><span id="coming-soon" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
 </div> 
         {% endfor %}
     </div>
