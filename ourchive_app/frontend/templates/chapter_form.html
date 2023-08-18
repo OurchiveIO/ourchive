@@ -148,7 +148,7 @@
         {% if not request.user.collapse_chapter_image %}
         <div class="uk-margin" id="chapter-form-image-all-parent">
         {% else %}
-        <div class="uk-margin uk-width-small"><a class="uk-accordion-title" uk-toggle="target: #chapter-form-image-hidden-parent" href="#">Image fields</a></div>
+        <div class="uk-margin uk-width-small"><a class="uk-accordion-title" uk-toggle="target: #chapter-form-image-hidden-parent" href="#">{% translate 'Image' %}</a></div>
         <div class="uk-accordion-content" id="chapter-form-image-hidden-parent" hidden>
         {% endif %}
         <div class="uk-margin" id="chapter-form-image-parent">
@@ -178,7 +178,7 @@
         {% if not request.user.collapse_chapter_audio %}
         <div class="uk-margin" id="chapter-form-audio-parent">
         {% else %}
-        <div class="uk-margin uk-width-small"><a class="uk-accordion-title" uk-toggle="target: #chapter-form-audio-hidden-parent" href="#">Audio fields</a></div>
+        <div class="uk-margin uk-width-small"><a class="uk-accordion-title" uk-toggle="target: #chapter-form-audio-hidden-parent" href="#">{% translate 'Audio' %}</a></div>
         <div class="uk-accordion-content" id="chapter-form-audio-hidden-parent" hidden>
         {% endif %}
         <div class="uk-margin" id="chapter-form-audio-upload-parent">
@@ -212,7 +212,7 @@
         {% if not request.user.collapse_chapter_text %}
         <div class="uk-margin" id="chapter-form-text-parent">
         {% else %}
-        <div class="uk-margin uk-width-small"><a class="uk-accordion-title" href="#" uk-toggle="target: #chapter-form-text-parent">Text fields</a></div>
+        <div class="uk-margin uk-width-small"><a class="uk-accordion-title" href="#" uk-toggle="target: #chapter-form-text-parent">{% translate 'Text' %}</a></div>
         <div class="uk-accordion-content" id="chapter-form-text-parent" hidden>
         {% endif %}
             <label id="chapter-form-text-label" class="uk-form-label" for="form-horizontal-text">Chapter Text</label>
