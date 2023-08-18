@@ -31,7 +31,7 @@ def group_tags(tags):
 def group_tags_for_edit(tags, tag_types=None):
 	tag_parent = {tag_type['label']:{'admin_administrated': tag_type['admin_administrated'], 'type_name': tag_type['type_name']} for tag_type in tag_types['results']}
 	for tag in tags:
-		tag['text'] = escape(tag['text'])
+		tag['text'] = tag['text']
 		if 'tags' not in tag_parent[tag['tag_type']]:
 			tag_parent[tag['tag_type']]['tags'] = []
 			tag_parent[tag['tag_type']]['tags'].append(tag)
@@ -850,7 +850,7 @@ def new_work(request):
 			'comments_permitted': True
 		}
 		tag_types = do_get(f'api/tagtypes', request, 'Tag').response_data
-		tags = {result['label']:[] for result in tag_types['results']}
+		tags = group_tags_for_edit([], tag_types)
 		work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Work Attributes')
 		work['attribute_types'] = process_attributes([], work_attributes.response_data['results'])
 		return render(request, 'work_form.html', {

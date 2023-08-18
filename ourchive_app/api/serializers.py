@@ -608,6 +608,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         required_tag_types = list(TagType.objects.filter(required=True))
         has_any_required = len(required_tag_types) > 0
         for item in tags:
+            print(item['text'])
             tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
             tag_friendly_name = item['text']
             tag_type = item['tag_type']
