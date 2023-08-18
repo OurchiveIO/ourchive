@@ -74,7 +74,7 @@
         <div class="uk-margin" id="work-form-summary-parent">
             <label id="work-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
             <div id="work-form-summary-controls" class="uk-form-controls">
-                <div id="work-form-summary-inline" class="uk-inline">
+                <div id="work-form-summary-inline" class="uk-inline uk-child-width-expand uk-width-expand">
                     <input type="hidden" id="summary" name="summary" value="{{ work.summary|safe|default_if_none:'' }}">
                     <textarea id="summaryEditor"></textarea>
                     <script type="text/javascript">
@@ -108,7 +108,7 @@
         <div class="uk-margin" id="work-form-notes-parent">
             <label id="work-form-notes-label" class="uk-form-label" for="form-horizontal-text">Notes</label>
             <div id="work-form-notes-controls" class="uk-form-controls">
-                <div class="uk-inline" id="work-form-notes-inline">
+                <div class="uk-inline uk-child-width-expand uk-width-expand" id="work-form-notes-inline">
                     <input type="hidden" id="notes" name="notes" value="{{ work.notes|safe|default_if_none:'' }}">
                     <textarea id="notesEditor"></textarea>
                     <script type="text/javascript">

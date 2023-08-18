@@ -58,7 +58,7 @@
         <div class="uk-margin" id="chapter-form-summary-parent">
             <label id="chapter-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
             <div id="chapter-form-summary-controls" class="uk-form-controls">
-                <div id="chapter-form-summary-inline" class="uk-inline">
+                <div id="chapter-form-summary-inline" class="uk-inline uk-child-width-expand uk-width-expand">
                     <input type="hidden" id="summary" name="summary" value="{{ chapter.summary|safe|default_if_none:'' }}">
                     <textarea id="summaryEditor"></textarea>
                     <script type="text/javascript">
@@ -92,7 +92,7 @@
         <div class="uk-margin" id="chapter-form-notes-parent">
             <label class="uk-form-label" for="form-horizontal-text" id="chapter-form-notes-label">Notes</label>
             <div class="uk-form-controls" id="chapter-form-notes-controls">
-                <div class="uk-inline" id="chapter-form-notes-inline">
+                <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-notes-inline">
                     <input type="hidden" id="notes" name="notes" value="{{ chapter.notes|safe|default_if_none:'' }}">
                     <textarea id="notesEditor"></textarea>
                     <script type="text/javascript">
@@ -217,7 +217,7 @@
         {% endif %}
             <label id="chapter-form-text-label" class="uk-form-label" for="form-horizontal-text">Chapter Text</label>
             <div class="uk-form-controls" id="chapter-form-text-controls">
-                <div class="uk-inline uk-width-expand" id="chapter-form-text-inline">
+                <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-text-inline">
                 	<div class="uk-margin-bottom">
                 	<span width="150" class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
                         <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>

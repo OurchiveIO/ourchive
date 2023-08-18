@@ -92,7 +92,7 @@
     <div id="bookmark-form-description-parent" class="uk-margin">
         <label id="bookmark-form-description-label" class="uk-form-label" for="form-horizontal-text">Description</label>
         <div id="bookmark-form-description-form-controls" class="uk-form-controls">
-            <div id="bookmark-form-description-inline" class="uk-inline">
+            <div id="bookmark-form-description-inline" class="uk-inline uk-child-width-expand uk-width-expand">
                 <input type="hidden" id="description" name="description" value="{{ bookmark.description|safe|default_if_none:'' }}">
                 <textarea id="descriptionEditor"></textarea>
                 <script type="text/javascript">

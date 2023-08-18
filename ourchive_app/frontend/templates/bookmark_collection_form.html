@@ -139,7 +139,7 @@ function removeBookmark(event, bookmark_id) {
     <div id="bkcol-form-description-parent" class="uk-margin">
         <label id="bkcol-form-description-label" class="uk-form-label" for="form-horizontal-text">Description</label>
         <div id="bkcol-form-description-form-controls" class="uk-form-controls">
-            <div id="bkcol-form-description-inline" class="uk-inline">
+            <div id="bkcol-form-description-inline" class="uk-inline uk-child-width-expand uk-width-expand">
                 <input type="hidden" id="description" name="description" value="{{ bookmark_collection.description|safe|default_if_none:'' }}">
                 <textarea id="descriptionEditor"></textarea>
                 <script type="text/javascript">
