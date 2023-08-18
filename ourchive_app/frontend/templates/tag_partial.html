@@ -4,7 +4,7 @@
     <div id="{{obj_name}}-tile-tag-type-{{type}}" class="uk-margin-small uk-visible@s">
         <span class="uk-text-bold uk-margin-right">{{ type }}</span>
         {% for single_tag in tag %}
-            <div class="uk-inline uk-margin"><a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link" class="uk-button-primary uk-border-rounded ourchive-tag-list" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}">{{ single_tag.display_text|default:single_tag.text }}</a></div> 
+            <div class="uk-inline uk-margin"><a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link" class="uk-button-primary uk-button-tag uk-border-rounded ourchive-tag-list" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}">{{ single_tag.display_text|default:single_tag.text }}</a></div> 
         {% endfor %}
     </div>
     {% if not forloop.last %}<hr class="uk-margin-remove uk-padding-remove ourchive-divider"/>{% endif %}

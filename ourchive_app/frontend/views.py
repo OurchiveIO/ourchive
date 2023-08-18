@@ -545,6 +545,7 @@ def user_notifications(request, username):
 		notifications = response.response_data['results']
 		return render(request, 'notifications.html', {
 			'notifications': notifications,
+			'page_title': _('Notifications'),
 			'next': f"/username/{username}/notifications/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
 			'previous': f"/username/{username}/notifications/{response.response_data['prev_params']}" if response.response_data['prev_params'] is not None else None})
 	else:
