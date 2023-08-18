@@ -255,7 +255,7 @@ class FingergunSerializer(serializers.HyperlinkedModelSerializer):
     work = serializers.PrimaryKeyRelatedField(
         queryset=Work.objects.all(), required=False)
     user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field='username', required=False)
+        queryset=User.objects.all(), slug_field='username', required=False, allow_null=True)
 
     class Meta:
         model = Fingergun
