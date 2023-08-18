@@ -179,3 +179,25 @@ class ApiTests(TestCase):
         force_authenticate(request, user=user)
         response = view(request)
         self.assertEquals(response.status_code, 200)
+
+    def test_can_create_fingerguns(self):
+        fingerguns_create_json = {
+            "work": 1,
+        }
+        factory = APIRequestFactory()
+        view = api_views.FingergunList.as_view()
+        request = factory.post(
+            f'/fingerguns/', fingerguns_create_json, format='json')
+        response = view(request)
+        # anon fingerguns are allowed
+        self.assertEquals(response.status_code, 201)
+        fingerguns_create_json['user'] = 'test_user'
+        request = factory.post(
+            f'/fingerguns/', fingerguns_create_json, format='json')
+        force_authenticate(request, user=self.test_user)
+        response = view(request)
+        self.assertEquals(response.status_code, 201)
+        created_fingergun_id = response.data['id']
+        created_fingergun = models.Fingergun.objects.get(id=created_fingergun_id)
+        self.assertEquals(created_fingergun.user.id, 1)
+        self.assertEquals(created_fingergun.work.id, 1)
