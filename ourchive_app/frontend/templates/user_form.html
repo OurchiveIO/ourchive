@@ -121,7 +121,7 @@
         <div class="uk-margin" id="profile-text-parent">
             <label id="profile-text-label" class="uk-form-label" for="form-horizontal-text">Profile Text</label>
             <div class="uk-form-controls" id="profile-text-controls">
-                <div class="uk-inline" id="profile-text-inline">
+                <div class="uk-inline uk-child-width-expand uk-width-expand" id="profile-text-inline">
                 	<input type="hidden" id="profile" name="profile" value="{{ user.profile|safe|default_if_none:'' }}">
                     <textarea id="profileEditor"></textarea>
                     <script type="text/javascript">
