@@ -220,3 +220,56 @@ class ApiTests(TestCase):
         self.assertEquals(expected_id, work_id)
         work_id = util.parse_work_id_from_ao3_url(plain_id)
         self.assertEquals(expected_id, work_id)
+
+    def test_work_drafts_not_in_search(self):
+        self.assertFalse(True)
+
+    def test_bookmark_drafts_not_in_search(self):
+        self.assertFalse(True)
+    
+    def test_collection_drafts_not_in_search(self):
+        self.assertFalse(True)
+
+    def test_cannot_view_nonowned_draft_work(self):
+        self.assertFalse(True)
+
+    def test_cannot_view_nonowned_draft_chapter(self):
+        self.assertFalse(True)
+
+    def test_cannot_view_nonowned_draft_bookmark(self):
+        self.assertFalse(True)
+    
+    def test_cannot_view_nonowned_draft_collection(self):
+        self.assertFalse(True)
+
+    def test_can_view_owned_draft_work(self):
+        self.assertFalse(True)
+
+    def test_can_view_owned_draft_chapter(self):
+        self.assertFalse(True)
+
+    def test_can_view_owned_draft_bookmark(self):
+        self.assertFalse(True)
+    
+    def test_can_view_owned_draft_collection(self):
+        self.assertFalse(True)
+
+    def test_cannot_register_with_reg_disabled(self):
+        self.assertFalse(True)
+
+    def test_can_register_with_reg_enabled(self):
+        self.assertFalse(True)
+
+    def test_can_request_invite(self):
+        self.assertFalse(True)
+
+    def test_cannot_view_user_email(self):
+        self.assertFalse(True)
+
+    def test_tag_with_naughty_char(self):
+        self.assertFalse(True)
+
+    def test_tag_with_ampersand(self):
+        self.assertFalse(True)
+
+        

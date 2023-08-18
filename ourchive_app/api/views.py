@@ -343,7 +343,7 @@ class WorkList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id))
+        return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'cover_url' in self.request.data:
@@ -356,7 +356,7 @@ class UserWorkDraftList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(draft=True, user__username=self.kwargs['username'])
+        return Work.objects.filter(draft=True, user__username=self.kwargs['username']).order_by('-updated_on')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -399,7 +399,7 @@ class SubscriptionList(generics.ListCreateAPIView):
     def get_queryset(self):
         if 'subscribed_to' in self.request.GET and self.request.GET.get('subscribed_to') is not None:
             return UserSubscription.objects.filter(user__id=self.request.user.id, subscribed_user__username=self.request.GET.get('subscribed_to'))
-        return UserSubscription.objects.all().order_by('created_on')
+        return UserSubscription.objects.all().order_by('-created_on')
 
 
 class UserSubscriptionList(generics.ListCreateAPIView):
@@ -419,7 +419,7 @@ class UserSubscriptionBookmarkList(generics.ListAPIView):
             user__id=self.request.user.id).filter(
             subscribed_to_bookmark=True)
         ids = subscriptions.values_list('subscribed_user', flat=True).all()
-        return Bookmark.objects.filter(user__id__in=ids).order_by('created_on')
+        return Bookmark.objects.filter(user__id__in=ids).order_by('-created_on')
 
 
 class UserSubscriptionBookmarkCollectionList(generics.ListAPIView):
@@ -431,7 +431,7 @@ class UserSubscriptionBookmarkCollectionList(generics.ListAPIView):
             user__id=self.request.user.id).filter(
             subscribed_to_collection=True)
         ids = subscriptions.values_list('subscribed_user', flat=True).all()
-        return BookmarkCollection.objects.filter(user__id__in=ids).order_by('created_on')
+        return BookmarkCollection.objects.filter(user__id__in=ids).order_by('-created_on')
 
 
 class UserSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
