@@ -215,6 +215,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return user
 
     def update(self, user, validated_data):
+        if not validated_data['icon'] or validated_data['icon'].lower() == 'none':
+            validated_data['icon_alt_text'] = "Default icon"
+            icon = OurchiveSetting.objects.filter(name='Default Icon URL').first()
+            if icon is not None:
+                validated_data['icon'] = f"{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{settings.STATIC_URL}{icon.value}"
+            else:
+                validated_data['icon'] = ''
         validated_data['password'] = User.objects.filter(
             id=user.id).first().password
         if 'attributes' in validated_data:
