@@ -472,6 +472,9 @@ def edit_user(request, pk):
 			user_data['icon'] = user_data['unaltered_icon']
 		user_data.pop('unaltered_icon')
 		user_id = user_data.pop('user_id')[0]
+		user_data['collapse_chapter_image'] = 'collapse_chapter_image' in user_data
+		user_data['collapse_chapter_audio'] = 'collapse_chapter_audio' in user_data
+		user_data['collapse_chapter_text'] = 'collapse_chapter_text' in user_data
 		user_data["attributes"] = get_attributes_from_form_data(request)
 		response = do_patch(f'api/users/{user_id}/', request, data=user_data, object_name='User Profile')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS

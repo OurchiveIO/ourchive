@@ -145,6 +145,12 @@
         </div>
         <h3 id="obj-attrs-form-header">Chapter Content</h3>
         {% if request.user.can_upload_images %}
+        {% if not request.user.collapse_chapter_image %}
+        <div class="uk-margin" id="chapter-form-image-all-parent">
+        {% else %}
+        <div class="uk-margin uk-width-small"><a class="uk-accordion-title" uk-toggle="target: #chapter-form-image-hidden-parent" href="#">Image fields</a></div>
+        <div class="uk-accordion-content" id="chapter-form-image-hidden-parent" hidden>
+        {% endif %}
         <div class="uk-margin" id="chapter-form-image-parent">
             <label id="chapter-form-image-label" class="uk-form-label" for="form-horizontal-text">Chapter Image</label>
             {% if chapter.image_url and chapter.image_url != "None" %}
@@ -166,9 +172,16 @@
                 </div>
             </div>
         </div>
+        </div>
         {% endif %}
         {% if request.user.can_upload_audio %}
+        {% if not request.user.collapse_chapter_audio %}
         <div class="uk-margin" id="chapter-form-audio-parent">
+        {% else %}
+        <div class="uk-margin uk-width-small"><a class="uk-accordion-title" uk-toggle="target: #chapter-form-audio-hidden-parent" href="#">Audio fields</a></div>
+        <div class="uk-accordion-content" id="chapter-form-audio-hidden-parent" hidden>
+        {% endif %}
+        <div class="uk-margin" id="chapter-form-audio-upload-parent">
             <label id="chapter-form-audio-label" class="uk-form-label" for="form-horizontal-text">Chapter Audio</label>
             <div class="uk-form-controls" id="chapter-form-audio-controls">
                 <div class="uk-inline" id="chapter-form-audio-inline">
@@ -194,8 +207,14 @@
             </div>
         </div>
         {% endif %}
+        </div>
         {% endif %}
+        {% if not request.user.collapse_chapter_text %}
         <div class="uk-margin" id="chapter-form-text-parent">
+        {% else %}
+        <div class="uk-margin uk-width-small"><a class="uk-accordion-title" href="#" uk-toggle="target: #chapter-form-text-parent">Text fields</a></div>
+        <div class="uk-accordion-content" id="chapter-form-text-parent" hidden>
+        {% endif %}
             <label id="chapter-form-text-label" class="uk-form-label" for="form-horizontal-text">Chapter Text</label>
             <div class="uk-form-controls" id="chapter-form-text-controls">
                 <div class="uk-inline uk-width-expand" id="chapter-form-text-inline">
@@ -203,7 +222,7 @@
                 	<span width="150" class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
                         <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
                     </span>
-                	<label id="chapter-text-edit-mode-label" class="switch uk-width-medium"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText()" checked uk-toggle="target: .chapter-text-toggle")> 
+                	<label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText()" checked uk-toggle="target: .chapter-text-toggle")> 
                 		<span class="slider round"></span></label>
                 	</div>
                 	<input type="hidden" id="chapter_text" name="text" value="{{ chapter.text|safe|default_if_none:'' }}">

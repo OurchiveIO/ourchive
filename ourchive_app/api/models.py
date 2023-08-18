@@ -7,6 +7,7 @@ import unidecode
 
 
 class User(AbstractUser):
+
     __tablename__ = 'user'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -27,7 +28,9 @@ class User(AbstractUser):
     attributes = models.ManyToManyField('AttributeValue', blank=True)
     display_username = models.CharField(max_length=150, blank=True, null=True)
     cookies_accepted = models.BooleanField(default=False)
-
+    collapse_chapter_text = models.BooleanField(default=False)
+    collapse_chapter_audio = models.BooleanField(default=False)
+    collapse_chapter_image = models.BooleanField(default=False)
     default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True, blank=True)
 
     def save(self, *args, **kwargs):
