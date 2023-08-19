@@ -37,6 +37,7 @@ class EtlWorkImport(object):
         import_jobs = WorkImport.objects.filter(job_finished=False).filter(
             job_processing=False).order_by('created_on')[:100]
         tracking_job = None
+        user_imports = {}
         for job in import_jobs:
             self.import_job = job
             try:
@@ -45,12 +46,21 @@ class EtlWorkImport(object):
                 self.save_as_draft = job.save_as_draft
                 self.allow_anon_comments = job.allow_anon_comments
                 self.allow_comments = job.allow_comments
-                self.get_single_work(job.work_id, True, job)
+                processed = self.get_single_work(job.work_id, True, job)
+                if processed:
+                    if job.user.id in user_imports:
+                        user_imports[job.user.id]['works'].append(job.work_id)
+                        user_imports[job.user.id]['jobs'].append(job.id)
+                    else:
+                        user_imports[job.user.id] = {}
+                        user_imports[job.user.id]['works'] = [job.work_id]
+                        user_imports[job.user.id]['jobs'] = [job.id]
             except Exception as err:
                 logger.error(
                     f'Work import: Exception executing import job {job.job_uid}. Error: {err}')
-        if tracking_job is not None:
-            self.handle_job_complete(1, tracking_job)
+                self.handle_job_complete(None, tracking_job)
+                continue
+        self.handle_batch_complete(user_imports)
 
     def get_single_work(self, work_id, as_batch=False, import_job=None):
         if not as_batch:
@@ -59,6 +69,7 @@ class EtlWorkImport(object):
             except Exception as err:
                 logger.error(
                     f'Work import: Exception creating import job for {work_id}. Error: {err}')
+            return None
         if import_job:
             chapters_processed = None
             try:
@@ -70,6 +81,8 @@ class EtlWorkImport(object):
                 # if it's a single import or the import failed, let's go ahead and create a notif.
                 # this prevents spamming on success of a username import
                 self.handle_job_complete(chapters_processed, import_job)
+            else:
+                return 1
 
     def create_import_job(self, work_id):
         job_uid = uuid.uuid4()
@@ -92,6 +105,29 @@ class EtlWorkImport(object):
             return
         self.handle_job_success(import_job)
         logger.info(f'Work import complete: {import_job.job_uid}.')
+
+    def handle_batch_complete(self, user_imports):
+        for user_id, process_info in user_imports.items():
+            for job in process_info['jobs']:
+                import_job = WorkImport.objects.get(pk=job)
+                import_job.job_message = self.success_message
+                import_job.job_success = True
+                import_job.job_finished = True
+                import_job.job_processing = False
+                import_job.save()
+            works_string = ", ".join(process_info['works'])
+            user = api.User.objects.filter(id=user_id).first()
+            notification_type = api.NotificationType.objects.filter(
+                type_label="System Notification").first()
+            notification = api.Notification.objects.create(
+                notification_type=notification_type,
+                user=user,
+                title=_("Work Imports Processed"),
+                content=_(f"Your work import for works {work_string} has been processed. You can view your works in your profile."))
+            notification.save()
+            user.has_notifications = True
+            user.save()
+        logger.info(f'Work import batch processed.')
 
     def import_work(self, job_uid):
         import_job = WorkImport.objects.filter(job_uid=job_uid).first()
@@ -174,7 +210,7 @@ class EtlWorkImport(object):
                         tag_type.save()
                     if type(origin_value) is list:
                         for text in origin_value:
-                            tag = api.Tag.objects.filter(text=text.lower(), tag_type=tag_type).first()
+                            tag = api.Tag.find_existing_tag(text, tag_type.id)
                             if not tag:
                                 try:
                                     tag = api.Tag(text=text.lower(),
@@ -185,7 +221,7 @@ class EtlWorkImport(object):
                                     continue
                             obj.tags.add(tag)
                     else:
-                        tag = api.Tag.objects.filter(text=origin_value.lower(), tag_type=tag_type).first()
+                        tag = api.Tag.find_existing_tag(text, tag_type.id)
                         if not tag:
                             try:
                                 tag = api.Tag(text=origin_value.lower(),

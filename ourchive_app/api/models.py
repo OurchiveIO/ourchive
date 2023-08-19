@@ -402,6 +402,11 @@ class Tag(models.Model):
         self.text = unidecode.unidecode(self.text)
         super(Tag, self).save(*args, **kwargs)
 
+    def find_existing_tag(tag_text, tag_type_id):
+        cleaned_text = unidecode.unidecode(nh3.clean(self.text.lower()))
+        existing_tag = Tag.objects.filter(text=cleaned_text, tag_type__id=tag_type_id).first()
+        return existing_tag
+
 
 class TagType(models.Model):
 
