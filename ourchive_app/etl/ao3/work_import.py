@@ -165,27 +165,39 @@ class EtlWorkImport(object):
             if origin_value is None:
                 continue
             if 'tag' in mapping.destination_field:
-                # create tag
-                tag_type_label = mapping.destination_field.split(".")[1]
-                tag_type = api.TagType.objects.filter(label=tag_type_label).first()
-                if not tag_type:
-                    tag_type = api.TagType(label=tag_type_label)
-                    tag_type.save()
-                if type(origin_value) is list:
-                    for text in origin_value:
-                        tag = api.Tag.objects.filter(text=text.lower()).first()
+                try:
+                    # create tag
+                    tag_type_label = mapping.destination_field.split(".")[1]
+                    tag_type = api.TagType.objects.filter(label=tag_type_label).first()
+                    if not tag_type:
+                        tag_type = api.TagType(label=tag_type_label)
+                        tag_type.save()
+                    if type(origin_value) is list:
+                        for text in origin_value:
+                            tag = api.Tag.objects.filter(text=text.lower(), tag_type=tag_type).first()
+                            if not tag:
+                                try:
+                                    tag = api.Tag(text=text.lower(),
+                                              display_text=text, tag_type=tag_type)
+                                    tag.save()
+                                except Exception as err:
+                                    logger.error(f'Error creating tag with text {text.lower()} on obj {obj.id}: {err}')
+                                    continue
+                            obj.tags.add(tag)
+                    else:
+                        tag = api.Tag.objects.filter(text=origin_value.lower(), tag_type=tag_type).first()
                         if not tag:
-                            tag = api.Tag(text=text.lower(),
-                                          display_text=text, tag_type=tag_type)
-                            tag.save()
+                            try:
+                                tag = api.Tag(text=origin_value.lower(),
+                                          display_text=origin_value, tag_type=tag_type)
+                                tag.save()
+                            except Exception as err:
+                                logger.error(f'Error creating tag with text {text.lower()} on obj {obj.id}: {err}')
+                                continue
                         obj.tags.add(tag)
-                else:
-                    tag = api.Tag.objects.filter(text=origin_value.lower()).first()
-                    if not tag:
-                        tag = api.Tag(text=origin_value.lower(),
-                                      display_text=origin_value, tag_type=tag_type)
-                        tag.save()
-                    obj.tags.add(tag)
+                except Exception as err:
+                    logger.error(f'Error processing tag with text {text.lower()} on obj {obj.id}: {err}')
+                    continue
             elif 'attribute' in mapping.destination_field:
                 # create attribute
                 attribute_type_label = mapping.destination_field.split(".")[1]
