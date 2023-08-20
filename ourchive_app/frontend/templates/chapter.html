@@ -22,6 +22,7 @@
             <a id="chapter-delete-link" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete"><span id="chapter-delete-span">{% translate 'Delete' %}</span> </a>
             {% include "delete_modal.html" with object='chapter' parent_object_id=work.id object_id=chapter.id %}
             {% endif %}
+            <a id="jump-to-comments" href="#chapter-{{ chapter.id }}-comments" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom uk-align-right"><span id="chapter-comments-span">{% translate 'Comments' %}</span> </a>
     </div>
 	<div class="uk-width-2-3@m uk-width-1-1@s uk-margin-small-top" id="chapter-header-parent">
 		<h2 id="chapter-header-h2"><a id="chapter-header-link" class="uk-link-reset" href="">Chapter {{ chapter.number }}: {{ chapter.title }}</a></h2>
@@ -30,9 +31,6 @@
 	                <span id="chapter-draft-badge" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
 	            </div>
 	    {% endif %}
-	</div>	
-	<div class="uk-width-1-3@m uk-width-1-1@s uk-margin-small-top uk-margin-remove-left uk-align-right uk-text-right" id="chapter-header-controls">
-		<a id="jump-to-comments" href="#chapter-{{ chapter.id }}-comments" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="chapter-comments-span">{% translate 'Jump to comments' %}</span> </a>
 	</div>	
     <div id="chapter-context-parent" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
 		{% if chapter.summary %}<div id="chapter-summary-header"><span id="chapter-summary-label" class="uk-text-large">Summary</span></div>
