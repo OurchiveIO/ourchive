@@ -49,11 +49,11 @@ class EtlWorkImport(object):
                 processed = self.get_single_work(job.work_id, True, job)
                 if processed:
                     if job.user.id in user_imports:
-                        user_imports[job.user.id]['works'].append(job.work_id)
+                        user_imports[job.user.id]['works'].append(f'{job.work_id}')
                         user_imports[job.user.id]['jobs'].append(job.id)
                     else:
                         user_imports[job.user.id] = {}
-                        user_imports[job.user.id]['works'] = [job.work_id]
+                        user_imports[job.user.id]['works'] = [f'{job.work_id}']
                         user_imports[job.user.id]['jobs'] = [job.id]
             except Exception as err:
                 logger.error(
@@ -123,7 +123,7 @@ class EtlWorkImport(object):
                 notification_type=notification_type,
                 user=user,
                 title=_("Work Imports Processed"),
-                content=_(f"Your work import for works {work_string} has been processed. You can view your works in your profile."))
+                content=_(f"Your work import for work(s) {works_string} has been processed. You can view your works in your profile."))
             notification.save()
             user.has_notifications = True
             user.save()
@@ -211,6 +211,8 @@ class EtlWorkImport(object):
                     if type(origin_value) is list:
                         for text in origin_value:
                             tag = api.Tag.find_existing_tag(text, tag_type.id)
+                            print(tag)
+                            logger.info(tag)
                             if not tag:
                                 try:
                                     tag = api.Tag(text=text.lower(),
@@ -222,6 +224,9 @@ class EtlWorkImport(object):
                             obj.tags.add(tag)
                     else:
                         tag = api.Tag.find_existing_tag(text, tag_type.id)
+                        print('not list')
+                        print(tag)
+                        logger.info(f'not list {tag}')
                         if not tag:
                             try:
                                 tag = api.Tag(text=origin_value.lower(),
