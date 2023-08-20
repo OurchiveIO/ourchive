@@ -234,7 +234,12 @@
         {% endif %}
     </div>
     <div><hr/></div>
-    <label id="work-form-multichapter-switch" class="switch"><input class="uk-checkbox" id="work-form-multichapter-checkbox" type="checkbox" uk-toggle="target: .work-chapter-content" {% if work.chapter_count > 1 %} checked {% endif %} name="multichapter"> <span id="work-form-multichapter-slider" class="slider round"></span></label>
+    <div id="multichapter-select" class="uk-width-1-1">
+        <label class="uk-form-label" for="form-horizontal-text">Multichapter?</label>
+        <div id="work-form-multichapter-control" class="uk-form-controls">
+            <label id="work-form-multichapter-switch" class="switch"><input class="uk-checkbox" id="work-form-multichapter-checkbox" type="checkbox" uk-toggle="target: .work-chapter-content" {% if work.chapter_count > 1 %} checked {% endif %} name="multichapter"><span id="work-form-multichapter-slider" class="slider round"></span></label>
+        </div>
+    </div>
     <div id="work-form-single-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if work.chapter_count > 1 %} hidden {% endif %}>
         <input type="hidden" id="work" name="chapter_id" value="{{ work_chapter.id }}">
         {% include 'chapter_form_body.html' with chapter=work_chapter %}

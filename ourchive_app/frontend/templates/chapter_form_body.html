@@ -1,6 +1,7 @@
 {% load i18n %}
 {% load static %}
 {% csrf_token %}
+<h3 id="obj-attrs-form-header">Chapter Details</h3>
 <div id="chapter-form-title-parent" class="uk-margin">
     <label id="chapter-form-title-label" class="uk-form-label" for="form-horizontal-text">Title</label>
     <div id="chapter-form-title-controls" class="uk-form-controls">
@@ -10,11 +11,8 @@
     </div>
 </div>
 {% if chapter.attribute_types %}
-<h3 id="obj-attrs-form-header">Chapter Tags</h3>
     {% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types show_header=False %}
 {% endif %}
-<hr id="chapter-summary-hr"/>
-<h3 id="obj-attrs-form-header">Chapter Details</h3>
 <div class="uk-margin" id="chapter-form-summary-parent">
     <label id="chapter-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
     <div id="chapter-form-summary-controls" class="uk-form-controls">
@@ -101,7 +99,7 @@
         </div>
     </div>
 </div>
-<h3 id="obj-attrs-form-header">Chapter Content</h3>
+<h4 id="obj-attrs-form-header">Content</h3>
 {% if request.user.can_upload_images %}
 {% if not request.user.collapse_chapter_image %}
 <div class="uk-margin" id="chapter-form-image-all-parent">
