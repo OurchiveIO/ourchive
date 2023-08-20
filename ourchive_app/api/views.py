@@ -431,7 +431,7 @@ class UserSubscriptionBookmarkCollectionList(generics.ListAPIView):
             user__id=self.request.user.id).filter(
             subscribed_to_collection=True)
         ids = subscriptions.values_list('subscribed_user', flat=True).all()
-        return BookmarkCollection.objects.filter(user__id__in=ids).order_by('-created_on')
+        return BookmarkCollection.objects.filter(draft=False).filter(user__id__in=ids).order_by('-created_on')
 
 
 class UserSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -788,18 +788,20 @@ class BookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return BookmarkCollection.objects.get_queryset().order_by('id')
+        return BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
-            serializer.pop('header_url')
+            self.request.data.pop('header_url')
         serializer.save(user=self.request.user)
 
 
 class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = BookmarkCollection.objects.get_queryset().order_by('id')
     serializer_class = BookmarkCollectionSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        return BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
 
     def perform_update(self, serializer):
         attributes = []

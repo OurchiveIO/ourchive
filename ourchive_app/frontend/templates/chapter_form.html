@@ -3,274 +3,32 @@
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
 {% load static %}
-<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
-<div id="chapter-form-parent" class="uk-width-1-1 uk-text-left"> 
-	<form class="uk-form-horizontal"  method="post" id="chapterForm" onsubmit="return getRichTextValues()">
-		<script>
-	        function getRichTextValues() {
-	        	document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
-            	document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
-            	if (document.getElementById('chapter-text-edit-mode-toggle').checked) {
-		            document.getElementById('chapter_text').value = tinymce.get("textEditor").getContent().replace(/\r?\n?/g, '');
-		        } else {
-		            document.getElementById('chapter_text').value = document.getElementById('toggle-chapter-plaintext-area').value;
-		        }
-	        }
-
-	        function updateModeText() {
-	        	if (document.getElementById('chapter-text-edit-mode-toggle').checked) {
-	        		tinymce.get("textEditor").setContent(document.getElementById('toggle-chapter-plaintext-area').value);
-	        	}
-	        	else {
-	        		const grafEx = new RegExp('<p>', "g");
-	        		const whEx = new RegExp('</p>', "g");
-	        		document.getElementById('toggle-chapter-plaintext-area').innerHTML = tinymce.get("textEditor").getContent().replace(/\r?\n?/g, '').replace(grafEx, '\n').replace(whEx, '').replace('\n', '');
-	        	}
-	        }
-    	</script>
-		{% csrf_token %}
-		<input type="hidden" id="work" name="work" value="{{ chapter.work }}">
-		<input type="hidden" id="work" name="chapter_id" value="{{ chapter.id }}">
-		<div id="chapter-form-title-grid" class="uk-grid" uk-grid>
-	        <div class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom" id="chapter-form-title-div">
-	            <span id="chapter-form-title-span" class="uk-text-large">{{ chapter.title|default_if_none:'' }}</span>
-	        </div>
-	        <div class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="chapter-form-top-buttons-group">
-                <button id="chapter-form-top-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-	        	<input id="chapter-form-cancel-button" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel"/>
-	            <input id="chapter-form-submit-button" class="uk-button uk-button-primary" type="submit" value="Submit"/>
-	        </div>
-	    </div>
+    <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
+    <script src="{% static 'frontend/js/ourchive-chapter.js' %}"></script>
+    <div id="chapter-form-parent" class="uk-width-1-1 uk-text-left"> 
+    	<form class="uk-form-horizontal"  method="post" id="chapterForm" onsubmit="return getRichTextValues()">
+            <input type="hidden" id="work" name="work" value="{{ chapter.work }}">
+            <input type="hidden" id="work" name="chapter_id" value="{{ chapter.id }}">
+    <div id="chapter-form-title-grid" class="uk-grid" uk-grid>
+        <div class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom" id="chapter-form-title-div">
+            <span id="chapter-form-title-span" class="uk-text-large">{{ chapter.title|default_if_none:'' }}</span>
+        </div>
+        <div class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="chapter-form-top-buttons-group">
+            <button id="chapter-form-top-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+            <input id="chapter-form-cancel-button" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel"/>
+            <input id="chapter-form-submit-button" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+        </div>
+    </div>
     <hr id="chapter-form-hr"/>
-		<div id="chapter-form-title-parent" class="uk-margin">
-            <label id="chapter-form-title-label" class="uk-form-label" for="form-horizontal-text">Title</label>
-            <div id="chapter-form-title-controls" class="uk-form-controls">
-                <div id="chapter-form-title-inline" class="uk-inline">
-                    <input id="chapter-form-title-input" class="uk-input uk-form-width-large" type="text" name="title" value="{{ chapter.title|default_if_none:'' }}">
-                </div>
-            </div>
-            
+	{% include 'chapter_form_body.html' %}
+    <hr/>
+    <div id="chapter-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
+        <div class="uk-align-right uk-width-1-1@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="chapter-form-bottom-buttons-group">
+            <button id="chapter-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+            <input id="chapter-form-cancel-button-bottom" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel"/>
+            <input id="chapter-form-submit-button-bottom" class="uk-button uk-button-primary" type="submit" value="Submit"/>
         </div>
-        <h3 id="obj-attrs-form-header">Chapter Tags</h3>
-            {% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types show_header=False %}
-        <hr id="chapter-summary-hr"/>
-        <h3 id="obj-attrs-form-header">Chapter Details</h3>
-        <div class="uk-margin" id="chapter-form-summary-parent">
-            <label id="chapter-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
-            <div id="chapter-form-summary-controls" class="uk-form-controls">
-                <div id="chapter-form-summary-inline" class="uk-inline uk-child-width-expand uk-width-expand">
-                    <input type="hidden" id="summary" name="summary" value="{{ chapter.summary|safe|default_if_none:'' }}">
-                    <textarea id="summaryEditor"></textarea>
-                    <script type="text/javascript">
-                                      tinymce.init({
-                                        selector: '#summaryEditor',
-                                        width: '100%',
-                                        height: 200,
-                                        autoresize_min_height: 150,
-                                        autoresize_max_height: 800,
-                                        plugins: [
-                                          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                                          'fullscreen', 'insertdatetime',
-                                          'media', 'table', 'emoticons'
-                                        ],
-                                        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                          'forecolor backcolor emoticons | help',
-                                        menubar: '',
-                                        init_instance_callback : function(editor) {
-                                        	var chapterSummary = document.getElementById('summary').value;
-                                        	if (chapterSummary === "None") {
-                                        		chapterSummary = '';
-                                        	}
-                                            editor.setContent(chapterSummary);
-                                        }
-                                      });
-                   </script>
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin" id="chapter-form-notes-parent">
-            <label class="uk-form-label" for="form-horizontal-text" id="chapter-form-notes-label">Notes</label>
-            <div class="uk-form-controls" id="chapter-form-notes-controls">
-                <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-notes-inline">
-                    <input type="hidden" id="notes" name="notes" value="{{ chapter.notes|safe|default_if_none:'' }}">
-                    <textarea id="notesEditor"></textarea>
-                    <script type="text/javascript">
-                                      tinymce.init({
-                                        selector: '#notesEditor',
-                                        width: '100%',
-                                        height: 200,
-                                        autoresize_min_height: 150,
-                                        autoresize_max_height: 800,
-                                        plugins: [
-                                          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                                          'fullscreen', 'insertdatetime',
-                                          'media', 'table', 'emoticons'
-                                        ],
-                                        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                          'forecolor backcolor emoticons | help',
-                                        menubar: '',
-                                        init_instance_callback : function(editor) {
-                                            var chapterNotes = document.getElementById('notes').value;
-                                            if (chapterNotes === "None") {
-                                                chapterNotes = '';
-                                            }
-                                            editor.setContent(chapterNotes);
-                                        }
-                                      });
-                   </script>
-                </div>
-            </div>
-        </div>
-
-       
-        <div class="uk-margin" id="chapter-form-number-parent">
-            <label id="chapter-form-number-label" class="uk-form-label" for="form-horizontal-text">Number</label>
-            <div id="chapter-form-number-controls" class="uk-form-controls">
-                <div id="chapter-form-number-inline" class="uk-inline">
-                    <input id="chapter-form-number-input" class="uk-input" type="number" name="number" min="1" value="{{ chapter.number }}">
-                </div>
-            </div>            
-        </div>
-        <div class="uk-margin" id="chapter-form-draft-parent">
-            <label id="chapter-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
-            </label>
-            <div class="uk-form-controls" id="chapter-form-draft-controls">
-                <div class="uk-inline" id="chapter-form-draft-inline">
-                    <label id="chapter-form-draft-checkbox-label" class="switch"><input class="uk-checkbox" type="checkbox" id="chapter-form-draft" name="draft" {% if chapter.draft %} checked {% endif %}> <span class="slider round"></span></label>
-                </div>
-            </div>
-        </div>
-        <h3 id="obj-attrs-form-header">Chapter Content</h3>
-        {% if request.user.can_upload_images %}
-        {% if not request.user.collapse_chapter_image %}
-        <div class="uk-margin" id="chapter-form-image-all-parent">
-        {% else %}
-        <div class="uk-margin uk-width-small"><a class="uk-accordion-title uk-text-meta" uk-toggle="target: #chapter-form-image-hidden-parent" href="#">{% translate 'Image' %}</a></div>
-        <div class="uk-accordion-content" id="chapter-form-image-hidden-parent" hidden>
-        {% endif %}
-        <div class="uk-margin" id="chapter-form-image-parent">
-            <label id="chapter-form-image-label" class="uk-form-label" for="form-horizontal-text">Chapter Image</label>
-            {% if chapter.image_url and chapter.image_url != "None" %}
-            <div class="uk-form-controls" id="chapter-form-image-controls">
-                <img id="chapter-form-image" src="{{ chapter.image_url }}" class="uk-margin-bottom"/>
-            </div>
-            {% endif %}
-            <div class="uk-form-controls" id="chapter-form-image-upload-controls">
-                <div class="uk-inline" id="chapter-form-image-upload-inline">
-                	{% include 'file_upload.html' with object='image_url' replace_selector='chapter-form-image' object_type='img' upload_placeholder='Upload chapter image' original_value=chapter.image_url %}
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin" id="chapter-form-image-alt-text-parent">
-            <label id="chapter-form-image-alt-text-label" class="uk-form-label" for="form-horizontal-text">Image Alt Text</label>
-            <div id="chapter-form-image-alt-text-controls" class="uk-form-controls">
-                <div class="uk-inline" id="chapter-form-image-alt-text-inline">
-                    <textarea id="chapter-form-image-alt-text" class="uk-textarea uk-form-width-large" rows="2" placeholder="Image alt text" name="image_alt_text" maxlength="600">{{ chapter.image_alt_text|default_if_none:'' }}</textarea>
-                </div>
-            </div>
-        </div>
-        </div>
-        {% endif %}
-        {% if request.user.can_upload_audio %}
-        {% if not request.user.collapse_chapter_audio %}
-        <div class="uk-margin" id="chapter-form-audio-parent">
-        {% else %}
-        <div class="uk-margin uk-width-small"><a class="uk-accordion-title uk-text-meta" uk-toggle="target: #chapter-form-audio-hidden-parent" href="#">{% translate 'Audio' %}</a></div>
-        <div class="uk-accordion-content" id="chapter-form-audio-hidden-parent" hidden>
-        {% endif %}
-        <div class="uk-margin" id="chapter-form-audio-upload-parent">
-            <label id="chapter-form-audio-label" class="uk-form-label" for="form-horizontal-text">Chapter Audio</label>
-            <div class="uk-form-controls" id="chapter-form-audio-controls">
-                <div class="uk-inline" id="chapter-form-audio-inline">
-                	{% include 'file_upload.html' with object='audio_url' replace_selector='chapter-form-audio' object_type='audio' upload_placeholder='Upload chapter audio' original_value=chapter.audio_url %}
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin" id="chapter-form-audio-description-parent">
-            <label id="chapter-form-audio-description-label" class="uk-form-label" for="form-horizontal-text">Audio Description</label>
-            <div id="chapter-form-audio-description-controls" class="uk-form-controls">
-                <div class="uk-inline" id="chapter-form-audio-description-inline">
-                    <textarea id="chapter-form-audio-description" class="uk-textarea uk-form-width-large" rows="2" placeholder="Audio description" name="audio_description" maxlength="600">{{ chapter.audio_description|default_if_none:'' }}</textarea>
-                </div>
-            </div>
-        </div>
-        {% if settings.AudioProcessing == 'False' %}
-        <div class="uk-margin" id="chapter-form-audio-length-parent">
-            <label id="chapter-form-audio-length-label" class="uk-form-label" for="form-horizontal-text">Audio Length <sup uk-icon="icon: question"></sup></label>
-            <div id="chapter-form-audio-length-controls" class="uk-form-controls">
-                <div class="uk-inline" id="chapter-form-audio-length-inline">
-                    <input id="chapter-form-audio-length" class="uk-input uk-form-width-large" type="number" name="audio_length" value="{{ chapter.audio_length|default_if_none:0 }}">
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        </div>
-        {% endif %}
-        {% if not request.user.collapse_chapter_text %}
-        <div class="uk-margin" id="chapter-form-text-parent">
-        {% else %}
-        <div class="uk-margin uk-width-small"><a class="uk-accordion-title uk-text-meta" href="#" uk-toggle="target: #chapter-form-text-parent">{% translate 'Text' %}</a></div>
-        <div class="uk-accordion-content" id="chapter-form-text-parent" hidden>
-        {% endif %}
-            <label id="chapter-form-text-label" class="uk-form-label" for="form-horizontal-text">Chapter Text</label>
-            <div class="uk-form-controls" id="chapter-form-text-controls">
-                <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-text-inline">
-                	<div class="uk-margin-bottom">
-                	<span width="150" class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
-                    </span>
-                	<label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText()" checked uk-toggle="target: .chapter-text-toggle")> 
-                		<span class="slider round"></span></label>
-                	</div>
-                	<input type="hidden" id="chapter_text" name="text" value="{{ chapter.text|safe|default_if_none:'' }}">
-                    <textarea id="textEditor"></textarea>
-                    <script type="text/javascript">
-                                      tinymce.init({
-                                        selector: '#textEditor',
-                                        width: '100%',
-										height: 450,
-										autoresize_min_height: 450,
-										autoresize_max_height: 800,
-                                        plugins: [
-                                          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                                          'fullscreen', 'insertdatetime',
-                                          'media', 'table', 'emoticons'
-                                        ],
-                                        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                          'forecolor backcolor emoticons | help',
-                                        menubar: '',
-                                        setup : function(ed) {
-										    ed.on('init', function(event) {
-										      ed.getContainer().classList.add("chapter-text-toggle");
-										    });
-										},
-										paste_preprocess: function(editor, args) {
-											args.content = args.content.replaceAll("<br />", "");
-										},
-                                        init_instance_callback : function(editor) {
-                                        	var chapterText = document.getElementById('chapter_text').value;
-                                            editor.setContent(chapterText);
-                                        }
-                                      });
-                   </script>
-                </div>
-                <div class="uk-width-1-1" id="chapter-form-html-text">
-                    <textarea id="toggle-chapter-plaintext-area" rows="25" name="text-plain" class="chapter-text-toggle uk-width-expand" hidden>{{ chapter.text|safe|default_if_none:'' }}</textarea>
-                </div>
-            </div>
-        </div>
-        <hr/>
-        <div id="chapter-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
-            <div class="uk-align-right uk-width-1-1@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="chapter-form-bottom-buttons-group">
-                <button id="chapter-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-                <input id="chapter-form-cancel-button-bottom" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel"/>
-                <input id="chapter-form-submit-button-bottom" class="uk-button uk-button-primary" type="submit" value="Submit"/>
-            </div>
-        </div>
+    </div>
 	</form>
 </div>
 {% endblock %}

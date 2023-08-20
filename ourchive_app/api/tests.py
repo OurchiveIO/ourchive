@@ -13,8 +13,8 @@ class ApiTests(TestCase):
         fixtures = [
             'tagtype', 'tags', 'worktype', 'work', 'bookmark', 'bookmarkcollection', 'chapter', 'ourchivesettings'
         ]
-        cls.test_user = models.User.objects.create(username="test_user")
-        cls.test_admin_user = models.User.objects.create(username="test_admin_user")
+        cls.test_user = models.User.objects.create(username="test_user", email="test_user@test.com")
+        cls.test_admin_user = models.User.objects.create(username="test_admin_user", email="test_admin@test.com")
         for db_name in cls._databases_names(include_mirrors=False):
             call_command("loaddata", *fixtures, verbosity=0, database=db_name)
 
@@ -222,54 +222,436 @@ class ApiTests(TestCase):
         self.assertEquals(expected_id, work_id)
 
     def test_work_drafts_not_in_search(self):
-        self.assertFalse(True)
+        work_draft_json = {
+            "tags": [],
+            "word_count": 0,
+            "audio_length": 0,
+            "attributes": [],
+            "chapter_count": 0,
+            "work_type_name": "Fic",
+            "title": "My BTVS draft WIP",
+            "summary": "Buffy and Faith go for a nice walk, and nothing bad happens.",
+            "notes": "",
+            "is_complete": False,
+            "anon_comments_permitted": False,
+            "comments_permitted": False,
+            "fingerguns": 1,
+            "draft": True,
+            "comment_count": 0,
+            "user": "test_user"
+        }
+        work_nondraft_json = {
+            "tags": [],
+            "word_count": 0,
+            "audio_length": 0,
+            "attributes": [],
+            "chapter_count": 0,
+            "work_type_name": "Fic",
+            "title": "My BTVS fic",
+            "summary": "Buffy and Faith go for a nice walk, and several bad things happen.",
+            "notes": "",
+            "is_complete": False,
+            "anon_comments_permitted": False,
+            "comments_permitted": False,
+            "draft": False,
+            "comment_count": 0,
+            "user": "test_user"
+        }
+        factory = APIRequestFactory()
+        user = models.User.objects.get(username='test_user')
+        work = models.Work.objects.get(id=1)
+        view = api_views.WorkList.as_view()
+        request = factory.post(f'/works/', work_draft_json, format='json')
+        force_authenticate(request, user=self.test_user)
+        response = view(request)
+        request = factory.post(f'/works/', work_nondraft_json, format='json')
+        force_authenticate(request, user=self.test_user)
+        response = view(request)
+        search_view = api_views.SearchList.as_view()
+        work_search_data = {
+            "work_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "bookmark_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "collection_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "tag_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "user_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            }
+        }
+        request = factory.post(f'/search/', work_search_data, format='json')
+        force_authenticate(request, user=self.test_user)
+        response = search_view(request)
+        works = response.data['results']['work']['data']
+        self.assertEquals(1, len(works))
+        self.assertEquals("My BTVS fic", works[0]['title'])
 
     def test_bookmark_drafts_not_in_search(self):
-        self.assertFalse(True)
+        bookmark_draft_json = {
+            "work_id": 1,
+            "collection": None,
+            "tags": [],
+            "attributes": [],
+            "title": "DRAFT - BTVS",
+            "rating": 0,
+            "description": "<p>hello</p>",
+            "draft": True,
+            "anon_comments_permitted": True,
+            "comments_permitted": True,
+            "comment_count": 0,
+            "public_notes": None,
+            "private_notes": None,
+            "is_private": False,
+            "user": "test_user"
+        }
+        bookmark_nondraft_json = {
+            "work_id": 1,
+            "collection": None,
+            "tags": [],
+            "attributes": [],
+            "title": "NOT A DRAFT - BTVS",
+            "rating": 0,
+            "description": "<p>hello</p>",
+            "draft": False,
+            "anon_comments_permitted": True,
+            "comments_permitted": True,
+            "comment_count": 0,
+            "public_notes": None,
+            "private_notes": None,
+            "is_private": False,
+            "user": "test_user"
+        }
+        factory = APIRequestFactory()
+        user = models.User.objects.get(username='test_user')
+        view = api_views.BookmarkList.as_view()
+        request = factory.post(f'/bookmarks/', bookmark_draft_json, format='json')
+        force_authenticate(request, user=self.test_user)
+        response = view(request)
+        request = factory.post(f'/bookmarks/', bookmark_nondraft_json, format='json')
+        force_authenticate(request, user=self.test_user)
+        response = view(request)
+        search_view = api_views.SearchList.as_view()
+        bookmark_search_data = {
+            "work_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "bookmark_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "collection_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "tag_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "user_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            }
+        }
+        request = factory.post(f'/search/', bookmark_search_data, format='json')
+        force_authenticate(request, user=self.test_user)
+        response = search_view(request)
+        bookmarks = response.data['results']['bookmark']['data']
+        self.assertEquals(1, len(bookmarks))
+        self.assertEquals("NOT A DRAFT - BTVS", bookmarks[0]['title'])
     
     def test_collection_drafts_not_in_search(self):
-        self.assertFalse(True)
+        collection_draft_json = {
+            "tags": [],
+            "attributes": [],
+            "bookmarks_readonly": [],
+            "bookmarks": [],
+            "title": "MY DRAFT COLLECTION - BTVS",
+            "is_complete": False,
+            "header_url": None,
+            "header_alt_text": None,
+            "short_description": "does what it says on the tin",
+            "description": "",
+            "draft": True,
+            "anon_comments_permitted": True,
+            "comments_permitted": True,
+            "comment_count": 0,
+            "is_private": False,
+            "user": "test_user"
+        }
+        collection_nondraft_json = {
+            "tags": [],
+            "attributes": [],
+            "bookmarks_readonly": [],
+            "bookmarks": [],
+            "title": "NOT A DRAFT - BTVS",
+            "is_complete": False,
+            "header_url": None,
+            "header_alt_text": None,
+            "short_description": "does what it says on the tin",
+            "description": "",
+            "draft": False,
+            "anon_comments_permitted": True,
+            "comments_permitted": True,
+            "comment_count": 0,
+            "is_private": False,
+            "user": "test_user"
+        }
+        factory = APIRequestFactory()
+        user = models.User.objects.get(username='test_user')
+        view = api_views.BookmarkCollectionList.as_view()
+        request = factory.post(f'/bookmarkcollections/', collection_draft_json, format='json')
+        force_authenticate(request, user=self.test_user)
+        response = view(request)
+        request = factory.post(f'/bookmarkcollections/', collection_nondraft_json, format='json')
+        force_authenticate(request, user=self.test_user)
+        response = view(request)
+        search_view = api_views.SearchList.as_view()
+        collection_search_data = {
+            "work_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "bookmark_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "collection_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "tag_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            },
+            "user_search": {
+                "include_filter": {},
+                "exclude_filter": {},
+                "term": "btvs",
+                "order_by": "created_on",
+                "page": 1
+            }
+        }
+        request = factory.post(f'/search/', collection_search_data, format='json')
+        force_authenticate(request, user=self.test_user)
+        response = search_view(request)
+        collections = response.data['results']['collection']['data']
+        self.assertEquals(1, len(collections))
+        self.assertEquals("NOT A DRAFT - BTVS", collections[0]['title'])
 
     def test_cannot_view_nonowned_draft_work(self):
-        self.assertFalse(True)
+        factory = APIRequestFactory()
+        user = models.User.objects.get(username='test_user')
+        view = api_views.WorkDetail.as_view()
+        request = factory.get(f'/works/2/')
+        force_authenticate(request, user=user)
+        response = view(request, pk=2)
+        self.assertEquals(response.status_code, 404)
 
     def test_cannot_view_nonowned_draft_chapter(self):
-        self.assertFalse(True)
+        factory = APIRequestFactory()
+        user = models.User.objects.get(username='test_user')
+        view = api_views.ChapterDetail.as_view()
+        request = factory.get(f'/chapters/2/')
+        force_authenticate(request, user=user)
+        response = view(request, pk=2)
+        self.assertEquals(response.status_code, 404)
+
+        user = models.User.objects.get(username='test_admin_user')
+        view = api_views.ChapterDetail.as_view()
+        request = factory.get(f'/chapters/2/')
+        force_authenticate(request, user=user)
+        response = view(request, pk=2)
+        self.assertEquals(response.status_code, 200)
 
     def test_cannot_view_nonowned_draft_bookmark(self):
-        self.assertFalse(True)
+        factory = APIRequestFactory()
+        user = models.User.objects.get(username='test_user')
+        view = api_views.BookmarkDetail.as_view()
+        request = factory.get(f'/bookmarks/2/')
+        force_authenticate(request, user=user)
+        response = view(request, pk=2)
+        self.assertEquals(response.status_code, 404)
+
+        request = factory.get(f'/bookmarks/3/')
+        force_authenticate(request, user=user)
+        response = view(request, pk=3)
+        self.assertEquals(response.status_code, 200)
     
     def test_cannot_view_nonowned_draft_collection(self):
-        self.assertFalse(True)
+        factory = APIRequestFactory()
+        user = models.User.objects.get(username='test_user')
+        view = api_views.BookmarkCollectionDetail.as_view()
+        request = factory.get(f'/bookmarkcollections/2/')
+        force_authenticate(request, user=user)
+        response = view(request, pk=2)
+        self.assertEquals(response.status_code, 404)
 
     def test_can_view_owned_draft_work(self):
-        self.assertFalse(True)
-
-    def test_can_view_owned_draft_chapter(self):
-        self.assertFalse(True)
-
-    def test_can_view_owned_draft_bookmark(self):
-        self.assertFalse(True)
+        factory = APIRequestFactory()
+        user = models.User.objects.get(username='test_user')
+        view = api_views.WorkDetail.as_view()
+        request = factory.get(f'/works/3/')
+        force_authenticate(request, user=user)
+        response = view(request, pk=2)
+        self.assertEquals(response.status_code, 404)
     
     def test_can_view_owned_draft_collection(self):
-        self.assertFalse(True)
+        factory = APIRequestFactory()
+        user = models.User.objects.get(username='test_user')
+        view = api_views.BookmarkCollectionDetail.as_view()
+        request = factory.get(f'/bookmarkcollections/3/')
+        force_authenticate(request, user=user)
+        response = view(request, pk=3)
+        self.assertEquals(response.status_code, 200)
 
     def test_cannot_register_with_reg_disabled(self):
-        self.assertFalse(True)
+        factory = APIRequestFactory()
+        view = api_views.UserList.as_view()
+        require_invite = models.OurchiveSetting.objects.filter(
+            name='Invite Only').first()
+        require_invite.value = "False"
+        require_invite.save()
+        reg_permit = models.OurchiveSetting.objects.filter(
+            name='Registration Permitted').first()
+        reg_permit.value = "False"
+        reg_permit.save()
+        user_data = {
+            "username": "test_new_user",
+            "email": "test@test.com",
+            "password": "changem3r1ghtn0w",
+            "profile": "",
+            "icon": "",
+            "icon_alt_text": "",
+            "has_notifications": False,
+            "default_content": "Work",
+            "attributes": [],
+            "cookies_accepted": True,
+            "can_upload_audio": True,
+            "can_upload_export_files": True,
+            "can_upload_images": True,
+            "default_work_type": "Fic",
+            "collapse_chapter_image": True,
+            "collapse_chapter_audio": False,
+            "collapse_chapter_text": True
+        }
+        request = factory.post(f'/users/', user_data, format='json')
+        response = view(request)
+        self.assertEquals(response.status_code, 403)
 
     def test_can_register_with_reg_enabled(self):
-        self.assertFalse(True)
+        factory = APIRequestFactory()
+        view = api_views.UserList.as_view()
+        require_invite = models.OurchiveSetting.objects.filter(
+            name='Invite Only').first()
+        require_invite.value = "False"
+        require_invite.save()
+        reg_permit = models.OurchiveSetting.objects.filter(
+            name='Registration Permitted').first()
+        reg_permit.value = "True"
+        reg_permit.save()
+        user_data = {
+            "username": "test_new_user",
+            "email": "test@test.com",
+            "password": "changem3r1ghtn0w",
+            "profile": "",
+            "icon": "",
+            "icon_alt_text": "",
+            "has_notifications": False,
+            "default_content": "Work",
+            "attributes": [],
+            "cookies_accepted": True,
+            "can_upload_audio": True,
+            "can_upload_export_files": True,
+            "can_upload_images": True,
+            "default_work_type": "Fic",
+            "collapse_chapter_image": True,
+            "collapse_chapter_audio": False,
+            "collapse_chapter_text": True
+        }
+        request = factory.post(f'/users/', user_data, format='json')
+        response = view(request)
+        self.assertEquals(response.status_code, 201)
 
     def test_can_request_invite(self):
-        self.assertFalse(True)
+        invite_request = {
+            "email": "test@test.com",
+            "join_reason": "Curiosity"
+        }
+        factory = APIRequestFactory()
+        view = api_views.Invitations.as_view()
+        request = factory.post(f'/invitations/', invite_request, format='json')
+        response = view(request)
+        self.assertEquals(response.status_code, 200)
+        new_user = models.User.objects.create(username="test_user_2", email="test@test.com")
+        request = factory.post(f'/invitations/', invite_request, format='json')
+        response = view(request)
+        self.assertEquals(response.status_code, 418)
 
     def test_cannot_view_user_email(self):
-        self.assertFalse(True)
-
-    def test_tag_with_naughty_char(self):
-        self.assertFalse(True)
-
-    def test_tag_with_ampersand(self):
-        self.assertFalse(True)
-
-        
+        factory = APIRequestFactory()
+        user = models.User.objects.get(username='test_user')
+        view = api_views.UserDetail.as_view()
+        request = factory.get(f'/users/{user.id}/')
+        force_authenticate(request, user=user)
+        response = view(request, pk=user.id)
+        email_response = response.data['email']
+        self.assertEquals('test_user@test.com', email_response)
+        request = factory.get(f'/users/2/')
+        force_authenticate(request, user=user)
+        response = view(request, pk=2)
+        email_response = response.data['email']
+        self.assertEquals(None, email_response)

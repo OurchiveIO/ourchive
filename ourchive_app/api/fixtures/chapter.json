@@ -1,1 +1,92 @@
-[{"model": "api.chapter", "pk": 1, "fields": {"uid": "4b0e5801-1039-462e-abbb-17707570cd07", "created_on": "2023-08-17T18:07:12.978Z", "updated_on": "2023-08-17T18:07:12.978Z", "title": "Hello World - Chapter", "number": 1, "text": "", "notes": "<p>Chapter notes!&nbsp;</p>", "end_notes": null, "word_count": 0, "audio_url": null, "audio_description": null, "audio_length": 0, "image_url": null, "image_alt_text": null, "image_format": null, "image_size": null, "summary": "<p>Chapter summary</p>", "draft": false, "comment_count": 0, "work": 1, "user": 1, "attributes": []}}]
+[
+    {
+        "model": "api.chapter",
+        "pk": 1,
+        "fields":
+        {
+            "uid": "4b0e5801-1039-462e-abbb-17707570cd07",
+            "created_on": "2023-08-17T18:07:12.978Z",
+            "updated_on": "2023-08-17T18:07:12.978Z",
+            "title": "Hello World - Chapter",
+            "number": 1,
+            "text": "",
+            "notes": "<p>Chapter notes!&nbsp;</p>",
+            "end_notes": null,
+            "word_count": 0,
+            "audio_url": null,
+            "audio_description": null,
+            "audio_length": 0,
+            "image_url": null,
+            "image_alt_text": null,
+            "image_format": null,
+            "image_size": null,
+            "summary": "<p>Chapter summary</p>",
+            "draft": false,
+            "comment_count": 0,
+            "work": 2,
+            "user": 1,
+            "attributes":
+            []
+        }
+    },
+    {
+        "model": "api.chapter",
+        "pk": 2,
+        "fields":
+        {
+            "uid": "4b0e5801-1039-462e-abbb-17707570cd07",
+            "created_on": "2023-08-17T18:07:12.978Z",
+            "updated_on": "2023-08-17T18:07:12.978Z",
+            "title": "Hello World - Chapter",
+            "number": 1,
+            "text": "",
+            "notes": "<p>Chapter notes!&nbsp;</p>",
+            "end_notes": null,
+            "word_count": 0,
+            "audio_url": null,
+            "audio_description": null,
+            "audio_length": 0,
+            "image_url": null,
+            "image_alt_text": null,
+            "image_format": null,
+            "image_size": null,
+            "summary": "<p>Chapter summary</p>",
+            "draft": true,
+            "comment_count": 0,
+            "work": 1,
+            "user": 2,
+            "attributes":
+            []
+        }
+    },
+    {
+        "model": "api.chapter",
+        "pk": 3,
+        "fields":
+        {
+            "uid": "4b0e5801-1039-462e-abbb-17707570cd07",
+            "created_on": "2023-08-17T18:07:12.978Z",
+            "updated_on": "2023-08-17T18:07:12.978Z",
+            "title": "Hello World - Chapter",
+            "number": 1,
+            "text": "",
+            "notes": "<p>Chapter notes!&nbsp;</p>",
+            "end_notes": null,
+            "word_count": 0,
+            "audio_url": null,
+            "audio_description": null,
+            "audio_length": 0,
+            "image_url": null,
+            "image_alt_text": null,
+            "image_format": null,
+            "image_size": null,
+            "summary": "<p>Chapter summary</p>",
+            "draft": true,
+            "comment_count": 0,
+            "work": 3,
+            "user": 1,
+            "attributes":
+            []
+        }
+    }
+]

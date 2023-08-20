@@ -1,5 +1,5 @@
 <div class="uk-margin-small-top uk-visible@s ourchive-tag-text" id="{{obj_name}}-tags-dl">
-    <hr class="uk-margin-remove uk-padding-remove ourchive-divider"/>
+    {% if tags %}<hr class="uk-margin-remove uk-padding-remove ourchive-divider"/>{% endif %}
 {% for type, tag in tags %}
     <div id="{{obj_name}}-tile-tag-type-{{type}}" class="uk-margin-small uk-visible@s">
         <span class="uk-text-bold uk-margin-right">{{ type }}</span>

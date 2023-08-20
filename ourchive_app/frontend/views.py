@@ -89,6 +89,20 @@ def sanitize_rich_text(rich_text):
 
 def get_work_obj(request, work_id=None):
 	work_dict = request.POST.copy()
+	multichapter = work_dict.pop('multichapter') if 'multichapter' in work_dict else None
+	chapter_dict = {'title': '',
+		'summary': '',
+		'notes': '',
+		'chapter_title': 'Untitled Chapter',
+		'number': '1',
+		'image_url': '',
+		'image_url-upload': '',
+		'image_alt_text': '',
+		'audio_url': '',
+		'audio_url-upload': '',
+		'audio_description': '',
+		'text': ''
+	}
 	tags = []
 	tag_types = {}
 	chapters = []
@@ -96,9 +110,21 @@ def get_work_obj(request, work_id=None):
 	for item in result.response_data['results']:
 		tag_types[item['type_name']] = item
 	for item in request.POST:
-		if 'tags' in request.POST[item]:
+		if item in chapter_dict and not multichapter:
+			val_list = request.POST.getlist(item)
+			if len(val_list) > 1:
+				print("LIST FOUND!")
+				print(val_list)
+				chapter_dict[item] = val_list[1]
+				work_dict[item] = val_list[0]
+			else:
+				chapter_dict[item] = request.POST[item]
+		elif item == 'chapter_id':
+			chapter_dict['id'] = request.POST[item]
+			work_dict.pop('chapter_id')
+		elif 'tags' in request.POST[item]:
 			tag = {}
-			json_item = request.POST[item].split("_")
+			json_item = request.POST[item].split(settings.TAG_DIVIDER)
 			tag['tag_type'] = tag_types[json_item[2]]['label']
 			tag['text'] = json_item[1]
 			tags.append(tag)
@@ -108,6 +134,7 @@ def get_work_obj(request, work_id=None):
 			chapter_number = request.POST[item]
 			chapters.append({'id': chapter_id, 'number': chapter_number, 'work': work_id})
 	work_dict["tags"] = tags
+	chapter_dict = None if multichapter else chapter_dict
 	if 'comments_permitted' not in work_dict:
 		comments_permitted = False
 	else:
@@ -120,7 +147,7 @@ def get_work_obj(request, work_id=None):
 	work_dict = work_dict.dict()
 	work_dict["user"] = str(request.user)
 	work_dict["attributes"] = get_attributes_from_form_data(request)
-	return [work_dict, redirect_toc, chapters]
+	return [work_dict, redirect_toc, chapters, chapter_dict]
 
 
 def get_bookmark_obj(request):
@@ -747,6 +774,7 @@ def tag_autocomplete(request):
 		tag['display_text_clean'] = tag['display_text'].replace("'", "\\'")
 	return render(request, template, {
 		'tags': tags,
+		'divider': settings.TAG_DIVIDER,
 		'fetch_all': params['fetch_all']})
 
 
@@ -855,13 +883,19 @@ def new_work(request):
 		work['attribute_types'] = process_attributes([], work_attributes.response_data['results'])
 		return render(request, 'work_form.html', {
 			'tags': tags,
+			'divider': settings.TAG_DIVIDER,
 			'form_title': 'New Work',
 			'work_types': work_types['results'],
 			'work': work})
 	elif request.user.is_authenticated:
 		work_data = get_work_obj(request)
+		chapter_dict = work_data[3]
 		work = do_post(f'api/works/', request, work_data[0], 'Work').response_data
-		if work_data[1] == 'false':
+		if chapter_dict:
+			response = do_post(f'api/chapters/', request, chapter_dict, 'Chapter')
+			if response.response_info.status_code >= 400:
+				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		if work_data[1] == 'false' or chapter_dict is not None:
 			return redirect(f'/works/{work["id"]}')
 		else:
 			return redirect(f'/works/{work["id"]}/chapters/new?count=0')
@@ -924,9 +958,17 @@ def edit_work(request, id):
 	if request.method == 'POST':
 		work_dict = get_work_obj(request, id)
 		chapters = work_dict[2]
+		chapter_dict = work_dict[3]
 		response = do_patch(f'api/works/{id}/', request, data=work_dict[0], object_name='Work')
 		if response.response_info.status_code == 200:
 			messages.add_message(request, messages.SUCCESS, response.response_info.message, response.response_info.type_label)
+			if chapter_dict:
+				if 'id' in chapter_dict:
+					response = do_patch(f'api/chapters/{chapter_dict["id"]}/', request, chapter_dict, 'Chapter')
+				else:
+					response = do_post(f'api/chapters/', request, chapter_dict, 'Chapter')
+				if response.response_info.status_code >= 400:
+					messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
 			for chapter in chapters:
 				response = do_patch(f'api/chapters/{chapter["id"]}/', request, data=chapter, object_name='Work')
 				if response.response_info.status_code >= 400:
@@ -951,14 +993,21 @@ def edit_work(request, id):
 			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Attribute')
 			work['attribute_types'] = process_attributes(work['attributes'], work_attributes.response_data['results'])
 			chapters = do_get(f'api/works/{id}/chapters/all', request, 'Chapter').response_data
+			chapter_count = int(work['chapter_count'])
+			if chapter_count < 2:
+				work_chapter = do_get(f'api/works/{id}/chapters', request, 'Chapter').response_data['results'][0] if chapter_count > 0 else {}
+			else:
+				work_chapter = chapters[0]
 			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else []
 			return render(request, 'work_form.html', {
 				'work_types': work_types['results'],
 				'form_title': 'Edit Work',
 				'work': work,
 				'tags': tags,
+				'divider': settings.TAG_DIVIDER,
 				'show_chapter': request.GET.get('show_chapter') if 'show_chapter' in request.GET else None,
 				'chapters': chapters,
+				'work_chapter': work_chapter,
 				'chapter_count': len(chapters)})
 		else:
 			return get_unauthorized_message(request, '/login', 'work-update-unauthorized-error')
@@ -1042,6 +1091,7 @@ def new_bookmark(request, work_id):
 		bookmark['rating'] = star_count
 		return render(request, 'bookmark_form.html', {
 			'tags': tags,
+			'divider': settings.TAG_DIVIDER,
 			'rating_range': star_count,
 			'form_title': 'New Bookmark',
 			'bookmark': bookmark})
@@ -1074,6 +1124,7 @@ def edit_bookmark(request, pk):
 			tags = group_tags_for_edit(bookmark['tags'], tag_types) if 'tags' in bookmark else []
 			return render(request, 'bookmark_form.html', {
 				'rating_range': bookmark['star_count'],
+				'divider': settings.TAG_DIVIDER,
 				'form_title': 'Edit Bookmark',
 				'bookmark': bookmark,
 				'tags': tags})
@@ -1119,6 +1170,7 @@ def new_bookmark_collection(request):
 		tags = {result['label']:[] for result in tag_types['results']}
 		return render(request, 'bookmark_collection_form.html', {
 			'tags': tags,
+			'divider': settings.TAG_DIVIDER,
 			'form_title': _('New Collection'),
 			'bookmark_collection': bookmark_collection})
 	elif request.user.is_authenticated:
@@ -1149,6 +1201,7 @@ def edit_bookmark_collection(request, pk):
 			tags = group_tags_for_edit(bookmark_collection['tags'], tag_types) if 'tags' in bookmark_collection else []
 			return render(request, 'bookmark_collection_form.html', {
 				'bookmark_collection': bookmark_collection,
+				'divider': settings.TAG_DIVIDER,
 				'form_title': 'Edit Bookmark Collection',
 				'tags': tags})
 		else:
