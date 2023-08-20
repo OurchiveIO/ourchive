@@ -244,7 +244,8 @@
         <input type="hidden" id="work" name="chapter_id" value="{{ work_chapter.id }}">
         {% include 'chapter_form_body.html' with chapter=work_chapter %}
     </div>
-    <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if work.chapter_count < 2 %} hidden {% endif %}>
+
+    <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.chapter_count or work.chapter_count < 2 %} hidden {% endif %}>
         <script>
             var util = UIkit.util;
 
