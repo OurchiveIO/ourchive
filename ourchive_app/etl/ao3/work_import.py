@@ -145,6 +145,7 @@ class EtlWorkImport(object):
         try:
             work_importer = Work(work_id)
         except Exception as err:
+            self.error_message = err
             logger.error(
                 f'Work import scraping for {work_id} in job {job_uid} failed: {err}')
             self.handle_job_fail(import_job)
@@ -153,6 +154,7 @@ class EtlWorkImport(object):
         try:
             work_dict = work_importer.__dict__()
         except Exception as err:
+            self.error_message = err
             logger.error(f'Work dict for {work_id} in job {job_uid} failed: {err}')
             self.handle_job_fail(import_job)
             return
@@ -160,22 +162,26 @@ class EtlWorkImport(object):
         try:
             work_processed_id = self.process_work_data(work_dict)
         except Exception as err:
+            self.error_message = err
             logger.error(
                 f'Process work data failed for {work_id} in job {job_uid}: {err}. Work dict: {work_dict}')
             self.handle_job_fail(import_job)
             return
         if work_processed_id is None:
+            self.error_message = 'Could not retrieve work ID. Error may have occurred while processing data.'
             self.handle_job_fail(import_job)
             return
         try:
             chapters = Chapters(work_id)
         except Exception as err:
+            self.error_message = err
             logger.error(f'Chapter import for {work_id} failed: {err}.')
             self.handle_job_fail(import_job)
             return
         try:
             chapters.chapter_contents()
         except Exception as err:
+            self.error_message = err
             logger.error(f'Scraping chapter contents failed for {job_uid}: {err}.')
             self.handle_job_fail(import_job)
             return
@@ -185,6 +191,7 @@ class EtlWorkImport(object):
                 chapter_dict, work_processed_id)
             return chapters_processed
         except Exception as err:
+            self.error_message = err
             logger.error(
                 f'Process chapter data failed for {work_id} in job {job_uid}: {err}. Chapter dict: {chapter_dict}')
             self.handle_job_fail(import_job)
@@ -211,8 +218,6 @@ class EtlWorkImport(object):
                     if type(origin_value) is list:
                         for text in origin_value:
                             tag = api.Tag.find_existing_tag(text, tag_type.id)
-                            print(tag)
-                            logger.info(tag)
                             if not tag:
                                 try:
                                     tag = api.Tag(text=text.lower(),
@@ -223,17 +228,14 @@ class EtlWorkImport(object):
                                     continue
                             obj.tags.add(tag)
                     else:
-                        tag = api.Tag.find_existing_tag(text, tag_type.id)
-                        print('not list')
-                        print(tag)
-                        logger.info(f'not list {tag}')
+                        tag = api.Tag.find_existing_tag(origin_value, tag_type.id)
                         if not tag:
                             try:
                                 tag = api.Tag(text=origin_value.lower(),
                                           display_text=origin_value, tag_type=tag_type)
                                 tag.save()
                             except Exception as err:
-                                logger.error(f'Error creating tag with text {text.lower()} on obj {obj.id}: {err}')
+                                logger.error(f'Error creating tag with text {origin_value.lower()} on obj {obj.id}: {err}')
                                 continue
                         obj.tags.add(tag)
                 except Exception as err:
@@ -330,12 +332,15 @@ class EtlWorkImport(object):
             chapter_num += 1
         return chapter_ids
 
-    def create_fail_notification(self):
+    def create_fail_notification(self, message=None):
         user = api.User.objects.filter(id=self.user_id).first()
         notification_type = api.NotificationType.objects.filter(
             type_label="System Notification").first()
+        notification_message = _("Your work import was not successfully processed.")
+        if message:
+            notification_message = f"{notification_message} Error message: {message}. Contact your admin for more information."
         notification = api.Notification.objects.create(notification_type=notification_type, user=user, title=_("Work Import Processed"),
-                                                       content=_("Your work import has been processed. You can view your works in your profile."))
+                                                       content=notification_message)
         notification.save()
         user.has_notifications = True
         user.save()

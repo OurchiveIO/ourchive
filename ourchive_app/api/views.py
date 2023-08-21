@@ -298,7 +298,7 @@ class UserWorkList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+        return Work.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
 
 class UserBookmarkList(generics.ListCreateAPIView):
@@ -306,7 +306,7 @@ class UserBookmarkList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Bookmark.objects.filter(user__username=self.kwargs['username']).order_by('id')
+        return Bookmark.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
 
 
 class UserBookmarkCollectionList(generics.ListCreateAPIView):
@@ -314,7 +314,7 @@ class UserBookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return BookmarkCollection.objects.filter(user__username=self.kwargs['username']).order_by('id')
+        return BookmarkCollection.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
 
 
 class UserBookmarkDraftList(generics.ListCreateAPIView):
@@ -464,7 +464,7 @@ class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         if not self.request.user.can_upload_images and 'cover_url' in self.request.data:
-            serializer.pop('cover_url')
+            self.request.data.pop('cover_url')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
