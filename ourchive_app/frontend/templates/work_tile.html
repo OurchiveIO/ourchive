@@ -1,3 +1,4 @@
+{% load i18n %}
 <div class="uk-margin" id="work-{{work.id}}-tile-parent">
 	<div class="uk-card uk-card-default" id="work-{{work.id}}-tile-card">
 	    <div class="uk-card-header uk-padding-small ourchive-card-head" id="work-{{work.id}}-tile-card-header">
@@ -16,9 +17,14 @@
 	                {% endif %}
 	            </div>
 	            {% if work.user == request.user.username %}
-		        <div class="uk-align-right uk-margin-small-top" id="work-{{work.id}}-footer-user-controls">
-		            <a id="work-{{work.id}}-footer-edit-link" href="/works/{{ work.id }}/edit"><span id="work-{{work.id}}-footer-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
-		            <a id="work-{{work.id}}-footer-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span id="work-{{work.id}}-footer-delete-span" uk-icon="icon: trash" title="Delete"></span> </a>
+		        <div class="uk-align-right uk-text-right uk-margin-small-top uk-visible@s uk-margin-remove-bottom" id="work-{{work.id}}-header-user-controls">
+		            <a id="work-{{work.id}}-header-edit-link" href="/works/{{ work.id }}/edit" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="work-{{work.id}}-header-edit-span">{% translate 'Edit' %}</span> </a>
+		            <a id="work-{{work.id}}-header-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="work-{{work.id}}-header-delete-span">{% translate 'Delete' %}</span> </a>
+		            {% include "delete_modal.html" with object='work' object_id=work.id %}
+		        </div>
+		        <div class="uk-align-left uk-text-left uk-margin-small-top uk-hidden@s uk-margin-remove-bottom uk-width-1-1" id="work-{{work.id}}-header-user-controls">
+		        	<a id="work-{{work.id}}-header-edit-link" href="/works/{{ work.id }}/edit" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="work-{{work.id}}-header-edit-span">{% translate 'Edit' %}</span> </a>
+		            <a id="work-{{work.id}}-header-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="work-{{work.id}}-header-delete-span">{% translate 'Delete' %}</span> </a>
 		            {% include "delete_modal.html" with object='work' object_id=work.id %}
 		        </div>
 		        {% endif %}

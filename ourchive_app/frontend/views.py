@@ -88,12 +88,13 @@ def sanitize_rich_text(rich_text):
 
 
 def get_work_obj(request, work_id=None):
+	print(request.POST)
 	work_dict = request.POST.copy()
 	multichapter = work_dict.pop('multichapter') if 'multichapter' in work_dict else None
-	chapter_dict = {'title': '',
+	chapter_dict = {
+		'title': '',
 		'summary': '',
 		'notes': '',
-		'chapter_title': 'Untitled Chapter',
 		'number': '1',
 		'image_url': '',
 		'image_url-upload': '',
@@ -101,7 +102,9 @@ def get_work_obj(request, work_id=None):
 		'audio_url': '',
 		'audio_url-upload': '',
 		'audio_description': '',
-		'text': ''
+		'text': '',
+		'work': '',
+		'draft': 'chapter_draft' in request.POST
 	}
 	tags = []
 	tag_types = {}
@@ -113,8 +116,6 @@ def get_work_obj(request, work_id=None):
 		if item in chapter_dict and not multichapter:
 			val_list = request.POST.getlist(item)
 			if len(val_list) > 1:
-				print("LIST FOUND!")
-				print(val_list)
 				chapter_dict[item] = val_list[1]
 				work_dict[item] = val_list[0]
 			else:
@@ -135,6 +136,8 @@ def get_work_obj(request, work_id=None):
 			chapters.append({'id': chapter_id, 'number': chapter_number, 'work': work_id})
 	work_dict["tags"] = tags
 	chapter_dict = None if multichapter else chapter_dict
+	if work_id and chapter_dict:
+		chapter_dict['work'] = work_id
 	if 'comments_permitted' not in work_dict:
 		comments_permitted = False
 	else:
@@ -143,10 +146,11 @@ def get_work_obj(request, work_id=None):
 	work_dict["anon_comments_permitted"] = comments_permitted == "All"
 	redirect_toc = work_dict.pop('redirect_toc')[0]
 	work_dict["is_complete"] = "is_complete" in work_dict
-	work_dict["draft"] = "draft" in work_dict
+	work_dict["draft"] = "work_draft" in work_dict
 	work_dict = work_dict.dict()
 	work_dict["user"] = str(request.user)
 	work_dict["attributes"] = get_attributes_from_form_data(request)
+	print(chapter_dict)
 	return [work_dict, redirect_toc, chapters, chapter_dict]
 
 
@@ -877,6 +881,10 @@ def new_work(request):
 			'anon_comments_permitted': True,
 			'comments_permitted': True
 		}
+		work_chapter = {
+			'title': 'Untitled Chapter',
+			'number': 1
+		}
 		tag_types = do_get(f'api/tagtypes', request, 'Tag').response_data
 		tags = group_tags_for_edit([], tag_types)
 		work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Work Attributes')
@@ -886,12 +894,14 @@ def new_work(request):
 			'divider': settings.TAG_DIVIDER,
 			'form_title': 'New Work',
 			'work_types': work_types['results'],
-			'work': work})
+			'work': work,
+			'work_chapter': work_chapter})
 	elif request.user.is_authenticated:
 		work_data = get_work_obj(request)
 		chapter_dict = work_data[3]
 		work = do_post(f'api/works/', request, work_data[0], 'Work').response_data
 		if chapter_dict:
+			chapter_dict['work'] = work['id']
 			response = do_post(f'api/chapters/', request, chapter_dict, 'Chapter')
 			if response.response_info.status_code >= 400:
 				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
@@ -915,7 +925,7 @@ def new_chapter(request, work_id):
 			'form_title': 'New Chapter'})
 	elif request.user.is_authenticated:
 		chapter_dict = request.POST.copy()
-		chapter_dict["draft"] = "draft" in chapter_dict
+		chapter_dict["draft"] = "chapter_draft" in chapter_dict
 		chapter_dict["attributes"] = get_attributes_from_form_data(request)
 		response = do_post(f'api/chapters/', request, data=chapter_dict, object_name='Chapter')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
@@ -930,7 +940,7 @@ def new_chapter(request, work_id):
 def edit_chapter(request, work_id, id):
 	if request.method == 'POST':
 		chapter_dict = request.POST.copy()
-		chapter_dict["draft"] = "draft" in chapter_dict
+		chapter_dict["draft"] = "chapter_draft" in chapter_dict
 		chapter_dict["attributes"] = get_attributes_from_form_data(request)
 		response = do_patch(f'api/chapters/{id}/', request, data=chapter_dict, object_name='Chapter')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
@@ -963,7 +973,7 @@ def edit_work(request, id):
 		if response.response_info.status_code == 200:
 			messages.add_message(request, messages.SUCCESS, response.response_info.message, response.response_info.type_label)
 			if chapter_dict:
-				if 'id' in chapter_dict:
+				if 'id' in chapter_dict and chapter_dict['id']:
 					response = do_patch(f'api/chapters/{chapter_dict["id"]}/', request, chapter_dict, 'Chapter')
 				else:
 					response = do_post(f'api/chapters/', request, chapter_dict, 'Chapter')
@@ -995,7 +1005,7 @@ def edit_work(request, id):
 			chapters = do_get(f'api/works/{id}/chapters/all', request, 'Chapter').response_data
 			chapter_count = int(work['chapter_count'])
 			if chapter_count < 2:
-				work_chapter = do_get(f'api/works/{id}/chapters', request, 'Chapter').response_data['results'][0] if chapter_count > 0 else {}
+				work_chapter = do_get(f'api/works/{id}/chapters', request, 'Chapter').response_data['results'][0] if chapter_count > 0 else {'title': 'Untitled Chapter','number': 1}
 			else:
 				work_chapter = chapters[0]
 			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else []

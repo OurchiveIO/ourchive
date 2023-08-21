@@ -188,7 +188,7 @@
             </label>
             <div id="work-form-draft-controls" class="uk-form-controls">
                 <div id="work-form-draft-inline" class="uk-inline">
-                    <label id="work-form-draft-switch" class="switch"><input class="uk-checkbox" id="work-form-draft-checkbox" type="checkbox" name="draft" {% if work.draft %} checked {% endif %}> <span id="work-form-draft-slider" class="slider round"></span></label>
+                    <label id="work-form-draft-switch" class="switch"><input class="uk-checkbox" id="work-form-draft-checkbox" type="checkbox" name="work_draft" {% if work.draft %} checked {% endif %}> <span id="work-form-draft-slider" class="slider round"></span></label>
                 </div>
             </div>
         </div>
@@ -241,7 +241,7 @@
         </div>
     </div>
     <div id="work-form-single-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if work.chapter_count > 1 %} hidden {% endif %}>
-        <input type="hidden" id="work" name="chapter_id" value="{{ work_chapter.id }}">
+        <input type="hidden" id="work_chapter_id" name="chapter_id" value="{{ work_chapter.id }}">
         {% include 'chapter_form_body.html' with chapter=work_chapter %}
     </div>
 
