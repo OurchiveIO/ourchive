@@ -88,7 +88,6 @@ def sanitize_rich_text(rich_text):
 
 
 def get_work_obj(request, work_id=None):
-	print(request.POST)
 	work_dict = request.POST.copy()
 	multichapter = work_dict.pop('multichapter') if 'multichapter' in work_dict else None
 	chapter_dict = {
@@ -168,7 +167,7 @@ def get_bookmark_obj(request):
 	for item in request.POST:
 		if 'tags' in request.POST[item]:
 			tag = {}
-			json_item = request.POST[item].split("_")
+			json_item = request.POST[item].split(settings.TAG_DIVIDER)
 			tag['tag_type'] = tag_types[json_item[2]]['label']
 			tag['text'] = json_item[1]
 			tags.append(tag)
@@ -195,7 +194,7 @@ def get_bookmark_collection_obj(request):
 	for item in request.POST:
 		if 'tags' in request.POST[item]:
 			tag = {}
-			json_item = request.POST[item].split("_")
+			json_item = request.POST[item].split(settings.TAG_DIVIDER)
 			tag['tag_type'] = tag_types[json_item[2]]['label']
 			tag['text'] = json_item[1]
 			tags.append(tag)
@@ -797,7 +796,6 @@ def bookmark_autocomplete(request):
 	params = {'term': term}
 	response = do_get(f'api/bookmark-autocomplete', request, params, 'Bookmark')
 	bookmarks = response.response_data['results']
-	print(bookmarks)
 	for bookmark in bookmarks:
 		bookmark['bookmark']['title_clean'] = bookmark['bookmark']['title'].replace("'", "\\'")
 		bookmark['bookmark']['work']['title_clean'] = bookmark['bookmark']['work']['title'].replace("'", "\\'")
@@ -1024,7 +1022,7 @@ def edit_work(request, id):
 				work_chapter = do_get(f'api/works/{id}/chapters', request, 'Chapter').response_data['results'][0] if chapter_count > 0 else {'title': 'Untitled Chapter','number': 1}
 			else:
 				work_chapter = chapters[0]
-			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else []
+			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else group_tags_for_edit([], tag_types)
 			return render(request, 'work_form.html', {
 				'work_types': work_types['results'],
 				'form_title': 'Edit Work',
@@ -1112,7 +1110,7 @@ def new_bookmark(request, work_id):
 		bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
 		bookmark['attribute_types'] = process_attributes([], bookmark_attributes.response_data['results'])
 		tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
-		tags = {result['label']:[] for result in tag_types['results']}
+		tags = group_tags_for_edit([], tag_types)
 		# todo - this should be a specific endpoint, we don't need to retrieve 10 objects to get config
 		star_count = do_get(f'api/bookmarks', request, 'Bookmark').response_data['star_count']
 		bookmark['rating'] = star_count
@@ -1148,7 +1146,8 @@ def edit_bookmark(request, pk):
 			bookmark['description'] = sanitize_rich_text(bookmark['description'])
 			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
 			bookmark['attribute_types'] = process_attributes(bookmark['attributes'], bookmark_attributes.response_data['results'])
-			tags = group_tags_for_edit(bookmark['tags'], tag_types) if 'tags' in bookmark else []
+			tags = group_tags_for_edit(bookmark['tags'], tag_types) if 'tags' in bookmark else group_tags_for_edit([], tag_types)
+			print(tags)
 			return render(request, 'bookmark_form.html', {
 				'rating_range': bookmark['star_count'],
 				'divider': settings.TAG_DIVIDER,
@@ -1194,7 +1193,7 @@ def new_bookmark_collection(request):
 		bookmark_collection_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
 		bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes.response_data['results'])
 		tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
-		tags = {result['label']:[] for result in tag_types['results']}
+		tags = group_tags_for_edit([], tag_types)
 		return render(request, 'bookmark_collection_form.html', {
 			'tags': tags,
 			'divider': settings.TAG_DIVIDER,

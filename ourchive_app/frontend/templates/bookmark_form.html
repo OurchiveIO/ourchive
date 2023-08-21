@@ -63,7 +63,7 @@
         <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
     </span>
     {% include "object_attributes_form.html" with object='Bookmark' attribute_types=bookmark.attribute_types show_header=False %}
-    {% include "edit_tags.html" with object='bookmark' show_header=False %}
+    {% include "edit_tags.html" with object='bookmark' object_friendly='Bookmark' show_header=False %}
     <hr/>
     <h3 id="obj-attrs-form-header">Bookmark Details</h3>
     {% if settings.RatingsEnabled %}
