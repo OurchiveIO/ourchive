@@ -1,0 +1,131 @@
+[
+    {
+        "model": "api.work",
+        "pk": 1,
+        "fields":
+        {
+            "uid": "337c44d8-71b1-4ae7-94a4-65285d955eec",
+            "title": "Untitled Work",
+            "summary": "",
+            "notes": "",
+            "is_complete": false,
+            "process_status": null,
+            "cover_url": null,
+            "cover_alt_text": null,
+            "preferred_download_url": null,
+            "created_on": "2023-08-14T02:01:51.875Z",
+            "updated_on": "2023-08-17T17:51:11.487Z",
+            "anon_comments_permitted": false,
+            "comments_permitted": false,
+            "word_count": 0,
+            "audio_length": 0,
+            "fingerguns": 1,
+            "draft": false,
+            "comment_count": 0,
+            "preferred_download": null,
+            "epub_url": "",
+            "m4b_url": null,
+            "zip_url": "",
+            "external_id": null,
+            "user": 2,
+            "work_type": 1,
+            "tags":
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+            ],
+            "attributes":
+            []
+        }
+    },
+    {
+        "model": "api.work",
+        "pk": 2,
+        "fields":
+        {
+            "uid": "337c44d8-71b1-4ae7-94a4-65284d955eec",
+            "title": "Untitled Draft Work",
+            "summary": "My Draft Work",
+            "notes": "",
+            "is_complete": false,
+            "process_status": null,
+            "cover_url": null,
+            "cover_alt_text": null,
+            "preferred_download_url": null,
+            "created_on": "2023-08-14T02:01:51.875Z",
+            "updated_on": "2023-08-17T17:51:11.487Z",
+            "anon_comments_permitted": false,
+            "comments_permitted": false,
+            "word_count": 0,
+            "audio_length": 0,
+            "fingerguns": 1,
+            "draft": true,
+            "comment_count": 0,
+            "preferred_download": null,
+            "epub_url": "",
+            "m4b_url": null,
+            "zip_url": "",
+            "external_id": null,
+            "user": 2,
+            "work_type": 1,
+            "tags":
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+            ],
+            "attributes":
+            []
+        }
+    },
+    {
+        "model": "api.work",
+        "pk": 3,
+        "fields":
+        {
+            "uid": "337c44d8-71b1-4ae7-94a4-65284d955eec",
+            "title": "Untitled Draft Work",
+            "summary": "My Draft Work by test_user",
+            "notes": "",
+            "is_complete": false,
+            "process_status": null,
+            "cover_url": null,
+            "cover_alt_text": null,
+            "preferred_download_url": null,
+            "created_on": "2023-08-14T02:01:51.875Z",
+            "updated_on": "2023-08-17T17:51:11.487Z",
+            "anon_comments_permitted": false,
+            "comments_permitted": false,
+            "word_count": 0,
+            "audio_length": 0,
+            "fingerguns": 1,
+            "draft": true,
+            "comment_count": 0,
+            "preferred_download": null,
+            "epub_url": "",
+            "m4b_url": null,
+            "zip_url": "",
+            "external_id": null,
+            "user": 1,
+            "work_type": 1,
+            "tags":
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+            ],
+            "attributes":
+            []
+        }
+    }
+]

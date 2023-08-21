@@ -115,6 +115,8 @@ S3_BUCKET = 'ourchive_media'
 
 SEARCH_BACKEND = 'POSTGRES'
 
+TAG_DIVIDER = '$!$'
+
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
     EMAIL_FILE_PATH = BASE_DIR+"/sent_emails"
@@ -164,9 +166,6 @@ DATABASES = {
         'PASSWORD': os.getenv('OURCHIVE_DB_PW'),
         'HOST': os.getenv('OURCHIVE_DB_HOST'),
         'PORT': '5432',
-        'TEST': {
-            'MIRROR': 'default',
-        },
     }
 }
 

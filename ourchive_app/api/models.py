@@ -7,6 +7,7 @@ import unidecode
 
 
 class User(AbstractUser):
+
     __tablename__ = 'user'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -27,7 +28,9 @@ class User(AbstractUser):
     attributes = models.ManyToManyField('AttributeValue', blank=True)
     display_username = models.CharField(max_length=150, blank=True, null=True)
     cookies_accepted = models.BooleanField(default=False)
-
+    collapse_chapter_text = models.BooleanField(default=False)
+    collapse_chapter_audio = models.BooleanField(default=False)
+    collapse_chapter_image = models.BooleanField(default=False)
     default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True, blank=True)
 
     def save(self, *args, **kwargs):
@@ -212,6 +215,8 @@ class Fingergun(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        null=True,
+        blank=True
     )
 
     def __repr__(self):
@@ -382,6 +387,10 @@ class Tag(models.Model):
         on_delete=models.CASCADE,
     )
 
+    @property
+    def type_label(self):
+        return self.tag_type.type_name if self.tag_type.type_name else self.tag_type.label.lower().replace(" ", "_")
+
     def __repr__(self):
         return '<Tag: {}>'.format(self.id)
 
@@ -393,19 +402,25 @@ class Tag(models.Model):
         self.text = unidecode.unidecode(self.text)
         super(Tag, self).save(*args, **kwargs)
 
+    def find_existing_tag(tag_text, tag_type_id):
+        cleaned_text = unidecode.unidecode(nh3.clean(tag_text.lower()))
+        existing_tag = Tag.objects.filter(text=cleaned_text, tag_type__id=tag_type_id).first()
+        return existing_tag
+
 
 class TagType(models.Model):
 
     __tablename__ = 'tag_types'
     id = models.AutoField(primary_key=True)
-    label = models.CharField(max_length=200, db_index=True)
+    label = models.CharField(max_length=200)
+    type_name = models.CharField(max_length=200, db_index=True, null=True, blank=True)
     admin_administrated = models.BooleanField(default=False)
     required = models.BooleanField(default=False)
     sort_order = models.IntegerField(default=1)
 
     class Meta:
         indexes = [
-            models.Index(fields=['label']),
+            models.Index(fields=['type_name']),
         ]
         ordering = ('sort_order', 'label',)
 
@@ -414,6 +429,10 @@ class TagType(models.Model):
 
     def __str__(self):
         return self.label
+
+    def save(self, *args, **kwargs):
+        self.type_name = unidecode.unidecode(nh3.clean(self.label.lower().replace(" ", "")))
+        super(TagType, self).save(*args, **kwargs)
 
 
 class BookmarkCollection(models.Model):

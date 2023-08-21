@@ -8,20 +8,20 @@
             </label>
             <div id="{{ object }}-form-tag-controls" class="uk-form-controls">                
                 <div id="{{ object }}-form-tag-inline" class="uk-inline">
-                    <div id="{{ type }}_tags">
+                    <div id="{{ tag_data.type_name }}_tags">
                     {% if tag_data.tags %}
                         {% for single_tag in tag_data.tags %}
-                            <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="tags_{{ single_tag.text }}_{{ type }}">
-                            <span class="uk-badge uk-padding-small" id="tags_{{ single_tag.text }}_{{ type }}_txt"><span class="uk-text-bold uk-text-default uk-padding-small">{{ single_tag.display_text }} </span><span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{type}}')" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
+                            <input type="hidden" id="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}" name="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}" value="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}">
+                            <div class="uk-margin-small uk-inline"><span class="uk-button-primary uk-border-rounded ourchive-tag-list" id="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}{{ divider }}txt">{{ single_tag.display_text }} <span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{ tag_data.type_name }}', '{{ divider }}')" id="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}{{ divider }}delete"></span></span></div>
                         {% endfor %}
                         {% else %}
-                        <span class="uk-text-medium" id="no-tag-prompt-{{type}}">No tags yet. Add some below.</span>
+                        <span class="uk-text-medium" id="no-tag-prompt-{{ tag_data.type_name }}">No tags yet. Add some below.</span>
                         {% endif %}
                     </div>
                 </div>
-                <div class="uk-margin-top ourchive-tag-entry-{{type}}">
-                    <input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="Search for tags..." id="{{ type }}_new_tag" oninput="doAdminAutocomplete(this.value, 'edit', '{{type}}', '{{type}}')">
-                    <div id="tag-autocomplete-dropdown-{{type}}" uk-drop="boundary: !.ourchive-tag-entry-{{type}}"></div>
+                <div class="uk-margin-top ourchive-tag-entry-{{ tag_data.type_name }}">
+                    <input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="Search for tags..." id="{{ tag_data.type_name }}_new_tag" oninput="doAdminAutocomplete(this.value, 'edit', '{{ tag_data.type_name }}', '{{ tag_data.type_name }}', '{{ divider }}')">
+                    <div id="tag-autocomplete-dropdown-{{ tag_data.type_name }}" uk-drop="boundary: !.ourchive-tag-entry-{{ tag_data.type_name }}"></div>
                 </div>
             </div>
         </div>
@@ -30,20 +30,20 @@
             <label id="{{ object }}-form-tag-type-label" class="uk-form-label" for="form-horizontal-text">{{ type }}</label>
             <div id="{{ object }}-form-tag-controls" class="uk-form-controls">                
                 <div id="{{ object }}-form-tag-inline" class="uk-inline">
-                    <div id="{{ type }}_tags">
+                    <div id="{{ tag_data.type_name }}_tags">
                     {% if tag_data.tags %}
                         {% for single_tag in tag_data.tags %}
-                            <input type="hidden" id="tags_{{ single_tag.text }}_{{ type }}" name="tags_{{ single_tag.text }}_{{ type }}" value="tags_{{ single_tag.text }}_{{ type }}">
-                            <span class="uk-badge uk-padding-small" id="tags_{{ single_tag.text }}_{{ type }}_txt"><span class="uk-text-bold uk-text-default uk-padding-small">{{ single_tag.display_text }} </span><span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{type}}')" id="tags_{{ single_tag.text }}_{{ type }}_delete"></span></span>
+                            <input type="hidden" id="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}" name="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}" value="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}">
+                            <div class="uk-margin-small uk-inline"><span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}{{ divider }}txt">{{ single_tag.display_text }} <span uk-icon="close" onclick="removetag('{{single_tag.text}}', '{{ tag_data.type_name }}', '{{ divider }}')" id="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}{{ divider }}delete"></span></span></div>
                         {% endfor %}
                         {% else %}
-                        <span class="uk-text-medium" id="no-tag-prompt-{{type}}">No tags yet. Add some below.</span>
+                        <span class="uk-text-medium" id="no-tag-prompt-{{ tag_data.type_name }}">No tags yet. Add some below.</span>
                         {% endif %}
                     </div>
                 </div>
                 <div class="uk-margin-top">
-                    <div><input autocomplete="off" pattern="^[a-zA-Z0-9]+$" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ type }}_new_tag" onkeyup="tagCheck(event, '{{type}}')" oninput="doAutocomplete(this.value, 'edit', '{{type}}', '{{type}}')"> <span uk-icon="plus" onclick="tagCheck(event, '{{type}}', true)"></span>
-                        <div class="uk-card-small" id="tag-autocomplete-dropdown-{{type}}" uk-drop="target: #{{ type }}_new_tag"></div>
+                    <div><input autocomplete="off" pattern="^[a-zA-Z0-9]+$" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ tag_data.type_name }}_new_tag" onkeyup="tagCheck(event, '{{ tag_data.type_name }}', false, '{{ divider }}')" oninput="doAutocomplete(this.value, 'edit', '{{ tag_data.type_name }}', '{{ tag_data.type_name }}', '{{ divider }}')"> <span uk-icon="plus" onclick="tagCheck(event, '{{ tag_data.type_name }}', true, '{{ divider }}')"></span>
+                        <div class="uk-card-small" id="tag-autocomplete-dropdown-{{ tag_data.type_name }}" uk-drop="target: #{{ tag_data.type_name }}_new_tag"></div>
                     </div>
                     
                 </div>
