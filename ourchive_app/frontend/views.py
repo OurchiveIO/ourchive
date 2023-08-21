@@ -120,6 +120,10 @@ def get_work_obj(request, work_id=None):
 				work_dict[item] = val_list[0]
 			else:
 				chapter_dict[item] = request.POST[item]
+		elif item in chapter_dict:
+			val_list = request.POST.getlist(item)
+			if len(val_list) > 1:
+				work_dict[item] = val_list[0]
 		elif item == 'chapter_id':
 			chapter_dict['id'] = request.POST[item]
 			work_dict.pop('chapter_id')
@@ -1002,7 +1006,6 @@ def edit_work(request, id):
 			return redirect(f'/works/{id}/chapters/new?count={len(chapters)}')
 	else:
 		if request.user.is_authenticated:
-			print(request.GET)
 			multichapter = request.GET.get('multichapter', 'false')
 			work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
 			tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
