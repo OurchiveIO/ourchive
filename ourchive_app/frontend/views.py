@@ -792,9 +792,14 @@ def bookmark_autocomplete(request):
 	term = request.GET.get('text')
 	params = {'term': term}
 	response = do_get(f'api/bookmark-autocomplete', request, params, 'Bookmark')
+	bookmarks = response.response_data['results']
+	print(bookmarks)
+	for bookmark in bookmarks:
+		bookmark['bookmark']['title_clean'] = bookmark['bookmark']['title'].replace("'", "\\'")
+		bookmark['bookmark']['work']['title_clean'] = bookmark['bookmark']['work']['title'].replace("'", "\\'")
 	template = 'bookmark_collection_autocomplete.html'
 	return render(request, template, {
-		'bookmarks': response.response_data['results']})
+		'bookmarks': bookmarks})
 
 
 def search_filter(request):
