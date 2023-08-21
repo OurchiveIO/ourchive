@@ -75,6 +75,7 @@ class EtlWorkImport(object):
             try:
                 chapters_processed = self.import_work(import_job.job_uid)
             except Exception as err:
+                self.error_message = err
                 logger.error(
                     f'Work import: Exception in get_single_work for {import_job.job_uid}. Error: {err}')
             if not as_batch or not chapters_processed:
