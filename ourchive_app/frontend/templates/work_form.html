@@ -237,15 +237,15 @@
     <div id="multichapter-select" class="uk-width-1-1">
         <label class="uk-form-label" for="form-horizontal-text">Multichapter?</label>
         <div id="work-form-multichapter-control" class="uk-form-controls">
-            <label id="work-form-multichapter-switch" class="switch"><input class="uk-checkbox" id="work-form-multichapter-checkbox" type="checkbox" uk-toggle="target: .work-chapter-content" {% if work.chapter_count > 1 %} checked {% endif %} name="multichapter"><span id="work-form-multichapter-slider" class="slider round"></span></label>
+            <label id="work-form-multichapter-switch" class="switch"><input class="uk-checkbox" id="work-form-multichapter-checkbox" type="checkbox" uk-toggle="target: .work-chapter-content" {% if work.chapter_count > 1 or multichapter == 'true' %} checked {% endif %} name="multichapter"><span id="work-form-multichapter-slider" class="slider round"></span></label>
         </div>
     </div>
-    <div id="work-form-single-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if work.chapter_count > 1 %} hidden {% endif %}>
+    <div id="work-form-single-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if work.chapter_count > 1 or multichapter == 'true' %} hidden {% endif %}>
         <input type="hidden" id="work_chapter_id" name="chapter_id" value="{{ work_chapter.id }}">
         {% include 'chapter_form_body.html' with chapter=work_chapter %}
     </div>
 
-    <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.chapter_count or work.chapter_count < 2 %} hidden {% endif %}>
+    <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.chapter_count or work.chapter_count < 2 %} {% if multichapter == 'false' %} hidden {% endif %} {% endif %}>
         <script>
             var util = UIkit.util;
 

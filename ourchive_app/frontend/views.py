@@ -936,7 +936,7 @@ def new_chapter(request, work_id):
 		response = do_post(f'api/chapters/', request, data=chapter_dict, object_name='Chapter')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
-		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit/#work-form-chapter-content-parent"
+		redirect_url = f'/works/{work_id}/?offset={request.GET.get("from_work", 0)}' if 'from_work' in request.GET else f"/works/{work_id}/edit/?multichapter=true#work-form-chapter-content-parent"
 		return redirect(redirect_url)
 	else:
 		messages.add_message(request, messages.ERROR, _('You must log in to post a new chapter.'), 'chapter-create-login-error')
@@ -997,6 +997,8 @@ def edit_work(request, id):
 			return redirect(f'/works/{id}/chapters/new?count={len(chapters)}')
 	else:
 		if request.user.is_authenticated:
+			print(request.GET)
+			multichapter = request.GET.get('multichapter', 'false')
 			work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
 			tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
 			works_response = do_get(f'api/works/{id}/', request, 'Work')
@@ -1020,6 +1022,7 @@ def edit_work(request, id):
 				'form_title': 'Edit Work',
 				'work': work,
 				'tags': tags,
+				'multichapter': multichapter,
 				'divider': settings.TAG_DIVIDER,
 				'show_chapter': request.GET.get('show_chapter') if 'show_chapter' in request.GET else None,
 				'chapters': chapters,
