@@ -25,7 +25,7 @@
             <a id="jump-to-comments" href="#chapter-{{ chapter.id }}-comments" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom uk-align-right"><span id="chapter-comments-span">{% translate 'Comments' %}</span> </a>
     </div>
 	<div class="uk-width-2-3@m uk-width-1-1@s uk-margin-small-top" id="chapter-header-parent">
-		<h2 id="chapter-header-h2"><a id="chapter-header-link" class="uk-link-reset" href="">Chapter {{ chapter.number }}: {{ chapter.title }}</a></h2>
+		<h2 id="chapter-header-h2"><a id="chapter-header-link" class="uk-link-reset" href="">Chapter {{ chapter.number }}{% if chapter.title %}: {{ chapter.title|default:'' }}{% endif %}</a></h2>
 		{% if chapter.draft %}
 	            <div class="uk-width-auto" id="chapter-draft-div">
 	                <span id="chapter-draft-badge" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
