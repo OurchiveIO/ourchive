@@ -2,8 +2,12 @@
 {% load i18n %}
 {% block title %}{{ page_title }}{% endblock %}
 {% block content %}		
-<div class="uk-width-1-1">
-    <h1 class="uk-text-lead">{{ page_title }}</h1><hr class="ourchive-hr"/>
+<div class="uk-width-1-1 uk-margin-small-bottom">
+    <h1 class="uk-text-lead uk-inline">{{ page_title }}</h1>
+    {% if notifications %}
+    <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-notifications-mark-all-read' request.user %}">{% translate 'Mark all read' %}</a>
+    {% endif %}
+    <hr class="ourchive-hr"/>
     {% if not notifications %}
     <p id="notifications-empty-message">{% translate "You don't have any notifications yet." %}</p>
     {% endif %}
