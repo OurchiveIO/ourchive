@@ -18,15 +18,16 @@ function sanitize(string) {
 
 function tagCheck (e, type, bypass_check=false, divider='$!$') {
     if (e.keyCode == 188 || e.keyCode == 13 || bypass_check) {
+        var randomId = Math.floor(Math.random() * 100) + 1
         var section = document.getElementById(type+"_tags");
         var final = document.getElementById(type+"_new_tag");
         final.value = sanitize(final.value.replace(/,\s*$/, ""));
         unescaped = final.value.replace(/,\s*$/, "");
         var wrapper= document.createElement('div');
-        wrapper.innerHTML= '<input type="hidden" id="tags'+divider+final.value+divider+type+'" name="tags'+divider+final.value+divider+type+'" value="tags'+divider+final.value+divider+type+'">';
+        wrapper.innerHTML= '<input type="hidden" id="tags'+divider+randomId+divider+type+'" name="tags'+divider+final.value+divider+type+'" value="tags'+divider+final.value+divider+type+'">';
         var div= wrapper.firstChild;
         section.appendChild(div);
-        wrapper.innerHTML = '<div class="uk-margin-small uk-inline"><span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="tags'+divider+final.value+divider+type+divider+'txt"><span class="uk-button-primary uk-border-rounded ourchive-tag-list">'+unescaped+' </span><span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\', \''+divider+'\')" id="tags'+divider+final.value+divider+type+'_delete"></span></span></div>';
+        wrapper.innerHTML = '<div class="uk-margin-small uk-inline"><span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="tags'+divider+randomId+divider+type+divider+'txt"><span class="uk-button-primary uk-border-rounded ourchive-tag-list">'+unescaped+' </span><span uk-icon="close" onclick="removetag(\''+randomId+'\', \''+type+'\', \''+divider+'\')" id="tags'+divider+randomId+divider+type+'_delete"></span></span></div>';
         div = wrapper.firstChild;
         section.appendChild(div);
         final.value = '';
