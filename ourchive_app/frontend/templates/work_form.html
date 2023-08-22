@@ -245,7 +245,7 @@
         {% include 'chapter_form_body.html' with chapter=work_chapter %}
     </div>
 
-    <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.chapter_count or work.chapter_count < 2 %} {% if multichapter == 'false' %} hidden {% endif %} {% endif %}>
+    <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.id %} hidden {% endif %} {% if work.chapter_count or work.chapter_count < 2 %} {% if work.id and multichapter == 'false' %} hidden {% endif %} {% endif %}>
         <script>
             var util = UIkit.util;
 
