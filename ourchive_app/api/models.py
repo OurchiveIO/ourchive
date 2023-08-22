@@ -404,7 +404,7 @@ class Tag(models.Model):
 
     def find_existing_tag(tag_text, tag_type_id):
         cleaned_text = unidecode.unidecode(nh3.clean(tag_text.lower()))
-        existing_tag = Tag.objects.filter(text=cleaned_text, tag_type__id=tag_type_id).first()
+        existing_tag = Tag.objects.filter(text__iexact=cleaned_text, tag_type__id=tag_type_id).first()
         return existing_tag
 
 
