@@ -30,7 +30,7 @@ Postgres will need to be up and running.
 
 FFMPEG should be installed on the Linux machine to enable audio processing.
 
-see [local-dev][local-dev.md] for further local dev set up.
+see [local-dev](local-dev.md) for further local dev set up.
 
 
 <a name="contributor-guidelines"></a>

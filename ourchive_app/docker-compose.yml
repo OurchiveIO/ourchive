@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres
+    container_name: db
     volumes:
       - ./data/db:/var/lib/postgresql/data
     environment:
@@ -9,6 +10,7 @@ services:
       - POSTGRES_PASSWORD=ourchive
   web:
     build: .
+    container_name: web
     command: >
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
@@ -17,8 +19,12 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - OURCHIVE_DEBUG=True
+      - OURCHIVE_DB_HOST=db
+      - OURCHIVE_DB_PW=ourchive
+      - OURCHIVE_ROOT_URL=0.0.0.0:8000
+      - OURCHIVE_MEDIA_ROOT=http://0.0.0.0:8000
+      - OURCHIVE_MEDIA_URL=media/
+      - OURCHIVE_SECRET_KEY=supersekrit
     depends_on:
       - db
