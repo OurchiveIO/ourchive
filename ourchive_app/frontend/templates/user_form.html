@@ -83,12 +83,45 @@
                     {% endfor %}
                 </select>
             </div>
-        </div>        
+        </div> 
+
+        <div class="uk-margin" id="profile-collapse-image-parent">
+            <label id="profile-collapse-image-label" class="uk-form-label" for="form-horizontal-text">Collapse image fields? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter image fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
+            </label>
+            <div id="profile-collapse-image-controls" class="uk-form-controls">
+                <div id="profile-collapse-image-inline" class="uk-inline">
+                    <label id="profile-collapse-image-switch" class="switch"><input class="uk-checkbox" id="profile-collapse-image-checkbox" type="checkbox" name="collapse_chapter_image" {% if user.collapse_chapter_image %} checked {% endif %}> <span id="profile-collapse-image-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div> 
+
+        <div class="uk-margin" id="profile-collapse-audio-parent">
+            <label id="profile-collapse-audio-label" class="uk-form-label" for="form-horizontal-text">Collapse audio fields? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter audio fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
+            </label>
+            <div id="profile-collapse-audio-controls" class="uk-form-controls">
+                <div id="profile-collapse-audio-inline" class="uk-inline">
+                    <label id="profile-collapse-audio-switch" class="switch"><input class="uk-checkbox" id="profile-collapse-audio-checkbox" type="checkbox" name="collapse_chapter_audio" {% if user.collapse_chapter_audio %} checked {% endif %}> <span id="profile-collapse-audio-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div>   
+
+        <div class="uk-margin" id="profile-collapse-text-parent">
+            <label id="profile-collapse-text-label" class="uk-form-label" for="form-horizontal-text">Collapse text fields? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter text fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
+            </label>
+            <div id="profile-collapse-text-controls" class="uk-form-controls">
+                <div id="profile-collapse-text-inline" class="uk-inline">
+                    <label id="profile-collapse-text-switch" class="switch"><input class="uk-checkbox" id="profile-collapse-text-checkbox" type="checkbox" name="collapse_chapter_text" {% if user.collapse_chapter_text %} checked {% endif %}> <span id="profile-collapse-text-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div>      
 
         <div class="uk-margin" id="profile-text-parent">
             <label id="profile-text-label" class="uk-form-label" for="form-horizontal-text">Profile Text</label>
             <div class="uk-form-controls" id="profile-text-controls">
-                <div class="uk-inline" id="profile-text-inline">
+                <div class="uk-inline uk-child-width-expand uk-width-expand" id="profile-text-inline">
                 	<input type="hidden" id="profile" name="profile" value="{{ user.profile|safe|default_if_none:'' }}">
                     <textarea id="profileEditor"></textarea>
                     <script type="text/javascript">

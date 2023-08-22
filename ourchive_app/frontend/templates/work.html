@@ -1,58 +1,56 @@
 {% extends 'index.html' %}
+{% load i18n %}
 {% block title %}Work - {{ work.title }}{% endblock %}
 {% block content %}	
 <div id="work-parent-grid" class="uk-child-width-1@m uk-child-width-1@s uk-text-left uk-width-expand" uk-grid>
 <article id="work-article" class="uk-article">
     <div id="work-article-grid" class="uk-child-width-2-1" uk-grid>
-            <div id="work-controls-parent" class="uk-text-right uk-width-1-1 uk-margin-remove">
-                {% if work.user == request.user.username %}
-                <a id="work-publish-all-link" href="/works/{{ id }}/publish-full"><span uk-icon="icon: world" id="work-publish-all-span" title="Publish All"></span> </a>
-                {% if work.draft %}
-                <a id="work-publish-link" href="/works/{{ id }}/publish"><span uk-icon="icon: check" id="work-publish-span" title="Publish"></span> </a>
-                {% endif %}
-                <a id="work-edit-link" href="/works/{{ id }}/edit"><span uk-icon="icon: file-edit" id="work-edit-span" title="Edit"></span> </a>
-                <a id="work-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span id="work-delete-span" uk-icon="icon: trash" title="Delete"></span> </a>
+        {% if work.user == request.user.username %}
+            <div id="work-controls-parent" class="uk-text-left uk-width-1-2@m uk-width-1-1@s uk-margin-small-bottom">
+                <a id="work-publish-all-link" href="/works/{{ id }}/publish-full" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="publish-all-span">{% translate 'Publish All' %}</span> </a>
+                <a class="uk-button uk-button-default uk-button-small uk-margin-small-bottom" id="work-edit-link" href="/works/{{ id }}/edit"><span id="work-edit-span">{% translate 'Edit' %}</span> </a>
+                <a id="work-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span id="work-delete-span" class="uk-button uk-button-default uk-button-small  uk-margin-small-bottom">{% translate 'Delete' %}</span> </a>
                 {% include "delete_modal.html" with object='work' object_id=work.id %}
-                {% endif %}
-                {% if view_full %}
-                <a id="work-view-by-chapter-link" href="/works/{{ id }}/"><span id="work-view-by-chapter-span" uk-icon="icon: minus-circle" title="View By Chapter"></span> </a>
-                {% else %}
-                <a id="work-view-all-link" href="/works/{{ id }}/?view_full=true"><span uk-icon="icon: plus-circle" id="work-view-all-span" title="View All Chapters"></span> </a>
-                {% endif %}
-                <a id="work-bookmark-link" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span uk-icon="icon: bookmark" id="work-bookmark-span" title="Bookmark"></span> </a>
-                <div class="uk-inline">
-                    <a id="work-download-drop" href="#"><span uk-icon="icon: download" id="work-download-span" title="Download"></span> </a>
-                    <div class="uk-card uk-card-body uk-card-default uk-text-left" uk-drop><ul class="uk-list uk-list-divider">
-                        {% if work.preferred_download_url %}<li><a href="{{ work.preferred_download_url }}">{{ work.preferred_download }} - Creator's Preferred</a></li>{% endif %}
-                        <li><a href="{% if work.epub_url %}{{work.epub_url}}{% else %}{% url 'export-work' work.id 'epub' %}{% endif %}">EPUB</a></li>
-                        <li><a href="{% if work.zip_url %}{{work.zip_url}}{% else %}{% url 'export-work' work.id 'zip' %}{% endif %}">ZIP</a></li>
-                    </ul></div>
-                </div>
-                <a id="work-fingerguns-link" href="/fingerguns/{{ id }}"><span uk-icon="icon: bolt" id="work-fingerguns-span" title="Add Fingerguns"></span> </a>
             </div>
-            <div class="uk-width-1-1 uk-margin-remove-top" id="work-header-parent">
-                <h1 id="work-title-h1" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="work-title-link" href="/works/{{ id }}">{{ work.title }}</a></h1> <span id="work-user-span" class="uk-text-large" style="padding-left: 10px;">by <a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a></span>
-                {% if work.draft %}
-                <div class="uk-width-auto" id="work-draft-div">
-                    <span id="work-draft-span" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
-                </div>
-                {% endif %}
+         <div id="work-controls-parent" class="uk-text-right uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-top uk-margin-remove-left uk-margin-small-bottom">
+        {% else %}
+        <div id="work-controls-parent" class="uk-text-right uk-align-right uk-width-1-1 uk-margin-remove">
+        {% endif %}
+            <a id="work-bookmark-link" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span" uk-icon="icon: bookmark;ratio:1.25" title="{% translate 'Bookmark' %}"></span> </a>
+            <a id="work-fingerguns-link" href="/fingerguns/{{ id }}"><span id="work-fingerguns-span" uk-icon="icon: heart;ratio:1.25" title="{% translate 'Fingerguns' %}"></span> </a>
+            <div class="uk-inline">
+                <a id="work-download-drop" href="#"><span uk-icon="icon: download;ratio:1.25" title="{% translate 'Download' %}" id="work-download-span"></span> </a>
+                <div class="uk-card uk-card-body uk-card-default uk-text-left" uk-drop><ul class="uk-list uk-list-divider">
+                    {% if work.preferred_download_url %}<li><a href="{{ work.preferred_download_url }}">{{ work.preferred_download }} - Creator's Preferred</a></li>{% endif %}
+                    <li><a href="{% if work.epub_url %}{{work.epub_url}}{% else %}{% url 'export-work' work.id 'epub' %}{% endif %}">EPUB</a></li>
+                    <li><a href="{% if work.zip_url %}{{work.zip_url}}{% else %}{% url 'export-work' work.id 'zip' %}{% endif %}">ZIP</a></li>
+                </ul></div>
             </div>
-            {% if work.cover_url and work.cover_url != "None" %}
-                <div id="work-cover-child-div" class="uk-width-1-1 uk-align-center"><img id="work-cover-img" src="{{work.cover_url}}" class="uk-align-center"/></div>
+        </div>
+        <div class="uk-width-1-1 uk-margin-remove-top" id="work-header-parent">
+            <h1 id="work-title-h1" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="work-title-link" href="/works/{{ id }}">{{ work.title }}</a></h1> <span id="work-user-span" class="uk-text-large" style="padding-left: 10px;">by <a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a></span>
+            {% if work.draft %}
+            <div class="uk-width-auto" id="work-draft-div">
+                <span id="work-draft-span" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+            </div>
             {% endif %}
-            <div id="work-top-hr-div" class="uk-width-1-1 uk-margin-small-top">
-                <hr id="work-top-hr"/>
-            </div>
+        </div>
+        
+        {% if work.cover_url and work.cover_url != "None" %}
+            <div id="work-cover-child-div" class="uk-width-1-1 uk-align-center"><img id="work-cover-img" src="{{work.cover_url}}" class="uk-align-center"/></div>
+        {% endif %}
+        <div id="work-top-hr-div" class="uk-width-1-1 uk-margin-small-top">
+            <hr class="ourchive-hr" id="work-top-hr"/>
+        </div>
     </div>
     <div id="work-intro-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
-        <div id="work-summary-div"><span id="work-summary-span" class="uk-text-large">Summary</span></div>
-        <div id="work-summary-text-div"><span id="work-summary-text-span" class="uk-text-medium">{% autoescape off %}{{ work.summary|default_if_none:'' }}{% endautoescape %}</span></div>
+        {% if work.summary %}<div id="work-summary-div"><span id="work-summary-span" class="uk-text-large">Summary</span></div>
+        <div id="work-summary-text-div"><span id="work-summary-text-span" class="uk-text-medium">{% autoescape off %}{{ work.summary|default_if_none:'' }}{% endautoescape %}</span></div>{% endif %}
         <div class="uk-text-right" id="work-metadata-parent">
         {% include 'work_metadata.html' %}
         </div>
         {% if work.notes %} 
-            <div id="summary-notes-divider-div" class="uk-margin-top"><hr id="summary-notes-divider-hr"/></div>
+            <div id="summary-notes-divider-div" class="uk-margin-top"><hr class="ourchive-hr" id="summary-notes-divider-hr"/></div>
             <div id="work-notes-div"><span id="work-notes-span" class="uk-text-large">Notes</span></div>
             <div id="work-notes-text-div"><span id="work-notes-text-span" class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></div>
         {% endif %} 
@@ -63,8 +61,18 @@
     {% if chapter %} 
         {% include "chapter.html" %}  
     {% elif chapters %}
+        {% if work.chapter_count > 1 %}
+        <div class="uk-align-right uk-text-right uk-width-1-1 uk-margin-remove">
+            {% if view_full %}
+            <a id="work-view-by-chapter-link" class="uk-button uk-button-default uk-button-small  uk-margin-small-bottom" href="/works/{{ id }}/"><span id="work-view-by-chapter-span">{% translate 'View By Chapter' %}</span> </a>
+            {% else %}
+            <a id="work-view-all-link" href="/works/{{ id }}/?view_full=true" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="work-view-all-span">{% translate 'View Full' %}</span> </a>
+        </div>
+        {% endif %}
+        {% endif %}
         {% for chapter in chapters %}
             {% include "chapter.html" %}
+            {% if view_full and work.chapter_count > 1 and not forloop.last %}<div id="chapter-divider" class="uk-margin-top"><hr class="ourchive-hr" id="chapter-view-full-hr"/></div>{% endif %}
         {% endfor %}  
     {% endif %}
 </article>

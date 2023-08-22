@@ -1,6 +1,6 @@
 {% load i18n %}
 <div class="uk-inline ourchive-metadata-list">
-	<span id="work-metadata-complete" class="uk-inline uk-text-bold">{% if work.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
+	<span id="work-metadata-complete" class="uk-inline uk-text-bold">{% translate 'Status' %}: {% if work.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
 </div>
 <div class="uk-inline ourchive-metadata-list">
 	<span id="work-metadata-complete" class="uk-inline uk-text-bold">-</span>
@@ -12,23 +12,23 @@
 	<span id="work-metadata-complete" class="uk-inline uk-text-bold">-</span>
 </div>
 <div class="uk-inline ourchive-metadata-list">
-	<span id="work-metadata-fingerguns" class="uk-inline uk-text-bold">{% blocktranslate with fg=work.fingerguns %}{{ fg }} Fingerguns{% endblocktranslate %}</span>
+	<span id="work-metadata-fingerguns" class="uk-inline uk-text-bold">{% blocktranslate with fg=work.fingerguns %}Fingerguns: {{ fg }}{% endblocktranslate %}</span>
 </div>
 <div class="uk-inline ourchive-metadata-list">
 	<span id="work-metadata-complete" class="uk-inline uk-text-bold">-</span>
 </div>
 {% if work.chapter_count > 0 %}
-<div class="uk-inline ourchive-metadata-list"><span id="work-metadata-chapter-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=work.chapter_count %}{{ cc }} Chapters{% endblocktranslate %}</span></div>
+<div class="uk-inline ourchive-metadata-list"><span id="work-metadata-chapter-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=work.chapter_count %}Chapters: {{ cc }}{% endblocktranslate %}</span></div>
 <div class="uk-inline ourchive-metadata-list">
 	<span id="work-metadata-complete" class="uk-inline uk-text-bold">-</span>
 </div>
 {% endif %}
 {% if settings.AllowComments %}
-<div class="uk-inline ourchive-metadata-list"><span id="work-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=work.comment_count %}{{ cc }} Comments{% endblocktranslate %}</span></div>
+<div class="uk-inline ourchive-metadata-list"><span id="work-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=work.comment_count %}Comments: {{ cc }}{% endblocktranslate %}</span></div>
 <div class="uk-inline ourchive-metadata-list">
 	<span id="work-metadata-complete" class="uk-inline uk-text-bold">-</span>
 </div>
 {% endif %}
 <div class="uk-inline ourchive-metadata-list">
-	<span class="uk-inline uk-text-bold" id="work-metadata-word-count">{% blocktranslate with wc=work.word_count %}{{ wc }} Words{% endblocktranslate %}</span>
+	<span class="uk-inline uk-text-bold" id="work-metadata-word-count">{% blocktranslate with wc=work.word_count %}Words: {{ wc }}{% endblocktranslate %}</span>
 </div>

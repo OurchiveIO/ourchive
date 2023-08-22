@@ -13,25 +13,25 @@
 			  });
 		}
 	</script>
-	<div class="uk-width-2-3@m uk-width-1-1@s" id="chapter-header-parent">
-		<h2 id="chapter-header-h2"><a id="chapter-header-link" class="uk-link-reset" href="">Chapter {{ chapter.number }}: {{ chapter.title }}</a></h2>
+	<div class="uk-width-1-1" id="chapter-user-actions-parent">
+            {% if work.user == request.user.username %}
+            {% if chapter.draft %}
+            <a id="chapter-publish-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/publish" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="chapter-publish-span">{% translate 'Publish' %}</span> </a>
+            {% endif %}
+            <a id="chapter-edit-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/edit?from_work={{chapter_offset}}" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="chapter-edit-span">{% translate 'Edit' %}</span> </a>
+            <a id="chapter-delete-link" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete"><span id="chapter-delete-span">{% translate 'Delete' %}</span> </a>
+            {% include "delete_modal.html" with object='chapter' parent_object_id=work.id object_id=chapter.id %}
+            {% endif %}
+            <a id="jump-to-comments" href="#chapter-{{ chapter.id }}-comments" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom uk-align-right"><span id="chapter-comments-span">{% translate 'Comments' %}</span> </a>
+    </div>
+	<div class="uk-width-2-3@m uk-width-1-1@s uk-margin-small-top" id="chapter-header-parent">
+		<h2 id="chapter-header-h2"><a id="chapter-header-link" class="uk-link-reset" href="">Chapter {{ chapter.number }}{% if chapter.title %}: {{ chapter.title|default:'' }}{% endif %}</a></h2>
 		{% if chapter.draft %}
 	            <div class="uk-width-auto" id="chapter-draft-div">
 	                <span id="chapter-draft-badge" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
 	            </div>
 	    {% endif %}
 	</div>	
-	
-	<div class="uk-text-right uk-width-1-3@m uk-width-1-1@s" id="chapter-user-actions-parent">
-            {% if work.user == request.user.username %}
-            {% if chapter.draft %}
-            <a id="chapter-publish-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/publish"><span id="chapter-publish-span" uk-icon="icon: check" title="Publish"></span> </a>
-            {% endif %}
-            <a id="chapter-edit-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/edit?from_work={{chapter_offset}}"><span uk-icon="icon: file-edit" id="chapter-edit-span"></span> </a>
-            <a id="chapter-delete-link" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete"><span uk-icon="icon: trash" id="chapter-delete-span"></span> </a>
-            {% include "delete_modal.html" with object='chapter' parent_object_id=work.id object_id=chapter.id %}
-            {% endif %}
-    </div>
     <div id="chapter-context-parent" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
 		{% if chapter.summary %}<div id="chapter-summary-header"><span id="chapter-summary-label" class="uk-text-large">Summary</span></div>
 	    <div id="chapter-summary-div"><span id="chapter-summary-text" class="uk-text-medium">{% autoescape off %}{{ chapter.summary }}{% endautoescape %}</span></div>{% endif %}
@@ -43,28 +43,39 @@
 	    {% endif %} 
 	</div>
 	<div class="uk-align-right uk-text-right uk-margin-remove" id="chapter-metadata-div"><p id="chapter-metadata-p" class="uk-article-meta"><span id="chapter-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{chapter.updated_on|date:'d M Y'}}</span> {% if chapter.word_count %}- <span id="chapter-metadata-length" class="uk-inline uk-text-bold">{% blocktranslate with wc=chapter.word_count %}{{ wc }} Words{% endblocktranslate %}</span>{% endif %} {% if chapter.audio_length %}- <span class="uk-inline uk-text-bold" id="chapter-metadata-audio-length">{% blocktranslate with al=chapter.audio_length %}Audio Length: {{ al }}{% endblocktranslate %}</span>{% endif %} {% if chapter.image_size %}- <span class="uk-inline uk-text-bold" id="chapter-metadata-image-size">{% blocktranslate with imgs=chapter.image_size|default:0 %}Image Size: {{ imgs }}{% endblocktranslate %}</span>{% endif %} {% if settings.AllowComments %}- <span id="chapter-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=chapter.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span></p></div>
-	    <div id="chapter-notes-summary-hr"><hr id="chapter-content-hr"/></div>
+	{% if chapter.image_url or chapter.audio_url or chapter.text %}<div id="chapter-notes-summary-hr"><hr class="ourchive-hr" id="chapter-content-hr"/></div>
+	{% else %}
+	<div id="chapter-notes-summary-hr">
+		<hr class="ourchive-hr" id="chapter-content-hr"/>
+		<p>{% translate 'Nothing to see here...' %}</p>
+	</div>
+	{% endif %}
 	{% if chapter.image_url and chapter.image_url != "None" %}
 		<p id="chapter-image-graf">
 			<img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/>
 		</p>
-		<hr id="chapter-image-hr"/>
+		<hr class="ourchive-hr" id="chapter-image-hr"/>
 	{% endif %}
-	{% if chapter.audio_url and chapter.audio_url != "None" %}<p id="chapter-audio-graf"><audio id="chapter-audio" src="{{ chapter.audio_url }}" controls></audio></p><hr id="chapter-audio-hr"/>{% endif %}
+	{% if chapter.audio_url and chapter.audio_url != "None" %}<p id="chapter-audio-graf"><audio id="chapter-audio" src="{{ chapter.audio_url }}" controls></audio></p><hr class="ourchive-hr" id="chapter-audio-hr"/>{% endif %}
 	{% if chapter.text %}<span id="chapter-text" class="uk-text-medium">{% autoescape off %}{{ chapter.text }}{% endautoescape %}</span>{% endif %}
-	<div id="chapter-content-divider"><hr/></div>
+	<div id="chapter-content-divider"><hr class="ourchive-hr"/></div>
 	{% if chapter.end_notes %}
 		<div id="chapter-notes-header"><span id="chapter-notes-label" class="uk-text-large">Notes</span></div>
 	    <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.end_notes }}{% endautoescape %}</span></div>
 	{% endif %}
-	<!-- use iconnav for work edit icons -->
-    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid>
-        <div>
-            <ul class="uk-pagination">
-            {% if previous_chapter is not None %}<li><a href="{{ previous_chapter }}"><span class="uk-margin-small-right" uk-pagination-previous></span> Previous Chapter</a></li>{% endif %}
-            {% if next_chapter is not None %}<li class="uk-margin-auto-left"><a href="{{ next_chapter }}">Next Chapter <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
-        </ul>
-        </div>        
-    </div>  
-    {% include 'comments_parent.html' with object_name='chapter' comments=chapter.comments object=chapter edit_action_url=chapter.edit_action_url post_action_url=chapter.post_action_url comment_offset=chapter.comment_offset delete_obj='chapter-comment' load_more_base=chapter.load_more_base root_obj_id=work.id view_thread_base=chapter.view_thread_base %}
+	<div id="work-controls-parent-bottom" class="uk-text-right uk-align-right uk-width-4-1 uk-margin-top uk-margin-remove-bottom">
+        <a id="work-bookmark-link-bottom" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span-bottom" uk-icon="icon: bookmark;ratio:1.25" title="{% translate 'Bookmark' %}"></span> </a>
+        <a id="work-fingerguns-link-bottom" href="/fingerguns/{{ id }}"><span id="work-fingerguns-span-bottom" uk-icon="icon: heart;ratio:1.25" title="{% translate 'Fingerguns' %}"></span> </a>
+        <div class="uk-inline">
+            <a id="work-download-drop-bottom" href="#"><span uk-icon="icon: download;ratio:1.25" title="{% translate 'Download' %}" id="work-download-span"></span> </a>
+            <div class="uk-card uk-card-body uk-card-default uk-text-left" uk-drop><ul class="uk-list uk-list-divider">
+                {% if work.preferred_download_url %}<li><a href="{{ work.preferred_download_url }}">{{ work.preferred_download }} - Creator's Preferred</a></li>{% endif %}
+                <li><a href="{% if work.epub_url %}{{work.epub_url}}{% else %}{% url 'export-work' work.id 'epub' %}{% endif %}">EPUB</a></li>
+                <li><a href="{% if work.zip_url %}{{work.zip_url}}{% else %}{% url 'export-work' work.id 'zip' %}{% endif %}">ZIP</a></li>
+            </ul></div>
+        </div>
+    </div>
+    {% if previous_chapter is not None %}<div class="uk-width-1-2"><a href="{{ previous_chapter }}"><span uk-pagination-previous></span> Previous Chapter</a></div>{% endif %}
+    {% if next_chapter is not None %}<div class="uk-width-2-1 uk-text-right uk-align-right"><a href="{{ next_chapter }}">Next Chapter <span uk-pagination-next></span></a></div>{% endif %}
+    <div class="uk-width-1-1" id="chapter-{{ chapter.id }}-comments">{% include 'comments_parent.html' with object_name='chapter' comments=chapter.comments object=chapter edit_action_url=chapter.edit_action_url post_action_url=chapter.post_action_url comment_offset=chapter.comment_offset delete_obj='chapter-comment' load_more_base=chapter.load_more_base root_obj_id=work.id view_thread_base=chapter.view_thread_base %}</div>
 </div>

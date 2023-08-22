@@ -1,0 +1,78 @@
+[
+    {
+        "model": "api.bookmarkcollection",
+        "pk": 1,
+        "fields":
+        {
+            "uid": "b93f1427-98b0-4554-87e1-25e911b09774",
+            "title": "New Bookmark Collection",
+            "is_complete": false,
+            "header_url": null,
+            "header_alt_text": null,
+            "short_description": "does what it says on the tin",
+            "description": "",
+            "created_on": "2023-08-14T14:32:22.792Z",
+            "updated_on": "2023-08-14T14:32:22.803Z",
+            "draft": false,
+            "anon_comments_permitted": true,
+            "comments_permitted": true,
+            "comment_count": 0,
+            "user": 2,
+            "is_private": false,
+            "tags":
+            [],
+            "attributes":
+            []
+        }
+    },
+    {
+        "model": "api.bookmarkcollection",
+        "pk": 2,
+        "fields":
+        {
+            "title": "New Bookmark Collection",
+            "is_complete": false,
+            "header_url": null,
+            "header_alt_text": null,
+            "short_description": "does what it says on the tin",
+            "description": "",
+            "created_on": "2023-08-14T14:32:22.792Z",
+            "updated_on": "2023-08-14T14:32:22.803Z",
+            "draft": true,
+            "anon_comments_permitted": true,
+            "comments_permitted": true,
+            "comment_count": 0,
+            "user": 2,
+            "is_private": false,
+            "tags":
+            [],
+            "attributes":
+            []
+        }
+    },
+    {
+        "model": "api.bookmarkcollection",
+        "pk": 3,
+        "fields":
+        {
+            "title": "New Bookmark Collection",
+            "is_complete": false,
+            "header_url": null,
+            "header_alt_text": null,
+            "short_description": "does what it says on the tin",
+            "description": "",
+            "created_on": "2023-08-14T14:32:22.792Z",
+            "updated_on": "2023-08-14T14:32:22.803Z",
+            "draft": true,
+            "anon_comments_permitted": true,
+            "comments_permitted": true,
+            "comment_count": 0,
+            "user": 1,
+            "is_private": false,
+            "tags":
+            [],
+            "attributes":
+            []
+        }
+    }
+]

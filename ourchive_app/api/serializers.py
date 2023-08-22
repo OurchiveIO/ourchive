@@ -168,13 +168,16 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                   'work_set', 'bookmark_set', 'userblocks_set', 'profile',
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
                   'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files',
-                  'can_upload_images', 'default_work_type')
+                  'can_upload_images', 'default_work_type', 'collapse_chapter_image',
+                  'collapse_chapter_audio', 'collapse_chapter_text')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         require_invite = OurchiveSetting.objects.filter(
             name='Invite Only').first()
         if convert_boolean(require_invite.value):
+            if 'invite_code' not in validated_data:
+                raise serializers.ValidationError("Invite only instance; invite_code must be present.")
             invitation = Invitation.objects.filter(
                 invite_token=validated_data['invite_code']).first()
             if invitation.token_expiration.date() >= datetime.datetime.now().date():
@@ -214,6 +217,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return user
 
     def update(self, user, validated_data):
+        if not validated_data['icon'] or validated_data['icon'].lower() == 'none':
+            validated_data['icon_alt_text'] = "Default icon"
+            icon = OurchiveSetting.objects.filter(name='Default Icon URL').first()
+            if icon is not None:
+                validated_data['icon'] = f"{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{settings.STATIC_URL}{icon.value}"
+            else:
+                validated_data['icon'] = ''
         validated_data['password'] = User.objects.filter(
             id=user.id).first().password
         if 'attributes' in validated_data:
@@ -255,7 +265,7 @@ class FingergunSerializer(serializers.HyperlinkedModelSerializer):
     work = serializers.PrimaryKeyRelatedField(
         queryset=Work.objects.all(), required=False)
     user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field='username', required=False)
+        queryset=User.objects.all(), slug_field='username', required=False, allow_null=True)
 
     class Meta:
         model = Fingergun
@@ -278,6 +288,7 @@ class FingergunSerializer(serializers.HyperlinkedModelSerializer):
 class TagSerializer(serializers.HyperlinkedModelSerializer):
     tag_type = serializers.SlugRelatedField(
         queryset=TagType.objects.all(), slug_field='label')
+    tag_type_label = serializers.CharField(source='type_label', read_only=True)
     id = serializers.ReadOnlyField()
 
     class Meta:
@@ -599,10 +610,11 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         required_tag_types = list(TagType.objects.filter(required=True))
         has_any_required = len(required_tag_types) > 0
         for item in tags:
+            print(item['text'])
             tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
             tag_friendly_name = item['text']
             tag_type = item['tag_type']
-            tag_type_id = TagType.objects.filter(label=tag_type).first().id
+            tag_type_id = tag_type.id
             if tag_type in required_tag_types:
                 if tag_id is None or tag_id == '':
                     # todo: error

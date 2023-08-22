@@ -7,53 +7,20 @@
 <div class="uk-width-1-1 uk-text-left" id="work-form-parent"> 
 <form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
     <script>
-
         function getCurrentTab(submitted) {
             //var expanded = document.getElementById('toc_link').getAttribute("aria-expanded");
             var new_chapter_clicked = submitted === "New Chapter";
             document.getElementById('redirect_toc').value = new_chapter_clicked;
             document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
             document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
-        }
-        
-        function removetag(tag, type) {
-            document.getElementById("tags_"+tag+"_"+type).remove();
-            document.getElementById("tags_"+tag+"_"+type+"_txt").remove();
-        }
-
-        function sanitize(string) {
-          const map = {
-              '&': '&amp;',
-              '<': '&lt;',
-              '>': '&gt;',
-              '"': '&quot;',
-              "'": '&#x27;',
-              "/": '&#x2F;',
-          };
-          const reg = /[&<>"'/]/ig;
-          return string.replace(reg, (match)=>(map[match]));
-        }
-
-        function tagCheck (e, type, bypass_check=false) {
-            if (e.keyCode == 188 || e.keyCode == 13 || bypass_check) {
-                var section = document.getElementById(type+"_tags");
-                var final = document.getElementById(type+"_new_tag");
-                final.value = sanitize(final.value.replace(/,\s*$/, ""));
-                unescaped = final.value.replace(/,\s*$/, "");
-                var wrapper= document.createElement('div');
-                wrapper.innerHTML= '<input type="hidden" id="tags_'+final.value+'_'+type+'" name="tags_'+final.value+'_'+type+'" value="tags_'+final.value+'_'+type+'">';
-                var div= wrapper.firstChild;
-                section.appendChild(div);
-                wrapper.innerHTML = '<span class="uk-badge uk-padding-small uk-margin-right" id="tags_'+final.value+'_'+type+'_txt"><span class="uk-text-bold uk-text-default uk-padding-small">'+unescaped+' </span><span uk-icon="close" onclick="removetag(\''+final.value+'\', \''+type+'\')" id="tags_'+final.value+'_'+type+'_delete"></span></span>  ';
-                div = wrapper.firstChild;
-                section.appendChild(div);
-                final.value = '';
-                final.focus();
-                document.getElementById('tag-autocomplete-dropdown-'+type).innerHTML = "";
-                document.getElementById('no-tag-prompt-'+type).style.display = "none";
+            document.getElementById('chapter_summary').value = tinymce.get("chapterSummaryEditor").getContent().replace(/\r?\n?/g, '');
+            document.getElementById('chapter_notes').value = tinymce.get("chapterNotesEditor").getContent().replace(/\r?\n?/g, '');
+            if (document.getElementById('chapter-text-edit-mode-toggle').checked) {
+                document.getElementById('chapter_text').value = tinymce.get("chapterTextEditor").getContent().replace(/\r?\n?/g, '');
+            } else {
+                document.getElementById('chapter_text').value = document.getElementById('toggle-chapter-plaintext-area').value;
             }
         }
-        
     </script>
     {% csrf_token %}
     <input type="hidden" id="work-id-hidden" name="work_id" value="{{ work.id }}">
@@ -113,7 +80,7 @@
         <div class="uk-margin" id="work-form-summary-parent">
             <label id="work-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
             <div id="work-form-summary-controls" class="uk-form-controls">
-                <div id="work-form-summary-inline" class="uk-inline">
+                <div id="work-form-summary-inline" class="uk-inline uk-child-width-expand uk-width-expand">
                     <input type="hidden" id="summary" name="summary" value="{{ work.summary|safe|default_if_none:'' }}">
                     <textarea id="summaryEditor"></textarea>
                     <script type="text/javascript">
@@ -144,10 +111,11 @@
                 </div>
             </div>
         </div>
+        <div class="uk-margin uk-width-1-6"><a href="#" id="work-notes-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-notes-hidden-parent">{% translate 'Notes' %}</a></div>
+        <div id="work-form-notes-hidden-parent" hidden>
         <div class="uk-margin" id="work-form-notes-parent">
-            <label id="work-form-notes-label" class="uk-form-label" for="form-horizontal-text">Notes</label>
             <div id="work-form-notes-controls" class="uk-form-controls">
-                <div class="uk-inline" id="work-form-notes-inline">
+                <div class="uk-inline uk-child-width-expand uk-width-expand" id="work-form-notes-inline">
                     <input type="hidden" id="notes" name="notes" value="{{ work.notes|safe|default_if_none:'' }}">
                     <textarea id="notesEditor"></textarea>
                     <script type="text/javascript">
@@ -178,9 +146,11 @@
                 </div>
             </div>
         </div>
+        </div>
         {% if request.user.can_upload_images %}
+        <div class="uk-margin uk-width-1-6"><a href="#" id="work-cover-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-image-hidden-parent">{% translate 'Work Cover' %}</a></div>
+        <div id="work-form-image-hidden-parent" hidden>
         <div class="uk-margin" id="work-form-cover-parent">
-            <label id="work-form-cover-label" class="uk-form-label" for="form-horizontal-text">Cover</label>
             <div id="work-form-existing-image" class="uk-form-controls">
                 {% if work.cover_url %}
                 <img id="work-form-cover-img" src="{{ work.cover_url }}" class="uk-margin-bottom"/>
@@ -200,6 +170,7 @@
                 </div>
             </div>
         </div>
+        </div>      
         {% endif %}
         <hr/>
         <h3 id="obj-attrs-form-header">Work Settings</h3>
@@ -211,14 +182,13 @@
                 </div>
             </div>
         </div>
-
         <div class="uk-margin" id="work-form-draft-parent">
             <label id="work-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-draft-controls" class="uk-form-controls">
                 <div id="work-form-draft-inline" class="uk-inline">
-                    <label id="work-form-draft-switch" class="switch"><input class="uk-checkbox" id="work-form-draft-checkbox" type="checkbox" name="draft" {% if work.draft %} checked {% endif %}> <span id="work-form-draft-slider" class="slider round"></span></label>
+                    <label id="work-form-draft-switch" class="switch"><input class="uk-checkbox" id="work-form-draft-checkbox" type="checkbox" name="work_draft" {% if work.draft %} checked {% endif %}> <span id="work-form-draft-slider" class="slider round"></span></label>
                 </div>
             </div>
         </div>
@@ -264,7 +234,18 @@
         {% endif %}
     </div>
     <div><hr/></div>
-    <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left">
+    <div id="multichapter-select" class="uk-width-1-1">
+        <label class="uk-form-label" for="form-horizontal-text">Multichapter?</label>
+        <div id="work-form-multichapter-control" class="uk-form-controls">
+            <label id="work-form-multichapter-switch" class="switch"><input class="uk-checkbox" id="work-form-multichapter-checkbox" type="checkbox" uk-toggle="target: .work-chapter-content" {% if work.chapter_count > 1 or multichapter == 'true' %} checked {% endif %} name="multichapter"><span id="work-form-multichapter-slider" class="slider round"></span></label>
+        </div>
+    </div>
+    <div id="work-form-single-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if work.chapter_count > 1 or multichapter == 'true' %} hidden {% endif %}>
+        <input type="hidden" id="work_chapter_id" name="chapter_id" value="{{ work_chapter.id }}">
+        {% include 'chapter_form_body.html' with chapter=work_chapter %}
+    </div>
+
+    <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.id %} hidden {% endif %} {% if work.chapter_count or work.chapter_count < 2 %} {% if work.id and multichapter == 'false' %} hidden {% endif %} {% endif %}>
         <script>
             var util = UIkit.util;
 
