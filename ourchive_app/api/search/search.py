@@ -323,7 +323,7 @@ class PostgresProvider:
         # build query
         query = self.get_query(work_search.term, work_search.term_search_fields)
         if not query and not work_filters:
-            return []
+            return {'data': []}
         resultset = self.run_queries(work_filters, query, Work, [
                                      'title', 'summary'], work_search.term, kwargs['page'], work_search.order_by, True)
         result_json = self.build_work_resultset(resultset[0], work_search.reserved_fields)
@@ -335,7 +335,7 @@ class PostgresProvider:
         bookmark_filters = self.get_filters(bookmark_search)
         query = self.get_query(bookmark_search.term, bookmark_search.term_search_fields)
         if not query and not bookmark_filters:
-            return []
+            return {'data': []}
         resultset = self.run_queries(bookmark_filters, query, Bookmark, [
                                      'title', 'description'], bookmark_search.term, kwargs.get('page', 1), bookmark_search.order_by, True)
         result_json = self.build_bookmark_resultset(resultset[0], bookmark_search.reserved_fields)
@@ -348,7 +348,7 @@ class PostgresProvider:
         query = self.get_query(collection_search.term,
                                collection_search.term_search_fields)
         if not query and not collection_filters:
-            return []
+            return {'data': []}
         resultset = self.run_queries(collection_filters, query, BookmarkCollection, [
                                      'title', 'short_description'], collection_search.term, kwargs.get('page', 1), collection_search.order_by, True)
         result_json = self.build_collection_resultset(resultset[0], collection_search.reserved_fields)
@@ -359,7 +359,7 @@ class PostgresProvider:
         user_search.from_dict(kwargs)
         query = self.get_query(user_search.term, user_search.term_search_fields)
         if query is None:
-            return []
+            return {'data': []}
         resultset = User.objects.filter(is_active=True).filter(query)
         result_json = []
         for result in resultset:
@@ -412,7 +412,7 @@ class PostgresProvider:
         tag_filters = self.get_filters(tag_search)
         query = self.get_query(tag_search.term, tag_search.term_search_fields)
         if not query and not tag_filters:
-            return []
+            return {'data': []}
         resultset = self.run_queries(tag_filters, query, Tag, [
                                      'text'], tag_search.term, kwargs.get('page', 1), tag_search.order_by, False, 0.7, False)
         result_json = []

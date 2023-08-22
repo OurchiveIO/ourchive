@@ -315,7 +315,6 @@ class WorkSearch(object):
         self.page = 1
 
     def from_dict(self, dict_obj):
-        print(dict_obj)
         self.filter.from_dict(dict_obj['include_filter'])
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         if 'term' in dict_obj:
