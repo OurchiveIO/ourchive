@@ -67,7 +67,7 @@
 		    <div class="uk-navbar-left" id="uk-nav-left">
 		    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
 		        <ul class="uk-navbar-nav uk-visible@s">
-		            <li class="uk-active" id="nav-home"><a href="/">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav"/>{% endif %}</a></li>
+		            <li class="uk-active" id="nav-home"><a href="/" title="Home" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
 		            <li><a href="/works/" id="nav-works">Works</a></li>
 		            <li><a href="/bookmarks/" id="nav-bookmarks">Bookmarks</a></li>
 		            <li><a href="/bookmark-collections/" id="nav-bookmark-collections">Bookmark Collections</a></li>
