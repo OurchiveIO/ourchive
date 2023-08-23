@@ -219,6 +219,16 @@ def get_bookmark_collection_obj(request):
 	return collection_dict
 
 
+def prepare_chapter_data(chapter, request):
+	chapter['text'] = sanitize_rich_text(chapter['text'])
+	chapter['text'] = chapter['text'].replace('\r\n', '<br/>')
+	chapter['summary'] = sanitize_rich_text(chapter['summary'])
+	chapter['notes'] = sanitize_rich_text(chapter['notes'])
+	chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True}, object_name='Attribute')
+	chapter['attribute_types'] = process_attributes(chapter['attributes'], chapter_attributes.response_data['results'])
+	return chapter
+
+
 def get_default_search_result_tab(resultsets):
 	most_results = 0
 	default_tab = ''
@@ -963,12 +973,7 @@ def edit_chapter(request, work_id, id):
 	else:
 		if request.user.is_authenticated:
 			chapter = do_get(f'api/chapters/{id}', request, 'Chapter').response_data
-			chapter['text'] = sanitize_rich_text(chapter['text'])
-			chapter['text'] = chapter['text'].replace('\r\n', '<br/>')
-			chapter['summary'] = sanitize_rich_text(chapter['summary'])
-			chapter['notes'] = sanitize_rich_text(chapter['notes'])
-			chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True}, object_name='Attribute')
-			chapter['attribute_types'] = process_attributes(chapter['attributes'], chapter_attributes.response_data['results'])
+			chapter = prepare_chapter_data(chapter, request)
 			return render(request, 'chapter_form.html', {
 				'chapter': chapter,
 				'form_title': 'Edit Chapter'})
@@ -1022,6 +1027,7 @@ def edit_work(request, id):
 				work_chapter = do_get(f'api/works/{id}/chapters', request, 'Chapter').response_data['results'][0] if chapter_count > 0 else {'title': 'Untitled Chapter','number': 1}
 			else:
 				work_chapter = chapters[0]
+			work_chapter = prepare_chapter_data(work_chapter, request)
 			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else group_tags_for_edit([], tag_types)
 			return render(request, 'work_form.html', {
 				'work_types': work_types['results'],

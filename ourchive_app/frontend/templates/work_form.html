@@ -4,6 +4,7 @@
 {% block content %}	
 {% load static %}
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
+<script src="{% static 'frontend/js/ourchive-chapter.js' %}"></script>
 <div class="uk-width-1-1 uk-text-left" id="work-form-parent"> 
 <form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
     <script>
@@ -13,13 +14,7 @@
             document.getElementById('redirect_toc').value = new_chapter_clicked;
             document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
             document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
-            document.getElementById('chapter_summary').value = tinymce.get("chapterSummaryEditor").getContent().replace(/\r?\n?/g, '');
-            document.getElementById('chapter_notes').value = tinymce.get("chapterNotesEditor").getContent().replace(/\r?\n?/g, '');
-            if (document.getElementById('chapter-text-edit-mode-toggle').checked) {
-                document.getElementById('chapter_text').value = tinymce.get("chapterTextEditor").getContent().replace(/\r?\n?/g, '');
-            } else {
-                document.getElementById('chapter_text').value = document.getElementById('toggle-chapter-plaintext-area').value;
-            }
+            getChapterRichTextValues();
         }
     </script>
     {% csrf_token %}

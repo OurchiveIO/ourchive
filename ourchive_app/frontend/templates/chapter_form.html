@@ -6,7 +6,7 @@
     <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
     <script src="{% static 'frontend/js/ourchive-chapter.js' %}"></script>
     <div id="chapter-form-parent" class="uk-width-1-1 uk-text-left"> 
-    	<form class="uk-form-horizontal"  method="post" id="chapterForm" onsubmit="return getRichTextValues()">
+    	<form class="uk-form-horizontal"  method="post" id="chapterForm" onsubmit="return getChapterRichTextValues()">
             <input type="hidden" id="work" name="work" value="{{ chapter.work }}">
             <input type="hidden" id="work" name="chapter_id" value="{{ chapter.id }}">
     <div id="chapter-form-title-grid" class="uk-grid" uk-grid>
