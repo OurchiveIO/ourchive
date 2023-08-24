@@ -235,11 +235,12 @@
             <label id="work-form-multichapter-switch" class="switch"><input class="uk-checkbox" id="work-form-multichapter-checkbox" type="checkbox" uk-toggle="target: .work-chapter-content" {% if chapters|length > 1 or multichapter == 'true' %} checked {% endif %} name="multichapter"><span id="work-form-multichapter-slider" class="slider round"></span></label>
         </div>
     </div>
+    <div id="work-form-chapter-content-parent">
     <div id="work-form-single-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if chapters|length > 1 or multichapter == 'true' %} hidden {% endif %}>
         <input type="hidden" id="work_chapter_id" name="chapter_id" value="{{ work_chapter.id }}">
         {% include 'chapter_form_body.html' with chapter=work_chapter %}
     </div>
-    <div id="work-form-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.id %} hidden {% endif %} {% if work.chapter_count < 2 or chapters|length < 2 %} {% if work.id and multichapter == 'false' %} hidden {% endif %} {% endif %}>
+    <div id="work-form-multi-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.id %} hidden {% endif %} {% if work.chapter_count < 2 or chapters|length < 2 %} {% if work.id and multichapter == 'false' %} hidden {% endif %} {% endif %}>
         <script>
             var util = UIkit.util;
 
@@ -278,6 +279,7 @@
             {% endfor %}
             <input id="work-form-new-chapter-link" class="uk-button uk-button-link" style="width:15em;" onclick="this.form.submitted=this.value;" type="submit" value="New Chapter"/>
         </ul>
+    </div>
     </div>
     <hr/>
     <div id="work-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
