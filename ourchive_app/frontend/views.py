@@ -1299,8 +1299,13 @@ def log_in(request):
 			return referrer_redirect(request, request.POST.get('referrer'))
 		else:
 			messages.add_message(request, messages.ERROR, _('Login unsuccessful. Please try again.'), 'login-unsuccessful-error')
-			return redirect('/login')
+			referrer = request.POST.get('referrer')
+			if not referrer:
+				referrer = '/'
+			return render(request, 'login.html', {'referrer': referrer})
 	else:
+		if request.user.is_authenticated:
+			return referrer_redirect(request)
 		if 'HTTP_REFERER' in request.META:
 			return render(request, 'login.html', {'referrer': request.META['HTTP_REFERER']})
 		else:
