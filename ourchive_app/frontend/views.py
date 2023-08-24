@@ -1318,11 +1318,13 @@ def reset_password(request):
 		if user is not None:
 			login(request, user)
 			messages.add_message(request, messages.SUCCESS, _('Reset successful.'), 'reset-login-success')
-			return referrer_redirect(request)
+			return redirect('/')
 		else:
 			messages.add_message(request, messages.ERROR, _('Reset unsuccessful. Please try again.'), 'reset-login-error')
 			return redirect('/login')
 	else:
+		if request.user.is_authenticated:
+			return referrer_redirect(request)
 		if 'HTTP_REFERER' in request.META:
 			return render(request, 'login.html', {
 				'referrer': request.META['HTTP_REFERER']})
