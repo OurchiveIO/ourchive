@@ -327,7 +327,7 @@ class EtlWorkImport(object):
         work.save()
         work_id = self.process_mappings(work, mappings, work_json)
         if work_id:
-            transl_note = _(f'Imported from Archive of Our Own. Original work id: {self.import_job.work_id}')
+            transl_note = _(f'Imported from Archive of Our Own. Original work id: {self.import_job.work_id}.')
             work.notes = f'{work.notes}<br/>{transl_note}'
         work.save()
         return work_id
