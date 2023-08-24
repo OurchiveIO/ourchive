@@ -329,6 +329,8 @@ class EtlWorkImport(object):
         if work_id:
             transl_note = _(f'Imported from Archive of Our Own. Original work id: {self.import_job.work_id}')
             work.notes = f'{work.notes}<br/>{transl_note}'
+        work.save()
+        return work_id
 
     def process_chapter_data(self, chapter_json, work_id):
         mappings = ObjectMapping.objects.filter(
