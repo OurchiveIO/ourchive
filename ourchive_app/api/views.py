@@ -931,12 +931,12 @@ class NotificationTypeList(generics.ListCreateAPIView):
 class NotificationList(generics.ListCreateAPIView):
     queryset = Notification.objects.get_queryset().order_by('id')
     serializer_class = NotificationSerializer
-    permission_classes = [IsOwner, permissions.IsAdminUser]
+    permission_classes = [IsOwner]
 
 
 class NotificationRead(APIView):
     parser_classes = [JSONParser]
-    permission_classes = [IsOwner, permissions.IsAdminUser]
+    permission_classes = [IsOwner]
 
     def patch(self, request, format=None):
         notifications = Notification.objects.filter(user__id=request.user.id, read=False).all()
@@ -960,7 +960,7 @@ class UserNotificationList(generics.ListCreateAPIView):
 class NotificationDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Notification.objects.get_queryset().order_by('id')
     serializer_class = NotificationSerializer
-    permission_classes = [IsOwner, permissions.IsAdminUser]
+    permission_classes = [IsOwner]
 
 
 class OurchiveSettingList(generics.ListCreateAPIView):
