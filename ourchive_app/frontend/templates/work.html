@@ -27,23 +27,23 @@
                 </ul></div>
             </div>
         </div>
-        <div class="uk-width-1-1 uk-margin-remove-top" id="work-header-parent">
+        <div class="uk-width-1-1@s uk-width-3-4@m uk-margin-remove-top" id="work-header-parent">
             <h1 id="work-title-h1" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="work-title-link" href="/works/{{ id }}">{{ work.title }}</a></h1> <span id="work-user-span" class="uk-text-large" style="padding-left: 10px;">by <a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a></span>
-            {% if work.chapter_count > 1 %}
-            <div class="uk-align-right uk-text-right uk-width-auto uk-margin-remove">
-                {% if view_full %}
-                <a id="work-view-by-chapter-link" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom" href="/works/{{ id }}/"><span id="work-view-by-chapter-span">{% translate 'View By Chapter' %}</span> </a>
-                {% else %}
-                <a id="work-view-all-link" href="/works/{{ id }}/?view_full=true" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="work-view-all-span">{% translate 'View Full' %}</span> </a>
-                {% endif %}
-            </div>
-            {% endif %}
             {% if work.draft %}
             <div class="uk-width-auto" id="work-draft-div">
                 <span id="work-draft-span" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
             </div>
             {% endif %}
         </div>
+        {% if work.chapter_count > 1 %}
+            <div class="uk-align-right uk-text-right uk-width-1-1@s uk-width-1-4@m uk-margin-remove">
+                {% if view_full %}
+                <a id="work-view-by-chapter-link" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom uk-align-right" href="/works/{{ id }}/"><span id="work-view-by-chapter-span">{% translate 'View By Chapter' %}</span> </a>
+                {% else %}
+                <a id="work-view-all-link" href="/works/{{ id }}/?view_full=true" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom uk-align-right"><span id="work-view-all-span">{% translate 'View Full' %}</span> </a>
+                {% endif %}
+            </div>
+            {% endif %}
         
         {% if work.cover_url and work.cover_url != "None" %}
             <div id="work-cover-child-div" class="uk-width-1-1 uk-align-center"><img id="work-cover-img" src="{{work.cover_url}}" class="uk-align-center"/></div>
