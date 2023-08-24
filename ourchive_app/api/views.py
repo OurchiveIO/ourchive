@@ -39,6 +39,8 @@ import threading
 from urllib.parse import unquote
 from etl.models import WorkImport
 from etl.ao3 import util
+from django.core.mail import send_mail
+from django.utils.translation import gettext as _
 
 
 @api_view(['GET'])
@@ -178,6 +180,13 @@ class Invitations(APIView):
         invitation.token_expiration = datetime.datetime.now() + datetime.timedelta(days=7)
         invitation.register_link = f"{settings.ALLOWED_HOSTS[0]}/register?invite_token={invitation.invite_token}&email={invitation.email}"
         invitation.save()
+        send_mail(
+            _("New Registration Request"),
+            _(f"You've received a new registration request for Ourchive. Go to 'Invitations' in your admin site to review."),
+            settings.DEFAULT_FROM_EMAIL,
+            [settings.SERVER_EMAIL],
+            fail_silently=False,
+        )
         return Response({}, status=200)
 
 
