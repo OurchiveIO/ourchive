@@ -177,14 +177,14 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             name='Invite Only').first()
         if convert_boolean(require_invite.value):
             if 'invite_code' not in validated_data:
-                raise serializers.ValidationError("Invite only instance; invite_code must be present.")
+                raise serializers.ValidationError({"message": ["Invite only instance; invite_code must be present."]})
             invitation = Invitation.objects.filter(
                 invite_token=validated_data['invite_code']).first()
             if invitation.token_expiration.date() >= datetime.datetime.now().date():
                 invitation.token_used = True
                 invitation.save()
             else:
-                raise serializers.ValidationError("Invite token has expired.")
+                raise serializers.ValidationError({"message": ["Invite token has expired."]})
         if 'icon' not in validated_data:
             icon_alt_text = "Default icon"
             icon = OurchiveSetting.objects.filter(name='Default Icon URL').first()
@@ -524,6 +524,12 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         model = Chapter
         fields = '__all__'
 
+    def validate_chapter_number(self, validated_data):
+        if 'number' in validated_data and 'work' in validated_data:
+            existing_number = Chapter.objects.filter(work=validated_data['work'],number=validated_data['number'])
+            if existing_number:
+                raise serializers.ValidationError({"message": [f"Chapter with number {validated_data['number']} already exists. Please review chapter numbers."]})
+
     def update(self, chapter, validated_data):
         if 'text' in validated_data:
             validated_data['text'] = nh3.clean(validated_data['text']) if 'text' in validated_data and validated_data['text'] is not None else ''
@@ -534,6 +540,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'audio_url' in validated_data:
             if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
                 validated_data['audio_url'] = ''
+        self.validate_chapter_number(validated_data)
         chapter.update(**validated_data)
         Work.objects.filter(id=chapter.first().work.id).update(
             **{'zip_url': '', 'epub_url': ''})
@@ -549,6 +556,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'audio_url' in validated_data:
             if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
                 validated_data['audio_url'] = ''
+        self.validate_chapter_number(validated_data)
         chapter = Chapter.objects.create(**validated_data)
         if attributes is not None:
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
