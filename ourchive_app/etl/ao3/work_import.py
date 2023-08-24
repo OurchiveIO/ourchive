@@ -285,6 +285,7 @@ class EtlWorkImport(object):
             except Exception as err:
                 self.error_message = f'Error occurred processing mapping: {err}'
                 logger.error(self.error_message)
+                continue;
         obj.save()
         return obj.id
 
