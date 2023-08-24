@@ -524,17 +524,8 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         model = Chapter
         fields = '__all__'
 
-    def update_word_count(self, chapter):
-        word_count = 0
-        for work_chapter in chapter.work.chapters.all():
-            word_count += work_chapter.word_count
-        Work.objects.filter(id=chapter.work.id).update(
-            **{'word_count': word_count})
-
     def update(self, chapter, validated_data):
         if 'text' in validated_data:
-            validated_data['word_count'] = 0 if not validated_data['text'] else len(
-                validated_data['text'].split())
             validated_data['text'] = nh3.clean(validated_data['text']) if 'text' in validated_data and validated_data['text'] is not None else ''
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -546,7 +537,6 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         chapter.update(**validated_data)
         Work.objects.filter(id=chapter.first().work.id).update(
             **{'zip_url': '', 'epub_url': ''})
-        self.update_word_count(chapter.first())
         return chapter.first()
 
     def create(self, validated_data):
@@ -560,7 +550,6 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
             if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
                 validated_data['audio_url'] = ''
         chapter = Chapter.objects.create(**validated_data)
-        self.update_word_count(chapter)
         if attributes is not None:
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
         return chapter
@@ -639,13 +628,6 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         work.save()
         return work
 
-    def update_word_count(self, work):
-        word_count = 0
-        for chapter in work.chapters.all():
-            word_count += chapter.word_count
-        work.word_count = word_count
-        return work
-
     def update(self, work, validated_data):
         if 'tags' in validated_data:
             tags = validated_data.pop('tags') if 'tags' in validated_data else []
@@ -653,7 +635,6 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
-        work = self.update_word_count(work)
         validated_data['word_count'] = work.word_count
         if 'summary' in validated_data:
             validated_data['summary'] = nh3.clean(validated_data['summary']) if validated_data['summary'] is not None else ''
