@@ -75,7 +75,7 @@
             </ul></div>
         </div>
     </div>
-    {% if previous_chapter is not None %}<div class="uk-width-1-2"><a href="{{ previous_chapter }}"><span uk-pagination-previous></span> Previous Chapter</a></div>{% endif %}
-    {% if next_chapter is not None %}<div class="uk-width-2-1 uk-text-right uk-align-right"><a href="{{ next_chapter }}">Next Chapter <span uk-pagination-next></span></a></div>{% endif %}
+    <div class="uk-width-1-2">{% if previous_chapter is not None %}<a href="{{ previous_chapter }}"><span uk-pagination-previous></span> Previous Chapter</a>{% endif %}</div>
+    {% if next_chapter is not None %}<div class="uk-width-1-2 uk-text-right uk-align-right uk-margin-remove-left uk-margin-remove-right"><a href="{{ next_chapter }}">Next Chapter <span uk-pagination-next></span></a></div>{% endif %}
     <div class="uk-width-1-1" id="chapter-{{ chapter.id }}-comments">{% include 'comments_parent.html' with object_name='chapter' comments=chapter.comments object=chapter edit_action_url=chapter.edit_action_url post_action_url=chapter.post_action_url comment_offset=chapter.comment_offset delete_obj='chapter-comment' load_more_base=chapter.load_more_base root_obj_id=work.id view_thread_base=chapter.view_thread_base %}</div>
 </div>

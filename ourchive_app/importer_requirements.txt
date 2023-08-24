@@ -1,1 +1,1 @@
-ourchiveao3importer @ git+https://@github.com/c-e-p/ao3importer.git@v0.1.0
+ourchiveao3importer @ git+https://@github.com/c-e-p/ao3importer.git@v0.1.1
