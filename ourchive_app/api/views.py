@@ -356,7 +356,7 @@ class WorkList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'cover_url' in self.request.data:
-            serializer.pop('cover_url')
+            self.request.data.pop('cover_url')
         serializer.save(user=self.request.user)
 
 
@@ -465,7 +465,7 @@ class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'cover_url' in self.request.data:
-            serializer.pop('cover_url')
+            self.request.data.pop('cover_url')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
@@ -585,9 +585,9 @@ class ChapterList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'image_url' in self.request.data:
-            serializer.pop('image_url')
+            self.request.data.pop('image_url')
         if not self.request.user.can_upload_audio and 'audio_url' in self.request.data:
-            serializer.pop('aduio_url')
+            self.request.data.pop('audio_url')
         serializer.save(user=self.request.user)
 
 
@@ -600,9 +600,9 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'image_url' in self.request.data:
-            serializer.pop('image_url')
+            self.request.data.pop('image_url')
         if not self.request.user.can_upload_audio and 'audio_url' in self.request.data:
-            serializer.pop('audio_url')
+            self.request.data.pop('audio_url')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
@@ -610,9 +610,9 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         if not self.request.user.can_upload_images and 'image_url' in self.request.data:
-            serializer.pop('image_url')
+            self.request.data.pop('image_url')
         if not self.request.user.can_upload_images and 'audio_url' in self.request.data:
-            serializer.pop('audio_url')
+            self.request.data.pop('audio_url')
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']

@@ -153,7 +153,6 @@ def get_work_obj(request, work_id=None):
 	work_dict = work_dict.dict()
 	work_dict["user"] = str(request.user)
 	work_dict["attributes"] = get_attributes_from_form_data(request)
-	print(chapter_dict)
 	return [work_dict, redirect_toc, chapters, chapter_dict]
 
 
@@ -220,12 +219,16 @@ def get_bookmark_collection_obj(request):
 
 
 def prepare_chapter_data(chapter, request):
-	chapter['text'] = sanitize_rich_text(chapter['text'])
-	chapter['text'] = chapter['text'].replace('\r\n', '<br/>')
-	chapter['summary'] = sanitize_rich_text(chapter['summary'])
-	chapter['notes'] = sanitize_rich_text(chapter['notes'])
+	if 'text' in chapter:
+		chapter['text'] = sanitize_rich_text(chapter['text'])
+		chapter['text'] = chapter['text'].replace('\r\n', '<br/>')
+	if 'summary' in chapter:
+		chapter['summary'] = sanitize_rich_text(chapter['summary'])
+	if 'notes' in chapter:
+		chapter['notes'] = sanitize_rich_text(chapter['notes'])
+	og_attributes = chapter['attributes'] if 'attributes' in chapter else []
 	chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True}, object_name='Attribute')
-	chapter['attribute_types'] = process_attributes(chapter['attributes'], chapter_attributes.response_data['results'])
+	chapter['attribute_types'] = process_attributes(og_attributes, chapter_attributes.response_data['results'])
 	return chapter
 
 
@@ -708,7 +711,6 @@ def get_search_request(request, request_object, request_builder):
 			# TODO evaluate if this can be gotten rid of; do we have legitimate use cases that aren't a range?
 			filter_options = key.split('|')
 			for option in filter_options:
-				print(option)
 				filter_details = option.split('$')
 				filter_type = request_builder.get_object_type(filter_details[0])
 				if filter_type == 'work':
@@ -1153,7 +1155,6 @@ def edit_bookmark(request, pk):
 			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
 			bookmark['attribute_types'] = process_attributes(bookmark['attributes'], bookmark_attributes.response_data['results'])
 			tags = group_tags_for_edit(bookmark['tags'], tag_types) if 'tags' in bookmark else group_tags_for_edit([], tag_types)
-			print(tags)
 			return render(request, 'bookmark_form.html', {
 				'rating_range': bookmark['star_count'],
 				'divider': settings.TAG_DIVIDER,

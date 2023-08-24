@@ -1,5 +1,6 @@
 from api.models import OurchiveSetting
 from django.core.exceptions import ObjectDoesNotExist
+import nh3
 
 
 def convert_boolean(string_bool):
@@ -21,3 +22,7 @@ def get_star_count():
     except ObjectDoesNotExist:
         star_count = list(range(1, 5))
     return star_count
+
+
+def clean_text(text):
+    return nh3.clean(text, attributes={"*": {'style'}})
