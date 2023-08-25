@@ -177,7 +177,7 @@ class PostgresProvider:
                 resultset = obj.objects.filter(Q(query & filters))
             else:
                 resultset = obj.objects.filter(query)
-        if resultset is not None:
+        if resultset is not None and has_drafts:
             resultset = resultset.filter(draft=False)
         if resultset is not None and len(resultset) == 0:
             # if exact matching & filtering produced no results, let's do limited trigram searching
@@ -190,6 +190,8 @@ class PostgresProvider:
                 else:
                     resultset = resultset.filter(zero_distance__lte=trigram_max).filter(
                         one_distance__lte=trigram_max)
+                if resultset is not None and has_drafts:
+                    resultset = resultset.filter(draft=False)
                 resultset = resultset.order_by(
                     'zero_distance', 'one_distance', order_by)
             else:
@@ -200,6 +202,8 @@ class PostgresProvider:
                         Q((Q(zero_distance__lte=trigram_max) & filters)))
                 else:
                     resultset = resultset.filter(zero_distance__lte=trigram_max)
+                if resultset is not None and has_drafts:
+                    resultset = resultset.filter(draft=False)
                 resultset = resultset.order_by('zero_distance', order_by)
             require_distinct = False
         if require_distinct:
