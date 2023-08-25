@@ -1100,7 +1100,11 @@ def new_fingerguns(request, work_id):
 def delete_work(request, work_id):
 	response = do_delete(f'api/works/{work_id}/', request, object_name='Work')
 	process_message(request, response)
-	return referrer_redirect(request)
+	referrer = request.META.get('HTTP_REFERER')
+	print(referrer)
+	if f'works/{work_id}' in referrer:
+		return redirect('/')
+	return referrer_redirect(request, referrer)
 
 
 def delete_chapter(request, work_id, chapter_id):
