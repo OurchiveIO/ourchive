@@ -165,7 +165,10 @@ class Invitations(APIView):
         invitation = Invitation.objects.filter(
             invite_token=request.GET.get('invite_token'), email=email_decoded).first()
         if invitation:
-            return Response({'invitation': invitation.invite_token}, status=200)
+            if not invitation.token_used:
+                return Response({'invitation': invitation.invite_token}, status=200)
+            else:
+                return Response({'message': _("Invitation has already been used. Please request a new invite link.")}, status=418)
         else:
             return Response({}, status=404)
 

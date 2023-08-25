@@ -67,10 +67,10 @@ def get_400s_message(status_code, object_name, html_obj_name, response=None) -> 
 	if status_code == 404:
 		return [_(f"We could not find this {object_name}. You may not have access to it, or it may not exist."), f"{html_obj_name}-not-found-error"]
 	if status_code == 418:
-		if response:
+		if response is not None:
 			content_json = response.json()
 			return[_(content_json['message']), f"{html_obj_name}-validation-error"]
-	return [_("An unknown error occurred"), f"{html_obj_name}-unknown-error"]
+	return [_("An unknown error occurred."), f"{html_obj_name}-unknown-error"]
 
 def get_500s_message(status_code, object_name, html_obj_name) -> tuple[str, str]:
 	if status_code == 500:

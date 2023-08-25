@@ -1307,7 +1307,10 @@ def log_in(request):
 		if request.user.is_authenticated:
 			return referrer_redirect(request)
 		if 'HTTP_REFERER' in request.META:
-			return render(request, 'login.html', {'referrer': request.META['HTTP_REFERER']})
+			referrer = request.META['HTTP_REFERER']
+			if 'register' in referrer:
+				referrer = '/'
+			return render(request, 'login.html', {'referrer': referrer})
 		else:
 			return render(request, 'login.html', {'referrer': '/'})
 
@@ -1350,6 +1353,9 @@ def register(request):
 			response = do_get(f'api/invitations/', request, params={'email': request.GET.get('email'), 'invite_token': request.GET.get('invite_token')}, object_name='Invite Code')
 			if response.response_info.status_code == 200:
 				return render(request, 'register.html', {'permit_registration': True, 'invite_code': response.response_data['invitation']})
+			if response.response_info.status_code == 418:
+				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+				return redirect('/')
 			else:
 				messages.add_message(request, messages.ERROR, _('Your invite code or email is incorrect. Please check your link again and contact site admin.'), 'register-invalid-token-error')
 				return redirect('/')
