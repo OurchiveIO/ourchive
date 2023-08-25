@@ -116,26 +116,25 @@
 			            {% if request.user.is_authenticated %}
 			            	<a class="uk-width-auto uk-text-truncate" title="{{ request.user }}" href="{% url 'user-profile-parent' request.user.id %}" id="nav-username">{{ request.user }}</a>
 			            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div">
-	                    		<ul class="uk-nav uk-navbar-dropdown-nav" id="nav-user-dropdown-ul">
+	                    		<ul class="uk-nav uk-navbar-dropdown-nav uk-list-divider uk-list-collapse" id="nav-user-dropdown-ul">
 	                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
 	                    			<li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link">{% translate 'Import Work(s)' %}</a></li>
-	                    			<ul class="uk-nav-sub" id="imports-subnav">
+	                    			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="imports-subnav">
 								            <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}">{% translate 'Import Status' %}</a></li>
 								        </ul>
 	                    			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
 	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link">Bookmarks</a></li>
 	                    			<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link">{% translate 'Collections' %}</a></li>
 	                    			<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">Works</a></li>
-	                    			<li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a>
-		                    			<ul class="uk-nav-sub" id="subscriptions-subnav">
+	                    			<li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a></li>
+		                    			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="subscriptions-subnav">
 								            <li id="subscriptions-bookmarks"><a href="{% url 'fe-user-bookmark-subscriptions' request.user %}">{% translate 'Bookmarks' %}</a></li>
 								            <li id="subscriptions-collections">
 								                <a href="{% url 'fe-user-collection-subscriptions' request.user %}">{% translate 'Collections' %}</a>
 								            </li>
 								        </ul>
-								    </li>
 								    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a>
-								    	<ul class="uk-nav-sub" id="profile-subnav">
+								    	<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="profile-subnav">
 	                    				<li id="nav-edit-profile-li"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-edit-profile-link">{% translate 'Edit Profile' %}</a></li>
 	                    				<li id="nav-edit-account-li"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-edit-account-link">{% translate 'Edit Account' %}</a></li>
 	                    				<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">{% translate 'Blocklist' %}</a></li>
