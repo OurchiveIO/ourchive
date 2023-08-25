@@ -38,9 +38,9 @@
         {% if work.chapter_count > 1 %}
             <div class="uk-align-right uk-text-right uk-width-1-1@s uk-width-1-4@m uk-margin-remove">
                 {% if view_full %}
-                <a id="work-view-by-chapter-link" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom uk-align-right" href="/works/{{ id }}/"><span id="work-view-by-chapter-span">{% translate 'View By Chapter' %}</span> </a>
+                <a id="work-view-by-chapter-link" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom uk-margin-small-top uk-align-right" href="/works/{{ id }}/"><span id="work-view-by-chapter-span">{% translate 'View By Chapter' %}</span> </a>
                 {% else %}
-                <a id="work-view-all-link" href="/works/{{ id }}/?view_full=true" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom uk-align-right"><span id="work-view-all-span">{% translate 'View Full' %}</span> </a>
+                <a id="work-view-all-link" href="/works/{{ id }}/?view_full=true" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom uk-align-right uk-margin-small-top"><span id="work-view-all-span">{% translate 'View Full' %}</span> </a>
                 {% endif %}
             </div>
             {% endif %}

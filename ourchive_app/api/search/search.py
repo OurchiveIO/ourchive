@@ -379,12 +379,12 @@ class PostgresProvider:
         term = term.lower()
         if tag_type:
             resultset = Tag.objects.filter(
-                tag_type__type_name=tag_type).filter(text__contains=term)
+                tag_type__type_name=tag_type).filter(Q(text__icontains=term) | Q(display_text__icontains=term))
         else:
             resultset = Tag.objects.annotate(zero_distance=TrigramWordDistance(term, 'text'))
             resultset = resultset.filter(zero_distance__lte=.85)
             resultset = resultset.order_by('zero_distance', 'text')
-            resultset = resultset[:15]
+            resultset = resultset[:10]
         if resultset is None:
             resultset = Tag.objects.filter(
                 tag_type__type_name=tag_type) if fetch_all else []

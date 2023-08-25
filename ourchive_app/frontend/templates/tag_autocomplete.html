@@ -1,8 +1,8 @@
 {% load i18n %}
 {% if tags %}
-<div class="uk-card uk-card-body uk-card-default uk-card-small uk-height-max-medium ourchive-autocomplete-parent" id="search-tag-autocomplete-parent">
+<div class="uk-width-auto uk-height-max-medium ourchive-autocomplete-parent" id="search-tag-autocomplete-parent">
 	{% for tag in tags %}
-		<div class="ourchive-autocomplete-child"><p id="search-tag-autocomplete-graf-{{tag.tag}}" class="uk-text-left uk-margin-large-left"><a id="populate-search-tag-href-{{tag.tag}}" href="/tags/{{tag.id}}?term={{tag.tag}}"><span class="ourchive-autocomplete uk-text-small" id="search-tag-autocorrect-span-{{tag.tag}}">{{tag.tag}}</span></a></p></div>
+		<div class="ourchive-autocomplete-child"><p id="search-tag-autocomplete-graf-{{tag.tag}}" class="uk-text-left uk-margin-large-left"><a id="populate-search-tag-href-{{tag.tag}}" href="/tags/{{tag.id}}?term={{tag.tag}}"><span class="ourchive-autocomplete uk-text-small" id="search-tag-autocorrect-span-{{tag.tag}}">{{tag.display_text|default:tag.tag}}</span></a></p></div>
 	{% endfor %}
 </div>
 {% endif %}
