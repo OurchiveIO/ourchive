@@ -10,7 +10,7 @@
 		</div>
 	    <div class="uk-card-footer" id="notification-actions-container">
 	    	<div class="uk-margin-remove uk-align-right uk-text-right">
-	        {% if not notification.read %}<a href="/username/{{ notification.user }}/notifications/{{ notification.id }}/read" id="notification-mark-read" title="Mark as read" class="uk-icon-link uk-margin-right" uk-icon="check"></a>{% endif %} <a href="/username/{{ notification.user }}/notifications/{{ notification.id }}/delete" id="notification-mark-delete" title="Delete" class="uk-icon-link" uk-icon="trash"></a>
+	        {% if not notification.read %}<a href="/username/{{ notification.user }}/notifications/{{ notification.id }}/read" id="notification-{{ notification.id }}-mark-read" title="Mark {{ notification.id }} as read" class="uk-icon-link uk-margin-right" uk-icon="check"></a>{% endif %} <a href="/username/{{ notification.user }}/notifications/{{ notification.id }}/delete" id="notification-{{ notification.id }}-mark-delete" title="Delete Notification {{ notification.id }}" class="uk-icon-link" uk-icon="trash"></a>
 	    </div>
 	    </div>
 	</div>  

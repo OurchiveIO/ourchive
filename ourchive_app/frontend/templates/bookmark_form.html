@@ -45,7 +45,7 @@
         <label id="bookmark-form-title-label" class="uk-form-label" for="form-horizontal-text">Title</label>
         <div id="bookmark-form-title-form-control" class="uk-form-controls">
             <div id="bookmark-form-title-inline-div" class="uk-inline">
-                <input id="bookmark-form-title-input" class="uk-input uk-form-width-large" type="text" name="title" value="{{ bookmark.title|default_if_none:'' }}">
+                <input id="bookmark-form-title-input" title="Bookmark Title" class="uk-input uk-form-width-large" type="text" name="title" value="{{ bookmark.title|default_if_none:'' }}">
             </div>
         </div>
     </div>
@@ -59,7 +59,7 @@
         </div>
     </div>
     <hr id="bookmark-attributes-hr"/>
-    <span class="uk-inline"><h3 id="obj-attrs-form-header" class="uk-inline">Bookmark Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question"></sup>    
+    <span class="uk-inline"><h3 id="obj-attrs-form-header" class="uk-inline">Bookmark Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question" title="Tag help"></sup>    
         <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
     </span>
     {% include "object_attributes_form.html" with object='Bookmark' attribute_types=bookmark.attribute_types show_header=False %}
@@ -123,12 +123,12 @@
     <hr id="bookmark-settings-hr"/>
     <h3 id="obj-attrs-form-header">Bookmark Settings</h3>
     <div class="uk-margin" id="bookmark-form-draft-parent">
-        <label id="bookmark-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+        <label id="bookmark-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question" title="Draft Help"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
         </label>
         <div id="bookmark-form-draft-controls" class="uk-form-controls">
             <div id="bookmark-form-draft-inline" class="uk-inline">
-                <label id="bookmark-form-draft-label" class="switch"><input id="bookmark-form-draft-input" class="uk-checkbox" type="checkbox" name="draft" {% if bookmark.draft %} checked {% endif %}> <span class="slider round"></span> </label>
+                <label id="bookmark-form-draft-label" class="switch"><input id="bookmark-form-draft-input" title="Draft Checkbox" class="uk-checkbox" type="checkbox" name="draft" {% if bookmark.draft %} checked {% endif %}> <span class="slider round"></span> </label>
             </div>
         </div>
     </div>
@@ -137,7 +137,7 @@
     <div class="uk-margin" id="bookmark-form-allow-comments-parent">
         <label id="bookmark-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
         <div id="bookmark-form-allow-comments-controls" class="uk-form-controls">
-            <select id="bookmark-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted">                    
+            <select id="bookmark-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted" title="Comment Settings">                    
                 <option {% if bookmark.anon_comments_permitted and bookmark.comments_permitted %} selected {% endif %}>All</option>
                 <option {% if bookmark.anon_comments_permitted == False and bookmark.comments_permitted %} selected {% endif %}>Registered users only</option>
                 <option {% if not bookmark.anon_comments_permitted and not bookmark.comments_permitted %} selected {% endif %}>None</option>

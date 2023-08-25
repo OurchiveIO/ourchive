@@ -77,7 +77,7 @@
 		    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
 		    	 	<li id="nav-search-li">
 			                <div class="nav-overlay uk-navbar-right">
-			                	<a class="uk-navbar-toggle" uk-search-icon uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"></a>
+			                	<a class="uk-navbar-toggle" id="search-toggle-overlay" uk-search-icon uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"></a>
 			                </div>
     					<div class="nav-overlay uk-navbar-left uk-flex-1" hidden>
         					<div class="uk-navbar-item uk-width-expand uk-margin-small-left">
@@ -92,7 +92,7 @@
     					</div>
 		        	</li>
 		    	 	<li id="theme-switcher-li">
-		    	 		<a onclick="switchTheme()" id="theme-switcher-link">
+		    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" title="Switch Modes">
 		    	 			{% if request.session.css_mode == "dark" %}
 		    	 			<span class="custom-icon uk-text-medium" uk-icon="icon: sun-regular; ratio:1" title="Light Mode" id="theme-switcher-light">
 		    	 			{% else %}
@@ -200,7 +200,7 @@
 	<hr id="footer-hr">
 	<div id="footer-parent-grid" class="uk-text-center uk-grid uk-padding-small" uk-grid>
 	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s">
-	        <span id="footer-created-by" class="uk-text-meta uk-padding">Ourchive is created & maintained by <a href="https://federatedfandom.net/@kate" target="_blank">kate</a>, <a href="https://github.com/ladyofthelog">verity</a>, and <a href="https://federatedfandom.net/@imp" target="_blank">imp</a>. Issues with the site? Report <a class="uk-text-uppercase uk-text-meta" target="_blank" href="https://forms.bluecatreports.com/mXFMLWyv/issue-report">here</a>.</span>
+	        <span id="footer-created-by" class="uk-text-meta uk-padding">Ourchive is created & maintained by <a href="https://federatedfandom.net/@kate" target="_blank">kate</a>, <a href="https://github.com/ladyofthelog">verity</a>, and <a href="https://federatedfandom.net/@imp" target="_blank">imp</a>. Issues with the site? Report <a class="uk-text-uppercase uk-text-meta" target="_blank" title="Report Issue" href="https://forms.bluecatreports.com/mXFMLWyv/issue-report">here</a>.</span>
 	    </div>
 	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s">
 	        {% for page in content_pages %}

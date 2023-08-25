@@ -9,7 +9,7 @@
 		        </div>
 		        {% if bookmark_collection.user == request.user.username %}
 		        <div id="bkcol-tile-actions-parent" class="uk-align-right">
-		            <a id="bkcol-tile-edit-link" href="/bookmark-collections/{{bookmark_collection.id}}/edit"><span id="bkcol-tile-edit-span" uk-icon="icon: file-edit" title="Edit"></span> </a>
+		            <a id="bkcol-tile-edit-{{ bookmark_collection.id }}-link" href="/bookmark-collections/{{bookmark_collection.id}}/edit"><span id="bkcol-tile-edit-span" uk-icon="icon: file-edit" title="Edit Collection {{ bookmark_collection.id }}"></span> </a>
 		            <a id="bkcol-tile-delete-link" uk-toggle="target: #bookmark-collection-{{bookmark_collection.id}}-modal-delete"><span uk-icon="icon: trash" id="bkcol-tile-delete-span" title="Delete"></span> </a>
 			    <p>{% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bookmark_collection.id %}</p>
 		        </div>

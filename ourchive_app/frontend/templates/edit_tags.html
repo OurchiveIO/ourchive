@@ -4,7 +4,7 @@
     {% if tag_data.admin_administrated %}
         <div class="uk-margin" id="{{ object }}-form-tag-parent">
             <label id="{{ object }}-form-tag-type-label" class="uk-form-label" for="form-horizontal-text">{{ type }} <sup class="uk-margin-small-left">(admin)</sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This tag type is administrated by your site admin(s). This means that you can select an existing {{ type }}, but cannot create a new one.{% endblocktranslate %}</div>
+                <div class="uk-card uk-card-body uk-card-default" uk-drop title="Admin-Administrated Tag">{% blocktranslate %}This tag type is administrated by your site admin(s). This means that you can select an existing {{ type }}, but cannot create a new one.{% endblocktranslate %}</div>
             </label>
             <div id="{{ object }}-form-tag-controls" class="uk-form-controls">                
                 <div id="{{ object }}-form-tag-inline" class="uk-inline">
@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 <div class="uk-margin-top">
-                    <div><input autocomplete="off" pattern="^[a-zA-Z0-9]+$" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ tag_data.type_name }}_new_tag" onkeyup="tagCheck(event, '{{ tag_data.type_name }}', false, '{{ divider }}')" oninput="doAutocomplete(this.value, 'edit', '{{ tag_data.type_name }}', '{{ tag_data.type_name }}', '{{ divider }}')"> <span uk-icon="plus" onclick="tagCheck(event, '{{ tag_data.type_name }}', true, '{{ divider }}')"></span>
+                    <div><input autocomplete="off" pattern="^[a-zA-Z0-9]+$" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ tag_data.type_name }}_new_tag" onkeyup="tagCheck(event, '{{ tag_data.type_name }}', false, '{{ divider }}')" oninput="doAutocomplete(this.value, 'edit', '{{ tag_data.type_name }}', '{{ tag_data.type_name }}', '{{ divider }}')"> <span title="Add tag for {{ type }}" uk-icon="plus" onclick="tagCheck(event, '{{ tag_data.type_name }}', true, '{{ divider }}')"></span>
                         <div class="uk-card-small" id="tag-autocomplete-dropdown-{{ tag_data.type_name }}" uk-drop="target: #{{ tag_data.type_name }}_new_tag"></div>
                     </div>
                     

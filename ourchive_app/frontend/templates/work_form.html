@@ -40,11 +40,11 @@
         </div>
         <input type="hidden" id="redirect_toc" name="redirect_toc">
         <div class="uk-margin" id="work-form-type-parent">
-            <label id="work-form-type-label" class="uk-form-label" for="form-horizontal-text">Work Type <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+            <label id="work-form-type-label" class="uk-form-label" for="form-horizontal-text">Work Type <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work type help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Work types are admin-configured. Select the one that best matches what kind of work you're posting.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-type-controls" class="uk-form-controls">
-                <select id="work-form-type-select" class="uk-select uk-form-width-small" name="work_type">
+                <select id="work-form-type-select" class="uk-select uk-form-width-small" name="work_type" title="{% translate 'Work type dropdown' %}">
                     {% for item in work_types %}
                         {% if work.id %}
                             <option id="type_{{item.type_name}}" value="{{item.url}}" {% if work.work_type == item.url %} selected="selected" {% endif %}>{{ item.type_name }}</option>
@@ -60,13 +60,13 @@
             <label id="work-form-title-form-label" class="uk-form-label" for="form-horizontal-text">Title</label>
             <div id="work-form-title-controls" class="uk-form-controls">
                 <div id="work-form-title-inline" class="uk-inline">
-                    <input id="work-form-title-input" class="uk-input uk-form-width-large" type="text" name="title" value="{{ work.title|default_if_none:'' }}">
+                    <input id="work-form-title-input" class="uk-input uk-form-width-large" type="text" name="title" title="{% translate 'Work title input' %}" value="{{ work.title|default_if_none:'' }}">
                 </div>
             </div>
             
         </div>
         <hr id="work-attributes-hr"/>
-        <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Work Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question"></sup>    
+        <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Work Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question" title="{% translate 'Work tags help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
         {% include "object_attributes_form.html" with object='Work' attribute_types=work.attribute_types show_header=False %}
         {% include "edit_tags.html" with object='work' object_friendly='Work' show_header=False %}
@@ -173,17 +173,17 @@
             <label id="work-form-complete-label" class="uk-form-label" for="form-horizontal-text">Complete?</label>
             <div id="work-form-complete-controls" class="uk-form-controls">
                 <div id="work-form-complete-inline" class="uk-inline">
-                    <label id="work-form-complete-switch-label" class="switch"><input class="uk-checkbox" id="work-form-complete-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}> <span id="work-form-complete-slider" class="slider round"></span> </label>
+                    <label id="work-form-complete-switch-label" class="switch"><input title="{% translate 'Work complete toggle' %}" class="uk-checkbox" id="work-form-complete-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}> <span id="work-form-complete-slider" class="slider round"></span> </label>
                 </div>
             </div>
         </div>
         <div class="uk-margin" id="work-form-draft-parent">
-            <label id="work-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+            <label id="work-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work draft help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-draft-controls" class="uk-form-controls">
                 <div id="work-form-draft-inline" class="uk-inline">
-                    <label id="work-form-draft-switch" class="switch"><input class="uk-checkbox" id="work-form-draft-checkbox" type="checkbox" name="work_draft" {% if work.draft %} checked {% endif %}> <span id="work-form-draft-slider" class="slider round"></span></label>
+                    <label id="work-form-draft-switch" class="switch"><input title="{% translate 'Work draft toggle' %}" class="uk-checkbox" id="work-form-draft-checkbox" type="checkbox" name="work_draft" {% if work.draft %} checked {% endif %}> <span id="work-form-draft-slider" class="slider round"></span></label>
                 </div>
             </div>
         </div>
@@ -191,7 +191,7 @@
         <div class="uk-margin" id="work-form-allow-comments-parent">
             <label id="work-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
             <div id="work-form-allow-comments-controls" class="uk-form-controls">
-                <select id="work-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted">                    
+                <select id="work-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted" title="{% translate 'Comment settings' %}">                    
                     <option id="work-form-allow-comments-all" {% if work.anon_comments_permitted and work.comments_permitted %} selected {% endif %}>All</option>
                     <option id="work-form-allow-comments-registered" {% if work.anon_comments_permitted == False and work.comments_permitted %} selected {% endif %}>Registered users only</option>
                     <option id="work-form-allow-comments-none" {% if not work.anon_comments_permitted and not work.comments_permitted %} selected {% endif %}>None</option>
@@ -202,7 +202,7 @@
         {% endif %}
         {% if user.can_upload_export_files %}
         <div class="uk-margin" id="work-form-preferred-download-parent">
-            <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+            <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Preferred export help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you have a file for your work that you'd prefer users download, you can upload here and it will display at the top of the download list.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-preferred-download-controls" class="uk-form-controls">
@@ -232,7 +232,7 @@
     <div id="multichapter-select" class="uk-width-1-1">
         <label class="uk-form-label" for="form-horizontal-text">Multichapter?</label>
         <div id="work-form-multichapter-control" class="uk-form-controls">
-            <label id="work-form-multichapter-switch" class="switch"><input class="uk-checkbox" id="work-form-multichapter-checkbox" type="checkbox" uk-toggle="target: .work-chapter-content" {% if chapters|length > 1 or multichapter == 'true' %} checked {% endif %} name="multichapter"><span id="work-form-multichapter-slider" class="slider round"></span></label>
+            <label id="work-form-multichapter-switch" class="switch"><input class="uk-checkbox" id="work-form-multichapter-checkbox" title="{% translate 'Multichapter toggle' %}" type="checkbox" uk-toggle="target: .work-chapter-content" {% if chapters|length > 1 or multichapter == 'true' %} checked {% endif %} name="multichapter"><span id="work-form-multichapter-slider" class="slider round"></span></label>
         </div>
     </div>
     <div id="work-form-chapter-content-parent">
@@ -265,7 +265,7 @@
                     <div id="chapter-{{chapter.id}}-sortable" class="uk-sortable-handle">
                         <span class="uk-margin-small-right" uk-icon="icon: table"></span><span id="chapter-{{chapter.id}}-span" class="uk-text-medium">Chapter {{chapter.number}}: {{chapter.title}}</span>
                     </div>
-                    <div id="chapter-{{chapter.id}}-controls-div"><a id="chapter-{{chapter.id}}-edit-link" href="/works/{{work.id}}/chapters/{{chapter.id}}/edit">Edit</a> | <a id="chapter-{{chapter.id}}-delete-link" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete">Delete</a></div>
+                    <div id="chapter-{{chapter.id}}-controls-div"><a id="chapter-{{chapter.id}}-edit-link" href="/works/{{work.id}}/chapters/{{chapter.id}}/edit" title="{% translate 'Edit chapter' %} {{ chapter.id }}">Edit</a> | <a title="{% translate 'Delete chapter' %} {{ chapter.id }}" id="chapter-{{chapter.id}}-delete-link" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete">Delete</a></div>
                     {% if chapter.draft %}
                         <div class="uk-width-auto" id="chapter-{{chapter.id}}-draft-div">
                             <span id="chapter-{{chapter.id}}-draft-span" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
