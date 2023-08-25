@@ -48,7 +48,7 @@
     </div>
 </div>
 <div class="uk-margin" id="chapter-form-notes-parent">
-    <label class="uk-form-label" for="form-horizontal-text" id="chapter-form-notes-label">Notes</label>
+    <label class="uk-form-label" for="form-horizontal-text" id="chapter-form-notes-label">{% translate 'Notes' %}</label>
     <div class="uk-form-controls" id="chapter-form-notes-controls">
         <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-notes-inline">
             <input type="hidden" id="chapter_notes" name="notes" value="{{ chapter.notes|safe|default_if_none:'' }}">
@@ -216,6 +216,40 @@
         </div>
         <div class="uk-width-1-1" id="chapter-form-html-text">
             <textarea id="toggle-chapter-plaintext-area" rows="25" name="text_plain" class="chapter-text-toggle uk-width-expand" hidden>{{ chapter.text|safe|default_if_none:'' }}</textarea>
+        </div>
+    </div>
+</div>
+<div class="uk-margin" id="chapter-form-end-notes-parent">
+    <label class="uk-form-label" for="form-horizontal-text" id="chapter-form-end-notes-label">{% translate 'End Notes' %}</label>
+    <div class="uk-form-controls" id="chapter-form-end-notes-controls">
+        <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-end-notes-inline">
+            <input type="hidden" id="chapter_end_notes" name="end_notes" value="{{ chapter.end_notes|safe|default_if_none:'' }}">
+            <textarea id="chapterEndNotesEditor"></textarea>
+            <script type="text/javascript">
+                              tinymce.init({
+                                selector: '#chapterEndNotesEditor',
+                                width: '100%',
+                                height: 200,
+                                autoresize_min_height: 150,
+                                autoresize_max_height: 800,
+                                plugins: [
+                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
+                                  'fullscreen', 'insertdatetime',
+                                  'media', 'table', 'emoticons'
+                                ],
+                                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
+                                  'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+                                  'forecolor backcolor emoticons | help',
+                                menubar: '',
+                                init_instance_callback : function(editor) {
+                                    var chapterEndNotes = document.getElementById('chapter_end_notes').value;
+                                    if (chapterEndNotes === "None") {
+                                        chapterEndNotes = '';
+                                    }
+                                    editor.setContent(chapterEndNotes);
+                                }
+                              });
+           </script>
         </div>
     </div>
 </div>
