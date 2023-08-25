@@ -177,7 +177,7 @@ class PostgresProvider:
                 resultset = obj.objects.filter(Q(query & filters))
             else:
                 resultset = obj.objects.filter(query)
-        if resultset is not None and has_drafts:
+        if resultset is not None:
             resultset = resultset.filter(draft=False)
         if resultset is not None and len(resultset) == 0:
             # if exact matching & filtering produced no results, let's do limited trigram searching
