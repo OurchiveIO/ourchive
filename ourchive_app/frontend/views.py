@@ -590,6 +590,9 @@ def user_bookmark_collections(request, username):
 
 
 def user_notifications(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these notifications.'), 'notification-not-authed')
+		return redirect('/')
 	response = do_get(f'api/users/{username}/notifications', request, params=request.GET, object_name='Notification')
 	if response.response_info.status_code == 204 or response.response_info.status_code == 200:
 		notifications = response.response_data['results']
