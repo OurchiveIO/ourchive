@@ -1337,6 +1337,9 @@ def reset_password(request):
 
 
 def register(request):
+	if request.user.is_authenticated:
+		messages.add_message(request, messages.ERROR, _('You are already logged in.'), 'register-while-authed-error')
+		return redirect('/')
 	if request.method == 'POST':
 		response = do_post(f'api/users/', request, data=request.POST, object_name='Registration')
 		if response.response_info.status_code >= 200 and response.response_info.status_code < 400:
