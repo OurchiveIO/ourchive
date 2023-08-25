@@ -20,7 +20,7 @@
 		{% for job in user_imports.results %}
 			<tr id="user-imports-{{job.id}}-parent">
 		        <td id="user-subscriptions-{{job.id}}-work">{{job.work_id}}</td>
-		        <td id="user-subscriptions-{{job.id}}-processing">{{job.job_processing}}</td>
+		        <td id="user-subscriptions-{{job.id}}-processing">{% if job.processing %}{% translate 'Processing' %}{% else %}{% translate 'Queued for Import' %}{% endif %}</td>
 		        <td id="user-subscriptions-{{job.id}}-processing">{{job.created_on|date:'DATETIME_FORMAT'}} UTC</td>
 		    </tr>
 		{% endfor %}
