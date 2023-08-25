@@ -423,8 +423,8 @@ def user_block_list(request, username):
 	})
 
 
-def block_user(request, username):
-	data = {'user': request.user.username, 'blocked_user': username}
+def block_user(request, pk):
+	data = {'user': request.user.username, 'blocked_user': pk}
 	blocklist = do_post(f'api/userblocks', request, data, 'Block')
 	message_type = messages.WARNING
 	if blocklist.response_info.status_code >= 400:
@@ -432,10 +432,10 @@ def block_user(request, username):
 	elif blocklist.response_info.status_code >= 200:
 		message_type = messages.SUCCESS
 	messages.add_message(request, message_type, blocklist.response_info.message, blocklist.response_info.type_label)
-	return redirect(f'/username/{username}')
+	return redirect(f'/username/{pk}')
 
 
-def unblock_user(request, username, pk):
+def unblock_user(request, user_id, pk):
 	blocklist = do_delete(f'api/userblocks/{pk}', request, 'Blocklist')
 	message_type = messages.WARNING
 	if blocklist.response_info.status_code >= 400:
@@ -443,7 +443,7 @@ def unblock_user(request, username, pk):
 	elif blocklist.response_info.status_code >= 200:
 		message_type = messages.SUCCESS
 	messages.add_message(request, message_type, blocklist.response_info.message, blocklist.response_info.type_label)
-	return redirect(f'/username/{username}')
+	return redirect(f'/username/{user_id}')
 
 
 def report_user(request, username):

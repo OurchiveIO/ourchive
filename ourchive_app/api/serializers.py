@@ -80,8 +80,11 @@ class UserBlocksSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
-    blocked_user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field='username')
+    blocked_user_name = serializers.CharField(
+        source='blocked_user.username',
+        read_only=True
+    )
+    blocked_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
 
     class Meta:
         model = UserBlocks
