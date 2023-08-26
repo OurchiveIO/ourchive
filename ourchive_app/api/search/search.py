@@ -174,7 +174,7 @@ class PostgresProvider:
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
             if filters is not None:
-                resultset = obj.objects.filter(Q(query & filters))
+                resultset = obj.objects.filter(query).filter(filters)
             else:
                 resultset = obj.objects.filter(query)
         if resultset is not None and has_drafts:
@@ -590,11 +590,11 @@ class PostgresProvider:
                     attribute_filter_vals.append({"label": val, "filter_val": filter_val})
                 result_json.append({'label': key, 'values': attribute_filter_vals})
 
-        stars = OurchiveSetting.objects.filter(name='Rating Star Count').first()
+        stars = OurchiveSetting.objects.get(name='Rating Star Count')
         bookmark_rating_dict = {}
         bookmark_rating_dict["label"] = "Rating"
         bookmark_rating_dict["values"] = []
-        stars = get_star_count()
+        stars = get_star_count(stars)
         for star in stars:
             bookmark_rating_dict["values"].append(
                 {"label": f"{star}", "filter_val": f"rating_gte${star}"})

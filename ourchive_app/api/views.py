@@ -39,6 +39,7 @@ import threading
 from urllib.parse import unquote
 from etl.models import WorkImport
 from etl.ao3 import util
+from .utils import get_star_count
 from django.core.mail import send_mail
 from django.utils.translation import gettext as _
 
@@ -678,17 +679,6 @@ class BookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
-    # TODO: DRY
-    def get_star_count(self):
-        try:
-            if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
-                star_count = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
-            else:
-                star_count = list(range(1, 5))
-        except ObjectDoesNotExist:
-            star_count = list(range(1, 5))
-        return star_count
-
     def list(self, request, *args, **kwargs):
         response = super(BookmarkList, self).list(request, args, kwargs)
         try:
@@ -702,7 +692,7 @@ class BookmarkList(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         response = super(BookmarkList, self).create(request, args, kwargs)
-        response.data['star_count'] = self.get_star_count()
+        response.data['star_count'] = get_star_count(OurchiveSetting.objects.get(name='Rating Star Count'))
         return response
 
     def get_queryset(self):
@@ -724,19 +714,9 @@ class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
-    def get_star_count(self):
-        try:
-            if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
-                star_count = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
-            else:
-                star_count = list(range(1, 5))
-        except ObjectDoesNotExist:
-            star_count = list(range(1, 5))
-        return star_count
-
     def retrieve(self, request, *args, **kwargs):
         response = super(BookmarkDetail, self).retrieve(request, args, kwargs)
-        response.data['star_count'] = self.get_star_count()
+        response.data['star_count'] = get_star_count(OurchiveSetting.objects.get(name='Rating Star Count'))
         return response
 
     def get_queryset(self):

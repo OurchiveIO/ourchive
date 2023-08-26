@@ -4,6 +4,7 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 import nh3
 import unidecode
+from .utils import clean_tag_text
 
 
 class User(AbstractUser):
@@ -415,7 +416,7 @@ class Tag(models.Model):
         super(Tag, self).save(*args, **kwargs)
 
     def find_existing_tag(tag_text, tag_type_id):
-        cleaned_text = unidecode.unidecode(nh3.clean(tag_text.lower()))
+        cleaned_text = clean_tag_text(tag_text)
         existing_tag = Tag.objects.filter(text__iexact=cleaned_text, tag_type__id=tag_type_id).first()
         return existing_tag
 
