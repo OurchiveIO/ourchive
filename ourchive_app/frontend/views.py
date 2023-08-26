@@ -969,7 +969,6 @@ def new_chapter(request, work_id):
 def edit_chapter(request, work_id, id):
 	if request.method == 'POST':
 		chapter_dict = request.POST.copy()
-		print(chapter_dict)
 		chapter_dict["draft"] = "chapter_draft" in chapter_dict
 		chapter_dict["attributes"] = get_attributes_from_form_data(request)
 		response = do_patch(f'api/chapters/{id}/', request, data=chapter_dict, object_name='Chapter')
@@ -1101,7 +1100,6 @@ def delete_work(request, work_id):
 	response = do_delete(f'api/works/{work_id}/', request, object_name='Work')
 	process_message(request, response)
 	referrer = request.META.get('HTTP_REFERER')
-	print(referrer)
 	if f'works/{work_id}' in referrer:
 		return redirect('/')
 	return referrer_redirect(request, referrer)
