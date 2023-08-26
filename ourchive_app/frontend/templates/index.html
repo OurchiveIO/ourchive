@@ -119,7 +119,7 @@
 	                    		<ul class="uk-nav uk-navbar-dropdown-nav uk-list-divider uk-list-collapse" id="nav-user-dropdown-ul">
 	                    			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
 	                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
-	                    			<li id="nav-creations-li"><a href="#" id="nav-creations-link">{% translate 'My Content' %}</a></li>
+	                    			<li id="nav-creations-li"><a href="#" id="nav-creations-link">{% translate 'My Chives' %}</a></li>
 	                    			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="creations-subnav">
 	                    				<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link">Bookmarks</a></li>
 	                    				<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link">{% translate 'Collections' %}</a></li>
