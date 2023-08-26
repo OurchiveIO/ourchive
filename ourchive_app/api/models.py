@@ -294,8 +294,9 @@ class Chapter(models.Model):
         else:
             self.word_count = 0
         super(Chapter, self).save(*args, **kwargs)
+        work_word_count = 0
         for work_chapter in self.work.chapters.all():
-                work_word_count += work_chapter.word_count
+            work_word_count += work_chapter.word_count
         Work.objects.filter(id=self.work.id).update(**{'word_count': work_word_count})
 
     class Meta:
