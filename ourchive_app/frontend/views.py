@@ -227,6 +227,10 @@ def prepare_chapter_data(chapter, request):
 		chapter['summary'] = sanitize_rich_text(chapter['summary'])
 	if 'notes' in chapter:
 		chapter['notes'] = sanitize_rich_text(chapter['notes'])
+		chapter['notes'] = chapter['notes'].replace('\r\n', '<br/>')
+	if 'end_notes' in chapter:
+		chapter['end_notes'] = sanitize_rich_text(chapter['end_notes'])
+		chapter['notes'] = chapter['notes'].replace('\r\n', '<br/>')
 	og_attributes = chapter['attributes'] if 'attributes' in chapter else []
 	chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True}, object_name='Attribute')
 	chapter['attribute_types'] = process_attributes(og_attributes, chapter_attributes.response_data['results'])
