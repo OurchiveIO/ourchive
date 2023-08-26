@@ -155,7 +155,6 @@ class EtlWorkImport(object):
             self.handle_job_fail(import_job)
             return
         work_dict = {}
-        print(work_importer.json())
         try:
             work_dict = work_importer.__dict__()
         except Exception as err:
