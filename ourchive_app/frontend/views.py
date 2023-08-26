@@ -132,6 +132,8 @@ def get_work_obj(request, work_id=None):
 			json_item = request.POST[item].split(settings.TAG_DIVIDER)
 			tag['tag_type'] = tag_types[json_item[2]]['label']
 			tag['text'] = json_item[1]
+			if not json_item[1].strip():
+				continue
 			tags.append(tag)
 			work_dict.pop(item)
 		elif 'chapters_' in item and work_id is not None:
@@ -165,9 +167,11 @@ def get_bookmark_obj(request):
 	for item in result.response_data['results']:
 		tag_types[item['type_name']] = item
 	for item in request.POST:
-		if 'tags' in request.POST[item]:
+		if 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
 			tag = {}
 			json_item = request.POST[item].split(settings.TAG_DIVIDER)
+			if not json_item[1].strip():
+				continue
 			tag['tag_type'] = tag_types[json_item[2]]['label']
 			tag['text'] = json_item[1]
 			tags.append(tag)
@@ -192,11 +196,13 @@ def get_bookmark_collection_obj(request):
 	for item in result.response_data['results']:
 		tag_types[item['type_name']] = item
 	for item in request.POST:
-		if 'tags' in request.POST[item]:
+		if 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
 			tag = {}
 			json_item = request.POST[item].split(settings.TAG_DIVIDER)
 			tag['tag_type'] = tag_types[json_item[2]]['label']
 			tag['text'] = json_item[1]
+			if not json_item[1].strip():
+				continue
 			tags.append(tag)
 			collection_dict.pop(item)
 		if 'bookmarksidstoadd' in request.POST[item]:
@@ -245,6 +251,26 @@ def get_default_search_result_tab(resultsets):
 			most_results = len(results[0])
 			default_tab = results[1]
 	return default_tab
+
+
+def get_bookmark_boilerplate(request, work_id):
+	bookmark = {
+			'title': '',
+			'description': '',
+			'user': request.user.username,
+			'work': {'title': request.GET.get('title'), 'id': work_id},
+			'is_private': True,
+			'anon_comments_permitted': True,
+			'comments_permitted': True
+		}
+	bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
+	bookmark['attribute_types'] = process_attributes([], bookmark_attributes.response_data['results'])
+	tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+	tags = group_tags_for_edit([], tag_types)
+	# todo - this should be a specific endpoint, we don't need to retrieve 10 objects to get config
+	star_count = do_get(f'api/bookmarks', request, 'Bookmark').response_data['star_count']
+	bookmark['rating'] = star_count
+	return [bookmark, tags, star_count]
 
 
 def referrer_redirect(request, alternate_url=None):
@@ -1117,28 +1143,13 @@ def delete_chapter(request, work_id, chapter_id):
 
 def new_bookmark(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
-		bookmark = {
-			'title': '',
-			'description': '',
-			'user': request.user.username,
-			'work': {'title': request.GET.get('title'), 'id': work_id},
-			'is_private': True,
-			'anon_comments_permitted': True,
-			'comments_permitted': True
-		}
-		bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
-		bookmark['attribute_types'] = process_attributes([], bookmark_attributes.response_data['results'])
-		tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
-		tags = group_tags_for_edit([], tag_types)
-		# todo - this should be a specific endpoint, we don't need to retrieve 10 objects to get config
-		star_count = do_get(f'api/bookmarks', request, 'Bookmark').response_data['star_count']
-		bookmark['rating'] = star_count
+		bookmark_boilerplate = get_bookmark_boilerplate(request, work_id)
 		return render(request, 'bookmark_form.html', {
-			'tags': tags,
+			'tags': bookmark_boilerplate[1],
 			'divider': settings.TAG_DIVIDER,
-			'rating_range': star_count,
+			'rating_range': bookmark_boilerplate[2],
 			'form_title': 'New Bookmark',
-			'bookmark': bookmark})
+			'bookmark':  bookmark_boilerplate[0]})
 	elif request.user.is_authenticated:
 		bookmark_dict = get_bookmark_obj(request)
 		if 'rating' not in bookmark_dict:
@@ -1147,6 +1158,14 @@ def new_bookmark(request, work_id):
 			bookmark_dict['rating'] = 0
 		response = do_post(f'api/bookmarks/', request, data=bookmark_dict, object_name='Bookmark')
 		process_message(request, response)
+		if 'id' not in response.response_data:
+			bookmark_boilerplate = get_bookmark_boilerplate(request, work_id)
+			return render(request, 'bookmark_form.html', {
+				'tags': bookmark_boilerplate[1],
+				'divider': settings.TAG_DIVIDER,
+				'rating_range': bookmark_boilerplate[2],
+				'form_title': 'New Bookmark',
+				'bookmark':  bookmark_boilerplate[0]})
 		return redirect(f'/bookmarks/{response.response_data["id"]}')
 	else:
 		return get_unauthorized_message(request, '/login', 'bookmark-create-login-error')
