@@ -19,11 +19,6 @@
 </head>
 <body>
 	<script>
-		if (('{{css_mode}}' == "light" || '{{css_mode}}' == "dark") && (localStorage.getItem("fe-theme") == "light" || localStorage.getItem("fe-theme") == "dark")) {
-			if ('{{css_mode}}' !== localStorage.getItem("fe-theme")) {
-				window.location.reload();
-			}
-		}
 		function switchTheme() {
 			fetch('{% url 'switch-css-mode' %}').then((response) => {
 				localStorage.setItem("fe-theme", '{{css_mode}}' == 'dark' ? 'light' : 'dark');

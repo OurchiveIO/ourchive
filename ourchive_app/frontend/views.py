@@ -127,7 +127,7 @@ def get_work_obj(request, work_id=None):
 		elif item == 'chapter_id':
 			chapter_dict['id'] = request.POST[item]
 			work_dict.pop('chapter_id')
-		elif 'tags' in request.POST[item]:
+		elif 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
 			tag = {}
 			json_item = request.POST[item].split(settings.TAG_DIVIDER)
 			tag['tag_type'] = tag_types[json_item[2]]['label']
