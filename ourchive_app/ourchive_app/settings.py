@@ -258,7 +258,7 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'level': 'DEBUG',
+            'level':  os.getenv("OURCHIVE_LOG_LEVEL", "INFO"),
             'handlers': ['file'],
         },
     },
