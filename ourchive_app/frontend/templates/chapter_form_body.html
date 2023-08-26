@@ -210,6 +210,18 @@
 								paste_preprocess: function(editor, args) {
 									args.content = args.content.replaceAll("<br />", "");
 								},
+								paste_postprocess: function(plugin, args) {
+									let removeParagraphStyles = function(node) {
+										// Only strip styles from paragraph tags.
+										if(node.localName == "p") {
+											node.setAttribute('style', {});
+										}
+										for(let index = 0; index < node.children.length; index++) {
+											removeParagraphStyles(node.children[index]);
+										}
+									};
+									removeParagraphStyles(args.node);
+								},
                                 init_instance_callback : function(editor) {
                                 	var chapterText = document.getElementById('chapter_text').value;
                                     editor.setContent(chapterText);
