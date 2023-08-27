@@ -9,7 +9,7 @@ function getChapterRichTextValues() {
     }
 }
 
-function updateModeText() {
+function updateModeText(toggling=false) {
 	const richTextContainer = document.getElementById('toggle-chapter-richtext-area');
 	const plainTextContainer = document.getElementById('toggle-chapter-plaintext-area');
 	if (document.getElementById('chapter-text-edit-mode-toggle').checked) {
@@ -19,9 +19,11 @@ function updateModeText() {
 		richTextContainer.removeAttribute('hidden');
 	}
 	else {
-		const grafEx = new RegExp('<p>', "g");
-		const whEx = new RegExp('</p>', "g");
-		document.getElementById('toggle-chapter-plaintext-area').innerHTML = tinymce.get("chapterTextEditor").getContent().replace(/\r?\n?/g, '').replace(grafEx, '\n').replace(whEx, '').replace('\n', '');
+		if (toggling) {
+			const grafEx = new RegExp('<p>', "g");
+			const whEx = new RegExp('</p>', "g");
+			document.getElementById('toggle-chapter-plaintext-area').innerHTML = tinymce.get("chapterTextEditor").getContent().replace(/\r?\n?/g, '').replace(grafEx, '\n').replace(whEx, '').replace('\n', '');
+		}
 		localStorage.setItem('rich-text', false);
 		richTextContainer.setAttribute('hidden', true);
 		plainTextContainer.removeAttribute('hidden');

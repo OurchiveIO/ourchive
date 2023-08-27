@@ -28,7 +28,7 @@
                                 autoresize_min_height: 150,
                                 autoresize_max_height: 800,
                                 plugins: [
-                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak', 'paste',
+                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak', 
                                   'fullscreen', 'insertdatetime',
                                   'media', 'table', 'emoticons'
                                 ],
@@ -180,7 +180,7 @@
         	<span width="150" class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
             </span>
-			<label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText()" checked>
+			<label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText(true)" checked>
         		<span class="slider round"></span></label>
         	</div>
         	<input type="hidden" id="chapter_text" name="text" value="{{ chapter.text|safe|default_if_none:'' }}">
