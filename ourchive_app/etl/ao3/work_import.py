@@ -6,6 +6,7 @@ import logging
 from etl.models import WorkImport, ObjectMapping
 from api import models as api
 from django.utils.translation import gettext as _
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,13 @@ class EtlWorkImport(object):
                     f'Work import: Exception creating import job for: {work_id} username: {username}. Error: {err}')
                 return False
         return True
+
+    def clean_old_jobs(self):
+        try:
+            import_jobs = WorkImport.objects.filter(job_finished=True, created_on__lte=datetime.now()-timedelta(days=7)).filter(
+                job_processing=False).delete()
+        except Exception as err:
+            logger.error(f'Import job cleanup failed: {err}')
 
     def run_unprocessed_jobs(self):
         import_jobs = WorkImport.objects.filter(job_finished=False).filter(

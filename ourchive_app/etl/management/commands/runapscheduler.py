@@ -19,6 +19,11 @@ def process_works():
   importer.run_unprocessed_jobs()
 
 
+def import_job_cleanup():
+  importer = EtlWorkImport(0)
+  importer.clean_old_jobs()
+
+
 # The `close_old_connections` decorator ensures that database connections, that have become
 # unusable or are obsolete, are closed before and after your job has run. You should use it
 # to wrap any jobs that you schedule that access the Django database in any way. 
@@ -44,12 +49,21 @@ class Command(BaseCommand):
 
     scheduler.add_job(
       process_works,
-      trigger=CronTrigger(hour="*/2"),  # Every 10 minutes
+      trigger=CronTrigger(hour="*/2"),  # Every 2 hours
       id="process_works",  # The `id` assigned to each job MUST be unique
       max_instances=1,
       replace_existing=True,
     )
     logger.info("Added job 'process_works'.")
+
+    scheduler.add_job(
+      import_job_cleanup,
+      trigger=CronTrigger(day="*/7"),  # Every week
+      id="import_job_cleanup",  # The `id` assigned to each job MUST be unique
+      max_instances=1,
+      replace_existing=True,
+    )
+    logger.info("Added job 'import_job_cleanup'.")
 
     try:
       logger.info("Starting scheduler...")
