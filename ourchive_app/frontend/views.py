@@ -89,6 +89,11 @@ def sanitize_rich_text(rich_text):
 
 def get_work_obj(request, work_id=None):
 	work_dict = request.POST.copy()
+	publish_all = False
+	if 'publish_all' in work_dict:
+		publish = work_dict.pop('publish_all')
+		if publish[0].lower() == 'on':
+			publish_all = True
 	multichapter = work_dict.pop('multichapter') if 'multichapter' in work_dict else None
 	chapter_dict = {
 		'title': '',
@@ -156,7 +161,7 @@ def get_work_obj(request, work_id=None):
 	work_dict = work_dict.dict()
 	work_dict["user"] = str(request.user)
 	work_dict["attributes"] = get_attributes_from_form_data(request)
-	return [work_dict, redirect_toc, chapters, chapter_dict]
+	return [work_dict, redirect_toc, chapters, chapter_dict, publish_all]
 
 
 def get_bookmark_obj(request):
@@ -963,6 +968,9 @@ def new_work(request):
 			response = do_post(f'api/chapters/', request, chapter_dict, 'Chapter')
 			if response.response_info.status_code >= 400:
 				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		if work_data[4]:
+			data = {'id': id, 'draft': False}
+			response = do_patch(f'api/works/{work["id"]}/publish-full/', request, data=data, object_name='Work And Chapters')
 		if work_data[1] == 'false' or chapter_dict is not None:
 			return redirect(f'/works/{work["id"]}')
 		else:
@@ -1036,6 +1044,9 @@ def edit_work(request, id):
 				response = do_patch(f'api/chapters/{chapter["id"]}/', request, data=chapter, object_name='Work')
 				if response.response_info.status_code >= 400:
 					messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+			if work_dict[4]:
+				data = {'id': id, 'draft': False}
+				response = do_patch(f'api/works/{id}/publish-full/', request, data=data, object_name='Work And Chapters')
 		else:
 			messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
 		if work_dict[1] == 'false':

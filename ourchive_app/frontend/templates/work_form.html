@@ -22,7 +22,7 @@
     <div id="work-form-top-controls-parent" class="uk-grid" uk-grid>
         <div id="work-form-title-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
             {% if work.id %}
-                <span id="work-form-title-span" class="uk-text-large"><a id="work-form-title-link" href="/works/{{work.id}}">{{ form_title }}</a></span> <span id="work-form-publish-all-span" class="uk-text-meta uk-margin-medium-left">(<a id="work-form-publish-all" class="uk-link" href="/works/{{ work.id }}/publish-full">Publish All</a>)</span>
+                <span id="work-form-title-span" class="uk-text-large"><a id="work-form-title-link" href="/works/{{work.id}}">{{ form_title }}</a></span>
             {% else %}
                 <span id="work-form-title-span" class="uk-text-large">{{ work.title }}</span>
             {% endif %}
@@ -186,6 +186,16 @@
             <div id="work-form-draft-controls" class="uk-form-controls">
                 <div id="work-form-draft-inline" class="uk-inline">
                     <label id="work-form-draft-switch" class="switch"><input title="{% translate 'Work draft toggle' %}" class="uk-checkbox" id="work-form-draft-checkbox" type="checkbox" name="work_draft" {% if work.draft %} checked {% endif %}> <span id="work-form-draft-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div>
+        <div class="uk-margin" id="work-form-publish-all-parent">
+            <label id="work-form-publish-all-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Publish All' %}? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work draft help' %}"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your work and all chapters will no longer be in draft state.{% endblocktranslate %}</div>
+            </label>
+            <div id="work-form-publish-all-controls" class="uk-form-controls">
+                <div id="work-form-publish-all-inline" class="uk-inline">
+                    <label id="work-form-publish-all-switch" class="switch"><input title="{% translate 'Work publish all toggle' %}" class="uk-checkbox" id="work-form-publish-all-checkbox" type="checkbox" name="publish_all"> <span id="work-form-publish-all-slider" class="slider round"></span></label>
                 </div>
             </div>
         </div>
