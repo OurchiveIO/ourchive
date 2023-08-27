@@ -180,7 +180,7 @@
         	<span width="150" class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
             </span>
-        	<label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText()" checked uk-toggle="target: .chapter-text-toggle")> 
+			<label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText()" checked>
         		<span class="slider round"></span></label>
         	</div>
         	<input type="hidden" id="chapter_text" name="text" value="{{ chapter.text|safe|default_if_none:'' }}">
@@ -204,7 +204,7 @@
                                 menubar: '',
                                 setup : function(ed) {
 								    ed.on('init', function(event) {
-								      ed.getContainer().classList.add("chapter-text-toggle");
+								      ed.getContainer().setAttribute('id', 'toggle-chapter-richtext-area');
 								    });
 								},
 								paste_preprocess: function(editor, args) {
@@ -225,6 +225,12 @@
                                 init_instance_callback : function(editor) {
                                 	var chapterText = document.getElementById('chapter_text').value;
                                     editor.setContent(chapterText);
+									// This handles user preferences in local storage for whether they prefer rich text or plain text/HTML input.
+									let richTextPreference = localStorage.getItem('rich-text');
+									const richTextCheckbox = document.querySelector('#chapter-text-edit-mode-toggle');
+									// This data is saved in local storage as a string, and we want to default to rich text mode.
+									richTextCheckbox.checked = richTextPreference !== 'false';
+									updateModeText();
                                 }
                               });
            </script>
