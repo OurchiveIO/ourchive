@@ -407,7 +407,6 @@ def import_works(request, username):
 		messages.add_message(request, messages.ERROR, _('You must be logged in to import works.'), 'Import')
 		return redirect('/login')
 	if request.method == 'POST':
-		referer = request.POST.get('referer')
 		allow_anon_comments = request.POST.get('allow_anon_comments') == 'on'
 		allow_comments = request.POST.get('allow_comments') == 'on'
 		save_as_draft = request.POST.get('save_as_draft') == 'on'
@@ -423,7 +422,7 @@ def import_works(request, username):
 		response = do_post(f'api/users/import-works/', request, data, 'Import')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, _('Import has started. You will receive a notification when it completes.'), response.response_info.type_label)
-		return redirect(referer)
+		return redirect('/')
 	return render(request, 'work_import_form.html', {
 		'form_title': _('Import AO3 Work(s)'),
 		'referer': request.META.get('HTTP_REFERER')
