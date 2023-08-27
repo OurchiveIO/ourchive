@@ -945,7 +945,7 @@ def new_work(request):
 			'comments_permitted': True
 		}
 		work_chapter = {
-			'title': 'Untitled Chapter',
+			'title': '',
 			'number': 1
 		}
 		tag_types = do_get(f'api/tagtypes', request, 'Tag').response_data
@@ -983,7 +983,7 @@ def new_work(request):
 def new_chapter(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
 		count = request.GET.get('count') if request.GET.get('count') != '' else 0
-		chapter = {'title': 'Untitled Chapter', 'work': work_id, 'text': '', 'number': int(count) + 1}
+		chapter = {'title': '', 'work': work_id, 'text': '', 'number': int(count) + 1}
 		chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True}, object_name='Chapter')
 		chapter['attribute_types'] = process_attributes([], chapter_attributes.response_data['results'])
 		return render(request, 'chapter_form.html', {
@@ -1070,7 +1070,7 @@ def edit_work(request, id):
 			chapters = do_get(f'api/works/{id}/chapters/all', request, 'Chapter').response_data
 			chapter_count = int(work['chapter_count'])
 			if chapter_count < 2:
-				work_chapter = do_get(f'api/works/{id}/chapters', request, 'Chapter').response_data['results'][0] if chapter_count > 0 else {'title': 'Untitled Chapter','number': 1}
+				work_chapter = do_get(f'api/works/{id}/chapters', request, 'Chapter').response_data['results'][0] if chapter_count > 0 else {'title': '','number': 1}
 			else:
 				work_chapter = chapters[0]
 			work_chapter = prepare_chapter_data(work_chapter, request)

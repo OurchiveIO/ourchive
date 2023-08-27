@@ -275,7 +275,7 @@
             <li id="chapters-list-{{chapter.id}}">
                 <div id="chapter-{{chapter.id}}-card" class="uk-card uk-card-hover uk-card-body uk-grid-small uk-child-width-1-2 uk-text-left uk-padding-small" uk-grid>
                     <div id="chapter-{{chapter.id}}-sortable" class="uk-sortable-handle">
-                        <span class="uk-margin-small-right" uk-icon="icon: table"></span><span id="chapter-{{chapter.id}}-span" class="uk-text-medium">Chapter {{chapter.number}}: {{chapter.title}}</span>
+                        <span class="uk-margin-small-right" uk-icon="icon: table"></span><span id="chapter-{{chapter.id}}-span" class="uk-text-medium">Chapter {{chapter.number}}{% if chapter.title %}: {{chapter.title}}{% endif %}</span>
                     </div>
                     <div id="chapter-{{chapter.id}}-controls-div"><a id="chapter-{{chapter.id}}-edit-link" href="/works/{{work.id}}/chapters/{{chapter.id}}/edit" title="{% translate 'Edit chapter' %} {{ chapter.id }}">Edit</a> | <a title="{% translate 'Delete chapter' %} {{ chapter.id }}" id="chapter-{{chapter.id}}-delete-link" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete">Delete</a></div>
                     {% if chapter.draft %}
