@@ -575,7 +575,16 @@ class TopTagList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return Tag.objects.filter(tag_type__filterable=True).annotate(num_uses=Count("bookmark")+Count("work")).order_by("-num_uses")[:30]
+        return Tag.objects.filter(tag_type__filterable=True).annotate(num_uses=Count("bookmark")+Count("work")).order_by("-num_uses")[:15]
+
+
+class RecentWorksList(generics.ListAPIView):
+    serializer_class = WorkSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = NonPaginatedResultSetPagination
+
+    def get_queryset(self):
+        return Work.objects.filter(draft=False).order_by("-updated_on")[:10]
 
 
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):

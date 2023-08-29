@@ -2,9 +2,8 @@
 {% load i18n %}
 {% block title %}Work - {{ work.title }}{% endblock %}
 {% block content %}	
-<div id="work-parent-grid" class="uk-child-width-1@m uk-child-width-1@s uk-text-left uk-width-expand" uk-grid>
-<article id="work-article" class="uk-article">
-    <div id="work-article-grid" class="uk-child-width-2-1" uk-grid>
+<article id="work-article" class="uk-article uk-width-expand uk-padding-remove">
+    <div id="work-article-grid" class="uk-child-width-2-1 ourchive-parent-grid" uk-grid>
         {% if work.user == request.user.username %}
             <div id="work-controls-parent" class="uk-text-left uk-width-1-2@m uk-width-1-1@s uk-margin-small-bottom">
                 {% if work.has_drafts %}<a id="work-publish-all-link" href="/works/{{ id }}/publish-full" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="publish-all-span">{% translate 'Publish All' %}</span> </a>{% endif %}
@@ -52,7 +51,7 @@
             <hr class="ourchive-hr" id="work-top-hr"/>
         </div>
     </div>
-    <div id="work-intro-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
+    <div id="work-intro-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" uk-grid>
         {% if work.summary %}<div id="work-summary-div"><span id="work-summary-span" class="uk-text-large">Summary</span></div>
         <div id="work-summary-text-div"><span id="work-summary-text-span" class="uk-text-medium">{% autoescape off %}{{ work.summary|default_if_none:'' }}{% endautoescape %}</span></div>{% endif %}
         <div class="uk-text-right" id="work-metadata-parent">
@@ -66,7 +65,7 @@
     </div>
     {% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}
     {% include "tag_partial.html" with obj_name='work-tag' tags=tags.items %}
-    <hr class="uk-divider-icon" id="work-chapter-hr"/>
+    <div id="work-chapter-hr-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" uk-grid><div><hr class="uk-divider-icon" id="work-chapter-hr"/></div></div>
     {% if chapter %} 
         {% include "chapter.html" %}  
     {% elif chapters %}
@@ -76,7 +75,6 @@
         {% endfor %}  
     {% endif %}
 </article>
-</div>
 {% if scroll_comment_id %}
     <script>
         window.onload = function(){

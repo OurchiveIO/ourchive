@@ -1,5 +1,5 @@
 {% load i18n %}
-<div id="chapter-grid-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+<div id="chapter-grid-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left ourchive-parent-grid" uk-grid>
 	<script>
 		function loadMoreComments(next, chapterId) {
 			fetch(next)
@@ -54,7 +54,7 @@
 		</div>
 		{% endif %}
 	{% endif %}
-	<div class="uk-width-1-1">
+	<div class="uk-width-1-1 ourchive-padding-tiny-horizontal">
 	{% if chapter.image_url and chapter.image_url != "None" %}
 		<p id="chapter-image-graf">
 			<img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/>

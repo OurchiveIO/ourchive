@@ -322,6 +322,7 @@ def get_works_list(request, username=None):
 
 def index(request):
 	top_tags = []
+	recent_works = []
 	response = do_get(f'api/tags/top', request, params=request.GET, object_name='top tags')
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
 		top_tags = response.response_data['results']
@@ -335,11 +336,15 @@ def index(request):
 				font_size = font_size + 1
 			tag['font_size'] = f'{font_size}em'
 		random.shuffle(top_tags)
+	response = do_get(f'api/works/recent', request, params=request.GET, object_name='recent works')
+	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
+		recent_works = response.response_data['results']
 	return render(request, 'index.html', {
 		'heading_message': _('ourchive_welcome'),
 		'long_message': _('ourchive_intro_copy'),
 		'root': settings.ROOT_URL,
 		'top_tags': top_tags,
+		'recent_works': recent_works,
 		'stylesheet_name': 'ourchive-light.css',
 		'has_notifications': request.session.get('has_notifications')
 	})

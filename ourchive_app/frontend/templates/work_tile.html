@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="uk-margin" id="work-{{work.id}}-tile-parent">
+<div class="uk-width-1-1 uk-padding-remove-horizontal" id="work-{{work.id}}-tile-parent">
 	<div class="uk-card uk-card-default" id="work-{{work.id}}-tile-card">
 	    <div class="uk-card-header uk-padding-small ourchive-card-head" id="work-{{work.id}}-tile-card-header">
 	        <div class="uk-grid-small uk-flex-middle" uk-grid id="work-{{work.id}}-tile-card-header-grid">
@@ -10,7 +10,7 @@
 	            {% endif %}
 	            <div class="uk-width-expand" id="work-{{work.id}}-tile-title-parent">
 	                {% if work.draft == True %}
-	                	<span id="work-{{work.id}}-tile-draft-title" class="uk-text-medium uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-draft-title-link" href="/works/{{work.id}}?draft=true">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {{ work.user }}</span>
+	                	<span id="work-{{work.id}}-tile-draft-title" class="uk-text-medium uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-draft-title-link" href="{% url 'fe-work-view' work.id %}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {{ work.user }}</span>
 		                <p class="uk-label uk-margin-remove-top uk-margin-remove-right uk-margin-remove-left uk-text-small uk-inline uk-label-warning" id="work-{{work.id}}-tile-draft-button-span"><strong>DRAFT</strong></p>
 	                {% else %}
 	                	<span id="work-{{work.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {{ work.user }}</span>

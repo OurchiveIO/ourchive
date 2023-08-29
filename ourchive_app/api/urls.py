@@ -7,6 +7,7 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('', views.api_root),
     path('works/', views.WorkList.as_view(), name='work-list'),
+    path('works/recent/', views.RecentWorksList.as_view(), name='recent-works-list'),
     path('works/<int:pk>/', views.WorkDetail.as_view(), name='work-detail'),
     path('works/<int:pk>/export/', views.ExportWork.as_view(), name='export-work'),
     path('works/<int:pk>/publish-full/', views.PublishWork.as_view(), name='publish-work'),

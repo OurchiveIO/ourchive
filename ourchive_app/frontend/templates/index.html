@@ -174,23 +174,50 @@
 		</div>
 	</div>
 	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="arrow-up"></span></button>
-	<div class="uk-container uk-margin content-block-parent" id="content-block-parent">	
-		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true" class="uk-grid">
+	<div class="uk-width-expand uk-container uk-margin content-block-parent" id="content-block-parent">	
+		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true" class="uk-grid uk-margin-remove ourchive-top-level-grid">
 			{% block content %}
-				<div class="uk-child-width-1-1" id="index-content-div">
+				<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-bottom ourchive-parent-grid" id="index-content-intro-div">
 				        <h1 id="index-content-heading" class="uk-heading-medium">{{ heading_message }}</h1>
 				  		<span id="index-content-message">{{ long_message }}</span>
-						<form id="index-content-search-form" class="uk-search uk-search-large" method="post" action="search/">
-							{% csrf_token %}
-							<a id="index-content-search-link" href="#" uk-search-icon></a>
-							<input autocomplete="off" id="index-content-search-input" class="uk-search-input" type="search" name="term" placeholder="Search..." value="{{ term }}" oninput="doAutocomplete(this.value, 'search', 'main')">
-							<div id="tag-autocomplete-dropdown-main" uk-drop></div>
-						</form>
-						
-				</div>		  
-			{% endblock %}	
+				</div>
+				<div class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-medium-top ourchive-parent-grid" id="recent-works-column">
+					<h2 id="recent-works-header">{% translate 'Recent Works' %}</h2>
+					<ul class="uk-list uk-list-striped" id="recent-works-ul">
+						{% for work in recent_works %}
+							<li id="recent-works-li-{{work.id}}"><a href="{% url 'fe-work-view' work.id %}" title="{{ work.title }}">{{ work.title }} {% translate 'by' %} {{ work.user }}</a></li>
+						{% endfor %}
+					</ul>
+				</div>
+				<div class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-right uk-margin-medium-top ourchive-parent-grid" id="index-content-tag-cloud-div">
+					<h2 class="uk-text-center" id="top-tags-header">{% translate 'Top Tags' %}</h2>
+					<!-- Tag cloud adapted from https://css-tricks.com/create-a-tag-cloud-with-some-simple-css-and-even-simpler-javascript/ -->
+						<ul class="ourchive-homepage-tags" id="cloud-tag-ul">
+						{% for tag in top_tags %}
+							<li class="ourchive-homepage-tag" id="cloud-tag-li-{{tag.id}}">
+							  <a
+							    class="ourchive-homepage-tag__link"
+							    title="{{ tag.display_text }}"
+							    href="/tags/{{tag.id}}?tag_id={{tag.id}}"
+							    style="font-size: {{tag.font_size}}">
+							    {{ tag.display_text }}
+							  </a>
+							</li>
+						{% endfor %}
+						</ul>
+				</div>
+				<!--<div class="uk-width-1-1">
+					<form id="index-content-search-form" class="uk-search uk-search-large uk-align-center" method="post" action="search/">
+						{% csrf_token %}
+						<a id="index-content-search-link" href="#" uk-search-icon></a>
+						<input autocomplete="off" id="index-content-search-input" class="uk-search-input" type="search" name="term" placeholder="Search..." value="{{ term }}" oninput="doAutocomplete(this.value, 'search', 'main')">
+						<div id="tag-autocomplete-dropdown-main" uk-drop></div>
+					</form>
+				</div>-->
+			{% endblock %}
 	    </div>
 	</div>
+		
 	<script src="{% static 'frontend/js/scroll-to-top.js' %}"></script>
 </body>
 <footer id="ourchive-footer uk-container">

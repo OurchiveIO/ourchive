@@ -15,7 +15,7 @@ urlpatterns = [
     path('works/<int:id>/publish-full/', views.publish_work_and_chapters, name='publish-full'),
     path('works/<int:pk>/export/<str:file_ext>', views.export_work, name='export-work'),
     path('works/type/<int:type_id>', views.works_by_type),
-    path('works/<int:pk>/', views.work),
+    path('works/<int:pk>/', views.work, name='fe-work-view'),
     path('works/<int:pk>/<int:chapter_offset>', views.work),
     path('works/<int:work_id>/delete', views.delete_work, name='delete-work'),
     path('works/<int:work_id>/chapters/<int:chapter_id>/delete', views.delete_chapter, name='delete-chapter'),
