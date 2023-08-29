@@ -14,6 +14,7 @@ from django.views.decorators.cache import never_cache
 from dateutil.parser import *
 from dateutil import tz
 from urllib.parse import unquote, quote
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -320,10 +321,25 @@ def get_works_list(request, username=None):
 
 
 def index(request):
+	top_tags = []
+	response = do_get(f'api/tags/top', request, params=request.GET, object_name='top tags')
+	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
+		top_tags = response.response_data['results']
+		highest_count = top_tags[0]['tag_count']
+		tag_max_size = 3
+		for tag in top_tags:
+			tag_count = tag['tag_count']
+			font_size = tag_count / highest_count * tag_max_size
+			font_size = abs(float(font_size))
+			if (font_size <= 1):
+				font_size = font_size + 1
+			tag['font_size'] = f'{font_size}em'
+		random.shuffle(top_tags)
 	return render(request, 'index.html', {
 		'heading_message': _('ourchive_welcome'),
 		'long_message': _('ourchive_intro_copy'),
 		'root': settings.ROOT_URL,
+		'top_tags': top_tags,
 		'stylesheet_name': 'ourchive-light.css',
 		'has_notifications': request.session.get('has_notifications')
 	})

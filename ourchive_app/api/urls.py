@@ -32,6 +32,7 @@ urlpatterns = [
     path('worktypes/<int:type_id>/works',
          views.WorkByTypeList.as_view(), name='work-by-type-list'),
     path('tags/', views.TagList.as_view(), name='tag-list'),
+    path('tags/top/', views.TopTagList.as_view(), name='top-tag-list'),
     path('tags/<int:pk>/', views.TagDetail.as_view(), name='tag-detail'),
     path('bookmarks/', views.BookmarkList.as_view(), name='bookmark-list'),
     path('bookmarks/<int:pk>/', views.BookmarkDetail.as_view(), name='bookmark-detail'),

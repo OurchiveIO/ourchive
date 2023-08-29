@@ -579,6 +579,20 @@ class ChapterAllSerializer(serializers.Serializer):
         fields = ['id', 'number', 'title', 'draft', 'work', 'user', 'updated_on']
 
 
+class TopTagSerializer(serializers.HyperlinkedModelSerializer):
+    tag_type_label = serializers.CharField(source='type_label', read_only=True)
+    id = serializers.ReadOnlyField()
+    tag_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Tag
+        fields = '__all__'
+
+    def get_tag_count(self, obj):
+        tag_count = obj.work_set.count() + obj.bookmark_set.count()
+        return tag_count
+
+
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
     user = serializers.SlugRelatedField(
@@ -599,10 +613,16 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         source='work_type.type_name',
         read_only=True
     )
+    has_drafts = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Work
         fields = '__all__'
+
+    def get_has_drafts(self, obj):
+        has_drafts = obj.draft or obj.chapters.all().filter(draft=True).exists()
+        return has_drafts
 
     def process_tags(self, work, validated_data, tags):
         tags_to_add = []

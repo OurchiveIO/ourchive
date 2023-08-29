@@ -9,7 +9,7 @@ from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
     UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
     ChapterAllSerializer, UserReportSerializer, UserSubscriptionSerializer, \
     BookmarkSummarySerializer, BookmarkCollectionSummarySerializer, CollectionCommentSerializer, \
-    ImportSerializer
+    ImportSerializer, TopTagSerializer
 from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
     NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
@@ -42,6 +42,8 @@ from etl.ao3 import util
 from .utils import get_star_count
 from django.core.mail import send_mail
 from django.utils.translation import gettext as _
+from django.db.models import Count
+from api.custom_pagination import NonPaginatedResultSetPagination
 
 
 @api_view(['GET'])
@@ -565,6 +567,15 @@ class TagList(generics.ListCreateAPIView):
     def perform_update(self, serializer):
         serializer.save(
             display_text=self.request.data['display_text'], user=self.request.user)
+
+
+class TopTagList(generics.ListAPIView):
+    serializer_class = TopTagSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = NonPaginatedResultSetPagination
+
+    def get_queryset(self):
+        return Tag.objects.filter(tag_type__filterable=True).annotate(num_uses=Count("bookmark")+Count("work")).order_by("-num_uses")[:30]
 
 
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):

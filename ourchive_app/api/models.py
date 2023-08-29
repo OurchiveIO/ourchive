@@ -429,6 +429,7 @@ class TagType(models.Model):
     admin_administrated = models.BooleanField(default=False)
     required = models.BooleanField(default=False)
     sort_order = models.IntegerField(default=1)
+    filterable = models.BooleanField(default=True)
 
     class Meta:
         indexes = [

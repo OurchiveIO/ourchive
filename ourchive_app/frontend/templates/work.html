@@ -7,7 +7,7 @@
     <div id="work-article-grid" class="uk-child-width-2-1" uk-grid>
         {% if work.user == request.user.username %}
             <div id="work-controls-parent" class="uk-text-left uk-width-1-2@m uk-width-1-1@s uk-margin-small-bottom">
-                <a id="work-publish-all-link" href="/works/{{ id }}/publish-full" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="publish-all-span">{% translate 'Publish All' %}</span> </a>
+                {% if work.has_drafts %}<a id="work-publish-all-link" href="/works/{{ id }}/publish-full" class="uk-button uk-button-default uk-button-small uk-margin-small-bottom"><span id="publish-all-span">{% translate 'Publish All' %}</span> </a>{% endif %}
                 <a class="uk-button uk-button-default uk-button-small uk-margin-small-bottom" id="work-edit-link" href="/works/{{ id }}/edit"><span id="work-edit-span">{% translate 'Edit' %}</span> </a>
                 <a id="work-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span id="work-delete-span" class="uk-button uk-button-default uk-button-small  uk-margin-small-bottom">{% translate 'Delete' %}</span> </a>
                 {% include "delete_modal.html" with object='work' object_id=work.id %}
