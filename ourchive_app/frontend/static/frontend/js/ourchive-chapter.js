@@ -9,6 +9,12 @@ function getChapterRichTextValues() {
     }
 }
 
+function removeChapterImage() {
+	console.log(document.getElementById('image_url-file-uk-input-original'));
+	document.getElementById('image_url-file-uk-input-original').value = "";
+	document.getElementById('chapter-form-image').src = "";
+}
+
 function updateModeText(toggling=false) {
 	const richTextContainer = document.getElementById('toggle-chapter-richtext-area');
 	const plainTextContainer = document.getElementById('toggle-chapter-plaintext-area');

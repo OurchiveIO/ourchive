@@ -114,12 +114,17 @@
 <div class="uk-accordion-content" id="chapter-form-image-hidden-parent" hidden>
 {% endif %}
 <div class="uk-margin" id="chapter-form-image-parent">
+<div class="uk-margin" id="chapter-form-image-hover-container" uk-toggle="target: #chapter-delete-overlay; mode: hover">
     <label id="chapter-form-image-label" class="uk-form-label" for="form-horizontal-text">Chapter Image</label>
     {% if chapter.image_url and chapter.image_url != "None" %}
-    <div class="uk-form-controls" id="chapter-form-image-controls">
-        <img id="chapter-form-image" src="{{ chapter.image_url }}" class="uk-margin-bottom"/>
+    <div class="uk-inline" id="chapter-form-image-controls">
+        <img id="chapter-form-image" src="{{ chapter.image_url }}"/>
+        <div class="uk-overlay uk-dark uk-overlay-default uk-position-cover" id="chapter-delete-overlay" hidden>
+            <p class="uk-text-right"><a href="#" onclick="removeChapterImage()" title="{% translate 'Delete chapter image' %}"><span uk-icon="icon: trash; ratio: 2.5"></span></a></p>
+        </div>
     </div>
     {% endif %}
+</div>
     <div class="uk-form-controls" id="chapter-form-image-upload-controls">
         <div class="uk-inline" id="chapter-form-image-upload-inline">
         	{% include 'file_upload.html' with object='image_url' replace_selector='chapter-form-image' object_type='img' upload_placeholder='Upload chapter image' original_value=chapter.image_url %}

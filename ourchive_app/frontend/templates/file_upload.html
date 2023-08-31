@@ -1,5 +1,5 @@
 <div id="{{ object }}-upload-parent" class="js-upload-{{ object_type }} uk-placeholder uk-text-center">
-	<input id="{{ object }}-file-uk-input-original" class="uk-input uk-form-width-medium" type="text" placeholder="{{ upload_placeholder }}" value="{{ original_value }}" name="{{ object }}" hidden>
+	<p id="{{ object }}-file-uk-input-original-p"><input id="{{ object }}-file-uk-input-original" class="uk-input uk-form-width-medium" type="text" value="{{ original_value }}" name="{{ object }}"></p>
     <span id="{{ object }}-upload-icon" uk-icon="icon: cloud-upload"></span>
     <div id="{{ object }}-upload-form" uk-form-custom="target: true">
         <input type="file" id="{{ object }}-file-input">
@@ -64,6 +64,7 @@
 	            var result = JSON.parse(arguments[0]['response'])['final_url'];
 	            document.getElementById('{{ object }}-file-uk-input').value = result;
 	            document.getElementById('{{ object }}-file-uk-input-original').value = result;
+	            document.getElementById('{{ object }}-file-uk-input-original-p').style.visibility = "hidden";
 	            var replace_selector = '{{ replace_selector }}';
 	            {% if object_type == 'img' %}
 	            document.getElementById(replace_selector).src = result;
