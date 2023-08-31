@@ -37,7 +37,9 @@ def clean_text(text):
         }, 
         attributes={
             "*": {'style'}, 
-            "iframe": {'src', 'width', 'height', 'frameborder', 'allow', 'title', 'allowfullscreen'}
+            "iframe": {'src', 'width', 'height', 'frameborder', 'allow', 'title', 'allowfullscreen'},
+            "img": {'src', 'alt', 'width', 'height'},
+            "a": {'href', 'alt', 'title', 'target'}
         }
     )
 
