@@ -264,10 +264,10 @@ LOGGING = {
     },
 }
 
-#if not DEBUG:
-#    CACHES = {
-#        "default": {
-#            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-#            "LOCATION": os.getenv('OURCHIVE_DJANGO_CACHE'),
-#        }
-#    }
+if not DEBUG:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": os.getenv('OURCHIVE_DJANGO_CACHE'),
+        }
+    }

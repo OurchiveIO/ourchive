@@ -54,7 +54,7 @@
 		</div>
 		{% endif %}
 	{% endif %}
-	<div class="uk-width-1-1 ourchive-padding-tiny-horizontal">
+	<div class="uk-width-1-1" id="chapter-{{ chapter.id }}-content-container">
 	{% if chapter.image_url and chapter.image_url != "None" %}
 		<p id="chapter-image-graf">
 			<img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/>

@@ -3,6 +3,7 @@
 <head>
 	{% load static %}
 	{% load i18n %}
+	{% load cache %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% if css_mode %}
@@ -177,11 +178,14 @@
 	<div class="uk-width-expand uk-container uk-margin content-block-parent" id="content-block-parent">	
 		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true" class="uk-grid uk-margin-remove ourchive-top-level-grid">
 			{% block content %}
+				{% cache 43200 homepage-intro %}
 				<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-bottom ourchive-parent-grid" id="index-content-intro-div">
 				        <h1 id="index-content-heading" class="uk-heading-medium">{{ heading_message }}</h1>
 				  		<span id="index-content-message">{{ long_message }}</span>
 				</div>
-				<div class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-medium-top ourchive-parent-grid" id="recent-works-column">
+				{% endcache %}
+				{% cache 300 homepage-recent-works %}
+				<div class="uk-width-1-3@m uk-width-1-1@s uk-margin-remove-left uk-margin-medium-top ourchive-parent-grid ourchive-border-right" id="recent-works-column">
 					<h2 id="recent-works-header">{% translate 'Recent Works' %}</h2>
 					<ul class="uk-list uk-list-striped" id="recent-works-ul">
 						{% for work in recent_works %}
@@ -189,7 +193,9 @@
 						{% endfor %}
 					</ul>
 				</div>
-				<div class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-right uk-margin-medium-top ourchive-parent-grid" id="index-content-tag-cloud-div">
+				{% endcache %}
+				{% cache 3600 homepage-top-tags %}
+				<div class="uk-width-2-3@m uk-width-1-1@s uk-margin-remove-right uk-margin-medium-top ourchive-parent-grid" id="index-content-tag-cloud-div">
 					<h2 class="uk-text-center" id="top-tags-header">{% translate 'Top Tags' %}</h2>
 					<!-- Tag cloud adapted from https://css-tricks.com/create-a-tag-cloud-with-some-simple-css-and-even-simpler-javascript/ -->
 						<ul class="ourchive-homepage-tags" id="cloud-tag-ul">
@@ -206,6 +212,7 @@
 						{% endfor %}
 						</ul>
 				</div>
+				{% endcache %}
 				<!--<div class="uk-width-1-1">
 					<form id="index-content-search-form" class="uk-search uk-search-large uk-align-center" method="post" action="search/">
 						{% csrf_token %}
