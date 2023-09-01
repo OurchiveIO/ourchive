@@ -22,4 +22,4 @@ def spoil_cache_create(sender, instance, created, **kwargs):
 def spoil_cache_update(sender, instance, **kwargs):
     connection = connections['default']
     with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM ourchive_database_cache where cache_key like f'ourchive:%:work_{instance.id}_%'")
+        cursor.execute(f"DELETE FROM ourchive_database_cache where cache_key like 'ourchive:%:work_{instance.id}_%'")
