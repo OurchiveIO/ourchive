@@ -1461,8 +1461,9 @@ def log_out(request):
 
 @require_http_methods(["GET"])
 def work(request, pk, chapter_offset=0):
-	if cache.get(f'work_{pk}_{request.user}'):
-		return cache.get(f'work_{pk}_{request.user}')
+	cache_key = f'work_{pk}_{chapter_offset}_{request.user}'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
 	view_full = request.GET.get('view_full', False)
 	work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
 	url = f'api/works/{pk}/'
@@ -1518,8 +1519,8 @@ def work(request, pk, chapter_offset=0):
 		'chapter_offset': chapter_offset,
 		'next_chapter': f'/works/{pk}/{chapter_offset + 1}' if 'next' in chapter_response and chapter_response['next'] else None,
 		'previous_chapter': f'/works/{pk}/{chapter_offset - 1}' if 'previous' in chapter_response and chapter_response['previous'] else None,})
-	if not cache.get(f'work_{pk}_{request.user}') and len(messages.get_messages(request)) < 1:
-		cache.set(f'work_{pk}_{request.user}', page_content, 60 * 60)
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
 	return page_content
 
 def render_comments_common(request, get_comment_base, object_name, object_id, load_more_base, view_thread_base,
