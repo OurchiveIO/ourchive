@@ -21,14 +21,18 @@ Ourchive is a configurable, multi-media archive application. It grew out of a ne
 Ourchive runs on Django, using Django Rest Framework for the backend. The following stack is recommended:
 
 Host: Debian Linux
+
+Server: NGINX
+
 Database: Postgres
-Task scheduler: Django Background Tasks
-Search: Postgres OR Elastic (configurable provider)
-File Upload: Django OR S3 (configurable provider)
 
-Postgres will need to be up and running.
+Task scheduler: Advanced Python Scheduler
 
-FFMPEG should be installed on the Linux machine to enable audio processing.
+Search: Postgres 
+
+File Upload: Django 
+
+FFMPEG should be installed on the Linux machine to enable audio processing. Audio processing is a configurable setting.
 
 see [local-dev](local-dev.md) for further local dev set up.
 
@@ -64,13 +68,9 @@ Please see [the code of conduct and diversity statement](codeofconduct.md).
 
 We have used Unsplash free images for icon defaults.
 
-This app was instantiated in part from the [flask boilerplate](https://github.com/italomaia/flask-empty) project, as well as [react-flask](https://github.com/bonniee/react-flask). Additionally, all the frameworks and tools we are using are open source, including:
+All frameworks and tools we are using are open source, including:
 
-- tusd
-- React
-- flask
-- postgres
-- docker
-- redis
-- elasticsearch
+- Django
+- Postgres
+- Docker
 - pytest
