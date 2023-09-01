@@ -1,4 +1,4 @@
-[![Deploy Dev App](https://github.com/c-e-p/ourchive/actions/workflows/deploy_dev_app.yml/badge.svg)](https://github.com/c-e-p/ourchive/actions/workflows/deploy_dev_app.yml)
+[![Deploy Dev App](https://github.com/c-e-p/ourchive/actions/workflows/deploy_dev_app.yml/badge.svg?branch=development)](https://github.com/c-e-p/ourchive/actions/workflows/deploy_dev_app.yml)
 
 # ourchive
 
