@@ -189,7 +189,6 @@
 				<div class="uk-width-expand" id="search-results-tags-content">
 			        <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
 			        {% include "tag_partial.html" with obj_name='tag' tags=tags.data.items %}
-				    {% include 'pagination.html' with previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' %}
 					</dl>
 				</div>     
 			</li>
@@ -197,7 +196,7 @@
 				<div uk-grid id="search-results-users-grid">
 				<div class="uk-width-expand" id="search-results-users-content-parent">
 			        {% for user in users.data %} 
-						<p id="search-results-user-{{user.id}}"> <a id="search-results-user-{{user.id}}-link" href="/username/{{ user.username }}">{{ user.username }}</a> </p>
+						<p id="search-results-user-{{user.id}}"> <a id="search-results-user-{{user.id}}-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a> </p>
 				    {% endfor %}
 				</div>     
 			</li>

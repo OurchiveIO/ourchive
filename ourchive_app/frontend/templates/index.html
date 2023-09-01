@@ -76,21 +76,27 @@
 		    <div class="uk-navbar-right uk-margin-right" id="uk-nav-right">
 		    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
 		    	 	<li id="nav-search-li">
-			            <a class="uk-navbar-toggle" uk-search-icon href="#" id="nav-search-toggle"></a>
-			            <div id="nav-search-div" class="uk-drop" uk-drop="mode: click; pos: left-center; offset: 0">
-			                <form class="uk-search uk-search-navbar uk-width-1-1" action="/search/" method="post" id="nav-search-form">
-			                	{% csrf_token %}
-			                    <input class="uk-search-input ourchive-nav-search" autocomplete="off" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
-							<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
-			                </form>
-			            </div>
+			                <div class="nav-overlay uk-navbar-right">
+			                	<a class="uk-navbar-toggle" uk-search-icon uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"></a>
+			                </div>
+    					<div class="nav-overlay uk-navbar-left uk-flex-1" hidden>
+        					<div class="uk-navbar-item uk-width-expand uk-margin-small-left">
+	            				<form class="uk-search uk-search-navbar uk-width-1-1" action="/search/" method="post" id="nav-search-form">
+				                	{% csrf_token %}
+				                    <input class="uk-search-input ourchive-nav-search" autocomplete="off" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
+								<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
+				                </form>
+        					</div>
+        					<a class="uk-navbar-toggle" uk-close uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"></a>
+
+    					</div>
 		        	</li>
 		    	 	<li id="theme-switcher-li">
 		    	 		<a onclick="switchTheme()" id="theme-switcher-link">
 		    	 			{% if request.session.css_mode == "dark" %}
-		    	 			<span class="custom-icon" uk-icon="icon: sun-regular; ratio:1" title="Light Mode" id="theme-switcher-light">
+		    	 			<span class="custom-icon uk-text-medium" uk-icon="icon: sun-regular; ratio:1" title="Light Mode" id="theme-switcher-light">
 		    	 			{% else %}
-		    	 			<span class="custom-icon" uk-icon="icon: moon-regular; ratio:1" title="Dark Mode" id="theme-switcher-dark">
+		    	 			<span class="custom-icon uk-text-medium" uk-icon="icon: moon-regular; ratio:1" title="Dark Mode" id="theme-switcher-dark">
 		    	 			{% endif %}
 		    	 		</a></span>
 		    	 	</li>
@@ -108,11 +114,14 @@
 			            	</li>
 			            {% endif %}
 			            {% if request.user.is_authenticated %}
-			            	<a href="/username/{{request.user}}" id="nav-username">{{ request.user }}</a>
+			            	<a href="{% url 'user-profile-parent' request.user.id %}" id="nav-username">{{ request.user }}</a>
 			            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div">
 	                    		<ul class="uk-nav uk-navbar-dropdown-nav" id="nav-user-dropdown-ul">
 	                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
-	                    			<li id="nav-new-work-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link">{% translate 'Import Work(s)' %}</a></li>
+	                    			<li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link">{% translate 'Import Work(s)' %}</a></li>
+	                    			<ul class="uk-nav-sub" id="imports-subnav">
+								            <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}">{% translate 'Import Status' %}</a></li>
+								        </ul>
 	                    			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
 	                    			<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link">Bookmarks</a></li>
 	                    			<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link">{% translate 'Collections' %}</a></li>
@@ -125,10 +134,10 @@
 								            </li>
 								        </ul>
 								    </li>
-								    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user %}">{% translate 'Profile' %}</a>
+								    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a>
 								    	<ul class="uk-nav-sub" id="profile-subnav">
-	                    				<li id="nav-edit-profile-li"><a href="/username/{{request.user}}/edit" id="nav-edit-profile-link">{% translate 'Edit Profile' %}</a></li>
-	                    				<li id="nav-edit-account-li"><a href="/username/{{request.user}}/account/edit" id="nav-edit-account-link">{% translate 'Edit Account' %}</a></li>
+	                    				<li id="nav-edit-profile-li"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-edit-profile-link">{% translate 'Edit Profile' %}</a></li>
+	                    				<li id="nav-edit-account-li"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-edit-account-link">{% translate 'Edit Account' %}</a></li>
 	                    				<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">{% translate 'Blocklist' %}</a></li>
 	                    			</ul>
 	                    			{% if request.session.has_notifications %}
@@ -169,7 +178,7 @@
 	</div>
 	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="arrow-up"></span></button>
 	<div class="uk-container uk-margin content-block-parent" id="content-block-parent">	
-		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true">
+		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true" class="uk-grid">
 			{% block content %}
 				<div class="uk-child-width-1-1" id="index-content-div">
 				        <h1 id="index-content-heading" class="uk-heading-medium">{{ heading_message }}</h1>

@@ -13,11 +13,11 @@
     	</script>
 		{% csrf_token %}
 		<div id="user-form-buttons-top-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
-			<div class="uk-width-1-2" id="edit-profile-header-parent">
+			<div class="uk-width-1-2@m uk-width-1-1@s" id="edit-profile-header-parent">
             	<span id="edit-profile-header-span" class="uk-text-large">Edit Profile Information</span>
         	</div>
-	        <div class="uk-text-right uk-width-1-2" id="user-form-buttons-container">
-	        	<input id="user-form-cancel" class="uk-button uk-width-small uk-button-danger" onclick="history.back()" value="Cancel"/>
+	        <div class="uk-text-right uk-width-1-2@m uk-width-1-1@s" id="user-form-buttons-container">
+	        	<input id="user-form-cancel" class="uk-button uk-width-small uk-button-secondary" onclick="history.back()" value="Cancel"/>
             	<button id="user-form-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
 	            <input id="user-form-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
 	        </div>
@@ -55,21 +55,73 @@
             	{% if user.default_content == "Work" %}
                     <option id="default-content-work-selected" value="Work" selected="selected">Work</option>
                     <option id="default-content-work-bookmark" value="Bookmark">Bookmark</option>
+                    <option id="default-content-collection" value="Collection">Collection</option>
                 {% elif user.default_content == "Bookmark" %} 
                 	<option id="default-content-bookmark-work" value="Work">Work</option>
                     <option id="default-content-bookmark-selected" value="Bookmark" selected="selected">Bookmark</option>
+                    <option id="default-content-collection" value="Collection">Collection</option>
+                {% elif user.default_content == "Collection" %} 
+                    <option id="default-content-collection-work" value="Work">Work</option>
+                    <option id="default-content-collection-bookmark" value="Bookmark" selected="selected">Bookmark</option>
+                    <option id="default-content-collection-selected" value="Collection" selected="selected">Collection</option>
                 {% else %}
                 	<option id="default-content-work" value="Work">Work</option>
                     <option id="default-content-bookmark" value="Bookmark">Bookmark</option>
+                    <option id="default-content-collection" value="Collection">Collection</option>
                 {% endif %}
                 </select>
+            </div>
+        </div> 
+
+        <div class="uk-margin" id="default-content-parent">
+            <label id="default-content-label" class="uk-form-label" for="form-horizontal-text">Default Work Type <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This determines the default work type shown on the work form.{% endblocktranslate %}</div></label>
+            <div class="uk-form-controls" id="default-content-controls">
+                <select id="work-form-type-select" class="uk-select uk-form-width-small" name="default_work_type">
+                    {% for item in work_types %}
+                        <option id="type_{{item.type_name}}" value="{{item.type_name}}" {% if user.default_work_type == item.type_name %} selected="selected" {% endif %}>{{ item.type_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div> 
+
+        <div class="uk-margin" id="profile-collapse-image-parent">
+            <label id="profile-collapse-image-label" class="uk-form-label" for="form-horizontal-text">Collapse image fields? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter image fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
+            </label>
+            <div id="profile-collapse-image-controls" class="uk-form-controls">
+                <div id="profile-collapse-image-inline" class="uk-inline">
+                    <label id="profile-collapse-image-switch" class="switch"><input class="uk-checkbox" id="profile-collapse-image-checkbox" type="checkbox" name="collapse_chapter_image" {% if user.collapse_chapter_image %} checked {% endif %}> <span id="profile-collapse-image-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div> 
+
+        <div class="uk-margin" id="profile-collapse-audio-parent">
+            <label id="profile-collapse-audio-label" class="uk-form-label" for="form-horizontal-text">Collapse audio fields? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter audio fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
+            </label>
+            <div id="profile-collapse-audio-controls" class="uk-form-controls">
+                <div id="profile-collapse-audio-inline" class="uk-inline">
+                    <label id="profile-collapse-audio-switch" class="switch"><input class="uk-checkbox" id="profile-collapse-audio-checkbox" type="checkbox" name="collapse_chapter_audio" {% if user.collapse_chapter_audio %} checked {% endif %}> <span id="profile-collapse-audio-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div>   
+
+        <div class="uk-margin" id="profile-collapse-text-parent">
+            <label id="profile-collapse-text-label" class="uk-form-label" for="form-horizontal-text">Collapse text fields? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter text fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
+            </label>
+            <div id="profile-collapse-text-controls" class="uk-form-controls">
+                <div id="profile-collapse-text-inline" class="uk-inline">
+                    <label id="profile-collapse-text-switch" class="switch"><input class="uk-checkbox" id="profile-collapse-text-checkbox" type="checkbox" name="collapse_chapter_text" {% if user.collapse_chapter_text %} checked {% endif %}> <span id="profile-collapse-text-slider" class="slider round"></span></label>
+                </div>
             </div>
         </div>      
 
         <div class="uk-margin" id="profile-text-parent">
             <label id="profile-text-label" class="uk-form-label" for="form-horizontal-text">Profile Text</label>
             <div class="uk-form-controls" id="profile-text-controls">
-                <div class="uk-inline" id="profile-text-inline">
+                <div class="uk-inline uk-child-width-expand uk-width-expand" id="profile-text-inline">
                 	<input type="hidden" id="profile" name="profile" value="{{ user.profile|safe|default_if_none:'' }}">
                     <textarea id="profileEditor"></textarea>
                     <script type="text/javascript">
@@ -100,6 +152,13 @@
             {% include "object_attributes_form.html" with object='User' attribute_types=user.attribute_types %}
         {% endif %}
     </fieldset>
+    <div id="user-form-buttons-bottom-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
+        <div class="uk-text-right uk-align-right uk-width-1-1" id="user-form-buttons-btm-container">
+            <input id="user-form-btm-cancel" class="uk-button uk-width-small uk-button-secondary" onclick="history.back()" value="Cancel"/>
+            <button id="user-form-btm-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+            <input id="user-form-btm-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
+        </div>
+    </div>
 	</form>
 </div>
 {% endblock %}

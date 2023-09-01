@@ -37,7 +37,8 @@ class ObjectMapping(models.Model):
 
     OBJECT_TYPES = [
         ('work', 'work'),
-        ('chapter', 'chapter')
+        ('chapter', 'chapter'),
+        ('work_type', 'work_type')
     ]
 
     id = models.AutoField(primary_key=True)

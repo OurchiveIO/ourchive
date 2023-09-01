@@ -1,5 +1,6 @@
 from django.contrib.auth.models import Group, AnonymousUser
 from rest_framework import serializers
+from django.db import IntegrityError
 from rest_framework_recursive.fields import RecursiveField
 import nh3
 from .custom_fields import UserPrivateField
@@ -16,6 +17,7 @@ from .utils import convert_boolean
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 import unidecode
+from etl.models import WorkImport
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +28,7 @@ class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
 
     def process_attributes(attr_obj, validated_data, attributes):
-        attr_obj.attributes.clear()
+        attrs_to_add = []
         attr_types = set()
         for attribute in attributes:
             attribute = AttributeValue.objects.filter(name=attribute['name'], attribute_type__name=attribute['attribute_type']).first()
@@ -34,8 +36,11 @@ class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
                 if attribute.attribute_type.name in attr_types and attribute.attribute_type.allow_multiselect is False:
                     logger.error(f"Cannot add attribute value {attribute.name}; attribute type {attribute.attribute_type.name} does not allow multi-select.")
                 else:
-                    attr_obj.attributes.add(attribute)
+                    attrs_to_add.append(attribute)
                     attr_types.add(attribute.attribute_type.name)
+        attr_obj.attributes.clear()
+        for attr in attrs_to_add:
+            attr_obj.attributes.add(attr)
         attr_obj.save()
         return attr_obj
 
@@ -120,6 +125,7 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
         queryset=User.objects.all(), slug_field='username')
     subscribed_user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
+    subscribed_user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
 
     def update(self, subscription, validated_data):
         UserSubscription.objects.filter(id=subscription.id).update(**validated_data)
@@ -130,6 +136,12 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = UserSubscription
+        fields = '__all__'
+
+
+class ImportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkImport
         fields = '__all__'
 
 
@@ -146,19 +158,26 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     can_upload_images = serializers.ReadOnlyField(required=False)
     can_upload_export_files = serializers.ReadOnlyField(required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    default_work_type = serializers.SlugRelatedField(
+        queryset=WorkType.objects.all(),
+        slug_field='type_name', required=False)
 
     class Meta:
         model = User
         fields = ('id', 'url', 'username', 'password', 'email', 'groups',
                   'work_set', 'bookmark_set', 'userblocks_set', 'profile',
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
-                  'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files', 'can_upload_images')
+                  'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files',
+                  'can_upload_images', 'default_work_type', 'collapse_chapter_image',
+                  'collapse_chapter_audio', 'collapse_chapter_text')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         require_invite = OurchiveSetting.objects.filter(
             name='Invite Only').first()
         if convert_boolean(require_invite.value):
+            if 'invite_code' not in validated_data:
+                raise serializers.ValidationError("Invite only instance; invite_code must be present.")
             invitation = Invitation.objects.filter(
                 invite_token=validated_data['invite_code']).first()
             if invitation.token_expiration.date() >= datetime.datetime.now().date():
@@ -198,6 +217,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return user
 
     def update(self, user, validated_data):
+        if not validated_data['icon'] or validated_data['icon'].lower() == 'none':
+            validated_data['icon_alt_text'] = "Default icon"
+            icon = OurchiveSetting.objects.filter(name='Default Icon URL').first()
+            if icon is not None:
+                validated_data['icon'] = f"{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{settings.STATIC_URL}{icon.value}"
+            else:
+                validated_data['icon'] = ''
         validated_data['password'] = User.objects.filter(
             id=user.id).first().password
         if 'attributes' in validated_data:
@@ -239,7 +265,7 @@ class FingergunSerializer(serializers.HyperlinkedModelSerializer):
     work = serializers.PrimaryKeyRelatedField(
         queryset=Work.objects.all(), required=False)
     user = serializers.SlugRelatedField(
-        queryset=User.objects.all(), slug_field='username', required=False)
+        queryset=User.objects.all(), slug_field='username', required=False, allow_null=True)
 
     class Meta:
         model = Fingergun
@@ -262,6 +288,7 @@ class FingergunSerializer(serializers.HyperlinkedModelSerializer):
 class TagSerializer(serializers.HyperlinkedModelSerializer):
     tag_type = serializers.SlugRelatedField(
         queryset=TagType.objects.all(), slug_field='label')
+    tag_type_label = serializers.CharField(source='type_label', read_only=True)
     id = serializers.ReadOnlyField()
 
     class Meta:
@@ -546,16 +573,18 @@ class ChapterAllSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     number = serializers.IntegerField()
     title = serializers.ReadOnlyField()
+    updated_on = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Chapter
-        fields = ['id', 'number', 'title', 'draft', 'work', 'user']
+        fields = ['id', 'number', 'title', 'draft', 'work', 'user', 'updated_on']
 
 
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     work_id = serializers.HyperlinkedIdentityField(
         view_name='work-detail', read_only=True)
     id = serializers.ReadOnlyField()
@@ -564,7 +593,11 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
     chapter_count = serializers.IntegerField(
-        source='chapters.count', 
+        source='chapters.count',
+        read_only=True
+    )
+    work_type_name = serializers.CharField(
+        source='work_type.type_name',
         read_only=True
     )
 
@@ -573,29 +606,36 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
     def process_tags(self, work, validated_data, tags):
-        work.tags.clear()
+        tags_to_add = []
         required_tag_types = list(TagType.objects.filter(required=True))
         has_any_required = len(required_tag_types) > 0
         for item in tags:
+            print(item['text'])
             tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
             tag_friendly_name = item['text']
             tag_type = item['tag_type']
-            tag_type_id = TagType.objects.filter(label=tag_type).first().id
+            tag_type_id = tag_type.id
             if tag_type in required_tag_types:
                 if tag_id is None or tag_id == '':
                     # todo: error
                     return None
                 else:
                     required_tag_types.pop()
-            tag, created = Tag.objects.get_or_create(
-                text=tag_id, tag_type_id=tag_type_id)
+            try:
+                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+            except IntegrityError:
+                logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Work: {work.id}')
+                continue
             if tag.display_text == '':
                 tag.display_text = tag_friendly_name
                 tag.save()
-            work.tags.add(tag)
+            tags_to_add.append(tag)
         if has_any_required and len(required_tag_types) > 0:
             # todo: error
             return None
+        work.tags.clear()
+        for tag in tags_to_add:
+            work.tags.add(tag)
         work.save()
         return work
 
@@ -684,7 +724,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         #    fields = '__all__'
 
     def process_tags(self, bookmark, validated_data, tags):
-        bookmark.tags.clear()
+        tags_to_add = []
         required_tag_types = list(TagType.objects.filter(required=True))
         has_any_required = len(required_tag_types) > 0
         for item in tags:
@@ -698,29 +738,34 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
                     return None
                 else:
                     required_tag_types.pop()
-
-            tag, created = Tag.objects.get_or_create(
-                text=tag_id, tag_type_id=tag_type_id)
+            try:
+                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+            except IntegrityError:
+                logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Bookmark: {bookmark.id}')
+                continue
             if tag.display_text == '':
                 tag.display_text = tag_friendly_name
                 tag.save()
-            bookmark.tags.add(tag)
+            tags_to_add.append(tag)
         if has_any_required and len(required_tag_types) > 0:
             # todo: error
             return None
+        bookmark.tags.clear()
+        for tag in tags_to_add:
+            bookmark.tags.add(tag)
         bookmark.save()
         return bookmark
 
     def update(self, bookmark, validated_data):
         if 'title' in validated_data and validated_data['title'] == '':
             validated_data['title'] = f'Bookmark: {bookmark.work.title}'
-        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
+        if (OurchiveSetting.objects.filter(name='Ratings Enabled') and OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
             if 'rating' in validated_data:
                 validated_data.pop('rating')
         if 'description' in validated_data:
             validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         if 'tags' in validated_data:
-            tags = validated_data.pop('tags') if 'tags' in validated_data else []
+            tags = validated_data.pop('tags')
             bookmark = self.process_tags(bookmark, validated_data, tags)
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -728,12 +773,12 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)
         return Bookmark.objects.filter(id=bookmark.id).first()
 
-
     def create(self, validated_data):
-        if (OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
+        if (OurchiveSetting.objects.filter(name='Ratings Enabled') and OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
             if 'rating' in validated_data:
                 validated_data.pop('rating')
-        tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        if 'tags' in validated_data:
+            tags = validated_data.pop('tags')
         validated_data['description'] = nh3.clean(validated_data['description']) if validated_data['description'] is not None else ''
         attributes = None
         if 'attributes' in validated_data:
@@ -781,7 +826,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     def update(self, bookmark, validated_data):
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
-            bookmark.tags.clear()
+            tags_to_add = []
             required_tag_types = list(TagType.objects.filter(required=True))
             for item in tags:
                 tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
@@ -794,12 +839,17 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                         return None
                     else:
                         required_tag_types.pop()
-
-                tag, created = Tag.objects.get_or_create(
-                    text=tag_id, tag_type_id=tag_type_id)
+                try:
+                    tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+                except IntegrityError:
+                    logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Collection: {bookmark.id}')
+                    continue
                 if tag.display_text == '':
                     tag.display_text = tag_friendly_name
                     tag.save()
+                tags_to_add.append(tag)
+            bookmark.tags.clear()
+            for tag in tags_to_add:
                 bookmark.tags.add(tag)
             bookmark.save()
         if 'attributes' in validated_data:
@@ -823,6 +873,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         bookmark_list = validated_data.pop('bookmarks') if 'bookmarks' in validated_data else []
         tags = []
+        attributes = None
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
         if 'attributes' in validated_data:
@@ -830,9 +881,17 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         bookmark_collection = BookmarkCollection.objects.create(**validated_data)
         for item in tags:
             tag_id = unidecode.unidecode(nh3.clean(item['text'].lower()))
-            tag_type = item['tag_type_id']
-            tag, created = Tag.objects.get_or_create(
-                text=tag_id, tag_type=tag_type)
+            tag_friendly_name = item['text']
+            tag_type = item['tag_type']
+            tag_type_id = TagType.objects.filter(label=tag_type).first().id
+            try:
+                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+            except IntegrityError:
+                logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Collection: {bookmark_collection.id}')
+                continue
+            if tag.display_text == '':
+                tag.display_text = tag_friendly_name
+                tag.save()
             bookmark_collection.tags.add(tag)
         for bookmark in bookmark_list:
             bookmark_collection.bookmarks.add(bookmark)

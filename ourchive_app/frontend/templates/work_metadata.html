@@ -1,2 +1,34 @@
 {% load i18n %}
-<p id="work-metadata-p" class="uk-article-meta"><span id="work-metadata-complete" class="uk-inline uk-text-bold">{% if work.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span> | <span id="work-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Last Updated' %}: {{work.updated_on|date:'d M Y'}}</span> | <span id="work-metadata-fingerguns" class="uk-inline uk-text-bold">{% blocktranslate with fg=work.fingerguns %}{{ fg }} Fingerguns{% endblocktranslate %}</span> | <span class="uk-inline uk-text-bold" id="work-metadata-word-count">{% blocktranslate with wc=work.word_count %}{{ wc }} Words{% endblocktranslate %}</span> {% if work.chapter_count > 0 %}| <span id="work-metadata-chapter-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=work.chapter_count %}{{ cc }} Chapters{% endblocktranslate %}</span>{% endif %} {% if settings.AllowComments %}| <span id="work-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=work.comment_count %}{{ cc }} Comments{% endblocktranslate %}</span>{% endif %}</p>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-complete" class="uk-inline uk-text-bold">{% translate 'Status' %}: {% if work.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-complete" class="uk-inline uk-text-bold">-</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{work.updated_on|date:'d M Y'}}</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-complete" class="uk-inline uk-text-bold">-</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-fingerguns" class="uk-inline uk-text-bold">{% blocktranslate with fg=work.fingerguns %}Fingerguns: {{ fg }}{% endblocktranslate %}</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-complete" class="uk-inline uk-text-bold">-</span>
+</div>
+{% if work.chapter_count > 0 %}
+<div class="uk-inline ourchive-metadata-list"><span id="work-metadata-chapter-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=work.chapter_count %}Chapters: {{ cc }}{% endblocktranslate %}</span></div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-complete" class="uk-inline uk-text-bold">-</span>
+</div>
+{% endif %}
+{% if settings.AllowComments %}
+<div class="uk-inline ourchive-metadata-list"><span id="work-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=work.comment_count %}Comments: {{ cc }}{% endblocktranslate %}</span></div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-complete" class="uk-inline uk-text-bold">-</span>
+</div>
+{% endif %}
+<div class="uk-inline ourchive-metadata-list">
+	<span class="uk-inline uk-text-bold" id="work-metadata-word-count">{% blocktranslate with wc=work.word_count %}Words: {{ wc }}{% endblocktranslate %}</span>
+</div>

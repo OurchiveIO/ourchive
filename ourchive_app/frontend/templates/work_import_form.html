@@ -4,17 +4,25 @@
 {% block content %}	
 {% load static %}
 <div class="uk-width-1-1 uk-text-left" id="work-import-form-parent"> 
+    <div>
+    <div id="work-import-form-title-parent" class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
+        <span id="work-import-form-title-span" class="uk-text-large">{{form_title}}</span>
+        <hr class="ourchive-hr"/>
+    </div>
+    <div id="work-import-form-directions" class="uk-width-1-1 uk-padding-small">
+        <p class="uk-text uk-text-bold">We are currently in the process of testing bulk import. You may receive flaky failure messages or see strange behavior. Use the beta tester discord to alert us of these issues.</p>
+        <p class="uk-text">{% blocktranslate %}Input an AO3 username or single work (ID or URL) below. The work ID can be found in the work URL.{% endblocktranslate %}</p>
+        <p>{% blocktranslate %}Accepted work URL formats:{% endblocktranslate %}</p>
+        <ul class="uk-text-break"><li>https://archiveofourown.org/works/33568501/chapters/83411257</li>
+        <li>https://archiveofourown.org/works/33568501</li>
+        <li>https://archiveofourown.org/works/33568501/</li>
+        <li>https://archiveofourown.org/works/33568501?view_full_work=true</li></ul>
+        <p class="uk-text uk-text-bold">{% blocktranslate %}To ensure account security, restricted works will not be imported. We recommend temporarily making restricted works public or manually recreating them.{%endblocktranslate%}</p>
+    </div>
+</div>
 <form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
     {% csrf_token %}
     <input type="hidden" id="referer-hidden" name="referer" value="{{ referer }}">
-    <div id="work-import-form-top-controls-parent" class="uk-grid" uk-grid>
-        <div id="work-import-form-title-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
-            <span id="work-import-form-title-span" class="uk-text-large">{{form_title}}</span>
-        </div>
-        <div id="work-import-form-directions" class="uk-width-1-1">
-            <p>{% blocktranslate %}Input an AO3 username or single work ID below. The work ID can be found in the work URL.{%endblocktranslate%}</p>
-        </div>
-    </div>
     <div id="work-import-form-content-parent" class="uk-child-width-1-1@m uk-child-width-1@s uk-text-left uk-margin-top" uk-grid>
         <div class="uk-margin" id="work-import-form-complete-parent">
             <label id="work-import-form-complete-label" class="uk-form-label" for="form-horizontal-text">Import single work</label>
@@ -33,7 +41,8 @@
             </div>
         </div>
         <div class="uk-margin toggle" id="work-import-form-username-parent" hidden>
-            <label id="work-import-form-username-label" class="uk-form-label" for="form-horizontal-text">Single work id</label>
+            <label id="work-import-form-username-label" class="uk-form-label" for="form-horizontal-text">Work ID or URL <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The work ID is the unique number that follows 'works/' in the URL (ex: archiveofourown.org/works/<strong>33568501</strong> ){% endblocktranslate %}</div></label>
             <div id="work-import-form-work-id-controls" class="uk-form-controls">
                 <div id="work-import-form-work-id-inline" class="uk-inline">
                     <input id="work-import-form-work-id-input" class="uk-input uk-form-width-large" type="text" name="work_id">

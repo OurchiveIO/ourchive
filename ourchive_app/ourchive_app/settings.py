@@ -25,7 +25,7 @@ hosts = []
 if os.getenv('OURCHIVE_DEV') == 'True' or DEBUG:
     hosts = ["127.0.0.1:8000", "*",]
 else:
-    hosts = ["ourchive-dev.stopthatimp.net", "45.79.159.247"]
+    hosts = [os.getenv("OURCHIVE_ROOT_URL"), os.getenv("OURCHIVE_SERVER_IP")]
 
 ALLOWED_HOSTS = hosts
 
@@ -115,17 +115,19 @@ S3_BUCKET = 'ourchive_media'
 
 SEARCH_BACKEND = 'POSTGRES'
 
+TAG_DIVIDER = '$!$'
+
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
     EMAIL_FILE_PATH = BASE_DIR+"/sent_emails"
 else:
     ANYMAIL = {
         "MAILGUN_API_KEY": os.getenv("OURCHIVE_MAILGUN_API_KEY"),
-        "MAILGUN_SENDER_DOMAIN": 'ourchive-mail.stopthatimp.net', 
+        "MAILGUN_SENDER_DOMAIN": os.getenv("OURCHIVE_MAILGUN_SENDER_DOMAIN"), 
     }
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend" 
-DEFAULT_FROM_EMAIL = "admin@ourchive-dev.stopthatimp.net"  
-SERVER_EMAIL = "serveradmin@ourchive-dev.stopthatimp.net" 
+DEFAULT_FROM_EMAIL = os.getenv("OURCHIVE_DEFAULT_FROM_EMAIL")
+SERVER_EMAIL = os.getenv("OURCHIVE_SERVER_EMAIL")
 
 
 TEMPLATES = [
@@ -164,9 +166,6 @@ DATABASES = {
         'PASSWORD': os.getenv('OURCHIVE_DB_PW'),
         'HOST': os.getenv('OURCHIVE_DB_HOST'),
         'PORT': '5432',
-        'TEST': {
-            'MIRROR': 'default',
-        },
     }
 }
 

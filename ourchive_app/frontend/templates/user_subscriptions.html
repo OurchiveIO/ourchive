@@ -33,7 +33,7 @@
 	    <tbody>
 		{% for subscription in subscriptions %}
 			<tr id="user-subscriptions-{{subscription.id}}-parent">
-		        <td id="user-subscriptions-{{subscription.id}}-user"><a href="{% url 'user-profile-parent' subscription.subscribed_user %}">{{subscription.subscribed_user}}</a></td>
+		        <td id="user-subscriptions-{{subscription.id}}-user"><a href="{% url 'user-profile-parent' subscription.subscribed_user_id %}">{{subscription.subscribed_user}}</a></td>
 		        <td id="user-subscriptions-{{subscription.id}}-st">{% if subscription.subscribed_to_bookmark %}<span class="uk-margin"><a class="uk-link" id="user-subscriptions-{{subscription.id}}-bookmark-link" href="{% url 'fe-user-bookmarks' subscription.subscribed_user %}">{% translate 'Bookmarks' %}</a></span>{% endif %}{% if subscription.subscribed_to_collection %}<span class="uk-margin-left"><a class="uk-link" id="user-subscriptions-{{subscription.id}}-collection-link" href="{% url 'fe-user-collections' subscription.subscribed_user %}">{% translate 'Collections' %}</span></a>{% endif %}</td>
 		        <td id="user-subscriptions-{{subscription.id}}-ac">(<a id="user-subscriptions-{{subscription.id}}-unsubscribe-link" uk-toggle="target: #subscription-{{subscription.id}}-unsubscribe">Unsubscribe</a>)</td>
 		        <div id="subscription-{{subscription.id}}-unsubscribe" uk-modal>

@@ -1,7 +1,10 @@
+{% load i18n %}
 {% if bookmarks %}
-<div class="uk-card uk-card-body uk-card-default uk-card-small" id="search-bookmark-autocomplete-parent">
+<div class="uk-background-muted">
 	{% for bookmark in bookmarks %}
-		<p id="search-bookmark-autocomplete-graf-{{bookmark.id}}" class="uk-text-left uk-margin-large-left"><a id="populate-search-bookmark-href-{{bookmark.bookmark.id}}" onclick="populateBookmarkInput('{{bookmark.bookmark.id}}', '{{bookmark.bookmark.title|default:bookmark.bookmark.work.title}}')"><span class="ourchive-autocomplete uk-text-small" id="search-bookmark-autocomplete-span-{{bookmark.id}}">{{bookmark.bookmark.title|default:bookmark.bookmark.work.title}}</span></a></p>
+	<div id="search-bookmark-autocomplete-graf-{{bookmark.id}}" class="uk-background-default uk-padding-small" onclick="populateBookmarkInput('{{bookmark.bookmark.id}}', '{{bookmark.bookmark.title_clean|default:bookmark.bookmark.work.title_clean}}')"><span class="ourchive-autocomplete uk-text-small uk-link uk-text-bold" id="collection-autocomplete-span-{{tag.tag}}">{{bookmark.bookmark.title|default:bookmark.bookmark.work.title}}</span></div>
 	{% endfor %}
 </div>
+{% else %}
+<div class="uk-background-muted">{% translate 'No bookmarks found' %}</div>
 {% endif %}

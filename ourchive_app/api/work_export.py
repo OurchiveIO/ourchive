@@ -17,14 +17,27 @@ def get_media_directory(work_uid):
     return f'{settings.MEDIA_ROOT}/export/{work_uid}/'
 
 
+def get_media_url(work_uid):
+    return f'{settings.MEDIA_URL}export/{work_uid}/'
+
+
 def get_zip_dir(work):
     clean_title = "".join([c for c in work.title if c.isalpha() or c.isdigit() or c==' ']).rstrip()
     return f"{get_media_directory(work.uid)}{clean_title}.zip"
 
 
+def get_zip_url(work):
+    clean_title = "".join([c for c in work.title if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+    return f"{get_media_url(work.uid)}{clean_title}.zip"
+
+
 def get_epub_dir(work):
     clean_title = "".join([c for c in work.title if c.isalpha() or c.isdigit() or c==' ']).rstrip()
     return f"{get_media_directory(work.uid)}{clean_title}.epub"
+
+def get_epub_url(work):
+    clean_title = "".join([c for c in work.title if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+    return f"{get_media_url(work.uid)}{clean_title}.epub"
 
 
 def get_image_from_url(image_url):
@@ -41,6 +54,7 @@ def get_zip_temp_dir(work, chapter):
 
 def create_zip(work):
     location = get_zip_dir(work)
+    zip_url = get_zip_url(work)
     with ZipFile(location, 'w') as work_file:
         # write basic work info; this will result in a very small html file
         temp_dir = get_temp_directory(work.uid)
@@ -86,7 +100,7 @@ def create_zip(work):
             shutil.rmtree(temp_dir)
         # clean up parent folder
         shutil.rmtree(get_temp_directory(work.uid))
-    return location
+    return [location, zip_url]
 
 
 def create_epub(work):
@@ -185,4 +199,4 @@ def create_epub(work):
     os.makedirs(get_media_directory(work.uid), exist_ok=True)
     location = get_epub_dir(work)
     epub.write_epub(location, book, {})
-    return location
+    return [location, get_epub_url(work)]

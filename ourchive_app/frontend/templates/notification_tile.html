@@ -1,4 +1,4 @@
-<div class="uk-width-1-2@m uk-width-1-1@s" id="notification-tile-parent">
+<div class="uk-width-1-2@m uk-width-1-1@s uk-margin-small-top" id="notification-tile-parent">
 	<div class="uk-card uk-card-default" id="notification-tile-card">
 	    <div class="uk-card-header" id="notification-tile-card-header">
 	        <div id="notification-tile-title-grid" class="uk-grid-small uk-flex-middle" uk-grid>
@@ -9,7 +9,9 @@
 	    	<p id="notification-content">{{ notification.content|safe }}</p>
 		</div>
 	    <div class="uk-card-footer" id="notification-actions-container">
+	    	<div class="uk-margin-remove uk-align-right uk-text-right">
 	        {% if not notification.read %}<a href="/username/{{ notification.user }}/notifications/{{ notification.id }}/read" id="notification-mark-read" title="Mark as read" class="uk-icon-link uk-margin-right" uk-icon="check"></a>{% endif %} <a href="/username/{{ notification.user }}/notifications/{{ notification.id }}/delete" id="notification-mark-delete" title="Delete" class="uk-icon-link" uk-icon="trash"></a>
+	    </div>
 	    </div>
 	</div>  
 </div>

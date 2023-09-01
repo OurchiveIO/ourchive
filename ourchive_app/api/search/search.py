@@ -375,7 +375,7 @@ class PostgresProvider:
         term = term.lower()
         if tag_type:
             resultset = Tag.objects.filter(
-                tag_type__label=tag_type).filter(text__contains=term)
+                tag_type__type_name=tag_type).filter(text__contains=term)
         else:
             resultset = Tag.objects.annotate(zero_distance=TrigramWordDistance(term, 'text'))
             resultset = resultset.filter(zero_distance__lte=.85)
@@ -383,10 +383,10 @@ class PostgresProvider:
             resultset = resultset[:15]
         if resultset is None:
             resultset = Tag.objects.filter(
-                tag_type__label=tag_type) if fetch_all else []
+                tag_type__type_name=tag_type) if fetch_all else []
         for result in resultset:
             results.append({"tag": result.text, "display_text": result.display_text,
-                            "id": result.id, "type": result.tag_type.label})
+                            "id": result.id, "type": result.tag_type.label, "type_name": result.tag_type.type_name})
         return results
 
     def autocomplete_bookmarks(self, term, user):
@@ -466,7 +466,7 @@ class PostgresProvider:
             result_dict.pop(field, None)
         result_dict['tag_type'] = tag_type
         result_json.append(result_dict)
-        tag_results = {'data': result_json, 'page': {'count': 1}}
+        tag_results = {'data': result_json, 'page': {}}
 
         work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
         bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
