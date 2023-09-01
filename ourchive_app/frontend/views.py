@@ -15,6 +15,8 @@ from dateutil.parser import *
 from dateutil import tz
 from urllib.parse import unquote, quote
 import random
+from django.core.cache import cache
+from django.views.decorators.vary import vary_on_cookie
 
 logger = logging.getLogger(__name__)
 
@@ -1396,7 +1398,6 @@ def reset_password(request):
 			return render(request, 'login.html', {
 				'referrer': '/'})
 
-
 def register(request):
 	if request.user.is_authenticated:
 		messages.add_message(request, messages.ERROR, _('You are already logged in.'), 'register-while-authed-error')
@@ -1460,6 +1461,8 @@ def log_out(request):
 
 @require_http_methods(["GET"])
 def work(request, pk, chapter_offset=0):
+	if cache.get(f'work_{pk}_{request.user}'):
+		return cache.get(f'work_{pk}_{request.user}')
 	view_full = request.GET.get('view_full', False)
 	work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
 	url = f'api/works/{pk}/'
@@ -1501,7 +1504,7 @@ def work(request, pk, chapter_offset=0):
 			chapter['attributes'] = get_attributes_for_display(chapter['attributes'])
 			chapter['new_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 			chapters.append(chapter)
-	return render(request, 'work.html', {
+	page_content = render(request, 'work.html', {
 		'work_types': work_types['results'],
 		'work': work,
 		'user_can_comment': user_can_comment,
@@ -1515,7 +1518,9 @@ def work(request, pk, chapter_offset=0):
 		'chapter_offset': chapter_offset,
 		'next_chapter': f'/works/{pk}/{chapter_offset + 1}' if 'next' in chapter_response and chapter_response['next'] else None,
 		'previous_chapter': f'/works/{pk}/{chapter_offset - 1}' if 'previous' in chapter_response and chapter_response['previous'] else None,})
-
+	if not cache.get(f'work_{pk}_{request.user}'):
+		cache.set(f'work_{pk}_{request.user}', page_content, 60 * 60)
+	return page_content
 
 def render_comments_common(request, get_comment_base, object_name, object_id, load_more_base, view_thread_base,
 		delete_obj, post_action_url, edit_action_url, root_obj_id=None, additional_params={}):
