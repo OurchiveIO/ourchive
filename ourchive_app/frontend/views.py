@@ -1518,7 +1518,7 @@ def work(request, pk, chapter_offset=0):
 		'chapter_offset': chapter_offset,
 		'next_chapter': f'/works/{pk}/{chapter_offset + 1}' if 'next' in chapter_response and chapter_response['next'] else None,
 		'previous_chapter': f'/works/{pk}/{chapter_offset - 1}' if 'previous' in chapter_response and chapter_response['previous'] else None,})
-	if not cache.get(f'work_{pk}_{request.user}'):
+	if not cache.get(f'work_{pk}_{request.user}') and len(messages.get_messages(request)) < 1:
 		cache.set(f'work_{pk}_{request.user}', page_content, 60 * 60)
 	return page_content
 
