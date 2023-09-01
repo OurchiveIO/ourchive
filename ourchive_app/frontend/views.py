@@ -1461,10 +1461,10 @@ def log_out(request):
 
 @require_http_methods(["GET"])
 def work(request, pk, chapter_offset=0):
-	cache_key = f'work_{pk}_{chapter_offset}_{request.user}'
+	view_full = request.GET.get('view_full', False)
+	cache_key = f'work_{pk}_{chapter_offset}_{request.user}_{view_full}'
 	if cache.get(cache_key):
 		return cache.get(cache_key)
-	view_full = request.GET.get('view_full', False)
 	work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
 	url = f'api/works/{pk}/'
 	work_response = do_get(url, request, 'Work')

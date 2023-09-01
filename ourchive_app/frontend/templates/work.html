@@ -66,14 +66,18 @@
     {% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}
     {% include "tag_partial.html" with obj_name='work-tag' tags=tags.items %}
     <div id="work-chapter-hr-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" uk-grid><div><hr class="uk-divider-icon" id="work-chapter-hr"/></div></div>
+    <div id="chapter-grid-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left ourchive-parent-grid" uk-grid>
     {% if chapter %} 
+    
         {% include "chapter.html" %}  
+        
     {% elif chapters %}
         {% for chapter in chapters %}
             {% include "chapter.html" %}
             {% if view_full and work.chapter_count > 1 and not forloop.last %}<div id="chapter-divider" class="uk-margin-top"><hr class="ourchive-hr" id="chapter-view-full-hr"/></div>{% endif %}
         {% endfor %}  
     {% endif %}
+    </div>
 </article>
 {% if scroll_comment_id %}
     <script>
