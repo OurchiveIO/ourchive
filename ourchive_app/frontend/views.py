@@ -693,26 +693,53 @@ def user_bookmarks_drafts(request, username):
 
 
 def user_bookmark_subscriptions(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
+		return redirect('/')
+	cache_key = f'subscription_{username}_{request.user}_bookmarks'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
 	response = do_get(f'api/users/{username}/subscriptions/bookmarks', request)
-	return render(request, 'user_bookmark_subscriptions.html', {
+	page_content = render(request, 'user_bookmark_subscriptions.html', {
 		'bookmarks': response.response_data
 	})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
 
 
 def user_collection_subscriptions(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
+		return redirect('/')
+	cache_key = f'subscription_{username}_{request.user}_collections'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
 	response = do_get(f'api/users/{username}/subscriptions/collections', request, params=request.GET)
-	return render(request, 'user_collection_subscriptions.html', {
+	page_content = render(request, 'user_collection_subscriptions.html', {
 		'bookmark_collections': response.response_data,
 		'next': f"/users/{username}/subscriptions/collections/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
 		'previous': f"/users/{username}/subscriptions/collections/{response.response_data['prev_params']}" if response.response_data['prev_params'] is not None else None,
 	})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
 
 
 def user_subscriptions(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
+		return redirect('/')
+	cache_key = f'subscription_{username}_{request.user}'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
 	response = do_get(f'api/users/{username}/subscriptions', request, 'Subscription')
-	return render(request, 'user_subscriptions.html', {
+	page_content = render(request, 'user_subscriptions.html', {
 		'subscriptions': response.response_data['results'] if 'results' in response.response_data else {}
 	})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
 
 
 def unsubscribe(request, username):
@@ -1305,16 +1332,22 @@ def edit_bookmark_collection(request, pk):
 
 
 def bookmark_collection(request, pk):
+	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
+	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
+	comment_id = request.GET.get('comment_thread')
+	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
+	comment_count = request.GET.get('comment_count')
+	cache_key = f'collection_{pk}_{request.user}_{expand_comments}_{scroll_comment_id}_{comment_id}_{comment_offset}_{comment_count}'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
 	bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request, 'Bookmark Collection').response_data
 	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
 	bookmark_collection['tags'] = tags
 	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
-	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
-		comment_id = request.GET.get('comment_thread')
 		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
 		comment_offset = 0
-		comments = {'results': [comments], 'count': request.GET.get('comment_count')}
+		comments = {'results': [comments], 'count': comment_count}
 		bookmark_collection['post_action_url'] = f"/bookmark-collections/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
 		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
 	else:
@@ -1323,11 +1356,9 @@ def bookmark_collection(request, pk):
 		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit"""
 	for bookmark in bookmark_collection['bookmarks_readonly']:
 		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '').replace('<br/>', '', 1)
-	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
-	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
 	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
 	bookmark_collection['new_action_url'] = f"/bookmark-collections/{pk}/comments/new"
-	return render(request, 'bookmark_collection.html', {
+	page_content = render(request, 'bookmark_collection.html', {
 		'load_more_base': f"/bookmark-collections/{pk}",
 		'view_thread_base': f"/bookmark-collections/{pk}",
 		'bkcol': bookmark_collection,
@@ -1336,6 +1367,9 @@ def bookmark_collection(request, pk):
 		'expand_comments': expand_comments,
 		'user_can_comment': user_can_comment,
 		'comments': comments})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
 
 
 def delete_bookmark_collection(request, pk):
@@ -1462,7 +1496,11 @@ def log_out(request):
 @require_http_methods(["GET"])
 def work(request, pk, chapter_offset=0):
 	view_full = request.GET.get('view_full', False)
-	cache_key = f'work_{pk}_{chapter_offset}_{request.user}_{view_full}'
+	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
+	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
+	comment_id = request.GET.get('comment_thread')
+	comment_count = request.GET.get('comment_count')
+	cache_key = f'work_{pk}_{chapter_offset}_{request.user}_{view_full}_{expand_comments}_{comment_offset}_{comment_id}_{comment_count}'
 	if cache.get(cache_key):
 		return cache.get(cache_key)
 	work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
@@ -1481,21 +1519,18 @@ def work(request, pk, chapter_offset=0):
 	chapter_response = do_get(chapter_url_string, request, 'Chapter').response_data
 	chapter_json = chapter_response['results'] if 'results' in chapter_response else chapter_response
 	user_can_comment = (work['comments_permitted'] and (work['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in work else False
-	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	chapters = []
 	for chapter in chapter_json:
 		chapter['updated_on'] = parse(chapter['updated_on']).date()
 		if 'id' in chapter:
 			if 'comment_thread' not in request.GET:
-				comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 				chapter_comments = do_get(f"api/chapters/{chapter['id']}/comments?limit=10&offset={comment_offset}", request, "Chapter Comments").response_data
 				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}"""
 			else:
-				comment_id = request.GET.get('comment_thread')
 				chapter_comments = do_get(f"api/comments/{comment_id}", request, 'Chapter Comments').response_data
 				comment_offset = 0
-				chapter_comments = {'results': [chapter_comments], 'count': request.GET.get('comment_count')}
+				chapter_comments = {'results': [chapter_comments], 'count': comment_count}
 				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}&comment_thread={comment_id}"
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
 			chapter['comments'] = chapter_comments
@@ -1720,26 +1755,30 @@ def bookmarks(request):
 
 
 def bookmark(request, pk):
+	comment_id = request.GET.get('comment_thread')
+	comment_count = request.GET.get('comment_count')
+	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
+	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
+	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
+	cache_key = f'bookmark_{pk}_{request.user}_{comment_id}_{comment_count}_{comment_offset}_{expand_comments}_{scroll_comment_id}'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
 	bookmark = do_get(f'api/bookmarks/{pk}', request, 'Bookmark').response_data
 	tags = group_tags(bookmark['tags']) if 'tags' in bookmark else {}
 	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes']) if 'attributes' in bookmark else {}
-	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
 	if 'comment_thread' in request.GET:
-		comment_id = request.GET.get('comment_thread')
 		comments = do_get(f"api/bookmarkcomments/{comment_id}", request, 'Bookmark Comments').response_data
 		comment_offset = 0
-		comments = {'results': [comments], 'count': request.GET.get('comment_count')}
+		comments = {'results': [comments], 'count': comment_count}
 		bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
 		bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
 	else:
 		comments = do_get(f'api/bookmarks/{pk}/comments?limit=10&offset={comment_offset}', request, 'Bookmark Comment').response_data
 		bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new"
 		bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit"""
-	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
 	bookmark['new_action_url'] = f"/bookmarks/{pk}/comments/new"
-	scroll_comment_id = request.GET['scrollCommentId'] if'scrollCommentId' in request.GET else None
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
-	return render(request, 'bookmark.html', {
+	page_content = render(request, 'bookmark.html', {
 		'bookmark': bookmark,
 		'load_more_base': f"/bookmarks/{pk}",
 		'view_thread_base': f"/bookmarks/{pk}",
@@ -1751,6 +1790,9 @@ def bookmark(request, pk):
 		'rating_range': bookmark['star_count'] if 'star_count' in bookmark else [],
 		'work': bookmark['work'] if 'work' in bookmark else {},
 		'comments': comments})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
 
 
 def works_by_tag(request, tag):

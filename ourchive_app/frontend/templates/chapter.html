@@ -67,7 +67,7 @@
     <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.end_notes }}{% endautoescape %}</span></div>
 {% endif %}
 </div>
-<div id="work-controls-parent-bottom" class="uk-text-right uk-align-right uk-width-4-1 uk-margin-top uk-margin-remove-bottom">
+<div id="work-controls-parent-bottom" class="uk-text-right uk-align-right uk-width-1-4">
     <a id="work-bookmark-link-bottom" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span-bottom" uk-icon="icon: bookmark;ratio:1.25" title="{% translate 'Bookmark' %}"></span> </a>
     <a id="work-fingerguns-link-bottom" href="/fingerguns/{{ id }}"><span id="work-fingerguns-span-bottom" uk-icon="icon: heart;ratio:1.25" title="{% translate 'Fingerguns' %}"></span> </a>
     <div class="uk-inline">
@@ -79,6 +79,8 @@
         </ul></div>
     </div>
 </div>
-<div class="uk-width-1-1"><div class="uk-width-1-2">{% if previous_chapter is not None %}<a href="{{ previous_chapter }}"><span uk-pagination-previous></span> Previous Chapter</a>{% endif %}</div>
-{% if next_chapter is not None %}<div class="uk-width-1-2 uk-text-right uk-align-right uk-margin-remove-left uk-margin-remove-right"><a href="{{ next_chapter }}">Next Chapter <span uk-pagination-next></span></a></div>{% endif %}</div>
+<div class="uk-grid uk-width-expand uk-margin-remove" uk-grid>
+<div class="uk-width-1-2 uk-margin-remove-left uk-margin-remove-right uk-padding-remove-horizontal">{% if previous_chapter is not None %}<a href="{{ previous_chapter }}"><span uk-pagination-previous></span> Previous Chapter</a>{% endif %}</div>
+{% if next_chapter is not None %}<div class="uk-width-1-2 uk-text-right uk-align-right uk-margin-remove-left uk-margin-remove-right uk-padding-remove-horizontal"><a href="{{ next_chapter }}">Next Chapter <span uk-pagination-next></span></a></div>{% endif %}
+</div>
 <div class="uk-width-1-1" id="chapter-{{ chapter.id }}-comments-include">{% include 'comments_parent.html' with object_name='chapter' comments=chapter.comments object=chapter edit_action_url=chapter.edit_action_url post_action_url=chapter.post_action_url comment_offset=chapter.comment_offset delete_obj='chapter-comment' load_more_base=chapter.load_more_base root_obj_id=work.id view_thread_base=chapter.view_thread_base %}</div>
