@@ -149,12 +149,14 @@ def create_epub(work):
 
     book.spine = ['nav', cover_page, title_page]
 
-    num = 0
+    num = 1
     for chapter in work.chapters.all():
         new_chapter = epub.EpubHtml(
-            title=chapter.title, file_name=num + '.xhtml', lang='en', content='')
+            title=f'{num}_{chapter.title}', file_name=f'{num}_{chapter.title}.xhtml', lang='en', content='')
         if chapter.title:
             new_chapter.content = f'{new_chapter.content}<h2>{chapter.title}</h2>'
+        else:
+            new_chapter.content = f'{new_chapter.content}<h2>Chapter {num}</h2>'
         if chapter.summary:
             new_chapter.content = f'{new_chapter.content}<h3>Summary</h3><p>{chapter.summary}</p>'
         if chapter.notes:
@@ -177,13 +179,15 @@ def create_epub(work):
             new_chapter.content += "<br/><br/><br/>"
         if chapter.text and chapter.text != "None":
             new_chapter.content += chapter.text
+        if chapter.end_notes and chapter.end_notes != "None":
+            new_chapter.content = f"{new_chapter.content}<br/><hr><br/><h3>End Notes</h3>{chapter.end_notes}"
         if chapter.text or chapter.image_url:
             # don't add anything to the epub if the chapter is functionally empty
             book.add_item(new_chapter)
             book.spine.append(new_chapter)
-            toc_link = chapter.summary if chapter.summary else chapter.title
-            book.toc.append(epub.Link(chapter.title + '.xhtml',
-                                  chapter.title, toc_link))
+            toc_link = chapter.summary if chapter.summary else (chapter.title if chapter.title else f'Chapter {num}')
+            book.toc.append(epub.Link(f'{num}_{chapter.title}' + '.xhtml',
+                                  f'Chapter {num}', toc_link))
         num = num + 1
 
     # define CSS style
