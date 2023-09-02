@@ -23,7 +23,7 @@ urlpatterns = [
     path('bookmark-collections/', views.bookmark_collections),
     path('bookmark-collections/new', views.new_bookmark_collection, name='fe-new-collection'),
     path('bookmark-collections/<int:pk>/edit', views.edit_bookmark_collection),
-    path('bookmark-collections/<int:pk>/', views.bookmark_collection),
+    path('bookmark-collections/<int:pk>/', views.bookmark_collection, name='fe-view-collection'),
     path('bookmark-collections/<int:pk>/delete', views.delete_bookmark_collection, name='delete-bookmark-collection'),
     path('bookmark-collections/<int:pk>/publish', views.publish_bookmark_collection, name='publish-bookmark-collection'),
     path('bookmark-collections/<int:pk>/comments', views.render_collection_comments),

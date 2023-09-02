@@ -38,7 +38,7 @@
     </div>
     <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" id="bookmark-content-grid-parent" uk-grid>
         <div id="bookmark-work-link-grid-hr" class="uk-width-1-1"><hr/></div>
-    	<div id="bookmark-work-link-grid-span" class="uk-width-1-2"><span id="bookmark-work-link-span" class="uk-text-uppercase">Work:</span> <a id="bookmark-work-link-id" class="uk-link uk-text-medium" href="{% url 'fe-work-view' work.id %}">{{ work.title }} by {{work.user}}</a></span></div>
+    	<div id="bookmark-work-link-grid-span" class="uk-width-1-2"><span id="bookmark-work-link-span" class="uk-text-bold">Work:</span> <a id="bookmark-work-link-id" class="uk-link uk-text-medium" href="{% url 'fe-work-view' work.id %}">{{ work.title }}</a> by <a href="{% url 'user-profile-parent' bookmark.work.user_id %}" title="Bookmark work creator" id="bookmark-work-creator-link">{{work.user}}</a></a></span></div>
     	{% if settings.RatingsEnabled %}
 	    <div id="bookmark-rating-parent" class="uk-width-1-2">
 	    	<p id="bookmark-description-hed" class="uk-text-medium"><span>{{bookmark.user}}'s rating:</span>
