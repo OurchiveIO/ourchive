@@ -978,6 +978,7 @@ class NotificationDetail(generics.RetrieveUpdateDestroyAPIView):
 class OurchiveSettingList(generics.ListCreateAPIView):
     serializer_class = OurchiveSettingSerializer
     permission_classes = [IsAdminOrReadOnly]
+    pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
         if 'setting_name' in self.request.GET:

@@ -10,10 +10,10 @@
 	            {% endif %}
 	            <div class="uk-width-expand" id="work-{{work.id}}-tile-title-parent">
 	                {% if work.draft == True %}
-	                	<span id="work-{{work.id}}-tile-draft-title" class="uk-text-medium uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-draft-title-link" href="{% url 'fe-work-view' work.id %}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {{ work.user }}</span>
+	                	<span id="work-{{work.id}}-tile-draft-title" class="uk-text-medium uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-draft-title-link" href="{% url 'fe-work-view' work.id %}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by <a title="Work Creator" id="work-creator-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a></span>
 		                <p class="uk-label uk-margin-remove-top uk-margin-remove-right uk-margin-remove-left uk-text-small uk-inline uk-label-warning" id="work-{{work.id}}-tile-draft-button-span"><strong>DRAFT</strong></p>
 	                {% else %}
-	                	<span id="work-{{work.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {{ work.user }}</span>
+	                	<span id="work-{{work.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by <a title="Work Creator" id="work-creator-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a></span>
 	                {% endif %}
 	            </div>
 	            {% if work.user == request.user.username %}

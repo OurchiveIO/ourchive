@@ -31,7 +31,7 @@ urlpatterns = [
     path('bookmark-collections/<int:pk>/comments/edit', views.edit_collection_comment),
     path('bookmark-collections/<int:pk>/comments/<int:comment_id>/delete', views.delete_collection_comment, name='delete-collection-comment'),
     path('bookmarks/', views.bookmarks),
-    path('bookmarks/<int:pk>/', views.bookmark),
+    path('bookmarks/<int:pk>/', views.bookmark, name='fe-view-bookmark'),
     path('bookmarks/<int:pk>/comments', views.render_bookmark_comments),
     path('bookmarks/<int:pk>/comments/new', views.create_bookmark_comment),
     path('bookmarks/<int:pk>/comments/edit', views.edit_bookmark_comment),
