@@ -320,6 +320,17 @@ class UserBookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
+    def list(self, request, *args, **kwargs):
+        response = super(UserBookmarkList, self).list(request, args, kwargs)
+        try:
+            if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
+                response.data['star_count'] = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
+            else:
+                response.data['star_count'] = [1,2,3,4,5]
+        except ObjectDoesNotExist:
+            response.data['star_count'] = [1,2,3,4,5]
+        return response
+
     def get_queryset(self):
         return Bookmark.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
 

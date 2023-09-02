@@ -14,6 +14,16 @@
 			document.getElementById('bookmark-{{bookmark.id}}-comments-child-container').scrollIntoView();
 		  });
 	}
+
+    function addSelectedCollection() {
+        var collection = document.querySelector('.add-to-bookmark-radio');
+        console.log(collection.checked);
+        if (collection.checked !== true) {
+            return;
+        }
+        var url = "{% url 'fe-add-collection-to-bookmark' bookmark.id %}";
+        window.location.replace(url + '?collection_id=' + collection.name);
+    }
 </script>
 <article class="uk-article uk-width-expand uk-padding-remove" id="bookmark-uk-article">
     <div class="uk-child-width-2-1 ourchive-parent-grid" id="bookmark-uk-child-grid" uk-grid>
@@ -33,6 +43,8 @@
             <a id="bookmark-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
             <a id="bookmark-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a>
             {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
+            <a title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: plus"></span> </a>
+            {% include "bookmark_collection_modal.html" %}
             {% endif %}
         </div>
     </div>

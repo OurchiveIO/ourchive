@@ -715,8 +715,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
-    collection = serializers.HyperlinkedRelatedField(
-        view_name='bookmarkcollection-detail', queryset=BookmarkCollection.objects.all(), required=False, allow_null=True)
+    collection = serializers.PrimaryKeyRelatedField(queryset=BookmarkCollection.objects.all(), required=False, allow_null=True)
     bookmark_id = serializers.HyperlinkedIdentityField(
         view_name='work-detail', read_only=True)
     id = serializers.ReadOnlyField()
@@ -810,6 +809,7 @@ class BookmarkSummarySerializer(serializers.HyperlinkedModelSerializer):
     work_id = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all())
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     collection = serializers.HyperlinkedRelatedField(
         view_name='bookmarkcollection-detail', queryset=BookmarkCollection.objects.all(), required=False, allow_null=True)
     bookmark_id = serializers.HyperlinkedIdentityField(
@@ -919,6 +919,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
 class BookmarkCollectionSummarySerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)

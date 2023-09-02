@@ -4,8 +4,7 @@
 {% block content %}	
 {% if user_filter %}
 	<div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="user-bookmarks-parent">
-		<div class="uk-card" id="user-books-uk-card"><h1 id="user-bookmarks-header-h1" class="uk-heading-line uk-text-center"> <span id="user_bookmarks_header">{% translate 'Bookmarks by' %} {{ user_filter }}</span> </h1> 
-		</div>
+		<h1 id="user-bookmarks-header-h1" class="uk-heading-line uk-text-center"> <span id="user_bookmarks_header">{% translate 'Bookmarks by' %} {{ user_filter }}</span> </h1> 
 	</div>
 {% endif %}
 <div class="uk-width-1-1 uk-padding-remove-horizontal">{% include "bookmarks_list.html" %}</div>

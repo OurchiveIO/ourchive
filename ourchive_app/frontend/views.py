@@ -648,6 +648,7 @@ def user_bookmarks(request, username):
 	bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks,
+		'rating_range': response.response_data['star_count'],
 		'next': f"/username/{username}/bookmarks/{response.response_data['next_params']}" if response.response_data["next_params"] is not None else None,
 		'previous': f"/username/{username}/bookmarks/{response.response_data['prev_params']}" if response.response_data["prev_params"] is not None else None,
 		'user_filter': username})
@@ -1807,8 +1808,10 @@ def bookmark(request, pk):
 		bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit"""
 	bookmark['new_action_url'] = f"/bookmarks/{pk}/comments/new"
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
+	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections', request, 'Collections').response_data
 	page_content = render(request, 'bookmark.html', {
 		'bookmark': bookmark,
+		'collections': collections,
 		'load_more_base': f"/bookmarks/{pk}",
 		'view_thread_base': f"/bookmarks/{pk}",
 		'tags': tags,
@@ -1822,6 +1825,18 @@ def bookmark(request, pk):
 	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
 		cache.set(cache_key, page_content, 60 * 60)
 	return page_content
+
+
+def add_collection_to_bookmark(request, pk):
+	collection_id = request.GET.get('collection_id')
+	if not collection_id:
+		return redirect(f'/bookmarks/{pk}')
+	if not request.user.is_authenticated:
+		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'add-collection-to-bookmark-noauth')
+	response = do_patch(f'api/bookmarks/{pk}/', request, data={'id': pk, 'collection': collection_id}, object_name="Collection")
+	message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
+	messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
+	return redirect(f'/bookmarks/{pk}')
 
 
 def works_by_tag(request, tag):
