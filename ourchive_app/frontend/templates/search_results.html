@@ -164,7 +164,7 @@
 			<li id="search-results-work-facet-switcher-li" class="uk-width-expand"> 
 				<div class="uk-width-expand" id="search-results-works-parent">		
 					{% for work in works.data %} 
-						{% include "work_tile.html" %}     
+						<div class="uk-margin-bottom">{% include "work_tile.html" %} </div>    
 				    {% endfor %}
 				    {% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' %}
 				</div>
@@ -172,7 +172,7 @@
 			<li id="search-results-bookmarks-li" class="uk-width-expand"> 
 				<div class="uk-width-expand" id="search-results-bookmarks-content">
 			        {% for bookmark in bookmarks.data %} 
-						{% include "bookmark_tile.html" %}     
+						<div class="uk-margin-bottom">{% include "bookmark_tile.html" %} </div>   
 				    {% endfor %}
 				    {% include 'pagination.html' with previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' %}
 				</div>     
@@ -180,7 +180,7 @@
 			<li id="search-results-collections-li" class="uk-width-expand"> 
 				<div class="uk-width-expand" id="search-results-collections-content">
 			        {% for bookmark_collection in collections.data %} 
-						{% include "bookmark_collection_tile.html" %}     
+						<div class="uk-margin-bottom">{% include "bookmark_collection_tile.html" %}</div>  
 				    {% endfor %}
 				    {% include 'pagination.html' with previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' %}
 				</div>     

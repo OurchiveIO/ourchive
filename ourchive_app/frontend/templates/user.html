@@ -12,7 +12,7 @@
     };
 </script>
 {% endif %}
-<div class="uk-width-1" id="user-profile-parent">
+<div class="uk-width-1 uk-padding-remove-horizontal" id="user-profile-parent">
     <div class="uk-text-right uk-width-1" id="user-profile-controls-parent">
         {% if user.username == request.user.username %}
             <a id="user-profile-edit-link" href="/username/{{ user.id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>

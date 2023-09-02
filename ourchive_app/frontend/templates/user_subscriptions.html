@@ -2,26 +2,27 @@
 {% load i18n %}
 {% block title %}Subscriptions{% endblock %}
 {% block content %}	
-<div class="uk-width-1-1 uk-text-left" id="user-subscriptions-grid">
-	<div id="user-subscriptions-header" class="uk-width-1-1">
+	<div id="user-subscriptions-header" class="uk-width-1-1 uk-padding-remove-horizontal">
 		<h1 id="user-subscriptions-h1">Subscriptions</h1>
 		<hr/>
 	</div>
-	<div id="user-subscriptions-detail" class="uk-width-1-1">
+	<div id="user-subscriptions-detail" class="uk-width-1-1 uk-padding-remove-horizontal">
 		<p class="uk-text-large">{% blocktranslate %}Welcome to your subscriptions page. You can access your subscription feeds by clicking the links below, or manage your subscriptions in the table.{% endblocktranslate %}</p>
 	</div>
-	<div class="user-subscriptions-links">
+	<div class="user-subscriptions-links uk-width-1-1 uk-padding-remove-horizontal" id="individual-subscription-buttons">
 		<a href="{% url 'fe-user-bookmark-subscriptions' request.user.username %}" class="uk-button-primary uk-button">{% translate 'Bookmarks' %}</a>
 		<a href="{% url 'fe-user-collection-subscriptions' request.user.username %}" class="uk-button-primary uk-button">{% translate 'Collections' %}</a>
 		<a href="#" class="uk-button-default uk-button uk-disabled">{% translate 'Works' %} ({% translate 'Coming Soon!' %})</a>
 		<a href="#" class="uk-button-default uk-button uk-disabled">{% translate 'Anthologies' %} ({% translate 'Coming Soon!' %})</a>
+		<hr/>
 	</div>
-	<hr/>
-	<div id="user-subscriptions-content" class="uk-width-1-1">
+	<div id="user-subscriptions-content" class="uk-width-1-1 uk-padding-remove-horizontal">
 		<h3>{{ request.user.username }}'s Subscriptions</h3>
 		{% if not subscriptions %}
 		<p id="user-subscriptions-none-message">{% blocktranslate %}No subscriptions yet. To create a subscription, navigate to a user's profile and click the 'subscribe' button.{% endblocktranslate %}</p>
 		{% endif %}
+	</div>
+	<div class="uk-overflow-auto uk-width-1-1 uk-padding-remove-horizontal">
 		<table class="uk-table uk-table-striped">
 	    <thead>
 	        <tr>
@@ -34,7 +35,7 @@
 		{% for subscription in subscriptions %}
 			<tr id="user-subscriptions-{{subscription.id}}-parent">
 		        <td id="user-subscriptions-{{subscription.id}}-user"><a href="{% url 'user-profile-parent' subscription.subscribed_user_id %}">{{subscription.subscribed_user}}</a></td>
-		        <td id="user-subscriptions-{{subscription.id}}-st">{% if subscription.subscribed_to_bookmark %}<span class="uk-margin"><a class="uk-link" id="user-subscriptions-{{subscription.id}}-bookmark-link" href="{% url 'fe-user-bookmarks' subscription.subscribed_user %}">{% translate 'Bookmarks' %}</a></span>{% endif %}{% if subscription.subscribed_to_collection %}<span class="uk-margin-left"><a class="uk-link" id="user-subscriptions-{{subscription.id}}-collection-link" href="{% url 'fe-user-collections' subscription.subscribed_user %}">{% translate 'Collections' %}</span></a>{% endif %}</td>
+		        <td id="user-subscriptions-{{subscription.id}}-st">{% if subscription.subscribed_to_bookmark %}<p><span class="uk-margin"><a class="uk-link" id="user-subscriptions-{{subscription.id}}-bookmark-link" href="{% url 'fe-user-bookmarks' subscription.subscribed_user %}">{% translate 'Bookmarks' %}</a></span></p>{% endif %}{% if subscription.subscribed_to_collection %}<p><span class="uk-margin"><a class="uk-link" id="user-subscriptions-{{subscription.id}}-collection-link" href="{% url 'fe-user-collections' subscription.subscribed_user %}">{% translate 'Collections' %}</span></a></p>{% endif %}</td>
 		        <td id="user-subscriptions-{{subscription.id}}-ac">(<a id="user-subscriptions-{{subscription.id}}-unsubscribe-link" uk-toggle="target: #subscription-{{subscription.id}}-unsubscribe">Unsubscribe</a>)</td>
 		        <div id="subscription-{{subscription.id}}-unsubscribe" uk-modal>
 			    <div class="uk-modal-dialog uk-modal-body" id="subscription-{{subscription.id}}-unsubscribe-body">
@@ -84,5 +85,4 @@
 		</tbody>
 		</table>
 	</div>
-</div>
 {% endblock %}
