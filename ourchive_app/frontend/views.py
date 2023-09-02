@@ -1490,6 +1490,12 @@ def register(request):
 
 def request_invite(request):
 	if request.method == 'POST':
+		if not request.user.is_authenticated:
+			if settings.USE_CAPTCHA:
+				captcha_passed = validate_captcha(request)
+				if not captcha_passed:
+					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.', 'captcha-fail-error')
+					return redirect('/request-invite/')
 		response = do_post(f'api/invitations/', request, data=request.POST.copy(), object_name='Invitation')
 		if response.response_info.status_code >= 200 and response.response_info.status_code < 400:
 			messages.add_message(request, messages.SUCCESS, _('You have been added to the invite queue.'), 'invite-request-success')
