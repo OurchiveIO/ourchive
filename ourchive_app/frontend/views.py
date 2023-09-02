@@ -97,6 +97,8 @@ def get_work_obj(request, work_id=None):
 		publish = work_dict.pop('publish_all')
 		if publish[0].lower() == 'on':
 			publish_all = True
+	if 'preferred_download_url' in work_dict and work_dict['preferred_download_url'] == 'None':
+		work_dict['preferred_download_url'] = ''
 	multichapter = work_dict.pop('multichapter') if 'multichapter' in work_dict else None
 	chapter_dict = {
 		'title': '',
@@ -1169,7 +1171,8 @@ def publish_work(request, id):
 def export_work(request, pk, file_ext):
 	file_url = do_get(f'api/works/{pk}/export/', request, params={'extension': file_ext}, object_name='Work')
 	message_type = messages.ERROR if file_url.response_info.status_code >= 400 else messages.SUCCESS
-	messages.add_message(request, message_type, file_url.response_info.message, file_url.response_info.type_label)
+	if not message_type == messages.SUCCESS:
+		messages.add_message(request, message_type, file_url.response_info.message, file_url.response_info.type_label)
 	if file_url.response_info.status_code >= 400:
 		return redirect(f'/works/{pk}')
 	response = FileResponse(open(file_url.response_data['media_url'], 'rb'))

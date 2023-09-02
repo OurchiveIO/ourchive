@@ -217,16 +217,19 @@ class ExportWork(APIView):
 
     def get(self, request, pk):
         work = Work.objects.filter(id=pk).first()
+        if work.draft and request.user.id != work.user.id:
+            return Response({'message': ["You do not have permission to download this work."]}, status=400)
         work_url = ''
         # get export if it hasn't been created already.
         # note the archive has no M4B creation capability, so that's going to
         # be in preferred download url or nowhere.
         ext = request.GET.get('extension')
         if not ext:
-            return Response({'message': "GET param 'extension' must be supplied"}, status=400)
+            return Response({'message': ["GET param 'extension' must be supplied"]}, status=400)
         if ext.lower() == 'epub':
             if work.epub_url and work.epub_url != "None":
-                return Response({'message': "EPUB url exists. Use EPUB URL to download work."}, status=400)
+                media_url = work_export.get_epub_dir(work)
+                return Response({'media_url': media_url}, status=200)
             work_url = work_export.create_epub(work)
             work.epub_url = work_url[1]
             #full_url = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{work_url}'
@@ -240,7 +243,7 @@ class ExportWork(APIView):
             work.save()
             return Response({'media_url': work_url[0]}, status=200)
         else:
-            return Response({'message': 'Format not supported or work does not exist.'}, status=400)
+            return Response({'message': ['Format not supported or work does not exist.']}, status=400)
 
 
 class ImportWorks(APIView):

@@ -149,9 +149,10 @@ def create_epub(work):
 
     book.spine = ['nav', cover_page, title_page]
 
+    num = 0
     for chapter in work.chapters.all():
         new_chapter = epub.EpubHtml(
-            title=chapter.title, file_name=chapter.title + '.xhtml', lang='en', content='')
+            title=chapter.title, file_name=num + '.xhtml', lang='en', content='')
         if chapter.title:
             new_chapter.content = f'{new_chapter.content}<h2>{chapter.title}</h2>'
         if chapter.summary:
@@ -183,6 +184,7 @@ def create_epub(work):
             toc_link = chapter.summary if chapter.summary else chapter.title
             book.toc.append(epub.Link(chapter.title + '.xhtml',
                                   chapter.title, toc_link))
+        num = num + 1
 
     # define CSS style
     loaded_css = get_epub_style()
