@@ -538,11 +538,15 @@ def report_user(request, username):
 
 
 def user_works(request, username):
-	works = get_works_list(request, username)
+	response = get_works_list(request, username)
+	next_params = response['next_params']
+	prev_params = response['prev_params']
+	works = response['works']
+	works = format_date_for_template(works, 'updated_on', True)
 	return render(request, 'works.html', {
-		'works': works['works'],
-		'next': f"/username/{username}/works/{works['next_params']}" if works["next_params"] is not None else None,
-		'previous': f"/username/{username}/works/{works['prev_params']}" if works["prev_params"] is not None else None,
+		'works': works,
+		'next': f"/username/{username}/works/{next_params}" if next_params is not None else None,
+		'previous': f"/username/{username}/works/{prev_params}" if prev_params is not None else None,
 		'user_filter': username,
 		'root': settings.ROOT_URL})
 
@@ -551,6 +555,7 @@ def user_works_drafts(request, username):
 	response = do_get(f'api/users/{username}works/drafts', request)
 	works = response.response_data['results']
 	works = get_object_tags(works)
+	works = format_date_for_template(works, 'updated_on', True)
 	return render(request, 'works.html', {
 		'works': works,
 		'user_filter': username,
@@ -640,6 +645,7 @@ def user_bookmarks(request, username):
 	response = do_get(f'api/users/{username}/bookmarks', request, params=request.GET, object_name='User Bookmarks')
 	bookmarks = response.response_data['results']
 	bookmarks = get_object_tags(bookmarks)
+	bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks,
 		'next': f"/username/{username}/bookmarks/{response.response_data['next_params']}" if response.response_data["next_params"] is not None else None,
@@ -651,6 +657,7 @@ def user_bookmark_collections(request, username):
 	response = do_get(f'api/users/{username}/bookmarkcollections', request, params=request.GET, object_name='Bookmark Collections')
 	bookmark_collections = response.response_data['results']
 	bookmark_collections = get_object_tags(bookmark_collections)
+	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
 	return render(request, 'bookmark_collections.html', {
 		'bookmark_collections': bookmark_collections,
 		'next': f"/username/{username}/bookmarkcollections/{response.response_data['next_params']}" if response.response_data["next_params"] is not None else None,
