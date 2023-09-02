@@ -3,7 +3,7 @@ from ourchiveao3importer.works import Work
 from ourchiveao3importer.chapters import Chapters
 import uuid
 import logging
-from etl.models import WorkImport, ObjectMapping
+from etl.models import WorkImport, ObjectMapping, AdditionalMapping
 from api import models as api
 from django.utils.translation import gettext as _
 from datetime import datetime, timedelta
@@ -210,6 +210,8 @@ class EtlWorkImport(object):
             return
 
     def process_mappings(self, obj, mappings, origin_json):
+        additional_tag_mappings = AdditionalMapping.objects.filter(destination_object='tag')
+        additional_attribute_mappings = AdditionalMapping.objects.filter(destination_object='attribute')
         for mapping in mappings:
             try:
                 if "." in mapping.origin_field:
@@ -221,6 +223,41 @@ class EtlWorkImport(object):
                 if origin_value is None:
                     continue
                 if 'tag' in mapping.destination_field:
+                    if mapping.additional_mappings:
+                        if type(origin_value) is list:
+                            for text in origin_value:
+                                additional_mapping = additional_tag_mappings.filter(original_value=text.lower()).first()
+                                tag_type = api.TagType.objects.filter(label=additional_mapping.destination_type).first()
+                                if not tag_type:
+                                    tag_type = api.TagType(label=additional_mapping.destination_type)
+                                    tag_type.save()
+                                tag = api.Tag.find_existing_tag(additional_mapping.destination_value, tag_type.id)
+                                if not tag:
+                                    try:
+                                        tag = api.Tag(text=additional_mapping.destination_value,
+                                                  display_text=additional_mapping.destination_value, tag_type=tag_type)
+                                        tag.save()
+                                    except Exception as err:
+                                        logger.error(f'Error creating additional mapped tag with text {additional_mapping.destination_value} on obj {obj.id}: {err}')
+                                        continue
+                                obj.tags.add(tag)
+                        else:
+                            additional_mapping = additional_tag_mappings.filter(original_value=origin_value.lower()).first()
+                            tag_type = api.TagType.objects.filter(label=additional_mapping.destination_type).first()
+                            if not tag_type:
+                                tag_type = api.TagType(label=additional_mapping.destination_type)
+                                tag_type.save()
+                            tag = api.Tag.find_existing_tag(additional_mapping.destination_value, tag_type.id)
+                            if not tag:
+                                try:
+                                    tag = api.Tag(text=additional_mapping.destination_value,
+                                              display_text=additional_mapping.destination_value, tag_type=tag_type)
+                                    tag.save()
+                                except Exception as err:
+                                    logger.error(f'Error creating additional mapped tag with text {additional_mapping.destination_value} on obj {obj.id}: {err}')
+                                    continue
+                            obj.tags.add(tag)
+                        continue
                     try:
                         # create tag
                         tag_type_label = mapping.destination_field.split(".")[1]
@@ -255,6 +292,53 @@ class EtlWorkImport(object):
                         logger.error(f'Error processing tag with text {text.lower()} on obj {obj.id}: {err}')
                         continue
                 elif 'attribute' in mapping.destination_field:
+                    if mapping.additional_mappings:
+                        if type(origin_value) is list:
+                            for text in origin_value:
+                                additional_mapping = additional_attribute_mappings.filter(original_value=text.lower()).first()
+                                attribute_type = api.AttributeType.objects.filter(name=additional_mapping.destination_type).first()
+                                if not attribute_type:
+                                    attribute_type = api.AttributeType(name=additional_mapping.destination_type,
+                                                                        display_name=additional_mapping.destination_type,
+                                                                        allow_on_work=True,
+                                                                        allow_on_bookmark=True,
+                                                                        allow_on_chapter=True)
+                                    attribute_type.save()
+                                attribute = api.AttributeValue.objects.filter(name=additional_mapping.destination_value.lower()).first()
+                                if not attribute:
+                                    try:
+                                        obj_attr = api.AttributeValue(
+                                            name=additional_mapping.destination_value.lower(),
+                                            display_name=additional_mapping.destination_value,
+                                            attribute_type=attribute_type)
+                                        obj_attr.save()
+                                    except Exception as err:
+                                        logger.error(f'Error creating additional mapped attribute with text {additional_mapping.destination_value} on obj {obj.id}: {err}')
+                                        continue
+                                obj.attributes.add(obj_attr)
+                        else:
+                            additional_mapping = additional_attribute_mappings.filter(original_value=origin_value.lower()).first()
+                            attribute_type = api.AttributeType.objects.filter(name=additional_mapping.destination_type).first()
+                            if not attribute_type:
+                                attribute_type = api.AttributeType(name=additional_mapping.destination_type,
+                                                                    display_name=additional_mapping.destination_type,
+                                                                    allow_on_work=True,
+                                                                    allow_on_bookmark=True,
+                                                                    allow_on_chapter=True)
+                                attribute_type.save()
+                            attribute = api.AttributeValue.objects.filter(name=additional_mapping.destination_value.lower()).first()
+                            if not attribute:
+                                try:
+                                    obj_attr = api.AttributeValue(
+                                        name=additional_mapping.destination_value.lower(),
+                                        display_name=additional_mapping.destination_value,
+                                        attribute_type=attribute_type)
+                                    obj_attr.save()
+                                except Exception as err:
+                                    logger.error(f'Error creating additional mapped attribute with text {additional_mapping.destination_value} on obj {obj.id}: {err}')
+                                    continue
+                            obj.attributes.add(obj_attr)
+                        continue
                     # create attribute
                     attribute_type_label = mapping.destination_field.split(".")[1]
                     attribute_type = api.AttributeType.objects.filter(
