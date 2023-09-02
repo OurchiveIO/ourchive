@@ -1,7 +1,7 @@
 {% load i18n %}
 <div id="bk-tile-parent" class="uk-width-1-1 uk-padding-remove-horizontal">
 	<div id="bk-tile-card" class="uk-card uk-card-default">
-	    <div id="bk-tile-header-parent" class="uk-card-header">
+	    <div id="bk-tile-header-parent" class="uk-card-header uk-padding-small ourchive-card-head">
 	        <div id="bk-tile-header-grid" class="uk-grid-small uk-flex-middle" uk-grid>
 		        <div id="bk-tile-header-content" class="uk-width-expand">
 	                <span id="bookmark-{{bookmark.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="bookmark-{{bookmark.id}}-tile-title-link" href="{% url 'fe-view-bookmark' bookmark.id %}">{% if bookmark.title %}{{ bookmark.title }}{% else %}{% translate 'Bookmark' %}: {{ bookmark.work.title }}{% endif %}</a> by <a href="{% url 'user-profile-parent' bookmark.user_id %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark.user }}</a></span>
@@ -23,14 +23,16 @@
 		        </div>
 		    </div>
 		</div>
-		<div id="bk-tile-body" class="uk-card-body">
+		<div id="bk-tile-body" class="uk-card-body ourchive-card-body uk-padding-small">
 	    	{% if bookmark.work.title %}<p id="bk-tile-work"><strong id="bk-tile-work-label">Work</strong>: {{ bookmark.work.title }}</p>{% endif %}
 	        {% if settings.RatingsEnabled %}<p id="bk-tile-rating-body"><strong id="bk-tile-rating-body-label">Rating</strong>: {{ bookmark.rating }} stars</p>{% endif %}
 	        {% if bookmark.tags.items %}{% include "tag_partial.html" with obj_name='bookmark' tags=bookmark.tags.items %}{% endif %}
 		   	{% if bookmark.attributes %}{% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}{% endif %}
 		</div>
-	    <div class="uk-card-footer" id="bk-tile-footer-parent">
-			<div class="uk-align-right uk-text-right uk-width-1-1"><p id="bk-metadata-p" class="uk-article-meta">{% if settings.AllowComments %}<span id="bk-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span></p></div>
+	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="bk-tile-footer-parent">
+			<div class="uk-width-1-1 uk-padding-small uk-margin-small">
+				{% include 'bookmark_metadata.html' %}
+			</div>
 	    </div>
 	</div>  
 </div>

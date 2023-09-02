@@ -281,6 +281,17 @@ def get_bookmark_boilerplate(request, work_id):
 	return [bookmark, tags, star_count]
 
 
+# utility method to format date for the Django template engine.
+# there should be a better way to do this. google was not forthcoming.
+def format_date_for_template(obj, field_name, is_list=False):
+	if is_list:
+		for item in obj:
+			item[field_name] = parse(item[field_name]).date()
+		return obj
+	obj[field_name] = parse(obj[field_name]).date()
+	return obj
+
+
 def referrer_redirect(request, alternate_url=None):
 	response = None
 	if request.META.get('HTTP_REFERER') is not None:
@@ -964,8 +975,7 @@ def works(request):
 	works = response.response_data['results'] if 'results' in response.response_data else []
 	works = get_object_tags(works)
 	works = get_array_attributes_for_display(works, 'attributes')
-	for work in works:
-		work['updated_on'] = parse(work['updated_on']).date()
+	works = format_date_for_template(works, 'updated_on', True)
 	return render(request, 'works.html', {
 		'works': works,
 		'next': f"/works/{works_response['next_params']}" if works_response['next_params'] is not None else None,
@@ -1512,7 +1522,7 @@ def work(request, pk, chapter_offset=0):
 	work = work_response.response_data
 	tags = group_tags(work['tags']) if 'tags' in work else {}
 	work['attributes'] = get_attributes_for_display(work['attributes'])
-	work['updated_on'] = parse(work['updated_on']).date()
+	work = format_date_for_template(work, 'updated_on')
 	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else "/all"}'
 	if chapter_offset > 0:
 		chapter_url_string = f'{chapter_url_string}&offset={chapter_offset}'
@@ -1521,7 +1531,7 @@ def work(request, pk, chapter_offset=0):
 	user_can_comment = (work['comments_permitted'] and (work['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in work else False
 	chapters = []
 	for chapter in chapter_json:
-		chapter['updated_on'] = parse(chapter['updated_on']).date()
+		chapter = format_date_for_template(chapter, 'updated_on')
 		if 'id' in chapter:
 			if 'comment_thread' not in request.GET:
 				chapter_comments = do_get(f"api/chapters/{chapter['id']}/comments?limit=10&offset={comment_offset}", request, "Chapter Comments").response_data
@@ -1745,6 +1755,7 @@ def bookmarks(request):
 	previous_param = response['prev_params']
 	next_param = response['next_params']
 	bookmarks = get_object_tags(bookmarks)
+	bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
 	for bookmark in bookmarks:
 		bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
 	return render(request, 'bookmarks.html', {
@@ -1766,6 +1777,7 @@ def bookmark(request, pk):
 	bookmark = do_get(f'api/bookmarks/{pk}', request, 'Bookmark').response_data
 	tags = group_tags(bookmark['tags']) if 'tags' in bookmark else {}
 	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes']) if 'attributes' in bookmark else {}
+	bookmark = format_date_for_template(bookmark, 'updated_on')
 	if 'comment_thread' in request.GET:
 		comments = do_get(f"api/bookmarkcomments/{comment_id}", request, 'Bookmark Comments').response_data
 		comment_offset = 0
