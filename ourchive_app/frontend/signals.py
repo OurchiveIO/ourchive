@@ -40,6 +40,7 @@ def spoil_bookmark_cache_update(sender, instance, **kwargs):
     connection = connections['default']
     with connection.cursor() as cursor:
         cursor.execute(f"DELETE FROM ourchive_database_cache where cache_key like 'ourchive:%:bookmark_{instance.id}_%'")
+        cursor.execute(f"DELETE FROM ourchive_database_cache where cache_key like 'ourchive:%:collection_{instance.id}_%'")
 
 @receiver(post_save, sender=api.BookmarkCollection)
 def spoil_collection_cache_update(sender, instance, **kwargs):
