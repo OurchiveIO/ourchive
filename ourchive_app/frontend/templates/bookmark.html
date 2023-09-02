@@ -36,41 +36,38 @@
             {% endif %}
         </div>
     </div>
-    <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" id="bookmark-content-grid-parent">
-    	<div id="bookmark-work-link-grid-hr"><hr/></div>
-    	<div id="bookmark-work-link-grid-span"><span id="bookmark-work-link-span" class="uk-text-uppercase">Work:</span> <a id="bookmark-work-link-id" class="uk-link-reset uk-text-medium" href="/works/{{ work.id }}">{{ work.title }} by {{work.user}}</a></span></div>
+    <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" id="bookmark-content-grid-parent" uk-grid>
+        <div id="bookmark-work-link-grid-hr" class="uk-width-1-1"><hr/></div>
+    	<div id="bookmark-work-link-grid-span" class="uk-width-1-2"><span id="bookmark-work-link-span" class="uk-text-uppercase">Work:</span> <a id="bookmark-work-link-id" class="uk-link uk-text-medium" href="{% url 'fe-work-view' work.id %}">{{ work.title }} by {{work.user}}</a></span></div>
     	{% if settings.RatingsEnabled %}
-	    <div id="bookmark-rating-parent">
+	    <div id="bookmark-rating-parent" class="uk-width-1-2">
 	    	<p id="bookmark-description-hed" class="uk-text-medium"><span>{{bookmark.user}}'s rating:</span>
-	    	{% for stars in rating_range %}
-	            <div id="bookmark-star-parent" class="uk-animation-toggle uk-inline" tabindex="0">
-	                <div id="bookkmark-star-child">
-	                    {% if stars <= bookmark.rating %}
-	                        <span id="bookmark-star-filled-span" uk-icon="icon: star" id="rating_{{stars}}" class="rating-star"></span>
-	                    {% else %}
-	                        <span id="bookmark-star-empty-span" uk-icon="icon: star" id="rating_{{stars}}"></span>
-	                    {% endif %}
-	                    
-	                </div>
-	            </div>
-	        {% endfor %}
+    	    	{% for stars in rating_range %}
+    	            <div id="bookmark-star-parent" class="uk-animation-toggle uk-inline" tabindex="0">
+    	                <div id="bookkmark-star-child">
+    	                    {% if stars <= bookmark.rating %}
+    	                        <span id="bookmark-star-filled-span" uk-icon="icon: star" id="rating_{{stars}}" class="rating-star"></span>
+    	                    {% else %}
+    	                        <span id="bookmark-star-empty-span" uk-icon="icon: star" id="rating_{{stars}}"></span>
+    	                    {% endif %}
+    	                    
+    	                </div>
+    	            </div>
+    	        {% endfor %}
+            </p>
 	    </div>	
-    {% endif %} 
-
-    {% if bookmark.description %}
-    <div id="bookmark-description-parent" class="uk-margin-top">
-    	<p id="bookmark-description-hed" class="uk-text-large"><span>{{bookmark.user}} says:</span>
-    	<p id="bookmark-description-text" class="uk-text-medium">{{ bookmark.description|safe }}</p>
-    </div>	   
-    {% endif %}
-
+        {% endif %} 
+        {% if bookmark.description %}
+            <div id="bookmark-description-parent" class="uk-margin-top"><span class="uk-text-large">{{bookmark.user}} says:</span></div>
+            <div id="bookmark-description-text" class="uk-text-medium"><span class="uk-text-medium">{{ bookmark.description|safe }}</span></div>	   
+        {% endif %}
+    </div>
     {% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}
     {% include "tag_partial.html" with obj_name='bookmark-tag' tags=tags.items %}
-    {% if settings.AllowComments %}<div id="bookmark-comments-divider-hr" class="uk-margin-small-top"><hr id="bookmark-comments-hr" class="ourchive-hr"/></div>{% endif %}
-    <div class="uk-width-1" id="bookmark-parent-comments-include-container">{% include 'comments_parent.html' with object_name='bookmark' comments=comments object=bookmark edit_action_url=bookmark.edit_action_url post_action_url=bookmark.post_action_url comment_offset=comment_offset delete_obj='bookmark-comment' load_more_base=load_more_base view_thread_base=view_thread_base %}</div>
-
+    <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" id="bookmark-comments-grid-parent" uk-grid>
+        {% if settings.AllowComments %}<div id="bookmark-comments-divider-hr" class="uk-margin-top"><hr id="bookmark-comments-hr" class="ourchive-hr"/></div>{% endif %}
+        <div class="uk-width-1" id="bookmark-parent-comments-include-container">{% include 'comments_parent.html' with object_name='bookmark' comments=comments object=bookmark edit_action_url=bookmark.edit_action_url post_action_url=bookmark.post_action_url comment_offset=comment_offset delete_obj='bookmark-comment' load_more_base=load_more_base view_thread_base=view_thread_base %}</div>  
     </div>
-    
 </article>
 {% if scroll_comment_id %}
     <script>
