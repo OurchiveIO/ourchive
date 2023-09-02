@@ -10,6 +10,7 @@
 			            <a id="bk-tile-edit-{{ bookmark.id }}-link" href="/bookmarks/{{ bookmark.id }}/edit"><span id="bk-tile-edit-span" uk-icon="icon: file-edit" title="Edit Bookmark {{ bookmark.id }}"></span> </a>
 			            <a id="bk-tile-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: trash" id="bk-tile-delete-span" title="Delete"></span> </a>
 						{% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
+						{% if bookmark.draft %}<span class="uk-label uk-margin-remove-right uk-margin-left uk-text-small uk-inline uk-label-warning" id="bookmark-{{ bookmark.id }}-tile-draft-button-span"><strong>DRAFT</strong></span>{% endif %}
 			        </div>
 			        {% endif %}
 	                {% if settings.RatingsEnabled %}<span id="bk-tile-rating-span" class="uk-inline uk-align-right">{% for stars in rating_range %}

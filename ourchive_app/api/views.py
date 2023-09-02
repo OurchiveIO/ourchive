@@ -543,7 +543,7 @@ class WorkByTypeList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(work_type__id=self.kwargs['type_id']).order_by('id')
+        return Work.objects.filter(work_type__id=self.kwargs['type_id']).order_by('-updated_on')
 
 
 class WorkByTagList(generics.ListCreateAPIView):
@@ -551,7 +551,7 @@ class WorkByTagList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(tags__id=self.kwargs['pk']).order_by('id')
+        return Work.objects.filter(tags__id=self.kwargs['pk']).order_by('-updated_on')
 
 
 class TagTypeDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -619,7 +619,7 @@ class ChapterList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+        return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('number')
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'image_url' in self.request.data:
@@ -730,7 +730,7 @@ class BookmarkList(generics.ListCreateAPIView):
         return response
 
     def get_queryset(self):
-        return Bookmark.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+        return Bookmark.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
