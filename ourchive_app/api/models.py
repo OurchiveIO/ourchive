@@ -475,6 +475,7 @@ class BookmarkCollection(models.Model):
 
     tags = models.ManyToManyField('Tag')
     attributes = models.ManyToManyField('AttributeValue')
+    works = models.ManyToManyField('Work')
 
     def __str__(self):
         return self.title

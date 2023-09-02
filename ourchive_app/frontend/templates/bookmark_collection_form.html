@@ -45,6 +45,17 @@ function removeBookmark(event, bookmark_id) {
     li.remove();
     hidden.remove();
 }
+
+function addSelectedBookmarks() {
+    var bookmarks = document.querySelectorAll('.add-to-collection-checkbox');
+    bookmarks.forEach((bookmark) => {
+        if (bookmark.checked) {
+            console.log(bookmark.name);
+            var bookmark_display = document.getElementById("bookmark-"+bookmark.name+"-bookmark").innerHTML;
+            populateBookmarkInput(bookmark.name, bookmark_display);
+        }
+    });
+}
 </script>
 <div class="uk-width-1-1 uk-text-left" id="bkcol-form-parent-grid">  
 <form class="uk-form-horizontal" method="post" id="bookmarkCollectionForm" onsubmit="return getDescriptionText()">
@@ -131,6 +142,7 @@ function removeBookmark(event, bookmark_id) {
                 <div id="bkcol-form-bookmarks-inline-div" class="uk-inline">
                     <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="Search for bookmark..." id="bookmark_entry" oninput="doBookmarkAutocomplete(this.value)">
                     <div id="bookmark-autocomplete-dropdown" uk-drop></div>
+                    <a class="uk-margin-left" href="#" id="collection-add-bookmark-modal-toggle" uk-toggle="target: #collection-add-bookmark-modal">Add from list</a>
                 </div>
             </div>
             
@@ -204,4 +216,5 @@ function removeBookmark(event, bookmark_id) {
     </div>    
 </form>
 </div>
+{% include 'collection_form_bookmark_modal.html' %}
 {% endblock %}
