@@ -153,7 +153,7 @@ class UserSubscriptionAdmin(admin.ModelAdmin):
 
 
 class AdminAnnouncementAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title')
+    list_display = ('id', 'title', 'content')
 
 
 class TagTypeAdmin(admin.ModelAdmin):
