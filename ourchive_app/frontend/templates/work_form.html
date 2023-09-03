@@ -5,7 +5,7 @@
 {% load static %}
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
 <script src="{% static 'frontend/js/ourchive-chapter.js' %}"></script>
-<div class="uk-width-1-1 uk-text-left" id="work-form-parent"> 
+<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="work-form-parent"> 
 <form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
     <script>
         function getCurrentTab(submitted) {
@@ -66,7 +66,7 @@
             
         </div>
         <hr/>
-        <h3 id="obj-attrs-form-header">Work Settings</h3>
+        <h4 id="obj-attrs-form-header">Work Settings</h4>
         <div class="uk-margin" id="work-form-complete-parent">
             <label id="work-form-complete-label" class="uk-form-label" for="form-horizontal-text">Complete?</label>
             <div id="work-form-complete-controls" class="uk-form-controls">
@@ -137,12 +137,12 @@
         </div>
         {% endif %}
         <hr id="work-attributes-hr"/>
-        <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Work Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question" title="{% translate 'Work tags help' %}"></sup>    
+        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">Work Tags</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question" title="{% translate 'Work tags help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
         {% include "object_attributes_form.html" with object='Work' attribute_types=work.attribute_types show_header=False %}
         {% include "edit_tags.html" with object='work' object_friendly='Work' show_header=False %}
         <hr/>
-        <h3 id="obj-attrs-form-header">Work Details</h3>
+        <h4 id="obj-attrs-form-header">Work Details</h4>
         <div class="uk-margin" id="work-form-summary-parent">
             <label id="work-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
             <div id="work-form-summary-controls" class="uk-form-controls">

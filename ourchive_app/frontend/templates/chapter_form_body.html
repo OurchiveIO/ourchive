@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load static %}
 {% csrf_token %}
-<h3 id="obj-attrs-form-header">Chapter Details</h3>
+<h4 id="obj-attrs-form-header">Chapter Details</h4>
 <div id="chapter-form-title-parent" class="uk-margin" {% if suppress_info_fields %}hidden{% endif%}>
     <label id="chapter-form-title-label" class="uk-form-label" for="form-horizontal-text">Title</label>
     <div id="chapter-form-title-controls" class="uk-form-controls">
@@ -184,16 +184,23 @@
 <div class="uk-margin uk-width-small"><a class="uk-accordion-title uk-text-meta" href="#" uk-toggle="target: #chapter-form-text-parent">{% translate 'Text' %}</a></div>
 <div class="uk-accordion-content" id="chapter-form-text-parent" hidden>
 {% endif %}
-    <label id="chapter-form-text-label" class="uk-form-label" for="form-horizontal-text">Chapter Text</label>
+    <label id="chapter-form-text-label" class="uk-form-label uk-visible@s" for="form-horizontal-text">Chapter Text</label>
+    
+    <div class="uk-margin-bottom uk-width-1-1 uk-align-right uk-margin-remove-bottom uk-inline uk-text-right uk-hidden@s">
+        <label id="chapter-form-text-label-mobile" class="uk-text-left uk-align-left" for="form-horizontal-text">Chapter Text</label>
+       <span class="uk-inline uk-margin-small-right" id="chapter-edit-mode-toggle-label">Rich Text?</span>
+        <label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText(true)" checked>
+        <span class="slider round"></span></label>
+    </div>
     <div class="uk-form-controls" id="chapter-form-text-controls">
         <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-text-inline">
-        	<div class="uk-margin-bottom">
-        	<span width="150" class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+        	<div class="uk-margin-bottom uk-visible@s">
+                <span class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
-            </span>
-			<label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText(true)" checked>
-        		<span class="slider round"></span></label>
-        	</div>
+                </span>
+                <label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText(true)" checked>
+                <span class="slider round"></span></label>
+            </div>
         	<input type="hidden" id="chapter_text" name="text" value="{{ chapter.text|safe|default_if_none:'' }}">
             <textarea id="chapterTextEditor"></textarea>
             <script type="text/javascript">
