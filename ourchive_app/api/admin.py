@@ -157,7 +157,7 @@ class AdminAnnouncementAdmin(admin.ModelAdmin):
 
 
 class TagTypeAdmin(admin.ModelAdmin):
-    list_display = ('label', 'sort_order', 'filterable')
+    list_display = ('label', 'sort_order', 'filterable', 'show_in_aggregate')
 
 
 class WorkTypeAdmin(admin.ModelAdmin):

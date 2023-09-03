@@ -589,7 +589,7 @@ class TopTagList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return Tag.objects.filter(tag_type__filterable=True).annotate(num_uses=Count("bookmark")+Count("work")).order_by("-num_uses")[:15]
+        return Tag.objects.filter(tag_type__show_in_aggregate=True).annotate(num_uses=Count("bookmark")+Count("work")).order_by("-num_uses")[:15]
 
 
 class RecentWorksList(generics.ListAPIView):
@@ -673,7 +673,7 @@ class ChapterDraftList(generics.ListCreateAPIView):
     permission_classes = [IsOwner]
 
     def get_queryset(self):
-        return Chapter.objects.get_queryset().order_by('id')
+        return Chapter.objects.get_queryset().order_by('number')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -741,7 +741,7 @@ class BookmarkByTagList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        return Bookmark.objects.filter(tags__id=self.kwargs['pk']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+        return Bookmark.objects.filter(tags__id=self.kwargs['pk']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
 
 class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):

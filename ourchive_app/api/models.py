@@ -430,6 +430,7 @@ class TagType(models.Model):
     required = models.BooleanField(default=False)
     sort_order = models.IntegerField(default=1)
     filterable = models.BooleanField(default=True)
+    show_in_aggregate = models.BooleanField(default=True)
 
     class Meta:
         indexes = [
