@@ -71,7 +71,7 @@
 		<div id="content-block-parent-grid" class="uk-flex uk-flex-middle uk-flex-center uk-display-block">
 			{% for announcement in admin_announcements %}
 			<div class="uk-text-center uk-padding-small uk-width-expand" id="admin-announcement-{{announcement.id}}">
-			    <span class="uk-text-large">{{ announcement.content|safe }}</span>
+			    <span class="uk-text-bold">{{ announcement.content|safe }}</span>
 			   	<span title="Dismiss" uk-toggle="target: #admin-announcement-{{announcement.id}}" onclick="dismissAnnouncement('{{announcement.id}}')" class="uk-link ourchive-span-link uk-align-right uk-text-middle" uk-icon="icon: close;" id="dismiss-announcement"></span>
 			</div>
 			{% endfor %}
