@@ -2,7 +2,7 @@
 {% block title %}Edit Account{% endblock %}
 {% block content %}	
 {% load static %}
-<div class="uk-width-1-1 uk-text-left" id="account-form-parent"> 
+<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="account-form-parent"> 
 	<form class="uk-form-horizontal"  method="post" id="accountForm">
 		{% csrf_token %}
 		<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="edit-account-header-parent" uk-grid>

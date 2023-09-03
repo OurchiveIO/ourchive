@@ -4,7 +4,7 @@
 {% block content %}	
 {% load static %}
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
-<div class="uk-width-1-1 uk-text-left" id="user-form-parent-div"> 
+<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="user-form-parent-div"> 
 	<form class="uk-form-horizontal"  method="post" id="userForm" onsubmit="return getProfileText()">
 		<script>
 	        function getProfileText() {

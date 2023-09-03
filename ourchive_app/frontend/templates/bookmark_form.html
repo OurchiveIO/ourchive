@@ -4,7 +4,7 @@
 {% block content %}	
 {% load static %}
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
-<div class="uk-width-1-1 uk-text-left" id="bookmark-form-parent-grid">  
+<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="bookmark-form-parent-grid">  
 <form class="uk-form-horizontal" method="post" id="bookmarkForm" onsubmit="return getDescriptionText()">
     <script>
         function getDescriptionText() {
