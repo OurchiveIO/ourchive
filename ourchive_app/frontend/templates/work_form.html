@@ -65,6 +65,77 @@
             </div>
             
         </div>
+        <hr/>
+        <h3 id="obj-attrs-form-header">Work Settings</h3>
+        <div class="uk-margin" id="work-form-complete-parent">
+            <label id="work-form-complete-label" class="uk-form-label" for="form-horizontal-text">Complete?</label>
+            <div id="work-form-complete-controls" class="uk-form-controls">
+                <div id="work-form-complete-inline" class="uk-inline">
+                    <label id="work-form-complete-switch-label" class="switch"><input title="{% translate 'Work complete toggle' %}" class="uk-checkbox" id="work-form-complete-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}> <span id="work-form-complete-slider" class="slider round"></span> </label>
+                </div>
+            </div>
+        </div>
+        <div class="uk-margin" id="work-form-draft-parent">
+            <label id="work-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work draft help' %}"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
+            </label>
+            <div id="work-form-draft-controls" class="uk-form-controls">
+                <div id="work-form-draft-inline" class="uk-inline">
+                    <label id="work-form-draft-switch" class="switch"><input title="{% translate 'Work draft toggle' %}" class="uk-checkbox" id="work-form-draft-checkbox" type="checkbox" name="work_draft" {% if work.draft %} checked {% endif %}> <span id="work-form-draft-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div>
+        <div class="uk-margin" id="work-form-publish-all-parent">
+            <label id="work-form-publish-all-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Publish All' %}? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work draft help' %}"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your work and all chapters will no longer be in draft state.{% endblocktranslate %}</div>
+            </label>
+            <div id="work-form-publish-all-controls" class="uk-form-controls">
+                <div id="work-form-publish-all-inline" class="uk-inline">
+                    <label id="work-form-publish-all-switch" class="switch"><input title="{% translate 'Work publish all toggle' %}" class="uk-checkbox" id="work-form-publish-all-checkbox" type="checkbox" name="publish_all"> <span id="work-form-publish-all-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div>
+        {% if settings.AllowComments %}
+        <div class="uk-margin" id="work-form-allow-comments-parent">
+            <label id="work-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
+            <div id="work-form-allow-comments-controls" class="uk-form-controls">
+                <select id="work-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted" title="{% translate 'Comment settings' %}">                    
+                    <option id="work-form-allow-comments-all" {% if work.anon_comments_permitted and work.comments_permitted %} selected {% endif %}>All</option>
+                    <option id="work-form-allow-comments-registered" {% if work.anon_comments_permitted == False and work.comments_permitted %} selected {% endif %}>Registered users only</option>
+                    <option id="work-form-allow-comments-none" {% if not work.anon_comments_permitted and not work.comments_permitted %} selected {% endif %}>None</option>
+
+                </select>
+            </div>
+        </div>
+        {% endif %}
+        {% if user.can_upload_export_files %}
+        <div class="uk-margin" id="work-form-preferred-download-parent">
+            <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Preferred export help' %}"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you have a file for your work that you'd prefer users download, you can upload here and it will display at the top of the download list.{% endblocktranslate %}</div>
+            </label>
+            <div id="work-form-preferred-download-controls" class="uk-form-controls">
+                <select id="work-form-preferred-download-select" class="uk-select uk-form-width-large" name="preferred_download"> 
+                    <option id="work-form-preferred-download-none">None</option>
+                {% for choice in work.download_choices %}                   
+                    <option id="work-form-preferred-download-{{choice}}" {% if work.preferred_download == choice.0 %} selected {% endif %}>{{choice.1}}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="uk-margin" id="work-export-file-parent">
+            <label id="work-export-file-parent" class="uk-form-label" for="form-horizontal-text">Export File</label>
+            {% if work.preferred_download_url %}
+            <div id="work-export-preferred-download" class="uk-form-controls">
+                <p>Existing file: {{ work.preferred_download_url }}</p>
+            </div>
+            {% endif %}
+            <div id="work-export-file-controls" class="uk-form-controls">
+                <div id="work-export-file-inline" class="uk-inline">
+                    {% include 'file_upload.html' with object='preferred_download_url' replace_selector='preferred-download-url' object_type='download' upload_placeholder='Upload file' original_value=work.preferred_download_url %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
         <hr id="work-attributes-hr"/>
         <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Work Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question" title="{% translate 'Work tags help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
@@ -173,76 +244,7 @@
         </div>
         </div>      
         {% endif %}
-        <hr/>
-        <h3 id="obj-attrs-form-header">Work Settings</h3>
-        <div class="uk-margin" id="work-form-complete-parent">
-            <label id="work-form-complete-label" class="uk-form-label" for="form-horizontal-text">Complete?</label>
-            <div id="work-form-complete-controls" class="uk-form-controls">
-                <div id="work-form-complete-inline" class="uk-inline">
-                    <label id="work-form-complete-switch-label" class="switch"><input title="{% translate 'Work complete toggle' %}" class="uk-checkbox" id="work-form-complete-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}> <span id="work-form-complete-slider" class="slider round"></span> </label>
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin" id="work-form-draft-parent">
-            <label id="work-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work draft help' %}"></sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
-            </label>
-            <div id="work-form-draft-controls" class="uk-form-controls">
-                <div id="work-form-draft-inline" class="uk-inline">
-                    <label id="work-form-draft-switch" class="switch"><input title="{% translate 'Work draft toggle' %}" class="uk-checkbox" id="work-form-draft-checkbox" type="checkbox" name="work_draft" {% if work.draft %} checked {% endif %}> <span id="work-form-draft-slider" class="slider round"></span></label>
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin" id="work-form-publish-all-parent">
-            <label id="work-form-publish-all-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Publish All' %}? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work draft help' %}"></sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your work and all chapters will no longer be in draft state.{% endblocktranslate %}</div>
-            </label>
-            <div id="work-form-publish-all-controls" class="uk-form-controls">
-                <div id="work-form-publish-all-inline" class="uk-inline">
-                    <label id="work-form-publish-all-switch" class="switch"><input title="{% translate 'Work publish all toggle' %}" class="uk-checkbox" id="work-form-publish-all-checkbox" type="checkbox" name="publish_all"> <span id="work-form-publish-all-slider" class="slider round"></span></label>
-                </div>
-            </div>
-        </div>
-        {% if settings.AllowComments %}
-        <div class="uk-margin" id="work-form-allow-comments-parent">
-            <label id="work-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
-            <div id="work-form-allow-comments-controls" class="uk-form-controls">
-                <select id="work-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted" title="{% translate 'Comment settings' %}">                    
-                    <option id="work-form-allow-comments-all" {% if work.anon_comments_permitted and work.comments_permitted %} selected {% endif %}>All</option>
-                    <option id="work-form-allow-comments-registered" {% if work.anon_comments_permitted == False and work.comments_permitted %} selected {% endif %}>Registered users only</option>
-                    <option id="work-form-allow-comments-none" {% if not work.anon_comments_permitted and not work.comments_permitted %} selected {% endif %}>None</option>
-
-                </select>
-            </div>
-        </div>
-        {% endif %}
-        {% if user.can_upload_export_files %}
-        <div class="uk-margin" id="work-form-preferred-download-parent">
-            <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Preferred export help' %}"></sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you have a file for your work that you'd prefer users download, you can upload here and it will display at the top of the download list.{% endblocktranslate %}</div>
-            </label>
-            <div id="work-form-preferred-download-controls" class="uk-form-controls">
-                <select id="work-form-preferred-download-select" class="uk-select uk-form-width-large" name="preferred_download"> 
-                {% for choice in work.download_choices %}                   
-                    <option id="work-form-preferred-download-{{choice}}" {% if work.preferred_download == choice.0 %} selected {% endif %}>{{choice.1}}</option>
-                {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="uk-margin" id="work-export-file-parent">
-            <label id="work-export-file-parent" class="uk-form-label" for="form-horizontal-text">Export File</label>
-            {% if work.preferred_download_url %}
-            <div id="work-export-preferred-download" class="uk-form-controls">
-                <p>Existing file: {{ work.preferred_download_url }}</p>
-            </div>
-            {% endif %}
-            <div id="work-export-file-controls" class="uk-form-controls">
-                <div id="work-export-file-inline" class="uk-inline">
-                    {% include 'file_upload.html' with object='preferred_download_url' replace_selector='preferred-download-url' object_type='download' upload_placeholder='Upload file' original_value=work.preferred_download_url %}
-                </div>
-            </div>
-        </div>
-        {% endif %}
+        
     </div>
     <div><hr/></div>
     <div id="multichapter-select" class="uk-width-1-1">
@@ -254,7 +256,7 @@
     <div id="work-form-chapter-content-parent">
     <div id="work-form-single-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if chapters|length > 1 or multichapter == 'true' %} hidden {% endif %}>
         <input type="hidden" id="work_chapter_id" name="chapter_id" value="{{ work_chapter.id }}">
-        {% include 'chapter_form_body.html' with chapter=work_chapter %}
+        {% include 'chapter_form_body.html' with chapter=work_chapter suppress_info_fields=True %}
     </div>
     <div id="work-form-multi-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.id %} hidden {% endif %} {% if work.chapter_count < 2 or chapters|length < 2 %} {% if work.id and multichapter == 'false' %} hidden {% endif %} {% endif %}>
         <script>

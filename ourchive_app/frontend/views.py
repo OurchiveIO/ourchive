@@ -99,6 +99,8 @@ def get_work_obj(request, work_id=None):
 			publish_all = True
 	if 'preferred_download_url' in work_dict and work_dict['preferred_download_url'] == 'None':
 		work_dict['preferred_download_url'] = ''
+	if 'preferred_download' in work_dict and work_dict['preferred_download'] == 'None':
+		work_dict.pop('preferred_download')
 	multichapter = work_dict.pop('multichapter') if 'multichapter' in work_dict else None
 	chapter_dict = {
 		'title': '',

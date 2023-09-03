@@ -2,7 +2,7 @@
 {% load static %}
 {% csrf_token %}
 <h3 id="obj-attrs-form-header">Chapter Details</h3>
-<div id="chapter-form-title-parent" class="uk-margin">
+<div id="chapter-form-title-parent" class="uk-margin" {% if suppress_info_fields %}hidden{% endif%}>
     <label id="chapter-form-title-label" class="uk-form-label" for="form-horizontal-text">Title</label>
     <div id="chapter-form-title-controls" class="uk-form-controls">
         <div id="chapter-form-title-inline" class="uk-inline">
@@ -10,10 +10,12 @@
         </div>
     </div>
 </div>
+{% if not suppress_info_fields %}
 {% if chapter.attribute_types %}
     {% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types show_header=False %}
 {% endif %}
-<div class="uk-margin" id="chapter-form-summary-parent">
+{% endif %}
+<div class="uk-margin" id="chapter-form-summary-parent" {% if suppress_info_fields %}hidden{% endif%}>
     <label id="chapter-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
     <div id="chapter-form-summary-controls" class="uk-form-controls">
         <div id="chapter-form-summary-inline" class="uk-inline uk-child-width-expand uk-width-expand">
@@ -50,7 +52,7 @@
         </div>
     </div>
 </div>
-<div class="uk-margin" id="chapter-form-notes-parent">
+<div class="uk-margin" id="chapter-form-notes-parent" {% if suppress_info_fields %}hidden{% endif%}>
     <label class="uk-form-label" for="form-horizontal-text" id="chapter-form-notes-label">{% translate 'Notes' %}</label>
     <div class="uk-form-controls" id="chapter-form-notes-controls">
         <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-notes-inline">
@@ -105,7 +107,7 @@
         </div>
     </div>
 </div>
-<h4 id="obj-attrs-form-header">Content</h3>
+{% if not suppress_info_fields %}<h4 id="obj-attrs-form-header">Content</h3>{% endif %}
 {% if request.user.can_upload_images %}
 {% if not request.user.collapse_chapter_image %}
 <div class="uk-margin" id="chapter-form-image-all-parent">
