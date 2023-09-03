@@ -613,7 +613,7 @@ class AdminAnnouncement(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=200, default='')
     content = models.TextField(blank=True, default='')
-    expires_on = models.DateTimeField(null=True)
+    expires_on = models.DateTimeField(null=True, blank=True)
     active = models.BooleanField(default=False)
 
     class Meta:
