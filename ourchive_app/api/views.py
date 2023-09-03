@@ -349,7 +349,7 @@ class UserBookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return BookmarkCollection.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+        return BookmarkCollection.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
 
 class UserBookmarkDraftList(generics.ListCreateAPIView):
