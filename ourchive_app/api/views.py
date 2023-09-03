@@ -1102,7 +1102,7 @@ class AdminAnnouncementActiveList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return AdminAnnouncement.objects.filter(active=True, expires_on__gte=datetime.datetime.now()).order_by('id')
+        return AdminAnnouncement.objects.exclude(expires_on__lte=datetime.datetime.now()).filter(active=True).order_by('id')
 
 
 class AdminAnnouncementDetail(generics.RetrieveUpdateDestroyAPIView):

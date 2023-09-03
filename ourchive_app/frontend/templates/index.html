@@ -68,10 +68,10 @@
 	{% endif %}
 	{% if admin_announcements %}
 	<div class="uk-width-expand uk-container uk-margin-remove uk-padding-remove" id="admin-messages-parent">	
-		<div id="content-block-parent-grid" class="uk-flex uk-flex-middle uk-flex-center">
+		<div id="content-block-parent-grid" class="uk-flex uk-flex-middle uk-flex-center uk-display-block">
 			{% for announcement in admin_announcements %}
 			<div class="uk-text-center uk-padding-small uk-width-expand" id="admin-announcement-{{announcement.id}}">
-			    <span class="uk-text-large" style="vertical-align:middle !important">{{ announcement.content }}</span>
+			    <span class="uk-text-large">{{ announcement.content }}</span>
 			   	<span title="Dismiss" uk-toggle="target: #admin-announcement-{{announcement.id}}" onclick="dismissAnnouncement('{{announcement.id}}')" class="uk-link ourchive-span-link uk-align-right uk-text-middle" uk-icon="icon: close;" id="dismiss-announcement"></span>
 			</div>
 			{% endfor %}
