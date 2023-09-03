@@ -286,6 +286,8 @@ def get_bookmark_boilerplate(request, work_id):
 # utility method to format date for the Django template engine.
 # there should be a better way to do this. google was not forthcoming.
 def format_date_for_template(obj, field_name, is_list=False):
+	if field_name not in obj:
+		return obj
 	if is_list:
 		for item in obj:
 			item[field_name] = parse(item[field_name]).date()
@@ -1799,6 +1801,9 @@ def bookmark(request, pk):
 	if cache.get(cache_key):
 		return cache.get(cache_key)
 	bookmark = do_get(f'api/bookmarks/{pk}', request, 'Bookmark').response_data
+	if not bookmark['id']:
+		messages.add_message(request, messages.ERROR, _('Bookmark not found.'), 'bookmark-not-found')
+		return referrer_redirect(request)
 	tags = group_tags(bookmark['tags']) if 'tags' in bookmark else {}
 	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes']) if 'attributes' in bookmark else {}
 	bookmark = format_date_for_template(bookmark, 'updated_on')

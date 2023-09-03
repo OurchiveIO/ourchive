@@ -17,7 +17,7 @@ from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     AdminAnnouncement
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
     UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
-    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked
+    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked, WorkIsNotDraft
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
@@ -715,7 +715,7 @@ class ChapterCommentDetail(generics.ListCreateAPIView):
 
 class BookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, WorkIsNotDraft]
 
     def list(self, request, *args, **kwargs):
         response = super(BookmarkList, self).list(request, args, kwargs)
@@ -742,7 +742,7 @@ class BookmarkList(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
-class BookmarkByTagList(generics.ListCreateAPIView):
+class BookmarkByTagList(generics.ListAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [IsAdminOrReadOnly]
 
@@ -752,7 +752,7 @@ class BookmarkByTagList(generics.ListCreateAPIView):
 
 class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, WorkIsNotDraft]
 
     def retrieve(self, request, *args, **kwargs):
         response = super(BookmarkDetail, self).retrieve(request, args, kwargs)

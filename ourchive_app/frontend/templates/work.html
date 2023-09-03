@@ -15,7 +15,7 @@
         {% else %}
         <div id="work-controls-parent" class="uk-text-right uk-align-right uk-width-1-1 uk-margin-remove">
         {% endif %}
-            <a id="work-bookmark-link" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span" uk-icon="icon: bookmark;ratio:1.25" title="{% translate 'Bookmark' %}"></span> </a>
+            {% if not work.draft %}<a id="work-bookmark-link" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span" uk-icon="icon: bookmark;ratio:1.25" title="{% translate 'Bookmark' %}"></span> </a>{% endif %}
             <a id="work-fingerguns-link" href="/fingerguns/{{ id }}"><span id="work-fingerguns-span" uk-icon="icon: heart;ratio:1.25" title="{% translate 'Fingerguns' %}"></span> </a>
             <div class="uk-inline">
                 <a id="work-download-drop" href="#"><span uk-icon="icon: download;ratio:1.25" title="{% translate 'Download' %}" id="work-download-span"></span> </a>

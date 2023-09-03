@@ -785,6 +785,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         return Bookmark.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
+        if validated_data['work_id'].draft:
+            raise serializers.ValidationError({"message": ["Cannot bookmark a draft work."]})
         if (OurchiveSetting.objects.filter(name='Ratings Enabled') and OurchiveSetting.objects.filter(name='Ratings Enabled').first().value == 'False'):
             if 'rating' in validated_data:
                 validated_data.pop('rating')
