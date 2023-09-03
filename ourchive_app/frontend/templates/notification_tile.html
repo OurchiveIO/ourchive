@@ -1,14 +1,14 @@
-<div class="uk-width-1-2@m uk-width-1-1@s uk-margin-small-top" id="notification-tile-parent">
+<div class="uk-width-expand uk-padding-remove-horizontal" id="notification-{{notification.id}}-tile-parent">
 	<div class="uk-card uk-card-default" id="notification-tile-card">
-	    <div class="uk-card-header" id="notification-tile-card-header">
+	    <div class="uk-card-header ourchive-card-header" id="notification-tile-card-header">
 	        <div id="notification-tile-title-grid" class="uk-grid-small uk-flex-middle" uk-grid>
 		        <h3 class="uk-card-title uk-margin-remove-bottom" id="notification-title">{{notification.title}}</h3>
 		    </div>
 		</div>
-		<div class="uk-card-body" id="notification-content-div">
+		<div class="uk-card-body ourchive-card-body" id="notification-content-div">
 	    	<p id="notification-content">{{ notification.content|safe }}</p>
 		</div>
-	    <div class="uk-card-footer" id="notification-actions-container">
+	    <div class="uk-card-footer ourchive-card-footer" id="notification-actions-container">
 	    	<div class="uk-margin-remove uk-align-right uk-text-right">
 	        {% if not notification.read %}<a href="/username/{{ notification.user }}/notifications/{{ notification.id }}/read" id="notification-{{ notification.id }}-mark-read" title="Mark {{ notification.id }} as read" class="uk-icon-link uk-margin-right" uk-icon="check"></a>{% endif %} <a href="/username/{{ notification.user }}/notifications/{{ notification.id }}/delete" id="notification-{{ notification.id }}-mark-delete" title="Delete Notification {{ notification.id }}" class="uk-icon-link" uk-icon="trash"></a>
 	    </div>

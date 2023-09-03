@@ -13,7 +13,7 @@
     {% endif %}
 </div>
 {% for notification in notifications %} 
-	{% include "notification_tile.html" %}          
+	<div class="uk-margin-bottom uk-width-1-2">{% include "notification_tile.html" %}</div>
 {% endfor %}
 <div class="uk-width-1-1 uk-text-center" id="notifications-pagination-parent">
     <div id="notifications-pagination-child">
