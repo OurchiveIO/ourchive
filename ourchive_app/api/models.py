@@ -658,6 +658,7 @@ class ContentPage(models.Model):
     value = models.TextField(null=True, blank=True)
     order = models.IntegerField(default=1)
     locked_to_users = models.BooleanField(default=False)
+    agree_on_signup = models.BooleanField(default=False)
 
     def __repr__(self):
         return '<ContentPage: {}>'.format(self.id)

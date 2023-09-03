@@ -1484,7 +1484,9 @@ def register(request):
 				messages.add_message(request, messages.ERROR, _('Your invite code or email is incorrect. Please check your link again and contact site admin.'), 'register-invalid-token-error')
 				return redirect('/')
 		permit_registration = do_get(f'api/settings/', request, params={'setting_name': 'Registration Permitted'}, object_name='Setting').response_data
-		invite_only = do_get(f'api/settings', request, params={'setting_name': 'Invite Only'}, object_name='Setting').response_data
+		invite_only = do_get(f'api/settings/', request, params={'setting_name': 'Invite Only'}, object_name='Setting').response_data
+		mandatory_agree_pages = do_get(f'api/contentpages/mandatory-on-signup/', request, object_name='Page').response_data
+		print(f"mandatory: {mandatory_agree_pages}")
 		if not utils.convert_boolean(permit_registration['results'][0]['value']):
 			return render(request, 'register.html', {'permit_registration': False})
 		elif utils.convert_boolean(invite_only['results'][0]['value']):
@@ -1492,6 +1494,7 @@ def register(request):
 		else:
 			return render(request, 'register.html', {
 				'permit_registration': True,
+				'mandatory_agree_pages': mandatory_agree_pages,
 				'username_check_url': 'registration-utils'
 			})
 

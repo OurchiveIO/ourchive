@@ -120,6 +120,7 @@ urlpatterns = [
     path('contentpages/', views.ContentPageList.as_view(), name='content-page-list'),
     path('contentpages/<int:pk>', views.ContentPageDetail.as_view(),
          name='content-page-detail'),
+    path('contentpages/mandatory-on-signup/', views.ContentPageMandatoryList.as_view(), name='content-page-mandatory-list'),
     path('reportreasons/', views.ReportReasonList.as_view(), name='report-reasons'),
     path('subscriptions/', views.SubscriptionList.as_view(), name='user-subscriptions'),
     path('subscriptions/<int:pk>/', views.UserSubscriptionDetail.as_view(),

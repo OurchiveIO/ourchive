@@ -14,6 +14,19 @@
     }
     function validateForm(event) {
         event.preventDefault();
+        var mandatoryAgrees = document.querySelectorAll(".register-mandatory-agree");
+        var anyFalse = false;
+        mandatoryAgrees.forEach((agreement) => {
+            if (agreement.checked != true) {
+                document.getElementById("register-agree-"+agreement.name+"-checkbox").classList.add("uk-form-danger");
+                document.getElementById("register-agree-"+agreement.name+"-errors").innerHTML = "{% translate 'You must agree to this item.' %}";
+                document.getElementById("register-agree-"+agreement.name+"-errors").style.visibility = "visible";
+                anyFalse = true;
+            }
+        });
+        if (anyFalse == true) {
+            return false;
+        }
         var username = document.getElementById("register-user-name-input").value;
         checkUsername(username).then((username_exists) => {
             if (username_exists) {
@@ -80,6 +93,18 @@
             </div>
         </div>
     </div>
+    {% for page in mandatory_agree_pages.results %}
+        <div class="uk-margin" id="register-agree-{{page.id}}">
+            <label id="register-agree-{{ page.id }}-label" class="uk-form-label" for="form-horizontal-text">{{ page.name }}</label>
+            <div id="register-agree-{{ page.id }}-controls" class="uk-form-controls">
+                <div class="uk-inline" id="register-agree-{{ page.id }}-input-parent">
+                    <div><span class="uk-text-small uk-text-danger" id="register-agree-{{ page.id }}-errors"></span></div>
+                    <input class="uk-checkbox uk-inline register-mandatory-agree" type="checkbox" title="Agree to {{ page.name }}" id="register-agree-{{ page.id }}-checkbox" name="{{ page.id }}"/>
+                    <label id="register-agree-{{ page.id }}-attr-label" class="uk-margin-small-left" for="register-agree-{{ page.id }}-checkbox">{% blocktranslate %}I have read and agree with the {% endblocktranslate %}<a title="{{ page.name }} link" target="_blank" href="{% url 'fe-content-page' page.id %}">{{ page.name }}</a>.</label>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
     <div class="uk-margin" id="register-submit-parent">
     	<label id="register-submit-label" class="uk-form-label" for="form-horizontal-text"></label>
         <div class="uk-form-controls" id="register-submit-controls">

@@ -1058,6 +1058,14 @@ class ContentPageList(generics.ListCreateAPIView):
             return ContentPage.objects.all()
 
 
+class ContentPageMandatoryList(generics.ListAPIView):
+    serializer_class = ContentPageSerializer
+    permission_classes = [ObjectIsLocked]
+    pagination_class = NonPaginatedResultSetPagination
+    def get_queryset(self):
+        return ContentPage.objects.filter(locked_to_users=False, agree_on_signup=True).order_by('id')
+
+
 class ContentPageDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ContentPage.objects.get_queryset()
     serializer_class = ContentPageDetailSerializer
