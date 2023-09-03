@@ -33,7 +33,7 @@ def spoil_chapter_cache_update(sender, instance, **kwargs):
 def spoil_subscription_cache_update(sender, instance, **kwargs):
     connection = connections['default']
     with connection.cursor() as cursor:
-        cursor.execute(f"DELETE FROM ourchive_database_cache where cache_key like 'ourchive:%:subscription_{instance.id}_%'")
+        cursor.execute(f"DELETE FROM ourchive_database_cache where cache_key like 'ourchive:%:subscription_{instance.user.username}_%'")
 
 @receiver(post_save, sender=api.Bookmark)
 def spoil_bookmark_cache_update(sender, instance, **kwargs):
