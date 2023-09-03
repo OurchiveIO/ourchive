@@ -397,7 +397,7 @@ class PostgresProvider:
         results = []
         resultset = None
         term = term.lower()
-        resultset = Bookmark.objects.filter(user__id=user).filter(
+        resultset = Bookmark.objects.filter(user__id=user,draft=False).filter(
             Q(title__icontains=term) | Q(work__title__icontains=term)).prefetch_related('work')
         for result in resultset:
             work_dict = vars(result.work)

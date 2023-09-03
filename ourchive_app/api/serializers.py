@@ -880,6 +880,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             bookmark = BookmarkCollection.objects.get(id=bookmark.id)
             bookmark.bookmarks.clear()
             for bookmark_child in bookmarks:
+                if bookmark_child.draft:
+                    raise serializers.ValidationError({"message": ["Cannot add draft bookmark to collection."]})
                 bookmark.bookmarks.add(bookmark_child)
             bookmark.save()
         BookmarkCollection.objects.filter(
@@ -910,6 +912,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                 tag.save()
             bookmark_collection.tags.add(tag)
         for bookmark in bookmark_list:
+            if bookmark.draft:
+                raise serializers.ValidationError({"message": ["Cannot add draft bookmark to collection."]})
             bookmark_collection.bookmarks.add(bookmark)
         bookmark_collection.save()
         if attributes is not None:

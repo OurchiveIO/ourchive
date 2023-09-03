@@ -339,7 +339,9 @@ class UserBookmarkList(generics.ListCreateAPIView):
         return response
 
     def get_queryset(self):
-        return Bookmark.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
+        if self.request.GET.get('draft', 'true').lower() == 'false':
+            return Bookmark.objects.filter(user__username=self.kwargs['username']).filter(draft=False).order_by('-updated_on')
+        return Bookmark.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
 
 class UserBookmarkCollectionList(generics.ListCreateAPIView):
@@ -347,7 +349,7 @@ class UserBookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return BookmarkCollection.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
+        return BookmarkCollection.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
 
 class UserBookmarkDraftList(generics.ListCreateAPIView):
@@ -452,7 +454,7 @@ class UserSubscriptionBookmarkList(generics.ListAPIView):
             user__id=self.request.user.id).filter(
             subscribed_to_bookmark=True)
         ids = subscriptions.values_list('subscribed_user', flat=True).all()
-        return Bookmark.objects.filter(user__id__in=ids).order_by('-created_on')
+        return Bookmark.objects.filter(draft=False).filter(user__id__in=ids).order_by('-created_on')
 
 
 class UserSubscriptionBookmarkCollectionList(generics.ListAPIView):
@@ -736,7 +738,10 @@ class BookmarkList(generics.ListCreateAPIView):
         return response
 
     def get_queryset(self):
-        return Bookmark.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+        if self.request.GET.get('draft', 'true').lower() == 'false':
+            return Bookmark.objects.filter(draft=False).order_by('-updated_on')
+        else:
+            return Bookmark.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

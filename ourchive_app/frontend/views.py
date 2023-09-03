@@ -1314,7 +1314,7 @@ def new_bookmark_collection(request):
 		bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes.response_data['results'])
 		tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
 		tags = group_tags_for_edit([], tag_types)
-		bookmarks = do_get(f'api/users/{request.user.username}/bookmarks', request, 'Bookmarks').response_data
+		bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks').response_data
 		return render(request, 'bookmark_collection_form.html', {
 			'tags': tags,
 			'divider': settings.TAG_DIVIDER,
@@ -1347,7 +1347,7 @@ def edit_bookmark_collection(request, pk):
 			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
 			bookmark_collection['attribute_types'] = process_attributes(bookmark_collection['attributes'], bookmark_attributes.response_data['results'])
 			tags = group_tags_for_edit(bookmark_collection['tags'], tag_types) if 'tags' in bookmark_collection else []
-			bookmarks = do_get(f'api/users/{request.user.username}/bookmarks', request, 'Bookmarks').response_data
+			bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks').response_data
 			return render(request, 'bookmark_collection_form.html', {
 				'bookmark_collection': bookmark_collection,
 				'bookmarks': bookmarks,

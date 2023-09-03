@@ -42,7 +42,7 @@
             <a id="bookmark-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
             <a id="bookmark-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a>
             {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
-            <a title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: plus"></span> </a>
+            {% if not bookmark.draft %}<a title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: plus"></span> </a>{% endif %}
             {% include "bookmark_collection_modal.html" %}
             {% endif %}
         </div>
