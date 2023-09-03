@@ -17,6 +17,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 import unidecode
 from etl.models import WorkImport
+from django.db.models.signals import post_save
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +132,7 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, subscription, validated_data):
         UserSubscription.objects.filter(id=subscription.id).update(**validated_data)
+        post_save.send(UserSubscription, instance=subscription, created=False)
         subscription = UserSubscription.objects.get(id=subscription.id)
         if not subscription.subscribed_to_bookmark and not subscription.subscribed_to_collection:
             subscription.delete()
