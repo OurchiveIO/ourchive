@@ -614,6 +614,10 @@ class AdminAnnouncement(models.Model):
     title = models.CharField(max_length=200, default='')
     content = models.TextField(blank=True, default='')
     expires_on = models.DateTimeField(null=True)
+    active = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('active', 'expires_on',)
 
     def __repr__(self):
         return '<AdminAnnouncement: {}>'.format(self.id)
@@ -848,3 +852,4 @@ class UserAttribute(models.Model):
 
     class Meta:
         ordering = ['attribute_value']
+

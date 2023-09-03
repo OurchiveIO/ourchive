@@ -7,13 +7,14 @@ from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
     BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, \
     NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, \
     UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
-    ChapterAllSerializer, UserReportSerializer, UserSubscriptionSerializer, \
+    UserReportSerializer, UserSubscriptionSerializer, AdminAnnouncementSerializer, \
     BookmarkSummarySerializer, BookmarkCollectionSummarySerializer, CollectionCommentSerializer, \
     ImportSerializer, TopTagSerializer
 from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
     NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
-    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment
+    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment, \
+    AdminAnnouncement
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
     UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
     UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked
@@ -36,7 +37,6 @@ from . import work_export
 from django.contrib.auth.models import AnonymousUser
 from etl import ao3
 import threading
-from urllib.parse import unquote
 from etl.models import WorkImport
 from etl.ao3 import util
 from .utils import get_star_count
@@ -232,7 +232,7 @@ class ExportWork(APIView):
                 return Response({'media_url': media_url}, status=200)
             work_url = work_export.create_epub(work)
             work.epub_url = work_url[1]
-            #full_url = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{work_url}'
+            # full_url = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{work_url}'
             work.save()
             return Response({'media_url': work_url[0]}, status=200)
         elif ext.lower() == 'zip':
@@ -256,16 +256,18 @@ class ImportWorks(APIView):
         if 'save_as_draft' not in request.data or 'allow_anon_comments' not in request.data or 'allow_comments' not in request.data:
             return Response({'message': 'save_as_draft, allow_anon_comments, and allow_comments required for work import.'}, status=400)
         importer = ao3.work_import.EtlWorkImport(
-            request.user.id, 
-            request.data['save_as_draft'], 
+            request.user.id,
+            request.data['save_as_draft'],
             request.data['allow_anon_comments'],
             request.data['allow_comments'])
         if 'work_id' in request.data:
             id_or_url = request.data['work_id']
             parsed_id = util.parse_work_id_from_ao3_url(id_or_url)
-            t = threading.Thread(target=importer.get_single_work,args=[parsed_id],daemon=True)   
+            t = threading.Thread(target=importer.get_single_work,
+                                 args=[parsed_id], daemon=True)
         elif 'username' in request.data:
-            t = threading.Thread(target=importer.get_works_by_username,args=[request.data['username']],daemon=True)
+            t = threading.Thread(target=importer.get_works_by_username, args=[
+                                 request.data['username']], daemon=True)
         t.start()
         return Response({'message': "Import started"}, status=200)
 
@@ -273,9 +275,9 @@ class ImportWorks(APIView):
 class ImportStatus(generics.ListAPIView):
     serializer_class = ImportSerializer
     permission_classes = [IsOwner]
+
     def get_queryset(self):
         return WorkImport.objects.filter(job_finished=False, user__id=self.request.user.id).order_by('-created_on')
-    
 
 
 class UserList(generics.ListCreateAPIView):
@@ -288,7 +290,8 @@ class UserList(generics.ListCreateAPIView):
             serializer.save(
                 invite_code=self.request.data['invite_code'], email=self.request.data['email'])
         else:
-            serializer.save(email=self.request.data['email'] if 'email' in self.request.data else '')
+            serializer.save(
+                email=self.request.data['email'] if 'email' in self.request.data else '')
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -327,11 +330,12 @@ class UserBookmarkList(generics.ListCreateAPIView):
         response = super(UserBookmarkList, self).list(request, args, kwargs)
         try:
             if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
-                response.data['star_count'] = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
+                response.data['star_count'] = [x for x in range(
+                    1, int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
             else:
-                response.data['star_count'] = [1,2,3,4,5]
+                response.data['star_count'] = [1, 2, 3, 4, 5]
         except ObjectDoesNotExist:
-            response.data['star_count'] = [1,2,3,4,5]
+            response.data['star_count'] = [1, 2, 3, 4, 5]
         return response
 
     def get_queryset(self):
@@ -589,7 +593,7 @@ class TopTagList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return Tag.objects.filter(tag_type__show_in_aggregate=True).annotate(num_uses=Count("bookmark")+Count("work")).order_by("-num_uses")[:15]
+        return Tag.objects.filter(tag_type__show_in_aggregate=True).annotate(num_uses=Count("bookmark") + Count("work")).order_by("-num_uses")[:15]
 
 
 class RecentWorksList(generics.ListAPIView):
@@ -717,16 +721,18 @@ class BookmarkList(generics.ListCreateAPIView):
         response = super(BookmarkList, self).list(request, args, kwargs)
         try:
             if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
-                response.data['star_count'] = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
+                response.data['star_count'] = [x for x in range(
+                    1, int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
             else:
-                response.data['star_count'] = [1,2,3,4,5]
+                response.data['star_count'] = [1, 2, 3, 4, 5]
         except ObjectDoesNotExist:
-            response.data['star_count'] = [1,2,3,4,5]
+            response.data['star_count'] = [1, 2, 3, 4, 5]
         return response
 
     def create(self, request, *args, **kwargs):
         response = super(BookmarkList, self).create(request, args, kwargs)
-        response.data['star_count'] = get_star_count(OurchiveSetting.objects.get(name='Rating Star Count'))
+        response.data['star_count'] = get_star_count(
+            OurchiveSetting.objects.get(name='Rating Star Count'))
         return response
 
     def get_queryset(self):
@@ -750,7 +756,8 @@ class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         response = super(BookmarkDetail, self).retrieve(request, args, kwargs)
-        response.data['star_count'] = get_star_count(OurchiveSetting.objects.get(name='Rating Star Count'))
+        response.data['star_count'] = get_star_count(
+            OurchiveSetting.objects.get(name='Rating Star Count'))
         return response
 
     def get_queryset(self):
@@ -888,7 +895,8 @@ class BookmarkCommentList(generics.ListCreateAPIView):
 
 class CollectionCommentList(generics.ListCreateAPIView):
     serializer_class = CollectionCommentSerializer
-    permission_classes = [UserAllowsCollectionComments, UserAllowsCollectionAnonComments]
+    permission_classes = [UserAllowsCollectionComments,
+                          UserAllowsCollectionAnonComments]
 
     def get_queryset(self):
         return CollectionComment.objects.get_queryset().order_by('id')
@@ -916,7 +924,8 @@ class CollectionCommentDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class BookmarkCollectionCommentDetail(generics.ListCreateAPIView):
     serializer_class = CollectionCommentSerializer
-    permission_classes = [UserAllowsCollectionComments, UserAllowsCollectionAnonComments]
+    permission_classes = [UserAllowsCollectionComments,
+                          UserAllowsCollectionAnonComments]
 
     def get_queryset(self):
         return CollectionComment.objects.filter(collection__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
@@ -965,7 +974,8 @@ class NotificationRead(APIView):
     permission_classes = [IsOwner]
 
     def patch(self, request, format=None):
-        notifications = Notification.objects.filter(user__id=request.user.id, read=False).all()
+        notifications = Notification.objects.filter(
+            user__id=request.user.id, read=False).all()
         for notification in notifications:
             notification.read = True
             notification.save()
@@ -1024,7 +1034,8 @@ class AttributeTypeList(generics.ListCreateAPIView):
         elif 'allow_on_user' in self.request.GET:
             queryset = queryset.filter(allow_on_user=self.request.GET['allow_on_user'])
         elif 'allow_on_bookmark_collection' in self.request.GET:
-            queryset = queryset.filter(allow_on_bookmark_collection=self.request.GET['allow_on_bookmark_collection'])
+            queryset = queryset.filter(
+                allow_on_bookmark_collection=self.request.GET['allow_on_bookmark_collection'])
         else:
             return AttributeType.objects.order_by('name')
         return queryset.order_by('name')
@@ -1051,6 +1062,7 @@ class AttributeValueDetail(generics.RetrieveUpdateDestroyAPIView):
 class ContentPageList(generics.ListCreateAPIView):
     serializer_class = ContentPageSerializer
     permission_classes = [ObjectIsLocked]
+
     def get_queryset(self):
         if isinstance(self.request.user, AnonymousUser):
             return ContentPage.objects.filter(locked_to_users=False)
@@ -1062,6 +1074,7 @@ class ContentPageMandatoryList(generics.ListAPIView):
     serializer_class = ContentPageSerializer
     permission_classes = [ObjectIsLocked]
     pagination_class = NonPaginatedResultSetPagination
+
     def get_queryset(self):
         return ContentPage.objects.filter(locked_to_users=False, agree_on_signup=True).order_by('id')
 
@@ -1070,3 +1083,24 @@ class ContentPageDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ContentPage.objects.get_queryset()
     serializer_class = ContentPageDetailSerializer
     permission_classes = [ObjectIsLocked]
+
+
+class AdminAnnouncementList(generics.ListCreateAPIView):
+    serializer_class = AdminAnnouncementSerializer
+    permission_classes = [permissions.IsAdminUser]
+    queryset = AdminAnnouncement.objects.get_queryset()
+
+
+class AdminAnnouncementActiveList(generics.ListAPIView):
+    serializer_class = AdminAnnouncementSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    pagination_class = NonPaginatedResultSetPagination
+
+    def get_queryset(self):
+        return AdminAnnouncement.objects.filter(active=True, expires_on__gte=datetime.datetime.now()).order_by('id')
+
+
+class AdminAnnouncementDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = AdminAnnouncement.objects.get_queryset()
+    serializer_class = AdminAnnouncementSerializer
+    permission_classes = [permissions.IsAdminUser]

@@ -26,6 +26,14 @@
 				window.location.reload();
 			});
 		}
+		function dismissAnnouncement(announcement_id) {
+			var name = "dismiss_announcement_" + announcement_id;
+			var expires = "";
+		    var date = new Date();
+		    date.setTime(date.getTime() + (8*24*60*60*1000));
+		    expires = "; expires=" + date.toUTCString();
+		    document.cookie = name + "=" + "dismissed" + expires + "; path=/";
+		}
 	</script>
 	{% if 'accept-cookies' not in request.COOKIES and not request.user.cookies_accepted %}
 		<script>
@@ -52,11 +60,23 @@
 				    message: '<div id="{{message.extra_tags}}"><strong>{{ message }}</strong></div>',
 				    status: status,
 				    pos: 'top-center',
-				    timeout: 10000
+				    timeout: 8000
 				});
 			</script>
 		{% endfor %}
 	
+	{% endif %}
+	{% if admin_announcements %}
+	<div class="uk-width-expand uk-container uk-margin-remove uk-padding-remove" id="admin-messages-parent">	
+		<div uk-grid id="parent-messages-grid" id="content-block-parent-grid" class="uk-grid uk-margin-remove ourchive-top-level-grid">
+			{% for announcement in admin_announcements %}
+				<div class="uk-width-1-1 uk-padding-small uk-text-center uk-margin-remove" id="admin-announcement-{{announcement.id}}">
+					<span class="uk-text-medium">{{ announcement.title }}: {{ announcement.content }}</span>
+					<a href="#" title="Dismiss" uk-toggle="target: #admin-announcement-{{announcement.id}}" onclick="dismissAnnouncement('{{announcement.id}}')"><span class="uk-align-right" uk-icon="icon: close;" id="dismiss-announcement-icon"></span></a>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
 	{% endif %}
 	<div class="ourchive-navbar" id="ourchive-navbar-parent">
 		<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small uk-padding-remove-vertical" uk-navbar id="uk-nav-parent">

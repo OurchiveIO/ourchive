@@ -125,6 +125,12 @@ urlpatterns = [
     path('subscriptions/', views.SubscriptionList.as_view(), name='user-subscriptions'),
     path('subscriptions/<int:pk>/', views.UserSubscriptionDetail.as_view(),
          name='usersubscription-detail'),
+    path('adminannouncements/active/', views.AdminAnnouncementActiveList.as_view(),
+         name='admin-announcements-active'),
+    path('adminannouncements/', views.AdminAnnouncementList.as_view(),
+         name='admin-announcements-list'),
+    path('adminannouncements/<int:pk>', views.AdminAnnouncementDetail.as_view(),
+         name='adminannouncement-detail'),
     path('openapi', get_schema_view(
         title="Ourchive",
         description="A fan-created archive software package",

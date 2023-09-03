@@ -7,7 +7,7 @@ from api.models import Work, Tag, Chapter, TagType, WorkType, \
     Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, \
     NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
     Invitation, AttributeType, AttributeValue, User, ContentPage, UserReport, \
-    UserReportReason, UserSubscription, CollectionComment
+    UserReportReason, UserSubscription, CollectionComment, AdminAnnouncement
 import datetime
 import logging
 from django.conf import settings
@@ -946,3 +946,12 @@ class InvitationSerializer(serializers.HyperlinkedModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
+class AdminAnnouncementSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    expires_on = serializers.DateTimeField(required=False, allow_null=True)
+
+    class Meta:
+        model = AdminAnnouncement
+        fields = '__all__'

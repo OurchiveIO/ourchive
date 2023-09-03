@@ -38,3 +38,9 @@ def load_settings(request):
     settings = do_get(f'api/settings', request).response_data
     settings_dict = {x['name'].replace(' ', ''): x['value'] if x['value'].lower() != 'true' and x['value'].lower() != 'false' else (convert_boolean(x['value'])) for x in settings['results']} if 'results' in settings else {}
     return {'settings': settings_dict}
+
+
+def load_announcements(request):
+    announcements = do_get(f'api/adminannouncements/active', request).response_data
+    announcements = [x for x in announcements['results'] if not request.COOKIES.get(f'dismiss_announcement_{x["id"]}')]
+    return {'admin_announcements': announcements}
