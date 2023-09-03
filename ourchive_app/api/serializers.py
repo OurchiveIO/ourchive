@@ -542,6 +542,9 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'audio_url' in validated_data:
             if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
                 validated_data['audio_url'] = ''
+        if 'image_url' in validated_data:
+            if validated_data['image_url'] is None or validated_data['image_url'] == "None":
+                validated_data['image_url'] = ''
         self.validate_chapter_number(validated_data, chapter.first().id)
         chapter.update(**validated_data)
         Work.objects.filter(id=chapter.first().work.id).update(
@@ -558,6 +561,9 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'audio_url' in validated_data:
             if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
                 validated_data['audio_url'] = ''
+        if 'image_url' in validated_data:
+            if validated_data['image_url'] is None or validated_data['image_url'] == "None":
+                validated_data['image_url'] = ''
         self.validate_chapter_number(validated_data)
         chapter = Chapter.objects.create(**validated_data)
         if attributes is not None:

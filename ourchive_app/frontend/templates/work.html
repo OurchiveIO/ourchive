@@ -43,9 +43,8 @@
                 {% endif %}
             </div>
             {% endif %}
-        
         {% if work.cover_url and work.cover_url != "None" %}
-            <div id="work-cover-child-div" class="uk-width-1-1 uk-align-center"><img id="work-cover-img" src="{{work.cover_url}}" class="uk-align-center"/></div>
+            <div id="work-cover-child-div" class="uk-width-1-1 uk-align-center"><img id="work-cover-img" src="{{work.cover_url}}" class="uk-align-center" alt="{{work.cover_alt_text|default:work.title}}"/></div>
         {% endif %}
         <div id="work-top-hr-div" class="uk-width-1-1 uk-margin-small-top">
             <hr class="ourchive-hr" id="work-top-hr"/>

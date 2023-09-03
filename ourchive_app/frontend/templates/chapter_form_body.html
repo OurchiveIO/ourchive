@@ -128,12 +128,12 @@
     {% endif %}
 </div>
     <div class="uk-form-controls" id="chapter-form-image-upload-controls">
-        <div class="uk-inline" id="chapter-form-image-upload-inline">
+        <div class="uk-inline" id="chapter-form-image-upload-inline" {% if not chapter.image_url %}uk-toggle="target: #chapter-form-image-alt-text-parent"{% endif %}>
         	{% include 'file_upload.html' with object='image_url' replace_selector='chapter-form-image' object_type='chapter-img' upload_placeholder='Upload chapter image' original_value=chapter.image_url %}
         </div>
     </div>
 </div>
-<div class="uk-margin" id="chapter-form-image-alt-text-parent">
+<div class="uk-margin" id="chapter-form-image-alt-text-parent" {% if not chapter.image_url %}hidden{% endif %}>
     <label id="chapter-form-image-alt-text-label" class="uk-form-label" for="form-horizontal-text">Image Alt Text</label>
     <div id="chapter-form-image-alt-text-controls" class="uk-form-controls">
         <div class="uk-inline" id="chapter-form-image-alt-text-inline">
@@ -153,12 +153,12 @@
 <div class="uk-margin" id="chapter-form-audio-upload-parent">
     <label id="chapter-form-audio-label" class="uk-form-label" for="form-horizontal-text">Chapter Audio</label>
     <div class="uk-form-controls" id="chapter-form-audio-controls">
-        <div class="uk-inline" id="chapter-form-audio-inline">
+        <div class="uk-inline" id="chapter-form-audio-inline" {% if not chapter.audio_url %}uk-toggle="target: .ourchive-chapter-audio-toggle"{% endif %}>
         	{% include 'file_upload.html' with object='audio_url' replace_selector='chapter-form-audio' object_type='audio' upload_placeholder='Upload chapter audio' original_value=chapter.audio_url %}
         </div>
     </div>
 </div>
-<div class="uk-margin" id="chapter-form-audio-description-parent">
+<div class="uk-margin ourchive-chapter-audio-toggle" id="chapter-form-audio-description-parent" {% if not chapter.audio_url %}hidden{% endif %}>
     <label id="chapter-form-audio-description-label" class="uk-form-label" for="form-horizontal-text">Audio Description</label>
     <div id="chapter-form-audio-description-controls" class="uk-form-controls">
         <div class="uk-inline" id="chapter-form-audio-description-inline">
@@ -166,9 +166,9 @@
         </div>
     </div>
 </div>
-{% if settings.AudioProcessing == 'False' %}
-<div class="uk-margin" id="chapter-form-audio-length-parent">
-    <label id="chapter-form-audio-length-label" class="uk-form-label" for="form-horizontal-text">Audio Length <sup uk-icon="icon: question"></sup></label>
+{% if not settings.AudioProcessing %}
+<div class="uk-margin ourchive-chapter-audio-toggle" id="chapter-form-audio-length-parent" {% if not chapter.audio_url %}hidden{% endif %}>
+    <label id="chapter-form-audio-length-label" class="uk-form-label" for="form-horizontal-text">Audio Length <sup uk-icon="icon: question"></sup><div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your admin has disabled automatic audio file processing, but you can add your own metadata here.{% endblocktranslate %}</div></label>
     <div id="chapter-form-audio-length-controls" class="uk-form-controls">
         <div class="uk-inline" id="chapter-form-audio-length-inline">
             <input id="chapter-form-audio-length" class="uk-input uk-form-width-large" type="number" name="audio_length" value="{{ chapter.audio_length|default_if_none:0 }}">

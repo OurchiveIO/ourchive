@@ -229,12 +229,12 @@
                 {% endif %}
             </div>
             <div id="work-form-cover-controls" class="uk-form-controls">
-                <div id="work-form-cover-inline" class="uk-inline">
+                <div id="work-form-cover-inline" class="uk-inline" {% if not work.cover_url %}uk-toggle="target: #work-form-cover-alt-parent"{% endif %}>
                     {% include 'file_upload.html' with object='cover_url' replace_selector='work-form-cover-img' object_type='work-img' upload_placeholder='Upload cover image' original_value=work.cover_url %}
                 </div>
             </div>
         </div>
-        <div id="work-form-cover-alt-parent" class="uk-margin">
+        <div id="work-form-cover-alt-parent" class="uk-margin" {% if not work.cover_url %}hidden{% endif %}>
             <label id="work-form-cover-alt-label" class="uk-form-label" for="form-horizontal-text">Cover Alt Text</label>
             <div id="work-form-cover-alt-controls" class="uk-form-controls">
                 <div id="work-form-cover-alt-inline" class="uk-inline">
