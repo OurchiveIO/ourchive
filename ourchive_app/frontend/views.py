@@ -517,8 +517,8 @@ def unblock_user(request, user_id, pk):
 		message_type = messages.ERROR
 	elif blocklist.response_info.status_code >= 200:
 		message_type = messages.SUCCESS
-	messages.add_message(request, message_type, blocklist.response_info.message, blocklist.response_info.type_label)
-	return redirect(f'/username/{user_id}')
+	messages.add_message(request, message_type, _('User unblocked.'), blocklist.response_info.type_label)
+	return redirect(f'/users/{request.user.username}/blocklist')
 
 
 def report_user(request, username):
