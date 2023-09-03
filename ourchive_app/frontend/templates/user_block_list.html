@@ -1,10 +1,12 @@
 {% extends 'index.html' %}
+{% load i18n %}
 {% block title %}Blocklist{% endblock %}
 {% block content %}	
 <div class="uk-width-1-1 uk-text-left" uk-grid id="user-blocklist-grid">
 	{% if not blocklist %}
 	<p id="user-blocklist-none-message">No users have been blocked. To block a user, navigate to their profile and click the "block" icon.</p>
 	{% endif %}
+	<p id="user-blocklist-info-message">Blocked users cannot comment on your works, bookmarks, or collections. If you are experiencing issues with a blocked user, please contact your admin or report the user.</p>
 	{% for block in blocklist %}
 		<div id="user-blocklist-{{block.id}}-parent">
 	        <div id="user-blocklist-{{block.id}}-card" class="uk-card uk-card-default uk-card-body">
