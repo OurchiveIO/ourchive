@@ -20,7 +20,7 @@ def spoil_work_cache(instance):
 def spoil_subscription_cache(instance):
     connection = connections['default']
     with connection.cursor() as cursor:
-        cursor.execute(f"DELETE FROM ourchive_database_cache where cache_key like 'ourchive:%:subscription_{instance.user.username}_%'")
+        cursor.execute("DELETE FROM ourchive_database_cache where cache_key like %s", [f'ourchive:%:subscription_{instance.user.username}_%'])
 
 def spoil_bookmark_cache(instance):
     connection = connections['default']
