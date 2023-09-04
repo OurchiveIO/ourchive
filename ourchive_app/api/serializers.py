@@ -813,9 +813,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BookmarkSummarySerializer(serializers.HyperlinkedModelSerializer):
-    work = serializers.SlugRelatedField(
-        queryset=Work.objects.all(), slug_field='title')
-    work_id = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all())
+    work = BookmarkWorkSerializer()
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
