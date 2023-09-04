@@ -529,7 +529,7 @@ def report_user(request, username):
 		response = do_post(f'api/userreports/', request, data=report_data, object_name='User Report')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
-		return redirect(f'/username/{username}/')
+		return redirect(f'/')
 	else:
 		if request.user.is_authenticated:
 			report_reasons = do_get(f'api/reportreasons/', request, 'Report Reason').response_data
