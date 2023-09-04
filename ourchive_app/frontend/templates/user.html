@@ -24,12 +24,12 @@
             <a id="user-subscribe-link" class="uk-button-small" uk-toggle="target: #user-subscribe">{% translate 'Subscribe' %}</a>
     </div>
 	<div class="uk-width-1 uk-align-center" id="user-profile-card-parent">
-        <div class="uk-card uk-card-body" id="user-profile-card-body"> 
+        <div class="uk-card uk-card-body uk-padding-remove-horizontal" id="user-profile-card-body"> 
             {% if user.icon and user.icon != "None" %} <img id="user-profile-icon" src="{{ user.icon }}" class="uk-align-center uk-height-max-small" style="border-radius: 50%"/> {% endif %}
             <h1 id="user-profile-username-h1" class="uk-heading-line uk-text-center"> <span id="user-profile-username-span">{{ user.username }}</span> </h1> 
         </div>
         {% if user.profile %}
-            <div class="uk-card uk-card-body uk-align-center" id="user-profile-text-parent">
+            <div class="uk-card uk-card-body uk-align-center uk-padding-remove-horizontal" id="user-profile-text-parent">
                 <h2 id="user-profile-text-h2"> Profile </h2>
                 <span id="user-profile-text-span">{% autoescape off %} {{ user.profile }} {% endautoescape %}</span> 
             </div>

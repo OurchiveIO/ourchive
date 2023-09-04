@@ -285,6 +285,10 @@ class PostgresProvider:
             result_dict["tags"] = tags
             result_dict["user"] = username
             result_dict["attributes"] = attributes
+            result_dict["work"] = {}
+            result_dict["work"]["id"] = result.work.id
+            result_dict["work"]["title"] = result.work.title
+            result_dict["work"]["user_id"] = result.work.user_id
             for field in reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
