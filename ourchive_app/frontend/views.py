@@ -1067,6 +1067,8 @@ def new_chapter(request, work_id):
 		chapter_dict = request.POST.copy()
 		chapter_dict["draft"] = "chapter_draft" in chapter_dict
 		chapter_dict["attributes"] = get_attributes_from_form_data(request)
+		if 'audio_length' in chapter_dict and not chapter_dict['audio_length']:
+			chapter_dict['audio_length'] = 0
 		response = do_post(f'api/chapters/', request, data=chapter_dict, object_name='Chapter')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
