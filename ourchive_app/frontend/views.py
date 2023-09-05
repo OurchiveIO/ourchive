@@ -345,6 +345,7 @@ def index(request):
 	response = do_get(f'api/tags/top', request, params=request.GET, object_name='top tags')
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
 		top_tags = response.response_data['results']
+		top_tags = sorted(top_tags, key=itemgetter('tag_count'), reverse=True)
 		highest_count = top_tags[0]['tag_count']
 		tag_max_size = 3
 		for tag in top_tags:

@@ -149,34 +149,33 @@ class EtlWorkImport(object):
             return
         work_id = import_job.work_id
         if api.Work.objects.filter(user=import_job.user).filter(external_id=work_id).first() is not None:
-            logger.info(
-                f'Work {work_id} for user {import_job.user} already exists. Job {job_uid} is stale.')
-            return 0
+            self.error_message = f'Work {work_id} for user {import_job.user} already exists. Job {job_uid} is stale.'
+            logger.info(self.error_message)
+            self.handle_job_fail(import_job)
+            return
         # handle restricted & 404 errors here
         work_importer = None
         try:
             work_importer = Work(work_id)
         except Exception as err:
-            self.error_message = err
-            logger.error(
-                f'Work import scraping for {work_id} in job {job_uid} failed: {err}')
+            self.error_message = f'Work import scraping for {work_id} in job {job_uid} failed: {err}'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
         work_dict = {}
         try:
             work_dict = work_importer.__dict__()
         except Exception as err:
-            self.error_message = err
-            logger.error(f'Work dict for {work_id} in job {job_uid} failed: {err}')
+            self.error_message = f'Work dict for {work_id} in job {job_uid} failed: {err}'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
         work_processed_id = None
         try:
             work_processed_id = self.process_work_data(work_dict)
         except Exception as err:
-            self.error_message = err
-            logger.error(
-                f'Process work data failed for {work_id} in job {job_uid}: {err}. Work dict: {work_dict}')
+            self.error_message = f'Process work data failed for {work_id} in job {job_uid}: {err}. Work dict: {work_dict}'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
         if work_processed_id is None:
@@ -186,15 +185,15 @@ class EtlWorkImport(object):
         try:
             chapters = Chapters(work_id)
         except Exception as err:
-            self.error_message = err
-            logger.error(f'Chapter import for {work_id} failed: {err}.')
+            self.error_message = f'Chapter import for {work_id} failed: {err}.'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
         try:
             chapters.chapter_contents()
         except Exception as err:
-            self.error_message = err
-            logger.error(f'Scraping chapter contents failed for {job_uid}: {err}.')
+            self.error_message = f'Scraping chapter contents failed for {job_uid}: {err}.'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
         try:
@@ -203,9 +202,8 @@ class EtlWorkImport(object):
                 chapter_dict, work_processed_id)
             return chapters_processed
         except Exception as err:
-            self.error_message = err
-            logger.error(
-                f'Process chapter data failed for {work_id} in job {job_uid}: {err}. Chapter dict: {chapter_dict}')
+            self.error_message = f'Process chapter data failed for {work_id} in job {job_uid}: {err}. Chapter dict: {chapter_dict}'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
 
