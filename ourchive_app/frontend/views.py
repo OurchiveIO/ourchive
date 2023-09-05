@@ -17,6 +17,7 @@ from urllib.parse import unquote, quote
 import random
 from django.core.cache import cache
 from django.views.decorators.vary import vary_on_cookie
+from operator import itemgetter
 
 logger = logging.getLogger(__name__)
 
