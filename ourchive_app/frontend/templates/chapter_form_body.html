@@ -97,7 +97,7 @@
         </div>
     </div>            
 </div>
-<div class="uk-margin" id="chapter-form-draft-parent">
+<div class="uk-margin" id="chapter-form-draft-parent" {% if suppress_info_fields %}hidden{% endif %}>
     <label id="chapter-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
         <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
     </label>
