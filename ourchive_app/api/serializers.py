@@ -87,6 +87,14 @@ class UserBlocksSerializer(serializers.HyperlinkedModelSerializer):
     )
     blocked_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
 
+    def create(self, validated_data):
+        existing_block = UserBlocks.objects.filter(user__id=validated_data['user'].id, blocked_user__id=validated_data['blocked_user'].id).first()
+        if existing_block:
+            raise serializers.ValidationError({"message": ["User block exists."]})
+        else:
+            block = UserBlocks.objects.create(**validated_data)
+            return block
+
     class Meta:
         model = UserBlocks
         fields = '__all__'

@@ -97,6 +97,7 @@ urlpatterns = [
          views.UserBookmarkDraftList.as_view(), name='user-bookmarks-drafts'),
     path('userblocks', views.UserBlocksList.as_view(), name='user-blocks-list'),
     path('userblocks/<int:pk>/', views.UserBlocksDetail.as_view(), name='userblocks-detail'),
+    path('userblocks/blocked/<int:user_id>', views.UserBlockSingleDetail.as_view(), name='userblocks-single-detail'),
     path('userreports/', views.UserReportList.as_view(), name='user-report-list'),
     path('userreports/<int:pk>/', views.UserReportDetail.as_view(), name='userreport-detail'),
     path('users/<str:username>/userblocks',

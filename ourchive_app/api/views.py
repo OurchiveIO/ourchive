@@ -313,6 +313,10 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
             attributes = self.request.data['attributes']
         serializer.save(attributes=attributes)
 
+    def retrieve(self, request, *args, **kwargs):
+        response = super(UserDetail, self).retrieve(request, args, kwargs)
+        return response
+
 
 class UserWorkList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer
@@ -414,6 +418,17 @@ class UserBlocksDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return UserBlocks.objects.filter(id=self.kwargs['pk'])
 
+
+class UserBlockSingleDetail(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id):
+        blocked_user = UserBlocks.objects.filter(user__id=request.user.id, blocked_user__id=user_id).first()
+        if blocked_user:
+            return Response({'user_blocked': True, 'block_id': blocked_user.id}, status=200)
+        else:
+            return Response({'user_blocked': False}, status=200)
 
 class UserReportList(generics.ListCreateAPIView):
     serializer_class = UserReportSerializer

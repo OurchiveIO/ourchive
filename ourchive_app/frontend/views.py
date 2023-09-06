@@ -389,6 +389,11 @@ def content_page(request, pk):
 
 def user_name(request, pk):
 	user = do_get(f"api/users/profile/{pk}", request, params=request.GET, object_name='User')
+	user_blocked = False
+	if request.user.is_authenticated:
+		response = do_get(f'api/userblocks/blocked/{pk}', request, 'user block')
+		if response.response_data['user_blocked']:
+			user_blocked = response.response_data['block_id']
 	if user.response_info.status_code >= 400:
 		messages.add_message(request, messages.ERROR, user.response_info.message, user.response_info.type_label)
 		return redirect('/')
@@ -436,6 +441,7 @@ def user_name(request, pk):
 		'bookmarks_next': bookmark_next,
 		'bookmarks_previous': bookmark_previous,
 		'user_filter': username,
+		'user_blocked': user_blocked,
 		'root': settings.ROOT_URL,
 		'works': works,
 		'anchor': anchor,
@@ -520,6 +526,8 @@ def unblock_user(request, user_id, pk):
 	elif blocklist.response_info.status_code >= 200:
 		message_type = messages.SUCCESS
 	messages.add_message(request, message_type, _('User unblocked.'), blocklist.response_info.type_label)
+	if 'HTTP_REFERER' in request.META and 'username' in request.META.get('HTTP_REFERER'):
+		return referrer_redirect(request)
 	return redirect(f'/users/{request.user.username}/blocklist')
 
 

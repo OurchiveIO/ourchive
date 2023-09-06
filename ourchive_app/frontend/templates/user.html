@@ -18,7 +18,10 @@
             <a id="user-profile-edit-link" href="/username/{{ user.id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
             <a id="user-profile-blocklist-link" href="/users/{{ user.username }}/blocklist"><span uk-icon="icon: ban" title="Blocklist"></span> </a>
         {% else %}
-            <a id="user-block-link" href="{% url 'fe-block-user' user.id %}"><span uk-icon="icon: ban" title="Block"></span> </a>
+            {% if not user_blocked %}<a id="user-block-link" href="{% url 'fe-block-user' user.id %}"><span uk-icon="icon: ban" title="Block"></span> </a>
+            {% else %}
+            <a id="user-unblock-link" href="{% url 'fe-unblock-user' user.id user_blocked %}"><span uk-icon="icon: eye" title="Unblock"></span> </a>
+            {% endif %}
             <a id="user-block-link" href="{% url 'report-user' user.username %}"><span uk-icon="icon: warning" title="Report"></span> </a>
         {% endif %}
             <a id="user-subscribe-link" class="uk-button-small" uk-toggle="target: #user-subscribe">{% translate 'Subscribe' %}</a>
