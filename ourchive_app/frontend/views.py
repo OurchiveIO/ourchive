@@ -875,19 +875,32 @@ def search(request):
 	if tag_id:
 		request_object["tag_id"] = tag_id
 	request_object = get_search_request(request, request_object, request_builder)
+	works = {'data': []}
+	bookmarks = {'data': []}
+	tags = {'data': []}
+	users = {'data': []}
+	collections = {'data': []}
+	facets = {}
 	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
-	works = response_json['results']['work']
-	works['data'] = get_object_tags(works['data'])
-	works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
-	bookmarks = response_json['results']['bookmark']
-	bookmarks['data'] = get_object_tags(bookmarks['data'])
-	bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
-	tags = response_json['results']['tag']
-	tags['data'] = group_tags(tags['data'])
-	tag_count = len(response_json['results']['tag']['data'])
-	users = response_json['results']['user']
-	collections = response_json['results']['collection']
-	collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
+	if 'work' in response_json['results']:
+		works = response_json['results']['work']
+		works['data'] = get_object_tags(works['data'])
+		works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
+	if 'bookmark' in response_data['results']:
+		bookmarks = response_json['results']['bookmark']
+		bookmarks['data'] = get_object_tags(bookmarks['data'])
+		bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
+	if 'tag' in response_data['results']:
+		tags = response_json['results']['tag']
+		tags['data'] = group_tags(tags['data'])
+		tag_count = len(response_json['results']['tag']['data'])
+	if 'user' in response_data['results']:
+		users = response_json['results']['user']
+	if 'collection' in response_data['results']:
+		collections = response_json['results']['collection']
+		collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
+	if 'facet' in response_data['results']:
+		facets = response_json['results']['facet']
 	default_tab = get_default_search_result_tab(
 		[
 			[works['data'], 0],
@@ -899,7 +912,7 @@ def search(request):
 	template_data = {
 		'works': works, 'bookmarks': bookmarks,
 		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
-		'facets': response_json['results']['facet'],
+		'facets': facets,
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
 		'root': settings.ROOT_URL, 'term': term,
@@ -955,21 +968,34 @@ def search_filter(request):
 	if tag_id:
 		request_object["tag_id"] = tag_id
 	request_object = get_search_request(request, request_object, request_builder)
+	works = {'data': []}
+	bookmarks = {'data': []}
+	tags = {'data': []}
+	users = {'data': []}
+	collections = {'data': []}
+	facets = {}
 	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
 	# todo DRY - this is redundant w search method - move processing to its own method
-	works = response_json['results']['work']
-	works['data'] = get_object_tags(works['data'])
-	works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
-	bookmarks = response_json['results']['bookmark']
-	bookmarks['data'] = get_object_tags(bookmarks['data'])
-	bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
-	tags = response_json['results']['tag']
-	tags['data'] = group_tags(tags['data'])
-	tag_count = len(response_json['results']['tag']['data'])
-	users = response_json['results']['user']
-	collections = response_json['results']['collection']
-	collections['data'] = get_object_tags(collections['data'])
-	collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
+	if 'work' in response_json['results']:
+		works = response_json['results']['work']
+		works['data'] = get_object_tags(works['data'])
+		works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
+	if 'bookmark' in response_json['results']:
+		bookmarks = response_json['results']['bookmark']
+		bookmarks['data'] = get_object_tags(bookmarks['data'])
+		bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
+	if 'tag' in response_json['results']:
+		tags = response_json['results']['tag']
+		tags['data'] = group_tags(tags['data'])
+		tag_count = len(response_json['results']['tag']['data'])
+	if 'user' in response_json['results']:
+		users = response_json['results']['user']
+	if 'collection' in response_json['results']:
+		collections = response_json['results']['collection']
+		collections['data'] = get_object_tags(collections['data'])
+		collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
+	if 'facet' in response_data['results']:
+		facets = response_json['results']['facet']
 	default_tab = get_default_search_result_tab(
 		[
 			[works['data'], 0],
@@ -981,7 +1007,7 @@ def search_filter(request):
 	template_data = {
 		'works': works, 'bookmarks': bookmarks,
 		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
-		'facets': response_json['results']['facet'],
+		'facets': facets,
 		'root': settings.ROOT_URL, 'term': term,
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
