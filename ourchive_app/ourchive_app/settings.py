@@ -232,9 +232,12 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'class': 'logging.FileHandler',
+            'level' : 'INFO',
+            'maxBytes' : 1024*1024*10, # 10MB
+            'backupCount' : 10,
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'ourchive.log',
-            'formatter': 'simple',
+            'formatter': 'verbose',
         }
     },
     'loggers': {

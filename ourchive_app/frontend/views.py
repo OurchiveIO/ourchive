@@ -289,10 +289,12 @@ def get_bookmark_boilerplate(request, work_id):
 # utility method to format date for the Django template engine.
 # there should be a better way to do this. google was not forthcoming.
 def format_date_for_template(obj, field_name, is_list=False):
-	if field_name not in obj:
+	if not is_list and field_name not in obj:
 		return obj
 	if is_list:
 		for item in obj:
+			if field_name not in item:
+				continue
 			item[field_name] = parse(item[field_name]).date()
 		return obj
 	obj[field_name] = parse(obj[field_name]).date()
@@ -886,20 +888,20 @@ def search(request):
 		works = response_json['results']['work']
 		works['data'] = get_object_tags(works['data'])
 		works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
-	if 'bookmark' in response_data['results']:
+	if 'bookmark' in response_json['results']:
 		bookmarks = response_json['results']['bookmark']
 		bookmarks['data'] = get_object_tags(bookmarks['data'])
 		bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
-	if 'tag' in response_data['results']:
+	if 'tag' in response_json['results']:
 		tags = response_json['results']['tag']
 		tags['data'] = group_tags(tags['data'])
 		tag_count = len(response_json['results']['tag']['data'])
-	if 'user' in response_data['results']:
+	if 'user' in response_json['results']:
 		users = response_json['results']['user']
-	if 'collection' in response_data['results']:
+	if 'collection' in response_json['results']:
 		collections = response_json['results']['collection']
 		collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
-	if 'facet' in response_data['results']:
+	if 'facet' in response_json['results']:
 		facets = response_json['results']['facet']
 	default_tab = get_default_search_result_tab(
 		[

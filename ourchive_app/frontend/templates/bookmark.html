@@ -1,6 +1,6 @@
 {% extends 'index.html' %}
 {% load i18n %}
-{% block title %}Bookmark - {{ bookmark.title }}{% endblock %}
+{% block title %}Bookmark - {{ bookmark.title|default:bookmark.work.title }}{% endblock %}
 {% block content %}	
 <script>
 	function loadMoreComments(next, chapterId) {
@@ -27,7 +27,7 @@
 <article class="uk-article uk-width-expand uk-padding-remove" id="bookmark-uk-article">
     <div class="uk-child-width-2-1 ourchive-parent-grid" id="bookmark-uk-child-grid" uk-grid>
         <div class="uk-width-2-3" id="bookmark-title-parent">
-            <h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bookmark.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large uk-margin-left"> {% translate 'bookmarked by' %} </span><a href="{% url 'user-profile-parent' bookmark.user_id %}"><span id="bookmark-username-span" class="uk-text-large">{{bookmark.user}}</span></a>
+            <h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bookmark.title|default:bookmark.work.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large uk-margin-left"> {% translate 'bookmarked by' %} </span><a href="{% url 'user-profile-parent' bookmark.user_id %}"><span id="bookmark-username-span" class="uk-text-large">{{bookmark.user}}</span></a>
             {% if bookmark.draft %}
             <div id="bookmark-draft-badge" class="uk-width-auto">
                 <span id="bookmark-draft-span" class="uk-label uk-label-warning"><strong id="bookmark-draft-text">DRAFT</strong></span>
