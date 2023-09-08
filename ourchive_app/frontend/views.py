@@ -998,7 +998,7 @@ def search_filter(request):
 		collections = response_json['results']['collection']
 		collections['data'] = get_object_tags(collections['data'])
 		collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
-	if 'facet' in response_data['results']:
+	if 'facet' in response_json['results']:
 		facets = response_json['results']['facet']
 	default_tab = get_default_search_result_tab(
 		[
