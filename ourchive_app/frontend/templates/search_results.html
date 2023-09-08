@@ -164,7 +164,7 @@
 				{% for work in works.data %} 
 					<div class="uk-margin-bottom">{% include "work_tile.html" %} </div>    
 			    {% endfor %}
-			    {% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' %}
+			    {% if works.data %}{% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' %}{% endif %}
 			</div>
 		</li>
 		<li id="search-results-bookmarks-li" class="uk-width-expand"> 
