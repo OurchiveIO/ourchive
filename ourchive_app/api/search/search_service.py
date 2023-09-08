@@ -27,7 +27,7 @@ class OurchiveSearch:
 		return results
 
 	def filter_by_tag(self, **kwargs):
-		if not isinstance(kwargs['tag_id'], numbers.Number):
+		if not kwargs['tag_id'].isdigit():
 			return {'results': {'errors': ['Tag id must be a number.']}}
 		results = self.searcher.filter_by_tag(**kwargs)
 		results['facet'] = self.searcher.get_result_facets(results)
