@@ -15,8 +15,8 @@
 <div class="uk-width-1 uk-padding-remove-horizontal" id="user-profile-parent">
     <div class="uk-text-right uk-width-1" id="user-profile-controls-parent">
         {% if user.username == request.user.username %}
-            <a id="user-profile-edit-link" href="/username/{{ user.id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
-            <a id="user-profile-blocklist-link" href="/users/{{ user.username }}/blocklist"><span uk-icon="icon: ban" title="Blocklist"></span> </a>
+            <a id="user-profile-edit-link" href="{% url 'fe-user-profile-edit' user.id %}"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
+            <a id="user-profile-blocklist-link" class="uk-button-small" href="{% url 'fe-user-blocklist' user.username %}" title="Blocklist">{% translate 'Blocklist' %}</a>
         {% else %}
             {% if not user_blocked %}<a id="user-block-link" href="{% url 'fe-block-user' user.id %}"><span uk-icon="icon: ban" title="Block"></span> </a>
             {% else %}

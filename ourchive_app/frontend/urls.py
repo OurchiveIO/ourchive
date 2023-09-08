@@ -65,7 +65,7 @@ urlpatterns = [
     path('username/<str:username>/notifications/<int:notification_id>/read', views.mark_notification_read),
     path('username/<str:username>/notifications/<int:notification_id>/delete', views.delete_notification),
     path('username/<str:username>/notifications/read', views.user_notifications_all_read, name='fe-notifications-mark-all-read'),
-    path('users/<str:username>/blocklist', views.user_block_list),
+    path('users/<str:username>/blocklist', views.user_block_list, name='fe-user-blocklist'),
     path('users/<int:user_id>/blocks/<int:pk>/unblock', views.unblock_user, name='fe-unblock-user'),
     path('users/<int:pk>/block', views.block_user, name='fe-block-user'),
     path('users/<str:username>/delete', views.delete_user),
