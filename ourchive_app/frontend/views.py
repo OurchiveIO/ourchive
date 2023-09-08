@@ -883,6 +883,7 @@ def search(request):
 	users = {'data': []}
 	collections = {'data': []}
 	facets = {}
+	tag_count = 0
 	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
 	if 'work' in response_json['results']:
 		works = response_json['results']['work']
@@ -976,6 +977,7 @@ def search_filter(request):
 	users = {'data': []}
 	collections = {'data': []}
 	facets = {}
+	tag_count = 0
 	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
 	# todo DRY - this is redundant w search method - move processing to its own method
 	if 'work' in response_json['results']:
