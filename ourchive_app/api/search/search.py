@@ -473,16 +473,22 @@ class PostgresProvider:
         page = kwargs['page'] if 'page' in kwargs else 1
         tag = Tag.objects.get(pk=kwargs['tag_id'])
         works = Work.objects.filter(tags__id__exact=tag.id)
-        if work_filters:
-            works = works.filter(work_filters)
+        if work_filters[0]:
+            works = works.filter(work_filters[0])
+        if work_filters[1]:
+            works = works.filter(work_filters[1])
         works = works.filter(draft=False).order_by('-updated_on').distinct()
         bookmarks = Bookmark.objects.filter(tags__id__exact=tag.id)
-        if bookmark_filters:
-            bookmarks = bookmarks.filter(bookmark_filters)
+        if bookmark_filters[0]:
+            bookmarks = bookmarks.filter(bookmark_filters[0])
+        if bookmark_filters[1]:
+            bookmarks = bookmarks.filter(bookmark_filters[1])
         bookmarks = bookmarks.filter(draft=False).order_by('-updated_on').distinct()
         collections = BookmarkCollection.objects.filter(tags__id__exact=tag.id)
-        if collection_filters:
-            collections = collections.filter(collection_filters)
+        if collection_filters[0]:
+            collections = collections.filter(collection_filters[0])
+        if collection_filters[1]:
+            collections = collections.filter(collection_filters[1])
         collections = collections.filter(draft=False).order_by('-updated_on').distinct()
 
         works_processed = self.process_results(works, page, Work)
