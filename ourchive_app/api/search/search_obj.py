@@ -218,7 +218,7 @@ class BookmarkSearch(object):
         self.include_mode = ""
         self.exclude_mode = ""
         self.order_by = ""
-        self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
+        self.reserved_fields = ['_state', 'uid', 'created_on']
         self.term_search_fields = ['title', 'description', 'tags__text']
         self.page = 1
 
@@ -246,7 +246,7 @@ class CollectionSearch(object):
         self.include_mode = ""
         self.exclude_mode = ""
         self.order_by = ""
-        self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
+        self.reserved_fields = ['_state', 'uid', 'created_on']
         self.term_search_fields = ['title', 'short_description', 'tags__text', 'attributes__name']
         self.page = 1
 
@@ -323,7 +323,7 @@ class WorkSearch(object):
         self.include_mode = ""
         self.exclude_mode = ""
         self.order_by = ""
-        self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
+        self.reserved_fields = ['_state', 'uid', 'created_on']
         self.term_search_fields = ['title', 'summary',
                                    'chapters__title', 'chapters__summary', 'tags__text', 'attributes__name']
         self.page = 1

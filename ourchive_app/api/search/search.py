@@ -62,6 +62,9 @@ class ElasticSearchServiceBuilder:
 
 class PostgresProvider:
 
+    def init_provider():
+        print('init provider')
+
     # ref: https://www.julienphalip.com/blog/adding-search-to-a-django-site-in-a-snap/
     def normalize_query(self, query_string,
                         findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
@@ -129,9 +132,6 @@ class PostgresProvider:
             existing_query = existing_query | or_query
         return existing_query
 
-    def init_provider():
-        print('init provider')
-
     def build_filters(self, filters, mode, include):
         full_filters = None
         for field in filters:
@@ -174,7 +174,21 @@ class PostgresProvider:
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
             if filters is not None:
-                resultset = obj.objects.filter(query).filter(filters)
+                resultset = obj.objects.filter(query)
+                if self.include_mode == "all" and resultset is not None and filters[0]:
+                    for q_item in filters[0].children:
+                        if resultset is None:
+                            break
+                        resultset = resultset.filter(q_item)
+                else:
+                    resultset = obj.objects.filter(query).filter(filters[0]) if filters[0] else resultset
+                if self.exclude_mode == "all" and resultset is not None and filters[1]:
+                    for q_item in filters[1].children:
+                        if resultset is None:
+                            break
+                        resultset = resultset.filter(q_item)
+                else:
+                    resultset = obj.objects.filter(query).filter(filters[1]) if filters[1] else resultset
             else:
                 resultset = obj.objects.filter(query)
         if resultset is not None and has_drafts:
@@ -184,9 +198,15 @@ class PostgresProvider:
             if len(trigram_fields) > 1:
                 resultset = obj.objects.annotate(zero_distance=TrigramWordDistance(
                     term, trigram_fields[0])).annotate(one_distance=TrigramWordDistance(term, trigram_fields[1]))
-                if filters:
+                if filters[0] and filters[1]:
                     resultset = resultset.filter(
-                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max)) & filters))
+                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max) & filters[0] & filters[1])))
+                elif filters[0]:
+                    resultset = resultset.filter(
+                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max) & filters[0])))
+                elif filters[1]:
+                    resultset = resultset.filter(
+                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max) & filters[1])))
                 else:
                     resultset = resultset.filter(zero_distance__lte=trigram_max).filter(
                         one_distance__lte=trigram_max)
@@ -197,9 +217,15 @@ class PostgresProvider:
             else:
                 resultset = obj.objects.annotate(
                     zero_distance=TrigramWordDistance(term, trigram_fields[0]))
-                if filters:
+                if filters[0] and filters[1]:
                     resultset = resultset.filter(
-                        Q((Q(zero_distance__lte=trigram_max) & filters)))
+                        Q((Q(zero_distance__lte=trigram_max) & filters[0] & filters[1])))
+                elif filters[0]:
+                    resultset = resultset.filter(
+                        Q((Q(zero_distance__lte=trigram_max) & filters[0])))
+                elif filters[1]:
+                    resultset = resultset.filter(
+                        Q((Q(zero_distance__lte=trigram_max) & filters[1])))
                 else:
                     resultset = resultset.filter(zero_distance__lte=trigram_max)
                 if resultset is not None and has_drafts:
@@ -217,13 +243,7 @@ class PostgresProvider:
             search_object.filter.include_filters, search_object.include_mode, True)
         exclude_filters = self.build_filters(
             search_object.filter.exclude_filters, search_object.exclude_mode, False)
-        if exclude_filters and include_filters:
-            final_filters = Q(include_filters & exclude_filters)
-        elif exclude_filters:
-            final_filters = exclude_filters
-        elif include_filters:
-            final_filters = include_filters
-        return final_filters
+        return [include_filters, exclude_filters]
 
     def build_work_resultset(self, resultset, reserved_fields):
         # build final resultset
@@ -253,7 +273,7 @@ class PostgresProvider:
             for field in reserved_fields:
                 result_dict.pop(field, None)
             result_dict["user"] = username
-            result_dict["work_type"] = work_type
+            result_dict["work_type_name"] = work_type
             result_dict["tags"] = tags
             result_dict["attributes"] = attributes
             result_dict["chapter_count"] = len(chapters)
@@ -328,6 +348,9 @@ class PostgresProvider:
         work_search = WorkSearch()
         work_search.from_dict(kwargs)
         work_filters = self.get_filters(work_search)
+        # TODO: this is global - shouldn't really be here
+        self.include_mode = work_search.include_mode
+        self.exclude_mode = work_search.exclude_mode
         # build query
         query = self.get_query(work_search.term, work_search.term_search_fields)
         if not query and not work_filters:
