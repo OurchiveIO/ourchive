@@ -186,7 +186,7 @@ class PostgresProvider:
                     for q_item in filters[1].children:
                         if resultset is None:
                             break
-                        resultset = resultset.filter(q_item)
+                        resultset = resultset.filter(~Q(q_item))
                 else:
                     resultset = obj.objects.filter(query).filter(filters[1]) if filters[1] else resultset
             else:
