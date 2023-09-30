@@ -41,7 +41,7 @@
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl-flyover">	
 			        {% for facet in facets %} 
 						{% include "facet_tile.html" with include='include' keys=keys_include %}     
-				    {% endfor %}		        
+				    {% endfor %}	        
 				</dl>
 				<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl-flyover">	
 					<dt><span class="uk-text-bold">Include all/any</span></dt>
@@ -58,7 +58,8 @@
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-facet-dl-flyover">	
 			        {% for facet in facets %} 
 						{% include "facet_tile.html" with include='exclude' keys=keys_exclude %}     
-				    {% endfor %}		        
+				    {% endfor %}	
+
 				</dl>
 				<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-type-dl-flyover">	
 					<dt><span class="uk-text-bold">Exclude all/any</span></dt>

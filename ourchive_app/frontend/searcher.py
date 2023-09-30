@@ -99,6 +99,23 @@ def build_and_execute_search(request):
 		collections['data'] = format_date_for_template(collections['data'], 'updated_on', True)
 	if 'facet' in response_json['results']:
 		facets = response_json['results']['facet']
+		for item in request_object[1]['exclude']:
+			facet_added = False
+			split = item.split('$')
+			label_split = split[0].split(',')
+			val_split = split[1].split(',')
+			for facet in facets:
+				if facet['label'] == label_split[1]:
+					print('hit label')
+					for val in facet['values']:
+						if val['label'] == val_split[1]:
+							facet_added = True
+							break
+					facet['values'].append({'label': val_split[1], 'filter_val': item})
+					facet_added = True
+					break
+			if not facet_added:
+				facets.append({'label': label_split[1], 'excluded': True, 'values': [{'label': val_split[1], 'filter_val': item}]})
 	default_tab = get_default_search_result_tab(
 		[
 			[works['data'], 0],
@@ -108,8 +125,12 @@ def build_and_execute_search(request):
 			[collections['data'], 2]
 		])
 	template_data = {
-		'works': works, 'bookmarks': bookmarks,
-		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
+		'works': works,
+		'bookmarks': bookmarks,
+		'tags': tags,
+		'users': users,
+		'tag_count': tag_count,
+		'collections': collections,
 		'facets': facets,
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',

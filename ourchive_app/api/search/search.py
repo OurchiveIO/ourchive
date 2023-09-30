@@ -173,8 +173,8 @@ class PostgresProvider:
         page = int(page)
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
+            resultset = obj.objects.filter(query)
             if filters is not None:
-                resultset = obj.objects.filter(query)
                 if self.include_mode == "all" and resultset is not None and filters[0]:
                     for q_item in filters[0].children:
                         if resultset is None:
@@ -200,13 +200,13 @@ class PostgresProvider:
                     term, trigram_fields[0])).annotate(one_distance=TrigramWordDistance(term, trigram_fields[1]))
                 if filters[0] and filters[1]:
                     resultset = resultset.filter(
-                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max) & filters[0] & filters[1])))
+                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max)) & filters[0] & filters[1]))
                 elif filters[0]:
                     resultset = resultset.filter(
-                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max) & filters[0])))
+                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max)) & filters[0]))
                 elif filters[1]:
                     resultset = resultset.filter(
-                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max) & filters[1])))
+                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max)) & filters[1]))
                 else:
                     resultset = resultset.filter(zero_distance__lte=trigram_max).filter(
                         one_distance__lte=trigram_max)
