@@ -179,21 +179,21 @@ class PostgresProvider:
                 for q_item in filters[0].children:
                     resultset = resultset.filter(q_item) if resultset else obj.objects.filter(q_item)
             else:
-                if not resultset:
-                    resultset = obj.objects.filter(filters[0]) if filters[0] else obj.objects.all()
-                else:
-                    resultset = resultset.filter(filters[0]) if filters[0] else resultset
+                if not resultset and filters[0]:
+                    resultset = obj.objects.filter(filters[0]) 
+                elif filters[0]:
+                    resultset = resultset.filter(filters[0]) 
             if self.exclude_mode == "all" and filters[1]:
                 for q_item in filters[1].children:
                     resultset = resultset.filter(~Q(q_item)) if resultset else obj.objects.filter(q_item)
             else:
-                if not resultset:
-                    resultset = obj.objects.filter(filters[1]) if filters[1] else obj.objects.all()
-                else:
-                    resultset = resultset.filter(filters[1]) if filters[1] else resultset
+                if not resultset and filters[1]:
+                    resultset = obj.objects.filter(filters[1]) 
+                elif filters[1]:
+                    resultset = resultset.filter(filters[1]) 
         if resultset is not None and has_drafts:
             resultset = resultset.filter(draft=False)
-        if resultset is not None and len(resultset) == 0 and term:
+        if resultset is not None and len(resultset) == 0 and query:
             # if exact matching & filtering produced no results, let's do limited trigram searching
             if len(trigram_fields) > 1:
                 resultset = obj.objects.annotate(zero_distance=TrigramWordDistance(
