@@ -3,6 +3,15 @@ from .search_models import SearchObject
 from .api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from .view_utils import *
 
+def get_default_search_result_tab(resultsets):
+	most_results = 0
+	default_tab = ''
+	for results in resultsets:
+		if results[0] > most_results:
+			most_results = results[0]
+			default_tab = results[1]
+	return default_tab
+
 def get_search_request(request, request_object, request_builder):
 	return_keys = {'include': [], 'exclude': []}
 	for key in request.POST:
@@ -118,11 +127,11 @@ def build_and_execute_search(request):
 				facets.append({'label': label_split[1], 'excluded': True, 'values': [{'label': val_split[1], 'filter_val': item}]})
 	default_tab = get_default_search_result_tab(
 		[
-			[works['data'], 0],
-			[bookmarks['data'], 1],
-			[tags['data'], 3],
-			[users['data'], 4],
-			[collections['data'], 2]
+			[works['page']['count'], 0],
+			[bookmarks['page']['count'], 1],
+			[tags['page']['count'], 3],
+			[len(users['data']), 4],
+			[collections['page']['count'], 2]
 		])
 	template_data = {
 		'works': works,

@@ -165,7 +165,7 @@
 				{% for work in works.data %} 
 					<div class="uk-margin-bottom">{% include "work_tile.html" %} </div>    
 			    {% endfor %}
-			    {% if works.data %}{% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' %}{% endif %}
+			    {% if works.data %}{% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}{% endif %}
 			</div>
 		</li>
 		<li id="search-results-bookmarks-li" class="uk-width-expand"> 
@@ -173,7 +173,7 @@
 		        {% for bookmark in bookmarks.data %} 
 					<div class="uk-margin-bottom">{% include "bookmark_tile.html" %} </div>   
 			    {% endfor %}
-			    {% include 'pagination.html' with previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' %}
+			    {% include 'pagination.html' with previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
 			</div>     
 		</li>
 		<li id="search-results-collections-li" class="uk-width-expand"> 
@@ -181,7 +181,7 @@
 		        {% for bookmark_collection in collections.data %} 
 					<div class="uk-margin-bottom">{% include "bookmark_collection_tile.html" %}</div>  
 			    {% endfor %}
-			    {% include 'pagination.html' with previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' %}
+			    {% include 'pagination.html' with previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
 			</div>     
 		</li>
 		<li id="search-results-tags-li" class="uk-width-expand"> 

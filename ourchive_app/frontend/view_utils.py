@@ -253,16 +253,6 @@ def prepare_chapter_data(chapter, request):
 	return chapter
 
 
-def get_default_search_result_tab(resultsets):
-	most_results = 0
-	default_tab = ''
-	for results in resultsets:
-		if len(results[0]) > most_results:
-			most_results = len(results[0])
-			default_tab = results[1]
-	return default_tab
-
-
 def get_bookmark_boilerplate(request, work_id):
 	bookmark = {
 			'title': '',
