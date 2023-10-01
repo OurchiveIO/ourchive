@@ -391,7 +391,7 @@ class PostgresProvider:
         query = self.get_query(user_search.term, user_search.term_search_fields)
         if query is None:
             return {'data': []}
-        resultset = User.objects.filter(is_active=True).filter(query)
+        resultset = User.objects.filter(is_active=True).filter(query)[:20]
         result_json = []
         for result in resultset:
             result_dict = result.__dict__
