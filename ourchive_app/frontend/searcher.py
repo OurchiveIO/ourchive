@@ -109,9 +109,12 @@ def build_and_execute_search(request):
 	if 'facet' in response_json['results']:
 		facets = response_json['results']['facet']
 		for item in request_object[1]['exclude']:
+			if item == 'any_all':
+				continue
 			facet_added = False
 			split = item.split('$')
 			label_split = split[0].split(',')
+			print(label_split)
 			val_split = split[1].split(',')
 			for facet in facets:
 				if facet['label'] == label_split[1]:
