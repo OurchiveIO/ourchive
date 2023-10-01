@@ -183,7 +183,7 @@ class PostgresProvider:
                     resultset = obj.objects.filter(filters[0]) 
                 elif filters[0]:
                     resultset = resultset.filter(filters[0]) 
-            if self.exclude_mode == "all" and filters[1]:
+            if self.exclude_mode == "any" and filters[1]:
                 for q_item in filters[1].children:
                     resultset = resultset.filter(~Q(q_item)) if resultset else obj.objects.filter(q_item)
             else:
