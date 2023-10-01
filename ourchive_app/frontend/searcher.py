@@ -14,6 +14,7 @@ def get_default_search_result_tab(resultsets):
 
 def get_search_request(request, request_object, request_builder):
 	return_keys = {'include': [], 'exclude': []}
+	print(request.POST)
 	for key in request.POST:
 		filter_val = request.POST[key]
 		include_exclude = 'exclude' if 'exclude_' in key else 'include'
@@ -31,7 +32,7 @@ def get_search_request(request, request_object, request_builder):
 			else:
 				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append((filter_details[3], filter_details[2]))
 		else:
-			# TODO evaluate if this can be gotten rid of; do we have legitimate use cases that aren't a range?
+			# TODO: make this less bad
 			filter_options = key.split('|')
 			for option in filter_options:
 				filter_details = option.split('$')
@@ -49,6 +50,12 @@ def get_search_request(request, request_object, request_builder):
 					request_object['tag_search'][f'{include_exclude}_filter']['text'].append(tag_text)
 					request_object['work_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
 					request_object['bookmark_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
+				elif filter_type == 'attribute':
+					attribute_type = filter_details[0].split(',')[1]
+					attribute_text = (filter_details[1].split(',')[1]).lower() if filter_details[1].split(',')[1] else ''
+					request_object['work_search'][f'{include_exclude}_filter']['attributes'].append(attribute_text)
+					request_object['bookmark_search'][f'{include_exclude}_filter']['attributes'].append(attribute_text)
+					request_object['collection_search'][f'{include_exclude}_filter']['attributes'].append(attribute_text)
 				elif filter_type == 'bookmark':
 					if filter_details[0] in request_object['bookmark_search'][f'{include_exclude}_filter'] and len(request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
 						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
@@ -114,7 +121,6 @@ def build_and_execute_search(request):
 			facet_added = False
 			split = item.split('$')
 			label_split = split[0].split(',')
-			print(label_split)
 			val_split = split[1].split(',')
 			for facet in facets:
 				if facet['label'] == label_split[1]:
@@ -132,8 +138,6 @@ def build_and_execute_search(request):
 		[
 			[works['page']['count'], 0],
 			[bookmarks['page']['count'], 1],
-			[tags['page']['count'], 3],
-			[len(users['data']), 4],
 			[collections['page']['count'], 2]
 		])
 	template_data = {

@@ -89,6 +89,8 @@ class SearchObject(object):
 			return 'work'
 		elif 'tag_type' in filter_term:
 			return 'tag'
+		elif 'attribute_type' in filter_term:
+			return 'attribute'
 		elif 'work_type' in filter_term:
 			return 'work'
 		elif 'word_count' in filter_term:
