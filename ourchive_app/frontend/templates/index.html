@@ -108,11 +108,11 @@
     					</div>
 		        	</li>
 		    	 	<li id="theme-switcher-li">
-		    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" title="Switch Modes">
+		    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper" title="Switch Modes">
 		    	 			{% if request.session.css_mode == "dark" %}
 		    	 			<span class="custom-icon uk-text-medium" uk-icon="icon: lightmode-switcher;" title="Light Mode" id="theme-switcher-light">
 		    	 			{% else %}
-		    	 			<span class="custom-icon uk-text-medium" uk-icon="icon: lightmode-switcher; ratio:1" title="Dark Mode" id="theme-switcher-dark">
+		    	 			<span class="custom-icon uk-text-medium" uk-icon="icon: lightmode-switcher;" title="Dark Mode" id="theme-switcher-dark">
 		    	 			{% endif %}
 		    	 		</a></span>
 		    	 	</li>

@@ -15,10 +15,10 @@
         {% else %}
         <div id="work-controls-parent" class="uk-text-right uk-align-right uk-width-1-1 uk-margin-remove">
         {% endif %}
-            {% if not work.draft %}<a id="work-bookmark-link" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span" uk-icon="icon: bookmark;ratio:1.25" title="{% translate 'Bookmark' %}"></span> </a>{% endif %}
-            <a id="work-fingerguns-link" href="/fingerguns/{{ id }}"><span id="work-fingerguns-span" uk-icon="icon: heart;ratio:1.25" title="{% translate 'Fingerguns' %}"></span> </a>
+            {% if not work.draft %}<a id="work-bookmark-link" class="ourchive-icon-wrapper" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span" uk-icon="icon: bookmark;ratio:1.25" title="{% translate 'Bookmark' %}"></span> </a>{% endif %}
+            <a id="work-fingerguns-link" href="/fingerguns/{{ id }}" class="ourchive-icon-wrapper"><span id="work-fingerguns-span" uk-icon="icon: heart;ratio:1.25" title="{% translate 'Fingerguns' %}"></span> </a>
             <div class="uk-inline">
-                <a id="work-download-drop" href="#"><span uk-icon="icon: download;ratio:1.25" title="{% translate 'Download' %}" id="work-download-span"></span> </a>
+                <a id="work-download-drop" class="ourchive-icon-wrapper" href="#"><span uk-icon="icon: download;ratio:1.25" title="{% translate 'Download' %}" id="work-download-span"></span> </a>
                 <div class="uk-card uk-card-body uk-card-default uk-text-left" uk-drop><ul class="uk-list uk-list-divider">
                     {% if work.preferred_download_url and work.preferred_download_url != "None" %}<li><a href="{{ work.preferred_download_url }}">{{ work.preferred_download }} - Creator's Preferred</a></li>{% endif %}
                     <li><a href="{% if work.epub_url %}{{work.epub_url}}{% else %}{% url 'export-work' work.id 'epub' %}{% endif %}">EPUB</a></li>
