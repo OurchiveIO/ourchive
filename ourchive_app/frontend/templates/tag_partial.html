@@ -3,7 +3,7 @@
     <div id="{{obj_name}}-tile-tag-type-{{type}}" class="uk-margin-small uk-visible@s {% if not forloop.last %}uk-width-1-2{% else %} uk-width-1-1 {% endif %}">
         <div class="uk-margin-remove"><span class="uk-text-bold uk-margin-right">{{ type }}</span></div>
         {% for single_tag in tag %}
-            <div class="uk-inline uk-button-tag"><a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link" class="uk-link-muted uk-inline uk-text-nowrap" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}">{{ single_tag.display_text|default:single_tag.text }}</a></div>
+            <div class="uk-inline uk-button-tag"><a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link" class="uk-link-muted uk-inline uk-text-break" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}">{{ single_tag.display_text|default:single_tag.text }}</a></div>
         {% endfor %}
     </div>
 {% endfor %}
