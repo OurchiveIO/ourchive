@@ -160,11 +160,11 @@ class PostgresProvider:
     def process_results(self, resultset, page, obj):
         page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
         paginator = Paginator(resultset, page_size)
-        count = paginator.count
-        resultset = paginator.get_page(page)
-        next_params = None if not resultset.has_next(
+        count = paginator.count if resultset else 0
+        resultset = paginator.get_page(page) if resultset else []
+        next_params = None if not resultset or not resultset.has_next(
         ) else f"/search/?limit={page_size}&page={page+1}&object_type={obj.__name__}"
-        prev_params = None if not resultset.has_previous(
+        prev_params = None if not resultset or not resultset.has_previous(
         ) else f"/search/?limit={page_size}&page={page-1}&object_type={obj.__name__}"
         return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
 
@@ -174,26 +174,26 @@ class PostgresProvider:
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
             resultset = obj.objects.filter(query)
-            if filters is not None:
-                if self.include_mode == "all" and resultset is not None and filters[0]:
-                    for q_item in filters[0].children:
-                        if resultset is None:
-                            break
-                        resultset = resultset.filter(q_item)
-                else:
-                    resultset = obj.objects.filter(query).filter(filters[0]) if filters[0] else resultset
-                if self.exclude_mode == "all" and resultset is not None and filters[1]:
-                    for q_item in filters[1].children:
-                        if resultset is None:
-                            break
-                        resultset = resultset.filter(~Q(q_item))
-                else:
-                    resultset = obj.objects.filter(query).filter(filters[1]) if filters[1] else resultset
+        if filters is not None:
+            if self.include_mode == "all" and filters[0]:
+                for q_item in filters[0].children:
+                    resultset = resultset.filter(q_item) if resultset else obj.objects.filter(q_item)
             else:
-                resultset = obj.objects.filter(query)
+                if not resultset:
+                    resultset = obj.objects.filter(filters[0]) if filters[0] else obj.objects.all()
+                else:
+                    resultset = resultset.filter(filters[0]) if filters[0] else resultset
+            if self.exclude_mode == "all" and filters[1]:
+                for q_item in filters[1].children:
+                    resultset = resultset.filter(~Q(q_item)) if resultset else obj.objects.filter(q_item)
+            else:
+                if not resultset:
+                    resultset = obj.objects.filter(filters[1]) if filters[1] else obj.objects.all()
+                else:
+                    resultset = resultset.filter(filters[1]) if filters[1] else resultset
         if resultset is not None and has_drafts:
             resultset = resultset.filter(draft=False)
-        if resultset is not None and len(resultset) == 0:
+        if resultset is not None and len(resultset) == 0 and term:
             # if exact matching & filtering produced no results, let's do limited trigram searching
             if len(trigram_fields) > 1:
                 resultset = obj.objects.annotate(zero_distance=TrigramWordDistance(
@@ -232,7 +232,7 @@ class PostgresProvider:
                     resultset = resultset.filter(draft=False)
                 resultset = resultset.order_by('zero_distance', order_by)
             require_distinct = False
-        if require_distinct:
+        if require_distinct and resultset:
             # remove any dupes & apply order_by
             resultset = resultset.order_by(order_by).distinct()
         return self.process_results(resultset, page, obj)
@@ -517,7 +517,7 @@ class PostgresProvider:
         return results
 
 
-    def get_result_facets(self, results):
+    def get_result_facets(self, results, tag_id=None):
         result_json = []
         work_types = WorkType.objects.all()
         work_types_list = []
@@ -563,7 +563,11 @@ class PostgresProvider:
         result_json.append(complete_dict)
 
         # TODO: DRY
-
+        tag_filter_name = None
+        if tag_id:
+            tag_filter = Tag.objects.filter(id=tag_id).first()
+            if tag_filter:
+                tag_filter_name = tag_filter.display_text
         tags_dict = {}
         for tag_type in TagType.objects.all():
             tags_dict[tag_type.label] = []
@@ -589,8 +593,11 @@ class PostgresProvider:
             if len(tags_dict[key]) > 0:
                 tag_filter_vals = []
                 for val in tags_dict[key]:
+                    checked_tag = False
+                    if tag_id and tag_filter_name and tag_filter_name == val:
+                        checked_tag = True
                     filter_val = "tag_type," + str(key) + "$tag_text," + val
-                    tag_filter_vals.append({"label": val, "filter_val": filter_val})
+                    tag_filter_vals.append({"label": val, "filter_val": filter_val, "checked": checked_tag})
                 result_json.append({'label': key, 'values': tag_filter_vals})
 
         attributes_dict = {}

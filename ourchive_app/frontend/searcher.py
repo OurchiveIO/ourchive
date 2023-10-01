@@ -106,12 +106,12 @@ def build_and_execute_search(request):
 			val_split = split[1].split(',')
 			for facet in facets:
 				if facet['label'] == label_split[1]:
-					print('hit label')
 					for val in facet['values']:
 						if val['label'] == val_split[1]:
 							facet_added = True
 							break
-					facet['values'].append({'label': val_split[1], 'filter_val': item})
+					if not facet_added:
+						facet['values'].append({'label': val_split[1], 'filter_val': item})
 					facet_added = True
 					break
 			if not facet_added:
@@ -136,7 +136,8 @@ def build_and_execute_search(request):
 		'click_func': 'getFormVals(event)',
 		'root': settings.ROOT_URL, 'term': term,
 		'keys_include': request_object[1]['include'],
-		'keys_exclude': request_object[1]['exclude']}
+		'keys_exclude': request_object[1]['exclude']
+	}
 	if tag_id:
 		template_data['tag_id'] = tag_id
 	return template_data

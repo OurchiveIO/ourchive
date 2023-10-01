@@ -155,8 +155,8 @@
         <li id="results-switcher-li-works"><a href="#" id="works_tab">Works ({{ works.page.count }})</a></li>
         <li id="results-switcher-li-bookmarks"><a href="#" id="bookmarks_tab">Bookmarks ({{ bookmarks.page.count }})</a></li>
         <li id="results-switcher-li-users"><a href="#" id="users_tab">Collections ({{ collections.page.count }})</a></li>
-        <li id="results-switcher-li-tags"><a href="#" id="tags_tab">Tags ({{ tags.page.count }})</a></li>
-        <li id="results-switcher-li-users"><a href="#" id="users_tab">Users ({{ users.data|length }})</a></li>
+        {% if not tag_id %}<li id="results-switcher-li-tags"><a href="#" id="tags_tab">Tags ({{ tags.page.count }})</a></li>
+        <li id="results-switcher-li-users"><a href="#" id="users_tab">Users ({{ users.data|length }})</a></li>{% endif %}
 	</ul>
 
 	<ul class="uk-switcher uk-margin-remove search-switcher" id="search-results-work-facet-switcher">
