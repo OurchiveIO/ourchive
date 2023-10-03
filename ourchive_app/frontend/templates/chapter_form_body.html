@@ -10,6 +10,16 @@
         </div>
     </div>
 </div>
+<div class="uk-margin" id="chapter-form-draft-parent" {% if suppress_info_fields %}hidden{% endif %}>
+    <label id="chapter-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75"></sup>    
+        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
+    </label>
+    <div class="uk-form-controls" id="chapter-form-draft-controls">
+        <div class="uk-inline" id="chapter-form-draft-inline">
+            <label id="chapter-form-draft-checkbox-label" class="switch"><input class="uk-checkbox" type="checkbox" id="chapter-form-draft" name="chapter_draft" {% if chapter.draft %} checked {% endif %}> <span class="slider round"></span></label>
+        </div>
+    </div>
+</div>
 {% if not suppress_info_fields %}
 {% if chapter.attribute_types %}
     {% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types show_header=False %}
@@ -96,16 +106,6 @@
             <input id="chapter-form-number-input" class="uk-input" type="number" name="number" min="1" value="{{ chapter.number }}">
         </div>
     </div>            
-</div>
-<div class="uk-margin" id="chapter-form-draft-parent" {% if suppress_info_fields %}hidden{% endif %}>
-    <label id="chapter-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75"></sup>    
-        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
-    </label>
-    <div class="uk-form-controls" id="chapter-form-draft-controls">
-        <div class="uk-inline" id="chapter-form-draft-inline">
-            <label id="chapter-form-draft-checkbox-label" class="switch"><input class="uk-checkbox" type="checkbox" id="chapter-form-draft" name="chapter_draft" {% if chapter.draft %} checked {% endif %}> <span class="slider round"></span></label>
-        </div>
-    </div>
 </div>
 {% if not suppress_info_fields %}<h4 id="obj-attrs-form-header">Content</h3>{% endif %}
 {% if request.user.can_upload_images %}
