@@ -95,7 +95,7 @@ function addSelectedBookmarks() {
     </div>
     {% if request.user.can_upload_images %}
     <div class="uk-margin" id="bkcol-form-header-parent">
-        <label id="bkcol-form-header-label" class="uk-form-label" for="form-horizontal-text">Header <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Collection header help' %}"></sup>    
+        <label id="bkcol-form-header-label" class="uk-form-label" for="form-horizontal-text">Header <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collection header help' %}"></sup>    
             <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This image will show directly below site nav. We recommend a rectangular image with width:height ratio of 2:1 or higher.{% endblocktranslate %}</div>
         </label>
         <div id="bookmark-collection-form-header-controls" class="uk-form-controls">
@@ -119,7 +119,7 @@ function addSelectedBookmarks() {
         </div>
     {% endif %}
     <hr/>
-    <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Collection Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question" title="{% translate 'Tags help' %}"></sup>
+    <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Collection Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Tags help' %}"></sup>
         <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
     </span>
     {% include "object_attributes_form.html" with object='Bookmark Collection' attribute_types=bookmark_collection.attribute_types show_header=False %}
@@ -135,7 +135,7 @@ function addSelectedBookmarks() {
         {% endfor %}
         </ul>
         <div id="bkcol-form-bookmarks-parent" class="uk-margin uk-margin-medium-top">
-            <label id="bkcol-form-bookmarks-label" class="uk-form-label" for="form-horizontal-text">Add Bookmark <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Bookmark help' %}"></sup>    
+            <label id="bkcol-form-bookmarks-label" class="uk-form-label" for="form-horizontal-text">Add Bookmark <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Bookmark help' %}"></sup>    
                     <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for your bookmarks by title.{% endblocktranslate %}</div>
             </label>
             <div id="bkcol-form-bookmarks-form-control" class="uk-form-controls">
@@ -185,7 +185,7 @@ function addSelectedBookmarks() {
     <hr id="bkcol-comments-hr"/>
     <h3 id="bkcol-settings-header">Collection Settings</h3>
     <div class="uk-margin" id="bkcol-form-draft-parent">
-        <label id="bkcol-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Draft help' %}"></sup>    
+        <label id="bkcol-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Draft help' %}"></sup>    
             <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
         </label>
         <div id="bkcol-form-draft-controls" class="uk-form-controls">

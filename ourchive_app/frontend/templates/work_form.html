@@ -40,7 +40,7 @@
         </div>
         <input type="hidden" id="redirect_toc" name="redirect_toc">
         <div class="uk-margin" id="work-form-type-parent">
-            <label id="work-form-type-label" class="uk-form-label" for="form-horizontal-text">Work Type <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work type help' %}"></sup>    
+            <label id="work-form-type-label" class="uk-form-label" for="form-horizontal-text">Work Type <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work type help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Work types are admin-configured. Select the one that best matches what kind of work you're posting.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-type-controls" class="uk-form-controls">
@@ -76,7 +76,7 @@
             </div>
         </div>
         <div class="uk-margin" id="work-form-draft-parent">
-            <label id="work-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work draft help' %}"></sup>    
+            <label id="work-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work draft help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-draft-controls" class="uk-form-controls">
@@ -86,7 +86,7 @@
             </div>
         </div>
         <div class="uk-margin" id="work-form-publish-all-parent">
-            <label id="work-form-publish-all-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Publish All' %}? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work draft help' %}"></sup>    
+            <label id="work-form-publish-all-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Publish All' %}? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work draft help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your work and all chapters will no longer be in draft state.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-publish-all-controls" class="uk-form-controls">
@@ -110,7 +110,7 @@
         {% endif %}
         {% if user.can_upload_export_files %}
         <div class="uk-margin" id="work-form-preferred-download-parent">
-            <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Preferred export help' %}"></sup>    
+            <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Preferred export help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you have a file for your work that you'd prefer users download, you can upload here and it will display at the top of the download list.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-preferred-download-controls" class="uk-form-controls">
@@ -137,7 +137,7 @@
         </div>
         {% endif %}
         <hr id="work-attributes-hr"/>
-        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">Work Tags</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question" title="{% translate 'Work tags help' %}"></sup>    
+        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">Work Tags</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work tags help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
         {% include "object_attributes_form.html" with object='Work' attribute_types=work.attribute_types show_header=False %}
         {% include "edit_tags.html" with object='work' object_friendly='Work' show_header=False %}
@@ -281,7 +281,7 @@
             <li id="chapters-list-{{chapter.id}}">
                 <div id="chapter-{{chapter.id}}-card" class="uk-card uk-card-hover uk-card-body uk-grid-small uk-child-width-1-2 uk-text-left uk-padding-small" uk-grid>
                     <div id="chapter-{{chapter.id}}-sortable" class="uk-sortable-handle">
-                        <span class="uk-margin-small-right" uk-icon="icon: table"></span><span id="chapter-{{chapter.id}}-span" class="uk-text-medium">Chapter {{chapter.number}}{% if chapter.title %}: {{chapter.title}}{% endif %}</span>
+                        <span class="uk-margin-small-right" uk-icon="icon: ourchive-hamburger;ratio:.75"></span><span id="chapter-{{chapter.id}}-span" class="uk-text-medium">Chapter {{chapter.number}}{% if chapter.title %}: {{chapter.title}}{% endif %}</span>
                     </div>
                     <div id="chapter-{{chapter.id}}-controls-div"><a id="chapter-{{chapter.id}}-edit-link" href="/works/{{work.id}}/chapters/{{chapter.id}}/edit" title="{% translate 'Edit chapter' %} {{ chapter.id }}">Edit</a> | <a title="{% translate 'Delete chapter' %} {{ chapter.id }}" id="chapter-{{chapter.id}}-delete-link" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete">Delete</a></div>
                     {% if chapter.draft %}

@@ -72,7 +72,7 @@
 			{% for announcement in admin_announcements %}
 			<div class="uk-text-center uk-padding-small uk-width-expand" id="admin-announcement-{{announcement.id}}">
 			    <span class="uk-text-bold">{{ announcement.content|safe }}</span>
-			   	<span title="Dismiss" uk-toggle="target: #admin-announcement-{{announcement.id}}" onclick="dismissAnnouncement('{{announcement.id}}')" class="uk-link ourchive-span-link uk-align-right uk-text-middle" uk-icon="icon: close;" id="dismiss-announcement"></span>
+			   	<span title="Dismiss" uk-toggle="target: #admin-announcement-{{announcement.id}}" onclick="dismissAnnouncement('{{announcement.id}}')" class="uk-link ourchive-span-link uk-align-right uk-text-middle" uk-icon="icon: ourchive-close;ratio:.75;" id="dismiss-announcement"></span>
 			</div>
 			{% endfor %}
 		</div>
