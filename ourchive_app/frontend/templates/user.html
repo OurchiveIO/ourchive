@@ -15,16 +15,16 @@
 <div class="uk-width-1 uk-padding-remove-horizontal" id="user-profile-parent">
     <div class="uk-text-right uk-width-1" id="user-profile-controls-parent">
         {% if user.username == request.user.username %}
-            <a id="user-profile-edit-link" href="{% url 'fe-user-profile-edit' user.id %}"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
+            <a class="ourchive-icon-wrapper" id="user-profile-edit-link" href="{% url 'fe-user-profile-edit' user.id %}"><span uk-icon="icon: ourchive-edit;ratio:.75" title="Edit"></span> </a>
             <a id="user-profile-blocklist-link" class="uk-button-small" href="{% url 'fe-user-blocklist' user.username %}" title="Blocklist">{% translate 'Blocklist' %}</a>
         {% else %}
-            {% if not user_blocked %}<a id="user-block-link" href="{% url 'fe-block-user' user.id %}"><span uk-icon="icon: ban" title="Block"></span> </a>
+            {% if not user_blocked %}<a class="ourchive-icon-wrapper" id="user-block-link" href="{% url 'fe-block-user' user.id %}"><span uk-icon="icon: ourchive-block;ratio:.75" title="{% translate 'Block' %}"></span> </a>
             {% else %}
-            <a id="user-unblock-link" href="{% url 'fe-unblock-user' user.id user_blocked %}"><span uk-icon="icon: eye" title="Unblock"></span> </a>
+            <a class="ourchive-icon-wrapper" id="user-unblock-link" href="{% url 'fe-unblock-user' user.id user_blocked %}"><span uk-icon="icon: ourchive-unblock;ratio:.75" title="Unblock"></span> </a>
             {% endif %}
-            <a id="user-block-link" href="{% url 'report-user' user.username %}"><span uk-icon="icon: warning" title="Report"></span> </a>
+            <a class="ourchive-icon-wrapper" id="user-block-link" href="{% url 'report-user' user.username %}"><span uk-icon="icon: ourchive-report;ratio:.75" title="Report"></span> </a>
         {% endif %}
-            <a id="user-subscribe-link" class="uk-button-small" uk-toggle="target: #user-subscribe">{% translate 'Subscribe' %}</a>
+            <a class="ourchive-icon-wrapper" id="user-subscribe-link" class="uk-button-small" uk-toggle="target: #user-subscribe"><span uk-icon="icon: ourchive-subscribe;ratio:.75" title="{% translate 'Subscribe' %}"></span></a>
     </div>
 	<div class="uk-width-1 uk-align-center" id="user-profile-card-parent">
         <div class="uk-card uk-card-body uk-padding-remove-horizontal" id="user-profile-card-body"> 

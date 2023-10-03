@@ -93,7 +93,7 @@
 		    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
 		    	 	<li id="nav-search-li">
 			                <div class="nav-overlay uk-navbar-right">
-			                	<a class="uk-navbar-toggle" id="search-toggle-overlay" uk-search-icon uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"></a>
+			                	<a class="uk-navbar-toggle ourchive-icon-wrapper" id="search-toggle-overlay" uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"><span uk-icon="icon: ourchive-search; ratio: .75" title="Search" id="ourchive-nav-search-icon"></a>
 			                </div>
     					<div class="nav-overlay uk-navbar-left uk-flex-1" hidden>
         					<div class="uk-navbar-item uk-width-expand uk-margin-small-left">
@@ -110,9 +110,9 @@
 		    	 	<li id="theme-switcher-li">
 		    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper" title="Switch Modes">
 		    	 			{% if request.session.css_mode == "dark" %}
-		    	 			<span class="custom-icon uk-text-medium" uk-icon="icon: lightmode-switcher;" title="Light Mode" id="theme-switcher-light">
+		    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Light Mode" id="theme-switcher-light">
 		    	 			{% else %}
-		    	 			<span class="custom-icon uk-text-medium" uk-icon="icon: lightmode-switcher;" title="Dark Mode" id="theme-switcher-dark">
+		    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Dark Mode" id="theme-switcher-dark">
 		    	 			{% endif %}
 		    	 		</a></span>
 		    	 	</li>
@@ -120,12 +120,12 @@
 			            {% if not request.user.is_authenticated %}
 			            	<li class="uk-active" id="nav-login-li">
 			            		<a href="/login" id="nav-login-link">
-			            			<span uk-icon="icon: sign-in; ratio:1.25" title="Sign In" id="nav-login-icon"></span>
+			            			<span uk-icon="icon: ourchive-login;ratio:.75" title="Sign In" id="nav-login-icon"></span>
 			            		</a>
 			            	</li>
 			            	<li class="uk-active" id="nav-register-li">
 			            		<a href="/register" id="nav-register-link">
-			            			<span uk-icon="icon: user; ratio:1.25" title="Register" id="nav-register-icon"></span>
+			            			<span uk-icon="icon: ourchive-register;ratio:.75" title="Register" id="nav-register-icon"></span>
 			            		</a>
 			            	</li>
 			            {% endif %}
@@ -183,18 +183,18 @@
 	            <li id="sidenav-search-li"><a id="sidenav-search-link" href="/search">Search</a></li>
 	            {% if not request.user.is_authenticated %}
 	            	<li id="sidenav-sign-in-li" class="uk-active">
-	            		<a id="sidenav-sign-in-link" href="/login"><span uk-icon="icon: sign-in; ratio:1.25" title="Sign in"/></a></li>
+	            		<a id="sidenav-sign-in-link" href="/login">Sign In</a></li>
 	            	<li id="sidenav-register-li" class="uk-active">
-	            		<a id="sidenav-register-link" href="/register"><span uk-icon="icon: user; ratio:1.25" title="Register"/></a></a></li>
+	            		<a id="sidenav-register-link" href="/register">Register</a></li>
 	            {% endif %}
 	            {% if request.user.is_authenticated %}
 	            	<li id="sidenav-signout-li" class="uk-active">
-	            		<a id="sidenav-signout-link" href="/logout"><span uk-icon="icon: sign-out; ratio:1.25" title="Sign out"></span></a></li>
+	            		<a id="sidenav-signout-link" href="/logout"><span uk-icon="icon: ourchive-logout; ratio: .75;" title="Sign out"></span></a></li>
 	            {% endif %}
 			</ul>
 		</div>
 	</div>
-	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="arrow-up"></span></button>
+	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="icon:ourchive-up;ratio:.75"></span></button>
 	<div class="uk-width-expand uk-container uk-margin content-block-parent ourchive-content-block-parent" id="content-block-parent">	
 		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true" class="uk-grid uk-margin-remove ourchive-top-level-grid">
 			{% block content %}

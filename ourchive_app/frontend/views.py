@@ -100,6 +100,7 @@ def user_name(request, pk):
 	works_response = do_get(f'api/users/{username}/works', request, params=work_params, object_name='Works')
 	works = works_response.response_data['results']
 	works = get_object_tags(works)
+	works = format_date_for_template(works, 'updated_on', True)
 	work_next = f'/username/{pk}/{works_response.response_data["next_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=")}' if works_response.response_data["next_params"] is not None else None
 	work_previous = f'/username/{pk}/{works_response.response_data["prev_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=")}' if works_response.response_data["prev_params"] is not None else None
 	bookmarks_response = do_get(f'api/users/{username}/bookmarks', request, params=bookmark_params).response_data
@@ -107,11 +108,13 @@ def user_name(request, pk):
 	bookmark_next = f'/username/{pk}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
 	bookmark_previous = f'/username/{pk}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
 	bookmarks = get_object_tags(bookmarks)
+	bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
 	bookmark_collection_response = do_get(f'api/users/{username}/bookmarkcollections', request, params=bookmark_collection_params).response_data
 	bookmark_collection = bookmark_collection_response['results']
 	bookmark_collection_next = f'/username/{pk}/{bookmark_collection_response["next_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["next_params"] is not None else None
 	bookmark_collection_previous = f'/username/{pk}/{bookmark_collection_response["prev_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["prev_params"] is not None else None
 	bookmark_collection = get_object_tags(bookmark_collection)
+	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on', True)
 	user = user.response_data['results'][0]
 	user['attributes'] = get_attributes_for_display(user['attributes'])
 	subscription = do_get(f"api/subscriptions/", request, params={'subscribed_to': username}, object_name='Subscription')

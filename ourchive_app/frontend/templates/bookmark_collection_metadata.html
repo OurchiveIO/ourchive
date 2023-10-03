@@ -1,2 +1,19 @@
 {% load i18n %}
-<div class="uk-align-right"><p id="bk-metadata-p" class="uk-article-meta"><span id="bkcol-metadata-complete" class="uk-inline uk-text-bold">{% if bookmark_collection.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span> | {% if settings.AllowComments %}<span id="bk-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark_collection.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span></p></div>
+
+	<div class="uk-inline ourchive-metadata-list" id="bk-metadata-p">
+		<span id="bkcol-metadata-complete" class="uk-inline uk-text-bold">Status: {% if bookmark_collection.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
+	</div>
+	<div class="uk-inline ourchive-metadata-list">
+		<span id="bookmark-metadata-status-divider" class="uk-inline uk-text-bold">-</span>
+	</div>
+	{% if settings.AllowComments %}
+	<div class="uk-inline ourchive-metadata-list">
+		<span id="bk-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark_collection.comment_count %}Comments: {{ cc }}{% endblocktranslate %}</span>
+	</div>
+	<div class="uk-inline ourchive-metadata-list">
+		<span id="bookmark-metadata-status-divider" class="uk-inline uk-text-bold">-</span>
+	</div>
+	{% endif %}
+	<div class="uk-inline ourchive-metadata-list">
+		<span id="bookmark-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{bookmark_collection.updated_on|date:'d M Y'}}</span>
+	</div>

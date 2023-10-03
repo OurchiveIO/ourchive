@@ -27,21 +27,25 @@
             {% else %}
             <h4 id="{{object_name}}-comment-{{comment.id}}-anon-h4" class="uk-comment-title uk-margin-remove"><a class="uk-link-reset" id="{{object_name}}-comment-{{comment.id}}-link" href="#">{% translate 'Anonymous' %}</a></h4>
             {% endif %}
-            <ul id="{{object_name}}-comment-{{comment.id}}-actions-ul" class="uk-comment-meta uk-subnav uk-subnav-divider uk-margin-remove-top">
-                <li id="{{object_name}}-comment-{{comment.id}}-reply-li"><button id="{{object_name}}-comment-{{comment.id}}-reply-button" class="uk-button uk-button-text" type="button" uk-toggle="target: #comment-{{comment.id}}-reply">{% translate 'Reply' %}</button></li>
-                {% if comment.user.username == request.user.username %}
-                <li id="{{object_name}}-comment-{{comment.id}}-edit-li"><button id="{{object_name}}-comment-{{comment.id}}-edit-button" class="uk-button uk-button-text" type="button" uk-toggle="target: #comment-{{comment.id}}-edit"><span id="{{object_name}}-comment-{{comment.id}}-edit-span" uk-icon="icon: file-edit"></span> </button></li>
-                <li id="{{object_name}}-comment-{{comment.id}}-delete-li"><a id="{{object_name}}-comment-{{comment.id}}-delete-link" uk-toggle="target: #{{object_name}}-comment-{{comment.id}}-modal-delete"><span id="{{object_name}}-comment-{{comment.id}}-delete-span" uk-icon="icon: trash"></span> </a></li>
-                {% endif %}
-            </ul>
         </div>
     </header>
-    <div class="uk-comment-body" id="{{object_name}}-comment-{{comment.id}}-text-parent" uk-grid>
+    <div class="uk-comment-body uk-grid" id="{{object_name}}-comment-{{comment.id}}-text-parent" uk-grid>
         <div id="{{object_name}}-comment-{{comment.id}}-text" class="uk-width-1-1"><span class="uk-text-medium ourchive-comment">{{comment.text|safe }}</span></div>
+        <div class="uk-width-1-1 uk-text-right uk-align-right uk-margin-remove-vertical">
+            <ul id="{{object_name}}-comment-{{comment.id}}-actions-ul" class="uk-list">
+                <li id="{{object_name}}-comment-{{comment.id}}-reply-li">
+                    <a href="#" id="{{object_name}}-comment-{{comment.id}}-reply-button" class="ourchive-icon-wrapper" uk-toggle="target: #comment-{{comment.id}}-reply"><span id="{{object_name}}-comment-{{comment.id}}-reply-span" uk-icon="icon: ourchive-reply;ratio:.75" title="{% translate 'Reply to' %} {{comment.id}}"></span></a>
+                    {% if comment.user.username == request.user.username %}
+                    <a id="{{object_name}}-comment-{{comment.id}}-edit-button" class="ourchive-icon-wrapper" uk-toggle="target: #comment-{{comment.id}}-edit"><span id="{{object_name}}-comment-{{comment.id}}-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="{% translate 'Edit comment' %} {{comment.id}}"></span> </a>
+                    <a class="ourchive-icon-wrapper" id="{{object_name}}-comment-{{comment.id}}-delete-link" href="#" uk-toggle="target: #{{object_name}}-comment-{{comment.id}}-modal-delete"><span id="{{object_name}}-comment-{{comment.id}}-delete-span" uk-icon="icon: ourchive-delete;ratio:.75" title="{% translate 'Delete comment' %} {{comment.id}}"></span> </a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
         {% include "comment_actions.html" with post_action=post_action_url object_name=object_name object_id=object.id edit_action=edit_action_url comment_count=comment_count current_offset=current_offset %}   
     </div>    
 </article>
-{% include "delete_modal.html" with object=delete_obj root_object_id=root_obj_id parent_object_id=object.id object_id=comment.id %}
+{% include "delete_modal.html" with object=delete_obj object_friendly='comment' root_object_id=root_obj_id parent_object_id=object.id object_id=comment.id %}
 {% if comment.replies %}
     {% include "comments.html" with comments=comment.replies object=object post_action=post_action_url object_name=object_name object_id=object.id edit_action_url=edit_action_url next_params=comment.replies.next_params prev_params=comment.replies.prev_params comment_count=comment_count current_offset=current_offset depth=depth|add:1 object_name=object_name delete_obj=delete_obj view_thread_base=view_thread_base %}
 {% endif %}

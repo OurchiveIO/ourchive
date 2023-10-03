@@ -37,12 +37,12 @@
         <div class="uk-text-right uk-width-1-3" id="bookmark-user-controls-parent">
             {% if bookmark.user == request.user.username %}
             {% if bookmark.draft %}
-            <a id="bookmark-publish-link" href="/bookmarks/{{ bookmark.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+            <a class="ourchive-icon-wrapper" id="bookmark-publish-link" href="/bookmarks/{{ bookmark.id }}/publish"><span uk-icon="icon: ourchive-publish;ratio:.75" title="Publish"></span> </a>
             {% endif %}
-            <a id="bookmark-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
-            <a id="bookmark-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a>
+            <a class="ourchive-icon-wrapper" id="bookmark-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: ourchive-edit;ratio:.75"></span> </a>
+            <a class="ourchive-icon-wrapper" id="bookmark-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: ourchive-delete;ratio:.75"></span> </a>
             {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
-            {% if not bookmark.draft %}<a title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: plus"></span> </a>{% endif %}
+            {% if not bookmark.draft %}<a class="ourchive-icon-wrapper" title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: ourchive-bookmark;ratio:.75"></span> </a>{% endif %}
             {% include "bookmark_collection_modal.html" %}
             {% endif %}
         </div>

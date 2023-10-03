@@ -6,9 +6,9 @@
 		        <div id="bk-tile-header-content" class="uk-width-expand">
 	                <span id="bookmark-{{bookmark.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="bookmark-{{bookmark.id}}-tile-title-link" href="{% url 'fe-view-bookmark' bookmark.id %}">{% if bookmark.title %}{{ bookmark.title }}{% else %}{% translate 'Bookmark' %}: {{ bookmark.work.title }}{% endif %}</a> by <a href="{% url 'user-profile-parent' bookmark.user_id %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark.user }}</a></span>
 	                {% if bookmark.user == request.user.username %}
-			        <div id="bk-tile-actions-parent" class="uk-align-right">
-			            <a id="bk-tile-edit-{{ bookmark.id }}-link" href="/bookmarks/{{ bookmark.id }}/edit"><span id="bk-tile-edit-span" uk-icon="icon: file-edit" title="Edit Bookmark {{ bookmark.id }}"></span> </a>
-			            <a id="bk-tile-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: trash" id="bk-tile-delete-span" title="Delete"></span> </a>
+			        <div id="bk-tile-actions-parent" class="uk-align-right uk-margin-remove-bottom">
+			            <a class="ourchive-icon-wrapper" id="bk-tile-edit-{{ bookmark.id }}-link" href="/bookmarks/{{ bookmark.id }}/edit"><span id="bk-tile-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="Edit Bookmark {{ bookmark.id }}"></span> </a>
+			            <a class="ourchive-icon-wrapper" id="bk-tile-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: ourchive-delete;ratio:.75" id="bk-tile-delete-span" title="Delete"></span> </a>
 						{% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
 						{% if bookmark.draft %}<span class="uk-label uk-margin-remove-right uk-margin-left uk-text-small uk-inline uk-label-warning" id="bookmark-{{ bookmark.id }}-tile-draft-button-span"><strong>DRAFT</strong></span>{% endif %}
 			        </div>

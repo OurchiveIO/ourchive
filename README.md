@@ -74,3 +74,5 @@ All frameworks and tools we are using are open source, including:
 - Postgres
 - Docker
 - pytest
+- The Noun Project (icons)
+- UIKit (CSS + JS)

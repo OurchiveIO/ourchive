@@ -688,6 +688,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         if 'cover_url' in validated_data:
             if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
                 validated_data['cover_url'] = ''
+        if 'updated_on' not in validated_data:
+            validated_data['updated_on'] = datetime.datetime.now()
         # always create a fresh file
         validated_data['epub_url'] = ''
         validated_data['zip_url'] = ''
@@ -704,6 +706,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 validated_data['cover_url'] = ''
         validated_data['summary'] = clean_text(validated_data['summary']) if validated_data['summary'] is not None else ''
         validated_data['notes'] = clean_text(validated_data['notes']) if validated_data['notes'] is not None else ''
+        if 'updated_on' not in validated_data:
+            validated_data['updated_on'] = datetime.datetime.now()
         work = Work.objects.create(**validated_data)
         work = self.process_tags(work, validated_data, tags)
         if attributes is not None:

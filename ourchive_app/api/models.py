@@ -144,7 +144,7 @@ class Work(models.Model):
     cover_alt_text = models.CharField(max_length=600, null=True, blank=True)
     preferred_download_url = models.CharField(max_length=600, null=True, blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    updated_on = models.DateTimeField(null=True, blank=True)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
     word_count = models.IntegerField(default=0)

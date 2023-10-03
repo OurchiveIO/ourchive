@@ -33,10 +33,10 @@
 	    <div class="uk-text-right uk-width-1-3 uk-padding-remove" id="bkcol-user-controls-parent">
         {% if bkcol.user == request.user.username %}
 	        {% if bkcol.draft %}
-	        <a id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+	        <a class="ourchive-icon-wrapper" id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: ourchive-publish; ratio: .75" title="Publish"></span> </a>
 	        {% endif %}
-	        <a id="bkcol-edit-link" href="/bookmark-collections/{{ bkcol.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
-	        <a id="bookmark-collection-delete-link" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a> 
+	        <a id="bkcol-edit-link" class="ourchive-icon-wrapper" href="/bookmark-collections/{{ bkcol.id }}/edit"><span uk-icon="icon: ourchive-edit; ratio: .75" title="Edit"></span> </a>
+	        <a id="bookmark-collection-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span title="Delete" uk-icon="icon: ourchive-delete; ratio: .75"></span> </a> 
         {% endif %}
 	    </div>
 	    <div id="bkcol-content" class="uk-width-1-1 uk-padding-remove">
