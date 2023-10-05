@@ -138,7 +138,8 @@ def build_and_execute_search(request):
 		[
 			[works['page']['count'], 0],
 			[bookmarks['page']['count'], 1],
-			[collections['page']['count'], 2]
+			[collections['page']['count'], 2],
+			[len(users['data']), 4]
 		])
 	template_data = {
 		'works': works,

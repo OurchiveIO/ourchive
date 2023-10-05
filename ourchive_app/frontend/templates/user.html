@@ -16,15 +16,16 @@
     <div class="uk-text-right uk-width-1" id="user-profile-controls-parent">
         {% if user.username == request.user.username %}
             <a class="ourchive-icon-wrapper" id="user-profile-edit-link" href="{% url 'fe-user-profile-edit' user.id %}"><span uk-icon="icon: ourchive-edit;ratio:.75" title="Edit"></span> </a>
-            <a id="user-profile-blocklist-link" class="uk-button-small" href="{% url 'fe-user-blocklist' user.username %}" title="Blocklist">{% translate 'Blocklist' %}</a>
+            <a id="user-profile-blocklist-link" class="ourchive-icon-wrapper" href="{% url 'fe-user-blocklist' user.username %}"><span uk-icon="icon: ourchive-block;ratio:.75" title="{% translate 'Blocklist' %}"></span></a>
         {% else %}
             {% if not user_blocked %}<a class="ourchive-icon-wrapper" id="user-block-link" href="{% url 'fe-block-user' user.id %}"><span uk-icon="icon: ourchive-block;ratio:.75" title="{% translate 'Block' %}"></span> </a>
             {% else %}
             <a class="ourchive-icon-wrapper" id="user-unblock-link" href="{% url 'fe-unblock-user' user.id user_blocked %}"><span uk-icon="icon: ourchive-unblock;ratio:.75" title="Unblock"></span> </a>
             {% endif %}
             <a class="ourchive-icon-wrapper" id="user-block-link" href="{% url 'report-user' user.username %}"><span uk-icon="icon: ourchive-report;ratio:.75" title="Report"></span> </a>
-        {% endif %}
             <a class="ourchive-icon-wrapper" id="user-subscribe-link" class="uk-button-small" uk-toggle="target: #user-subscribe"><span uk-icon="icon: ourchive-subscribe;ratio:.75" title="{% translate 'Subscribe' %}"></span></a>
+        {% endif %}
+            
     </div>
 	<div class="uk-width-1 uk-align-center" id="user-profile-card-parent">
         <div class="uk-card uk-card-body uk-padding-remove-horizontal" id="user-profile-card-body"> 
