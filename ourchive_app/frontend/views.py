@@ -853,6 +853,7 @@ def bookmark_collections(request):
 	response = do_get(f'api/bookmarkcollections/', request, 'Bookmark Collection').response_data
 	bookmark_collections = response['results']
 	bookmark_collections = get_object_tags(bookmark_collections)
+	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
 	for bkcol in bookmark_collections:
 		bkcol['attributes'] = get_attributes_for_display(bkcol['attributes'])
 	return render(request, 'bookmark_collections.html', {
@@ -934,6 +935,7 @@ def bookmark_collection(request, pk):
 	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
 	bookmark_collection['tags'] = tags
 	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
+	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on')
 	if 'comment_thread' in request.GET:
 		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
 		comment_offset = 0
