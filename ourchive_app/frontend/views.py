@@ -1301,7 +1301,7 @@ def edit_chapter_comment(request, work_id, chapter_id):
 
 
 def delete_chapter_comment(request, work_id, chapter_id, comment_id):
-	return delete_comment_common(request, f'/works/{work_id}/chapters/{chapter_id}', 'chapter', comment_id)
+	return delete_comment_common(request, request.headers.get('Referer'), 'chapter', comment_id)
 
 
 def create_bookmark_comment(request, pk):
