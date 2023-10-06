@@ -23,7 +23,7 @@
         {% endif %}
         <div id="{{object_name}}-comment-{{comment.id}}-parent-div" class="uk-width-expand">
             {% if comment.user is not None %}
-            <h4 id="{{object_name}}-comment-{{comment.id}}-username-h4" class="uk-comment-title uk-margin-remove"><a class="uk-link-reset" id="{{object_name}}-comment-{{comment.id}}-username-link" href="#">{{comment.user.username}}</a></h4>
+            <h4 id="{{object_name}}-comment-{{comment.id}}-username-h4" class="uk-comment-title uk-margin-remove"><a class="uk-link-reset" id="{{object_name}}-comment-{{comment.id}}-username-link" href="{% url 'user-profile-parent' comment.user.id %}">{{comment.user.username}}</a></h4>
             {% else %}
             <h4 id="{{object_name}}-comment-{{comment.id}}-anon-h4" class="uk-comment-title uk-margin-remove"><a class="uk-link-reset" id="{{object_name}}-comment-{{comment.id}}-link" href="#">{% translate 'Anonymous' %}</a></h4>
             {% endif %}

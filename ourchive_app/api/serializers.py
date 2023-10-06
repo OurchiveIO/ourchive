@@ -379,7 +379,7 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
 class CommentUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'icon', 'icon_alt_text']
+        fields = ['username', 'icon', 'icon_alt_text', 'id']
 
 
 class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
