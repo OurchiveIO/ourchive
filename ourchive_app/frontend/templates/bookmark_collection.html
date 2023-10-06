@@ -97,7 +97,7 @@
 		</div>
 		{% if comments %}<div class="uk-width-1-1 uk-padding-remove"><hr/></div>{% endif %}
 		<div class="uk-width-1-1 uk-padding-remove">
-			{% include 'comments_parent.html' with object_name='collection' comments=comments object=bkcol edit_action_url=bkcol.edit_action_url post_action_url=bkcol.post_action_url comment_offset=comment_offset delete_obj='collection-comment' load_more_base=load_more_base view_thread_base=view_thread_base %}
+			{% include 'comments_parent.html' with object_name='collection' comments=comments object=bkcol edit_action_url=bkcol.edit_action_url post_action_url=bkcol.post_action_url comment_offset=comment_offset delete_obj='collection-comment' load_more_base=load_more_base view_thread_base=view_thread_base comment_count=bkcol.comment_count %}
 		</div>
 	</article>
 </div>

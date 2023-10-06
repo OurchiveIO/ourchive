@@ -406,8 +406,8 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
             validated_data.pop('user')
         validated_data['text'] = clean_text(validated_data['text']) if validated_data['text'] is not None else ''
         comment = ChapterComment.objects.create(**validated_data)
-        comment.chapter.comment_count += 1
-        comment.chapter.work.comment_count += 1
+        comment.chapter.comment_count = ChapterComment.objects.filter(chapter__id=comment.chapter.id).count()
+        comment.chapter.work.comment_count = ChapterComment.objects.filter(chapter__work__id=comment.chapter.work.id).count()
         comment.chapter.save()
         comment.chapter.work.save()
         user = User.objects.filter(id=comment.chapter.user.id).first()
@@ -458,7 +458,7 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification.save()
         user.has_notifications = True
         user.save()
-        comment.bookmark.comment_count = comment.bookmark.comment_count + 1
+        comment.bookmark.comment_count = BookmarkComment.objects.filter(bookmark__id=comment.bookmark.id).count()
         comment.bookmark.save()
         return comment
 
@@ -500,7 +500,7 @@ class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification.save()
         user.has_notifications = True
         user.save()
-        comment.collection.comment_count = comment.collection.comment_count + 1
+        comment.collection.comment_count = CollectionComment.objects.filter(collection__id=comment.collection.id).count()
         comment.collection.save()
         return comment
 
