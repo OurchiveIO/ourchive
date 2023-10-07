@@ -12,15 +12,16 @@
 		  });
 	}
 </script>
-{% if work.chapter_count > 1 and work.user == request.user.username %}<div class="uk-width-1-2" id="chapter-user-actions-parent">
+<div class="uk-width-1-2" id="chapter-user-actions-parent">
+	{% if work.chapter_count > 1 and work.user == request.user.username %}
         {% if chapter.draft %}
         <a class="ourchive-icon-wrapper" id="chapter-{{chapter.id}}-publish-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/publish"><span id="chapter={{chapter.id}}-publish-icon" uk-icon="icon: ourchive-publish;ratio: .75" title="{% translate 'Publish' %}"></a>
         {% endif %}
         <a id="chapter-edit-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/edit?from_work={{chapter_offset}}" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-edit; ratio: .75" title="{% translate 'Edit' %}"></span></a>
         <a id="chapter-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete"><span uk-icon="icon: ourchive-delete; ratio: .75" title="{% translate 'Delete' %}"></span></a>
         {% include "delete_modal.html" with object='chapter' parent_object_id=work.id object_id=chapter.id %}
+    {% endif %}
 </div>
-{% endif %}
 <div class="uk-width-1-2 uk-align-right uk-margin-remove uk-text-right" id="chapter-user-actions-parent">
 	{% if work.chapter_count > 1 %}<a class="ourchive-icon-wrapper" id="work-bookmark-link-bottom" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span-bottom" uk-icon="icon: ourchive-bookmark;ratio: .75" title="{% translate 'Bookmark' %}"></span> </a>
     <a class="ourchive-icon-wrapper" id="work-fingerguns-link-bottom" href="/fingerguns/{{ id }}"><span id="work-fingerguns-span-bottom" uk-icon="icon: ourchive-like;ratio: .75" title="{% translate 'Fingerguns' %}"></span> </a>
