@@ -307,7 +307,7 @@ class Comment(models.Model):
     __tablename__ = 'comments'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    text = models.TextField(null=True, blank=True)
+    text = models.TextField()
 
     user = models.ForeignKey(
         User,
