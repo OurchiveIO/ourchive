@@ -395,6 +395,12 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
         model = ChapterComment
         fields = '__all__'
 
+    def get_comment_link(self, comment, offset, comment_thread, comment_count):
+        if not comment_thread:
+            return f'/works/{comment.chapter.work.id}/{offset}?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'
+        else:
+            return f'/works/{comment.chapter.work.id}/{offset}?expandComments=true&scrollCommentId={comment.id}&comment_offset={comment_thread}&comment_count={comment_count}'
+
     def update(self, comment, validated_data):
         if isinstance(serializers.CurrentUserDefault(), AnonymousUser):
             validated_data.pop('user')
@@ -404,20 +410,32 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         if 'user' in validated_data and isinstance(validated_data['user'], AnonymousUser):
             validated_data.pop('user')
+        chapter_offset = validated_data.pop('offset') if 'offset' in validated_data else 0
+        comment_thread = validated_data.pop('comment_thread') if 'comment_thread' in validated_data else None
+        comment_count = validated_data.pop('comment_count') if 'comment_count' in validated_data else None
         validated_data['text'] = clean_text(validated_data['text']) if validated_data['text'] is not None else ''
         comment = ChapterComment.objects.create(**validated_data)
         comment.chapter.comment_count = ChapterComment.objects.filter(chapter__id=comment.chapter.id).count()
         comment.chapter.work.comment_count = ChapterComment.objects.filter(chapter__work__id=comment.chapter.work.id).count()
         comment.chapter.save()
         comment.chapter.work.save()
+        comment_link = self.get_comment_link(comment, chapter_offset, comment_thread, comment_count)
         user = User.objects.filter(id=comment.chapter.user.id).first()
         notification_type = NotificationType.objects.filter(
             type_label="Comment Notification").first()
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Chapter Comment",
-                                                   content=f"""A new comment has been left on your chapter! <a href='/works/{comment.chapter.work.id}'>Click here</a> to view.""")
+                                                   content=f"""A new comment has been left on your chapter! <a href='{comment_link}'>Click here</a> to view.""")
         notification.save()
         user.has_notifications = True
         user.save()
+        if comment.parent_comment is not None and comment.parent_comment.user.id != comment.chapter.user.id:
+            user = User.objects.filter(id=comment.parent_comment.user.id).first()
+            notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Reply",
+                                                       content=f"""A new reply has been made to your comment. <a href='{comment_link}'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         return comment
 
     def to_representation(self, instance):
@@ -454,12 +472,20 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification_type = NotificationType.objects.filter(
             type_label="Comment Notification").first()
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Bookmark Comment",
-                                                   content=f"""A new comment has been left on your bookmark! <a href='/bookmarks/{comment.bookmark.id}'>Click here</a> to view.""")
+                                                   content=f"""A new comment has been left on your bookmark! <a href='/bookmarks/{comment.bookmark.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
         notification.save()
         user.has_notifications = True
         user.save()
         comment.bookmark.comment_count = BookmarkComment.objects.filter(bookmark__id=comment.bookmark.id).count()
         comment.bookmark.save()
+        if comment.parent_comment is not None and comment.parent_comment.user.id != comment.bookmark.user.id:
+            user = User.objects.filter(id=comment.parent_comment.user.id).first()
+            notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Reply",
+                                                       content=f"""A new reply has been made to your comment. <a href='/bookmarks/{comment.bookmark.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         return comment
 
     def to_representation(self, instance):
@@ -496,12 +522,20 @@ class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification_type = NotificationType.objects.filter(
             type_label="Comment Notification").first()
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Collection Comment",
-                                                   content=f"""A new comment has been left on your collection! <a href='/bookmark-collections/{comment.collection.id}'>Click here</a> to view.""")
+                                                   content=f"""A new comment has been left on your collection! <a href='/bookmark-collections/{comment.collection.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
         notification.save()
         user.has_notifications = True
         user.save()
         comment.collection.comment_count = CollectionComment.objects.filter(collection__id=comment.collection.id).count()
         comment.collection.save()
+        if comment.parent_comment is not None and comment.parent_comment.user.id != comment.collection.user.id:
+            user = User.objects.filter(id=comment.parent_comment.user.id).first()
+            notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Reply",
+                                                       content=f"""A new reply has been made to your comment. <a href='/bookmark-collections/{comment.collection.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         return comment
 
     def to_representation(self, instance):

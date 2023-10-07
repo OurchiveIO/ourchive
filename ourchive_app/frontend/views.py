@@ -1129,7 +1129,7 @@ def work(request, pk, chapter_offset=0):
 				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}"""
 			else:
-				chapter_comments = do_get(f"api/comments/{comment_id}", request, 'Chapter Comments').response_data
+				chapter_comments = do_get(f"api/chaptercomments/{comment_id}", request, 'Chapter Comments').response_data
 				comment_offset = 0
 				chapter_comments = {'results': [chapter_comments], 'count': comment_count}
 				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}&comment_thread={comment_id}"
@@ -1241,6 +1241,11 @@ def create_comment_common(request, captcha_fail_redirect, object_name, redirect_
 		comment_dict["user"] = str(request.user)
 	else:
 		comment_dict["user"] = None
+	if request.GET.get("offset", None):
+		comment_dict['offset'] = request.GET.get("offset")
+	if comment_thread:
+		comment_dict['comment_thread'] = comment_thread
+		comment_dict['comment_count'] = comment_count
 	response = do_post(f'api/{object_name}comments/', request, data=comment_dict, object_name='Comment')
 	comment_id = response.response_data['id'] if 'id' in response.response_data else None
 	redirect_url = f'{redirect_url}expandComments=true&scrollCommentId={comment_id}&comment_offset={comment_offset}'
