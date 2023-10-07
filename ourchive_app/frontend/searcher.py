@@ -14,7 +14,6 @@ def get_default_search_result_tab(resultsets):
 
 def get_search_request(request, request_object, request_builder):
 	return_keys = {'include': [], 'exclude': []}
-	print(request.POST)
 	for key in request.POST:
 		filter_val = request.POST[key]
 		include_exclude = 'exclude' if 'exclude_' in key else 'include'
