@@ -31,7 +31,8 @@
     </header>
     <div class="uk-comment-body uk-grid" id="{{object_name}}-comment-{{comment.id}}-text-parent" uk-grid>
         <div id="{{object_name}}-comment-{{comment.id}}-text" class="uk-width-1-1"><span class="uk-text-medium ourchive-comment">{{comment.text|safe }}</span></div>
-        <div class="uk-width-1-1 uk-text-right uk-align-right uk-margin-remove-vertical">
+        <div class="uk-width-1-1 uk-text-right uk-align-right uk-margin-remove-bottom">
+            <span class="uk-text uk-text-meta">Replies: {{comment.replies|length}} - Updated: {{comment.updated_on|date:'d M Y'}}</span>
             <ul id="{{object_name}}-comment-{{comment.id}}-actions-ul" class="uk-list">
                 <li id="{{object_name}}-comment-{{comment.id}}-reply-li">
                     <a href="#" id="{{object_name}}-comment-{{comment.id}}-reply-button" class="ourchive-icon-wrapper" uk-toggle="target: #comment-{{comment.id}}-reply"><span id="{{object_name}}-comment-{{comment.id}}-reply-span" uk-icon="icon: ourchive-reply;ratio:.75" title="{% translate 'Reply to' %} {{comment.id}}"></span></a>

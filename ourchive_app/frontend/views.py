@@ -950,6 +950,7 @@ def bookmark_collection(request, pk):
 		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '').replace('<br/>', '', 1)
 	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
 	bookmark_collection['new_action_url'] = f"/bookmark-collections/{pk}/comments/new"
+	comments['results'] = format_date_for_template(comments['results'], 'updated_on', True)
 	page_content = render(request, 'bookmark_collection.html', {
 		'load_more_base': f"/bookmark-collections/{pk}",
 		'view_thread_base': f"/bookmark-collections/{pk}",
@@ -1053,7 +1054,6 @@ def register(request):
 		permit_registration = do_get(f'api/settings/', request, params={'setting_name': 'Registration Permitted'}, object_name='Setting').response_data
 		invite_only = do_get(f'api/settings/', request, params={'setting_name': 'Invite Only'}, object_name='Setting').response_data
 		mandatory_agree_pages = do_get(f'api/contentpages/mandatory-on-signup/', request, object_name='Page').response_data
-		print(f"mandatory: {mandatory_agree_pages}")
 		if not utils.convert_boolean(permit_registration['results'][0]['value']):
 			return render(request, 'register.html', {'permit_registration': False})
 		elif utils.convert_boolean(invite_only['results'][0]['value']):
@@ -1134,6 +1134,7 @@ def work(request, pk, chapter_offset=0):
 				chapter_comments = {'results': [chapter_comments], 'count': comment_count}
 				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}&comment_thread={comment_id}"
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
+			chapter_comments['results'] = format_date_for_template(chapter_comments['results'], 'updated_on', True)
 			chapter['comments'] = chapter_comments
 			chapter['comment_offset'] = comment_offset
 			chapter['load_more_base'] = f"/works/{pk}/chapters/{chapter['id']}/{chapter_offset}"
@@ -1165,6 +1166,7 @@ def render_comments_common(request, get_comment_base, object_name, object_id, lo
 	offset = request.GET.get('offset', '')
 	depth = request.GET.get('depth', 0)
 	comments = do_get(f'{get_comment_base}/comments?limit={limit}&offset={offset}', request, 'Comments').response_data
+	comments = format_date_for_template(comments, 'updated_on', True)
 	response_dict = {
 		'comments': comments['results'],
 		'current_offset': comments['current'],
@@ -1387,6 +1389,7 @@ def bookmark(request, pk):
 		comments = do_get(f'api/bookmarks/{pk}/comments?limit=10&offset={comment_offset}', request, 'Bookmark Comment').response_data
 		bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new"
 		bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit"""
+	comments['results'] = format_date_for_template(comments['results'], 'updated_on', True)
 	bookmark['new_action_url'] = f"/bookmarks/{pk}/comments/new"
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
 	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections', request, 'Collections').response_data
