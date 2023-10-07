@@ -95,7 +95,7 @@ function addSelectedBookmarks() {
     </div>
     {% if request.user.can_upload_images %}
     <div class="uk-margin" id="bkcol-form-header-parent">
-        <label id="bkcol-form-header-label" class="uk-form-label" for="form-horizontal-text">Header <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Collection header help' %}"></sup>    
+        <label id="bkcol-form-header-label" class="uk-form-label" for="form-horizontal-text">Header <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collection header help' %}"></sup>    
             <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This image will show directly below site nav. We recommend a rectangular image with width:height ratio of 2:1 or higher.{% endblocktranslate %}</div>
         </label>
         <div id="bookmark-collection-form-header-controls" class="uk-form-controls">
@@ -118,14 +118,39 @@ function addSelectedBookmarks() {
             </div>
         </div>
     {% endif %}
+    <hr id="bkcol-comments-hr"/>
+    <h3 id="bkcol-settings-header">Settings</h3>
+    <div class="uk-margin" id="bkcol-form-draft-parent">
+        <label id="bkcol-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Draft help' %}"></sup>    
+            <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
+        </label>
+        <div id="bkcol-form-draft-controls" class="uk-form-controls">
+            <div id="bkcol-form-draft-inline" class="uk-inline">
+                <label id="bkcol-form-draft-label" class="switch"><input id="bkcol-form-draft-input" title="{% translate 'Draft checkbox' %}" class="uk-checkbox" type="checkbox" name="draft" {% if bookmark_collection.draft %} checked {% endif %}> <span class="slider round"></span> </label>
+            </div>
+        </div>
+    </div>
+    {% if settings.AllowComments %}
+    <div class="uk-margin" id="bkcol-form-allow-comments-parent">
+        <label id="bkcol-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
+        <div id="bkcol-form-allow-comments-controls" class="uk-form-controls">
+            <select id="bkcol-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted" title="{% translate 'Comment settings' %}">                    
+                <option {% if bookmark_collection.anon_comments_permitted and bookmark_collection.comments_permitted %} selected {% endif %}>All</option>
+                <option {% if bookmark_collection.anon_comments_permitted == False and bookmark_collection.comments_permitted %} selected {% endif %}>Registered users only</option>
+                <option {% if not bookmark_collection.anon_comments_permitted and not bookmark_collection.comments_permitted %} selected {% endif %}>None</option>
+
+            </select>
+        </div>
+    </div>
+    {% endif %}
     <hr/>
-    <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Collection Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question" title="{% translate 'Tags help' %}"></sup>
+    <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Tags help' %}"></sup>
         <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
     </span>
     {% include "object_attributes_form.html" with object='Bookmark Collection' attribute_types=bookmark_collection.attribute_types show_header=False %}
     {% include "edit_tags.html" with object='bookmark_collection' show_header=False %}
     <hr id="bkcol-form-tags-hr"/>
-    <h3 id="obj-attrs-form-header">Collection Details</h3>
+    <h3 id="obj-attrs-form-header">Details</h3>
     <div class="uk-margin" id="bkcol-bookmarks-list">
         {% if bookmark_collection.bookmarks_readonly %}<div class="uk-margin-medium-left"><h4 id="obj-attrs-form-header">Bookmarks</h4></div>{% endif %}
         <ul id="bookmarks_readonly_list" class="uk-margin-medium-left"> 
@@ -135,7 +160,7 @@ function addSelectedBookmarks() {
         {% endfor %}
         </ul>
         <div id="bkcol-form-bookmarks-parent" class="uk-margin uk-margin-medium-top">
-            <label id="bkcol-form-bookmarks-label" class="uk-form-label" for="form-horizontal-text">Add Bookmark <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Bookmark help' %}"></sup>    
+            <label id="bkcol-form-bookmarks-label" class="uk-form-label" for="form-horizontal-text">Add Bookmark <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Bookmark help' %}"></sup>    
                     <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for your bookmarks by title.{% endblocktranslate %}</div>
             </label>
             <div id="bkcol-form-bookmarks-form-control" class="uk-form-controls">
@@ -181,31 +206,6 @@ function addSelectedBookmarks() {
             </div>
         </div>
     </div>
-    {% if settings.AllowComments %}
-    <hr id="bkcol-comments-hr"/>
-    <h3 id="bkcol-settings-header">Collection Settings</h3>
-    <div class="uk-margin" id="bkcol-form-draft-parent">
-        <label id="bkcol-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Draft help' %}"></sup>    
-            <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
-        </label>
-        <div id="bkcol-form-draft-controls" class="uk-form-controls">
-            <div id="bkcol-form-draft-inline" class="uk-inline">
-                <label id="bkcol-form-draft-label" class="switch"><input id="bkcol-form-draft-input" title="{% translate 'Draft checkbox' %}" class="uk-checkbox" type="checkbox" name="draft" {% if bookmark_collection.draft %} checked {% endif %}> <span class="slider round"></span> </label>
-            </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="bkcol-form-allow-comments-parent">
-        <label id="bkcol-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
-        <div id="bkcol-form-allow-comments-controls" class="uk-form-controls">
-            <select id="bkcol-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted" title="{% translate 'Comment settings' %}">                    
-                <option {% if bookmark_collection.anon_comments_permitted and bookmark_collection.comments_permitted %} selected {% endif %}>All</option>
-                <option {% if bookmark_collection.anon_comments_permitted == False and bookmark_collection.comments_permitted %} selected {% endif %}>Registered users only</option>
-                <option {% if not bookmark_collection.anon_comments_permitted and not bookmark_collection.comments_permitted %} selected {% endif %}>None</option>
-
-            </select>
-        </div>
-    </div>
-    {% endif %}
     <hr/>
     <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bkcol-form-actions-footer-parent" uk-grid>
         <div class="uk-text-right uk-width-1-1" id="bkcol-form-actions-footer-child">

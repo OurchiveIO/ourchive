@@ -72,7 +72,7 @@
 			{% for announcement in admin_announcements %}
 			<div class="uk-text-center uk-padding-small uk-width-expand" id="admin-announcement-{{announcement.id}}">
 			    <span class="uk-text-bold">{{ announcement.content|safe }}</span>
-			   	<span title="Dismiss" uk-toggle="target: #admin-announcement-{{announcement.id}}" onclick="dismissAnnouncement('{{announcement.id}}')" class="uk-link ourchive-span-link uk-align-right uk-text-middle" uk-icon="icon: close;" id="dismiss-announcement"></span>
+			   	<span title="Dismiss" uk-toggle="target: #admin-announcement-{{announcement.id}}" onclick="dismissAnnouncement('{{announcement.id}}')" class="uk-link ourchive-span-link uk-align-right uk-text-middle" uk-icon="icon: ourchive-close;ratio:.75;" id="dismiss-announcement"></span>
 			</div>
 			{% endfor %}
 		</div>
@@ -244,20 +244,18 @@
 			{% endblock %}
 	    </div>
 	</div>
-		
-	<script src="{% static 'frontend/js/scroll-to-top.js' %}"></script>
-</body>
-<footer id="ourchive-footer uk-container">
-	<hr id="footer-hr">
-	<div id="footer-parent-grid" class="uk-text-center uk-grid uk-padding-small" uk-grid>
-	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s">
-	        <span id="footer-created-by" class="uk-text-meta uk-padding">Ourchive is created & maintained by <a href="https://federatedfandom.net/@kate" target="_blank">kate</a>, <a href="https://github.com/ladyofthelog">verity</a>, and <a href="https://federatedfandom.net/@imp" target="_blank">imp</a>. Issues with the site? Report <a class="uk-text-uppercase uk-text-meta" target="_blank" title="Report Issue" href="https://airtable.com/appwszF96OK0Ij880/shraFUg6oTWk5JFHO">here</a>.</span>
+	<hr id="footer-hr" class="ourchive-hr">
+	<div id="footer-parent-grid" class="uk-grid uk-padding-small uk-margin-bottom uk-margin-left uk-margin-right" uk-grid>
+	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">
+	        <span id="footer-created-by" class="uk-text-meta">Ourchive is created & maintained by <a href="https://federatedfandom.net/@kate" target="_blank">kate</a>, <a href="https://github.com/ladyofthelog">verity</a>, and <a href="https://federatedfandom.net/@imp" target="_blank">imp</a>. Issues with the site? Report <a class="uk-text-uppercase uk-text-meta" target="_blank" title="Report Issue" href="https://airtable.com/appwszF96OK0Ij880/shraFUg6oTWk5JFHO">here</a>.</span>
 	    </div>
-	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s">
+	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s uk-text-right">
 	        {% for page in content_pages %}
 	        <a href="/content-pages/{{page.id}}" class="uk-link uk-padding-small">{{page.name}}</a>
 	        {% endfor %}
 	    </div>
 	</div>
-</footer>
+		
+	<script src="{% static 'frontend/js/scroll-to-top.js' %}"></script>
+</body>
 </html>

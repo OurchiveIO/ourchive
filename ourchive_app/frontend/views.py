@@ -853,6 +853,7 @@ def bookmark_collections(request):
 	response = do_get(f'api/bookmarkcollections/', request, 'Bookmark Collection').response_data
 	bookmark_collections = response['results']
 	bookmark_collections = get_object_tags(bookmark_collections)
+	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
 	for bkcol in bookmark_collections:
 		bkcol['attributes'] = get_attributes_for_display(bkcol['attributes'])
 	return render(request, 'bookmark_collections.html', {
@@ -934,6 +935,7 @@ def bookmark_collection(request, pk):
 	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
 	bookmark_collection['tags'] = tags
 	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
+	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on')
 	if 'comment_thread' in request.GET:
 		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
 		comment_offset = 0
@@ -948,6 +950,7 @@ def bookmark_collection(request, pk):
 		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '').replace('<br/>', '', 1)
 	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
 	bookmark_collection['new_action_url'] = f"/bookmark-collections/{pk}/comments/new"
+	comments['results'] = format_comments_for_template(comments['results'])
 	page_content = render(request, 'bookmark_collection.html', {
 		'load_more_base': f"/bookmark-collections/{pk}",
 		'view_thread_base': f"/bookmark-collections/{pk}",
@@ -1036,7 +1039,7 @@ def register(request):
 			return redirect('/')
 		else:
 			messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
-			return redirect('/register')
+			return redirect(f'/register?username={request.POST.get("username")}&email={request.POST.get("email")}')
 	else:
 		if 'invite_token' in request.GET:
 			response = do_get(f'api/invitations/', request, params={'email': request.GET.get('email'), 'invite_token': request.GET.get('invite_token')}, object_name='Invite Code')
@@ -1051,7 +1054,6 @@ def register(request):
 		permit_registration = do_get(f'api/settings/', request, params={'setting_name': 'Registration Permitted'}, object_name='Setting').response_data
 		invite_only = do_get(f'api/settings/', request, params={'setting_name': 'Invite Only'}, object_name='Setting').response_data
 		mandatory_agree_pages = do_get(f'api/contentpages/mandatory-on-signup/', request, object_name='Page').response_data
-		print(f"mandatory: {mandatory_agree_pages}")
 		if not utils.convert_boolean(permit_registration['results'][0]['value']):
 			return render(request, 'register.html', {'permit_registration': False})
 		elif utils.convert_boolean(invite_only['results'][0]['value']):
@@ -1060,7 +1062,9 @@ def register(request):
 			return render(request, 'register.html', {
 				'permit_registration': True,
 				'mandatory_agree_pages': mandatory_agree_pages,
-				'username_check_url': 'registration-utils'
+				'username_check_url': 'registration-utils',
+				'email': request.GET.get('email', None),
+				'username': request.GET.get('username', None)
 			})
 
 
@@ -1127,11 +1131,12 @@ def work(request, pk, chapter_offset=0):
 				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}"""
 			else:
-				chapter_comments = do_get(f"api/comments/{comment_id}", request, 'Chapter Comments').response_data
+				chapter_comments = do_get(f"api/chaptercomments/{comment_id}", request, 'Chapter Comments').response_data
 				comment_offset = 0
 				chapter_comments = {'results': [chapter_comments], 'count': comment_count}
 				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}&comment_thread={comment_id}"
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
+			chapter_comments['results'] = format_comments_for_template(chapter_comments['results'])
 			chapter['comments'] = chapter_comments
 			chapter['comment_offset'] = comment_offset
 			chapter['load_more_base'] = f"/works/{pk}/chapters/{chapter['id']}/{chapter_offset}"
@@ -1163,6 +1168,7 @@ def render_comments_common(request, get_comment_base, object_name, object_id, lo
 	offset = request.GET.get('offset', '')
 	depth = request.GET.get('depth', 0)
 	comments = do_get(f'{get_comment_base}/comments?limit={limit}&offset={offset}', request, 'Comments').response_data
+	comments['results'] = format_comments_for_template(comments['results'])
 	response_dict = {
 		'comments': comments['results'],
 		'current_offset': comments['current'],
@@ -1229,9 +1235,9 @@ def create_comment_common(request, captcha_fail_redirect, object_name, redirect_
 	comment_dict = request.POST.copy()
 	comment_count = int(request.POST.get(f'{object_name}_comment_count'))
 	comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
-	if comment_count > 10 and request.POST.get('parent_comment') is None:
+	if comment_count > 9 and request.POST.get('parent_comment') is None:
 		comment_offset = int(int(request.POST.get(f'{object_name}_comment_count')) / 10) * 10
-	elif comment_count > 10 and request.POST.get('parent_comment') is not None:
+	elif comment_count > 9 and request.POST.get('parent_comment') is not None:
 		comment_offset = request.POST.get('parent_comment_next')
 	else:
 		comment_offset = 0
@@ -1239,6 +1245,11 @@ def create_comment_common(request, captcha_fail_redirect, object_name, redirect_
 		comment_dict["user"] = str(request.user)
 	else:
 		comment_dict["user"] = None
+	if request.GET.get("offset", None):
+		comment_dict['offset'] = request.GET.get("offset")
+	if comment_thread:
+		comment_dict['comment_thread'] = comment_thread
+		comment_dict['comment_count'] = comment_count
 	response = do_post(f'api/{object_name}comments/', request, data=comment_dict, object_name='Comment')
 	comment_id = response.response_data['id'] if 'id' in response.response_data else None
 	redirect_url = f'{redirect_url}expandComments=true&scrollCommentId={comment_id}&comment_offset={comment_offset}'
@@ -1299,7 +1310,7 @@ def edit_chapter_comment(request, work_id, chapter_id):
 
 
 def delete_chapter_comment(request, work_id, chapter_id, comment_id):
-	return delete_comment_common(request, f'/works/{work_id}/chapters/{chapter_id}', 'chapter', comment_id)
+	return delete_comment_common(request, request.headers.get('Referer'), 'chapter', comment_id)
 
 
 def create_bookmark_comment(request, pk):
@@ -1380,6 +1391,7 @@ def bookmark(request, pk):
 		comments = do_get(f'api/bookmarks/{pk}/comments?limit=10&offset={comment_offset}', request, 'Bookmark Comment').response_data
 		bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new"
 		bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit"""
+	comments['results'] = format_comments_for_template(comments['results'])
 	bookmark['new_action_url'] = f"/bookmarks/{pk}/comments/new"
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
 	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections', request, 'Collections').response_data

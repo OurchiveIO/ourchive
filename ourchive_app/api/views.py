@@ -881,7 +881,7 @@ class CommentList(generics.ListCreateAPIView):
         return ChapterComment.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, offset=self.request.data['offset'], comment_thread=self.request.data.get('comment_thread', None), comment_count=self.request.data.get('comment_count', None))
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -10,6 +10,16 @@
         </div>
     </div>
 </div>
+<div class="uk-margin" id="chapter-form-draft-parent" {% if suppress_info_fields %}hidden{% endif %}>
+    <label id="chapter-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75"></sup>    
+        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
+    </label>
+    <div class="uk-form-controls" id="chapter-form-draft-controls">
+        <div class="uk-inline" id="chapter-form-draft-inline">
+            <label id="chapter-form-draft-checkbox-label" class="switch"><input class="uk-checkbox" type="checkbox" id="chapter-form-draft" name="chapter_draft" {% if chapter.draft %} checked {% endif %}> <span class="slider round"></span></label>
+        </div>
+    </div>
+</div>
 {% if not suppress_info_fields %}
 {% if chapter.attribute_types %}
     {% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types show_header=False %}
@@ -97,16 +107,6 @@
         </div>
     </div>            
 </div>
-<div class="uk-margin" id="chapter-form-draft-parent" {% if suppress_info_fields %}hidden{% endif %}>
-    <label id="chapter-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
-        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
-    </label>
-    <div class="uk-form-controls" id="chapter-form-draft-controls">
-        <div class="uk-inline" id="chapter-form-draft-inline">
-            <label id="chapter-form-draft-checkbox-label" class="switch"><input class="uk-checkbox" type="checkbox" id="chapter-form-draft" name="chapter_draft" {% if chapter.draft %} checked {% endif %}> <span class="slider round"></span></label>
-        </div>
-    </div>
-</div>
 {% if not suppress_info_fields %}<h4 id="obj-attrs-form-header">Content</h3>{% endif %}
 {% if request.user.can_upload_images %}
 {% if not request.user.collapse_chapter_image %}
@@ -168,7 +168,7 @@
 </div>
 {% if not settings.AudioProcessing %}
 <div class="uk-margin ourchive-chapter-audio-toggle" id="chapter-form-audio-length-parent" {% if not chapter.audio_url %}hidden{% endif %}>
-    <label id="chapter-form-audio-length-label" class="uk-form-label" for="form-horizontal-text">Audio Length <sup uk-icon="icon: question"></sup><div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your admin has disabled automatic audio file processing, but you can add your own metadata here.{% endblocktranslate %}</div></label>
+    <label id="chapter-form-audio-length-label" class="uk-form-label" for="form-horizontal-text">Audio Length <sup uk-icon="icon: ourchive-help;ratio:.75"></sup><div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your admin has disabled automatic audio file processing, but you can add your own metadata here.{% endblocktranslate %}</div></label>
     <div id="chapter-form-audio-length-controls" class="uk-form-controls">
         <div class="uk-inline" id="chapter-form-audio-length-inline">
             <input id="chapter-form-audio-length" class="uk-input uk-form-width-large" type="number" name="audio_length" value="{{ chapter.audio_length|default_if_none:0 }}">
@@ -187,7 +187,7 @@
     <div class="uk-form-controls" id="chapter-form-text-controls">
         <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-text-inline">
         	<div class="uk-margin-bottom">
-                <span class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: question"></sup>    
+                <span class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
                 </span>
                 <label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText(true)" checked>

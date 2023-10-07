@@ -1,15 +1,13 @@
 {% load i18n %}
 {% if top_level %}
-<ul class="uk-comment-list" id="{{object_name}}-{{object.id}}-comments-list">
+<ul class="uk-comment-list ourchive-top-level" id="{{object_name}}-{{object.id}}-comments-list">
 {% endif %}
 {% for comment in comments %}
-{% if depth < 10 %}
 {% if comment.parent_comment != null %}
-<ul class="uk-comment-list" id="{{object_name}}-comment-{{comment.id}}-ul">
+<ul class="uk-comment-list ourchive-replies-list" id="{{object_name}}-comment-{{comment.id}}-ul">
 {% endif %}
 <li id="{{object_name}}-comment-{{comment.id}}-li">
-<hr id="{{object_name}}-comment-{{comment.id}}-hr"/>
-<article class="uk-comment" id="comment_container_{{comment.id}}">
+<article class="uk-comment {% if depth < 1 and not forloop.counter|divisibleby:'2' %}ourchive-comment-even{% elif depth > 1 and depth|divisibleby:'2' and top_level %}ourchive-comment-even{% elif forloop.counter > 1 and depth > 0 and forloop.counter|divisibleby:'2' %}ourchive-comment-even{% else %}ourchive-comment-odd{%endif%}" id="comment_container_{{comment.id}}">
     <header id="{{object_name}}-comment-{{comment.id}}-header" class="uk-comment-header uk-grid-medium uk-flex-middle" uk-grid>
         {% if comment.user is not None %}
         <div class="uk-width-auto" id="{{object_name}}-comment-{{comment.id}}-icon-div">
@@ -23,15 +21,16 @@
         {% endif %}
         <div id="{{object_name}}-comment-{{comment.id}}-parent-div" class="uk-width-expand">
             {% if comment.user is not None %}
-            <h4 id="{{object_name}}-comment-{{comment.id}}-username-h4" class="uk-comment-title uk-margin-remove"><a class="uk-link-reset" id="{{object_name}}-comment-{{comment.id}}-username-link" href="#">{{comment.user.username}}</a></h4>
+            <h4 id="{{object_name}}-comment-{{comment.id}}-username-h4" class="uk-comment-title uk-margin-remove"><a class="uk-link-reset" id="{{object_name}}-comment-{{comment.id}}-username-link" href="{% url 'user-profile-parent' comment.user.id %}">{{comment.user.username}}</a></h4>
             {% else %}
-            <h4 id="{{object_name}}-comment-{{comment.id}}-anon-h4" class="uk-comment-title uk-margin-remove"><a class="uk-link-reset" id="{{object_name}}-comment-{{comment.id}}-link" href="#">{% translate 'Anonymous' %}</a></h4>
+            <h4 id="{{object_name}}-comment-{{comment.id}}-anon-h4" class="uk-comment-title uk-margin-remove">{% translate 'Anonymous' %}</h4>
             {% endif %}
         </div>
     </header>
     <div class="uk-comment-body uk-grid" id="{{object_name}}-comment-{{comment.id}}-text-parent" uk-grid>
         <div id="{{object_name}}-comment-{{comment.id}}-text" class="uk-width-1-1"><span class="uk-text-medium ourchive-comment">{{comment.text|safe }}</span></div>
-        <div class="uk-width-1-1 uk-text-right uk-align-right uk-margin-remove-vertical">
+        <div class="uk-width-1-1 uk-text-right uk-align-right uk-margin-remove-bottom">
+            <span class="uk-text uk-text-meta">Replies: {{comment.replies|length}} - Updated: {{comment.updated_on|date:'d M Y'}}</span>
             <ul id="{{object_name}}-comment-{{comment.id}}-actions-ul" class="uk-list">
                 <li id="{{object_name}}-comment-{{comment.id}}-reply-li">
                     <a href="#" id="{{object_name}}-comment-{{comment.id}}-reply-button" class="ourchive-icon-wrapper" uk-toggle="target: #comment-{{comment.id}}-reply"><span id="{{object_name}}-comment-{{comment.id}}-reply-span" uk-icon="icon: ourchive-reply;ratio:.75" title="{% translate 'Reply to' %} {{comment.id}}"></span></a>
@@ -52,10 +51,6 @@
 </li>  
 {% if comment.parent_comment != null %}
 </ul>
-{% endif %}
-{% endif %}
-{% if depth >= 10 %}
-<a href="{{view_thread_base}}?expandComments=true&scrollCommentId={{comment.id}}&comment_thread={{comment.id}}&comment_count={{comment_count}}">{% translate 'View Thread...' %}</a>
 {% endif %}
 {% endfor %}
 {% if comment.parent_comment == null %}

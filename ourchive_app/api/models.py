@@ -5,12 +5,20 @@ from django.contrib.auth.models import AbstractUser
 import nh3
 import unidecode
 from .utils import clean_tag_text
+from django_registration.validators import ReservedNameValidator
 
 
 class User(AbstractUser):
+    username_validator = ReservedNameValidator()
 
     __tablename__ = 'user'
     id = models.AutoField(primary_key=True)
+    username = models.CharField(
+        "Username",
+        max_length = 150,
+        unique = True,
+        validators = [username_validator]
+    )
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
@@ -307,7 +315,7 @@ class Comment(models.Model):
     __tablename__ = 'comments'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    text = models.TextField(null=True, blank=True)
+    text = models.TextField()
 
     user = models.ForeignKey(
         User,
