@@ -1,14 +1,13 @@
 {% load i18n %}
 {% if top_level %}
-<ul class="uk-comment-list" id="{{object_name}}-{{object.id}}-comments-list">
+<ul class="uk-comment-list ourchive-top-level" id="{{object_name}}-{{object.id}}-comments-list">
 {% endif %}
 {% for comment in comments %}
 {% if comment.parent_comment != null %}
-<ul class="uk-comment-list" id="{{object_name}}-comment-{{comment.id}}-ul">
+<ul class="uk-comment-list ourchive-replies-list" id="{{object_name}}-comment-{{comment.id}}-ul">
 {% endif %}
 <li id="{{object_name}}-comment-{{comment.id}}-li">
-<hr id="{{object_name}}-comment-{{comment.id}}-hr"/>
-<article class="uk-comment" id="comment_container_{{comment.id}}">
+<article class="uk-comment {% if depth < 1 and not forloop.counter|divisibleby:'2' %}ourchive-comment-even{% elif depth > 1 and depth|divisibleby:'2' and top_level %}ourchive-comment-even{% elif forloop.counter > 1 and depth > 0 and forloop.counter|divisibleby:'2' %}ourchive-comment-even{% else %}ourchive-comment-odd{%endif%}" id="comment_container_{{comment.id}}">
     <header id="{{object_name}}-comment-{{comment.id}}-header" class="uk-comment-header uk-grid-medium uk-flex-middle" uk-grid>
         {% if comment.user is not None %}
         <div class="uk-width-auto" id="{{object_name}}-comment-{{comment.id}}-icon-div">
