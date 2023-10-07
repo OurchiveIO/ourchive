@@ -1039,7 +1039,7 @@ def register(request):
 			return redirect('/')
 		else:
 			messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
-			return redirect('/register')
+			return redirect(f'/register?username={request.POST.get("username")}&email={request.POST.get("email")}')
 	else:
 		if 'invite_token' in request.GET:
 			response = do_get(f'api/invitations/', request, params={'email': request.GET.get('email'), 'invite_token': request.GET.get('invite_token')}, object_name='Invite Code')
@@ -1062,7 +1062,9 @@ def register(request):
 			return render(request, 'register.html', {
 				'permit_registration': True,
 				'mandatory_agree_pages': mandatory_agree_pages,
-				'username_check_url': 'registration-utils'
+				'username_check_url': 'registration-utils',
+				'email': request.GET.get('email', None),
+				'username': request.GET.get('username', None)
 			})
 
 
