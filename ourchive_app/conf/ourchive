@@ -1,0 +1,21 @@
+server {
+    client_max_body_size 300M;
+    listen 80;
+    server_name [CHANGEME];
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /home/ourchive/ourchive/ourchive_app;
+    }
+    
+    # assumes a media folder at /mnt/ourchive-volume/media
+    location /media/ {
+        root /mnt/ourchive-volume;
+    }
+
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/ourchive/ourchive/ourchive_app/ourchive_app.sock;
+    }
+}
