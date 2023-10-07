@@ -287,6 +287,13 @@ def format_date_for_template(obj, field_name, is_list=False):
 	obj[field_name] = parse(obj[field_name]).date()
 	return obj
 
+def format_comments_for_template(comments):
+	for comment in comments:
+		comment = format_date_for_template(comment, 'updated_on')
+		if comment['replies']:
+			comment['replies'] = format_comments_for_template(comment['replies'])
+	return comments
+
 def referrer_redirect(request, alternate_url=None):
 	response = None
 	if request.META.get('HTTP_REFERER') is not None:
