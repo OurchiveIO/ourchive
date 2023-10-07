@@ -43,7 +43,7 @@
             {% include "object_attributes.html" with object='user' object_id=user.id attributes=user.attributes %}
             <hr class="uk-margin-medium" id="user-attributes-lower-hr"/>
         {% endif %}
-        <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.default_content == 'Work' %}0{% elif user.default_conect == 'Bookmark' %}1{% else %}2{% endif %}" id="user_content_switcher_header">
+        <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.default_content == 'Work' %}0{% elif user.default_content == 'Bookmark' %}1{% else %}2{% endif %}" id="user_content_switcher_header">
             {% if works %}<li><a href="#" id="user_works_selector">Works</a></li>{% endif %}
             {% if bookmarks %}<li><a href="#" id="user_bookmarks_selector">Bookmarks</a></li>{% endif %}
             {% if bookmark_collections %}<li><a href="#" id="user_collections_selector">Collections</a></li>{% endif %}
