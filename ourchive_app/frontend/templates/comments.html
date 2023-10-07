@@ -3,7 +3,6 @@
 <ul class="uk-comment-list" id="{{object_name}}-{{object.id}}-comments-list">
 {% endif %}
 {% for comment in comments %}
-{% if depth < 10 %}
 {% if comment.parent_comment != null %}
 <ul class="uk-comment-list" id="{{object_name}}-comment-{{comment.id}}-ul">
 {% endif %}
@@ -53,10 +52,6 @@
 </li>  
 {% if comment.parent_comment != null %}
 </ul>
-{% endif %}
-{% endif %}
-{% if depth >= 10 %}
-<a href="{{view_thread_base}}?expandComments=true&scrollCommentId={{comment.id}}&comment_thread={{comment.id}}&comment_count={{comment_count}}">{% translate 'View Thread...' %}</a>
 {% endif %}
 {% endfor %}
 {% if comment.parent_comment == null %}

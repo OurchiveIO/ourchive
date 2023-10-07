@@ -1166,7 +1166,7 @@ def render_comments_common(request, get_comment_base, object_name, object_id, lo
 	offset = request.GET.get('offset', '')
 	depth = request.GET.get('depth', 0)
 	comments = do_get(f'{get_comment_base}/comments?limit={limit}&offset={offset}', request, 'Comments').response_data
-	comments = format_date_for_template(comments, 'updated_on', True)
+	comments['results'] = format_date_for_template(comments['results'], 'updated_on', True)
 	response_dict = {
 		'comments': comments['results'],
 		'current_offset': comments['current'],
@@ -1233,9 +1233,9 @@ def create_comment_common(request, captcha_fail_redirect, object_name, redirect_
 	comment_dict = request.POST.copy()
 	comment_count = int(request.POST.get(f'{object_name}_comment_count'))
 	comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
-	if comment_count > 10 and request.POST.get('parent_comment') is None:
+	if comment_count > 9 and request.POST.get('parent_comment') is None:
 		comment_offset = int(int(request.POST.get(f'{object_name}_comment_count')) / 10) * 10
-	elif comment_count > 10 and request.POST.get('parent_comment') is not None:
+	elif comment_count > 9 and request.POST.get('parent_comment') is not None:
 		comment_offset = request.POST.get('parent_comment_next')
 	else:
 		comment_offset = 0

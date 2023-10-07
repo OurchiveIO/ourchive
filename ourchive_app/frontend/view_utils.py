@@ -287,7 +287,6 @@ def format_date_for_template(obj, field_name, is_list=False):
 	obj[field_name] = parse(obj[field_name]).date()
 	return obj
 
-
 def referrer_redirect(request, alternate_url=None):
 	response = None
 	if request.META.get('HTTP_REFERER') is not None:
