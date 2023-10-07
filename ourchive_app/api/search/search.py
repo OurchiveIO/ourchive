@@ -130,6 +130,7 @@ class PostgresProvider:
             existing_query = or_query
         else:
             existing_query = existing_query | or_query
+        print(existing_query)
         return existing_query
 
     def build_filters(self, filters, mode, include):
@@ -532,7 +533,7 @@ class PostgresProvider:
         # todo move to db setting
         word_count_dict = {}
         word_count_dict["label"] = "Work Word Count"
-        word_count_dict["values"] = [{"label": "Under 20,000", "filter_val": "word_count_range|ranges|20000|0"},
+        word_count_dict["values"] = [{"label": "Under 20,000", "filter_val": "word_count_range|ranges|0|20000"},
                                      {"label": "20,000 - 50,000",
                                          "filter_val": "word_count_range|ranges|20000|50000"},
                                      {"label": "50,000 - 80,000",
@@ -545,7 +546,7 @@ class PostgresProvider:
         # todo move to db setting
         audio_length_dict = {}
         audio_length_dict["label"] = "Audio Length"
-        audio_length_dict["values"] = [{"label": "Under 30:00", "filter_val": "audio_length_range|ranges|30|0"},
+        audio_length_dict["values"] = [{"label": "Under 30:00", "filter_val": "audio_length_range|ranges|0|30"},
                                        {"label": "30:00 - 1:00:00",
                                            "filter_val": "audio_length_range|ranges|30|60"},
                                        {"label": "1:00:00 - 2:00:00",
