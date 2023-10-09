@@ -133,11 +133,14 @@ def build_and_execute_search(request):
 					break
 			if not facet_added:
 				facets.append({'label': label_split[1], 'excluded': True, 'values': [{'label': val_split[1], 'filter_val': item}]})
+	works_count = works['page']['count'] if 'page' in works else 0
+	bookmarks_count = bookmarks['page']['count'] if 'page' in bookmarks else 0
+	collections_count = collections['page']['count'] if 'page' in collections else 0
 	default_tab = get_default_search_result_tab(
 		[
-			[works['page']['count'], 0],
-			[bookmarks['page']['count'], 1],
-			[collections['page']['count'], 2],
+			[works_count, 0],
+			[bookmarks_count, 1],
+			[collections_count, 2],
 			[len(users['data']), 4]
 		])
 	template_data = {
