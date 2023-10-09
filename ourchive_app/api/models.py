@@ -17,7 +17,7 @@ class User(AbstractUser):
         "Username",
         max_length = 150,
         unique = True,
-        #validators = [username_validator]
+        validators = [username_validator]
     )
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_on = models.DateTimeField(auto_now_add=True)

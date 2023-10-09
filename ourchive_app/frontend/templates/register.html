@@ -47,7 +47,6 @@
         });  
     }
 </script>
-{% cache 43200 registration-form %}
 <form class="uk-form-horizontal"  method="post" onsubmit="return validateForm(event)" id="register-form">
 	{% csrf_token %}
     <input id="invite-code-hidden-id" type="hidden" name="invite_code" value="{{ invite_code }}"/>
@@ -115,7 +114,6 @@
     	
     </div>
 </form>
-{% endcache %}
 {% else %}
 {% cache 43200 registration-not-permitted %}
 <div>
