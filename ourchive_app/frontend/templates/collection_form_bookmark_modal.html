@@ -1,31 +1,16 @@
-{% load i18n %}
+<script>
+function getBookmarks(params) {
+  var replace_selector = 'collection-add-bookmark-modal';
+  fetch('{% url 'collection-eligible-bookmarks' %}'+params)
+    .then((response) => {
+      return response.text();
+    })
+    .then((templateText) => {      
+    document.getElementById(replace_selector).innerHTML = "";
+    document.getElementById(replace_selector).innerHTML = templateText;
+    });
+}
+</script>
 <div id="collection-add-bookmark-modal" uk-modal>
-    <div class="uk-modal-dialog uk-modal-body" id="collection-add-bookmark-modal-body">
-        <h2 id="collection-add-bookmark-modal-header" class="uk-modal-title">Add Bookmark(s)</h2>
-        <p class="uk-text-medium">{% blocktranslate %}Add from your 10 most recent bookmarks.{% endblocktranslate %}</p>
-        <div class="uk-overflow-auto uk-width-1-1 uk-padding-remove-horizontal">
-            <table class="uk-table uk-table-striped">
-                <thead>
-                    <tr>
-                        <th>{% translate 'Bookmark' %}</th>
-                        <th>{% translate 'Work' %}</th>
-                        <th>{% translate 'Add to Collection' %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for bookmark in bookmarks.results %}
-                        <tr id="bookmark-{{ bookmark.id }}-parent">
-                            <td id="bookmark-{{ bookmark.id }}-bookmark">{{ bookmark.title|default:bookmark.work.title }}</td>
-                            <td id="bookmark-{{ bookmark.id }}-work">{{ bookmark.work.title }}</td>
-                            <td id="bookmark-{{ bookmark.id }}-checkbox"><input type="checkbox" name="{{bookmark.id}}" id="add-to-collection-checkbox-{{ bookmark.id }}" class="add-to-collection-checkbox"/></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <p id="add-to-collection-modal-button-parent" class="uk-text-right">
-            <a id="add-to-collection-modal-cancel" class="uk-button uk-button-default uk-modal-close uk-margin-right">{% translate 'Cancel' %}</a>
-            <a id="add-to-collection-modal-add" class="uk-button uk-button-primary uk-modal-close" onclick="addSelectedBookmarks()" href="#">{% translate 'Add to Collection' %}</a>
-        </p>
-    </div>
+    {% include 'collection_form_bookmark_modal_body.html' %}
 </div>

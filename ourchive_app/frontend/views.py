@@ -911,7 +911,7 @@ def edit_bookmark_collection(request, pk):
 			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
 			bookmark_collection['attribute_types'] = process_attributes(bookmark_collection['attributes'], bookmark_attributes.response_data['results'])
 			tags = group_tags_for_edit(bookmark_collection['tags'], tag_types) if 'tags' in bookmark_collection else []
-			bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks').response_data
+			bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks')
 			return render(request, 'bookmark_collection_form.html', {
 				'bookmark_collection': bookmark_collection,
 				'bookmarks': bookmarks,
@@ -920,6 +920,13 @@ def edit_bookmark_collection(request, pk):
 				'tags': tags})
 		else:
 			return get_unauthorized_message(request, '/login', 'bookmark-collection-update-login-error')
+
+
+def get_bookmarks_for_collection(request):
+	bookmarks = do_get(f'api/users/{request.user.username}/bookmarks', request, params=request.GET, object_name='Bookmarks')
+	return render(request, 'collection_form_bookmark_modal_body.html', {
+		'bookmarks': bookmarks
+	})
 
 
 def bookmark_collection(request, pk):
@@ -1024,6 +1031,7 @@ def reset_password(request):
 		else:
 			return render(request, 'login.html', {
 				'referrer': '/'})
+
 
 def register(request):
 	if request.user.is_authenticated:
@@ -1162,8 +1170,8 @@ def work(request, pk, chapter_offset=0):
 		cache.set(cache_key, page_content, 60 * 60)
 	return page_content
 
-def render_comments_common(request, get_comment_base, object_name, object_id, load_more_base, view_thread_base,
-		delete_obj, post_action_url, edit_action_url, root_obj_id=None, additional_params={}):
+
+def render_comments_common(request, get_comment_base, object_name, object_id, load_more_base, view_thread_base, delete_obj, post_action_url, edit_action_url, root_obj_id=None, additional_params={}):
 	limit = request.GET.get('limit', '')
 	offset = request.GET.get('offset', '')
 	depth = request.GET.get('depth', 0)

@@ -21,6 +21,7 @@ urlpatterns = [
     path('works/<int:work_id>/chapters/<int:chapter_id>/delete', views.delete_chapter, name='delete-chapter'),
     path('works/<int:work_id>/chapters/<int:chapter_id>/publish/', views.publish_chapter),
     path('bookmark-collections/', views.bookmark_collections),
+    path('bookmark-collections/collection-eligible-bookmarks', views.get_bookmarks_for_collection, name='collection-eligible-bookmarks'),
     path('bookmark-collections/new', views.new_bookmark_collection, name='fe-new-collection'),
     path('bookmark-collections/<int:pk>/edit', views.edit_bookmark_collection),
     path('bookmark-collections/<int:pk>/', views.bookmark_collection, name='fe-view-collection'),

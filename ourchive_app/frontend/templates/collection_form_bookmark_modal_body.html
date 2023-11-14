@@ -1,0 +1,37 @@
+{% load i18n %}
+<div class="uk-modal-dialog uk-modal-body" id="collection-add-bookmark-modal-body">
+        <h2 id="collection-add-bookmark-modal-header" class="uk-modal-title">Add Bookmark(s)</h2>
+        <p class="uk-text-medium">{% blocktranslate %}Add from your most recent bookmarks.{% endblocktranslate %}</p>
+        <div class="uk-overflow-auto uk-width-1-1 uk-padding-remove-horizontal">
+            <table class="uk-table uk-table-striped">
+                <thead>
+                    <tr>
+                        <th>{% translate 'Bookmark' %}</th>
+                        <th>{% translate 'Work' %}</th>
+                        <th>{% translate 'Add to Collection' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bookmark in bookmarks.response_data.results %}
+                        <tr id="bookmark-{{ bookmark.id }}-parent">
+                            <td id="bookmark-{{ bookmark.id }}-bookmark">{{ bookmark.title|default:bookmark.work.title }}</td>
+                            <td id="bookmark-{{ bookmark.id }}-work">{{ bookmark.work.title }}</td>
+                            <td id="bookmark-{{ bookmark.id }}-checkbox"><input type="checkbox" name="{{bookmark.id}}" id="add-to-collection-checkbox-{{ bookmark.id }}" class="add-to-collection-checkbox"/></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid id="bookmarks-pagination-parent">
+            <div id="bookmarks-pagination-child-div">
+                <ul class="uk-pagination" id="bookmarks-pagination-uk-ul">
+                {% if bookmarks.response_data.previous is not None %}<li id="bookmarks-pagination-prev-li"><a id="bookmarks-pagination-prev-link" href="#" onclick="getBookmarks('{{bookmarks.response_data.prev_params}}')"><span id="bookmarks-pagination-prev-span" class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
+                {% if bookmarks.response_data.next is not None %}<li id="bookmarks-pagination-next-li" class="uk-margin-auto-left"><a href="#" onclick="getBookmarks('{{bookmarks.response_data.next_params}}')" id="bookmarks-pagination-next-link">Next <span id="bookmarks-pagination-next-span" class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
+            </ul>
+            </div>        
+        </div> 
+        <p id="add-to-collection-modal-button-parent" class="uk-text-right">
+            <a id="add-to-collection-modal-cancel" class="uk-button uk-button-default uk-modal-close uk-margin-right">{% translate 'Cancel' %}</a>
+            <a id="add-to-collection-modal-add" class="uk-button uk-button-primary uk-modal-close" onclick="addSelectedBookmarks()" href="#">{% translate 'Add to Collection' %}</a>
+        </p>
+    </div>
