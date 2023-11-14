@@ -1,6 +1,10 @@
 function getChapterRichTextValues() {
-	document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
-	document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
+	if (tinymce.get("summaryEditor") !== null) {
+		document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
+	}
+	if (tinymce.get("notesEditor") !== null) {
+		document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
+	}
 	document.getElementById('end_notes').value = tinymce.get("end_notesEditor").getContent().replace(/\r?\n?/g, '');
 	if (document.getElementById('chapter-text-edit-mode-toggle').checked) {
         document.getElementById('text').value = tinymce.get("textEditor").getContent().replace(/\r?\n?/g, '');
