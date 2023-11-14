@@ -5,12 +5,8 @@
 {% load static %}
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
 <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="bookmark-form-parent-grid">  
-<form class="uk-form-horizontal" method="post" id="bookmarkForm" onsubmit="return getDescriptionText()">
+<form class="uk-form-horizontal" method="post" id="bookmarkForm" onsubmit="return getRichText(['description'])">
     <script>
-        function getDescriptionText() {
-            document.getElementById('description').value = tinymce.get("descriptionEditor").getContent().replace(/\r?\n?/g, '');
-        }
-
         function colorStar(starNum) {
             if (!document.getElementById("rating_"+starNum).classList.contains("rating-star")) {
                 for (let star = 1; star <= starNum; star++) {
@@ -116,37 +112,7 @@
     {% endif %}
     <div id="bookmark-form-description-parent" class="uk-margin">
         <label id="bookmark-form-description-label" class="uk-form-label" for="form-horizontal-text">Description</label>
-        <div id="bookmark-form-description-form-controls" class="uk-form-controls">
-            <div id="bookmark-form-description-inline" class="uk-inline uk-child-width-expand uk-width-expand">
-                <input type="hidden" id="description" name="description" value="{{ bookmark.description|safe|default_if_none:'' }}">
-                <textarea id="descriptionEditor"></textarea>
-                <script type="text/javascript">
-                                  tinymce.init({
-                                    selector: '#descriptionEditor',
-                            width: '100%',
-                            contextmenu: false,
-                            convert_urls:false,
-                            relative_urls:false,
-                            height: 400,
-                            autoresize_min_height: 400,
-                            autoresize_max_height: 800,
-                            plugins: [
-                              'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                              'fullscreen', 'insertdatetime',
-                              'media', 'table', 'emoticons'
-                            ],
-                            toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                              'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                              'forecolor backcolor emoticons | help',
-                            menubar: '',
-                            init_instance_callback : function(editor) {
-                                var descriptionText = document.getElementById('description').value;
-                                editor.setContent(descriptionText);
-                            }
-                          });
-                </script>
-            </div>
-        </div>
+        {% include 'ourchive_tinymce_template.html' with form_field_value=bookmark.description form_field='description' obj_name='bookmark' %}
     </div>
     <hr/>
     <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bookmark-form-actions-footer-parent" uk-grid>

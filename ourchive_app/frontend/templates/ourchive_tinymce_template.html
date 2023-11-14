@@ -1,0 +1,31 @@
+<div id="{{obj_name}}-form-{{form_field}}-form-controls" class="uk-form-controls">
+    <div id="{{obj_name}}-form-{{form_field}}-inline" class="uk-inline uk-child-width-expand uk-width-expand">
+        <input type="hidden" id="{{form_field}}" name="{{form_field}}" value="{{form_field_value|safe|default_if_none:''}}">
+        <textarea id="{{form_field}}Editor"></textarea>
+        <script type="text/javascript">
+                          tinymce.init({
+                            selector: '#{{form_field}}Editor',
+                    width: '100%',
+                    contextmenu: false,
+                    convert_urls:false,
+                    relative_urls:false,
+                    height: {% if min_height is None %}400{% else %}{{min_height}}{% endif %},
+                    autoresize_min_height: {% if min_height is None %}400{% else %}{{min_height}}{% endif %},
+                    autoresize_max_height: 800,
+                    plugins: [
+                      'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
+                      'fullscreen', 'insertdatetime',
+                      'media', 'table', 'emoticons'
+                    ],
+                    toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
+                      'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+                      'forecolor backcolor emoticons | help',
+                    menubar: '',
+                    init_instance_callback : function(editor) {
+                        var plainText = document.getElementById('{{form_field}}').value;
+                        editor.setContent(plainText);
+                    }
+                  });
+        </script>
+    </div>
+</div>

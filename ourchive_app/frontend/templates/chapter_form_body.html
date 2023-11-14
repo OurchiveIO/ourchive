@@ -1,5 +1,4 @@
 {% load i18n %}
-{% load static %}
 {% csrf_token %}
 <h4 id="obj-attrs-form-header">Chapter Details</h4>
 <div id="chapter-form-title-parent" class="uk-margin" {% if suppress_info_fields %}hidden{% endif%}>
@@ -27,77 +26,11 @@
 {% endif %}
 <div class="uk-margin" id="chapter-form-summary-parent" {% if suppress_info_fields %}hidden{% endif%}>
     <label id="chapter-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
-    <div id="chapter-form-summary-controls" class="uk-form-controls">
-        <div id="chapter-form-summary-inline" class="uk-inline uk-child-width-expand uk-width-expand">
-            <input type="hidden" id="chapter_summary" name="summary" value="{{ chapter.summary|safe|default_if_none:'' }}">
-            <textarea id="chapterSummaryEditor"></textarea>
-            <script type="text/javascript">
-                              tinymce.init({
-                                selector: '#chapterSummaryEditor',
-                                width: '100%',
-                                contextmenu: false,
-                                convert_urls:false,
-                                relative_urls:false,
-                                height: 200,
-                                autoresize_min_height: 150,
-                                autoresize_max_height: 800,
-                                plugins: [
-                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak', 
-                                  'fullscreen', 'insertdatetime',
-                                  'media', 'table', 'emoticons'
-                                ],
-                                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                  'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                  'forecolor backcolor emoticons | help',
-                                menubar: '',
-                                init_instance_callback : function(editor) {
-                                	var chapterSummary = document.getElementById('chapter_summary').value;
-                                	if (chapterSummary === "None") {
-                                		chapterSummary = '';
-                                	}
-                                    editor.setContent(chapterSummary);
-                                }
-                              });
-           </script>
-        </div>
-    </div>
+    {% include 'ourchive_tinymce_template.html' with form_field_value=chapter.summary form_field='summary' obj_name='chapter' min_height=200 %}
 </div>
 <div class="uk-margin" id="chapter-form-notes-parent" {% if suppress_info_fields %}hidden{% endif%}>
     <label class="uk-form-label" for="form-horizontal-text" id="chapter-form-notes-label">{% translate 'Notes' %}</label>
-    <div class="uk-form-controls" id="chapter-form-notes-controls">
-        <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-notes-inline">
-            <input type="hidden" id="chapter_notes" name="notes" value="{{ chapter.notes|safe|default_if_none:'' }}">
-            <textarea id="chapterNotesEditor"></textarea>
-            <script type="text/javascript">
-                              tinymce.init({
-                                selector: '#chapterNotesEditor',
-                                width: '100%',
-                                height: 200,
-                                contextmenu: false,
-                                convert_urls:false,
-                                relative_urls:false,
-                                autoresize_min_height: 150,
-                                autoresize_max_height: 800,
-                                plugins: [
-                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                                  'fullscreen', 'insertdatetime',
-                                  'media', 'table', 'emoticons'
-                                ],
-                                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                  'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                  'forecolor backcolor emoticons | help',
-                                menubar: '',
-                                init_instance_callback : function(editor) {
-                                    var chapterNotes = document.getElementById('chapter_notes').value;
-                                    if (chapterNotes === "None") {
-                                        chapterNotes = '';
-                                    }
-                                    editor.setContent(chapterNotes);
-                                }
-                              });
-           </script>
-        </div>
-    </div>
+    {% include 'ourchive_tinymce_template.html' with form_field_value=chapter.notes form_field='notes' obj_name='chapter' min_height=200 %}
 </div>
 <div class="uk-margin" id="chapter-form-number-parent">
     <label id="chapter-form-number-label" class="uk-form-label" for="form-horizontal-text">Number</label>
@@ -254,38 +187,5 @@
 </div>
 <div class="uk-margin" id="chapter-form-end-notes-parent">
     <label class="uk-form-label" for="form-horizontal-text" id="chapter-form-end-notes-label">{% translate 'End Notes' %}</label>
-    <div class="uk-form-controls" id="chapter-form-end-notes-controls">
-        <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-end-notes-inline">
-            <input type="hidden" id="chapter_end_notes" name="end_notes" value="{{ chapter.end_notes|safe|default_if_none:'' }}">
-            <textarea id="chapterEndNotesEditor"></textarea>
-            <script type="text/javascript">
-                              tinymce.init({
-                                selector: '#chapterEndNotesEditor',
-                                width: '100%',
-                                height: 200,
-                                contextmenu: false,
-                                convert_urls:false,
-                                relative_urls:false,
-                                autoresize_min_height: 150,
-                                autoresize_max_height: 800,
-                                plugins: [
-                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                                  'fullscreen', 'insertdatetime',
-                                  'media', 'table', 'emoticons'
-                                ],
-                                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                  'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                  'forecolor backcolor emoticons | help',
-                                menubar: '',
-                                init_instance_callback : function(editor) {
-                                    var chapterEndNotes = document.getElementById('chapter_end_notes').value;
-                                    if (chapterEndNotes === "None") {
-                                        chapterEndNotes = '';
-                                    }
-                                    editor.setContent(chapterEndNotes);
-                                }
-                              });
-           </script>
-        </div>
-    </div>
+    {% include 'ourchive_tinymce_template.html' with form_field_value=chapter.end_notes form_field='end_notes' obj_name='chapter' min_height=200 %}
 </div>

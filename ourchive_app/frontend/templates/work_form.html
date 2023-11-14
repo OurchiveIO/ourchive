@@ -3,17 +3,14 @@
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
 {% load static %}
-<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
 <script src="{% static 'frontend/js/ourchive-chapter.js' %}"></script>
 <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="work-form-parent"> 
 <form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
     <script>
         function getCurrentTab(submitted) {
-            //var expanded = document.getElementById('toc_link').getAttribute("aria-expanded");
             var new_chapter_clicked = submitted === "New Chapter";
             document.getElementById('redirect_toc').value = new_chapter_clicked;
-            document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
-            document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
+            getRichText(['summary', 'notes']);
             getChapterRichTextValues();
         }
     </script>
@@ -145,78 +142,12 @@
         <h4 id="obj-attrs-form-header">Work Details</h4>
         <div class="uk-margin" id="work-form-summary-parent">
             <label id="work-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
-            <div id="work-form-summary-controls" class="uk-form-controls">
-                <div id="work-form-summary-inline" class="uk-inline uk-child-width-expand uk-width-expand">
-                    <input type="hidden" id="summary" name="summary" value="{{ work.summary|safe|default_if_none:'' }}">
-                    <textarea id="summaryEditor"></textarea>
-                    <script type="text/javascript">
-                              tinymce.init({
-                                selector: '#summaryEditor',
-                                width: '100%',
-                                height: 200,
-                                contextmenu: false,
-                                convert_urls:false,
-                                relative_urls:false,
-                                autoresize_min_height: 150,
-                                autoresize_max_height: 800,
-                                plugins: [
-                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak', 
-                                  'fullscreen', 'insertdatetime',
-                                  'media', 'table', 'emoticons', 'code'
-                                ],
-                                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                  'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                  'forecolor backcolor emoticons | help | code',
-                                menubar: '',
-                                init_instance_callback : function(editor) {
-                                    var workSummary = document.getElementById('summary').value;
-                                    if (workSummary === "None") {
-                                        workSummary = '';
-                                    }
-                                    editor.setContent(workSummary);
-                                }
-                              });
-                      </script>
-                </div>
-            </div>
+            {% include 'ourchive_tinymce_template.html' with form_field_value=work.summary form_field='summary' obj_name='work' min_height=200 %}
         </div>
         <div class="uk-margin uk-width-1-6"><a href="#" id="work-notes-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-notes-hidden-parent">{% translate 'Notes' %}</a></div>
         <div id="work-form-notes-hidden-parent" hidden>
         <div class="uk-margin" id="work-form-notes-parent">
-            <div id="work-form-notes-controls" class="uk-form-controls">
-                <div class="uk-inline uk-child-width-expand uk-width-expand" id="work-form-notes-inline">
-                    <input type="hidden" id="notes" name="notes" value="{{ work.notes|safe|default_if_none:'' }}">
-                    <textarea id="notesEditor"></textarea>
-                    <script type="text/javascript">
-                              tinymce.init({
-                                selector: '#notesEditor',
-                                width: '100%',
-                                height: 200,
-                                contextmenu: false,
-                                convert_urls:false,
-                                relative_urls:false,
-                                autoresize_min_height: 150,
-                                autoresize_max_height: 800,
-                                plugins: [
-                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                                  'fullscreen', 'insertdatetime',
-                                  'media', 'table', 'emoticons', 'code'
-                                ],
-                                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                  'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                  'forecolor backcolor emoticons | help',
-                                menubar: '',
-                                init_instance_callback : function(editor) {
-                                    var workNotes = document.getElementById('notes').value;
-                                    if (workNotes === "None") {
-                                        workNotes = '';
-                                    }
-                                    editor.setContent(workNotes);
-                                }
-                              });
-                      </script>
-                </div>
-            </div>
+            {% include 'ourchive_tinymce_template.html' with form_field_value=work.notes form_field='notes' obj_name='work' min_height=200 %}
         </div>
         </div>
         {% if request.user.can_upload_images %}
