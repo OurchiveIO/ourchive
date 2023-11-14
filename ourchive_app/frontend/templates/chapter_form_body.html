@@ -117,73 +117,14 @@
 <div class="uk-margin uk-width-small"><a class="uk-accordion-title uk-text-meta" href="#" uk-toggle="target: #chapter-form-text-parent">{% translate 'Text' %}</a></div>
 <div class="uk-accordion-content" id="chapter-form-text-parent" hidden>
 {% endif %}
-    <div class="uk-form-controls" id="chapter-form-text-controls">
-        <div class="uk-inline uk-child-width-expand uk-width-expand" id="chapter-form-text-inline">
-        	<div class="uk-margin-bottom">
-                <span class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75"></sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
-                </span>
-                <label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText(true)" checked>
-                <span class="slider round"></span></label>
-            </div>
-        	<input type="hidden" id="chapter_text" name="text" value="{{ chapter.text|safe|default_if_none:'' }}">
-            <textarea id="chapterTextEditor"></textarea>
-            <script type="text/javascript">
-                              tinymce.init({
-                                selector: '#chapterTextEditor',
-                                width: '100%',
-								height: 450,
-                                contextmenu: false,
-                                convert_urls:false,
-                                relative_urls:false,
-								autoresize_min_height: 450,
-								autoresize_max_height: 800,
-                                plugins: [
-                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                                  'fullscreen', 'insertdatetime',
-                                  'media', 'table', 'emoticons'
-                                ],
-                                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                  'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                  'forecolor backcolor emoticons | help',
-                                menubar: '',
-                                setup : function(ed) {
-								    ed.on('init', function(event) {
-								      ed.getContainer().setAttribute('id', 'toggle-chapter-richtext-area');
-								    });
-								},
-								paste_preprocess: function(editor, args) {
-									args.content = args.content.replaceAll("<br />", "");
-								},
-								paste_postprocess: function(plugin, args) {
-									let removeParagraphStyles = function(node) {
-										// Only strip styles from paragraph tags.
-										if(node.localName == "p") {
-											node.setAttribute('style', {});
-										}
-										for(let index = 0; index < node.children.length; index++) {
-											removeParagraphStyles(node.children[index]);
-										}
-									};
-									removeParagraphStyles(args.node);
-								},
-                                init_instance_callback : function(editor) {
-                                	var chapterText = document.getElementById('chapter_text').value;
-                                    editor.setContent(chapterText);
-									// This handles user preferences in local storage for whether they prefer rich text or plain text/HTML input.
-									let richTextPreference = localStorage.getItem('rich-text');
-									const richTextCheckbox = document.querySelector('#chapter-text-edit-mode-toggle');
-									// This data is saved in local storage as a string, and we want to default to rich text mode.
-									richTextCheckbox.checked = richTextPreference !== 'false';
-									updateModeText();
-                                }
-                              });
-           </script>
-        </div>
-        <div class="uk-width-1-1" id="chapter-form-html-text">
-            <textarea id="toggle-chapter-plaintext-area" rows="25" name="text_plain" class="chapter-text-toggle uk-width-expand" hidden>{{ chapter.text|safe|default_if_none:'' }}</textarea>
-        </div>
+    <div class="uk-margin-bottom">
+        <span class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75"></sup>    
+        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
+        </span>
+        <label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText(true)" checked>
+        <span class="slider round"></span></label>
     </div>
+    {% include 'ourchive_tinymce_template.html' with form_field_value=chapter.text form_field='text' obj_name='chapter' min_height=450 setup_id='toggle-chapter-richtext-area' %}
 </div>
 <div class="uk-margin" id="chapter-form-end-notes-parent">
     <label class="uk-form-label" for="form-horizontal-text" id="chapter-form-end-notes-label">{% translate 'End Notes' %}</label>
