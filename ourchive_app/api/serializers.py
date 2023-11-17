@@ -576,9 +576,17 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
                 if chapter_id and existing_number.first().id != chapter_id:
                     raise serializers.ValidationError({"message": [f"Chapter with number {validated_data['number']} already exists. Please review chapter numbers."]})
 
+    def clean_rich_text(self, rich_fields, validated_data):
+        for field in rich_fields:
+            if field in validated_data:
+                validated_data[field] = clean_text(validated_data[field]) if field in validated_data and validated_data[field] is not None else ''
+        return validated_data
+
+    def get_rich_text_fields(self):
+        return ['text', 'notes', 'end_notes']
+
     def update(self, chapter, validated_data):
-        if 'text' in validated_data:
-            validated_data['text'] = clean_text(validated_data['text']) if 'text' in validated_data and validated_data['text'] is not None else ''
+        validated_data = self.clean_rich_text(self.get_rich_text_fields(), validated_data)
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
@@ -598,7 +606,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         validated_data['word_count'] = 0 if not (
             'text' in validated_data and validated_data['text']) else len(validated_data['text'].split())
-        validated_data['text'] = clean_text(validated_data['text']) if validated_data['text'] is not None else ''
+        validated_data = self.clean_rich_text(self.get_rich_text_fields(), validated_data)
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
