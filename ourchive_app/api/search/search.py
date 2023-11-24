@@ -169,7 +169,7 @@ class PostgresProvider:
         ) else f"/search/?limit={page_size}&page={page-1}&object_type={obj.__name__}"
         return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
 
-    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True):
+    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True, has_private=False):
         resultset = None
         page = int(page)
         # filter on query first, then use filters (more exact, used when searching within) to narrow
@@ -194,6 +194,8 @@ class PostgresProvider:
                     resultset = resultset.filter(filters[1]) 
         if resultset is not None and has_drafts:
             resultset = resultset.filter(draft=False)
+        if resultset is not None and has_private:
+            resultset = resultset.filter(is_private=False)
         if resultset is not None and len(resultset) == 0 and query:
             # if exact matching & filtering produced no results, let's do limited trigram searching
             if len(trigram_fields) > 1:
@@ -369,7 +371,7 @@ class PostgresProvider:
         if not query and not bookmark_filters:
             return {'data': []}
         resultset = self.run_queries(bookmark_filters, query, Bookmark, [
-                                     'title', 'description'], bookmark_search.term, kwargs.get('page', 1), bookmark_search.order_by, True)
+                                     'title', 'description'], bookmark_search.term, kwargs.get('page', 1), bookmark_search.order_by, True, .85, True, True)
         result_json = self.build_bookmark_resultset(resultset[0], bookmark_search.reserved_fields)
         return {'data': result_json, 'page': resultset[1]}
 

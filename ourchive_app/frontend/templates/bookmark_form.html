@@ -66,6 +66,16 @@
             </div>
         </div>
     </div>
+    <div class="uk-margin" id="bookmark-form-priv-parent">
+        <label id="bookmark-form-draft-label" class="uk-form-label" for="form-horizontal-text">Private? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="Private Help"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A private bookmark will not be seen by anyone but you.{% endblocktranslate %}</div>
+        </label>
+        <div id="bookmark-form-priv-controls" class="uk-form-controls">
+            <div id="bookmark-form-priv-inline" class="uk-inline">
+                <label id="bookmark-form-priv-label" class="switch"><input id="bookmark-form-priv-input" title="Private Checkbox" class="uk-checkbox" type="checkbox" name="is_private" {% if bookmark.is_private %} checked {% endif %}> <span class="slider round"></span> </label>
+            </div>
+        </div>
+    </div>
     {% if settings.AllowComments %}
     <div class="uk-margin" id="bookmark-form-allow-comments-parent">
         <label id="bookmark-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>

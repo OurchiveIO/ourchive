@@ -259,7 +259,6 @@ def get_bookmark_boilerplate(request, work_id):
 			'description': '',
 			'user': request.user.username,
 			'work': {'title': request.GET.get('title'), 'id': work_id},
-			'is_private': True,
 			'anon_comments_permitted': True,
 			'comments_permitted': True
 		}
