@@ -564,6 +564,8 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.IntegerField(read_only=True)
     word_count = serializers.IntegerField(read_only=True)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
 
     class Meta:
         model = Chapter
@@ -672,7 +674,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True
     )
     has_drafts = serializers.SerializerMethodField()
-
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
 
     class Meta:
         model = Work
@@ -782,6 +785,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
 
     # TODO: gotta be a better way to do this
     class Meta:
@@ -894,6 +899,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     works = AttributeValueSerializer(many=True, required=False)
     bookmarks_readonly = BookmarkSerializer(many=True, required=False, source='bookmarks')
     bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), required=False, many=True)
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
 
     class Meta:
         model = BookmarkCollection

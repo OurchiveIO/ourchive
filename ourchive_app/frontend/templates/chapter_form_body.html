@@ -20,6 +20,22 @@
     </div>
 </div>
 {% if not suppress_info_fields %}
+<div class="uk-margin" id="chapter-form-created-parent">
+    <label id="chapter-form-created-label" class="uk-form-label" for="form-horizontal-text">Post Date</label>
+    <div id="chapter-form-created-controls" class="uk-form-controls">
+        <div id="chapter-form-created-inline" class="uk-inline">
+            <input title="{% translate 'Chapter created on' %}" id="chapter-form-complete-checkbox" type="date" name="created_on" value="{{ chapter.created_on }}"> 
+        </div>
+    </div>
+</div>
+<div class="uk-margin" id="chapter-form-updated-parent">
+    <label id="chapter-form-updated-label" class="uk-form-label" for="form-horizontal-text">Update Date</label>
+    <div id="chapter-form-updated-controls" class="uk-form-controls">
+        <div id="chapter-form-updated-inline" class="uk-inline">
+            <input title="{% translate 'Chapter updated on' %}" id="chapter-form-complete-checkbox" type="date" name="updated_on" value="{{ chapter.updated_on }}"> 
+        </div>
+    </div>
+</div>
 {% if chapter.attribute_types %}
     {% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types show_header=False %}
 {% endif %}

@@ -76,6 +76,22 @@
             </div>
         </div>
     </div>
+    <div class="uk-margin" id="bookmark-form-created-parent">
+        <label id="bookmark-form-created-label" class="uk-form-label" for="form-horizontal-text">Post Date</label>
+        <div id="bookmark-form-created-controls" class="uk-form-controls">
+            <div id="bookmark-form-created-inline" class="uk-inline">
+                <input title="{% translate 'Bookmark created on' %}" id="bookmark-form-complete-checkbox" type="date" name="created_on" value="{{ bookmark.created_on }}"> 
+            </div>
+        </div>
+    </div>
+    <div class="uk-margin" id="bookmark-form-updated-parent">
+        <label id="bookmark-form-updated-label" class="uk-form-label" for="form-horizontal-text">Update Date</label>
+        <div id="bookmark-form-updated-controls" class="uk-form-controls">
+            <div id="bookmark-form-updated-inline" class="uk-inline">
+                <input title="{% translate 'Bookmark updated on' %}" id="bookmark-form-complete-checkbox" type="date" name="updated_on" value="{{ bookmark.updated_on }}"> 
+            </div>
+        </div>
+    </div>
     {% if settings.AllowComments %}
     <div class="uk-margin" id="bookmark-form-allow-comments-parent">
         <label id="bookmark-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>

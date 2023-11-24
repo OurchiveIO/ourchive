@@ -92,6 +92,22 @@
                 </div>
             </div>
         </div>
+        <div class="uk-margin" id="work-form-created-parent">
+            <label id="work-form-created-label" class="uk-form-label" for="form-horizontal-text">Post Date</label>
+            <div id="work-form-created-controls" class="uk-form-controls">
+                <div id="work-form-created-inline" class="uk-inline">
+                    <input title="{% translate 'Work created on' %}" id="work-form-complete-checkbox" type="date" name="created_on" value="{{ work.created_on }}"> 
+                </div>
+            </div>
+        </div>
+        <div class="uk-margin" id="work-form-updated-parent">
+            <label id="work-form-updated-label" class="uk-form-label" for="form-horizontal-text">Update Date</label>
+            <div id="work-form-updated-controls" class="uk-form-controls">
+                <div id="work-form-updated-inline" class="uk-inline">
+                    <input title="{% translate 'Work updated on' %}" id="work-form-complete-checkbox" type="date" name="updated_on" value="{{ work.updated_on }}> 
+                </div>
+            </div>
+        </div>
         {% if settings.AllowComments %}
         <div class="uk-margin" id="work-form-allow-comments-parent">
             <label id="work-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
