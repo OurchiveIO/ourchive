@@ -23,6 +23,8 @@ class FileHelperService:
 
 
 class FileCommon:
+    ALLOWED_TYPES = ['epub', 'pdf', 'mp4', 'mp3', 'm4b', 'mobi', 'm4a', 'zip']
+
     def get_filename(self, original_name):
         suffix = pathlib.Path(original_name).suffix
         trimmed_filename = original_name.split(suffix)[0]
@@ -40,14 +42,21 @@ class FileCommon:
             except audioread.DecodeError:
                 logging.error(f"File could not be decoded: {filename}")
 
+    def get_allowed_content_types(self, content_type):
+        for allowed_type in self.ALLOWED_TYPES:
+            if allowed_type in content_type:
+                return True
+        return False
+
 
 class LocalFileHelper:
     common = FileCommon()
 
     def handle_uploaded_file(self, file, name, username):
         filename = self.common.get_filename(name)
-        content_type = 'image/' if 'image' in file.content_type else 'audio/' if 'audio' in file.content_type else None
+        content_type = 'image/' if 'image' in file.content_type else 'audio/' if 'audio' in file.content_type else 'upload/' if self.common.get_allowed_content_types(file.content_type) else None
         if not content_type:
+            print(f"CONTENT TYPE: {file.content_type}")
             return None
         full_name = settings.MEDIA_ROOT + '/' + content_type + username + "/" + filename
         logging.debug(f"File upload: {full_name}")

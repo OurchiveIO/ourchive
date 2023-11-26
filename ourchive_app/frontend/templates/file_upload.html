@@ -1,6 +1,4 @@
-<div id="{{ object }}-upload-parent" class="js-upload-{{ object_type }} uk-placeholder uk-text-center">
-	<input style="border:0;" id="{{ object }}-file-uk-input-original" class="uk-input uk-text-muted uk-margin-small-bottom uk-text-right" type="text" value="{{ original_value }}" name="{{ object }}" placeholder="Final file url..."><br/>
-    <span id="{{ object }}-upload-icon" uk-icon="icon: ourchive-upload;ratio:.75" class="uk-padding-small"></span>
+<div id="{{ object }}-upload-parent" class="js-upload-{{ object_type }} uk-placeholder uk-text-right uk-width-medium">
     <div id="{{ object }}-upload-form" uk-form-custom="target: true">
         <input type="file" id="{{ object }}-file-input">
         <input id="{{ object }}-file-uk-input" class="uk-input uk-form-width-medium" type="text" placeholder="{{ upload_placeholder }}" name="{{ object }}-upload">
@@ -74,4 +72,5 @@
 	        }
 	    });
 	</script>
+	<input style="border:0;" id="{{ object }}-file-uk-input-original" class="uk-input uk-text-muted uk-margin-small-bottom uk-text-right" type="text" value="{{ original_value }}" name="{{ object }}" placeholder=""><br/>
 </div>
