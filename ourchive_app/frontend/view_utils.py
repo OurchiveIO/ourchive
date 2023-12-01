@@ -70,7 +70,7 @@ def get_attributes_for_display(obj_attrs):
 		if attribute['attribute_type'] not in attr_types:
 			attr_types.add(attribute['attribute_type'])
 			attrs[attribute['attribute_type']] = []
-		attrs[attribute['attribute_type']].append(attribute['display_name'])
+		attrs[attribute['attribute_type']].append({'display_name': attribute['display_name'], 'id': attribute['id']})
 	return attrs
 
 

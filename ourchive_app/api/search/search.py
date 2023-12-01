@@ -530,7 +530,7 @@ class PostgresProvider:
         collection_filters = self.get_filters(collection_search)
 
         page = kwargs['page'] if 'page' in kwargs else 1
-        attribute = AttributeValue.objects.get(pk=kwargs['attribute_id'])
+        attribute = AttributeValue.objects.get(pk=kwargs['attr_id'])
         works = Work.objects.filter(attributes__id__exact=attribute.id)
         if work_filters[0]:
             works = works.filter(work_filters[0])
