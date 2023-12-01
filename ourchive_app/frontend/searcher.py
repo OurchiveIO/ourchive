@@ -1,7 +1,7 @@
 from django.conf import settings
 from .search_models import SearchObject
-from .api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from .view_utils import *
+
 
 def get_default_search_result_tab(resultsets):
 	most_results = 0
@@ -11,6 +11,7 @@ def get_default_search_result_tab(resultsets):
 			most_results = results[0]
 			default_tab = results[1]
 	return default_tab
+
 
 def get_search_request(request, request_object, request_builder):
 	return_keys = {'include': [], 'exclude': []}
@@ -50,7 +51,6 @@ def get_search_request(request, request_object, request_builder):
 					request_object['work_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
 					request_object['bookmark_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
 				elif filter_type == 'attribute':
-					attribute_type = filter_details[0].split(',')[1]
 					attribute_text = (filter_details[1].split(',')[1]).lower() if filter_details[1].split(',')[1] else ''
 					request_object['work_search'][f'{include_exclude}_filter']['attributes'].append(attribute_text)
 					request_object['bookmark_search'][f'{include_exclude}_filter']['attributes'].append(attribute_text)
@@ -63,6 +63,7 @@ def get_search_request(request, request_object, request_builder):
 						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
 	return [request_object, return_keys]
 
+
 def build_and_execute_search(request):
 	tag_id = None
 	if 'term' in request.GET:
@@ -71,6 +72,9 @@ def build_and_execute_search(request):
 		term = request.POST['term']
 	elif 'tag_id' in request.GET:
 		tag_id = request.GET['tag_id']
+		term = ""
+	elif 'attr_id' in request.GET:
+		attr_id = request.GET['attr_id']
 		term = ""
 	else:
 		return None
@@ -82,6 +86,8 @@ def build_and_execute_search(request):
 	request_object = request_builder.with_term(term, pagination, (include_filter_any, exclude_filter_any), order_by)
 	if tag_id:
 		request_object["tag_id"] = tag_id
+	if attr_id:
+		request_object["attr_id"] = attr_id
 	request_object = get_search_request(request, request_object, request_builder)
 	works = {'data': []}
 	bookmarks = {'data': []}
@@ -136,11 +142,13 @@ def build_and_execute_search(request):
 	works_count = works['page']['count'] if 'page' in works else 0
 	bookmarks_count = bookmarks['page']['count'] if 'page' in bookmarks else 0
 	collections_count = collections['page']['count'] if 'page' in collections else 0
+	tag_count = tags['page']['count'] if 'page' in tags else 0
 	default_tab = get_default_search_result_tab(
 		[
 			[works_count, 0],
 			[bookmarks_count, 1],
 			[collections_count, 2],
+			[tag_count, 3],
 			[len(users['data']), 4]
 		])
 	template_data = {
