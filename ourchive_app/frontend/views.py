@@ -1437,6 +1437,10 @@ def works_by_tag(request, tag):
 	return search(request)
 
 
+def works_by_attribute(request, attribute):
+	return search(request)
+
+
 def works_by_tag_next(request, tag_id):
 	if 'next' in request.GET:
 		next_url = request.GET.get('next', '')
