@@ -66,6 +66,7 @@ def get_search_request(request, request_object, request_builder):
 
 def build_and_execute_search(request):
 	tag_id = None
+	attr_id = None
 	if 'term' in request.GET:
 		term = request.GET['term']
 	elif 'term' in request.POST:
