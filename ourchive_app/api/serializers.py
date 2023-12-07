@@ -181,7 +181,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
                   'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files',
                   'can_upload_images', 'default_work_type', 'collapse_chapter_image',
-                  'collapse_chapter_audio', 'collapse_chapter_text')
+                  'collapse_chapter_audio', 'collapse_chapter_text', 'copy_work_metadata')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):

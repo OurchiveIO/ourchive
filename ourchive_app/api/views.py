@@ -44,6 +44,7 @@ from django.core.mail import send_mail
 from django.utils.translation import gettext as _
 from django.db.models import Count
 from api.custom_pagination import NonPaginatedResultSetPagination
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 
 
 @api_view(['GET'])
@@ -283,7 +284,7 @@ class ImportStatus(generics.ListAPIView):
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
-    permission_classes = [RegistrationPermitted]
+    permission_classes = [RegistrationPermitted, TokenHasReadWriteScope]
 
     def perform_create(self, serializer):
         if 'invite_code' in self.request.data:
@@ -316,6 +317,13 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     def retrieve(self, request, *args, **kwargs):
         response = super(UserDetail, self).retrieve(request, args, kwargs)
         return response
+
+
+class GroupList(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    required_scopes = ['groups']
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
 
 
 class UserWorkList(generics.ListCreateAPIView):

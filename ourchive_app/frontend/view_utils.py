@@ -254,18 +254,23 @@ def prepare_chapter_data(chapter, request):
 
 
 def get_bookmark_boilerplate(request, work_id):
+	tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+	if not request.user.copy_work_metadata:
+		tags = group_tags_for_edit([], tag_types)
+	else:
+		work = do_get(f'api/works/{work_id}', request, 'Work').response_data
+		tags = group_tags_for_edit(work['tags'], tag_types) if work and 'tags' in work else group_tags_for_edit([], tag_types)
+		title = work['title'] if work else ''
 	bookmark = {
-			'title': '',
-			'description': '',
-			'user': request.user.username,
-			'work': {'title': request.GET.get('title'), 'id': work_id},
-			'anon_comments_permitted': True,
-			'comments_permitted': True
-		}
+		'title': title if request.user.copy_work_metadata else '',
+		'description': '',
+		'user': request.user.username,
+		'work': {'title': request.GET.get('title'), 'id': work_id},
+		'anon_comments_permitted': True,
+		'comments_permitted': True
+	}
 	bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
 	bookmark['attribute_types'] = process_attributes([], bookmark_attributes.response_data['results'])
-	tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
-	tags = group_tags_for_edit([], tag_types)
 	# todo - this should be a specific endpoint, we don't need to retrieve 10 objects to get config
 	star_count = do_get(f'api/bookmarks', request, 'Bookmark').response_data['star_count']
 	bookmark['rating'] = star_count

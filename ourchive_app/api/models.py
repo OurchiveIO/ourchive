@@ -41,6 +41,7 @@ class User(AbstractUser):
     collapse_chapter_audio = models.BooleanField(default=False)
     collapse_chapter_image = models.BooleanField(default=False)
     default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True, blank=True)
+    copy_work_metadata = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.display_username = self.username

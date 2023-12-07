@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
 from api import views
 from rest_framework.schemas import get_schema_view
@@ -74,6 +74,7 @@ urlpatterns = [
          name='ourchivesetting-detail'),
     path('settings/', views.OurchiveSettingList.as_view()),
     path('users/<int:pk>/', views.UserDetail.as_view(), name='user-detail'),
+    path('groups/', views.GroupList.as_view()),
     path('users/import-works/', views.ImportWorks.as_view(), name='import-works'),
     path('users/<int:pk>/importstatus/', views.ImportStatus.as_view(), name='import-status'),
     path('users/profile/<int:pk>', views.UserNameDetail.as_view(), name='user-detail'),
