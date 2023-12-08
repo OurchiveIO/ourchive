@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'oauth2_provider',
     'rest_framework',
-    'knox',
     'frontend',
     'django.contrib.postgres',
     'corsheaders',
