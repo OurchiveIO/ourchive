@@ -116,6 +116,7 @@ class UserSubscription(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
     subscribed_to_bookmark = models.BooleanField(default=False)
     subscribed_to_collection = models.BooleanField(default=False)
+    subscribed_to_work = models.BooleanField(default=False)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE

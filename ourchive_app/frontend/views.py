@@ -447,6 +447,24 @@ def user_collection_subscriptions(request, username):
 	return page_content
 
 
+def user_work_subscriptions(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
+		return redirect('/')
+	cache_key = f'subscription_{username}_{request.user}_works'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
+	response = do_get(f'api/users/{username}/subscriptions/works', request, params=request.GET)
+	page_content = render(request, 'user_work_subscriptions.html', {
+		'works': response.response_data,
+		'next': f"/users/{username}/subscriptions/works/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
+		'previous': f"/users/{username}/subscriptions/works/{response.response_data['prev_params']}" if response.response_data['prev_params'] is not None else None,
+	})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
+
+
 def user_subscriptions(request, username):
 	if not request.user.is_authenticated or not request.user.username == username:
 		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
@@ -474,6 +492,8 @@ def unsubscribe(request, username):
 			patch_data['subscribed_to_bookmark'] = False
 		if request.POST.get('subscribed_to_collection'):
 			patch_data['subscribed_to_collection'] = False
+		if request.POST.get('subscribed_to_work'):
+			patch_data['subscribed_to_work'] = False
 		response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
 		process_message(request, response)
 	return referrer_redirect(request)
@@ -488,6 +508,7 @@ def subscribe(request):
 		post_data['id'] = request.POST.get('subscription_id')
 	post_data['subscribed_to_bookmark'] = True if request.POST.get('subscribed_to_bookmark') else False
 	post_data['subscribed_to_collection'] = True if request.POST.get('subscribed_to_collection') else False
+	post_data['subscribed_to_work'] = True if request.POST.get('subscribed_to_work') else False
 	post_data['user'] = request.user.username
 	post_data['subscribed_user'] = request.POST.get('subscribed_to')
 	if 'subscription_id' in request.POST:

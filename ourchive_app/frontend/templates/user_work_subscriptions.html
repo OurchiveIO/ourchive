@@ -1,0 +1,9 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block title %}{% translate 'Work Subscriptions' %}{% endblock %}
+{% block content %}	
+<div class="uk-width-1-1" id="work-subscriptions-view-parent">
+	<h1 id="work-subscriptions-header-h1" class="uk-heading-line uk-text-center uk-margin-large-bottom"> <span id="work-subscriptions-header">{{request.user}}'s Work Subscriptions</span> </h1>
+	{% include "works_list.html" with works=works.results %}
+</div>
+{% endblock %}
