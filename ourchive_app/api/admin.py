@@ -49,7 +49,7 @@ def approve_invitations(modeladmin, request, queryset):
 
 class InvitationAdmin(admin.ModelAdmin):
     list_display = ('id', 'email', 'approved', 'join_reason', 'token_expiration', 'token_used')
-    search_fields = ('email', 'tag_type__label')
+    search_fields = ('email', 'join_reason')
     actions = [approve_invitations]
 
     def save_model(self, request, obj, form, change):
