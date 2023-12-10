@@ -173,10 +173,18 @@ def get_work_obj(request, work_id=None):
 		work_dict["created_on"] = str(datetime.now().date())
 	if not work_dict.get('updated_on', ''):
 		work_dict["updated_on"] = str(datetime.now().date())
+	else:
+		if work_dict["updated_on"] == work_dict["updated_on_original"]:
+			work_dict["updated_on"] = str(datetime.now().date())
+	work_dict.pop('updated_on_original')
 	if chapter_dict and not chapter_dict.get('created_on', ''):
 		chapter_dict["created_on"] = str(datetime.now().date())
 	if chapter_dict and not chapter_dict.get('updated_on', ''):
 		chapter_dict["updated_on"] = str(datetime.now().date())
+	else:
+		if chapter_dict and chapter_dict.get("updated_on", "") == chapter_dict.get("updated_on_original", ""):
+			chapter_dict["updated_on"] = str(datetime.now().date())
+			chapter_dict.pop('updated_on_original')
 	return [work_dict, redirect_toc, chapters, chapter_dict, publish_all]
 
 
@@ -205,6 +213,9 @@ def get_bookmark_obj(request):
 	bookmark_dict["user"] = str(request.user)
 	bookmark_dict["draft"] = 'draft' in bookmark_dict
 	bookmark_dict["attributes"] = get_attributes_from_form_data(request)
+	if bookmark_dict["updated_on"] == bookmark_dict["updated_on_original"]:
+		bookmark_dict["updated_on"] = str(datetime.now().date())
+	bookmark_dict.pop("updated_on_original")
 	return bookmark_dict
 
 
@@ -243,6 +254,9 @@ def get_bookmark_collection_obj(request):
 	collection_dict["draft"] = 'draft' in collection_dict
 	collection_dict["is_private"] = False
 	collection_dict["attributes"] = get_attributes_from_form_data(request)
+	if collection_dict["updated_on"] == collection_dict["updated_on_original"]:
+		collection_dict["updated_on"] = str(datetime.now().date())
+	collection_dict.pop("updated_on_original")
 	return collection_dict
 
 
@@ -278,7 +292,9 @@ def get_bookmark_boilerplate(request, work_id):
 		'user': request.user.username,
 		'work': {'title': request.GET.get('title'), 'id': work_id},
 		'anon_comments_permitted': True,
-		'comments_permitted': True
+		'comments_permitted': True,
+		'created_on': str(datetime.now().date()),
+		'updated_on': str(datetime.now().date())
 	}
 	bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
 	bookmark['attribute_types'] = process_attributes([], bookmark_attributes.response_data['results'])

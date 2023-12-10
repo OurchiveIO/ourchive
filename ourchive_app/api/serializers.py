@@ -602,7 +602,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         self.validate_chapter_number(validated_data, chapter.first().id)
         chapter.update(**validated_data)
         Work.objects.filter(id=chapter.first().work.id).update(
-            **{'zip_url': '', 'epub_url': ''})
+            **{'zip_url': '', 'epub_url': '', 'updated_on': str(datetime.datetime.now().date())})
         return chapter.first()
 
     def create(self, validated_data):

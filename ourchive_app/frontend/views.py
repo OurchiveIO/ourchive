@@ -658,8 +658,8 @@ def new_chapter(request, work_id):
 			'work': work_id,
 			'text': '',
 			'number': int(count) + 1,
-			'created_on': datetime.now(),
-			'updated_on': datetime.now()
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date())
 		}
 		chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True}, object_name='Chapter')
 		chapter['attribute_types'] = process_attributes([], chapter_attributes.response_data['results'])
@@ -672,6 +672,10 @@ def new_chapter(request, work_id):
 		chapter_dict["attributes"] = get_attributes_from_form_data(request)
 		if 'audio_length' in chapter_dict and not chapter_dict['audio_length']:
 			chapter_dict['audio_length'] = 0
+		if 'created_on' in chapter_dict and not chapter_dict['created_on']:
+			chapter_dict.pop('created_on')
+		if 'updated_on' in chapter_dict and not chapter_dict['updated_on']:
+			chapter_dict.pop('updated_on')
 		response = do_post(f'api/chapters/', request, data=chapter_dict, object_name='Chapter')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
@@ -839,7 +843,8 @@ def new_bookmark(request, work_id):
 			'divider': settings.TAG_DIVIDER,
 			'rating_range': bookmark_boilerplate[2],
 			'form_title': 'New Bookmark',
-			'bookmark':  bookmark_boilerplate[0]})
+			'bookmark': bookmark_boilerplate[0]
+		})
 	elif request.user.is_authenticated:
 		bookmark_dict = get_bookmark_obj(request)
 		if 'rating' not in bookmark_dict:
@@ -855,7 +860,8 @@ def new_bookmark(request, work_id):
 				'divider': settings.TAG_DIVIDER,
 				'rating_range': bookmark_boilerplate[2],
 				'form_title': 'New Bookmark',
-				'bookmark':  bookmark_boilerplate[0]})
+				'bookmark': bookmark_boilerplate[0]
+			})
 		return redirect(f'/bookmarks/{response.response_data["id"]}')
 	else:
 		return get_unauthorized_message(request, '/login', 'bookmark-create-login-error')
@@ -916,7 +922,9 @@ def new_bookmark_collection(request):
 			'is_private': True,
 			'is_draft': True,
 			'anon_comments_permitted': True,
-			'comments_permitted': True
+			'comments_permitted': True,
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date()),
 		}
 		bookmark_collection_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
 		bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes.response_data['results'])
