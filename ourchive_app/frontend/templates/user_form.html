@@ -109,8 +109,17 @@
                     <label id="profile-collapse-text-switch" class="switch"><input class="uk-checkbox" title="{% translate 'Collapse text fields input' %}" id="profile-collapse-text-checkbox" type="checkbox" name="collapse_chapter_text" {% if user.collapse_chapter_text %} checked {% endif %}> <span id="profile-collapse-text-slider" class="slider round"></span></label>
                 </div>
             </div>
-        </div>      
-
+        </div>   
+        <div class="uk-margin" id="copy-work-metadata-parent">
+            <label id="copy-work-metadata-label" class="uk-form-label" for="form-horizontal-text">Copy work metadata? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Copy work metadata help' %}"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, your bookmark of a work will be auto-populated with the work's title and tags. You can always remove or modify this data before saving your bookmark.{% endblocktranslate %}</div>
+            </label>
+            <div id="copy-work-metadata-controls" class="uk-form-controls">
+                <div id="copy-work-metadata-inline" class="uk-inline">
+                    <label id="copy-work-metadata-switch" class="switch"><input class="uk-checkbox" title="{% translate 'Copy work metadata' %}" id="copy-work-metadata-checkbox" type="checkbox" name="copy_work_metadata" {% if user.copy_work_metadata %} checked {% endif %}> <span id="copy-work-metadata-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div>
         <div class="uk-margin" id="profile-text-parent">
             <label id="profile-text-label" class="uk-form-label" for="form-horizontal-text">Profile Text</label>
             {% include 'ourchive_tinymce_template.html' with form_field_value=user.profile form_field='profile' obj_name='user' min_height=300 %}

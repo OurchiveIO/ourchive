@@ -18,6 +18,7 @@ import random
 from django.core.cache import cache
 from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
+from datetime import *
 
 def group_tags(tags):
 	tag_parent = {}
@@ -70,7 +71,7 @@ def get_attributes_for_display(obj_attrs):
 		if attribute['attribute_type'] not in attr_types:
 			attr_types.add(attribute['attribute_type'])
 			attrs[attribute['attribute_type']] = []
-		attrs[attribute['attribute_type']].append(attribute['display_name'])
+		attrs[attribute['attribute_type']].append({'display_name': attribute['display_name'], 'id': attribute['id']})
 	return attrs
 
 
@@ -114,7 +115,9 @@ def get_work_obj(request, work_id=None):
 		'text': '',
 		'work': '',
 		'draft': 'chapter_draft' in request.POST,
-		'end_notes': ''
+		'end_notes': '',
+		'created_on': str(datetime.now().date()),
+		'updated_on': str(datetime.now().date())
 	}
 	tags = []
 	tag_types = {}
@@ -166,6 +169,22 @@ def get_work_obj(request, work_id=None):
 	work_dict = work_dict.dict()
 	work_dict["user"] = str(request.user)
 	work_dict["attributes"] = get_attributes_from_form_data(request)
+	if not work_dict.get('created_on', ''):
+		work_dict["created_on"] = str(datetime.now().date())
+	if not work_dict.get('updated_on', ''):
+		work_dict["updated_on"] = str(datetime.now().date())
+	else:
+		if work_dict["updated_on"] == work_dict["updated_on_original"]:
+			work_dict["updated_on"] = str(datetime.now().date())
+	work_dict.pop('updated_on_original')
+	if chapter_dict and not chapter_dict.get('created_on', ''):
+		chapter_dict["created_on"] = str(datetime.now().date())
+	if chapter_dict and not chapter_dict.get('updated_on', ''):
+		chapter_dict["updated_on"] = str(datetime.now().date())
+	else:
+		if chapter_dict and chapter_dict.get("updated_on", "") == chapter_dict.get("updated_on_original", ""):
+			chapter_dict["updated_on"] = str(datetime.now().date())
+			chapter_dict.pop('updated_on_original')
 	return [work_dict, redirect_toc, chapters, chapter_dict, publish_all]
 
 
@@ -194,6 +213,9 @@ def get_bookmark_obj(request):
 	bookmark_dict["user"] = str(request.user)
 	bookmark_dict["draft"] = 'draft' in bookmark_dict
 	bookmark_dict["attributes"] = get_attributes_from_form_data(request)
+	if bookmark_dict["updated_on"] == bookmark_dict["updated_on_original"]:
+		bookmark_dict["updated_on"] = str(datetime.now().date())
+	bookmark_dict.pop("updated_on_original")
 	return bookmark_dict
 
 
@@ -232,6 +254,9 @@ def get_bookmark_collection_obj(request):
 	collection_dict["draft"] = 'draft' in collection_dict
 	collection_dict["is_private"] = False
 	collection_dict["attributes"] = get_attributes_from_form_data(request)
+	if collection_dict["updated_on"] == collection_dict["updated_on_original"]:
+		collection_dict["updated_on"] = str(datetime.now().date())
+	collection_dict.pop("updated_on_original")
 	return collection_dict
 
 
@@ -254,18 +279,25 @@ def prepare_chapter_data(chapter, request):
 
 
 def get_bookmark_boilerplate(request, work_id):
+	tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+	if not request.user.copy_work_metadata:
+		tags = group_tags_for_edit([], tag_types)
+	else:
+		work = do_get(f'api/works/{work_id}', request, 'Work').response_data
+		tags = group_tags_for_edit(work['tags'], tag_types) if work and 'tags' in work else group_tags_for_edit([], tag_types)
+		title = work['title'] if work else ''
 	bookmark = {
-			'title': '',
-			'description': '',
-			'user': request.user.username,
-			'work': {'title': request.GET.get('title'), 'id': work_id},
-			'anon_comments_permitted': True,
-			'comments_permitted': True
-		}
+		'title': title if request.user.copy_work_metadata else '',
+		'description': '',
+		'user': request.user.username,
+		'work': {'title': request.GET.get('title'), 'id': work_id},
+		'anon_comments_permitted': True,
+		'comments_permitted': True,
+		'created_on': str(datetime.now().date()),
+		'updated_on': str(datetime.now().date())
+	}
 	bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
 	bookmark['attribute_types'] = process_attributes([], bookmark_attributes.response_data['results'])
-	tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
-	tags = group_tags_for_edit([], tag_types)
 	# todo - this should be a specific endpoint, we don't need to retrieve 10 objects to get config
 	star_count = do_get(f'api/bookmarks', request, 'Bookmark').response_data['star_count']
 	bookmark['rating'] = star_count

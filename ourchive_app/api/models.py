@@ -41,6 +41,7 @@ class User(AbstractUser):
     collapse_chapter_audio = models.BooleanField(default=False)
     collapse_chapter_image = models.BooleanField(default=False)
     default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True, blank=True)
+    copy_work_metadata = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.display_username = self.username
@@ -115,6 +116,7 @@ class UserSubscription(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
     subscribed_to_bookmark = models.BooleanField(default=False)
     subscribed_to_collection = models.BooleanField(default=False)
+    subscribed_to_work = models.BooleanField(default=False)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE

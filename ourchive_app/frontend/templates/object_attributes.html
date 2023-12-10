@@ -4,7 +4,7 @@
     <div id="{{attribute}}-tile-attribute-type-{{type}}" class="uk-margin-small uk-visible@s {% if not forloop.last %}uk-width-1-2{% else %} uk-width-1-1 {% endif %}">
         <div class="uk-margin-remove"><span class="uk-text-bold uk-margin-right">{{ attribute }}</span></div>
         {% for single_attr in attribute_values %}
-            <div class="uk-inline uk-button-tag"><a id="{{single_attr}}-tile-attr-{{single_attr}}-link" class="uk-link-muted uk-inline uk-text-break" href="#" uk-toggle="target: #coming-soon">{{ single_attr }}</a></div><span id="coming-soon" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
+            <div class="uk-inline uk-button-tag"><a id="{{single_attr.display_name}}-tile-attr-{{single_attr.display_name}}-link" class="uk-link-muted uk-inline uk-text-break" href="/attributes/{{single_attr.id}}?attr_id={{single_attr.id}}">{{ single_attr.display_name }}</a></div>
         {% endfor %}
     </div>
 {% endfor %}
@@ -14,7 +14,7 @@
 <div class="uk-margin-small-top uk-hidden@s uk-width-medium" id="{{object}}-attributes-dl-mb">
     <span class="uk-text-bold uk-margin-small uk-hidden@s">{{ attribute }}: </span>
     {% for single_attr in attribute_values %}
-        <a id="{{object}}-attribute-{{single_attr}}-link-mb" href="#" class="uk-hidden@s ourchive-mobile-tag-list uk-inline uk-text-break" uk-toggle="target: #coming-soon-mb">{{ single_attr }}{% if not forloop.last %},{% endif %}</a><span id="coming-soon-mb" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
+        <a id="{{object}}-attribute-{{single_attr.display_name}}-link-mb" href="/attributes/{{single_attr.id}}?attr_id={{single_attr.id}}" class="uk-hidden@s ourchive-mobile-tag-list uk-inline uk-text-break">{{ single_attr.display_name }}{% if not forloop.last %},{% endif %}</a>
     {% endfor %}
 </div>
 {% endfor %}

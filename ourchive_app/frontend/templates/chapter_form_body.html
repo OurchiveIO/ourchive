@@ -24,7 +24,7 @@
     <label id="chapter-form-created-label" class="uk-form-label" for="form-horizontal-text">Post Date</label>
     <div id="chapter-form-created-controls" class="uk-form-controls">
         <div id="chapter-form-created-inline" class="uk-inline">
-            <input title="{% translate 'Chapter created on' %}" id="chapter-form-complete-checkbox" type="date" name="created_on" value="{{ chapter.created_on }}"> 
+            <input title="{% translate 'Chapter created on' %}" id="chapter-form-created-on" type="date" name="created_on" value="{{ chapter.created_on }}"> 
         </div>
     </div>
 </div>
@@ -32,7 +32,8 @@
     <label id="chapter-form-updated-label" class="uk-form-label" for="form-horizontal-text">Update Date</label>
     <div id="chapter-form-updated-controls" class="uk-form-controls">
         <div id="chapter-form-updated-inline" class="uk-inline">
-            <input title="{% translate 'Chapter updated on' %}" id="chapter-form-complete-checkbox" type="date" name="updated_on" value="{{ chapter.updated_on }}"> 
+            <input title="{% translate 'Chapter updated on' %}" id="chapter-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ chapter.updated_on }}"> 
+            <input title="{% translate 'Chapter updated on' %}" id="chapter-form-updated-on" type="date" name="updated_on" value="{{ chapter.updated_on }}"> 
         </div>
     </div>
 </div>

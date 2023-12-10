@@ -181,7 +181,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
                   'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files',
                   'can_upload_images', 'default_work_type', 'collapse_chapter_image',
-                  'collapse_chapter_audio', 'collapse_chapter_text')
+                  'collapse_chapter_audio', 'collapse_chapter_text', 'copy_work_metadata')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -602,7 +602,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         self.validate_chapter_number(validated_data, chapter.first().id)
         chapter.update(**validated_data)
         Work.objects.filter(id=chapter.first().work.id).update(
-            **{'zip_url': '', 'epub_url': ''})
+            **{'zip_url': '', 'epub_url': '', 'updated_on': str(datetime.datetime.now().date())})
         return chapter.first()
 
     def create(self, validated_data):

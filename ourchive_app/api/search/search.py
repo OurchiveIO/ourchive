@@ -1,4 +1,4 @@
-from api.models import Work, Tag, User, Chapter, TagType, WorkType, Bookmark, BookmarkComment, BookmarkCollection, ChapterComment, Message, NotificationType, Notification, OurchiveSetting
+from api.models import AttributeValue, Work, Tag, User, Chapter, TagType, WorkType, Bookmark, BookmarkComment, BookmarkCollection, ChapterComment, Message, NotificationType, Notification, OurchiveSetting
 from api import object_factory
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 import json
@@ -181,17 +181,17 @@ class PostgresProvider:
                     resultset = resultset.filter(q_item) if resultset else obj.objects.filter(q_item)
             else:
                 if not resultset and filters[0]:
-                    resultset = obj.objects.filter(filters[0]) 
+                    resultset = obj.objects.filter(filters[0])
                 elif filters[0]:
-                    resultset = resultset.filter(filters[0]) 
+                    resultset = resultset.filter(filters[0])
             if self.exclude_mode == "any" and filters[1]:
                 for q_item in filters[1].children:
                     resultset = resultset.filter(~Q(q_item)) if resultset else obj.objects.filter(q_item)
             else:
                 if not resultset and filters[1]:
-                    resultset = obj.objects.filter(filters[1]) 
+                    resultset = obj.objects.filter(filters[1])
                 elif filters[1]:
-                    resultset = resultset.filter(filters[1]) 
+                    resultset = resultset.filter(filters[1])
         if resultset is not None and has_drafts:
             resultset = resultset.filter(draft=False)
         if resultset is not None and has_private:
@@ -241,7 +241,6 @@ class PostgresProvider:
         return self.process_results(resultset, page, obj)
 
     def get_filters(self, search_object):
-        final_filters = None
         include_filters = self.build_filters(
             search_object.filter.include_filters, search_object.include_mode, True)
         exclude_filters = self.build_filters(
@@ -519,6 +518,55 @@ class PostgresProvider:
         results['user'] = {'data': [], 'page': {}}
         return results
 
+    def filter_by_attribute(self, **kwargs):
+        work_search = WorkSearch()
+        work_search.from_dict(kwargs['work_search'])
+        work_filters = self.get_filters(work_search)
+        bookmark_search = BookmarkSearch()
+        bookmark_search.from_dict(kwargs['bookmark_search'])
+        bookmark_filters = self.get_filters(bookmark_search)
+        collection_search = CollectionSearch()
+        collection_search.from_dict(kwargs['collection_search'])
+        collection_filters = self.get_filters(collection_search)
+
+        page = kwargs['page'] if 'page' in kwargs else 1
+        attribute = AttributeValue.objects.get(pk=kwargs['attr_id'])
+        works = Work.objects.filter(attributes__id__exact=attribute.id)
+        if work_filters[0]:
+            works = works.filter(work_filters[0])
+        if work_filters[1]:
+            works = works.filter(work_filters[1])
+        works = works.filter(draft=False).order_by('-updated_on').distinct()
+        bookmarks = Bookmark.objects.filter(attributes__id__exact=attribute.id)
+        if bookmark_filters[0]:
+            bookmarks = bookmarks.filter(bookmark_filters[0])
+        if bookmark_filters[1]:
+            bookmarks = bookmarks.filter(bookmark_filters[1])
+        bookmarks = bookmarks.filter(draft=False).order_by('-updated_on').distinct()
+        collections = BookmarkCollection.objects.filter(attributes__id__exact=attribute.id)
+        if collection_filters[0]:
+            collections = collections.filter(collection_filters[0])
+        if collection_filters[1]:
+            collections = collections.filter(collection_filters[1])
+        collections = collections.filter(draft=False).order_by('-updated_on').distinct()
+
+        works_processed = self.process_results(works, page, Work)
+        bookmarks_processed = self.process_results(bookmarks, page, Bookmark)
+        collections_processed = self.process_results(collections, page, BookmarkCollection)
+
+        # tag result object
+        tag_results = {'data': {}, 'page': {'count': 0}}
+
+        work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
+        bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
+        collection_results = {'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
+        results = {}
+        results['work'] = work_results
+        results['bookmark'] = bookmark_results
+        results['collection'] = collection_results
+        results['tag'] = tag_results
+        results['user'] = {'data': [], 'page': {}}
+        return results
 
     def get_result_facets(self, results, tag_id=None):
         result_json = []

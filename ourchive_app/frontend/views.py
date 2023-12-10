@@ -20,6 +20,7 @@ from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
 from .searcher import build_and_execute_search
 from .view_utils import *
+from datetime import *
 
 logger = logging.getLogger(__name__)
 
@@ -447,6 +448,24 @@ def user_collection_subscriptions(request, username):
 	return page_content
 
 
+def user_work_subscriptions(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
+		return redirect('/')
+	cache_key = f'subscription_{username}_{request.user}_works'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
+	response = do_get(f'api/users/{username}/subscriptions/works', request, params=request.GET)
+	page_content = render(request, 'user_work_subscriptions.html', {
+		'works': response.response_data,
+		'next': f"/users/{username}/subscriptions/works/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
+		'previous': f"/users/{username}/subscriptions/works/{response.response_data['prev_params']}" if response.response_data['prev_params'] is not None else None,
+	})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
+
+
 def user_subscriptions(request, username):
 	if not request.user.is_authenticated or not request.user.username == username:
 		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
@@ -474,6 +493,8 @@ def unsubscribe(request, username):
 			patch_data['subscribed_to_bookmark'] = False
 		if request.POST.get('subscribed_to_collection'):
 			patch_data['subscribed_to_collection'] = False
+		if request.POST.get('subscribed_to_work'):
+			patch_data['subscribed_to_work'] = False
 		response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
 		process_message(request, response)
 	return referrer_redirect(request)
@@ -488,6 +509,7 @@ def subscribe(request):
 		post_data['id'] = request.POST.get('subscription_id')
 	post_data['subscribed_to_bookmark'] = True if request.POST.get('subscribed_to_bookmark') else False
 	post_data['subscribed_to_collection'] = True if request.POST.get('subscribed_to_collection') else False
+	post_data['subscribed_to_work'] = True if request.POST.get('subscribed_to_work') else False
 	post_data['user'] = request.user.username
 	post_data['subscribed_user'] = request.POST.get('subscribed_to')
 	if 'subscription_id' in request.POST:
@@ -575,11 +597,15 @@ def new_work(request):
 				('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP'), ('M4A', 'M4A'),
 				('MOBI', 'MOBI')],
 			'anon_comments_permitted': True,
-			'comments_permitted': True
+			'comments_permitted': True,
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date())
 		}
 		work_chapter = {
 			'title': '',
-			'number': 1
+			'number': 1,
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date())
 		}
 		tag_types = do_get(f'api/tagtypes', request, 'Tag').response_data
 		tags = group_tags_for_edit([], tag_types)
@@ -595,7 +621,18 @@ def new_work(request):
 	elif request.user.is_authenticated:
 		work_data = get_work_obj(request)
 		chapter_dict = work_data[3]
-		work = do_post(f'api/works/', request, work_data[0], 'Work').response_data
+		work = do_post(f'api/works/', request, work_data[0], 'Work')
+		response = work
+		work = work.response_data
+		if 'id' not in work:
+			messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+			return render(request, 'work_form.html', {
+				'tags': work_data[0]['tags'],
+				'divider': settings.TAG_DIVIDER,
+				'form_title': 'New Work',
+				'work_types': work_types['results'],
+				'work': work_data[0],
+				'work_chapter': chapter_dict})
 		if chapter_dict:
 			chapter_dict['work'] = work['id']
 			response = do_post(f'api/chapters/', request, chapter_dict, 'Chapter')
@@ -616,7 +653,14 @@ def new_work(request):
 def new_chapter(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
 		count = request.GET.get('count') if request.GET.get('count') != '' else 0
-		chapter = {'title': '', 'work': work_id, 'text': '', 'number': int(count) + 1}
+		chapter = {
+			'title': '',
+			'work': work_id,
+			'text': '',
+			'number': int(count) + 1,
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date())
+		}
 		chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True}, object_name='Chapter')
 		chapter['attribute_types'] = process_attributes([], chapter_attributes.response_data['results'])
 		return render(request, 'chapter_form.html', {
@@ -628,6 +672,10 @@ def new_chapter(request, work_id):
 		chapter_dict["attributes"] = get_attributes_from_form_data(request)
 		if 'audio_length' in chapter_dict and not chapter_dict['audio_length']:
 			chapter_dict['audio_length'] = 0
+		if 'created_on' in chapter_dict and not chapter_dict['created_on']:
+			chapter_dict.pop('created_on')
+		if 'updated_on' in chapter_dict and not chapter_dict['updated_on']:
+			chapter_dict.pop('updated_on')
 		response = do_post(f'api/chapters/', request, data=chapter_dict, object_name='Chapter')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
@@ -795,7 +843,8 @@ def new_bookmark(request, work_id):
 			'divider': settings.TAG_DIVIDER,
 			'rating_range': bookmark_boilerplate[2],
 			'form_title': 'New Bookmark',
-			'bookmark':  bookmark_boilerplate[0]})
+			'bookmark': bookmark_boilerplate[0]
+		})
 	elif request.user.is_authenticated:
 		bookmark_dict = get_bookmark_obj(request)
 		if 'rating' not in bookmark_dict:
@@ -811,7 +860,8 @@ def new_bookmark(request, work_id):
 				'divider': settings.TAG_DIVIDER,
 				'rating_range': bookmark_boilerplate[2],
 				'form_title': 'New Bookmark',
-				'bookmark':  bookmark_boilerplate[0]})
+				'bookmark': bookmark_boilerplate[0]
+			})
 		return redirect(f'/bookmarks/{response.response_data["id"]}')
 	else:
 		return get_unauthorized_message(request, '/login', 'bookmark-create-login-error')
@@ -872,7 +922,9 @@ def new_bookmark_collection(request):
 			'is_private': True,
 			'is_draft': True,
 			'anon_comments_permitted': True,
-			'comments_permitted': True
+			'comments_permitted': True,
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date()),
 		}
 		bookmark_collection_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
 		bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes.response_data['results'])
@@ -1434,6 +1486,10 @@ def add_collection_to_bookmark(request, pk):
 
 
 def works_by_tag(request, tag):
+	return search(request)
+
+
+def works_by_attribute(request, attribute):
 	return search(request)
 
 

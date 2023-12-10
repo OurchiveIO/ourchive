@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'oauth2_provider',
     'rest_framework',
     'frontend',
     'django.contrib.postgres',
@@ -49,7 +50,6 @@ INSTALLED_APPS = [
     'api',
     'etl',
     'django_apscheduler'
-    #'background_task',
 ]
 
 MIDDLEWARE = [
@@ -197,13 +197,18 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+OAUTH2_PROVIDER = {
+    'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'}
+}
+
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'api.custom_exception_handler.custom_exception_handler',
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'api.custom_pagination.CustomPagination',
     'PAGE_SIZE': 10,
@@ -216,6 +221,8 @@ REST_FRAMEWORK = {
         'user': '500000/day'
     },
 }
+
+LOGIN_URL = '/admin/login/'
 
 LOGGING = {
     'version': 1,

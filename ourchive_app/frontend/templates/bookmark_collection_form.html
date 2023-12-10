@@ -128,7 +128,7 @@ function addSelectedBookmarks() {
         <label id="bkcol-form-created-label" class="uk-form-label" for="form-horizontal-text">Post Date</label>
         <div id="bkcol-form-created-controls" class="uk-form-controls">
             <div id="bkcol-form-created-inline" class="uk-inline">
-                <input title="{% translate 'Collection created on' %}" id="bkcol-form-complete-checkbox" type="date" name="created_on" value="{{ bookmark_collection.created_on }}"> 
+                <input title="{% translate 'Collection created on' %}" id="bkcol-form-created-on" type="date" name="created_on" value="{{ bookmark_collection.created_on }}"> 
             </div>
         </div>
     </div>
@@ -136,7 +136,8 @@ function addSelectedBookmarks() {
         <label id="bkcol-form-updated-label" class="uk-form-label" for="form-horizontal-text">Update Date</label>
         <div id="bkcol-form-updated-controls" class="uk-form-controls">
             <div id="bkcol-form-updated-inline" class="uk-inline">
-                <input title="{% translate 'Collection updated on' %}" id="bkcol-form-complete-checkbox" type="date" name="updated_on" value="{{ bookmark_collection.updated_on }}"> 
+                <input title="{% translate 'Collection updated on' %}" id="bkcol-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ bookmark_collection.updated_on }}"> 
+                <input title="{% translate 'Collection updated on' %}" id="bkcol-form-updated-on" type="date" name="updated_on" value="{{ bookmark_collection.updated_on }}"> 
             </div>
         </div>
     </div>

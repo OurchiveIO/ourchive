@@ -44,6 +44,7 @@ from django.core.mail import send_mail
 from django.utils.translation import gettext as _
 from django.db.models import Count
 from api.custom_pagination import NonPaginatedResultSetPagination
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 
 
 @api_view(['GET'])
@@ -283,7 +284,7 @@ class ImportStatus(generics.ListAPIView):
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
-    permission_classes = [RegistrationPermitted]
+    permission_classes = [RegistrationPermitted, TokenHasReadWriteScope]
 
     def perform_create(self, serializer):
         if 'invite_code' in self.request.data:
@@ -316,6 +317,13 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     def retrieve(self, request, *args, **kwargs):
         response = super(UserDetail, self).retrieve(request, args, kwargs)
         return response
+
+
+class GroupList(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    required_scopes = ['groups']
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
 
 
 class UserWorkList(generics.ListCreateAPIView):
@@ -387,6 +395,10 @@ class WorkList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'cover_url' in self.request.data:
             self.request.data.pop('cover_url')
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         serializer.save(user=self.request.user)
 
 
@@ -484,6 +496,18 @@ class UserSubscriptionBookmarkCollectionList(generics.ListAPIView):
         return BookmarkCollection.objects.filter(draft=False).filter(user__id__in=ids).order_by('-created_on')
 
 
+class UserSubscriptionWorkList(generics.ListAPIView):
+    serializer_class = WorkSerializer
+    permission_classes = [IsOwner, ObjectIsPrivate]
+
+    def get_queryset(self):
+        subscriptions = UserSubscription.objects.filter(
+            user__id=self.request.user.id).filter(
+            subscribed_to_work=True)
+        ids = subscriptions.values_list('subscribed_user', flat=True).all()
+        return Work.objects.filter(draft=False).filter(user__id__in=ids).order_by('-created_on')
+
+
 class UserSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSubscriptionSerializer
     permission_classes = [IsOwner]
@@ -510,6 +534,10 @@ class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         serializer.save(attributes=attributes)
 
     def perform_update(self, serializer):
@@ -518,6 +546,10 @@ class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         serializer.save(attributes=attributes)
 
 
@@ -647,6 +679,10 @@ class ChapterList(generics.ListCreateAPIView):
             self.request.data.pop('image_url')
         if not self.request.user.can_upload_audio and 'audio_url' in self.request.data:
             self.request.data.pop('audio_url')
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         serializer.save(user=self.request.user)
 
 
@@ -665,6 +701,10 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         serializer.save(attributes=attributes)
 
     def perform_update(self, serializer):
@@ -675,6 +715,10 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         serializer.save(attributes=attributes)
 
 
@@ -747,6 +791,10 @@ class BookmarkList(generics.ListCreateAPIView):
         return response
 
     def create(self, request, *args, **kwargs):
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         response = super(BookmarkList, self).create(request, args, kwargs)
         response.data['star_count'] = get_star_count(
             OurchiveSetting.objects.get(name='Rating Star Count'))
@@ -787,12 +835,20 @@ class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         serializer.save(attributes=attributes)
 
     def perform_update(self, serializer):
         attributes = []
         if 'attributes' in self.request.data:
             attributes = self.request.data['attributes']
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         serializer.save(attributes=attributes)
 
 
@@ -846,6 +902,10 @@ class BookmarkCollectionList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
             self.request.data.pop('header_url')
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         serializer.save(user=self.request.user)
 
 
@@ -862,6 +922,10 @@ class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
             attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
             self.request.data.pop('header_url')
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
         serializer.save(user=self.request.user, attributes=attributes)
 
     def perform_create(self, serializer):
