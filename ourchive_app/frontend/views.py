@@ -20,6 +20,7 @@ from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
 from .searcher import build_and_execute_search
 from .view_utils import *
+from datetime import *
 
 logger = logging.getLogger(__name__)
 
@@ -596,11 +597,15 @@ def new_work(request):
 				('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP'), ('M4A', 'M4A'),
 				('MOBI', 'MOBI')],
 			'anon_comments_permitted': True,
-			'comments_permitted': True
+			'comments_permitted': True,
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date())
 		}
 		work_chapter = {
 			'title': '',
-			'number': 1
+			'number': 1,
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date())
 		}
 		tag_types = do_get(f'api/tagtypes', request, 'Tag').response_data
 		tags = group_tags_for_edit([], tag_types)
@@ -616,7 +621,18 @@ def new_work(request):
 	elif request.user.is_authenticated:
 		work_data = get_work_obj(request)
 		chapter_dict = work_data[3]
-		work = do_post(f'api/works/', request, work_data[0], 'Work').response_data
+		work = do_post(f'api/works/', request, work_data[0], 'Work')
+		response = work
+		work = work.response_data
+		if 'id' not in work:
+			messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+			return render(request, 'work_form.html', {
+				'tags': work_data[0]['tags'],
+				'divider': settings.TAG_DIVIDER,
+				'form_title': 'New Work',
+				'work_types': work_types['results'],
+				'work': work_data[0],
+				'work_chapter': chapter_dict})
 		if chapter_dict:
 			chapter_dict['work'] = work['id']
 			response = do_post(f'api/chapters/', request, chapter_dict, 'Chapter')
@@ -637,7 +653,14 @@ def new_work(request):
 def new_chapter(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
 		count = request.GET.get('count') if request.GET.get('count') != '' else 0
-		chapter = {'title': '', 'work': work_id, 'text': '', 'number': int(count) + 1}
+		chapter = {
+			'title': '',
+			'work': work_id,
+			'text': '',
+			'number': int(count) + 1,
+			'created_on': datetime.now(),
+			'updated_on': datetime.now()
+		}
 		chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True}, object_name='Chapter')
 		chapter['attribute_types'] = process_attributes([], chapter_attributes.response_data['results'])
 		return render(request, 'chapter_form.html', {

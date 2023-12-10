@@ -18,6 +18,7 @@ import random
 from django.core.cache import cache
 from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
+from datetime import *
 
 def group_tags(tags):
 	tag_parent = {}
@@ -114,7 +115,9 @@ def get_work_obj(request, work_id=None):
 		'text': '',
 		'work': '',
 		'draft': 'chapter_draft' in request.POST,
-		'end_notes': ''
+		'end_notes': '',
+		'created_on': str(datetime.now().date()),
+		'updated_on': str(datetime.now().date())
 	}
 	tags = []
 	tag_types = {}
@@ -166,6 +169,14 @@ def get_work_obj(request, work_id=None):
 	work_dict = work_dict.dict()
 	work_dict["user"] = str(request.user)
 	work_dict["attributes"] = get_attributes_from_form_data(request)
+	if not work_dict.get('created_on', ''):
+		work_dict["created_on"] = str(datetime.now().date())
+	if not work_dict.get('updated_on', ''):
+		work_dict["updated_on"] = str(datetime.now().date())
+	if chapter_dict and not chapter_dict.get('created_on', ''):
+		chapter_dict["created_on"] = str(datetime.now().date())
+	if chapter_dict and not chapter_dict.get('updated_on', ''):
+		chapter_dict["updated_on"] = str(datetime.now().date())
 	return [work_dict, redirect_toc, chapters, chapter_dict, publish_all]
 
 
