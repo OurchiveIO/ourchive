@@ -7,6 +7,7 @@ from django.forms.widgets import Input
 from django.core.mail import send_mail
 from django.conf import settings
 from django.forms import ModelForm, ChoiceField
+import datetime
 
 
 class RichTextEditorWidget(Input):
@@ -42,6 +43,7 @@ def send_invite_email(invitation, approved=False):
 @admin.action(description="Approve selected invitations")
 def approve_invitations(modeladmin, request, queryset):
     for invitation in queryset:
+        invitation.token_expiration = datetime.datetime.now() + datetime.timedelta(days=7)
         send_invite_email(invitation, True)
         invitation.approved = True
         invitation.save()

@@ -184,7 +184,6 @@ class Invitations(APIView):
         invitation.email = html.escape(request.data['email']).replace('+', '%2B')
         invitation.join_reason = nh3.clean(request.data['join_reason'])
         invitation.invite_token = get_random_string(length=100)
-        invitation.token_expiration = datetime.datetime.now() + datetime.timedelta(days=7)
         invitation.register_link = f"{settings.ALLOWED_HOSTS[0]}/register?invite_token={invitation.invite_token}&email={invitation.email}"
         invitation.save()
         send_mail(

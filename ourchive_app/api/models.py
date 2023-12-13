@@ -703,7 +703,7 @@ class Invitation(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     email = models.CharField(max_length=200)
     invite_token = models.CharField(max_length=200)
-    token_expiration = models.DateTimeField()
+    token_expiration = models.DateTimeField(blank=True, null=True)
     token_used = models.BooleanField(default=False)
     register_link = models.CharField(max_length=200)
     approved = models.BooleanField(default=False)
