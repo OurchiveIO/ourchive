@@ -601,8 +601,12 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
                 validated_data['image_url'] = ''
         self.validate_chapter_number(validated_data, chapter.first().id)
         chapter.update(**validated_data)
+        if chapter.first().work.chapters.count() > 1:
+            work_updated_on = chapter.first().updated_on
+        else:
+            work_updated_on = chapter.first().work.updated_on
         Work.objects.filter(id=chapter.first().work.id).update(
-            **{'zip_url': '', 'epub_url': '', 'updated_on': str(datetime.datetime.now().date())})
+            **{'zip_url': '', 'epub_url': '', 'updated_on': work_updated_on})
         return chapter.first()
 
     def create(self, validated_data):
