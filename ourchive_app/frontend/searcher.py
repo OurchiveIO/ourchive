@@ -79,6 +79,7 @@ def build_and_execute_search(request):
 		term = ""
 	else:
 		return None
+	active_tab = request.POST.get('active_tab', None)
 	include_filter_any = 'any' if request.POST.get('include_any_all') == 'on' else 'all'
 	exclude_filter_any = 'any' if request.POST.get('exclude_any_all') == 'on' else 'all'
 	order_by = request.POST['order_by'] if 'order_by' in request.POST else '-updated_on'
@@ -151,7 +152,7 @@ def build_and_execute_search(request):
 			[collections_count, 2],
 			[tag_count, 3],
 			[len(users['data']), 4]
-		])
+		]) if not active_tab else active_tab
 	template_data = {
 		'works': works,
 		'bookmarks': bookmarks,
