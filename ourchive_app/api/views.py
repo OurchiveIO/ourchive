@@ -142,10 +142,13 @@ class FileUpload(APIView):
         if 'files[]' in request.FILES:
             if 'image' in request.FILES['files[]'].content_type:
                 if not request.user.can_upload_images:
-                    return Response({'message': 'User does not have permission to upload images.'}, status=403)
+                    return Response({'message': _('User does not have permission to upload images.')}, status=403)
             elif 'audio' in request.FILES['files[]'].content_type:
                 if not request.user.can_upload_audio:
-                    return Response({'message': 'User does not have permission to upload audio.'}, status=403)
+                    return Response({'message': _('User does not have permission to upload audio.')}, status=403)
+            elif 'video' in request.FILES['files[]'].content_type:
+                if not request.user.can_upload_video:
+                    return Response({'message': _('User does not have permission to upload video.')}, status=403)
             else:
                 if not request.user.can_upload_export_files:
                     return Response({'message': 'User does not have permission to upload this file.'}, status=403)
@@ -678,6 +681,8 @@ class ChapterList(generics.ListCreateAPIView):
             self.request.data.pop('image_url')
         if not self.request.user.can_upload_audio and 'audio_url' in self.request.data:
             self.request.data.pop('audio_url')
+        if not self.request.user.can_upload_video and 'video_url' in self.request.data:
+            self.request.data.pop('video_url')
         if 'created_on' in self.request.data and not self.request.data['created_on']:
             self.request.data['created_on'] = str(datetime.datetime.now().date())
         if 'updated_on' in self.request.data and not self.request.data['updated_on']:

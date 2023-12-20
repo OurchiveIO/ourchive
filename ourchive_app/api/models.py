@@ -31,6 +31,7 @@ class User(AbstractUser):
     can_upload_audio = models.BooleanField(default=False)
     can_upload_images = models.BooleanField(default=False)
     can_upload_export_files = models.BooleanField(default=False)
+    can_upload_video = models.BooleanField(default=False)
     default_post_language = models.CharField(max_length=10, blank=True, null=True)
     default_search_language = models.CharField(max_length=10, blank=True, null=True)
     default_editor = models.CharField(max_length=10, blank=True, null=True)
@@ -275,6 +276,9 @@ class Chapter(models.Model):
     audio_url = models.CharField(max_length=600, null=True, blank=True)
     audio_description = models.CharField(max_length=600, null=True, blank=True)
     audio_length = models.BigIntegerField(null=True, blank=True, default=0)
+    video_url = models.CharField(max_length=600, null=True, blank=True)
+    video_description = models.CharField(max_length=600, null=True, blank=True)
+    video_length = models.BigIntegerField(null=True, blank=True, default=0)
     image_url = models.CharField(max_length=600, null=True, blank=True)
     image_alt_text = models.CharField(max_length=600, null=True, blank=True)
     image_format = models.CharField(max_length=100, null=True, blank=True)
@@ -673,7 +677,7 @@ class OurchiveSetting(models.Model):
 
 class ContentPage(models.Model):
 
-    __tablename__ = 'ourchive_settings'
+    __tablename__ = 'ourchive_contentpage'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
@@ -698,7 +702,7 @@ class ContentPage(models.Model):
 
 class Invitation(models.Model):
 
-    __tablename__ = 'ourchive_settings'
+    __tablename__ = 'ourchive_invitation'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     email = models.CharField(max_length=200)
@@ -707,6 +711,7 @@ class Invitation(models.Model):
     token_used = models.BooleanField(default=False)
     register_link = models.CharField(max_length=200)
     approved = models.BooleanField(default=False)
+    allow_upload = models.BooleanField(default=False)
     join_reason = models.TextField(max_length=400, blank=True, null=True)
 
     def __repr__(self):
@@ -715,7 +720,7 @@ class Invitation(models.Model):
 
 class AttributeType(models.Model):
 
-    __tablename__ = 'ourchive_settings'
+    __tablename__ = 'ourchive_attributetype'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
@@ -750,7 +755,7 @@ class AttributeType(models.Model):
 
 class AttributeValue(models.Model):
 
-    __tablename__ = 'ourchive_settings'
+    __tablename__ = 'ourchive_attributevalue'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)

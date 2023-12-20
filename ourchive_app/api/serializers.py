@@ -169,6 +169,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     can_upload_audio = serializers.ReadOnlyField(required=False)
     can_upload_images = serializers.ReadOnlyField(required=False)
     can_upload_export_files = serializers.ReadOnlyField(required=False)
+    can_upload_video = serializers.ReadOnlyField(required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     default_work_type = serializers.SlugRelatedField(
         queryset=WorkType.objects.all(),
@@ -180,13 +181,15 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                   'work_set', 'bookmark_set', 'userblocks_set', 'profile',
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
                   'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files',
-                  'can_upload_images', 'default_work_type', 'collapse_chapter_image',
+                  'can_upload_images', 'can_upload_video', 'default_work_type', 'collapse_chapter_image',
                   'collapse_chapter_audio', 'collapse_chapter_text', 'copy_work_metadata')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         require_invite = OurchiveSetting.objects.filter(
             name='Invite Only').first()
+        allow_upload_all = convert_boolean(OurchiveSetting.objects.filter(
+            name='Auto-Allow Upload').first().value)
         if convert_boolean(require_invite.value):
             if 'invite_code' not in validated_data:
                 raise serializers.ValidationError({"message": ["Invite only instance; invite_code must be present."]})
@@ -194,6 +197,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                 invite_token=validated_data['invite_code']).first()
             if invitation.token_expiration.date() >= datetime.datetime.now().date():
                 invitation.token_used = True
+                allow_upload_all = True if (not allow_upload_all and invitation.allow_upload) else allow_upload_all
                 invitation.save()
             else:
                 raise serializers.ValidationError({"message": ["Invite token has expired."]})
@@ -217,6 +221,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             icon=icon,
             icon_alt_text=icon_alt_text
         )
+        if allow_upload_all:
+            user.can_upload_audio = True
+            user.can_upload_images = True
+            user.can_upload_export_files = True
+            user.can_upload_video = True
         try:
             validate_password(validated_data['password'], user)
         except ValidationError:

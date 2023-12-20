@@ -39,13 +39,22 @@ def send_invite_email(invitation, approved=False):
             fail_silently=False,
         )
 
-
 @admin.action(description="Approve selected invitations")
 def approve_invitations(modeladmin, request, queryset):
     for invitation in queryset:
         invitation.token_expiration = datetime.datetime.now() + datetime.timedelta(days=7)
         send_invite_email(invitation, True)
         invitation.approved = True
+        invitation.save()
+
+
+@admin.action(description="Approve selected invitations & allow upload")
+def approve_invitations_and_allow_upload(modeladmin, request, queryset):
+    for invitation in queryset:
+        invitation.token_expiration = datetime.datetime.now() + datetime.timedelta(days=7)
+        send_invite_email(invitation, True)
+        invitation.approved = True
+        invitation.allow_upload = True
         invitation.save()
 
 
@@ -99,7 +108,7 @@ class OurchiveSettingAdmin(admin.ModelAdmin):
     form = SettingsForm
     exclude = ('valtype',)
     readonly_fields = ('name', )
-    fields = ('name', 'value',)
+    fields = ('name', 'value')
     list_display = ('id', 'name', 'value', 'uid')
 
 
@@ -124,17 +133,25 @@ def allow_export_upload(modeladmin, request, queryset):
         user.save()
 
 
+@admin.action(description="Allow selected users to upload video")
+def allow_video_upload(modeladmin, request, queryset):
+    for user in queryset:
+        user.can_upload_video = True
+        user.save()
+
+
 @admin.action(description="Allow selected users to upload all files")
 def allow_all_upload(modeladmin, request, queryset):
     for user in queryset:
         user.can_upload_export_files = True
         user.can_upload_audio = True
         user.can_upload_images = True
+        user.can_upload_video = True
         user.save()
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'id', 'email', 'is_staff', 'can_upload_images', 'can_upload_audio', 'can_upload_export_files')
+    list_display = ('username', 'id', 'email', 'is_staff', 'can_upload_images', 'can_upload_audio', 'can_upload_export_files', 'can_upload_video')
     actions = [allow_audio_upload, allow_image_upload, allow_export_upload, allow_all_upload]
 
 
