@@ -122,25 +122,27 @@ def build_and_execute_search(request):
 		collections['data'] = format_date_for_template(collections['data'], 'updated_on', True)
 	if 'facet' in response_json['results']:
 		facets = response_json['results']['facet']
+		print(request_object[1]['exclude'])
 		for item in request_object[1]['exclude']:
 			if item == 'any_all':
 				continue
 			facet_added = False
-			split = item.split('$')
-			label_split = split[0].split(',')
-			val_split = split[1].split(',')
-			for facet in facets:
-				if facet['label'] == label_split[1]:
-					for val in facet['values']:
-						if val['label'] == val_split[1]:
-							facet_added = True
-							break
-					if not facet_added:
-						facet['values'].append({'label': val_split[1], 'filter_val': item})
-					facet_added = True
-					break
-			if not facet_added:
-				facets.append({'label': label_split[1], 'excluded': True, 'values': [{'label': val_split[1], 'filter_val': item}]})
+			if '$' in item and ',' in item:
+				split = item.split('$')
+				label_split = split[0].split(',')
+				val_split = split[1].split(',')
+				for facet in facets:
+					if facet['label'] == label_split[1]:
+						for val in facet['values']:
+							if val['label'] == val_split[1]:
+								facet_added = True
+								break
+						if not facet_added:
+							facet['values'].append({'label': val_split[1], 'filter_val': item})
+						facet_added = True
+						break
+				if not facet_added:
+					facets.append({'label': label_split[1], 'excluded': True, 'values': [{'label': val_split[1], 'filter_val': item}]})
 	works_count = works['page']['count'] if 'page' in works else 0
 	bookmarks_count = bookmarks['page']['count'] if 'page' in bookmarks else 0
 	collections_count = collections['page']['count'] if 'page' in collections else 0

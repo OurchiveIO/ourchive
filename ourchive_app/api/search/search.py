@@ -130,7 +130,6 @@ class PostgresProvider:
             existing_query = or_query
         else:
             existing_query = existing_query | or_query
-        print(existing_query)
         return existing_query
 
     def build_filters(self, filters, mode, include):

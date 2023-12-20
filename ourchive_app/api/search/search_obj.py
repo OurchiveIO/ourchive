@@ -10,6 +10,13 @@ class Common():
             tags.append(clean_tag_text(item))
         return tags
 
+    def get_completes(dict_obj):
+        completes = dict_obj.get('complete', [])
+        new_completes = []
+        for item in completes:
+            new_completes.append(int(item))
+        return new_completes
+
 class WorkFilter(object):
     def __init__(self):
         self.include_filters = {
@@ -78,8 +85,9 @@ class WorkFilter(object):
 
     def from_dict(self, dict_obj, include=True):
         tags = Common.get_tags(dict_obj)
+        completes = Common.get_completes(dict_obj)
         if include:
-            self.include_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+            self.include_filters['complete']['is_complete__exact'] = completes
             self.include_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
             self.include_filters['tags']['tags__text__icontains'] = tags
             self.include_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
@@ -91,7 +99,8 @@ class WorkFilter(object):
             for range_tuple in dict_obj.get('word_count_range', []):
                 self.include_filters['word_count_range']['ranges'].append(range_tuple)
         else:
-            self.exclude_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+            
+            self.exclude_filters['complete']['is_complete__exact'] = completes
             self.exclude_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
             self.exclude_filters['tags']['tags__text__icontains'] = tags
             self.exclude_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
