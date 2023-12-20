@@ -23,7 +23,7 @@ function updateModeText(toggling=false) {
 	const richTextContainer = document.getElementById('toggle-chapter-richtext-area');
 	const plainTextContainer = document.getElementById('toggle-chapter-plaintext-area');
 	if (document.getElementById('chapter-text-edit-mode-toggle').checked) {
-		tinymce.get("chapterTextEditor").setContent(document.getElementById('toggle-chapter-plaintext-area').value);
+		tinymce.get("textEditor").setContent(document.getElementById('toggle-chapter-plaintext-area').value);
 		localStorage.setItem('rich-text', true);
 		plainTextContainer.setAttribute('hidden', true);
 		richTextContainer.removeAttribute('hidden');
@@ -32,7 +32,7 @@ function updateModeText(toggling=false) {
 		if (toggling) {
 			const grafEx = new RegExp('<p>', "g");
 			const whEx = new RegExp('</p>', "g");
-			document.getElementById('toggle-chapter-plaintext-area').innerHTML = tinymce.get("chapterTextEditor").getContent().replace(/\r?\n?/g, '').replace(grafEx, '\n').replace(whEx, '').replace('\n', '');
+			document.getElementById('toggle-chapter-plaintext-area').innerHTML = tinymce.get("textEditor").getContent().replace(/\r?\n?/g, '').replace(grafEx, '\n').replace(whEx, '').replace('\n', '');
 		}
 		localStorage.setItem('rich-text', false);
 		richTextContainer.setAttribute('hidden', true);

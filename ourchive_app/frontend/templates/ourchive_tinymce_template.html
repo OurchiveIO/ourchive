@@ -21,6 +21,13 @@
                       'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
                       'forecolor backcolor emoticons | help',
                     menubar: '',
+                    {% if setup_id %}
+                    setup : function(ed) {
+                        ed.on('init', function(event) {
+                          ed.getContainer().setAttribute('id', '{{setup_id}}');
+                        });
+                    },
+                    {% endif %}
                     paste_preprocess: function(editor, args) {
                       args.content = args.content.replaceAll("<br />", "");
                     },
