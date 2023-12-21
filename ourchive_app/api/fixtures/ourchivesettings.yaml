@@ -75,3 +75,10 @@
     name: Ratings Enabled
     value: 'true'
     valtype: truefalse
+- model: api.ourchivesetting
+  pk: 13
+  fields:
+    uid: 9250a09d-b2fd-400b-b1e8-41fd9bc5cd7f
+    name: Auto-Allow Upload
+    value: 'true'
+    valtype: truefalse

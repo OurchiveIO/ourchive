@@ -2,6 +2,8 @@ from django.core.exceptions import ObjectDoesNotExist
 import nh3
 import unidecode
 
+def count_words(text):
+    return len(text.split())
 
 def convert_boolean(string_bool):
     if string_bool.lower() in ['true', 'yes', 'y', '1']:

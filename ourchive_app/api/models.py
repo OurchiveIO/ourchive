@@ -4,7 +4,7 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 import nh3
 import unidecode
-from .utils import clean_tag_text
+from .utils import clean_tag_text, count_words
 from django_registration.validators import ReservedNameValidator
 
 
@@ -308,7 +308,7 @@ class Chapter(models.Model):
 
     def save(self, *args, **kwargs):
         if self.text:
-            self.word_count = len(self.text.split())
+            self.word_count = count_words(self.text)
         else:
             self.word_count = 0
         super(Chapter, self).save(*args, **kwargs)

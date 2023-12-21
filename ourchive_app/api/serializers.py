@@ -12,7 +12,7 @@ import datetime
 import logging
 from django.conf import settings
 from django.core.mail import send_mail
-from .utils import convert_boolean, clean_text
+from .utils import convert_boolean, clean_text, count_words
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 import unidecode
@@ -619,8 +619,6 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         return chapter.first()
 
     def create(self, validated_data):
-        validated_data['word_count'] = 0 if not (
-            'text' in validated_data and validated_data['text']) else len(validated_data['text'].split())
         validated_data = self.clean_rich_text(self.get_rich_text_fields(), validated_data)
         attributes = None
         if 'attributes' in validated_data:

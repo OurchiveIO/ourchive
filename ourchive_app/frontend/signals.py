@@ -14,22 +14,34 @@ def make_key(key, key_prefix, version):
 
 def spoil_work_cache(instance):
     connection = connections['default']
+    all_tables = connection.introspection.table_names()
+    if 'ourchive_database_cache' not in all_tables:
+        return
     with connection.cursor() as cursor:
         cursor.execute(f"DELETE FROM ourchive_database_cache where cache_key like 'ourchive:%:work_{instance.id}_%'")
 
 def spoil_subscription_cache(instance):
     connection = connections['default']
+    all_tables = connection.introspection.table_names()
+    if 'ourchive_database_cache' not in all_tables:
+        return
     with connection.cursor() as cursor:
         cursor.execute("DELETE FROM ourchive_database_cache where cache_key like %s", [f'ourchive:%:subscription_{instance.user.username}_%'])
 
 def spoil_bookmark_cache(instance):
     connection = connections['default']
+    all_tables = connection.introspection.table_names()
+    if 'ourchive_database_cache' not in all_tables:
+        return
     with connection.cursor() as cursor:
         cursor.execute(f"DELETE FROM ourchive_database_cache where cache_key like 'ourchive:%:bookmark_{instance.id}_%'")
         cursor.execute(f"DELETE FROM ourchive_database_cache where cache_key like 'ourchive:%:collection_{instance.id}_%'")
 
 def spoil_collection_cache(instance):
     connection = connections['default']
+    all_tables = connection.introspection.table_names()
+    if 'ourchive_database_cache' not in all_tables:
+        return
     with connection.cursor() as cursor:
         cursor.execute(f"DELETE FROM ourchive_database_cache where cache_key like 'ourchive:%:collection_{instance.id}_%'")
 

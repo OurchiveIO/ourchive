@@ -286,7 +286,7 @@ class ImportStatus(generics.ListAPIView):
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
     serializer_class = UserSerializer
-    permission_classes = [RegistrationPermitted, TokenHasReadWriteScope]
+    permission_classes = [RegistrationPermitted]
 
     def perform_create(self, serializer):
         if 'invite_code' in self.request.data:
