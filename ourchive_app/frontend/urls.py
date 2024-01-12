@@ -91,6 +91,7 @@ urlpatterns = [
     path('tag-autocomplete', views.tag_autocomplete),
     path('bookmark-autocomplete', views.bookmark_autocomplete),
     path('content-pages/<int:pk>', views.content_page, name='fe-content-page'),
-    path('accept-cookies', views.accept_cookies, name='accept-cookies')
+    path('accept-cookies', views.accept_cookies, name='accept-cookies'),
+    path('export-chives', views.export_chives, name='fe-export-chives')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

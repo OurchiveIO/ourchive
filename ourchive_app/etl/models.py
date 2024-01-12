@@ -28,6 +28,31 @@ class WorkImport(models.Model):
     def __repr__(self):
         return '<WorkImport: {}>'.format(self.id)
 
+
+class ChiveExport(models.Model):
+
+    __tablename__ = 'chive_exports'
+
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    job_message = models.TextField()
+    job_success = models.BooleanField(default=True)
+    job_finished = models.BooleanField(default=False)
+    job_processing = models.BooleanField(default=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    export_works = models.BooleanField(default=True)
+    export_bookmarks = models.BooleanField(default=True)
+    export_collections = models.BooleanField(default=True)
+
+    user = models.ForeignKey(
+        api.User,
+        on_delete=models.CASCADE,
+    )
+
+    def __repr__(self):
+        return '<ChiveExport: {}>'.format(self.id)
+
+
 class ObjectMapping(models.Model):
     __tablename__ = 'objectmappings'
 

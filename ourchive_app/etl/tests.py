@@ -1,16 +1,26 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
-from .ao3.work_import import WorkImport
+from etl.ao3.work_import import EtlWorkImport
+from etl.export.chive_export import ChiveExport
 import json
-import api.models as api
+import api.models as models
+from django.core.management import call_command
 
 class Ao3ImportTests(TestCase):
-	fixtures = ['user']
+	@classmethod
+	def setUpTestData(cls):
+		fixtures = [
+			'tagtype', 'tags', 'worktype', 'work', 'bookmark', 'bookmarkcollection', 'chapter', 'ourchivesettings', 'objectmapping'
+		]
+		cls.test_user = models.User.objects.create(username="test_user", email="test_user@test.com")
+		cls.test_admin_user = models.User.objects.create(username="test_admin_user", email="test_admin@test.com")
+		for db_name in cls._databases_names(include_mirrors=False):
+			call_command("loaddata", *fixtures, verbosity=0, database=db_name)
 
 	def test_process_work_data(self):
-		work_import = WorkImport(1, True, True, False)
-		work_id = work_import.process_work_data(json.loads(self.test_work_data))
-		created_work = api.Work.objects.get(pk=work_id)
+		import_cls = EtlWorkImport(1, True, True, False)
+		work_id = import_cls.process_work_data(json.loads(self.test_work_data))
+		created_work = models.Work.objects.get(pk=work_id)
 		self.assertEqual(created_work.summary, "<p>An incident leads Prunella to acquire a somewhat inconvenient student.</p>")
 		self.assertEqual(len(created_work.tags.all()), 3)
 		self.assertEqual(len(created_work.attributes.all()), 2)
@@ -20,13 +30,29 @@ class Ao3ImportTests(TestCase):
 		self.assertEquals(created_work.word_count, 1119)
 
 	def test_process_chapter_data(self):
-		work_import = WorkImport(1, True, True, False)
-		work_id = work_import.process_work_data(json.loads(self.test_work_data))
-		chapter_ids = work_import.process_chapter_data(json.loads(self.test_chapter_data), work_id)
+		import_cls = EtlWorkImport(1, True, True, False)
+		work_id = import_cls.process_work_data(json.loads(self.test_work_data))
+		chapter_ids = import_cls.process_chapter_data(json.loads(self.test_chapter_data), work_id)
 		self.assertEquals(len(chapter_ids), 1)
-		created_chapter = api.Chapter.objects.get(pk=chapter_ids[0])
+		created_chapter = models.Chapter.objects.get(pk=chapter_ids[0])
 		self.assertEqual(created_chapter.title, "Chapter One")
 
+	def test_create_work_export(self):
+		works = models.Work.objects.all()
+		exporter = ChiveExport()
+		exporter.write_csv(works)
+		for work in works:
+			exporter.write_csv(work.chapters.all())
+
+	def test_create_bookmark_export(self):
+		bookmarks = models.Bookmark.objects.all()
+		exporter = ChiveExport()
+		exporter.write_csv(bookmarks)
+
+	def test_create_collection_export(self):
+		collections = models.BookmarkCollection.objects.all()
+		exporter = ChiveExport()
+		exporter.write_csv(collections)
 
 	test_work_data =  r"""{
                 "id": 8878807,

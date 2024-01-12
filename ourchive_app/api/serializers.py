@@ -165,6 +165,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     userblocks_set = serializers.HyperlinkedRelatedField(
         many=True, read_only=True, view_name="userblocks-detail")
     email = UserPrivateField()
+    chive_export_url = UserPrivateField()
     id = serializers.ReadOnlyField()
     can_upload_audio = serializers.ReadOnlyField(required=False)
     can_upload_images = serializers.ReadOnlyField(required=False)
@@ -182,7 +183,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
                   'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files',
                   'can_upload_images', 'can_upload_video', 'default_work_type', 'collapse_chapter_image',
-                  'collapse_chapter_audio', 'collapse_chapter_text', 'copy_work_metadata')
+                  'collapse_chapter_audio', 'collapse_chapter_text', 'copy_work_metadata', 'chive_export_url')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):

@@ -2,6 +2,7 @@
 {% block title %}Edit Account{% endblock %}
 {% block content %}	
 {% load static %}
+{% load i18n %}
 <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="account-form-parent"> 
 	<form class="uk-form-horizontal"  method="post" id="accountForm">
 		{% csrf_token %}
@@ -40,5 +41,28 @@
 	<hr id="destructive-account-actions-divider"/>
 	<a class="uk-link uk-button uk-button-secondary" href="/users/{{user.username}}/delete"><span class="uk-text-medium">I want to delete my account</span></a>
 	<a class="uk-link uk-button uk-button-secondary" href="{% url 'password_change' %}"><span class="uk-text-medium">I want to change my password</span></a>
+	<hr id="export-chives-divider"/>
+	<div class="uk-width-1-1" id="export-chives-header-container">
+    	<span id="export-chives-header-span" class="uk-text-large">{% translate 'Export Chives' %}</span>
+    	<p><span id="export-chives-information" class="uk-text-medium">{% blocktranslate %}To generate a chive export, click below. This data is in beta format (CSVs) and should not be used as a backup for your work. Additionally, to preserve your privacy, please note that only public chives are exported.{% endblocktranslate %}</span></p>
+	</div>
+	<form class="uk-form-horizontal"  method="post" id="exportForm">
+		{% csrf_token %}
+		<fieldset id="export-chives-fieldset" class="uk-fieldset" >
+			<input type="hidden" id="export-chives-user-id" name="id" value="{{ user.id }}">
+	        <div id="export-chives-form-parent" class="uk-margin">
+                <label class="uk-display-block"><input id="export-chives-works-input" class="uk-checkbox" type="checkbox" name="export_works"> {% translate 'Export works' %}</label>
+                <label class="uk-display-block"><input id="export-chives-bookmarks-input" class="uk-checkbox" type="checkbox" name="export_bookmarks"> {% translate 'Export bookmarks' %}</label>
+                <label class="uk-display-block"><input id="export-chives-bookmarks-input" class="uk-checkbox" type="checkbox" name="export_collections"> {% translate 'Export collections' %}</label>
+			    <div class="uk-width-1-3 uk-margin-medium-top" id="export-chives-controls-parent">
+					<button id="export-chives-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
+				    <input id="export-chives-submit-button" class="uk-button uk-width-small uk-button-primary" type="submit" formaction="{% url 'fe-export-chives' %}" value="Submit"/>
+				</div> 
+	        </div>     
+	    </fieldset>
+	</form>
+	{% if user.chive_export_url %}
+		<a class="uk-link" href="{{user.chive_export_url}}"><span class="uk-text-medium">{% translate 'Click to download existing archive' %}</span></a>
+	{% endif %}
 </div>
 {% endblock %}

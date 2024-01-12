@@ -32,3 +32,4 @@ output
 
 # ignore python stuff
 **/__pycache__
+.coverage

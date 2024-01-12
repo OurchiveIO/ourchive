@@ -10,6 +10,7 @@ from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
 from django_apscheduler import util
 from etl.ao3.work_import import EtlWorkImport
+from etl.export.chive_export import ChiveExportOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,16 @@ def process_works():
 def import_job_cleanup():
   importer = EtlWorkImport(0)
   importer.clean_old_jobs()
+
+
+def process_exports():
+  exporter = ChiveExportOrchestrator()
+  exporter.run_unprocessed_jobs()
+
+
+def export_job_cleanup():
+  exporter = ChiveExportOrchestrator()
+  exporter.clean_old_jobs()
 
 
 # The `close_old_connections` decorator ensures that database connections, that have become
@@ -58,12 +69,30 @@ class Command(BaseCommand):
 
     scheduler.add_job(
       import_job_cleanup,
-      trigger=CronTrigger(day="*/7"),  # Every week
-      id="import_job_cleanup",  # The `id` assigned to each job MUST be unique
+      trigger=CronTrigger(day="*/7"), 
+      id="import_job_cleanup", 
       max_instances=1,
       replace_existing=True,
     )
     logger.info("Added job 'import_job_cleanup'.")
+
+    scheduler.add_job(
+      export_job_cleanup,
+      trigger=CronTrigger(day="*/7"),
+      id="export_job_cleanup", 
+      max_instances=1,
+      replace_existing=True,
+    )
+    logger.info("Added job 'export_job_cleanup'.")
+
+    scheduler.add_job(
+      process_exports,
+      trigger=CronTrigger(minute="*/10"),
+      id="process_exports", 
+      max_instances=1,
+      replace_existing=True,
+    )
+    logger.info("Added job 'process_exports'.")
 
     try:
       logger.info("Starting scheduler...")

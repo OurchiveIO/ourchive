@@ -78,6 +78,7 @@ urlpatterns = [
     path('users/import-works/', views.ImportWorks.as_view(), name='import-works'),
     path('users/<int:pk>/importstatus/', views.ImportStatus.as_view(), name='import-status'),
     path('users/profile/<int:pk>', views.UserNameDetail.as_view(), name='user-detail'),
+    path('users/export-chives/', views.ExportChives.as_view(), name='export-chives-be'),
     path('users/<str:username>/works',
          views.UserWorkList.as_view(), name='user-works-drafts'),
     path('users/<str:username>/works/drafts',

@@ -406,7 +406,7 @@ class EtlWorkImport(object):
             import_type='ao3', object_type='work').all()
         work_type_mapping = None
         work_type = None
-        work_type_mapping = api.User.objects.filter(id=self.user_id).default_work_type
+        work_type_mapping = api.User.objects.filter(id=self.user_id).first().default_work_type
         if not work_type_mapping:
             work_type_mapping = ObjectMapping.objects.filter(
                 import_type='ao3', object_type='work_type')
@@ -437,11 +437,11 @@ class EtlWorkImport(object):
             anon_comments_permitted=self.allow_anon_comments,
             draft=self.save_as_draft,
             is_complete=True,
-            external_id=self.import_job.work_id)
+            external_id=self.import_job.work_id if self.import_job else None)
         work.save()
         work_id = self.process_mappings(work, mappings, work_json)
         if work_id:
-            transl_note = _(f'Imported from Archive of Our Own. Original work id: {self.import_job.work_id}.')
+            transl_note = _(f'Imported from Archive of Our Own. Original work id: {self.import_job.work_id if self.import_job else _("Unknown Work ID")}.')
             work.notes = f'{work.notes}<br/>{transl_note}'
         work.save()
         return work_id

@@ -289,6 +289,19 @@ def edit_account(request, pk):
 			return redirect('/login')
 
 
+def export_chives(request):
+	if request.user.is_authenticated:
+		form_data = convert_bool(request.POST.copy())
+		response = do_post(f'api/users/export-chives/', request, data=form_data)
+		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
+		user_message = response.response_info.message if message_type == messages.ERROR else _('Your export has begun. You will be notified when it is complete.')
+		messages.add_message(request, message_type, user_message, response.response_info.type_label)
+		return redirect(f'/username/{request.user.id}')
+	else:
+		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'user-unauthorized-error')
+		return redirect('/login')
+
+
 def edit_user(request, pk):
 	if request.method == 'POST':
 		user_data = request.POST.copy()

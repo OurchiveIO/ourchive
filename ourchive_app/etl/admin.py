@@ -1,5 +1,5 @@
 from django.contrib import admin
-from etl.models import WorkImport, ObjectMapping, AdditionalMapping
+from etl.models import WorkImport, ObjectMapping, AdditionalMapping, ChiveExport
 from .ao3 import work_import as importer
 
 def process_work_import(work_import):
@@ -29,3 +29,4 @@ class AdditionalMappingAdmin(admin.ModelAdmin):
 admin.site.register(WorkImport, WorkImportAdmin)
 admin.site.register(ObjectMapping, ObjectMappingAdmin)
 admin.site.register(AdditionalMapping, AdditionalMappingAdmin)
+admin.site.register(ChiveExport)

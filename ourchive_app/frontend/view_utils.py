@@ -364,3 +364,10 @@ def get_works_list(request, username=None):
 		works = response.response_data['results']
 		works = get_object_tags(works)
 	return {'works': works, 'next_params': response.response_data['next_params'] if 'next_params' in response.response_data else None, 'prev_params': response.response_data['prev_params'] if 'prev_params' in response.response_data else None}
+
+
+def convert_bool(post_data):
+	for key in post_data.keys():
+		if post_data[key] == 'on':
+			post_data[key] = 'true'
+	return post_data

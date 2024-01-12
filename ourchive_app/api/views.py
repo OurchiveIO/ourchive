@@ -37,7 +37,7 @@ from . import work_export
 from django.contrib.auth.models import AnonymousUser
 from etl import ao3
 import threading
-from etl.models import WorkImport
+from etl.models import WorkImport, ChiveExport
 from etl.ao3 import util
 from .utils import get_star_count
 from django.core.mail import send_mail
@@ -281,6 +281,25 @@ class ImportStatus(generics.ListAPIView):
 
     def get_queryset(self):
         return WorkImport.objects.filter(job_finished=False, user__id=self.request.user.id).order_by('-created_on')
+
+
+class ExportChives(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, format=None):
+        if not 'export_works' in request.data and not 'export_bookmarks' in request.data and not 'export_collections' in request.data:
+            return Response({'message': "export_works, export_bookmarks, or export_collections required."}, status=400)
+        export_job = ChiveExport(
+            user_id=request.user.id,
+            export_works=request.data.get('export_works', "false").lower() == "true",
+            export_bookmarks=request.data.get('export_bookmarks', "false").lower() == "true",
+            export_collections=request.data.get('export_collections', "false").lower() == "true")
+        export_job.save()
+        return Response({'message': 'Export started.'}, status=200)
+
+    def get(self, request, format=None):
+        return Response({'export_works': 'false', 'export_bookmarks': 'false', 'export_collections': 'false'}, status=200)
 
 
 class UserList(generics.ListCreateAPIView):
