@@ -449,7 +449,7 @@ class PostgresProvider:
         if not query and not tag_filters:
             return {'data': []}
         resultset = self.run_queries(tag_filters, query, Tag, [
-                                     'text'], tag_search.term, kwargs.get('page', 1), tag_search.order_by, False, 0.7, False, False, True)
+                                     'text'], tag_search.term, kwargs.get('page', 1), tag_search.order_by, False, 0.6, False, False, True)
         result_json = []
         if resultset is None:
             return result_json
