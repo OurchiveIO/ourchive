@@ -112,6 +112,8 @@ def get_work_obj(request, work_id=None):
 		'audio_url': '',
 		'audio_url-upload': '',
 		'audio_description': '',
+		'video_url': '',
+		'video_url-upload': '',
 		'text': '',
 		'work': '',
 		'draft': 'chapter_draft' in request.POST,

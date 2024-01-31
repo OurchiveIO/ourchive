@@ -100,6 +100,17 @@
             </div>
         </div>   
 
+        <div class="uk-margin" id="profile-collapse-video-parent">
+            <label id="profile-collapse-video-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Collapse video fields?' <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse video fields help' %}"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter video fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
+            </label>
+            <div id="profile-collapse-video-controls" class="uk-form-controls">
+                <div id="profile-collapse-video-inline" class="uk-inline">
+                    <label id="profile-collapse-video-switch" class="switch"><input class="uk-checkbox" title="{% translate 'Collapse video fields input' %}" id="profile-collapse-video-checkbox" type="checkbox" name="collapse_chapter_video" {% if user.collapse_chapter_video %} checked {% endif %}> <span id="profile-collapse-video-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div>  
+
         <div class="uk-margin" id="profile-collapse-text-parent">
             <label id="profile-collapse-text-label" class="uk-form-label" for="form-horizontal-text">Collapse text fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse text fields help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter text fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>

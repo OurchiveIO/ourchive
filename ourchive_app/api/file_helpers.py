@@ -23,7 +23,7 @@ class FileHelperService:
 
 
 class FileCommon:
-    ALLOWED_TYPES = ['epub', 'pdf', 'mp4', 'mp3', 'm4b', 'mobi', 'm4a', 'zip']
+    ALLOWED_TYPES = ['epub', 'pdf', 'mp4', 'mp3', 'm4b', 'mobi', 'm4a', 'zip', 'mkv', 'm4a', 'avi', 'divx']
 
     def get_filename(self, original_name):
         suffix = pathlib.Path(original_name).suffix
@@ -54,7 +54,7 @@ class LocalFileHelper:
 
     def handle_uploaded_file(self, file, name, username):
         filename = self.common.get_filename(name)
-        content_type = 'image/' if 'image' in file.content_type else 'audio/' if 'audio' in file.content_type else 'upload/' if self.common.get_allowed_content_types(file.content_type) else None
+        content_type = 'image/' if 'image' in file.content_type else 'audio/' if 'audio' in file.content_type else 'video/' if 'video' in file.content_type else 'upload/' if self.common.get_allowed_content_types(file.content_type) else None
         if not content_type:
             print(f"CONTENT TYPE: {file.content_type}")
             return None

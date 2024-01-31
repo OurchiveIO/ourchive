@@ -597,18 +597,25 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     def get_rich_text_fields(self):
         return ['text', 'notes', 'end_notes']
 
-    def update(self, chapter, validated_data):
-        validated_data = self.clean_rich_text(self.get_rich_text_fields(), validated_data)
-        if 'attributes' in validated_data:
-            attributes = validated_data.pop('attributes')
-            chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
-        chapter = Chapter.objects.filter(id=chapter.id)
+    def clean_empty_fields(self, validated_data):
         if 'audio_url' in validated_data:
             if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
                 validated_data['audio_url'] = ''
         if 'image_url' in validated_data:
             if validated_data['image_url'] is None or validated_data['image_url'] == "None":
                 validated_data['image_url'] = ''
+        if 'video_url' in validated_data:
+            if validated_data['video_url'] is None or validated_data['video_url'] == "None":
+                validated_data['video_url'] = ''
+        return validated_data
+
+    def update(self, chapter, validated_data):
+        validated_data = self.clean_rich_text(self.get_rich_text_fields(), validated_data)
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+            chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
+        chapter = Chapter.objects.filter(id=chapter.id)
+        validated_data = self.clean_empty_fields(validated_data)
         self.validate_chapter_number(validated_data, chapter.first().id)
         chapter.update(**validated_data)
         if chapter.first().work.chapters.count() > 1:
@@ -624,12 +631,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
-        if 'audio_url' in validated_data:
-            if validated_data['audio_url'] is None or validated_data['audio_url'] == "None":
-                validated_data['audio_url'] = ''
-        if 'image_url' in validated_data:
-            if validated_data['image_url'] is None or validated_data['image_url'] == "None":
-                validated_data['image_url'] = ''
+        validated_data = self.clean_empty_fields(validated_data)
         self.validate_chapter_number(validated_data)
         chapter = Chapter.objects.create(**validated_data)
         if attributes is not None:

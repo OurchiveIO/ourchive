@@ -128,6 +128,23 @@
 {% endif %}
 </div>
 {% endif %}
+{% if request.user.can_upload_video %}
+{% if not request.user.collapse_chapter_video %}
+<div class="uk-margin" id="chapter-form-video-parent">
+{% else %}
+<div class="uk-margin uk-width-small"><a class="uk-accordion-title uk-text-meta" uk-toggle="target: #chapter-form-video-hidden-parent" href="#">{% translate 'Video' %}</a></div>
+<div class="uk-accordion-content" id="chapter-form-video-hidden-parent" hidden>
+{% endif %}
+<div class="uk-margin" id="chapter-form-video-upload-parent">
+    <label id="chapter-form-video-label" class="uk-form-label" for="form-horizontal-text">Chapter Video</label>
+    <div class="uk-form-controls" id="chapter-form-video-controls">
+        <div class="uk-inline" id="chapter-form-video-inline">
+            {% include 'file_upload.html' with object='video_url' replace_selector='chapter-form-video' object_type='video' upload_placeholder='Upload chapter video' original_value=chapter.video_url %}
+        </div>
+    </div>
+</div>
+</div>
+{% endif %}
 {% if not request.user.collapse_chapter_text %}
 <div class="uk-margin" id="chapter-form-text-parent">
 {% else %}

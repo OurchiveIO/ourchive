@@ -33,6 +33,7 @@
 	        load: function () {
 	        },
 	        error: function () {
+	        	console.log('error', arguments);
 	        	var result = JSON.parse(arguments[0].xhr.response)['message'];
 	        	UIkit.notification(result, {pos: 'top-center', status: 'danger'});
 	        },

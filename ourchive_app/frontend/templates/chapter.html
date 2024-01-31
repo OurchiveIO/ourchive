@@ -70,6 +70,7 @@
 	<hr class="ourchive-hr" id="chapter-image-hr"/>
 {% endif %}
 {% if chapter.audio_url and chapter.audio_url != "None" %}<p id="chapter-audio-graf"><audio id="chapter-audio" src="{{ chapter.audio_url }}" controls></audio></p><hr class="ourchive-hr" id="chapter-audio-hr"/>{% endif %}
+{% if chapter.video_url and chapter.video_url != "None" %}<p id="chapter-{{chapter.id}}-video-graf"><video id="chapter-{{chapter.id}}-video" src="{{chapter.video_url}}" controls>{% translate 'Your browser does not support the HTML5 video tag.' %}</video></p><hr class="ourchive-hr" id="chapter-{{chapter.id}}video-hr"/>{% endif %}
 {% if chapter.text %}<span id="chapter-text" class="uk-text-medium">{% autoescape off %}{{ chapter.text }}{% endautoescape %}</span><div id="chapter-content-divider"><hr class="ourchive-hr"/></div>{% endif %}
 {% if chapter.end_notes %}
 	<div id="chapter-notes-header"><span id="chapter-notes-label" class="uk-text-large">Notes</span></div>

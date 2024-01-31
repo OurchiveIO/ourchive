@@ -41,6 +41,7 @@ class User(AbstractUser):
     collapse_chapter_text = models.BooleanField(default=False)
     collapse_chapter_audio = models.BooleanField(default=False)
     collapse_chapter_image = models.BooleanField(default=False)
+    collapse_chapter_video = models.BooleanField(default=False)
     default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True, blank=True)
     copy_work_metadata = models.BooleanField(default=False)
     chive_export_url = models.CharField(max_length=200, blank=True, null=True)
