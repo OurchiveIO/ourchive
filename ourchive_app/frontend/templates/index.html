@@ -94,10 +94,11 @@
 		    <div class="uk-navbar-right uk-margin-right" id="uk-nav-right">
 		    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
 		    	 	<li id="nav-search-li">
-			                <div class="nav-overlay uk-navbar-right">
+			                {% if not term %}<div class="nav-overlay uk-navbar-right">
 			                	<a class="uk-navbar-toggle ourchive-icon-wrapper" id="search-toggle-overlay" uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"><span uk-icon="icon: ourchive-search; ratio: .75" title="Search" id="ourchive-nav-search-icon"></a>
-			                </div>
-    					<div class="nav-overlay uk-navbar-left uk-flex-1" hidden>
+			                </div>{% endif %}
+    					{% if not term %}<div class="nav-overlay uk-navbar-left uk-flex-1" hidden>
+    					{% else %}<div class="nav-overlay uk-navbar-left uk-flex-1">{% endif %}
         					<div class="uk-navbar-item uk-width-expand uk-margin-small-left">
 	            				<form class="uk-search uk-search-navbar uk-width-1-1" action="/search/" method="post" id="nav-search-form">
 				                	{% csrf_token %}
@@ -105,7 +106,7 @@
 								<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
 				                </form>
         					</div>
-        					<a class="uk-navbar-toggle" uk-close uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"></a>
+        					{% if not term %}<a class="uk-navbar-toggle" uk-close uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"></a>{% endif %}
 
     					</div>
 		        	</li>

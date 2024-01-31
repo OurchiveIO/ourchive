@@ -568,6 +568,9 @@ class PostgresProvider:
         return results
 
     def get_result_facets(self, results, tag_id=None):
+        # todo: refactor - move attribute & tag processing to individual functions,
+        # change facet dicts to pull from consts, use translation on labels,
+        # move ranges to a dynamic number
         result_json = []
         work_types = WorkType.objects.all()
         work_types_list = []
@@ -582,14 +585,9 @@ class PostgresProvider:
         # todo move to db setting
         word_count_dict = {}
         word_count_dict["label"] = "Work Word Count"
-        word_count_dict["values"] = [{"label": "Under 20,000", "filter_val": "word_count_range|ranges|0|20000"},
-                                     {"label": "20,000 - 50,000",
-                                         "filter_val": "word_count_range|ranges|20000|50000"},
-                                     {"label": "50,000 - 80,000",
-                                         "filter_val": "word_count_range|ranges|50000|80000"},
-                                     {"label": "80,000 - 100,000",
-                                      "filter_val": "word_count_range|ranges|80000|100000"},
-                                     {"label": "100,000+", "filter_val": "word_count_range|ranges|10000000|100000"}]
+        word_count_dict["filters"] = ["word_count_gte", "word_count_lte"]
+        word_count_dict["values"] = [{"label": "From", "filter_val": "word_count_gte", "type": "text_range"},
+                                     {"label": "To","filter_val": "word_count_lte", "type": "text_range"}]
         result_json.append(word_count_dict)
 
         # todo move to db setting

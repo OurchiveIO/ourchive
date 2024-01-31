@@ -1,6 +1,7 @@
 import unidecode
 from api.utils import clean_tag_text
 
+
 class Common():
     def get_tags(dict_obj, key='tags'):
         tags = []
@@ -16,6 +17,7 @@ class Common():
         for item in completes:
             new_completes.append(int(item))
         return new_completes
+
 
 class WorkFilter(object):
     def __init__(self):
@@ -99,7 +101,6 @@ class WorkFilter(object):
             for range_tuple in dict_obj.get('word_count_range', []):
                 self.include_filters['word_count_range']['ranges'].append(range_tuple)
         else:
-            
             self.exclude_filters['complete']['is_complete__exact'] = completes
             self.exclude_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
             self.exclude_filters['tags']['tags__text__icontains'] = tags

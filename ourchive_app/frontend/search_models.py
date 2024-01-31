@@ -1,3 +1,36 @@
+class ParentSearch():
+	def __init__(self, work_search, bookmark_search, collection_search, user_search, tag_search):
+		self.work_search = work_search
+		self.bookmark_search = bookmark_search
+		self.collection_search = collection_search
+		self.user_search = user_search
+		self.tag_search = tag_search
+
+	def get_dict(self):
+		self.work_search = self.work_search.__dict__
+		self.bookmark_search = self.bookmark_search.__dict__
+		self.collection_search = self.collection_search.__dict__
+		self.user_search = self.user_search.__dict__
+		self.tag_search = self.tag_search.__dict__
+		return self.__dict__
+
+
+class ObjectSearch():
+	def __init__(self, mode, order_by, term, filters={'tags': [], 'attributes': []}):
+		self.term = term
+		self.include_mode = mode[0]
+		self.exclude_mode = mode[1]
+		self.page = 1
+		self.order_by = order_by
+		self.include_filter = filters.copy()
+		self.exclude_filter = filters.copy()
+
+
+class TagSearch(ObjectSearch):
+	def __init__(self, mode, order_by, term):
+		super(TagSearch, self).__init__(mode, order_by, term, {'tag_type': [], 'text': []})
+
+
 class WorkSearch(object):
 	def from_json(self, json_obj):
 		self.id = json_obj["id"]
@@ -24,65 +57,25 @@ class WorkSearch(object):
 
 class SearchObject(object):
 	def with_term(self, term, pagination=None, mode=('all', 'all'), order_by='-updated_on'):
-		return_obj = {}
-		work_search = {}
-		work_search["term"] = term
-		work_search["include_mode"] = mode[0]
-		work_search["exclude_mode"] = mode[1]
-		work_search["page"] = 1
-		work_search["order_by"] = order_by
-		work_search["include_filter"] = {'tags': [], 'attributes': []}
-		work_search["exclude_filter"] = {'tags': [], 'attributes': []}
-		return_obj["work_search"] = work_search
-
-		bookmark_search = {}
-		bookmark_search["term"] = term
-		bookmark_search["page"] = 1
-		bookmark_search["include_mode"] = mode[0]
-		bookmark_search["exclude_mode"] = mode[1]
-		bookmark_search["order_by"] = order_by
-		bookmark_search["include_filter"] = {'tags': [], 'attributes': []}
-		bookmark_search["exclude_filter"] = {'tags': [], 'attributes': []}
-		return_obj["bookmark_search"] = bookmark_search
-
-		collection_search = {}
-		collection_search["term"] = term
-		collection_search["include_mode"] = mode[0]
-		collection_search["exclude_mode"] = mode[1]
-		collection_search["page"] = 1
-		collection_search["order_by"] = order_by
-		collection_search["include_filter"] = {'tags': [], 'attributes': []}
-		collection_search["exclude_filter"] = {'tags': [], 'attributes': []}
-		return_obj["collection_search"] = collection_search
-
-		user_search = {}
-		user_search["term"] = term
-		user_search["page"] = 1
-		user_search["filter"] = {}
-		return_obj["user_search"] = user_search
-
-		tag_search = {}
-		tag_search["term"] = term
-		tag_search["include_mode"] = mode[0]
-		tag_search["exclude_mode"] = mode[1]
-		tag_search["page"] = 1
-		tag_search["order_by"] = order_by
-		tag_search["include_filter"] = {'tag_type': [], 'text': []}
-		tag_search["exclude_filter"] = {'tag_type': [], 'text': []}
-		return_obj["tag_search"] = tag_search
+		work_search = ObjectSearch(mode, order_by, term)
+		bookmark_search = ObjectSearch(mode, order_by, term)
+		collection_search = ObjectSearch(mode, order_by, term)
+		user_search = ObjectSearch(mode, order_by, term)
+		tag_search = TagSearch(mode, order_by, term)
+		return_obj = ParentSearch(work_search, bookmark_search, collection_search, user_search, tag_search)
 
 		if pagination:
 			obj = pagination['obj'].lower()
 			if obj == 'work':
-				return_obj['work_search']['page'] = pagination['page']
+				return_obj.work_search.page = pagination['page']
 			elif obj == 'bookmark':
-				return_obj['bookmark_search']['page'] = pagination['page']
+				return_obj.bookmark_search.page = pagination['page']
 			elif obj == 'tag':
-				return_obj['tag_search']['page'] = pagination['page']
+				return_obj.tag_search.page = pagination['page']
 			elif obj == 'bookmarkcollection':
-				return_obj['collection_search']['page'] = pagination['page']
+				return_obj.collection_search.page = pagination['page']
 
-		return return_obj
+		return return_obj.get_dict()
 
 	def get_object_type(self, filter_term):
 		if 'audio' in filter_term:

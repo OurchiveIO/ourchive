@@ -2,6 +2,11 @@ from django.conf import settings
 from .search_models import SearchObject
 from .view_utils import *
 
+# values we don't want to send to the API
+NONFILTER_VALS = ['csrfmiddlewaretoken', 'term']
+# values we don't want to add to the frontend facets
+NONRETAIN_VALS = ['order_by', 'active_tab', 'work_type']
+
 
 def get_default_search_result_tab(resultsets):
 	most_results = 0
@@ -13,58 +18,138 @@ def get_default_search_result_tab(resultsets):
 	return default_tab
 
 
+def build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val):
+	filter_key = f'{include_exclude}_filter'
+	filter_options = key.split('|')
+	if 'ranges' in key:
+		if filter_options[0] not in request_object['work_search'][filter_key]:
+			request_object['work_search'][filter_key][filter_options[0]] = [([filter_options[3], filter_options[2]])]
+		else:
+			request_object['work_search'][filter_key][filter_options[0]].append((filter_options[3], filter_options[2]))
+	else:
+		# TODO: refactor: request object should stay a true object, __dict__ should be called
+		# on making the API request, and collections.defaultdict should be used to prevent cluttered logic
+		for option in filter_options:
+			filter_details = option.split('$')
+			filter_type = request_builder.get_object_type(filter_details[0])
+			if len(filter_details) == 1:
+				if not filter_val:
+					continue
+			else:
+				filter_val = filter_details[1]
+			if filter_type == 'work':
+				if filter_details[0] in request_object['work_search'][filter_key] and len(request_object['work_search'][filter_key][filter_details[0]]) > 0:
+					request_object['work_search'][filter_key][filter_details[0]].append(filter_val)
+				else:
+					request_object['work_search'][filter_key][filter_details[0]] = []
+					request_object['work_search'][filter_key][filter_details[0]].append(filter_val)
+			elif filter_type == 'tag':
+				tag_type = filter_details[0].split(',')[1]
+				tag_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
+				request_object['tag_search'][filter_key]['tag_type'].append(tag_type)
+				request_object['tag_search'][filter_key]['text'].append(tag_text)
+				request_object['work_search'][filter_key]['tags'].append(tag_text)
+				request_object['bookmark_search'][filter_key]['tags'].append(tag_text)
+			elif filter_type == 'attribute':
+				attribute_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
+				request_object['work_search'][filter_key]['attributes'].append(attribute_text)
+				request_object['bookmark_search'][filter_key]['attributes'].append(attribute_text)
+				request_object['collection_search'][filter_key]['attributes'].append(attribute_text)
+			elif filter_type == 'bookmark':
+				if filter_details[0] in request_object['bookmark_search'][filter_key] and len(request_object['bookmark_search'][filter_key][filter_details[0]]) > 0:
+					request_object['bookmark_search'][filter_key][filter_details[0]].append(filter_val)
+				else:
+					request_object['bookmark_search'][filter_key][filter_details[0]] = []
+					request_object['bookmark_search'][filter_key][filter_details[0]].append(filter_val)
+	return request_object
+
+
+def add_facet_to_filters(facets, label, value, item, excluded=True):
+	if label in NONRETAIN_VALS:
+		return facets
+	facet_added = False
+	for facet in facets:
+		if facet['label'] == label:
+			for val in facet['values']:
+				if val['label'] == value:
+					facet_added = True
+					break
+			if not facet_added:
+				facet['values'].append({'label': value, 'filter_val': item})
+			facet_added = True
+			break
+		elif label in facet.get('filters', []):
+			key_field = 'include_value' if not excluded else 'exclude_value'
+			for val in facet['values']:
+				if val['filter_val'] == label:
+					val[key_field] = value
+					facet_added = True
+					break
+	if not facet_added:
+		facets.append({'label': label, 'excluded': excluded, 'values': [{'label': value, 'filter_val': item}]})
+	return facets
+
+
+def iterate_facets(facets, item, excluded=True):
+	if item == 'any_all':
+		return facets
+	if '$' in item and ',' in item:
+		split = item.split('$')
+		label_split = split[0].split(',')
+		val_split = split[1].split(',')
+		facets = add_facet_to_filters(facets, label_split[1], val_split[1], item, excluded)
+	elif '$' in item:
+		# assumes text format e.g. word count: word_count_gte$20000
+		split = item.split('$')
+		facets = add_facet_to_filters(facets, split[0], split[1], split[0], excluded)
+	return facets
+
+
+def get_response_facets(response_json, request_object):
+	facets = response_json['results']['facet']
+	print(request_object[1]['exclude'])
+	for item in request_object[1]['exclude']:
+		facets = iterate_facets(facets, item)
+	for item in request_object[1]['include']:
+		facets = iterate_facets(facets, item, False)
+	return facets
+
+
+def get_empty_response_obj():
+	return {'data': []}
+
+
 def get_search_request(request, request_object, request_builder):
 	return_keys = {'include': [], 'exclude': []}
 	for key in request.POST:
-		filter_val = request.POST[key]
+		filter_val = request.POST.get(key, None)
 		include_exclude = 'exclude' if 'exclude_' in key else 'include'
 		key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
-		if filter_val == 'csrfmiddlewaretoken':
+		if key in NONFILTER_VALS:
 			continue
 		else:
-			return_keys[include_exclude].append(key)
-		if filter_val == 'term':
-			continue
-		if 'ranges' in key:
-			filter_details = key.split('|')
-			if filter_details[0] not in request_object['work_search'][f'{include_exclude}_filter']:
-				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]] = [([filter_details[3], filter_details[2]])]
-			else:
-				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append((filter_details[3], filter_details[2]))
-		else:
-			# TODO: make this less bad
-			filter_options = key.split('|')
-			for option in filter_options:
-				filter_details = option.split('$')
-				filter_type = request_builder.get_object_type(filter_details[0])
-				if filter_type == 'work':
-					if filter_details[0] in request_object['work_search'][f'{include_exclude}_filter'] and len(request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
-						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
-					else:
-						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]] = []
-						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
-				elif filter_type == 'tag':
-					tag_type = filter_details[0].split(',')[1]
-					tag_text = (filter_details[1].split(',')[1]).lower() if filter_details[1].split(',')[1] else ''
-					request_object['tag_search'][f'{include_exclude}_filter']['tag_type'].append(tag_type)
-					request_object['tag_search'][f'{include_exclude}_filter']['text'].append(tag_text)
-					request_object['work_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
-					request_object['bookmark_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
-				elif filter_type == 'attribute':
-					attribute_text = (filter_details[1].split(',')[1]).lower() if filter_details[1].split(',')[1] else ''
-					request_object['work_search'][f'{include_exclude}_filter']['attributes'].append(attribute_text)
-					request_object['bookmark_search'][f'{include_exclude}_filter']['attributes'].append(attribute_text)
-					request_object['collection_search'][f'{include_exclude}_filter']['attributes'].append(attribute_text)
-				elif filter_type == 'bookmark':
-					if filter_details[0] in request_object['bookmark_search'][f'{include_exclude}_filter'] and len(request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
-						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
-					else:
-						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]] = []
-						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
+			if '$' in key:
+				return_keys[include_exclude].append(key)
+			elif filter_val:
+				return_keys[include_exclude].append(f'{key}${filter_val}')
+		request_object = build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val)
 	return [request_object, return_keys]
 
 
+def get_chive_results(response_obj):
+	response_obj['data'] = get_object_tags(response_obj['data'])
+	response_obj['data'] = get_array_attributes_for_display(response_obj['data'], 'attributes')
+	response_obj['data'] = format_date_for_template(response_obj['data'], 'updated_on', True)
+	return response_obj
+
+
+def get_tag_results(response_obj):
+	response_obj['data'] = group_tags(response_obj['data'])
+	return response_obj
+
+
 def build_and_execute_search(request):
+	# prepare search & preserve request data
 	tag_id = None
 	attr_id = None
 	if 'term' in request.GET:
@@ -91,58 +176,15 @@ def build_and_execute_search(request):
 	if attr_id:
 		request_object["attr_id"] = attr_id
 	request_object = get_search_request(request, request_object, request_builder)
-	works = {'data': []}
-	bookmarks = {'data': []}
-	tags = {'data': []}
-	users = {'data': []}
-	collections = {'data': []}
-	facets = {}
-	tag_count = 0
+	# make request
 	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
-	if 'work' in response_json['results']:
-		works = response_json['results']['work']
-		works['data'] = get_object_tags(works['data'])
-		works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
-		works['data'] = format_date_for_template(works['data'], 'updated_on', True)
-	if 'bookmark' in response_json['results']:
-		bookmarks = response_json['results']['bookmark']
-		bookmarks['data'] = get_object_tags(bookmarks['data'])
-		bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
-		bookmarks['data'] = format_date_for_template(bookmarks['data'], 'updated_on', True)
-	if 'tag' in response_json['results']:
-		tags = response_json['results']['tag']
-		tags['data'] = group_tags(tags['data'])
-		tag_count = len(response_json['results']['tag']['data'])
-	if 'user' in response_json['results']:
-		users = response_json['results']['user']
-	if 'collection' in response_json['results']:
-		collections = response_json['results']['collection']
-		collections['data'] = get_object_tags(collections['data'])
-		collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
-		collections['data'] = format_date_for_template(collections['data'], 'updated_on', True)
-	if 'facet' in response_json['results']:
-		facets = response_json['results']['facet']
-		print(request_object[1]['exclude'])
-		for item in request_object[1]['exclude']:
-			if item == 'any_all':
-				continue
-			facet_added = False
-			if '$' in item and ',' in item:
-				split = item.split('$')
-				label_split = split[0].split(',')
-				val_split = split[1].split(',')
-				for facet in facets:
-					if facet['label'] == label_split[1]:
-						for val in facet['values']:
-							if val['label'] == val_split[1]:
-								facet_added = True
-								break
-						if not facet_added:
-							facet['values'].append({'label': val_split[1], 'filter_val': item})
-						facet_added = True
-						break
-				if not facet_added:
-					facets.append({'label': label_split[1], 'excluded': True, 'values': [{'label': val_split[1], 'filter_val': item}]})
+	# process results
+	works = get_chive_results(response_json['results']['work']) if 'work' in response_json['results'] else get_empty_response_obj()
+	bookmarks = get_chive_results(response_json['results']['bookmark']) if 'bookmark' in response_json['results'] else get_empty_response_obj()
+	tags = get_tag_results(response_json['results']['tag']) if 'tag' in response_json['results'] else get_empty_response_obj()
+	users = response_json['results']['user'] if 'user' in response_json['results'] else get_empty_response_obj()
+	collections = get_chive_results(response_json['results']['collection']) if 'collection' in response_json['results'] else get_empty_response_obj()
+	facets = get_response_facets(response_json, request_object) if 'facet' in response_json['results'] else {}
 	works_count = works['page']['count'] if 'page' in works else 0
 	bookmarks_count = bookmarks['page']['count'] if 'page' in bookmarks else 0
 	collections_count = collections['page']['count'] if 'page' in collections else 0

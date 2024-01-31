@@ -2,7 +2,11 @@
 <dd>					    	
 	<div class="uk-child-width-1 uk-grid uk-grid-small uk-margin" id="{{include}}-facet-parent">
 		{% for value in facet.values %} 
+			{% if not value.type %}
 			<label id="{{include}}-facet-child-label-{{value.label}}"><input id="{{include}}-facet-child-val" class="uk-checkbox" type="checkbox" name="{{include}}_{{ value.filter_val }}" {% if value.filter_val in keys %}checked{%endif%} {% if value.checked and include == 'include' %}checked{%endif%}> {{ value.label }}</label>
+			{% else %}
+			<span class="uk-text-medium">{{value.label}}</span> <span><input id="{{include}}-facet-child-val" class="uk-input uk-width-small" type="text" name="{{include}}_{{ value.filter_val }}" {% if include == 'include' %}value="{{value.include_value}}"{% else %}value="{{value.exclude_value}}"{% endif %}></label></span>
+			{% endif %}
 	    {% endfor %}
 	</div>
 </dd>	
