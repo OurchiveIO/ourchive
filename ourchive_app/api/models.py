@@ -403,6 +403,7 @@ class Tag(models.Model):
     display_text = models.CharField(max_length=120, default='')
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
+    filterable = models.BooleanField(default=True)
 
     class Meta:
         indexes = [

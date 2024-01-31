@@ -168,7 +168,8 @@ class PostgresProvider:
         ) else f"/search/?limit={page_size}&page={page-1}&object_type={obj.__name__}"
         return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
 
-    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True, has_private=False):
+    # todo: move to kwargs or obj. my god.
+    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True, has_private=False, has_filterable=False):
         resultset = None
         page = int(page)
         # filter on query first, then use filters (more exact, used when searching within) to narrow
@@ -234,6 +235,8 @@ class PostgresProvider:
                     resultset = resultset.filter(draft=False)
                 resultset = resultset.order_by('zero_distance', order_by)
             require_distinct = False
+        if resultset and has_filterable:
+            resultset = resultset.filter(filterable=True)
         if require_distinct and resultset:
             # remove any dupes & apply order_by
             resultset = resultset.order_by(order_by).distinct()
@@ -407,7 +410,7 @@ class PostgresProvider:
         term = term.lower()
         if tag_type:
             resultset = Tag.objects.filter(
-                tag_type__type_name=tag_type).filter(Q(text__icontains=term) | Q(display_text__icontains=term))
+                tag_type__type_name=tag_type).filter(tag_type__filterable=True).filter(filterable=True).filter(Q(text__icontains=term) | Q(display_text__icontains=term))
         else:
             resultset = Tag.objects.annotate(zero_distance=TrigramWordDistance(term, 'text'))
             resultset = resultset.filter(zero_distance__lte=.85)
@@ -415,7 +418,7 @@ class PostgresProvider:
             resultset = resultset[:10]
         if resultset is None:
             resultset = Tag.objects.filter(
-                tag_type__type_name=tag_type) if fetch_all else []
+                tag_type__type_name=tag_type).filter(tag_type__filterable=True).filter(filterable=True) if fetch_all else []
         for result in resultset:
             results.append({"tag": result.text, "display_text": result.display_text,
                             "id": result.id, "type": result.tag_type.label, "type_name": result.tag_type.type_name})
@@ -446,7 +449,7 @@ class PostgresProvider:
         if not query and not tag_filters:
             return {'data': []}
         resultset = self.run_queries(tag_filters, query, Tag, [
-                                     'text'], tag_search.term, kwargs.get('page', 1), tag_search.order_by, False, 0.7, False)
+                                     'text'], tag_search.term, kwargs.get('page', 1), tag_search.order_by, False, 0.7, False, False, True)
         result_json = []
         if resultset is None:
             return result_json

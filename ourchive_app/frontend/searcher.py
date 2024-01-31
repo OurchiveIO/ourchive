@@ -179,12 +179,12 @@ def build_and_execute_search(request):
 	# make request
 	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
 	# process results
-	works = get_chive_results(response_json['results']['work']) if 'work' in response_json['results'] else get_empty_response_obj()
-	bookmarks = get_chive_results(response_json['results']['bookmark']) if 'bookmark' in response_json['results'] else get_empty_response_obj()
-	tags = get_tag_results(response_json['results']['tag']) if 'tag' in response_json['results'] else get_empty_response_obj()
-	users = response_json['results']['user'] if 'user' in response_json['results'] else get_empty_response_obj()
-	collections = get_chive_results(response_json['results']['collection']) if 'collection' in response_json['results'] else get_empty_response_obj()
-	facets = get_response_facets(response_json, request_object) if 'facet' in response_json['results'] else {}
+	works = get_chive_results(response_json['results']['work']) if 'results' in response_json and 'work' in response_json['results'] else get_empty_response_obj()
+	bookmarks = get_chive_results(response_json['results']['bookmark']) if 'results' in response_json and 'bookmark' in response_json['results'] else get_empty_response_obj()
+	tags = get_tag_results(response_json['results']['tag']) if 'results' in response_json and 'tag' in response_json['results'] else get_empty_response_obj()
+	users = response_json['results']['user'] if 'results' in response_json and 'user' in response_json['results'] else get_empty_response_obj()
+	collections = get_chive_results(response_json['results']['collection']) if 'results' in response_json and 'collection' in response_json['results'] else get_empty_response_obj()
+	facets = get_response_facets(response_json, request_object) if 'results' in response_json and 'facet' in response_json['results'] else {}
 	works_count = works['page']['count'] if 'page' in works else 0
 	bookmarks_count = bookmarks['page']['count'] if 'page' in bookmarks else 0
 	collections_count = collections['page']['count'] if 'page' in collections else 0
