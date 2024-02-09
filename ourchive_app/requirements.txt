@@ -65,7 +65,7 @@ simplejson==3.19.1
 six==1.16.0
 sniffio==1.3.0
 sortedcontainers==2.4.0
-soupsieve==2.4.1
+soupsieve==2.5
 sqlparse==0.4.4
 tqdm==4.65.0
 trio==0.22.0
