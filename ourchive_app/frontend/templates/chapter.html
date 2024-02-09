@@ -33,7 +33,11 @@
             <li><a href="{% if work.zip_url %}{{work.zip_url}}{% else %}{% url 'export-work' work.id 'zip' %}{% endif %}">ZIP</a></li>
         </ul></div>
     </div>{% endif %}
+    {% if view_full %}
+    <a id="jump-to-comments" href="#chapter-{{ work.last_chapter_id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: .75" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
+    {% else %} 
     <a id="jump-to-comments" href="#chapter-{{ chapter.id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: .75" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
+    {% endif %}
 </div>
 {% if work.chapter_count > 1 or chapter.title %}<div class="uk-width-1-1 uk-margin-small-top" id="chapter-header-parent">
 	<h2 id="chapter-header-h2"><a id="chapter-header-link" class="uk-link-reset" href="">{% if work.chapter_count > 1 %}Chapter {{ chapter.number }}{% if chapter.title %}: {% endif %}{{ chapter.title|default:'' }}{% endif %}{% endif %}</a></h2>
@@ -88,11 +92,22 @@
             <li><a href="{% if work.zip_url %}{{work.zip_url}}{% else %}{% url 'export-work' work.id 'zip' %}{% endif %}">ZIP</a></li>
         </ul></div>
     </div>
+    {% if view_full %}
+    <a id="jump-to-comments" href="#chapter-{{ work.last_chapter_id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: .75" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
+    {% else %} 
     <a id="jump-to-comments" href="#chapter-{{ chapter.id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: .75" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
+    {% endif %}
 </div>
 <div class="uk-grid uk-width-expand uk-margin-remove" uk-grid>
 <div class="uk-width-1-2 uk-margin-remove-left uk-margin-remove-right uk-padding-remove-horizontal">{% if previous_chapter is not None %}<a href="{{ previous_chapter }}"><span uk-pagination-previous></span> Previous Chapter</a>{% endif %}</div>
 {% if next_chapter is not None %}<div class="uk-width-1-2 uk-text-right uk-align-right uk-margin-remove-left uk-margin-remove-right uk-padding-remove-horizontal"><a href="{{ next_chapter }}">Next Chapter <span uk-pagination-next></span></a></div>{% endif %}
 </div>
+{% if view_full %}
+{% if chapter.comments %}
 <div class="uk-width-1-1 uk-margin-small-top"><hr class="ourchive-hr"/></div>
 <div class="uk-width-1-1" id="chapter-{{ chapter.id }}-comments-include">{% include 'comments_parent.html' with object_name='chapter' comments=chapter.comments object=chapter edit_action_url=chapter.edit_action_url post_action_url=chapter.post_action_url comment_offset=chapter.comment_offset delete_obj='chapter-comment' load_more_base=chapter.load_more_base root_obj_id=work.id view_thread_base=chapter.view_thread_base comment_count=chapter.comment_count %}</div>
+{% endif %}
+{% else %}
+<div class="uk-width-1-1 uk-margin-small-top"><hr class="ourchive-hr"/></div>
+<div class="uk-width-1-1" id="chapter-{{ chapter.id }}-comments-include">{% include 'comments_parent.html' with object_name='chapter' comments=chapter.comments object=chapter edit_action_url=chapter.edit_action_url post_action_url=chapter.post_action_url comment_offset=chapter.comment_offset delete_obj='chapter-comment' load_more_base=chapter.load_more_base root_obj_id=work.id view_thread_base=chapter.view_thread_base comment_count=chapter.comment_count %}</div>
+{% endif %}

@@ -79,6 +79,7 @@ urlpatterns = [
     path('users/<str:username>/subscriptions/works', views.user_work_subscriptions, name='fe-user-work-subscriptions'),
     path('works/<int:work_id>/chapters/<int:id>/edit', views.edit_chapter),
     path('works/<int:work_id>/chapters/new', views.new_chapter),
+    path('workcomments/<int:work_id>/chapter/<int:chapter_id>', views.render_work_comments),
     path('works/<int:work_id>/chapters/<int:chapter_id>/<int:chapter_offset>/comments', views.render_chapter_comments),
     path('works/<int:work_id>/chapters/<int:chapter_id>/comments/new', views.create_chapter_comment),
     path('works/<int:work_id>/chapters/<int:chapter_id>/comments/edit', views.edit_chapter_comment),

@@ -53,6 +53,7 @@ urlpatterns = [
          name='collectioncomment-detail'),
     path('chaptercomments/', views.CommentList.as_view(), name='comment-list'),
     path('chaptercomments/<int:pk>/', views.CommentDetail.as_view(), name='comment-detail'),
+    path('workcomments/<int:pk>/', views.WorkCommentList.as_view(), name='work-comment-list'),
     path('bookmarkcomments/', views.BookmarkCommentList.as_view(),
          name='bookmarkcomment-list'),
     path('bookmarkcomments/<int:pk>/', views.BookmarkPrimaryCommentDetail.as_view(),

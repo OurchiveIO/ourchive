@@ -1173,8 +1173,8 @@ def log_out(request):
 def work(request, pk, chapter_offset=0):
 	view_full = request.GET.get('view_full', False)
 	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
-	comment_offset = request.GET.get('comment_offset') if request.GET.get('comment_offset') else 0
-	comment_id = request.GET.get('comment_thread')
+	comment_offset = request.GET.get('comment_offset', 0)
+	comment_id = request.GET.get('comment_thread', None)
 	comment_count = request.GET.get('comment_count')
 	cache_key = f'work_{pk}_{chapter_offset}_{request.user}_{view_full}_{expand_comments}_{comment_offset}_{comment_id}_{comment_count}'
 	if cache.get(cache_key):
@@ -1199,24 +1199,41 @@ def work(request, pk, chapter_offset=0):
 	for chapter in chapter_json:
 		chapter = format_date_for_template(chapter, 'updated_on')
 		if 'id' in chapter:
-			if 'comment_thread' not in request.GET:
-				chapter_comments = do_get(f"api/chapters/{chapter['id']}/comments?limit=10&offset={comment_offset}", request, "Chapter Comments").response_data
-				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
-				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}"""
-			else:
-				chapter_comments = do_get(f"api/chaptercomments/{comment_id}", request, 'Chapter Comments').response_data
-				comment_offset = 0
-				chapter_comments = {'results': [chapter_comments], 'count': comment_count}
-				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}&comment_thread={comment_id}"
-				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
-			chapter_comments['results'] = format_comments_for_template(chapter_comments['results'])
-			chapter['comments'] = chapter_comments
-			chapter['comment_offset'] = comment_offset
-			chapter['load_more_base'] = f"/works/{pk}/chapters/{chapter['id']}/{chapter_offset}"
-			chapter['view_thread_base'] = f"/works/{pk}/{chapter_offset}"
+			if not view_full:
+				if 'comment_thread' not in request.GET:
+					chapter_comments = do_get(f"api/chapters/{chapter['id']}/comments?limit=10&offset={comment_offset}", request, "Chapter Comments").response_data
+					chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
+					chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}"""
+				else:
+					chapter_comments = do_get(f"api/chaptercomments/{comment_id}", request, 'Chapter Comments').response_data
+					comment_offset = 0
+					chapter_comments = {'results': [chapter_comments], 'count': comment_count}
+					chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}&comment_thread={comment_id}"
+					chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
+				chapter_comments['results'] = format_comments_for_template(chapter_comments['results'])
+				chapter['comments'] = chapter_comments
+				chapter['comment_offset'] = comment_offset
+				chapter['load_more_base'] = f"/works/{pk}/chapters/{chapter['id']}/{chapter_offset}/comments"
+				chapter['view_thread_base'] = f"/works/{pk}/{chapter_offset}"
+				chapter['new_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 			chapter['attributes'] = get_attributes_for_display(chapter['attributes'])
-			chapter['new_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 			chapters.append(chapter)
+	if view_full:
+		work_comments = do_get(f"api/workcomments/{pk}/?limit=10&offset={comment_offset}", request, _("Work Comments")).response_data
+		work_comments['results'] = format_comments_for_template(work_comments['results'])
+		chapters[-1]['comments'] = work_comments
+		chapters[-1]['comment_offset'] = comment_offset
+		chapters[-1]['load_more_base'] = f"/workcomments/{pk}/chapter/{chapters[-1]['id']}"
+		chapters[-1]['view_thread_base'] = f"/works/{pk}/?view_full=true"
+		chapters[-1]['comment_count'] = work['comment_count']
+		chapters[-1]['new_action_url'] = f"/works/{pk}/chapters/{chapters[-1]['id']}/comments/new?view_full=true"
+		if comment_id:
+			chapters[-1]['post_action_url'] = f"/works/{pk}/chapters/{chapters[-1]['id']}/comments/new?view_full=true&offset={comment_offset}&comment_thread={comment_id}"
+			chapters[-1]['edit_action_url'] = f"""/works/{pk}/chapters/{chapters[-1]['id']}/comments/edit?view_full=true&offset={comment_offset}&comment_thread={comment_id}"""
+		else:
+			chapters[-1]['post_action_url'] = f"/works/{pk}/chapters/{chapters[-1]['id']}/comments/new?view_full=true&offset={comment_offset}"
+			chapters[-1]['edit_action_url'] = f"""/works/{pk}/chapters/{chapters[-1]['id']}/comments/edit?view_full=true&offset={comment_offset}"""
+		work['last_chapter_id'] = chapters[-1]['id']
 	page_content = render(request, 'work.html', {
 		'work_types': work_types['results'],
 		'work': work,
@@ -1274,6 +1291,38 @@ def render_chapter_comments(request, work_id, chapter_id, chapter_offset):
 	return render_comments_common(
 		request, get_comment_base, 'chapter', chapter_id, load_more_base, view_thread_base,
 		'chapter-comment', post_action_url, edit_action_url, work_id, {'chapter-offset': chapter_offset})
+
+
+def render_work_comments(request, work_id, chapter_id):
+	post_action_url = f"/works/{work_id}/chapters/{chapter_id}/comments/new?view_full=true"
+	edit_action_url = f"""/works/{work_id}/chapters/{chapter_id}/comments/edit?view_full=true"""
+	get_comment_base = f'api/workcomments/{work_id}'
+	view_thread_base = f"/works/{work_id}/?view_full=true"
+	load_more_base = f"/workcomments/{work_id}/chapter/{chapter_id}"
+	limit = request.GET.get('limit', '')
+	offset = request.GET.get('offset', '')
+	depth = request.GET.get('depth', 0)
+	comments = do_get(f'{get_comment_base}/?limit={limit}&offset={offset}', request, 'Comments').response_data
+	comments['results'] = format_comments_for_template(comments['results'])
+	response_dict = {
+		'comments': comments['results'],
+		'current_offset': comments['current'],
+		'top_level': 'true',
+		'depth': int(depth),
+		'work': {'id': work_id},
+		'load_more_base': load_more_base,
+		'comment_count': comments['count'],
+		'view_thread_base': view_thread_base,
+		'delete_obj': 'chapter-comment',
+		'object_name': 'chapter',
+		'object': {'id': chapter_id},
+		'next_params': comments['next_params'],
+		'prev_params': comments['prev_params'],
+		'post_action_url': post_action_url,
+		'edit_action_url': edit_action_url
+	}
+	response_dict['root_obj_id'] = work_id
+	return render(request, 'comments.html', response_dict)
 
 
 def render_collection_comments(request, pk):
@@ -1334,12 +1383,12 @@ def create_comment_common(request, captcha_fail_redirect, object_name, redirect_
 		return redirect(redirect_url_threaded)
 
 
-def edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url_threaded):
+def edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url_threaded, comment_count=None):
 	if not request.method == 'POST':
 		messages.add_message(request, messages.ERROR, _('Invalid URL.'), f'{object_name}-comment-edit-not-found')
 		return redirect(error_redirect)
 	comment_dict = request.POST.copy()
-	comment_count = int(request.POST.get(f'{object_name}_comment_count'))
+	comment_count = int(request.POST.get(f'{object_name}_comment_count')) if comment_count is None else comment_count
 	comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
 	if comment_count > 10 and request.POST.get('parent_comment_val') is None:
 		comment_offset = int(int(request.POST.get(f'{object_name}_comment_count')) / 10) * 10
@@ -1352,6 +1401,7 @@ def edit_comment_common(request, object_name, error_redirect, redirect_url, redi
 		comment_dict["user"] = str(request.user)
 	else:
 		comment_dict["user"] = None
+	print(comment_dict)
 	response = do_patch(f"api/{object_name}comments/{comment_dict['id']}/", request, data=comment_dict, object_name='Comment')
 	process_message(request, response)
 	redirect_url = f'{redirect_url}expandComments=true&scrollCommentId={comment_dict["id"]}&comment_offset={comment_offset}'
@@ -1371,15 +1421,21 @@ def delete_comment_common(request, redirect_url, object_name, comment_id):
 def create_chapter_comment(request, work_id, chapter_id):
 	captcha_redirect_url = f'/works/{work_id}/'
 	object_name = 'chapter'
-	redirect_url = f'/works/{work_id}/{int(request.GET.get("offset", 0))}?'
+	if request.GET.get('view_full', False) == 'true':
+		redirect_url = f'/works/{work_id}/?view_full=true&'
+	else:
+		redirect_url = f'/works/{work_id}/{int(request.GET.get("offset", 0))}?'
 	return create_comment_common(request, captcha_redirect_url, object_name, redirect_url, redirect_url)
 
 
 def edit_chapter_comment(request, work_id, chapter_id):
 	object_name = 'chapter'
-	redirect_url = f'/works/{work_id}/{int(request.GET.get("offset", 0))}?'
+	if request.GET.get('view_full', False) == 'true':
+		redirect_url = f'/works/{work_id}/?view_full=true&'
+	else:
+		redirect_url = f'/works/{work_id}/{int(request.GET.get("offset", 0))}?'
 	error_redirect = f'/works/{work_id}'
-	return edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url)
+	return edit_comment_common(request, object_name, error_redirect, redirect_url, redirect_url, request.POST.get('work_comment_count'))
 
 
 def delete_chapter_comment(request, work_id, chapter_id, comment_id):

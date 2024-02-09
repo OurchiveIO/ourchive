@@ -5,12 +5,12 @@
         <div class="uk-width-1-1" id="reply-{{comment.id}}-parent-div">
             <label id="reply-{{comment.id}}-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Reply' %}</label>
             <div id="reply-{{comment.id}}-parent-controls" class="uk-form-controls">
-                <div class="uk-inline" id="reply-{{comment.id}}-fields">
+                <div class="uk-inline uk-width-expand" id="reply-{{comment.id}}-fields">
                     <input type="hidden" id="parent_comment" name="parent_comment" value="{{ comment.id }}">
                     <input type="hidden" id="parent_comment_next" name="parent_comment_next" value="{{current_offset}}"/>
                     <input type="hidden" id="{{ object_name }}" name="{{ object_name }}" value="{{ object_id }}">
                     <input type="hidden" id="{{ object_name }}_comment_count" name="{{ object_name }}_comment_count" value="{{ comment_count }}">
-                    <textarea class="uk-textarea uk-form-width-large" rows="5" id="text" name="text" required="required"></textarea>
+                    <textarea class="uk-textarea uk-width-expand" rows="5" id="text" name="text" required="required"></textarea>
                 </div>
             </div>
         </div>
@@ -33,13 +33,13 @@
         <div class="uk-width-1-1" id="edit-comment-parent-div">
             <label id="edit-comment-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Edit Comment' %}</label>
             <div id="edit-comment-form-controls" class="uk-form-controls">
-                <div id="edit-comment-input-div" class="uk-inline">
+                <div id="edit-comment-input-div" class="uk-inline uk-width-expand">
                     <input type="hidden" id="comment_id" name="id" value="{{ comment.id }}">
                      <input type="hidden" id="parent_comment_val" name="parent_comment_val" value="{{ comment.parent_comment}}">
                     <input type="hidden" id="parent_comment_next" name="parent_comment_next" value="{{current_offset}}"/>
                     <input type="hidden" id="{{ object_name }}" name="{{ object_name }}" value="{{ object_id }}">
                     <input type="hidden" id="{{ object_name }}_comment_count" name="{{ object_name }}_comment_count" value="{{ comment_count }}">
-                    <textarea id="edit-comment-textarea" class="uk-textarea uk-form-width-large" rows="5" placeholder="Text" name="text" required="required">{{ comment.text|default_if_none:'' }}</textarea>
+                    <textarea id="edit-comment-textarea" class="uk-textarea uk-width-expand" rows="5" placeholder="Text" name="text" required="required">{{ comment.text|default_if_none:'' }}</textarea>
 
                 </div>
             </div>

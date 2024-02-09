@@ -785,6 +785,15 @@ class WorkChapterDetailAll(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
+class WorkCommentList(generics.ListCreateAPIView):
+    serializer_class = ChapterCommentSerializer
+    permission_classes = [IsOwnerOrReadOnly,
+                          UserAllowsWorkComments, UserAllowsWorkAnonComments]
+
+    def get_queryset(self):
+        return ChapterComment.objects.filter(chapter__work__id=self.kwargs['pk']).filter(parent_comment=None).order_by('created_on')
+
+
 class ChapterCommentDetail(generics.ListCreateAPIView):
     serializer_class = ChapterCommentSerializer
     permission_classes = [IsOwnerOrReadOnly,
@@ -968,7 +977,8 @@ class CommentList(generics.ListCreateAPIView):
         return ChapterComment.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user, offset=self.request.data['offset'], comment_thread=self.request.data.get('comment_thread', None), comment_count=self.request.data.get('comment_count', None))
+        offset = self.request.data.get('offset', 0)
+        serializer.save(user=self.request.user, offset=offset, comment_thread=self.request.data.get('comment_thread', None), comment_count=self.request.data.get('comment_count', None))
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):

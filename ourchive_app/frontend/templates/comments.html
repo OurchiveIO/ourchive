@@ -56,8 +56,8 @@
 {% if comment.parent_comment == null %}
 <div id="{{object_name}}-{{object.id}}-pagination" class="uk-width-1-1 uk-margin-top">
     <ul class="uk-pagination">
-        {% if prev_params %}<li><a onclick='loadMoreComments("{{load_more_base}}/comments{{prev_params}}&depth={{depth}}")'><span class="uk-margin-small-right" uk-pagination-previous></span> {% translate 'Previous Comments' %}</a></li>{% endif %}
-        {% if next_params %}<li class="uk-margin-auto-left"><a onclick='loadMoreComments("{{load_more_base}}/comments{{next_params}}&depth={{depth}}")'>{% translate 'Next Comments' %} <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
+        {% if prev_params %}<li><a onclick='loadMoreComments("{{load_more_base}}{{prev_params}}&depth={{depth}}")'><span class="uk-margin-small-right" uk-pagination-previous></span> {% translate 'Previous Comments' %}</a></li>{% endif %}
+        {% if next_params %}<li class="uk-margin-auto-left"><a onclick='loadMoreComments("{{load_more_base}}{{next_params}}&depth={{depth}}")'>{% translate 'Next Comments' %} <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
     </ul>  
 </div>  
 {% endif %}
