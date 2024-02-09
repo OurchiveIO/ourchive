@@ -29,7 +29,6 @@ jobs:
           source venv/bin/activate
           pip install django
           pip install -r ourchive_app/requirements.txt
-          pip install -r ourchive_app/importer_requirements.txt
           python ourchive_app/manage.py collectstatic
           rsync -avzr -e "ssh -p ${remote_port} -i ~/.ssh/id_github -o StrictHostKeyChecking=no" ${local_dir} ${remote_user}@${remote_host}:${remote_dir}
           rm ~/.ssh/id_github
