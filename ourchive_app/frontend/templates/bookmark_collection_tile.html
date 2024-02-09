@@ -1,30 +1,30 @@
 {% load i18n %}
 <div id="bkcol-tile-parent" class="uk-width-1-1 uk-padding-remove-horizontal">
 	<div id="bkcol-tile-card" class="uk-card uk-card-default">
-	    <div id="bkcol-tile-header-parent" class="uk-card-header">
-	        <div id="bkcol-tile-header-grid" class="uk-grid-small uk-flex-middle" uk-grid>
-		        <div id="bkcol-tile-header-content" class="uk-width-expand">
-	                <a id="bkcol-tile-title-link" href="/bookmark-collections/{{bookmark_collection.id}}" class="uk-inline"><h3 id="bkcol-tile-title" class="uk-card-title uk-margin-remove-bottom">{{bookmark_collection.title}}</h3></a>
-	                <p id="bkcol-tile-creator" class="uk-text-meta uk-margin-remove-top">{{ bookmark_collection.user }}</p>
-		        </div>
+	    <div id="bkcol-tile-header-parent" class="uk-card-header uk-padding-small ourchive-card-head">
+	        <div id="bkcol-tile-header-grid" class="uk-grid uk-child-width-expand" uk-grid>
+		        <span id="collection-{{ bookmark_collection.id }}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="collection-{{ bookmark_collection.id }}-tile-title-link" href="{% url 'fe-view-collection' bookmark_collection.id %}">{{ bookmark_collection.title }}</a> by <a href="{% url 'user-profile-parent' bookmark_collection.user_id %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark_collection.user }}</a></span>
 		        {% if bookmark_collection.user == request.user.username %}
-		        <div id="bkcol-tile-actions-parent" class="uk-align-right">
-		            <a id="bkcol-tile-edit-{{ bookmark_collection.id }}-link" href="/bookmark-collections/{{bookmark_collection.id}}/edit"><span id="bkcol-tile-edit-span" uk-icon="icon: file-edit" title="Edit Collection {{ bookmark_collection.id }}"></span> </a>
-		            <a id="bkcol-tile-delete-link" uk-toggle="target: #bookmark-collection-{{bookmark_collection.id}}-modal-delete"><span uk-icon="icon: trash" id="bkcol-tile-delete-span" title="Delete"></span> </a>
+		        <div id="bkcol-tile-actions-parent" class="uk-align-right uk-text-right uk-margin-remove">
+		            <a class="ourchive-icon-wrapper" id="bkcol-tile-edit-{{ bookmark_collection.id }}-link" href="/bookmark-collections/{{bookmark_collection.id}}/edit"><span id="bkcol-tile-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="Edit Collection {{ bookmark_collection.id }}"></span> </a>
+		            <a class="ourchive-icon-wrapper" id="bkcol-tile-delete-link" uk-toggle="target: #bookmark-collection-{{bookmark_collection.id}}-modal-delete"><span uk-icon="icon: ourchive-delete;ratio:.75" id="bkcol-tile-delete-span" title="Delete"></span> </a>
+		            {% if bookmark_collection.draft %}<span class="uk-label uk-margin-remove-top uk-margin-remove-right uk-margin-remove-left uk-text-small uk-inline uk-label-warning" id="collection-{{ bookmark_collection.id }}-tile-draft-button-span"><strong>DRAFT</strong></span>{% endif %}
 			    <p>{% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bookmark_collection.id %}</p>
 		        </div>
 		        {% endif %}
 		    </div>
 		</div>
-		<div id="bkcol-tile-tags" class="uk-card-body">
-			{% if bookmark_collection.short_description %}<div id="bkcol-short-desc" class="uk-width-expand">
+		<div id="bkcol-tile-tags" class="uk-card-body ourchive-card-body uk-padding-small">
+			{% if bookmark_collection.short_description %}
 				<p class="uk-text-medium">{{ bookmark_collection.short_description }}</p>
-			</div>{% endif %}
+			{% endif %}
 			{% if bookmark_collection.tags.items %}{% include "tag_partial.html" with obj_name='bk' tags=bookmark_collection.tags.items %}{% endif %}
 			{% if bookmark_collection.attributes %}{% include "object_attributes.html" with object='bkcol' object_id=bookmark_collection.id attributes=bookmark_collection.attributes %}{% endif %}
 		</div>
-	    <div class="uk-card-footer" id="bkcol-tile-footer-parent">
-	        <div class="uk-align-right uk-text-right uk-width-1-1">{% include 'bookmark_collection_metadata.html' %}</div>
+	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="bkcol-tile-footer-parent">
+	        <div class="uk-width-1-1 uk-padding-small uk-margin-small">
+	        	{% include 'bookmark_collection_metadata.html' %}
+	        </div>
 	    </div>
 	</div>  
 </div>

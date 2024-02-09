@@ -1,5 +1,6 @@
 from . import search
 from api.models import OurchiveSetting
+import numbers
 
 
 class OurchiveSearch:
@@ -26,8 +27,10 @@ class OurchiveSearch:
 		return results
 
 	def filter_by_tag(self, **kwargs):
+		if not kwargs['tag_id'].isdigit():
+			return {'results': {'errors': ['Tag id must be a number.']}}
 		results = self.searcher.filter_by_tag(**kwargs)
-		results['facet'] = self.searcher.get_result_facets(results)
+		results['facet'] = self.searcher.get_result_facets(results, kwargs['tag_id'])
 		return results
 
 	def do_tag_search(self, term, tag_type, fetch_all):

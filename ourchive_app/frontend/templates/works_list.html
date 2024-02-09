@@ -1,5 +1,4 @@
 {% for work in works %} 
-	{% include "work_tile.html" %}     
+	<div class="uk-margin-bottom">{% include "work_tile.html" %}</div>
 {% endfor %}
-<div class="uk-width-1-2 uk-padding-remove">{% if previous is not None %}<a id="works-list-pagination-prev-link" href="{{ previous }}" class="uk-margin-left"><span id="works-list-pagination-prev-span" class="uk-margin-small-right" uk-pagination-previous></span> Previous</a>{% endif %}</div>
-{% if next is not None %}<div class="uk-width-1-2 uk-text-right uk-align-right uk-margin-remove-left"><a id="works-list-pagination-next-link" href="{{ next }}" class="uk-margin-right">Next <span id="works-list-pagination-next-span" class="uk-margin-small-left" uk-pagination-next></span></a></div>{% endif %}
+{% include 'pagination.html' with previous=previous next=next object_name='work' %}

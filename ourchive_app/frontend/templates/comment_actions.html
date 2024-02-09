@@ -10,7 +10,7 @@
                     <input type="hidden" id="parent_comment_next" name="parent_comment_next" value="{{current_offset}}"/>
                     <input type="hidden" id="{{ object_name }}" name="{{ object_name }}" value="{{ object_id }}">
                     <input type="hidden" id="{{ object_name }}_comment_count" name="{{ object_name }}_comment_count" value="{{ comment_count }}">
-                    <textarea class="uk-textarea uk-form-width-large" rows="5" id="text" name="text"></textarea>
+                    <textarea class="uk-textarea uk-form-width-large" rows="5" id="text" name="text" required="required"></textarea>
                 </div>
             </div>
         </div>
@@ -39,7 +39,7 @@
                     <input type="hidden" id="parent_comment_next" name="parent_comment_next" value="{{current_offset}}"/>
                     <input type="hidden" id="{{ object_name }}" name="{{ object_name }}" value="{{ object_id }}">
                     <input type="hidden" id="{{ object_name }}_comment_count" name="{{ object_name }}_comment_count" value="{{ comment_count }}">
-                    <textarea id="edit-comment-textarea" class="uk-textarea uk-form-width-large" rows="5" placeholder="Text" name="text">{{ comment.text|default_if_none:'' }}</textarea>
+                    <textarea id="edit-comment-textarea" class="uk-textarea uk-form-width-large" rows="5" placeholder="Text" name="text" required="required">{{ comment.text|default_if_none:'' }}</textarea>
 
                 </div>
             </div>

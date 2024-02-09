@@ -17,310 +17,11 @@ from urllib.parse import unquote, quote
 import random
 from django.core.cache import cache
 from django.views.decorators.vary import vary_on_cookie
+from operator import itemgetter
+from .searcher import build_and_execute_search
+from .view_utils import *
 
 logger = logging.getLogger(__name__)
-
-
-def group_tags(tags):
-	tag_parent = {}
-	for tag in tags:
-		if tag['tag_type'] not in tag_parent:
-			tag_parent[tag['tag_type']] = [tag]
-		else:
-			tag_parent[tag['tag_type']].append(tag)
-	return tag_parent
-
-
-def group_tags_for_edit(tags, tag_types=None):
-	tag_parent = {tag_type['label']:{'admin_administrated': tag_type['admin_administrated'], 'type_name': tag_type['type_name']} for tag_type in tag_types['results']}
-	for tag in tags:
-		tag['text'] = tag['text']
-		if 'tags' not in tag_parent[tag['tag_type']]:
-			tag_parent[tag['tag_type']]['tags'] = []
-			tag_parent[tag['tag_type']]['tags'].append(tag)
-		else:
-			tag_parent[tag['tag_type']]['tags'].append(tag)
-	return tag_parent
-
-
-def process_attributes(obj_attrs, all_attrs):
-	obj_attrs = [attribute['name'] for attribute in obj_attrs]
-	for attribute in all_attrs:
-		for attribute_value in attribute['attribute_values']:
-			if attribute_value['name'] in obj_attrs:
-				attribute_value['checked'] = True
-	return all_attrs
-
-
-def get_attributes_from_form_data(request):
-	obj_attributes = []
-	attributes = request.POST.getlist('attributevals')
-	for attribute in attributes:
-		attribute_vals = attribute.split('|_|')
-		if len(attribute_vals) > 1:
-			obj_attributes.append({
-				"attribute_type": attribute_vals[0],
-				"name": attribute_vals[1]
-			})
-	return obj_attributes
-
-
-def get_attributes_for_display(obj_attrs):
-	attrs = {}
-	attr_types = set()
-	for attribute in obj_attrs:
-		if attribute['attribute_type'] not in attr_types:
-			attr_types.add(attribute['attribute_type'])
-			attrs[attribute['attribute_type']] = []
-		attrs[attribute['attribute_type']].append(attribute['display_name'])
-	return attrs
-
-
-def get_array_attributes_for_display(dict_array, attr_key):
-	for obj in dict_array:
-		obj[attr_key] = get_attributes_for_display(obj[attr_key])
-	return dict_array
-
-
-def sanitize_rich_text(rich_text):
-	if rich_text is not None:
-		rich_text = escape(rich_text)
-	else:
-		rich_text = ''
-	return rich_text
-
-
-def get_work_obj(request, work_id=None):
-	work_dict = request.POST.copy()
-	publish_all = False
-	if 'publish_all' in work_dict:
-		publish = work_dict.pop('publish_all')
-		if publish[0].lower() == 'on':
-			publish_all = True
-	multichapter = work_dict.pop('multichapter') if 'multichapter' in work_dict else None
-	chapter_dict = {
-		'title': '',
-		'summary': '',
-		'notes': '',
-		'number': '1',
-		'image_url': '',
-		'image_url-upload': '',
-		'image_alt_text': '',
-		'audio_url': '',
-		'audio_url-upload': '',
-		'audio_description': '',
-		'text': '',
-		'work': '',
-		'draft': 'chapter_draft' in request.POST,
-		'end_notes': ''
-	}
-	tags = []
-	tag_types = {}
-	chapters = []
-	result = do_get(f'api/tagtypes', request)
-	for item in result.response_data['results']:
-		tag_types[item['type_name']] = item
-	for item in request.POST:
-		if item in chapter_dict and not multichapter:
-			val_list = request.POST.getlist(item)
-			if len(val_list) > 1:
-				chapter_dict[item] = val_list[1]
-				work_dict[item] = val_list[0]
-			else:
-				chapter_dict[item] = request.POST[item]
-		elif item in chapter_dict:
-			val_list = request.POST.getlist(item)
-			if len(val_list) > 1:
-				work_dict[item] = val_list[0]
-		elif item == 'chapter_id':
-			chapter_dict['id'] = request.POST[item]
-			work_dict.pop('chapter_id')
-		elif 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
-			tag = {}
-			json_item = request.POST[item].split(settings.TAG_DIVIDER)
-			tag['tag_type'] = tag_types[json_item[2]]['label']
-			tag['text'] = json_item[1]
-			if not json_item[1].strip():
-				continue
-			tags.append(tag)
-			work_dict.pop(item)
-		elif 'chapters_' in item and work_id is not None:
-			chapter_id = item[9:]
-			chapter_number = request.POST[item]
-			chapters.append({'id': chapter_id, 'number': chapter_number, 'work': work_id})
-	work_dict["tags"] = tags
-	chapter_dict = None if multichapter else chapter_dict
-	if work_id and chapter_dict:
-		chapter_dict['work'] = work_id
-	if 'comments_permitted' not in work_dict:
-		comments_permitted = False
-	else:
-		comments_permitted = work_dict["comments_permitted"]
-		work_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
-	work_dict["anon_comments_permitted"] = comments_permitted == "All"
-	redirect_toc = work_dict.pop('redirect_toc')[0]
-	work_dict["is_complete"] = "is_complete" in work_dict
-	work_dict["draft"] = "work_draft" in work_dict
-	work_dict = work_dict.dict()
-	work_dict["user"] = str(request.user)
-	work_dict["attributes"] = get_attributes_from_form_data(request)
-	return [work_dict, redirect_toc, chapters, chapter_dict, publish_all]
-
-
-def get_bookmark_obj(request):
-	bookmark_dict = request.POST.copy()
-	tags = []
-	tag_types = {}
-	result = do_get(f'api/tagtypes', request)
-	for item in result.response_data['results']:
-		tag_types[item['type_name']] = item
-	for item in request.POST:
-		if 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
-			tag = {}
-			json_item = request.POST[item].split(settings.TAG_DIVIDER)
-			if not json_item[1].strip():
-				continue
-			tag['tag_type'] = tag_types[json_item[2]]['label']
-			tag['text'] = json_item[1]
-			tags.append(tag)
-			bookmark_dict.pop(item)
-	bookmark_dict["tags"] = tags
-	comments_permitted = bookmark_dict["comments_permitted"]
-	bookmark_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
-	bookmark_dict["anon_comments_permitted"] = comments_permitted == "All"
-	bookmark_dict = bookmark_dict.dict()
-	bookmark_dict["user"] = str(request.user)
-	bookmark_dict["draft"] = 'draft' in bookmark_dict
-	bookmark_dict["attributes"] = get_attributes_from_form_data(request)
-	return bookmark_dict
-
-
-def get_bookmark_collection_obj(request):
-	collection_dict = request.POST.copy()
-	tags = []
-	bookmarks = []
-	tag_types = {}
-	result = do_get(f'api/tagtypes', request)
-	for item in result.response_data['results']:
-		tag_types[item['type_name']] = item
-	for item in request.POST:
-		if 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
-			tag = {}
-			json_item = request.POST[item].split(settings.TAG_DIVIDER)
-			tag['tag_type'] = tag_types[json_item[2]]['label']
-			tag['text'] = json_item[1]
-			if not json_item[1].strip():
-				continue
-			tags.append(tag)
-			collection_dict.pop(item)
-		if 'bookmarksidstoadd' in request.POST[item]:
-			json_item = request.POST[item].split("_")
-			if len(json_item) < 2:
-				continue
-			bookmark_id = json_item[1]
-			bookmarks.append(bookmark_id)
-			collection_dict.pop(item)
-	collection_dict["tags"] = tags
-	collection_dict["bookmarks"] = bookmarks
-	comments_permitted = collection_dict["comments_permitted"]
-	collection_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
-	collection_dict["anon_comments_permitted"] = comments_permitted == "All"
-	collection_dict = collection_dict.dict()
-	collection_dict["user"] = str(request.user)
-	collection_dict["draft"] = 'draft' in collection_dict
-	collection_dict["is_private"] = False
-	collection_dict["attributes"] = get_attributes_from_form_data(request)
-	return collection_dict
-
-
-def prepare_chapter_data(chapter, request):
-	if 'text' in chapter:
-		chapter['text'] = sanitize_rich_text(chapter['text'])
-		chapter['text'] = chapter['text'].replace('\r\n', '<br/>')
-	if 'summary' in chapter:
-		chapter['summary'] = sanitize_rich_text(chapter['summary'])
-	if 'notes' in chapter:
-		chapter['notes'] = sanitize_rich_text(chapter['notes'])
-		chapter['notes'] = chapter['notes'].replace('\r\n', '<br/>')
-	if 'end_notes' in chapter:
-		chapter['end_notes'] = sanitize_rich_text(chapter['end_notes'])
-		chapter['notes'] = chapter['notes'].replace('\r\n', '<br/>')
-	og_attributes = chapter['attributes'] if 'attributes' in chapter else []
-	chapter_attributes = do_get(f'api/attributetypes', request, params={'allow_on_chapter': True}, object_name='Attribute')
-	chapter['attribute_types'] = process_attributes(og_attributes, chapter_attributes.response_data['results'])
-	return chapter
-
-
-def get_default_search_result_tab(resultsets):
-	most_results = 0
-	default_tab = ''
-	for results in resultsets:
-		if len(results[0]) > most_results:
-			most_results = len(results[0])
-			default_tab = results[1]
-	return default_tab
-
-
-def get_bookmark_boilerplate(request, work_id):
-	bookmark = {
-			'title': '',
-			'description': '',
-			'user': request.user.username,
-			'work': {'title': request.GET.get('title'), 'id': work_id},
-			'is_private': True,
-			'anon_comments_permitted': True,
-			'comments_permitted': True
-		}
-	bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
-	bookmark['attribute_types'] = process_attributes([], bookmark_attributes.response_data['results'])
-	tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
-	tags = group_tags_for_edit([], tag_types)
-	# todo - this should be a specific endpoint, we don't need to retrieve 10 objects to get config
-	star_count = do_get(f'api/bookmarks', request, 'Bookmark').response_data['star_count']
-	bookmark['rating'] = star_count
-	return [bookmark, tags, star_count]
-
-
-def referrer_redirect(request, alternate_url=None):
-	response = None
-	if request.META.get('HTTP_REFERER') is not None:
-		if not any(loc in request.META['HTTP_REFERER'] for loc in ['/login', '/register', '/reset']):
-			response = redirect(f"{request.META.get('HTTP_REFERER')}")
-		else:
-			refer = alternate_url if alternate_url is not None else '/'
-			response = redirect(f"{refer}")
-	else:
-		response = redirect('/')
-	return response
-
-
-def get_object_tags(parent):
-	for item in parent:
-		item['tags'] = group_tags(item['tags']) if 'tags' in item else {}
-	return parent
-
-
-def get_unauthorized_message(request, redirect_url, html_tag):
-	messages.add_message(request, messages.WARNING, _('You must log in to perform this action.'), html_tag)
-	return redirect(redirect_url)
-
-
-def process_message(request, response):
-	message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
-	messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
-
-
-def get_works_list(request, username=None):
-	url = f'api/users/{username}/works' if username is not None else f'api/works'
-	response = do_get(url, request, params=request.GET, object_name='User Works')
-	if response.response_info.status_code >= 400:
-		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
-		return redirect('/')
-	else:
-		works = response.response_data['results']
-		works = get_object_tags(works)
-	return {'works': works, 'next_params': response.response_data['next_params'] if 'next_params' in response.response_data else None, 'prev_params': response.response_data['prev_params'] if 'prev_params' in response.response_data else None}
-
 
 def index(request):
 	top_tags = []
@@ -328,6 +29,7 @@ def index(request):
 	response = do_get(f'api/tags/top', request, params=request.GET, object_name='top tags')
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
 		top_tags = response.response_data['results']
+		top_tags = sorted(top_tags, key=itemgetter('tag_count'), reverse=True)
 		highest_count = top_tags[0]['tag_count']
 		tag_max_size = 3
 		for tag in top_tags:
@@ -370,6 +72,11 @@ def content_page(request, pk):
 
 def user_name(request, pk):
 	user = do_get(f"api/users/profile/{pk}", request, params=request.GET, object_name='User')
+	user_blocked = False
+	if request.user.is_authenticated:
+		response = do_get(f'api/userblocks/blocked/{pk}', request, 'user block')
+		if response.response_data['user_blocked']:
+			user_blocked = response.response_data['block_id']
 	if user.response_info.status_code >= 400:
 		messages.add_message(request, messages.ERROR, user.response_info.message, user.response_info.type_label)
 		return redirect('/')
@@ -393,6 +100,7 @@ def user_name(request, pk):
 	works_response = do_get(f'api/users/{username}/works', request, params=work_params, object_name='Works')
 	works = works_response.response_data['results']
 	works = get_object_tags(works)
+	works = format_date_for_template(works, 'updated_on', True)
 	work_next = f'/username/{pk}/{works_response.response_data["next_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=")}' if works_response.response_data["next_params"] is not None else None
 	work_previous = f'/username/{pk}/{works_response.response_data["prev_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=")}' if works_response.response_data["prev_params"] is not None else None
 	bookmarks_response = do_get(f'api/users/{username}/bookmarks', request, params=bookmark_params).response_data
@@ -400,11 +108,13 @@ def user_name(request, pk):
 	bookmark_next = f'/username/{pk}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
 	bookmark_previous = f'/username/{pk}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
 	bookmarks = get_object_tags(bookmarks)
+	bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
 	bookmark_collection_response = do_get(f'api/users/{username}/bookmarkcollections', request, params=bookmark_collection_params).response_data
 	bookmark_collection = bookmark_collection_response['results']
 	bookmark_collection_next = f'/username/{pk}/{bookmark_collection_response["next_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["next_params"] is not None else None
 	bookmark_collection_previous = f'/username/{pk}/{bookmark_collection_response["prev_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["prev_params"] is not None else None
 	bookmark_collection = get_object_tags(bookmark_collection)
+	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on', True)
 	user = user.response_data['results'][0]
 	user['attributes'] = get_attributes_for_display(user['attributes'])
 	subscription = do_get(f"api/subscriptions/", request, params={'subscribed_to': username}, object_name='Subscription')
@@ -417,6 +127,7 @@ def user_name(request, pk):
 		'bookmarks_next': bookmark_next,
 		'bookmarks_previous': bookmark_previous,
 		'user_filter': username,
+		'user_blocked': user_blocked,
 		'root': settings.ROOT_URL,
 		'works': works,
 		'anchor': anchor,
@@ -500,8 +211,10 @@ def unblock_user(request, user_id, pk):
 		message_type = messages.ERROR
 	elif blocklist.response_info.status_code >= 200:
 		message_type = messages.SUCCESS
-	messages.add_message(request, message_type, blocklist.response_info.message, blocklist.response_info.type_label)
-	return redirect(f'/username/{user_id}')
+	messages.add_message(request, message_type, _('User unblocked.'), blocklist.response_info.type_label)
+	if 'HTTP_REFERER' in request.META and 'username' in request.META.get('HTTP_REFERER'):
+		return referrer_redirect(request)
+	return redirect(f'/users/{request.user.username}/blocklist')
 
 
 def report_user(request, username):
@@ -512,7 +225,7 @@ def report_user(request, username):
 		response = do_post(f'api/userreports/', request, data=report_data, object_name='User Report')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
-		return redirect(f'/username/{username}/')
+		return redirect(f'/')
 	else:
 		if request.user.is_authenticated:
 			report_reasons = do_get(f'api/reportreasons/', request, 'Report Reason').response_data
@@ -527,11 +240,15 @@ def report_user(request, username):
 
 
 def user_works(request, username):
-	works = get_works_list(request, username)
+	response = get_works_list(request, username)
+	next_params = response['next_params']
+	prev_params = response['prev_params']
+	works = response['works']
+	works = format_date_for_template(works, 'updated_on', True)
 	return render(request, 'works.html', {
-		'works': works['works'],
-		'next': f"/username/{username}/works/{works['next_params']}" if works["next_params"] is not None else None,
-		'previous': f"/username/{username}/works/{works['prev_params']}" if works["prev_params"] is not None else None,
+		'works': works,
+		'next': f"/username/{username}/works/{next_params}" if next_params is not None else None,
+		'previous': f"/username/{username}/works/{prev_params}" if prev_params is not None else None,
 		'user_filter': username,
 		'root': settings.ROOT_URL})
 
@@ -540,6 +257,7 @@ def user_works_drafts(request, username):
 	response = do_get(f'api/users/{username}works/drafts', request)
 	works = response.response_data['results']
 	works = get_object_tags(works)
+	works = format_date_for_template(works, 'updated_on', True)
 	return render(request, 'works.html', {
 		'works': works,
 		'user_filter': username,
@@ -629,8 +347,10 @@ def user_bookmarks(request, username):
 	response = do_get(f'api/users/{username}/bookmarks', request, params=request.GET, object_name='User Bookmarks')
 	bookmarks = response.response_data['results']
 	bookmarks = get_object_tags(bookmarks)
+	bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
 	return render(request, 'bookmarks.html', {
 		'bookmarks': bookmarks,
+		'rating_range': response.response_data['star_count'],
 		'next': f"/username/{username}/bookmarks/{response.response_data['next_params']}" if response.response_data["next_params"] is not None else None,
 		'previous': f"/username/{username}/bookmarks/{response.response_data['prev_params']}" if response.response_data["prev_params"] is not None else None,
 		'user_filter': username})
@@ -640,6 +360,7 @@ def user_bookmark_collections(request, username):
 	response = do_get(f'api/users/{username}/bookmarkcollections', request, params=request.GET, object_name='Bookmark Collections')
 	bookmark_collections = response.response_data['results']
 	bookmark_collections = get_object_tags(bookmark_collections)
+	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
 	return render(request, 'bookmark_collections.html', {
 		'bookmark_collections': bookmark_collections,
 		'next': f"/username/{username}/bookmarkcollections/{response.response_data['next_params']}" if response.response_data["next_params"] is not None else None,
@@ -777,101 +498,17 @@ def subscribe(request):
 	return referrer_redirect(request)
 
 
-def get_search_request(request, request_object, request_builder):
-	return_keys = {'include': [], 'exclude': []}
-	for key in request.POST:
-		filter_val = request.POST[key]
-		include_exclude = 'exclude' if 'exclude_' in key else 'include'
-		key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
-		if filter_val == 'csrfmiddlewaretoken':
-			continue
-		else:
-			return_keys[include_exclude].append(key)
-		if filter_val == 'term':
-			continue
-		if 'ranges' in key:
-			filter_details = key.split('|')
-			if filter_details[0] not in request_object['work_search'][f'{include_exclude}_filter']:
-				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]] = [([filter_details[3], filter_details[2]])]
-			else:
-				request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append((filter_details[3], filter_details[2]))
-		else:
-			# TODO evaluate if this can be gotten rid of; do we have legitimate use cases that aren't a range?
-			filter_options = key.split('|')
-			for option in filter_options:
-				filter_details = option.split('$')
-				filter_type = request_builder.get_object_type(filter_details[0])
-				if filter_type == 'work':
-					if filter_details[0] in request_object['work_search'][f'{include_exclude}_filter'] and len(request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
-						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
-					else:
-						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]] = []
-						request_object['work_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
-				elif filter_type == 'tag':
-					tag_type = filter_details[0].split(',')[1]
-					tag_text = (filter_details[1].split(',')[1]).lower() if filter_details[1].split(',')[1] else ''
-					request_object['tag_search'][f'{include_exclude}_filter']['tag_type'].append(tag_type)
-					request_object['tag_search'][f'{include_exclude}_filter']['text'].append(tag_text)
-					request_object['work_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
-					request_object['bookmark_search'][f'{include_exclude}_filter']['tags'].append(tag_text)
-				elif filter_type == 'bookmark':
-					if filter_details[0] in request_object['bookmark_search'][f'{include_exclude}_filter'] and len(request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]]) > 0:
-						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
-					else:
-						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]] = []
-						request_object['bookmark_search'][f'{include_exclude}_filter'][filter_details[0]].append(filter_details[1])
-	return [request_object, return_keys]
-
-
 def search(request):
-	tag_id = None
-	if 'term' in request.GET:
-		term = request.GET['term']
-	elif 'term' in request.POST:
-		term = request.POST['term']
-	elif 'tag_id' in request.GET:
-		tag_id  = request.GET['tag_id']
-		term = ""
-	else:
+	template_data = build_and_execute_search(request)
+	if not template_data:
 		return redirect('/')
-	request_builder = SearchObject()
-	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
-	request_object = request_builder.with_term(term, pagination)
-	if tag_id:
-		request_object["tag_id"] = tag_id
-	request_object = get_search_request(request, request_object, request_builder)
-	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
-	works = response_json['results']['work']
-	works['data'] = get_object_tags(works['data'])
-	works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
-	bookmarks = response_json['results']['bookmark']
-	bookmarks['data'] = get_object_tags(bookmarks['data'])
-	bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
-	tags = response_json['results']['tag']
-	tags['data'] = group_tags(tags['data'])
-	tag_count = len(response_json['results']['tag']['data'])
-	users = response_json['results']['user']
-	collections = response_json['results']['collection']
-	collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
-	default_tab = get_default_search_result_tab(
-		[
-			[works['data'], 0],
-			[bookmarks['data'], 1],
-			[tags['data'], 3],
-			[users['data'], 4],
-			[collections['data'], 2]
-		])
-	template_data = {
-		'works': works, 'bookmarks': bookmarks,
-		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
-		'facets': response_json['results']['facet'],
-		'default_tab': default_tab,
-		'click_func': 'getFormVals(event)',
-		'root': settings.ROOT_URL, 'term': term,
-		'keys_include': request_object[1]['include'],
-		'keys_exclude': request_object[1]['exclude']}
-	if tag_id:
-		template_data['tag_id'] = tag_id
+	return render(request, 'search_results.html', template_data)
+
+
+def search_filter(request):
+	template_data = build_and_execute_search(request)
+	if not template_data:
+		return redirect('/')
 	return render(request, 'search_results.html', template_data)
 
 
@@ -904,59 +541,6 @@ def bookmark_autocomplete(request):
 		'bookmarks': bookmarks})
 
 
-def search_filter(request):
-	term = request.POST.get('term', '')
-	tag_id = None
-	if 'tag_id' in request.POST:
-		tag_id  = request.POST['tag_id']
-		term = ""
-	if not term and not tag_id:
-		return redirect('/')
-	include_filter_any = 'any' if request.POST.get('include_any_all') == 'on' else 'all'
-	exclude_filter_any = 'any' if request.POST.get('exclude_any_all') == 'on' else 'all'
-	order_by = request.POST['order_by'] if 'order_by' in request.POST else None
-	request_builder = SearchObject()
-	request_object = request_builder.with_term(term, None, (include_filter_any, exclude_filter_any), order_by)
-	if tag_id:
-		request_object["tag_id"] = tag_id
-	request_object = get_search_request(request, request_object, request_builder)
-	response_json = do_post(f'api/search/', request, data=request_object[0], object_name='Search').response_data
-	# todo DRY - this is redundant w search method - move processing to its own method
-	works = response_json['results']['work']
-	works['data'] = get_object_tags(works['data'])
-	works['data'] = get_array_attributes_for_display(works['data'], 'attributes')
-	bookmarks = response_json['results']['bookmark']
-	bookmarks['data'] = get_object_tags(bookmarks['data'])
-	bookmarks['data'] = get_array_attributes_for_display(bookmarks['data'], 'attributes')
-	tags = response_json['results']['tag']
-	tags['data'] = group_tags(tags['data'])
-	tag_count = len(response_json['results']['tag']['data'])
-	users = response_json['results']['user']
-	collections = response_json['results']['collection']
-	collections['data'] = get_object_tags(collections['data'])
-	collections['data'] = get_array_attributes_for_display(collections['data'], 'attributes')
-	default_tab = get_default_search_result_tab(
-		[
-			[works['data'], 0],
-			[bookmarks['data'], 1],
-			[tags['data'], 3],
-			[users['data'], 4],
-			[collections['data'], 2]
-		])
-	template_data = {
-		'works': works, 'bookmarks': bookmarks,
-		'tags': tags, 'users': users, 'tag_count': tag_count, 'collections': collections,
-		'facets': response_json['results']['facet'],
-		'root': settings.ROOT_URL, 'term': term,
-		'default_tab': default_tab,
-		'click_func': 'getFormVals(event)',
-		'keys_include': request_object[1]['include'],
-		'keys_exclude': request_object[1]['exclude']}
-	if tag_id:
-		template_data['tag_id'] = tag_id
-	return render(request, 'search_results.html', template_data)
-
-
 @require_http_methods(["GET"])
 def works(request):
 	response = do_get(f'api/works/', request, params=request.GET, object_name='Work')
@@ -964,8 +548,7 @@ def works(request):
 	works = response.response_data['results'] if 'results' in response.response_data else []
 	works = get_object_tags(works)
 	works = get_array_attributes_for_display(works, 'attributes')
-	for work in works:
-		work['updated_on'] = parse(work['updated_on']).date()
+	works = format_date_for_template(works, 'updated_on', True)
 	return render(request, 'works.html', {
 		'works': works,
 		'next': f"/works/{works_response['next_params']}" if works_response['next_params'] is not None else None,
@@ -1043,6 +626,8 @@ def new_chapter(request, work_id):
 		chapter_dict = request.POST.copy()
 		chapter_dict["draft"] = "chapter_draft" in chapter_dict
 		chapter_dict["attributes"] = get_attributes_from_form_data(request)
+		if 'audio_length' in chapter_dict and not chapter_dict['audio_length']:
+			chapter_dict['audio_length'] = 0
 		response = do_post(f'api/chapters/', request, data=chapter_dict, object_name='Chapter')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
@@ -1151,7 +736,8 @@ def publish_work(request, id):
 def export_work(request, pk, file_ext):
 	file_url = do_get(f'api/works/{pk}/export/', request, params={'extension': file_ext}, object_name='Work')
 	message_type = messages.ERROR if file_url.response_info.status_code >= 400 else messages.SUCCESS
-	messages.add_message(request, message_type, file_url.response_info.message, file_url.response_info.type_label)
+	if not message_type == messages.SUCCESS:
+		messages.add_message(request, message_type, file_url.response_info.message, file_url.response_info.type_label)
 	if file_url.response_info.status_code >= 400:
 		return redirect(f'/works/{pk}')
 	response = FileResponse(open(file_url.response_data['media_url'], 'rb'))
@@ -1267,6 +853,7 @@ def bookmark_collections(request):
 	response = do_get(f'api/bookmarkcollections/', request, 'Bookmark Collection').response_data
 	bookmark_collections = response['results']
 	bookmark_collections = get_object_tags(bookmark_collections)
+	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
 	for bkcol in bookmark_collections:
 		bkcol['attributes'] = get_attributes_for_display(bkcol['attributes'])
 	return render(request, 'bookmark_collections.html', {
@@ -1291,11 +878,13 @@ def new_bookmark_collection(request):
 		bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes.response_data['results'])
 		tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
 		tags = group_tags_for_edit([], tag_types)
+		bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks').response_data
 		return render(request, 'bookmark_collection_form.html', {
 			'tags': tags,
 			'divider': settings.TAG_DIVIDER,
 			'form_title': _('New Collection'),
-			'bookmark_collection': bookmark_collection})
+			'bookmark_collection': bookmark_collection,
+			'bookmarks': bookmarks})
 	elif request.user.is_authenticated:
 		collection_dict = get_bookmark_collection_obj(request)
 		response = do_post(f'api/bookmarkcollections/', request, data=collection_dict, object_name='Bookmark Collection')
@@ -1322,13 +911,22 @@ def edit_bookmark_collection(request, pk):
 			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
 			bookmark_collection['attribute_types'] = process_attributes(bookmark_collection['attributes'], bookmark_attributes.response_data['results'])
 			tags = group_tags_for_edit(bookmark_collection['tags'], tag_types) if 'tags' in bookmark_collection else []
+			bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks')
 			return render(request, 'bookmark_collection_form.html', {
 				'bookmark_collection': bookmark_collection,
+				'bookmarks': bookmarks,
 				'divider': settings.TAG_DIVIDER,
 				'form_title': 'Edit Bookmark Collection',
 				'tags': tags})
 		else:
 			return get_unauthorized_message(request, '/login', 'bookmark-collection-update-login-error')
+
+
+def get_bookmarks_for_collection(request):
+	bookmarks = do_get(f'api/users/{request.user.username}/bookmarks', request, params=request.GET, object_name='Bookmarks')
+	return render(request, 'collection_form_bookmark_modal_body.html', {
+		'bookmarks': bookmarks
+	})
 
 
 def bookmark_collection(request, pk):
@@ -1344,6 +942,7 @@ def bookmark_collection(request, pk):
 	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
 	bookmark_collection['tags'] = tags
 	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
+	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on')
 	if 'comment_thread' in request.GET:
 		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
 		comment_offset = 0
@@ -1358,6 +957,7 @@ def bookmark_collection(request, pk):
 		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '').replace('<br/>', '', 1)
 	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
 	bookmark_collection['new_action_url'] = f"/bookmark-collections/{pk}/comments/new"
+	comments['results'] = format_comments_for_template(comments['results'])
 	page_content = render(request, 'bookmark_collection.html', {
 		'load_more_base': f"/bookmark-collections/{pk}",
 		'view_thread_base': f"/bookmark-collections/{pk}",
@@ -1432,6 +1032,7 @@ def reset_password(request):
 			return render(request, 'login.html', {
 				'referrer': '/'})
 
+
 def register(request):
 	if request.user.is_authenticated:
 		messages.add_message(request, messages.ERROR, _('You are already logged in.'), 'register-while-authed-error')
@@ -1446,7 +1047,7 @@ def register(request):
 			return redirect('/')
 		else:
 			messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
-			return redirect('/register')
+			return redirect(f'/register?username={request.POST.get("username")}&email={request.POST.get("email")}')
 	else:
 		if 'invite_token' in request.GET:
 			response = do_get(f'api/invitations/', request, params={'email': request.GET.get('email'), 'invite_token': request.GET.get('invite_token')}, object_name='Invite Code')
@@ -1459,7 +1060,8 @@ def register(request):
 				messages.add_message(request, messages.ERROR, _('Your invite code or email is incorrect. Please check your link again and contact site admin.'), 'register-invalid-token-error')
 				return redirect('/')
 		permit_registration = do_get(f'api/settings/', request, params={'setting_name': 'Registration Permitted'}, object_name='Setting').response_data
-		invite_only = do_get(f'api/settings', request, params={'setting_name': 'Invite Only'}, object_name='Setting').response_data
+		invite_only = do_get(f'api/settings/', request, params={'setting_name': 'Invite Only'}, object_name='Setting').response_data
+		mandatory_agree_pages = do_get(f'api/contentpages/mandatory-on-signup/', request, object_name='Page').response_data
 		if not utils.convert_boolean(permit_registration['results'][0]['value']):
 			return render(request, 'register.html', {'permit_registration': False})
 		elif utils.convert_boolean(invite_only['results'][0]['value']):
@@ -1467,12 +1069,21 @@ def register(request):
 		else:
 			return render(request, 'register.html', {
 				'permit_registration': True,
-				'username_check_url': 'registration-utils'
+				'mandatory_agree_pages': mandatory_agree_pages,
+				'username_check_url': 'registration-utils',
+				'email': request.GET.get('email', None),
+				'username': request.GET.get('username', None)
 			})
 
 
 def request_invite(request):
 	if request.method == 'POST':
+		if not request.user.is_authenticated:
+			if settings.USE_CAPTCHA:
+				captcha_passed = validate_captcha(request)
+				if not captcha_passed:
+					messages.add_message(request, messages.ERROR, 'Captcha failed. Please try again.', 'captcha-fail-error')
+					return redirect('/request-invite/')
 		response = do_post(f'api/invitations/', request, data=request.POST.copy(), object_name='Invitation')
 		if response.response_info.status_code >= 200 and response.response_info.status_code < 400:
 			messages.add_message(request, messages.SUCCESS, _('You have been added to the invite queue.'), 'invite-request-success')
@@ -1512,7 +1123,7 @@ def work(request, pk, chapter_offset=0):
 	work = work_response.response_data
 	tags = group_tags(work['tags']) if 'tags' in work else {}
 	work['attributes'] = get_attributes_for_display(work['attributes'])
-	work['updated_on'] = parse(work['updated_on']).date()
+	work = format_date_for_template(work, 'updated_on')
 	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else "/all"}'
 	if chapter_offset > 0:
 		chapter_url_string = f'{chapter_url_string}&offset={chapter_offset}'
@@ -1521,18 +1132,19 @@ def work(request, pk, chapter_offset=0):
 	user_can_comment = (work['comments_permitted'] and (work['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in work else False
 	chapters = []
 	for chapter in chapter_json:
-		chapter['updated_on'] = parse(chapter['updated_on']).date()
+		chapter = format_date_for_template(chapter, 'updated_on')
 		if 'id' in chapter:
 			if 'comment_thread' not in request.GET:
 				chapter_comments = do_get(f"api/chapters/{chapter['id']}/comments?limit=10&offset={comment_offset}", request, "Chapter Comments").response_data
 				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}"
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}"""
 			else:
-				chapter_comments = do_get(f"api/comments/{comment_id}", request, 'Chapter Comments').response_data
+				chapter_comments = do_get(f"api/chaptercomments/{comment_id}", request, 'Chapter Comments').response_data
 				comment_offset = 0
 				chapter_comments = {'results': [chapter_comments], 'count': comment_count}
 				chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}&comment_thread={comment_id}"
 				chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
+			chapter_comments['results'] = format_comments_for_template(chapter_comments['results'])
 			chapter['comments'] = chapter_comments
 			chapter['comment_offset'] = comment_offset
 			chapter['load_more_base'] = f"/works/{pk}/chapters/{chapter['id']}/{chapter_offset}"
@@ -1558,12 +1170,13 @@ def work(request, pk, chapter_offset=0):
 		cache.set(cache_key, page_content, 60 * 60)
 	return page_content
 
-def render_comments_common(request, get_comment_base, object_name, object_id, load_more_base, view_thread_base,
-		delete_obj, post_action_url, edit_action_url, root_obj_id=None, additional_params={}):
+
+def render_comments_common(request, get_comment_base, object_name, object_id, load_more_base, view_thread_base, delete_obj, post_action_url, edit_action_url, root_obj_id=None, additional_params={}):
 	limit = request.GET.get('limit', '')
 	offset = request.GET.get('offset', '')
 	depth = request.GET.get('depth', 0)
 	comments = do_get(f'{get_comment_base}/comments?limit={limit}&offset={offset}', request, 'Comments').response_data
+	comments['results'] = format_comments_for_template(comments['results'])
 	response_dict = {
 		'comments': comments['results'],
 		'current_offset': comments['current'],
@@ -1630,9 +1243,9 @@ def create_comment_common(request, captcha_fail_redirect, object_name, redirect_
 	comment_dict = request.POST.copy()
 	comment_count = int(request.POST.get(f'{object_name}_comment_count'))
 	comment_thread = int(request.GET.get('comment_thread')) if 'comment_thread' in request.GET else None
-	if comment_count > 10 and request.POST.get('parent_comment') is None:
+	if comment_count > 9 and request.POST.get('parent_comment') is None:
 		comment_offset = int(int(request.POST.get(f'{object_name}_comment_count')) / 10) * 10
-	elif comment_count > 10 and request.POST.get('parent_comment') is not None:
+	elif comment_count > 9 and request.POST.get('parent_comment') is not None:
 		comment_offset = request.POST.get('parent_comment_next')
 	else:
 		comment_offset = 0
@@ -1640,6 +1253,11 @@ def create_comment_common(request, captcha_fail_redirect, object_name, redirect_
 		comment_dict["user"] = str(request.user)
 	else:
 		comment_dict["user"] = None
+	if request.GET.get("offset", None):
+		comment_dict['offset'] = request.GET.get("offset")
+	if comment_thread:
+		comment_dict['comment_thread'] = comment_thread
+		comment_dict['comment_count'] = comment_count
 	response = do_post(f'api/{object_name}comments/', request, data=comment_dict, object_name='Comment')
 	comment_id = response.response_data['id'] if 'id' in response.response_data else None
 	redirect_url = f'{redirect_url}expandComments=true&scrollCommentId={comment_id}&comment_offset={comment_offset}'
@@ -1700,7 +1318,7 @@ def edit_chapter_comment(request, work_id, chapter_id):
 
 
 def delete_chapter_comment(request, work_id, chapter_id, comment_id):
-	return delete_comment_common(request, f'/works/{work_id}/chapters/{chapter_id}', 'chapter', comment_id)
+	return delete_comment_common(request, request.headers.get('Referer'), 'chapter', comment_id)
 
 
 def create_bookmark_comment(request, pk):
@@ -1745,6 +1363,7 @@ def bookmarks(request):
 	previous_param = response['prev_params']
 	next_param = response['next_params']
 	bookmarks = get_object_tags(bookmarks)
+	bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
 	for bookmark in bookmarks:
 		bookmark['attributes'] = get_attributes_for_display(bookmark['attributes'])
 	return render(request, 'bookmarks.html', {
@@ -1764,8 +1383,12 @@ def bookmark(request, pk):
 	if cache.get(cache_key):
 		return cache.get(cache_key)
 	bookmark = do_get(f'api/bookmarks/{pk}', request, 'Bookmark').response_data
+	if 'id' not in bookmark or not bookmark['id']:
+		messages.add_message(request, messages.ERROR, _('Bookmark not found.'), 'bookmark-not-found')
+		return referrer_redirect(request)
 	tags = group_tags(bookmark['tags']) if 'tags' in bookmark else {}
 	bookmark['attributes'] = get_attributes_for_display(bookmark['attributes']) if 'attributes' in bookmark else {}
+	bookmark = format_date_for_template(bookmark, 'updated_on')
 	if 'comment_thread' in request.GET:
 		comments = do_get(f"api/bookmarkcomments/{comment_id}", request, 'Bookmark Comments').response_data
 		comment_offset = 0
@@ -1776,10 +1399,13 @@ def bookmark(request, pk):
 		comments = do_get(f'api/bookmarks/{pk}/comments?limit=10&offset={comment_offset}', request, 'Bookmark Comment').response_data
 		bookmark['post_action_url'] = f"/bookmarks/{pk}/comments/new"
 		bookmark['edit_action_url'] = f"""/bookmarks/{pk}/comments/edit"""
+	comments['results'] = format_comments_for_template(comments['results'])
 	bookmark['new_action_url'] = f"/bookmarks/{pk}/comments/new"
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
+	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections', request, 'Collections').response_data
 	page_content = render(request, 'bookmark.html', {
 		'bookmark': bookmark,
+		'collections': collections,
 		'load_more_base': f"/bookmarks/{pk}",
 		'view_thread_base': f"/bookmarks/{pk}",
 		'tags': tags,
@@ -1793,6 +1419,18 @@ def bookmark(request, pk):
 	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
 		cache.set(cache_key, page_content, 60 * 60)
 	return page_content
+
+
+def add_collection_to_bookmark(request, pk):
+	collection_id = request.GET.get('collection_id')
+	if not collection_id:
+		return redirect(f'/bookmarks/{pk}')
+	if not request.user.is_authenticated:
+		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'add-collection-to-bookmark-noauth')
+	response = do_patch(f'api/bookmarks/{pk}/', request, data={'id': pk, 'collection': collection_id}, object_name="Collection")
+	message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
+	messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
+	return redirect(f'/bookmarks/{pk}')
 
 
 def works_by_tag(request, tag):

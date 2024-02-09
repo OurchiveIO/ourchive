@@ -3,17 +3,14 @@
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
 {% load static %}
-<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
 <script src="{% static 'frontend/js/ourchive-chapter.js' %}"></script>
-<div class="uk-width-1-1 uk-text-left" id="work-form-parent"> 
+<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="work-form-parent"> 
 <form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
     <script>
         function getCurrentTab(submitted) {
-            //var expanded = document.getElementById('toc_link').getAttribute("aria-expanded");
             var new_chapter_clicked = submitted === "New Chapter";
             document.getElementById('redirect_toc').value = new_chapter_clicked;
-            document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
-            document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
+            getRichText(['summary', 'notes']);
             getChapterRichTextValues();
         }
     </script>
@@ -29,7 +26,7 @@
         </div>
         <div class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="work-form-top-buttons-group">
              <button id="work-form-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-             <input id="work-form-cancel-top" type="button" class="uk-button uk-button-secondary" onclick="history.back()" value="Cancel" />
+             <input id="work-form-cancel-top" type="button" class="uk-button uk-button-default" onclick="history.back()" value="Cancel" />
             <input id="work-form-submit-top" class="uk-button uk-button-primary" onclick="this.form.submitted=this.value;" type="submit" value="Submit"/>
         </div>
     </div>
@@ -40,7 +37,7 @@
         </div>
         <input type="hidden" id="redirect_toc" name="redirect_toc">
         <div class="uk-margin" id="work-form-type-parent">
-            <label id="work-form-type-label" class="uk-form-label" for="form-horizontal-text">Work Type <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work type help' %}"></sup>    
+            <label id="work-form-type-label" class="uk-form-label" for="form-horizontal-text">Work Type <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work type help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Work types are admin-configured. Select the one that best matches what kind of work you're posting.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-type-controls" class="uk-form-controls">
@@ -65,116 +62,8 @@
             </div>
             
         </div>
-        <hr id="work-attributes-hr"/>
-        <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Work Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question" title="{% translate 'Work tags help' %}"></sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
-        {% include "object_attributes_form.html" with object='Work' attribute_types=work.attribute_types show_header=False %}
-        {% include "edit_tags.html" with object='work' object_friendly='Work' show_header=False %}
         <hr/>
-        <h3 id="obj-attrs-form-header">Work Details</h3>
-        <div class="uk-margin" id="work-form-summary-parent">
-            <label id="work-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
-            <div id="work-form-summary-controls" class="uk-form-controls">
-                <div id="work-form-summary-inline" class="uk-inline uk-child-width-expand uk-width-expand">
-                    <input type="hidden" id="summary" name="summary" value="{{ work.summary|safe|default_if_none:'' }}">
-                    <textarea id="summaryEditor"></textarea>
-                    <script type="text/javascript">
-                              tinymce.init({
-                                selector: '#summaryEditor',
-                                width: '100%',
-                                height: 200,
-                                contextmenu: false,
-                                convert_urls:false,
-                                relative_urls:false,
-                                autoresize_min_height: 150,
-                                autoresize_max_height: 800,
-                                plugins: [
-                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak', 
-                                  'fullscreen', 'insertdatetime',
-                                  'media', 'table', 'emoticons', 'code'
-                                ],
-                                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                  'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                  'forecolor backcolor emoticons | help | code',
-                                menubar: '',
-                                init_instance_callback : function(editor) {
-                                    var workSummary = document.getElementById('summary').value;
-                                    if (workSummary === "None") {
-                                        workSummary = '';
-                                    }
-                                    editor.setContent(workSummary);
-                                }
-                              });
-                      </script>
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin uk-width-1-6"><a href="#" id="work-notes-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-notes-hidden-parent">{% translate 'Notes' %}</a></div>
-        <div id="work-form-notes-hidden-parent" hidden>
-        <div class="uk-margin" id="work-form-notes-parent">
-            <div id="work-form-notes-controls" class="uk-form-controls">
-                <div class="uk-inline uk-child-width-expand uk-width-expand" id="work-form-notes-inline">
-                    <input type="hidden" id="notes" name="notes" value="{{ work.notes|safe|default_if_none:'' }}">
-                    <textarea id="notesEditor"></textarea>
-                    <script type="text/javascript">
-                              tinymce.init({
-                                selector: '#notesEditor',
-                                width: '100%',
-                                height: 200,
-                                contextmenu: false,
-                                convert_urls:false,
-                                relative_urls:false,
-                                autoresize_min_height: 150,
-                                autoresize_max_height: 800,
-                                plugins: [
-                                  'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                                  'fullscreen', 'insertdatetime',
-                                  'media', 'table', 'emoticons', 'code'
-                                ],
-                                toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                  'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                  'forecolor backcolor emoticons | help',
-                                menubar: '',
-                                init_instance_callback : function(editor) {
-                                    var workNotes = document.getElementById('notes').value;
-                                    if (workNotes === "None") {
-                                        workNotes = '';
-                                    }
-                                    editor.setContent(workNotes);
-                                }
-                              });
-                      </script>
-                </div>
-            </div>
-        </div>
-        </div>
-        {% if request.user.can_upload_images %}
-        <div class="uk-margin uk-width-1-6"><a href="#" id="work-cover-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-image-hidden-parent">{% translate 'Work Cover' %}</a></div>
-        <div id="work-form-image-hidden-parent" hidden>
-        <div class="uk-margin" id="work-form-cover-parent">
-            <div id="work-form-existing-image" class="uk-form-controls">
-                {% if work.cover_url %}
-                <img id="work-form-cover-img" src="{{ work.cover_url }}" class="uk-margin-bottom"/>
-                {% endif %}
-            </div>
-            <div id="work-form-cover-controls" class="uk-form-controls">
-                <div id="work-form-cover-inline" class="uk-inline">
-                    {% include 'file_upload.html' with object='cover_url' replace_selector='work-form-cover-img' object_type='work-img' upload_placeholder='Upload cover image' original_value=work.cover_url %}
-                </div>
-            </div>
-        </div>
-        <div id="work-form-cover-alt-parent" class="uk-margin">
-            <label id="work-form-cover-alt-label" class="uk-form-label" for="form-horizontal-text">Cover Alt Text</label>
-            <div id="work-form-cover-alt-controls" class="uk-form-controls">
-                <div id="work-form-cover-alt-inline" class="uk-inline">
-                    <input id="work-form-cover-alt-input" class="uk-input uk-form-width-large" placeholder="Add a description for your cover image" type="text" name="cover_alt_text" value="{{ work.cover_alt_text|default_if_none:'' }}">
-                </div>
-            </div>
-        </div>
-        </div>      
-        {% endif %}
-        <hr/>
-        <h3 id="obj-attrs-form-header">Work Settings</h3>
+        <h4 id="obj-attrs-form-header">Work Settings</h4>
         <div class="uk-margin" id="work-form-complete-parent">
             <label id="work-form-complete-label" class="uk-form-label" for="form-horizontal-text">Complete?</label>
             <div id="work-form-complete-controls" class="uk-form-controls">
@@ -184,7 +73,7 @@
             </div>
         </div>
         <div class="uk-margin" id="work-form-draft-parent">
-            <label id="work-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work draft help' %}"></sup>    
+            <label id="work-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work draft help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-draft-controls" class="uk-form-controls">
@@ -194,12 +83,28 @@
             </div>
         </div>
         <div class="uk-margin" id="work-form-publish-all-parent">
-            <label id="work-form-publish-all-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Publish All' %}? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work draft help' %}"></sup>    
+            <label id="work-form-publish-all-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Publish All' %}? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work draft help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your work and all chapters will no longer be in draft state.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-publish-all-controls" class="uk-form-controls">
                 <div id="work-form-publish-all-inline" class="uk-inline">
                     <label id="work-form-publish-all-switch" class="switch"><input title="{% translate 'Work publish all toggle' %}" class="uk-checkbox" id="work-form-publish-all-checkbox" type="checkbox" name="publish_all"> <span id="work-form-publish-all-slider" class="slider round"></span></label>
+                </div>
+            </div>
+        </div>
+        <div class="uk-margin" id="work-form-created-parent">
+            <label id="work-form-created-label" class="uk-form-label" for="form-horizontal-text">Post Date</label>
+            <div id="work-form-created-controls" class="uk-form-controls">
+                <div id="work-form-created-inline" class="uk-inline">
+                    <input title="{% translate 'Work created on' %}" id="work-form-complete-checkbox" type="date" name="created_on" value="{{ work.created_on }}"> 
+                </div>
+            </div>
+        </div>
+        <div class="uk-margin" id="work-form-updated-parent">
+            <label id="work-form-updated-label" class="uk-form-label" for="form-horizontal-text">Update Date</label>
+            <div id="work-form-updated-controls" class="uk-form-controls">
+                <div id="work-form-updated-inline" class="uk-inline">
+                    <input title="{% translate 'Work updated on' %}" id="work-form-complete-checkbox" type="date" name="updated_on" value="{{ work.updated_on }}"> 
                 </div>
             </div>
         </div>
@@ -218,11 +123,12 @@
         {% endif %}
         {% if user.can_upload_export_files %}
         <div class="uk-margin" id="work-form-preferred-download-parent">
-            <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Preferred export help' %}"></sup>    
+            <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Preferred export help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you have a file for your work that you'd prefer users download, you can upload here and it will display at the top of the download list.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-preferred-download-controls" class="uk-form-controls">
                 <select id="work-form-preferred-download-select" class="uk-select uk-form-width-large" name="preferred_download"> 
+                    <option id="work-form-preferred-download-none">None</option>
                 {% for choice in work.download_choices %}                   
                     <option id="work-form-preferred-download-{{choice}}" {% if work.preferred_download == choice.0 %} selected {% endif %}>{{choice.1}}</option>
                 {% endfor %}
@@ -243,6 +149,49 @@
             </div>
         </div>
         {% endif %}
+        <hr id="work-attributes-hr"/>
+        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">Work Tags</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work tags help' %}"></sup>    
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
+        {% include "object_attributes_form.html" with object='Work' attribute_types=work.attribute_types show_header=False %}
+        {% include "edit_tags.html" with object='work' object_friendly='Work' show_header=False %}
+        <hr/>
+        <h4 id="obj-attrs-form-header">Work Details</h4>
+        <div class="uk-margin" id="work-form-summary-parent">
+            <label id="work-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
+            {% include 'ourchive_tinymce_template.html' with form_field_value=work.summary form_field='summary' obj_name='work' min_height=200 %}
+        </div>
+        <div class="uk-margin uk-width-1-6"><a href="#" id="work-notes-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-notes-hidden-parent">{% translate 'Notes' %}</a></div>
+        <div id="work-form-notes-hidden-parent" hidden>
+        <div class="uk-margin" id="work-form-notes-parent">
+            {% include 'ourchive_tinymce_template.html' with form_field_value=work.notes form_field='notes' obj_name='work' min_height=200 %}
+        </div>
+        </div>
+        {% if request.user.can_upload_images %}
+        <div class="uk-margin uk-width-1-6"><a href="#" id="work-cover-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-image-hidden-parent">{% translate 'Work Cover' %}</a></div>
+        <div id="work-form-image-hidden-parent" hidden>
+        <div class="uk-margin" id="work-form-cover-parent">
+            <div id="work-form-existing-image" class="uk-form-controls">
+                {% if work.cover_url %}
+                <img id="work-form-cover-img" src="{{ work.cover_url }}" class="uk-margin-bottom"/>
+                {% endif %}
+            </div>
+            <div id="work-form-cover-controls" class="uk-form-controls">
+                <div id="work-form-cover-inline" class="uk-inline" {% if not work.cover_url %}uk-toggle="target: #work-form-cover-alt-parent"{% endif %}>
+                    {% include 'file_upload.html' with object='cover_url' replace_selector='work-form-cover-img' object_type='work-img' upload_placeholder='Upload cover image' original_value=work.cover_url %}
+                </div>
+            </div>
+        </div>
+        <div id="work-form-cover-alt-parent" class="uk-margin" {% if not work.cover_url %}hidden{% endif %}>
+            <label id="work-form-cover-alt-label" class="uk-form-label" for="form-horizontal-text">Cover Alt Text</label>
+            <div id="work-form-cover-alt-controls" class="uk-form-controls">
+                <div id="work-form-cover-alt-inline" class="uk-inline">
+                    <input id="work-form-cover-alt-input" class="uk-input uk-form-width-large" placeholder="Add a description for your cover image" type="text" name="cover_alt_text" value="{{ work.cover_alt_text|default_if_none:'' }}">
+                </div>
+            </div>
+        </div>
+        </div>      
+        {% endif %}
+        
     </div>
     <div><hr/></div>
     <div id="multichapter-select" class="uk-width-1-1">
@@ -254,7 +203,7 @@
     <div id="work-form-chapter-content-parent">
     <div id="work-form-single-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if chapters|length > 1 or multichapter == 'true' %} hidden {% endif %}>
         <input type="hidden" id="work_chapter_id" name="chapter_id" value="{{ work_chapter.id }}">
-        {% include 'chapter_form_body.html' with chapter=work_chapter %}
+        {% include 'chapter_form_body.html' with chapter=work_chapter suppress_info_fields=True %}
     </div>
     <div id="work-form-multi-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.id %} hidden {% endif %} {% if work.chapter_count < 2 or chapters|length < 2 %} {% if work.id and multichapter == 'false' %} hidden {% endif %} {% endif %}>
         <script>
@@ -279,7 +228,7 @@
             <li id="chapters-list-{{chapter.id}}">
                 <div id="chapter-{{chapter.id}}-card" class="uk-card uk-card-hover uk-card-body uk-grid-small uk-child-width-1-2 uk-text-left uk-padding-small" uk-grid>
                     <div id="chapter-{{chapter.id}}-sortable" class="uk-sortable-handle">
-                        <span class="uk-margin-small-right" uk-icon="icon: table"></span><span id="chapter-{{chapter.id}}-span" class="uk-text-medium">Chapter {{chapter.number}}{% if chapter.title %}: {{chapter.title}}{% endif %}</span>
+                        <span class="uk-margin-small-right" uk-icon="icon: ourchive-hamburger;ratio:.75"></span><span id="chapter-{{chapter.id}}-span" class="uk-text-medium">Chapter {{chapter.number}}{% if chapter.title %}: {{chapter.title}}{% endif %}</span>
                     </div>
                     <div id="chapter-{{chapter.id}}-controls-div"><a id="chapter-{{chapter.id}}-edit-link" href="/works/{{work.id}}/chapters/{{chapter.id}}/edit" title="{% translate 'Edit chapter' %} {{ chapter.id }}">Edit</a> | <a title="{% translate 'Delete chapter' %} {{ chapter.id }}" id="chapter-{{chapter.id}}-delete-link" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete">Delete</a></div>
                     {% if chapter.draft %}
@@ -301,7 +250,7 @@
     <div id="work-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
         <div class="uk-align-right uk-width-1-1@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="work-form-bottom-buttons-group">
              <button id="work-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-             <input id="work-form-cancel-bottom" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel" />
+             <input id="work-form-cancel-bottom" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel" />
             <input id="work-form-submit-bottom" class="uk-button uk-button-primary" onclick="this.form.submitted=this.value;" type="submit" value="Submit"/>
         </div>
     </div>

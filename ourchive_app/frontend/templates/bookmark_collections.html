@@ -1,11 +1,11 @@
 {% extends 'index.html' %}
-{% block title %}Bookmark Collections{% endblock %}
+{% load i18n %}
+{% block title %}{% translate 'Collections' %}{% endblock %}
 {% block content %}	
 {% if user_filter %}
-	<div class="uk-margin" id="user-bkcols-parent">
-		<div class="uk-card" id="user-bkcols-uk-card"><h1 id="user-bkcols-header-h1" class="uk-heading-line uk-text-center"> <span id="user_bkcols_header"> Bookmark Collections by {{ user_filter }}</span> </h1> 
-		</div>
+	<div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="user-bkcols-parent">
+		<h1 id="user-bkcols-header-h1" class="uk-heading-line uk-text-center"> <span id="user_bkcols_header"> {% translate 'Collections by' %} {{ user_filter }}</span> </h1> 
 	</div>
 {% endif %}
-{% include "bookmark_collections_list.html" %}
+<div class="uk-width-1-1 uk-padding-remove-horizontal">{% include "bookmark_collections_list.html" %}</div>
 {% endblock %}

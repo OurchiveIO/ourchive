@@ -53,7 +53,7 @@
     uid: 398c31c8-44a6-43ab-ac56-2d3210d3479e
     name: Audio Processing
     value: 'False'
-    valtype: choice
+    valtype: truefalse
 - model: api.ourchivesetting
   pk: 10
   fields:

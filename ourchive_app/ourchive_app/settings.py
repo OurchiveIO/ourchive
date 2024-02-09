@@ -23,7 +23,7 @@ DEBUG = os.getenv('OURCHIVE_DEBUG') == 'True'
 
 hosts = []
 if os.getenv('OURCHIVE_DEV') == 'True' or DEBUG:
-    hosts = ["127.0.0.1:8000", "*",]
+    hosts = ["127.0.0.1:8000", "*", ]
 else:
     hosts = [os.getenv("OURCHIVE_ROOT_URL"), os.getenv("OURCHIVE_SERVER_IP")]
 
@@ -103,13 +103,13 @@ TAG_DIVIDER = '$!$'
 
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-    EMAIL_FILE_PATH = BASE_DIR+"/sent_emails"
+    EMAIL_FILE_PATH = BASE_DIR + "/sent_emails"
 else:
     ANYMAIL = {
         "MAILGUN_API_KEY": os.getenv("OURCHIVE_MAILGUN_API_KEY"),
-        "MAILGUN_SENDER_DOMAIN": os.getenv("OURCHIVE_MAILGUN_SENDER_DOMAIN"), 
+        "MAILGUN_SENDER_DOMAIN": os.getenv("OURCHIVE_MAILGUN_SENDER_DOMAIN"),
     }
-    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend" 
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = os.getenv("OURCHIVE_DEFAULT_FROM_EMAIL")
 SERVER_EMAIL = os.getenv("OURCHIVE_SERVER_EMAIL")
 
@@ -117,7 +117,7 @@ SERVER_EMAIL = os.getenv("OURCHIVE_SERVER_EMAIL")
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        "DIRS": [os.path.join(BASE_DIR,"templates")],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -131,6 +131,7 @@ TEMPLATES = [
                 'frontend.context_processors.set_content_pages',
                 'frontend.context_processors.set_captcha',
                 'frontend.context_processors.load_settings',
+                'frontend.context_processors.load_announcements',
             ],
         },
     },
@@ -211,9 +212,9 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '1000/day',
-        'user': '10000/day'
-    }
+        'anon': '200000/day',
+        'user': '500000/day'
+    },
 }
 
 LOGGING = {
@@ -231,14 +232,17 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'class': 'logging.FileHandler',
+            'level' : 'INFO',
+            'maxBytes' : 1024*1024*10, # 10MB
+            'backupCount' : 10,
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'ourchive.log',
-            'formatter': 'simple',
+            'formatter': 'verbose',
         }
     },
     'loggers': {
         '': {
-            'level':  os.getenv("OURCHIVE_LOG_LEVEL", "INFO"),
+            'level': os.getenv("OURCHIVE_LOG_LEVEL", "INFO"),
             'handlers': ['file'],
         },
     },
@@ -256,4 +260,4 @@ if not DEBUG:
         }
     }
 else:
-    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache',}}
+    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache', }}

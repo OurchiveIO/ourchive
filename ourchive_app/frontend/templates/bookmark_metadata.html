@@ -1,0 +1,10 @@
+{% load i18n %}
+<div class="uk-inline ourchive-metadata-list">
+	<span id="bookmark-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{bookmark.updated_on|date:'d M Y'}}</span>
+</div>
+{% if settings.AllowComments %}
+<div class="uk-inline ourchive-metadata-list">
+	<span id="bookmark-metadata-status-divider" class="uk-inline uk-text-bold">-</span>
+</div>
+<div class="uk-inline ourchive-metadata-list"><span id="bookmark-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark.comment_count %}Comments: {{ cc }}{% endblocktranslate %}</span></div>
+{% endif %}

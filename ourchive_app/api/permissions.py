@@ -17,7 +17,29 @@ class ObjectIsLocked(permissions.BasePermission):
         if request.method not in permissions.SAFE_METHODS:
             return False
         if isinstance(request.user, AnonymousUser):
-            return obj.locked_to_users == False
+            return obj.locked_to_users is False
+        return True
+
+
+class ObjectIsPrivate(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if not obj.is_private:
+            return True
+        if request.user.is_superuser:
+            return True
+        if request.user == obj.user:
+            return True
+        return False
+
+
+class WorkIsNotDraft(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if request.method == 'DELETE':
+            return True
+        if obj.work.draft:
+            return False
         return True
 
 

@@ -4,17 +4,17 @@
     <div id="{{attribute}}-tile-attribute-type-{{type}}" class="uk-margin-small uk-visible@s {% if not forloop.last %}uk-width-1-2{% else %} uk-width-1-1 {% endif %}">
         <div class="uk-margin-remove"><span class="uk-text-bold uk-margin-right">{{ attribute }}</span></div>
         {% for single_attr in attribute_values %}
-            <div class="uk-inline uk-button-tag"><a id="{{single_attr}}-tile-attr-{{single_attr}}-link" class="uk-link-muted uk-inline uk-text-nowrap" href="#" uk-toggle="target: #coming-soon">{{ single_attr }}</a></div><span id="coming-soon" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
+            <div class="uk-inline uk-button-tag"><a id="{{single_attr}}-tile-attr-{{single_attr}}-link" class="uk-link-muted uk-inline uk-text-break" href="#" uk-toggle="target: #coming-soon">{{ single_attr }}</a></div><span id="coming-soon" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
         {% endfor %}
     </div>
 {% endfor %}
 {% endif %}
 </div>
 {% for attribute, attribute_values in attributes.items %}
-<div class="uk-margin-small-top uk-hidden@s" id="{{object}}-attributes-dl-mb">
+<div class="uk-margin-small-top uk-hidden@s uk-width-medium" id="{{object}}-attributes-dl-mb">
     <span class="uk-text-bold uk-margin-small uk-hidden@s">{{ attribute }}: </span>
     {% for single_attr in attribute_values %}
-        <a id="{{object}}-attribute-{{single_attr}}-link-mb" href="#" class="uk-hidden@s ourchive-mobile-tag-list uk-inline" uk-toggle="target: #coming-soon-mb">{{ single_attr }}{% if not forloop.last %},{% endif %}</a><span id="coming-soon-mb" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
+        <a id="{{object}}-attribute-{{single_attr}}-link-mb" href="#" class="uk-hidden@s ourchive-mobile-tag-list uk-inline uk-text-break" uk-toggle="target: #coming-soon-mb">{{ single_attr }}{% if not forloop.last %},{% endif %}</a><span id="coming-soon-mb" hidden class="uk-text uk-margin-left">Attribute links & search coming soon!</span>
     {% endfor %}
 </div>
 {% endfor %}

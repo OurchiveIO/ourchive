@@ -3,7 +3,7 @@ from ourchiveao3importer.works import Work
 from ourchiveao3importer.chapters import Chapters
 import uuid
 import logging
-from etl.models import WorkImport, ObjectMapping
+from etl.models import WorkImport, ObjectMapping, AdditionalMapping
 from api import models as api
 from django.utils.translation import gettext as _
 from datetime import datetime, timedelta
@@ -149,34 +149,33 @@ class EtlWorkImport(object):
             return
         work_id = import_job.work_id
         if api.Work.objects.filter(user=import_job.user).filter(external_id=work_id).first() is not None:
-            logger.info(
-                f'Work {work_id} for user {import_job.user} already exists. Job {job_uid} is stale.')
-            return 0
+            self.error_message = f'Work {work_id} for user {import_job.user} already exists. Job {job_uid} is stale.'
+            logger.info(self.error_message)
+            self.handle_job_fail(import_job)
+            return
         # handle restricted & 404 errors here
         work_importer = None
         try:
             work_importer = Work(work_id)
         except Exception as err:
-            self.error_message = err
-            logger.error(
-                f'Work import scraping for {work_id} in job {job_uid} failed: {err}')
+            self.error_message = f'Work import scraping for {work_id} in job {job_uid} failed: {err}'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
         work_dict = {}
         try:
             work_dict = work_importer.__dict__()
         except Exception as err:
-            self.error_message = err
-            logger.error(f'Work dict for {work_id} in job {job_uid} failed: {err}')
+            self.error_message = f'Work dict for {work_id} in job {job_uid} failed: {err}'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
         work_processed_id = None
         try:
             work_processed_id = self.process_work_data(work_dict)
         except Exception as err:
-            self.error_message = err
-            logger.error(
-                f'Process work data failed for {work_id} in job {job_uid}: {err}. Work dict: {work_dict}')
+            self.error_message = f'Process work data failed for {work_id} in job {job_uid}: {err}. Work dict: {work_dict}'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
         if work_processed_id is None:
@@ -186,15 +185,15 @@ class EtlWorkImport(object):
         try:
             chapters = Chapters(work_id)
         except Exception as err:
-            self.error_message = err
-            logger.error(f'Chapter import for {work_id} failed: {err}.')
+            self.error_message = f'Chapter import for {work_id} failed: {err}.'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
         try:
             chapters.chapter_contents()
         except Exception as err:
-            self.error_message = err
-            logger.error(f'Scraping chapter contents failed for {job_uid}: {err}.')
+            self.error_message = f'Scraping chapter contents failed for {job_uid}: {err}.'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
         try:
@@ -203,13 +202,85 @@ class EtlWorkImport(object):
                 chapter_dict, work_processed_id)
             return chapters_processed
         except Exception as err:
-            self.error_message = err
-            logger.error(
-                f'Process chapter data failed for {work_id} in job {job_uid}: {err}. Chapter dict: {chapter_dict}')
+            self.error_message = f'Process chapter data failed for {work_id} in job {job_uid}: {err}. Chapter dict: {chapter_dict}'
+            logger.error(self.error_message)
             self.handle_job_fail(import_job)
             return
 
+    def process_attribute(self, mapping, origin_value, obj):
+        # create attribute
+        attribute_type_label = mapping.destination_field.split(".")[1]
+        attribute_type = api.AttributeType.objects.filter(
+            name=attribute_type_label.lower()).first()
+        if not attribute_type:
+            attribute_type = api.AttributeType(
+                name=attribute_type_label.lower(),
+                display_name=attribute_type_label,
+                allow_on_work=True,
+                allow_on_bookmark=True,
+                allow_on_chapter=True)
+            attribute_type.save()
+        if type(origin_value) is list:
+            for attribute_value in origin_value:
+                obj_attr = api.AttributeValue.objects.filter(
+                    name=attribute_value.lower()).first()
+                if not obj_attr:
+                    obj_attr = api.AttributeValue(
+                        name=attribute_value.lower(),
+                        display_name=attribute_value,
+                        attribute_type=attribute_type)
+                    obj_attr.save()
+                obj.attributes.add(obj_attr)
+        else:
+            obj_attr = api.AttributeValue.objects.filter(
+                name=origin_value.lower()).first()
+            if not work_attr:
+                obj_attr = api.AttributeValue(
+                    name=origin_value.lower(),
+                    display_name=origin_value,
+                    attribute_type=attribute_type)
+                obj_attr.save()
+            obj.attributes.add(obj_attr)
+
+    def process_tag(self, mapping, origin_value, obj):
+        try:
+            # create tag
+            tag_type_label = mapping.destination_field.split(".")[1]
+            tag_type = api.TagType.objects.filter(label=tag_type_label).first()
+            if not tag_type:
+                tag_type = api.TagType(label=tag_type_label)
+                tag_type.save()
+            if type(origin_value) is list:
+                for text in origin_value:
+                    tag = api.Tag.find_existing_tag(text, tag_type.id)
+                    if not tag:
+                        try:
+                            tag = api.Tag(text=text.lower(),
+                                      display_text=text, tag_type=tag_type)
+                            tag.save()
+                        except Exception as err:
+                            logger.error(f'Error creating tag with text {text.lower()} on obj {obj.id}: {err}')
+                            return False
+                    obj.tags.add(tag)
+            else:
+                tag = api.Tag.find_existing_tag(origin_value, tag_type.id)
+                if not tag:
+                    try:
+                        tag = api.Tag(text=origin_value.lower(),
+                                  display_text=origin_value, tag_type=tag_type)
+                        tag.save()
+                    except Exception as err:
+                        logger.error(f'Error creating tag with text {origin_value.lower()} on obj {obj.id}: {err}')
+                        return False
+                obj.tags.add(tag)
+            return True
+        except Exception as err:
+            logger.error(f'Error processing tag with text {text.lower()} on obj {obj.id}: {err}')
+            return False
+
     def process_mappings(self, obj, mappings, origin_json):
+        additional_tag_mappings = AdditionalMapping.objects.filter(destination_object='tag')
+        additional_attribute_mappings = AdditionalMapping.objects.filter(destination_object='attribute')
         for mapping in mappings:
             try:
                 if "." in mapping.origin_field:
@@ -221,73 +292,106 @@ class EtlWorkImport(object):
                 if origin_value is None:
                     continue
                 if 'tag' in mapping.destination_field:
-                    try:
-                        # create tag
-                        tag_type_label = mapping.destination_field.split(".")[1]
-                        tag_type = api.TagType.objects.filter(label=tag_type_label).first()
-                        if not tag_type:
-                            tag_type = api.TagType(label=tag_type_label)
-                            tag_type.save()
+                    if mapping.additional_mappings:
                         if type(origin_value) is list:
                             for text in origin_value:
-                                tag = api.Tag.find_existing_tag(text, tag_type.id)
+                                additional_mapping = additional_tag_mappings.filter(original_value=text).first()
+                                if not additional_mapping:
+                                    self.process_tag(mapping, text, obj)
+                                    continue
+                                tag_type = api.TagType.objects.filter(label=additional_mapping.destination_type).first()
+                                if not tag_type:
+                                    tag_type = api.TagType(label=additional_mapping.destination_type)
+                                    tag_type.save()
+                                tag = api.Tag.find_existing_tag(additional_mapping.destination_value, tag_type.id)
                                 if not tag:
                                     try:
-                                        tag = api.Tag(text=text.lower(),
-                                                  display_text=text, tag_type=tag_type)
+                                        tag = api.Tag(text=additional_mapping.destination_value,
+                                                  display_text=additional_mapping.destination_value, tag_type=tag_type)
                                         tag.save()
                                     except Exception as err:
-                                        logger.error(f'Error creating tag with text {text.lower()} on obj {obj.id}: {err}')
+                                        logger.error(f'Error creating additional mapped tag with text {additional_mapping.destination_value} on obj {obj.id}: {err}')
                                         continue
                                 obj.tags.add(tag)
+                            continue
                         else:
-                            tag = api.Tag.find_existing_tag(origin_value, tag_type.id)
+                            additional_mapping = additional_tag_mappings.filter(original_value=origin_value).first()
+                            if not additional_mapping:
+                                self.process_tag(mapping, origin_value, obj)
+                                continue
+                            tag_type = api.TagType.objects.filter(label=additional_mapping.destination_type).first()
+                            if not tag_type:
+                                tag_type = api.TagType(label=additional_mapping.destination_type)
+                                tag_type.save()
+                            tag = api.Tag.find_existing_tag(additional_mapping.destination_value, tag_type.id)
                             if not tag:
                                 try:
-                                    tag = api.Tag(text=origin_value.lower(),
-                                              display_text=origin_value, tag_type=tag_type)
+                                    tag = api.Tag(text=additional_mapping.destination_value,
+                                              display_text=additional_mapping.destination_value, tag_type=tag_type)
                                     tag.save()
                                 except Exception as err:
-                                    logger.error(f'Error creating tag with text {origin_value.lower()} on obj {obj.id}: {err}')
+                                    logger.error(f'Error creating additional mapped tag with text {additional_mapping.destination_value} on obj {obj.id}: {err}')
                                     continue
                             obj.tags.add(tag)
-                    except Exception as err:
-                        logger.error(f'Error processing tag with text {text.lower()} on obj {obj.id}: {err}')
-                        continue
-                elif 'attribute' in mapping.destination_field:
-                    # create attribute
-                    attribute_type_label = mapping.destination_field.split(".")[1]
-                    attribute_type = api.AttributeType.objects.filter(
-                        name=attribute_type_label.lower()).first()
-                    if not attribute_type:
-                        attribute_type = api.AttributeType(
-                            name=attribute_type_label.lower(),
-                            display_name=attribute_type_label,
-                            allow_on_work=True,
-                            allow_on_bookmark=True,
-                            allow_on_chapter=True)
-                        attribute_type.save()
-                    if type(origin_value) is list:
-                        for attribute_value in origin_value:
-                            obj_attr = api.AttributeValue.objects.filter(
-                                name=attribute_value.lower()).first()
-                            if not obj_attr:
-                                obj_attr = api.AttributeValue(
-                                    name=attribute_value.lower(),
-                                    display_name=attribute_value,
-                                    attribute_type=attribute_type)
-                                obj_attr.save()
-                            obj.attributes.add(obj_attr)
+                            continue
                     else:
-                        obj_attr = api.AttributeValue.objects.filter(
-                            name=origin_value.lower()).first()
-                        if not work_attr:
-                            obj_attr = api.AttributeValue(
-                                name=origin_value.lower(),
-                                display_name=origin_value,
-                                attribute_type=attribute_type)
-                            obj_attr.save()
-                        obj.attributes.add(obj_attr)
+                        self.process_tag(mapping, origin_value, obj)
+                elif 'attribute' in mapping.destination_field:
+                    if mapping.additional_mappings:
+                        if type(origin_value) is list:
+                            for text in origin_value:
+                                additional_mapping = additional_attribute_mappings.filter(original_value=text.lower()).first()
+                                if not additional_mapping:
+                                    self.process_attribute(mapping, text, obj)
+                                    continue
+                                attribute_type = api.AttributeType.objects.filter(name=additional_mapping.destination_type).first()
+                                if not attribute_type:
+                                    attribute_type = api.AttributeType(name=additional_mapping.destination_type,
+                                                                        display_name=additional_mapping.destination_type,
+                                                                        allow_on_work=True,
+                                                                        allow_on_bookmark=True,
+                                                                        allow_on_chapter=True)
+                                    attribute_type.save()
+                                attribute = api.AttributeValue.objects.filter(name=additional_mapping.destination_value.lower()).first()
+                                if not attribute:
+                                    try:
+                                        obj_attr = api.AttributeValue(
+                                            name=additional_mapping.destination_value.lower(),
+                                            display_name=additional_mapping.destination_value,
+                                            attribute_type=attribute_type)
+                                        obj_attr.save()
+                                    except Exception as err:
+                                        logger.error(f'Error creating additional mapped attribute with text {additional_mapping.destination_value} on obj {obj.id}: {err}')
+                                        continue
+                                obj.attributes.add(obj_attr)
+                        else:
+                            additional_mapping = additional_attribute_mappings.filter(original_value=origin_value.lower()).first()
+                            if not additional_mapping:
+                                self.process_attribute(mapping, origin_value, obj)
+                                continue
+                            attribute_type = api.AttributeType.objects.filter(name=additional_mapping.destination_type).first()
+                            if not attribute_type:
+                                attribute_type = api.AttributeType(name=additional_mapping.destination_type,
+                                                                    display_name=additional_mapping.destination_type,
+                                                                    allow_on_work=True,
+                                                                    allow_on_bookmark=True,
+                                                                    allow_on_chapter=True)
+                                attribute_type.save()
+                            attribute = api.AttributeValue.objects.filter(name=additional_mapping.destination_value.lower()).first()
+                            if not attribute:
+                                try:
+                                    obj_attr = api.AttributeValue(
+                                        name=additional_mapping.destination_value.lower(),
+                                        display_name=additional_mapping.destination_value,
+                                        attribute_type=attribute_type)
+                                    obj_attr.save()
+                                except Exception as err:
+                                    logger.error(f'Error creating additional mapped attribute with text {additional_mapping.destination_value} on obj {obj.id}: {err}')
+                                    continue
+                            obj.attributes.add(obj_attr)
+                        continue
+                    else:
+                        self.process_attribute(mapping, origin_value, obj)
                 else:
                     setattr(obj, mapping.destination_field, origin_value)
             except Exception as err:
@@ -302,8 +406,10 @@ class EtlWorkImport(object):
             import_type='ao3', object_type='work').all()
         work_type_mapping = None
         work_type = None
-        work_type_mapping = ObjectMapping.objects.filter(
-            import_type='ao3', object_type='work_type')
+        work_type_mapping = api.User.objects.filter(id=self.user_id).default_work_type
+        if not work_type_mapping:
+            work_type_mapping = ObjectMapping.objects.filter(
+                import_type='ao3', object_type='work_type')
         if not work_type_mapping:
             logger.error('Work type mapping not found. Trying to find Fic work type...')
             work_type_mapping = api.WorkType.objects.filter(type_name__iexact='Fic')

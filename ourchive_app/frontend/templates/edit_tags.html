@@ -1,5 +1,5 @@
 {% load i18n %} 
-{% if show_header != False %}<h3 id="obj-tags-form-header">{{ object_friendly|default_if_none:'' }} Tags <sup uk-icon="icon: question"></sup></h3>{% endif %}
+{% if show_header != False %}<h3 id="obj-tags-form-header">{{ object_friendly|default_if_none:'' }} Tags <sup uk-icon="icon: ourchive-help;ratio:.75"></sup></h3>{% endif %}
 {% for type, tag_data in tags.items %}
     {% if tag_data.admin_administrated %}
         <div class="uk-margin" id="{{ object }}-form-tag-parent">
@@ -12,7 +12,7 @@
                     {% if tag_data.tags %}
                         {% for single_tag in tag_data.tags %}
                             <input type="hidden" id="tags{{ divider }}{{ single_tag.id }}{{ divider }}{{ tag_data.type_name }}" name="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}" value="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}">
-                            <div class="uk-margin-small uk-inline"><span class="uk-button-primary uk-border-rounded ourchive-tag-list" id="tags{{ divider }}{{ single_tag.id }}{{ divider }}{{ tag_data.type_name }}{{ divider }}txt">{{ single_tag.display_text }} <span uk-icon="close" onclick="removetag('{{single_tag.id}}', '{{ tag_data.type_name }}', '{{ divider }}')" id="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}{{ divider }}delete"></span></span></div>
+                            <div class="uk-margin-small uk-inline"><span class="uk-button-primary uk-border-rounded ourchive-tag-list" id="tags{{ divider }}{{ single_tag.id }}{{ divider }}{{ tag_data.type_name }}{{ divider }}txt">{{ single_tag.display_text }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removetag('{{single_tag.id}}', '{{ tag_data.type_name }}', '{{ divider }}')" id="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}{{ divider }}delete"></span></span></div>
                         {% endfor %}
                         {% else %}
                         <span class="uk-text-medium" id="no-tag-prompt-{{ tag_data.type_name }}">No tags yet. Add some below.</span>
@@ -34,7 +34,7 @@
                     {% if tag_data.tags %}
                         {% for single_tag in tag_data.tags %}
                             <input type="hidden" id="tags{{ divider }}{{ single_tag.id }}{{ divider }}{{ tag_data.type_name }}" name="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}" value="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}">
-                            <div class="uk-margin-small uk-inline"><span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="tags{{ divider }}{{ single_tag.id }}{{ divider }}{{ tag_data.type_name }}{{ divider }}txt">{{ single_tag.display_text }} <span uk-icon="close" onclick="removetag('{{single_tag.id}}', '{{ tag_data.type_name }}', '{{ divider }}')" id="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}{{ divider }}delete"></span></span></div>
+                            <div class="uk-margin-small uk-inline"><span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="tags{{ divider }}{{ single_tag.id }}{{ divider }}{{ tag_data.type_name }}{{ divider }}txt">{{ single_tag.display_text }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removetag('{{single_tag.id}}', '{{ tag_data.type_name }}', '{{ divider }}')" id="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}{{ divider }}delete"></span></span></div>
                         {% endfor %}
                         {% else %}
                         <span class="uk-text-medium" id="no-tag-prompt-{{ tag_data.type_name }}">No tags yet. Add some below.</span>
@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 <div class="uk-margin-top">
-                    <div><input autocomplete="off" pattern="^[a-zA-Z0-9]+$" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ tag_data.type_name }}_new_tag" onkeyup="tagCheck(event, '{{ tag_data.type_name }}', false, '{{ divider }}')" oninput="doAutocomplete(this.value, 'edit', '{{ tag_data.type_name }}', '{{ tag_data.type_name }}', '{{ divider }}')"> <span title="Add tag for {{ type }}" uk-icon="plus" onclick="tagCheck(event, '{{ tag_data.type_name }}', true, '{{ divider }}')"></span>
+                    <div><input autocomplete="off" pattern="^[a-zA-Z0-9]+$" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ tag_data.type_name }}_new_tag" onkeyup="tagCheck(event, '{{ tag_data.type_name }}', false, '{{ divider }}')" oninput="doAutocomplete(this.value, 'edit', '{{ tag_data.type_name }}', '{{ tag_data.type_name }}', '{{ divider }}')"> <span title="Add tag for {{ type }}" uk-icon="icon:ourchive-add;ratio:.6" onclick="tagCheck(event, '{{ tag_data.type_name }}', true, '{{ divider }}')"></span>
                         <div class="uk-card-small" id="tag-autocomplete-dropdown-{{ tag_data.type_name }}" uk-drop="target: #{{ tag_data.type_name }}_new_tag"></div>
                     </div>
                     

@@ -16,6 +16,8 @@
     <script src="{% static 'frontend/js/uikit.min.js' %}"></script>
     <script src="{% static 'frontend/js/uikit-icons.min.js' %}"></script>
     <script src="{% static 'frontend/js/ourchive-tags.js' %}"></script>
+    <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
+    <script src="{% static 'frontend/js/ourchive-tinymce.js' %}"></script>
     <title>{% block title %}Ourchive{% endblock %}</title>
 </head>
 <body>
@@ -25,6 +27,14 @@
 				localStorage.setItem("fe-theme", '{{css_mode}}' == 'dark' ? 'light' : 'dark');
 				window.location.reload();
 			});
+		}
+		function dismissAnnouncement(announcement_id) {
+			var name = "dismiss_announcement_" + announcement_id;
+			var expires = "";
+		    var date = new Date();
+		    date.setTime(date.getTime() + (8*24*60*60*1000));
+		    expires = "; expires=" + date.toUTCString();
+		    document.cookie = name + "=" + "dismissed" + expires + "; path=/";
 		}
 	</script>
 	{% if 'accept-cookies' not in request.COOKIES and not request.user.cookies_accepted %}
@@ -52,11 +62,23 @@
 				    message: '<div id="{{message.extra_tags}}"><strong>{{ message }}</strong></div>',
 				    status: status,
 				    pos: 'top-center',
-				    timeout: 10000
+				    timeout: 8000
 				});
 			</script>
 		{% endfor %}
 	
+	{% endif %}
+	{% if admin_announcements %}
+	<div class="uk-width-expand uk-container uk-margin-remove uk-padding-remove" id="admin-messages-parent">	
+		<div id="content-block-parent-grid" class="uk-flex uk-flex-middle uk-flex-center uk-display-block">
+			{% for announcement in admin_announcements %}
+			<div class="uk-text-center uk-padding-small uk-width-expand" id="admin-announcement-{{announcement.id}}">
+			    <span class="uk-text-bold">{{ announcement.content|safe }}</span>
+			   	<span title="Dismiss" uk-toggle="target: #admin-announcement-{{announcement.id}}" onclick="dismissAnnouncement('{{announcement.id}}')" class="uk-link ourchive-span-link uk-align-right uk-text-middle" uk-icon="icon: ourchive-close;ratio:.75;" id="dismiss-announcement"></span>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
 	{% endif %}
 	<div class="ourchive-navbar" id="ourchive-navbar-parent">
 		<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small uk-padding-remove-vertical" uk-navbar id="uk-nav-parent">
@@ -64,16 +86,16 @@
 		    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
 		        <ul class="uk-navbar-nav uk-visible@s">
 		            <li class="uk-active" id="nav-home"><a href="/" title="Home" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
-		            <li><a href="/works/" id="nav-works">Works</a></li>
-		            <li><a href="/bookmarks/" id="nav-bookmarks">Bookmarks</a></li>
-		            <li><a href="/bookmark-collections/" id="nav-bookmark-collections">Bookmark Collections</a></li>
+		            <li><a href="/works/" id="nav-works">{% translate 'Works' %}</a></li>
+		            <li><a href="/bookmarks/" id="nav-bookmarks">{% translate 'Bookmarks' %}</a></li>
+		            <li><a href="/bookmark-collections/" id="nav-bookmark-collections">{% translate 'Collections' %}</a></li>
 		        </ul>
 		    </div>	    
 		    <div class="uk-navbar-right uk-margin-right" id="uk-nav-right">
 		    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
 		    	 	<li id="nav-search-li">
 			                <div class="nav-overlay uk-navbar-right">
-			                	<a class="uk-navbar-toggle" id="search-toggle-overlay" uk-search-icon uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"></a>
+			                	<a class="uk-navbar-toggle ourchive-icon-wrapper" id="search-toggle-overlay" uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"><span uk-icon="icon: ourchive-search; ratio: .75" title="Search" id="ourchive-nav-search-icon"></a>
 			                </div>
     					<div class="nav-overlay uk-navbar-left uk-flex-1" hidden>
         					<div class="uk-navbar-item uk-width-expand uk-margin-small-left">
@@ -88,11 +110,11 @@
     					</div>
 		        	</li>
 		    	 	<li id="theme-switcher-li">
-		    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" title="Switch Modes">
+		    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper" title="Switch Modes">
 		    	 			{% if request.session.css_mode == "dark" %}
-		    	 			<span class="custom-icon uk-text-medium" uk-icon="icon: sun-regular; ratio:1" title="Light Mode" id="theme-switcher-light">
+		    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Light Mode" id="theme-switcher-light">
 		    	 			{% else %}
-		    	 			<span class="custom-icon uk-text-medium" uk-icon="icon: moon-regular; ratio:1" title="Dark Mode" id="theme-switcher-dark">
+		    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Dark Mode" id="theme-switcher-dark">
 		    	 			{% endif %}
 		    	 		</a></span>
 		    	 	</li>
@@ -100,12 +122,12 @@
 			            {% if not request.user.is_authenticated %}
 			            	<li class="uk-active" id="nav-login-li">
 			            		<a href="/login" id="nav-login-link">
-			            			<span uk-icon="icon: sign-in; ratio:1.25" title="Sign In" id="nav-login-icon"></span>
+			            			<span uk-icon="icon: ourchive-login;ratio:.75" title="Sign In" id="nav-login-icon"></span>
 			            		</a>
 			            	</li>
 			            	<li class="uk-active" id="nav-register-li">
 			            		<a href="/register" id="nav-register-link">
-			            			<span uk-icon="icon: user; ratio:1.25" title="Register" id="nav-register-icon"></span>
+			            			<span uk-icon="icon: ourchive-register;ratio:.75" title="Register" id="nav-register-icon"></span>
 			            		</a>
 			            	</li>
 			            {% endif %}
@@ -156,25 +178,25 @@
 	<div id="sidenav" uk-offcanvas="flip: true" class="uk-offcanvas">
 		<div class="uk-offcanvas-bar" id="sidenav-parent-div">
 			<ul class="uk-nav" id="sidenav-ul">
-				<li id="sidenav-home-li" class="uk-active"><a id="sidenav-home-link" href="/">Home</a></li>
-	            <li id="sidenav-works-li"><a id="sidenav-works-link" href="/works/">Works</a></li>
-	            <li id="sidenav-bookmarks-li"><a id="sidenav-bookmarks-link" href="/bookmarks/">Bookmarks</a></li>
-	            <li id="sidenav-bookmark-collections-li"><a id="sidenav-bookmark-collections-link" href="/bookmark-collections/">Bookmark Collections</a></li>
+				<li id="sidenav-home-li" class="uk-active"><a id="sidenav-home-link" href="/">{% translate 'Home' %}</a></li>
+	            <li id="sidenav-works-li"><a id="sidenav-works-link" href="/works/">{% translate 'Works' %}</a></li>
+	            <li id="sidenav-bookmarks-li"><a id="sidenav-bookmarks-link" href="/bookmarks/">{% translate 'Bookmarks' %}</a></li>
+	            <li id="sidenav-bookmark-collections-li"><a id="sidenav-bookmark-collections-link" href="/bookmark-collections/">{% translate 'Collections' %}</a></li>
 	            <li id="sidenav-search-li"><a id="sidenav-search-link" href="/search">Search</a></li>
 	            {% if not request.user.is_authenticated %}
 	            	<li id="sidenav-sign-in-li" class="uk-active">
-	            		<a id="sidenav-sign-in-link" href="/login"><span uk-icon="icon: sign-in; ratio:1.25" title="Sign in"/></a></li>
+	            		<a id="sidenav-sign-in-link" href="/login">Sign In</a></li>
 	            	<li id="sidenav-register-li" class="uk-active">
-	            		<a id="sidenav-register-link" href="/register"><span uk-icon="icon: user; ratio:1.25" title="Register"/></a></a></li>
+	            		<a id="sidenav-register-link" href="/register">Register</a></li>
 	            {% endif %}
 	            {% if request.user.is_authenticated %}
 	            	<li id="sidenav-signout-li" class="uk-active">
-	            		<a id="sidenav-signout-link" href="/logout"><span uk-icon="icon: sign-out; ratio:1.25" title="Sign out"></span></a></li>
+	            		<a id="sidenav-signout-link" href="/logout"><span uk-icon="icon: ourchive-logout; ratio: .75;" title="Sign out"></span></a></li>
 	            {% endif %}
 			</ul>
 		</div>
 	</div>
-	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="arrow-up"></span></button>
+	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="icon:ourchive-up;ratio:.75"></span></button>
 	<div class="uk-width-expand uk-container uk-margin content-block-parent ourchive-content-block-parent" id="content-block-parent">	
 		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true" class="uk-grid uk-margin-remove ourchive-top-level-grid">
 			{% block content %}
@@ -224,20 +246,18 @@
 			{% endblock %}
 	    </div>
 	</div>
-		
-	<script src="{% static 'frontend/js/scroll-to-top.js' %}"></script>
-</body>
-<footer id="ourchive-footer uk-container">
-	<hr id="footer-hr">
-	<div id="footer-parent-grid" class="uk-text-center uk-grid uk-padding-small" uk-grid>
-	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s">
-	        <span id="footer-created-by" class="uk-text-meta uk-padding">Ourchive is created & maintained by <a href="https://federatedfandom.net/@kate" target="_blank">kate</a>, <a href="https://github.com/ladyofthelog">verity</a>, and <a href="https://federatedfandom.net/@imp" target="_blank">imp</a>. Issues with the site? Report <a class="uk-text-uppercase uk-text-meta" target="_blank" title="Report Issue" href="https://forms.bluecatreports.com/mXFMLWyv/issue-report">here</a>.</span>
+	<hr id="footer-hr" class="ourchive-hr">
+	<div id="footer-parent-grid" class="uk-grid uk-padding-small uk-margin-bottom uk-margin-left uk-margin-right" uk-grid>
+	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">
+	        <span id="footer-created-by" class="uk-text-meta"><a href="https://getourchive.io/">Ourchive</a> is created & maintained by <a href="https://federatedfandom.net/@kate" target="_blank">kate</a>, <a href="https://github.com/ladyofthelog">verity</a>, and <a href="https://federatedfandom.net/@imp" target="_blank">imp</a>.</span>
 	    </div>
-	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s">
+	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s uk-text-right">
 	        {% for page in content_pages %}
 	        <a href="/content-pages/{{page.id}}" class="uk-link uk-padding-small">{{page.name}}</a>
 	        {% endfor %}
 	    </div>
 	</div>
-</footer>
+		
+	<script src="{% static 'frontend/js/scroll-to-top.js' %}"></script>
+</body>
 </html>

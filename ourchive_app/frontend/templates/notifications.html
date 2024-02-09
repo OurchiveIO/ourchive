@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block title %}{{ page_title }}{% endblock %}
 {% block content %}		
-<div class="uk-width-1-1 uk-margin-small-bottom uk-height-max-small">
+<div class="uk-width-1-1 uk-margin-small-bottom uk-padding-remove-horizontal uk-height-max-small">
     <h1 class="uk-text-lead uk-inline">{{ page_title }}</h1>
     {% if notifications %}
     <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-notifications-mark-all-read' request.user %}">{% translate 'Mark all read' %}</a>
@@ -13,7 +13,7 @@
     {% endif %}
 </div>
 {% for notification in notifications %} 
-	{% include "notification_tile.html" %}          
+	<div class="uk-margin-bottom uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">{% include "notification_tile.html" %}</div>
 {% endfor %}
 <div class="uk-width-1-1 uk-text-center" id="notifications-pagination-parent">
     <div id="notifications-pagination-child">

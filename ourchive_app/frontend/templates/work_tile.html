@@ -10,21 +10,21 @@
 	            {% endif %}
 	            <div class="uk-width-expand" id="work-{{work.id}}-tile-title-parent">
 	                {% if work.draft == True %}
-	                	<span id="work-{{work.id}}-tile-draft-title" class="uk-text-medium uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-draft-title-link" href="{% url 'fe-work-view' work.id %}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {{ work.user }}</span>
+	                	<span id="work-{{work.id}}-tile-draft-title" class="uk-text-medium uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-draft-title-link" href="{% url 'fe-work-view' work.id %}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by <a title="Work Creator" id="work-creator-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a></span>
 		                <p class="uk-label uk-margin-remove-top uk-margin-remove-right uk-margin-remove-left uk-text-small uk-inline uk-label-warning" id="work-{{work.id}}-tile-draft-button-span"><strong>DRAFT</strong></p>
 	                {% else %}
-	                	<span id="work-{{work.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {{ work.user }}</span>
+	                	<span id="work-{{work.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by <a title="Work Creator" id="work-creator-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a></span>
 	                {% endif %}
 	            </div>
 	            {% if work.user == request.user.username %}
 		        <div class="uk-align-right uk-text-right uk-margin-small-top uk-visible@s uk-margin-remove-bottom" id="work-{{work.id}}-header-user-controls">
-		            <a id="work-{{work.id}}-header-edit-link" title="Edit Work {{ work.id }}" href="/works/{{ work.id }}/edit" class="uk-button uk-button-header uk-button-small uk-margin-small-bottom"><span id="work-{{work.id}}-header-edit-span">{% translate 'Edit' %}</span> </a>
-		            <a id="work-{{work.id}}-header-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete" class="uk-button uk-button-header uk-button-small uk-margin-small-bottom"><span id="work-{{work.id}}-header-delete-span">{% translate 'Delete' %}</span> </a>
+		            <a id="work-{{work.id}}-header-edit-link" title="Edit Work {{ work.id }}" href="/works/{{ work.id }}/edit" class="ourchive-icon-wrapper"><span id="work={{work.id}}-header-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="{% translate 'Edit Work' %} {{ work.id }}"></span></a>
+		            <a id="work-{{work.id}}-header-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete" class="ourchive-icon-wrapper"><span id="work-{{work.id}}-header-delete-span" uk-icon="icon: ourchive-delete;ratio:.75" title="{% translate 'Delete Work' %} {{ work.id }}"></span></a>
 		            {% include "delete_modal.html" with object='work' object_id=work.id %}
 		        </div>
 		        <div class="uk-align-left uk-text-left uk-margin-small-top uk-hidden@s uk-margin-remove-bottom uk-width-1-1" id="work-{{work.id}}-header-user-controls">
-		        	<a id="work-{{work.id}}-header-edit-link" href="/works/{{ work.id }}/edit" class="uk-button uk-button-header uk-button-small uk-margin-small-bottom"><span id="work-{{work.id}}-header-edit-span">{% translate 'Edit' %}</span> </a>
-		            <a id="work-{{work.id}}-header-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete" class="uk-button uk-button-header uk-button-small uk-margin-small-bottom"><span id="work-{{work.id}}-header-delete-span">{% translate 'Delete' %}</span> </a>
+		        	<a id="work-{{work.id}}-header-edit-link" title="Edit Work {{ work.id }}" href="/works/{{ work.id }}/edit" class="ourchive-icon-wrapper"><span id="work={{work.id}}-header-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="{% translate 'Edit Work' %} {{ work.id }}"></span></a>
+		            <a id="work-{{work.id}}-header-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete" class="ourchive-icon-wrapper"><span id="work-{{work.id}}-header-delete-span" uk-icon="icon: ourchive-delete;ratio:.75" title="{% translate 'Delete Work' %} {{ work.id }}"></span></a>
 		            {% include "delete_modal.html" with object='work' object_id=work.id %}
 		        </div>
 		        {% endif %}

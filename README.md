@@ -43,14 +43,14 @@ see [local-dev](local-dev.md) for further local dev set up.
 <a name="ways-to-contribute"></a>
 ### ways to contribute
 
-- USE THIS APP! spin up an archive, play around with it, and when you run into issues, please log them as [github issues]()! [good bug reporting guidelines](https://www.joelonsoftware.com/2000/11/08/painless-bug-tracking/)
+- USE THIS APP! spin up an archive, play around with it, and when you run into issues, please log them as [github issues][github issues]! [good bug reporting guidelines](https://www.joelonsoftware.com/2000/11/08/painless-bug-tracking/)
 - Tell others about this app - word of mouth is always helpful.
 
 We welcome technical contributions as well:
 
-- Submit a code fix for a bug. Grab a bug out of the [issue tracker]() and fix that sucker! Then make a pull request to the repo. [pull request guidelines]()
-- Submit a new feature request [as a GitHub issue]().
-- Work on a feature that's on the roadmap, or unassigned in [the release version]()! Then make a pull request to the repo. [pull request guidelines]()
+- Submit a code fix for a bug. Grab a bug out of the [issue tracker][github issues] and fix that sucker! Then make a pull request to the repo. [pull request guidelines]
+- Submit a new feature request [as a GitHub issue][github issues].
+- Work on a feature that's on the roadmap, or unassigned in [the release version]()! Then make a pull request to the repo. [pull request guidelines]
 - Submit a unit test.
 - Submit another unit test. Maybe even a ui test if you're feeling frisky!
 
@@ -74,3 +74,8 @@ All frameworks and tools we are using are open source, including:
 - Postgres
 - Docker
 - pytest
+- The Noun Project (icons)
+- UIKit (CSS + JS)
+
+[github issues]: https://github.com/c-e-p/ourchive/issues
+[pull request guidelines]: .github/PULL_REQUEST_TEMPLATE/pr_feature_template.md

@@ -12,24 +12,28 @@
     };
 </script>
 {% endif %}
-<div class="uk-width-1" id="user-profile-parent">
+<div class="uk-width-1 uk-padding-remove-horizontal" id="user-profile-parent">
     <div class="uk-text-right uk-width-1" id="user-profile-controls-parent">
         {% if user.username == request.user.username %}
-            <a id="user-profile-edit-link" href="/username/{{ user.id }}/edit"><span uk-icon="icon: file-edit" title="Edit"></span> </a>
-            <a id="user-profile-blocklist-link" href="/users/{{ user.username }}/blocklist"><span uk-icon="icon: ban" title="Blocklist"></span> </a>
+            <a class="ourchive-icon-wrapper" id="user-profile-edit-link" href="{% url 'fe-user-profile-edit' user.id %}"><span uk-icon="icon: ourchive-edit;ratio:.75" title="Edit"></span> </a>
+            <a id="user-profile-blocklist-link" class="ourchive-icon-wrapper" href="{% url 'fe-user-blocklist' user.username %}"><span uk-icon="icon: ourchive-block;ratio:.75" title="{% translate 'Blocklist' %}"></span></a>
         {% else %}
-            <a id="user-block-link" href="{% url 'fe-block-user' user.id %}"><span uk-icon="icon: ban" title="Block"></span> </a>
-            <a id="user-block-link" href="{% url 'report-user' user.username %}"><span uk-icon="icon: warning" title="Report"></span> </a>
+            {% if not user_blocked %}<a class="ourchive-icon-wrapper" id="user-block-link" href="{% url 'fe-block-user' user.id %}"><span uk-icon="icon: ourchive-block;ratio:.75" title="{% translate 'Block' %}"></span> </a>
+            {% else %}
+            <a class="ourchive-icon-wrapper" id="user-unblock-link" href="{% url 'fe-unblock-user' user.id user_blocked %}"><span uk-icon="icon: ourchive-unblock;ratio:.75" title="Unblock"></span> </a>
+            {% endif %}
+            <a class="ourchive-icon-wrapper" id="user-block-link" href="{% url 'report-user' user.username %}"><span uk-icon="icon: ourchive-report;ratio:.75" title="Report"></span> </a>
+            <a class="ourchive-icon-wrapper" id="user-subscribe-link" class="uk-button-small" uk-toggle="target: #user-subscribe"><span uk-icon="icon: ourchive-subscribe;ratio:.75" title="{% translate 'Subscribe' %}"></span></a>
         {% endif %}
-            <a id="user-subscribe-link" class="uk-button-small" uk-toggle="target: #user-subscribe">{% translate 'Subscribe' %}</a>
+            
     </div>
 	<div class="uk-width-1 uk-align-center" id="user-profile-card-parent">
-        <div class="uk-card uk-card-body" id="user-profile-card-body"> 
+        <div class="uk-card uk-card-body uk-padding-remove-horizontal" id="user-profile-card-body"> 
             {% if user.icon and user.icon != "None" %} <img id="user-profile-icon" src="{{ user.icon }}" class="uk-align-center uk-height-max-small" style="border-radius: 50%"/> {% endif %}
             <h1 id="user-profile-username-h1" class="uk-heading-line uk-text-center"> <span id="user-profile-username-span">{{ user.username }}</span> </h1> 
         </div>
         {% if user.profile %}
-            <div class="uk-card uk-card-body uk-align-center" id="user-profile-text-parent">
+            <div class="uk-card uk-card-body uk-align-center uk-padding-remove-horizontal" id="user-profile-text-parent">
                 <h2 id="user-profile-text-h2"> Profile </h2>
                 <span id="user-profile-text-span">{% autoescape off %} {{ user.profile }} {% endautoescape %}</span> 
             </div>
@@ -39,7 +43,7 @@
             {% include "object_attributes.html" with object='user' object_id=user.id attributes=user.attributes %}
             <hr class="uk-margin-medium" id="user-attributes-lower-hr"/>
         {% endif %}
-        <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.default_content == 'Work' %}0{% elif user.default_conect == 'Bookmark' %}1{% else %}2{% endif %}" id="user_content_switcher_header">
+        <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.default_content == 'Work' %}0{% elif user.default_content == 'Bookmark' %}1{% else %}2{% endif %}" id="user_content_switcher_header">
             {% if works %}<li><a href="#" id="user_works_selector">Works</a></li>{% endif %}
             {% if bookmarks %}<li><a href="#" id="user_bookmarks_selector">Bookmarks</a></li>{% endif %}
             {% if bookmark_collections %}<li><a href="#" id="user_collections_selector">Collections</a></li>{% endif %}
@@ -88,7 +92,7 @@
                     </div>
                 </div>
                 <div class="uk-text-right uk-width-1-1" id="user-subscribe-buttons-container">
-                    <input id="user-subscribe-cancel" class="uk-button uk-width-small uk-button-danger uk-modal-close" onclick="" value="Cancel"/>
+                    <input id="user-subscribe-cancel" class="uk-button uk-width-small uk-button-default uk-modal-close" onclick="" value="Cancel"/>
                     <button id="user-subscribe-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
                     <input id="user-subscribe-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
                 </div>

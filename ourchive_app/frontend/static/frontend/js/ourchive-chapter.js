@@ -1,11 +1,15 @@
 function getChapterRichTextValues() {
-	document.getElementById('chapter_summary').value = tinymce.get("chapterSummaryEditor").getContent().replace(/\r?\n?/g, '');
-	document.getElementById('chapter_notes').value = tinymce.get("chapterNotesEditor").getContent().replace(/\r?\n?/g, '');
-	document.getElementById('chapter_end_notes').value = tinymce.get("chapterEndNotesEditor").getContent().replace(/\r?\n?/g, '');
+	if (tinymce.get("summaryEditor") !== null) {
+		document.getElementById('summary').value = tinymce.get("summaryEditor").getContent().replace(/\r?\n?/g, '');
+	}
+	if (tinymce.get("notesEditor") !== null) {
+		document.getElementById('notes').value = tinymce.get("notesEditor").getContent().replace(/\r?\n?/g, '');
+	}
+	document.getElementById('end_notes').value = tinymce.get("end_notesEditor").getContent().replace(/\r?\n?/g, '');
 	if (document.getElementById('chapter-text-edit-mode-toggle').checked) {
-        document.getElementById('chapter_text').value = tinymce.get("chapterTextEditor").getContent().replace(/\r?\n?/g, '');
+        document.getElementById('text').value = tinymce.get("textEditor").getContent().replace(/\r?\n?/g, '');
     } else {
-        document.getElementById('chapter_text').value = document.getElementById('toggle-chapter-plaintext-area').value;
+        document.getElementById('text').value = document.getElementById('toggle-chapter-plaintext-area').value;
     }
 }
 
@@ -34,4 +38,13 @@ function updateModeText(toggling=false) {
 		richTextContainer.setAttribute('hidden', true);
 		plainTextContainer.removeAttribute('hidden');
 	}
+}
+
+function chapterTextInit() {
+	// This handles user preferences in local storage for whether they prefer rich text or plain text/HTML input.
+	let richTextPreference = localStorage.getItem('rich-text');
+	const richTextCheckbox = document.querySelector('#chapter-text-edit-mode-toggle');
+	// This data is saved in local storage as a string, and we want to default to rich text mode.
+	richTextCheckbox.checked = richTextPreference !== 'false';
+	updateModeText();
 }

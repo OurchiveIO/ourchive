@@ -1,7 +1,7 @@
 {% if settings.AllowComments %}
 	<div id="{{object_name}}-comments-grid" class="uk-grid-small uk-child-width-auto" uk-grid>
-        {% if comments.count > 0 %}<div id="{{object_name}}-comments-load-div">
-             <button id="{{object_name}}-comments-load-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #{{object_name}}-{{object.id}}-comments">{{ comments.count}} Comment(s)</button>    		
+        {% if comment_count > 0 %}<div id="{{object_name}}-comments-load-div">
+             <button id="{{object_name}}-comments-load-toggle" class="uk-button uk-button-text" type="button" uk-toggle="target: #{{object_name}}-{{object.id}}-comments">{{ comment_count}} Comment(s)</button>    		
         </div>{% endif %}
     </div>
     <div id="{{object_name}}-{{object.id}}-comments" {% if not expand_comments %} hidden {% endif %} class="uk-child-width-expand" uk-grid>
@@ -17,7 +17,7 @@
             <div id="{{object_name}}-comment-id-div" class="uk-width-1-1">
             	<input type="hidden" id="{{object_name}}-comment-id-hidden" name="{{object_name}}" value="{{ object.id }}">
             	<input type="hidden" id="{{object_name}}-comment-count" name="{{object_name}}_comment_count" value="{{comments.count|default:0}}"/>
-            	<textarea id="{{object_name}}-comment-textarea" rows="5" class="uk-textarea" id="text" name="text"></textarea>
+            	<textarea id="{{object_name}}-comment-textarea" rows="5" class="uk-textarea" id="text" name="text" required="required"></textarea>
             </div>
             {% if captcha_site_key %}
 	        {% if not request.user.is_authenticated %}

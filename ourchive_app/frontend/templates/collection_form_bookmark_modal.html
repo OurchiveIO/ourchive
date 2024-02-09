@@ -1,0 +1,16 @@
+<script>
+function getBookmarks(params) {
+  var replace_selector = 'collection-add-bookmark-modal';
+  fetch('{% url 'collection-eligible-bookmarks' %}'+params)
+    .then((response) => {
+      return response.text();
+    })
+    .then((templateText) => {      
+    document.getElementById(replace_selector).innerHTML = "";
+    document.getElementById(replace_selector).innerHTML = templateText;
+    });
+}
+</script>
+<div id="collection-add-bookmark-modal" uk-modal>
+    {% include 'collection_form_bookmark_modal_body.html' %}
+</div>

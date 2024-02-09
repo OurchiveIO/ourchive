@@ -14,7 +14,7 @@
         <label id="request-invite-email-label" class="uk-form-label" for="form-horizontal-text">Email</label>
         <div id="request-invite-email-controls" class="uk-form-controls">
             <div class="uk-inline" id="request-invite-email-input-parent">
-                <span class="uk-form-icon" uk-icon="icon: mail" id="request-invite-email-icon"></span>
+                <span class="uk-form-icon" uk-icon="icon: ourchive-mail;ratio:.75" id="request-invite-email-icon"></span>
                 <input class="uk-input" type="email" name="email" id="request-invite-email-input">
             </div>
         </div>
@@ -29,14 +29,18 @@
         </div>
         
     </div>
-    <div class="uk-margin" id="request-invite-submit-parent">
-    	<label id="request-invite-submit-label" class="uk-form-label" for="form-horizontal-text"></label>
-        <div class="uk-form-controls" id="request-invite-submit-controls">
-        	<div class="uk-inline" id="request-invite-submit-input-parent">
-	    		<input id="request-invite-submit-button" class="uk-button uk-button-default" type="submit" value="Request Invite"/>
-	    	</div>
+    {% if captcha_site_key %}
+        {% if not request.user.is_authenticated %}
+        <div class="uk-margin uk-form-controls" id ="request-invite-captcha-parent">
+            <div class="h-captcha" data-sitekey="{{captcha_site_key}}"></div>
+              <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
         </div>
-    	
+        {% endif %}
+    {% endif %}
+    <div class="uk-margin" id="request-invite-submit-parent">
+    	<div class="uk-inline uk-align-right" id="request-invite-submit-input-parent">
+    		<input id="request-invite-submit-button" class="uk-button uk-button-primary" type="submit" value="Request Invite"/>
+    	</div>
     </div>
 </form>
 {% endif %}

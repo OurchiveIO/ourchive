@@ -7,16 +7,17 @@ from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
     BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, \
     NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, \
     UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
-    ChapterAllSerializer, UserReportSerializer, UserSubscriptionSerializer, \
+    UserReportSerializer, UserSubscriptionSerializer, AdminAnnouncementSerializer, \
     BookmarkSummarySerializer, BookmarkCollectionSummarySerializer, CollectionCommentSerializer, \
     ImportSerializer, TopTagSerializer
 from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
     NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
-    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment
+    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment, \
+    AdminAnnouncement
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
     UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
-    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked
+    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked, WorkIsNotDraft, ObjectIsPrivate
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
@@ -36,7 +37,6 @@ from . import work_export
 from django.contrib.auth.models import AnonymousUser
 from etl import ao3
 import threading
-from urllib.parse import unquote
 from etl.models import WorkImport
 from etl.ao3 import util
 from .utils import get_star_count
@@ -217,19 +217,22 @@ class ExportWork(APIView):
 
     def get(self, request, pk):
         work = Work.objects.filter(id=pk).first()
+        if work.draft and request.user.id != work.user.id:
+            return Response({'message': ["You do not have permission to download this work."]}, status=400)
         work_url = ''
         # get export if it hasn't been created already.
         # note the archive has no M4B creation capability, so that's going to
         # be in preferred download url or nowhere.
         ext = request.GET.get('extension')
         if not ext:
-            return Response({'message': "GET param 'extension' must be supplied"}, status=400)
+            return Response({'message': ["GET param 'extension' must be supplied"]}, status=400)
         if ext.lower() == 'epub':
             if work.epub_url and work.epub_url != "None":
-                return Response({'message': "EPUB url exists. Use EPUB URL to download work."}, status=400)
+                media_url = work_export.get_epub_dir(work)
+                return Response({'media_url': media_url}, status=200)
             work_url = work_export.create_epub(work)
             work.epub_url = work_url[1]
-            #full_url = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{work_url}'
+            # full_url = f'{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{work_url}'
             work.save()
             return Response({'media_url': work_url[0]}, status=200)
         elif ext.lower() == 'zip':
@@ -240,7 +243,7 @@ class ExportWork(APIView):
             work.save()
             return Response({'media_url': work_url[0]}, status=200)
         else:
-            return Response({'message': 'Format not supported or work does not exist.'}, status=400)
+            return Response({'message': ['Format not supported or work does not exist.']}, status=400)
 
 
 class ImportWorks(APIView):
@@ -253,16 +256,18 @@ class ImportWorks(APIView):
         if 'save_as_draft' not in request.data or 'allow_anon_comments' not in request.data or 'allow_comments' not in request.data:
             return Response({'message': 'save_as_draft, allow_anon_comments, and allow_comments required for work import.'}, status=400)
         importer = ao3.work_import.EtlWorkImport(
-            request.user.id, 
-            request.data['save_as_draft'], 
+            request.user.id,
+            request.data['save_as_draft'],
             request.data['allow_anon_comments'],
             request.data['allow_comments'])
         if 'work_id' in request.data:
             id_or_url = request.data['work_id']
             parsed_id = util.parse_work_id_from_ao3_url(id_or_url)
-            t = threading.Thread(target=importer.get_single_work,args=[parsed_id],daemon=True)   
+            t = threading.Thread(target=importer.get_single_work,
+                                 args=[parsed_id], daemon=True)
         elif 'username' in request.data:
-            t = threading.Thread(target=importer.get_works_by_username,args=[request.data['username']],daemon=True)
+            t = threading.Thread(target=importer.get_works_by_username, args=[
+                                 request.data['username']], daemon=True)
         t.start()
         return Response({'message': "Import started"}, status=200)
 
@@ -270,9 +275,9 @@ class ImportWorks(APIView):
 class ImportStatus(generics.ListAPIView):
     serializer_class = ImportSerializer
     permission_classes = [IsOwner]
+
     def get_queryset(self):
         return WorkImport.objects.filter(job_finished=False, user__id=self.request.user.id).order_by('-created_on')
-    
 
 
 class UserList(generics.ListCreateAPIView):
@@ -285,7 +290,8 @@ class UserList(generics.ListCreateAPIView):
             serializer.save(
                 invite_code=self.request.data['invite_code'], email=self.request.data['email'])
         else:
-            serializer.save(email=self.request.data['email'] if 'email' in self.request.data else '')
+            serializer.save(
+                email=self.request.data['email'] if 'email' in self.request.data else '')
 
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -307,6 +313,10 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
             attributes = self.request.data['attributes']
         serializer.save(attributes=attributes)
 
+    def retrieve(self, request, *args, **kwargs):
+        response = super(UserDetail, self).retrieve(request, args, kwargs)
+        return response
+
 
 class UserWorkList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer
@@ -318,10 +328,24 @@ class UserWorkList(generics.ListCreateAPIView):
 
 class UserBookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, ObjectIsPrivate]
+
+    def list(self, request, *args, **kwargs):
+        response = super(UserBookmarkList, self).list(request, args, kwargs)
+        try:
+            if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
+                response.data['star_count'] = [x for x in range(
+                    1, int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
+            else:
+                response.data['star_count'] = [1, 2, 3, 4, 5]
+        except ObjectDoesNotExist:
+            response.data['star_count'] = [1, 2, 3, 4, 5]
+        return response
 
     def get_queryset(self):
-        return Bookmark.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
+        if self.request.GET.get('draft', 'true').lower() == 'false':
+            return Bookmark.objects.filter(user__username=self.kwargs['username']).filter(draft=False).order_by('-updated_on')
+        return Bookmark.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
 
 class UserBookmarkCollectionList(generics.ListCreateAPIView):
@@ -329,7 +353,7 @@ class UserBookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return BookmarkCollection.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
+        return BookmarkCollection.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
 
 class UserBookmarkDraftList(generics.ListCreateAPIView):
@@ -395,6 +419,17 @@ class UserBlocksDetail(generics.RetrieveUpdateDestroyAPIView):
         return UserBlocks.objects.filter(id=self.kwargs['pk'])
 
 
+class UserBlockSingleDetail(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id):
+        blocked_user = UserBlocks.objects.filter(user__id=request.user.id, blocked_user__id=user_id).first()
+        if blocked_user:
+            return Response({'user_blocked': True, 'block_id': blocked_user.id}, status=200)
+        else:
+            return Response({'user_blocked': False}, status=200)
+
 class UserReportList(generics.ListCreateAPIView):
     serializer_class = UserReportSerializer
     permission_classes = [IsOwner]
@@ -427,14 +462,14 @@ class UserSubscriptionList(generics.ListCreateAPIView):
 
 class UserSubscriptionBookmarkList(generics.ListAPIView):
     serializer_class = BookmarkSummarySerializer
-    permission_classes = [IsOwner]
+    permission_classes = [IsOwner, ObjectIsPrivate]
 
     def get_queryset(self):
         subscriptions = UserSubscription.objects.filter(
             user__id=self.request.user.id).filter(
             subscribed_to_bookmark=True)
         ids = subscriptions.values_list('subscribed_user', flat=True).all()
-        return Bookmark.objects.filter(user__id__in=ids).order_by('-created_on')
+        return Bookmark.objects.filter(draft=False).filter(user__id__in=ids).order_by('-created_on')
 
 
 class UserSubscriptionBookmarkCollectionList(generics.ListAPIView):
@@ -529,7 +564,7 @@ class WorkByTypeList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(work_type__id=self.kwargs['type_id']).order_by('id')
+        return Work.objects.filter(work_type__id=self.kwargs['type_id']).order_by('-updated_on')
 
 
 class WorkByTagList(generics.ListCreateAPIView):
@@ -537,7 +572,7 @@ class WorkByTagList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(tags__id=self.kwargs['pk']).order_by('id')
+        return Work.objects.filter(tags__id=self.kwargs['pk']).order_by('-updated_on')
 
 
 class TagTypeDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -575,7 +610,7 @@ class TopTagList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return Tag.objects.filter(tag_type__filterable=True).annotate(num_uses=Count("bookmark")+Count("work")).order_by("-num_uses")[:15]
+        return Tag.objects.filter(tag_type__show_in_aggregate=True).annotate(num_uses=Count("bookmark") + Count("work")).order_by("-num_uses")[:15]
 
 
 class RecentWorksList(generics.ListAPIView):
@@ -605,7 +640,7 @@ class ChapterList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+        return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('number')
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'image_url' in self.request.data:
@@ -659,7 +694,7 @@ class ChapterDraftList(generics.ListCreateAPIView):
     permission_classes = [IsOwner]
 
     def get_queryset(self):
-        return Chapter.objects.get_queryset().order_by('id')
+        return Chapter.objects.get_queryset().order_by('number')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -697,46 +732,52 @@ class ChapterCommentDetail(generics.ListCreateAPIView):
 
 class BookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, WorkIsNotDraft, ObjectIsPrivate]
 
     def list(self, request, *args, **kwargs):
         response = super(BookmarkList, self).list(request, args, kwargs)
         try:
             if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
-                response.data['star_count'] = [x for x in range(1,int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
+                response.data['star_count'] = [x for x in range(
+                    1, int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
             else:
-                response.data['star_count'] = [1,2,3,4,5]
+                response.data['star_count'] = [1, 2, 3, 4, 5]
         except ObjectDoesNotExist:
-            response.data['star_count'] = [1,2,3,4,5]
+            response.data['star_count'] = [1, 2, 3, 4, 5]
         return response
 
     def create(self, request, *args, **kwargs):
         response = super(BookmarkList, self).create(request, args, kwargs)
-        response.data['star_count'] = get_star_count(OurchiveSetting.objects.get(name='Rating Star Count'))
+        response.data['star_count'] = get_star_count(
+            OurchiveSetting.objects.get(name='Rating Star Count'))
         return response
 
     def get_queryset(self):
-        return Bookmark.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+        if self.request.GET.get('draft', 'true').lower() == 'false':
+            return Bookmark.objects.filter(draft=False).order_by('-updated_on')
+        else:
+            return Bookmark.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).filter(Q(is_private=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
 
-class BookmarkByTagList(generics.ListCreateAPIView):
+class BookmarkByTagList(generics.ListAPIView):
     serializer_class = BookmarkSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly, ObjectIsPrivate]
 
     def get_queryset(self):
-        return Bookmark.objects.filter(tags__id=self.kwargs['pk']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+        return Bookmark.objects.filter(tags__id=self.kwargs['pk']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
 
 class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, WorkIsNotDraft, ObjectIsPrivate]
 
     def retrieve(self, request, *args, **kwargs):
         response = super(BookmarkDetail, self).retrieve(request, args, kwargs)
-        response.data['star_count'] = get_star_count(OurchiveSetting.objects.get(name='Rating Star Count'))
+        response.data['star_count'] = get_star_count(
+            OurchiveSetting.objects.get(name='Rating Star Count'))
         return response
 
     def get_queryset(self):
@@ -800,7 +841,7 @@ class BookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+        return BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
@@ -840,7 +881,7 @@ class CommentList(generics.ListCreateAPIView):
         return ChapterComment.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, offset=self.request.data['offset'], comment_thread=self.request.data.get('comment_thread', None), comment_count=self.request.data.get('comment_count', None))
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -874,7 +915,8 @@ class BookmarkCommentList(generics.ListCreateAPIView):
 
 class CollectionCommentList(generics.ListCreateAPIView):
     serializer_class = CollectionCommentSerializer
-    permission_classes = [UserAllowsCollectionComments, UserAllowsCollectionAnonComments]
+    permission_classes = [UserAllowsCollectionComments,
+                          UserAllowsCollectionAnonComments]
 
     def get_queryset(self):
         return CollectionComment.objects.get_queryset().order_by('id')
@@ -902,7 +944,8 @@ class CollectionCommentDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class BookmarkCollectionCommentDetail(generics.ListCreateAPIView):
     serializer_class = CollectionCommentSerializer
-    permission_classes = [UserAllowsCollectionComments, UserAllowsCollectionAnonComments]
+    permission_classes = [UserAllowsCollectionComments,
+                          UserAllowsCollectionAnonComments]
 
     def get_queryset(self):
         return CollectionComment.objects.filter(collection__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
@@ -951,7 +994,8 @@ class NotificationRead(APIView):
     permission_classes = [IsOwner]
 
     def patch(self, request, format=None):
-        notifications = Notification.objects.filter(user__id=request.user.id, read=False).all()
+        notifications = Notification.objects.filter(
+            user__id=request.user.id, read=False).all()
         for notification in notifications:
             notification.read = True
             notification.save()
@@ -978,6 +1022,7 @@ class NotificationDetail(generics.RetrieveUpdateDestroyAPIView):
 class OurchiveSettingList(generics.ListCreateAPIView):
     serializer_class = OurchiveSettingSerializer
     permission_classes = [IsAdminOrReadOnly]
+    pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
         if 'setting_name' in self.request.GET:
@@ -1009,7 +1054,8 @@ class AttributeTypeList(generics.ListCreateAPIView):
         elif 'allow_on_user' in self.request.GET:
             queryset = queryset.filter(allow_on_user=self.request.GET['allow_on_user'])
         elif 'allow_on_bookmark_collection' in self.request.GET:
-            queryset = queryset.filter(allow_on_bookmark_collection=self.request.GET['allow_on_bookmark_collection'])
+            queryset = queryset.filter(
+                allow_on_bookmark_collection=self.request.GET['allow_on_bookmark_collection'])
         else:
             return AttributeType.objects.order_by('name')
         return queryset.order_by('name')
@@ -1036,6 +1082,7 @@ class AttributeValueDetail(generics.RetrieveUpdateDestroyAPIView):
 class ContentPageList(generics.ListCreateAPIView):
     serializer_class = ContentPageSerializer
     permission_classes = [ObjectIsLocked]
+
     def get_queryset(self):
         if isinstance(self.request.user, AnonymousUser):
             return ContentPage.objects.filter(locked_to_users=False)
@@ -1043,7 +1090,37 @@ class ContentPageList(generics.ListCreateAPIView):
             return ContentPage.objects.all()
 
 
+class ContentPageMandatoryList(generics.ListAPIView):
+    serializer_class = ContentPageSerializer
+    permission_classes = [ObjectIsLocked]
+    pagination_class = NonPaginatedResultSetPagination
+
+    def get_queryset(self):
+        return ContentPage.objects.filter(locked_to_users=False, agree_on_signup=True).order_by('id')
+
+
 class ContentPageDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ContentPage.objects.get_queryset()
     serializer_class = ContentPageDetailSerializer
     permission_classes = [ObjectIsLocked]
+
+
+class AdminAnnouncementList(generics.ListCreateAPIView):
+    serializer_class = AdminAnnouncementSerializer
+    permission_classes = [permissions.IsAdminUser]
+    queryset = AdminAnnouncement.objects.get_queryset()
+
+
+class AdminAnnouncementActiveList(generics.ListAPIView):
+    serializer_class = AdminAnnouncementSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    pagination_class = NonPaginatedResultSetPagination
+
+    def get_queryset(self):
+        return AdminAnnouncement.objects.exclude(expires_on__lte=datetime.datetime.now()).filter(active=True).order_by('id')
+
+
+class AdminAnnouncementDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = AdminAnnouncement.objects.get_queryset()
+    serializer_class = AdminAnnouncementSerializer
+    permission_classes = [permissions.IsAdminUser]

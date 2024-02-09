@@ -14,6 +14,19 @@
     }
     function validateForm(event) {
         event.preventDefault();
+        var mandatoryAgrees = document.querySelectorAll(".register-mandatory-agree");
+        var anyFalse = false;
+        mandatoryAgrees.forEach((agreement) => {
+            if (agreement.checked != true) {
+                document.getElementById("register-agree-"+agreement.name+"-checkbox").classList.add("uk-form-danger");
+                document.getElementById("register-agree-"+agreement.name+"-errors").innerHTML = "{% translate 'You must agree to this item.' %}";
+                document.getElementById("register-agree-"+agreement.name+"-errors").style.visibility = "visible";
+                anyFalse = true;
+            }
+        });
+        if (anyFalse == true) {
+            return false;
+        }
         var username = document.getElementById("register-user-name-input").value;
         checkUsername(username).then((username_exists) => {
             if (username_exists) {
@@ -34,7 +47,6 @@
         });  
     }
 </script>
-{% cache 43200 registration-form %}
 <form class="uk-form-horizontal"  method="post" onsubmit="return validateForm(event)" id="register-form">
 	{% csrf_token %}
     <input id="invite-code-hidden-id" type="hidden" name="invite_code" value="{{ invite_code }}"/>
@@ -43,8 +55,8 @@
         <div class="uk-form-controls" id="register-user-controls">
             <div><span class="uk-text-small uk-text-danger" id="register-user-name-input-errors"></span></div>
             <div class="uk-inline" id="register-user-input-parent">
-	            <span class="uk-form-icon" uk-icon="icon: user" id="register-user-icon"></span>
-	            <input class="uk-input" type="text" maxlength="150" name="username" id="register-user-name-input" required>
+	            <span class="uk-form-icon" uk-icon="icon: ourchive-user;ratio:.75" id="register-user-icon"></span>
+	            <input class="uk-input" type="text" maxlength="150" name="username" id="register-user-name-input" required {% if username%}value="{{username}}"{%endif%}>
 	        </div>
         </div>
         
@@ -54,8 +66,8 @@
         <label id="register-email-label" class="uk-form-label" for="form-horizontal-text">Email</label>
         <div id="register-email-controls" class="uk-form-controls">
             <div class="uk-inline" id="register-email-input-parent">
-                <span class="uk-form-icon" uk-icon="icon: mail" id="register-email-icon"></span>
-                <input class="uk-input" type="email" name="email" id="register-email-input" required>
+                <span class="uk-form-icon" uk-icon="icon: ourchive-mail;ratio:.75" id="register-email-icon"></span>
+                <input class="uk-input" type="email" name="email" id="register-email-input" required {% if email%}value="{{email}}"{%endif%}>
             </div>
         </div>
         
@@ -66,7 +78,7 @@
         <div id="register-password-controls" class="uk-form-controls">
             <div><span class="uk-text-small uk-text-danger" id="register-password-input-errors"></span></div>
 	        <div class="uk-inline" id="register-password-input-parent">
-	            <span class="uk-form-icon uk-form-icon" uk-icon="icon: lock" id="register-password-icon"></span>
+	            <span class="uk-form-icon uk-form-icon" uk-icon="icon: ourchive-lock;ratio:.75" id="register-password-icon"></span>
 	            <input class="uk-input" type="password" name="password" id="register-password-input" pattern=".{8,50}" title="Password must be 8-50 characters." required>
 	        </div>
 	    </div>
@@ -75,11 +87,23 @@
         <label id="register-confirm-password-label" class="uk-form-label" for="form-horizontal-text">Confirm Password</label>
         <div id="register-confirm-password-controls" class="uk-form-controls">
             <div class="uk-inline" id="register-confirm-password-input-parent">
-                <span class="uk-form-icon uk-form-icon" uk-icon="icon: lock" id="register-confirm-password-icon"></span>
+                <span class="uk-form-icon uk-form-icon" uk-icon="icon: ourchive-lock;ratio:.75" id="register-confirm-password-icon"></span>
                 <input class="uk-input" type="password" name="confirm-password" id="register-confirm-password-input" required>
             </div>
         </div>
     </div>
+    {% for page in mandatory_agree_pages.results %}
+        <div class="uk-margin" id="register-agree-{{page.id}}">
+            <label id="register-agree-{{ page.id }}-label" class="uk-form-label" for="form-horizontal-text">{{ page.name }}</label>
+            <div id="register-agree-{{ page.id }}-controls" class="uk-form-controls">
+                <div class="uk-inline" id="register-agree-{{ page.id }}-input-parent">
+                    <div><span class="uk-text-small uk-text-danger" id="register-agree-{{ page.id }}-errors"></span></div>
+                    <input class="uk-checkbox uk-inline register-mandatory-agree" type="checkbox" title="Agree to {{ page.name }}" id="register-agree-{{ page.id }}-checkbox" name="{{ page.id }}"/>
+                    <label id="register-agree-{{ page.id }}-attr-label" class="uk-margin-small-left" for="register-agree-{{ page.id }}-checkbox">{% blocktranslate %}I have read and agree with the {% endblocktranslate %}<a title="{{ page.name }} link" target="_blank" href="{% url 'fe-content-page' page.id %}">{{ page.name }}</a>.</label>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
     <div class="uk-margin" id="register-submit-parent">
     	<label id="register-submit-label" class="uk-form-label" for="form-horizontal-text"></label>
         <div class="uk-form-controls" id="register-submit-controls">
@@ -90,7 +114,6 @@
     	
     </div>
 </form>
-{% endcache %}
 {% else %}
 {% cache 43200 registration-not-permitted %}
 <div>

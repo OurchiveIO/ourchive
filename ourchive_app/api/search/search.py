@@ -62,6 +62,9 @@ class ElasticSearchServiceBuilder:
 
 class PostgresProvider:
 
+    def init_provider():
+        print('init provider')
+
     # ref: https://www.julienphalip.com/blog/adding-search-to-a-django-site-in-a-snap/
     def normalize_query(self, query_string,
                         findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
@@ -127,10 +130,8 @@ class PostgresProvider:
             existing_query = or_query
         else:
             existing_query = existing_query | or_query
+        print(existing_query)
         return existing_query
-
-    def init_provider():
-        print('init provider')
 
     def build_filters(self, filters, mode, include):
         full_filters = None
@@ -160,33 +161,55 @@ class PostgresProvider:
     def process_results(self, resultset, page, obj):
         page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
         paginator = Paginator(resultset, page_size)
-        count = paginator.count
-        resultset = paginator.get_page(page)
-        next_params = None if not resultset.has_next(
+        count = paginator.count if resultset else 0
+        resultset = paginator.get_page(page) if resultset else []
+        next_params = None if not resultset or not resultset.has_next(
         ) else f"/search/?limit={page_size}&page={page+1}&object_type={obj.__name__}"
-        prev_params = None if not resultset.has_previous(
+        prev_params = None if not resultset or not resultset.has_previous(
         ) else f"/search/?limit={page_size}&page={page-1}&object_type={obj.__name__}"
         return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
 
-    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True):
+    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True, has_private=False):
         resultset = None
         page = int(page)
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
-            if filters is not None:
-                resultset = obj.objects.filter(query).filter(filters)
+            resultset = obj.objects.filter(query)
+        if filters is not None:
+            if self.include_mode == "all" and filters[0]:
+                for q_item in filters[0].children:
+                    resultset = resultset.filter(q_item) if resultset else obj.objects.filter(q_item)
             else:
-                resultset = obj.objects.filter(query)
+                if not resultset and filters[0]:
+                    resultset = obj.objects.filter(filters[0]) 
+                elif filters[0]:
+                    resultset = resultset.filter(filters[0]) 
+            if self.exclude_mode == "any" and filters[1]:
+                for q_item in filters[1].children:
+                    resultset = resultset.filter(~Q(q_item)) if resultset else obj.objects.filter(q_item)
+            else:
+                if not resultset and filters[1]:
+                    resultset = obj.objects.filter(filters[1]) 
+                elif filters[1]:
+                    resultset = resultset.filter(filters[1]) 
         if resultset is not None and has_drafts:
             resultset = resultset.filter(draft=False)
-        if resultset is not None and len(resultset) == 0:
+        if resultset is not None and has_private:
+            resultset = resultset.filter(is_private=False)
+        if resultset is not None and len(resultset) == 0 and query:
             # if exact matching & filtering produced no results, let's do limited trigram searching
             if len(trigram_fields) > 1:
                 resultset = obj.objects.annotate(zero_distance=TrigramWordDistance(
                     term, trigram_fields[0])).annotate(one_distance=TrigramWordDistance(term, trigram_fields[1]))
-                if filters:
+                if filters[0] and filters[1]:
                     resultset = resultset.filter(
-                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max)) & filters))
+                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max)) & filters[0] & filters[1]))
+                elif filters[0]:
+                    resultset = resultset.filter(
+                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max)) & filters[0]))
+                elif filters[1]:
+                    resultset = resultset.filter(
+                        Q((Q(zero_distance__lte=trigram_max) | Q(one_distance__lte=trigram_max)) & filters[1]))
                 else:
                     resultset = resultset.filter(zero_distance__lte=trigram_max).filter(
                         one_distance__lte=trigram_max)
@@ -197,16 +220,22 @@ class PostgresProvider:
             else:
                 resultset = obj.objects.annotate(
                     zero_distance=TrigramWordDistance(term, trigram_fields[0]))
-                if filters:
+                if filters[0] and filters[1]:
                     resultset = resultset.filter(
-                        Q((Q(zero_distance__lte=trigram_max) & filters)))
+                        Q((Q(zero_distance__lte=trigram_max) & filters[0] & filters[1])))
+                elif filters[0]:
+                    resultset = resultset.filter(
+                        Q((Q(zero_distance__lte=trigram_max) & filters[0])))
+                elif filters[1]:
+                    resultset = resultset.filter(
+                        Q((Q(zero_distance__lte=trigram_max) & filters[1])))
                 else:
                     resultset = resultset.filter(zero_distance__lte=trigram_max)
                 if resultset is not None and has_drafts:
                     resultset = resultset.filter(draft=False)
                 resultset = resultset.order_by('zero_distance', order_by)
             require_distinct = False
-        if require_distinct:
+        if require_distinct and resultset:
             # remove any dupes & apply order_by
             resultset = resultset.order_by(order_by).distinct()
         return self.process_results(resultset, page, obj)
@@ -217,13 +246,7 @@ class PostgresProvider:
             search_object.filter.include_filters, search_object.include_mode, True)
         exclude_filters = self.build_filters(
             search_object.filter.exclude_filters, search_object.exclude_mode, False)
-        if exclude_filters and include_filters:
-            final_filters = Q(include_filters & exclude_filters)
-        elif exclude_filters:
-            final_filters = exclude_filters
-        elif include_filters:
-            final_filters = include_filters
-        return final_filters
+        return [include_filters, exclude_filters]
 
     def build_work_resultset(self, resultset, reserved_fields):
         # build final resultset
@@ -253,7 +276,7 @@ class PostgresProvider:
             for field in reserved_fields:
                 result_dict.pop(field, None)
             result_dict["user"] = username
-            result_dict["work_type"] = work_type
+            result_dict["work_type_name"] = work_type
             result_dict["tags"] = tags
             result_dict["attributes"] = attributes
             result_dict["chapter_count"] = len(chapters)
@@ -285,6 +308,10 @@ class PostgresProvider:
             result_dict["tags"] = tags
             result_dict["user"] = username
             result_dict["attributes"] = attributes
+            result_dict["work"] = {}
+            result_dict["work"]["id"] = result.work.id
+            result_dict["work"]["title"] = result.work.title
+            result_dict["work"]["user_id"] = result.work.user_id
             for field in reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
@@ -324,6 +351,9 @@ class PostgresProvider:
         work_search = WorkSearch()
         work_search.from_dict(kwargs)
         work_filters = self.get_filters(work_search)
+        # TODO: this is global - shouldn't really be here
+        self.include_mode = work_search.include_mode
+        self.exclude_mode = work_search.exclude_mode
         # build query
         query = self.get_query(work_search.term, work_search.term_search_fields)
         if not query and not work_filters:
@@ -341,7 +371,7 @@ class PostgresProvider:
         if not query and not bookmark_filters:
             return {'data': []}
         resultset = self.run_queries(bookmark_filters, query, Bookmark, [
-                                     'title', 'description'], bookmark_search.term, kwargs.get('page', 1), bookmark_search.order_by, True)
+                                     'title', 'description'], bookmark_search.term, kwargs.get('page', 1), bookmark_search.order_by, True, .85, True, True)
         result_json = self.build_bookmark_resultset(resultset[0], bookmark_search.reserved_fields)
         return {'data': result_json, 'page': resultset[1]}
 
@@ -364,7 +394,7 @@ class PostgresProvider:
         query = self.get_query(user_search.term, user_search.term_search_fields)
         if query is None:
             return {'data': []}
-        resultset = User.objects.filter(is_active=True).filter(query)
+        resultset = User.objects.filter(is_active=True).filter(query)[:20]
         result_json = []
         for result in resultset:
             result_dict = result.__dict__
@@ -397,7 +427,7 @@ class PostgresProvider:
         results = []
         resultset = None
         term = term.lower()
-        resultset = Bookmark.objects.filter(user__id=user).filter(
+        resultset = Bookmark.objects.filter(user__id=user,draft=False).filter(
             Q(title__icontains=term) | Q(work__title__icontains=term)).prefetch_related('work')
         for result in resultset:
             work_dict = vars(result.work)
@@ -446,16 +476,22 @@ class PostgresProvider:
         page = kwargs['page'] if 'page' in kwargs else 1
         tag = Tag.objects.get(pk=kwargs['tag_id'])
         works = Work.objects.filter(tags__id__exact=tag.id)
-        if work_filters:
-            works = works.filter(work_filters)
+        if work_filters[0]:
+            works = works.filter(work_filters[0])
+        if work_filters[1]:
+            works = works.filter(work_filters[1])
         works = works.filter(draft=False).order_by('-updated_on').distinct()
         bookmarks = Bookmark.objects.filter(tags__id__exact=tag.id)
-        if bookmark_filters:
-            bookmarks = bookmarks.filter(bookmark_filters)
+        if bookmark_filters[0]:
+            bookmarks = bookmarks.filter(bookmark_filters[0])
+        if bookmark_filters[1]:
+            bookmarks = bookmarks.filter(bookmark_filters[1])
         bookmarks = bookmarks.filter(draft=False).order_by('-updated_on').distinct()
         collections = BookmarkCollection.objects.filter(tags__id__exact=tag.id)
-        if collection_filters:
-            collections = collections.filter(collection_filters)
+        if collection_filters[0]:
+            collections = collections.filter(collection_filters[0])
+        if collection_filters[1]:
+            collections = collections.filter(collection_filters[1])
         collections = collections.filter(draft=False).order_by('-updated_on').distinct()
 
         works_processed = self.process_results(works, page, Work)
@@ -484,7 +520,7 @@ class PostgresProvider:
         return results
 
 
-    def get_result_facets(self, results):
+    def get_result_facets(self, results, tag_id=None):
         result_json = []
         work_types = WorkType.objects.all()
         work_types_list = []
@@ -499,7 +535,7 @@ class PostgresProvider:
         # todo move to db setting
         word_count_dict = {}
         word_count_dict["label"] = "Work Word Count"
-        word_count_dict["values"] = [{"label": "Under 20,000", "filter_val": "word_count_range|ranges|20000|0"},
+        word_count_dict["values"] = [{"label": "Under 20,000", "filter_val": "word_count_range|ranges|0|20000"},
                                      {"label": "20,000 - 50,000",
                                          "filter_val": "word_count_range|ranges|20000|50000"},
                                      {"label": "50,000 - 80,000",
@@ -512,7 +548,7 @@ class PostgresProvider:
         # todo move to db setting
         audio_length_dict = {}
         audio_length_dict["label"] = "Audio Length"
-        audio_length_dict["values"] = [{"label": "Under 30:00", "filter_val": "audio_length_range|ranges|30|0"},
+        audio_length_dict["values"] = [{"label": "Under 30:00", "filter_val": "audio_length_range|ranges|0|30"},
                                        {"label": "30:00 - 1:00:00",
                                            "filter_val": "audio_length_range|ranges|30|60"},
                                        {"label": "1:00:00 - 2:00:00",
@@ -530,7 +566,11 @@ class PostgresProvider:
         result_json.append(complete_dict)
 
         # TODO: DRY
-
+        tag_filter_name = None
+        if tag_id:
+            tag_filter = Tag.objects.filter(id=tag_id).first()
+            if tag_filter:
+                tag_filter_name = tag_filter.display_text
         tags_dict = {}
         for tag_type in TagType.objects.all():
             tags_dict[tag_type.label] = []
@@ -556,8 +596,11 @@ class PostgresProvider:
             if len(tags_dict[key]) > 0:
                 tag_filter_vals = []
                 for val in tags_dict[key]:
+                    checked_tag = False
+                    if tag_id and tag_filter_name and tag_filter_name == val:
+                        checked_tag = True
                     filter_val = "tag_type," + str(key) + "$tag_text," + val
-                    tag_filter_vals.append({"label": val, "filter_val": filter_val})
+                    tag_filter_vals.append({"label": val, "filter_val": filter_val, "checked": checked_tag})
                 result_json.append({'label': key, 'values': tag_filter_vals})
 
         attributes_dict = {}

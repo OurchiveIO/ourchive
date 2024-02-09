@@ -41,7 +41,7 @@
             </div>
         </div>
         <div class="uk-margin toggle" id="work-import-form-username-parent" hidden>
-            <label id="work-import-form-username-label" class="uk-form-label" for="form-horizontal-text">Work ID or URL <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Work ID help' %}"></sup>    
+            <label id="work-import-form-username-label" class="uk-form-label" for="form-horizontal-text">Work ID or URL <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work ID help' %}"></sup>    
                     <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The work ID is the unique number that follows 'works/' in the URL (ex: archiveofourown.org/works/<strong>33568501</strong> ){% endblocktranslate %}</div></label>
             <div id="work-import-form-work-id-controls" class="uk-form-controls">
                 <div id="work-import-form-work-id-inline" class="uk-inline">
@@ -77,7 +77,7 @@
     <div id="work-import-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
         <div class="uk-align-right uk-width-1-1@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="work-import-form-bottom-buttons-group">
              <button id="work-import-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-             <input id="work-import-form-cancel-bottom" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel" title="{% translate 'Cancel' %}"/>
+             <input id="work-import-form-cancel-bottom" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel" title="{% translate 'Cancel' %}"/>
             <input id="work-import-form-submit-bottom" class="uk-button uk-button-primary" onclick="this.form.submitted=this.value;" type="submit" value="Submit" uk-toggle="target: #modal-full"/>
         </div>
         

@@ -3,7 +3,6 @@
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
 {% load static %}
-<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
 <script>
 function doBookmarkAutocomplete(term) {
   if (term.length < 2)
@@ -45,14 +44,20 @@ function removeBookmark(event, bookmark_id) {
     li.remove();
     hidden.remove();
 }
-</script>
-<div class="uk-width-1-1 uk-text-left" id="bkcol-form-parent-grid">  
-<form class="uk-form-horizontal" method="post" id="bookmarkCollectionForm" onsubmit="return getDescriptionText()">
-    <script>
-        function getDescriptionText() {
-            document.getElementById('description').value = tinymce.get("descriptionEditor").getContent().replace(/\r?\n?/g, '');
+
+function addSelectedBookmarks() {
+    var bookmarks = document.querySelectorAll('.add-to-collection-checkbox');
+    bookmarks.forEach((bookmark) => {
+        if (bookmark.checked) {
+            console.log(bookmark.name);
+            var bookmark_display = document.getElementById("bookmark-"+bookmark.name+"-bookmark").innerHTML;
+            populateBookmarkInput(bookmark.name, bookmark_display);
         }
-    </script>
+    });
+}
+</script>
+<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="bkcol-form-parent-grid">  
+<form class="uk-form-horizontal" method="post" id="bookmarkCollectionForm" onsubmit="return getRichText(['description'])">
     {% csrf_token %}
     <input id="bkcol-form-hidden-id" type="hidden" name="bookmark_collection_id" value="{{ bookmark_collection.id }}"/>
     <div id="bkcol-form-actions-parent" class="uk-grid" uk-grid>
@@ -60,7 +65,7 @@ function removeBookmark(event, bookmark_id) {
             <span id="bkcol-form-header-span" class="uk-text-large">{{ form_title }}</span>
         </div>
         <div id="bkcol-form-actions-group" class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right">
-            <input id="bkcol-form-cancel" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel"/>
+            <input id="bkcol-form-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
             <button id="bkcol-form-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
             <input id="bkcol-form-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
         </div>
@@ -84,7 +89,7 @@ function removeBookmark(event, bookmark_id) {
     </div>
     {% if request.user.can_upload_images %}
     <div class="uk-margin" id="bkcol-form-header-parent">
-        <label id="bkcol-form-header-label" class="uk-form-label" for="form-horizontal-text">Header <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Collection header help' %}"></sup>    
+        <label id="bkcol-form-header-label" class="uk-form-label" for="form-horizontal-text">Header <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collection header help' %}"></sup>    
             <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This image will show directly below site nav. We recommend a rectangular image with width:height ratio of 2:1 or higher.{% endblocktranslate %}</div>
         </label>
         <div id="bookmark-collection-form-header-controls" class="uk-form-controls">
@@ -107,74 +112,10 @@ function removeBookmark(event, bookmark_id) {
             </div>
         </div>
     {% endif %}
-    <hr/>
-    <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Collection Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: question" title="{% translate 'Tags help' %}"></sup>
-        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
-    </span>
-    {% include "object_attributes_form.html" with object='Bookmark Collection' attribute_types=bookmark_collection.attribute_types show_header=False %}
-    {% include "edit_tags.html" with object='bookmark_collection' show_header=False %}
-    <hr id="bkcol-form-tags-hr"/>
-    <h3 id="obj-attrs-form-header">Collection Details</h3>
-    <div class="uk-margin" id="bkcol-bookmarks-list">
-        {% if bookmark_collection.bookmarks_readonly %}<div class="uk-margin-medium-left"><h4 id="obj-attrs-form-header">Bookmarks</h4></div>{% endif %}
-        <ul id="bookmarks_readonly_list" class="uk-margin-medium-left"> 
-        {% for bookmark in bookmark_collection.bookmarks_readonly %}
-            <input type="hidden" id="bookmarks_{{bookmark.id}}" name="bookmarksidstoadd_{{bookmark.id}}" value="bookmarksidstoadd_{{bookmark.id}}"/>
-            <li id="bookmarks_{{bookmark.id}}_li">{{bookmark.title|default:bookmark.work.title}} (<a onclick="removeBookmark(event, {{bookmark.id}})">Remove</a>)</li>
-        {% endfor %}
-        </ul>
-        <div id="bkcol-form-bookmarks-parent" class="uk-margin uk-margin-medium-top">
-            <label id="bkcol-form-bookmarks-label" class="uk-form-label" for="form-horizontal-text">Add Bookmark <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Bookmark help' %}"></sup>    
-                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for your bookmarks by title.{% endblocktranslate %}</div>
-            </label>
-            <div id="bkcol-form-bookmarks-form-control" class="uk-form-controls">
-                <div id="bkcol-form-bookmarks-inline-div" class="uk-inline">
-                    <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="Search for bookmark..." id="bookmark_entry" oninput="doBookmarkAutocomplete(this.value)">
-                    <div id="bookmark-autocomplete-dropdown" uk-drop></div>
-                </div>
-            </div>
-            
-        </div>
-    </div>
-    <div id="bkcol-form-description-parent" class="uk-margin">
-        <label id="bkcol-form-description-label" class="uk-form-label" for="form-horizontal-text">Description</label>
-        <div id="bkcol-form-description-form-controls" class="uk-form-controls">
-            <div id="bkcol-form-description-inline" class="uk-inline uk-child-width-expand uk-width-expand">
-                <input type="hidden" id="description" name="description" value="{{ bookmark_collection.description|safe|default_if_none:'' }}">
-                <textarea id="descriptionEditor"></textarea>
-                <script type="text/javascript">
-                                  tinymce.init({
-                                    selector: '#descriptionEditor',
-                            width: '100%',
-                            contextmenu: false,
-                            convert_urls:false,
-                            relative_urls:false,
-                            height: 400,
-                            autoresize_min_height: 400,
-                            autoresize_max_height: 800,
-                            plugins: [
-                              'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                              'fullscreen', 'insertdatetime',
-                              'media', 'table', 'emoticons'
-                            ],
-                            toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                              'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                              'forecolor backcolor emoticons | help',
-                            menubar: '',
-                            init_instance_callback : function(editor) {
-                                var descriptionText = document.getElementById('description').value;
-                                editor.setContent(descriptionText);
-                            }
-                          });
-                </script>
-            </div>
-        </div>
-    </div>
-    {% if settings.AllowComments %}
     <hr id="bkcol-comments-hr"/>
-    <h3 id="bkcol-settings-header">Collection Settings</h3>
+    <h3 id="bkcol-settings-header">Settings</h3>
     <div class="uk-margin" id="bkcol-form-draft-parent">
-        <label id="bkcol-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Draft help' %}"></sup>    
+        <label id="bkcol-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Draft help' %}"></sup>    
             <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
         </label>
         <div id="bkcol-form-draft-controls" class="uk-form-controls">
@@ -183,6 +124,23 @@ function removeBookmark(event, bookmark_id) {
             </div>
         </div>
     </div>
+    <div class="uk-margin" id="bkcol-form-created-parent">
+        <label id="bkcol-form-created-label" class="uk-form-label" for="form-horizontal-text">Post Date</label>
+        <div id="bkcol-form-created-controls" class="uk-form-controls">
+            <div id="bkcol-form-created-inline" class="uk-inline">
+                <input title="{% translate 'Collection created on' %}" id="bkcol-form-complete-checkbox" type="date" name="created_on" value="{{ bookmark_collection.created_on }}"> 
+            </div>
+        </div>
+    </div>
+    <div class="uk-margin" id="bkcol-form-updated-parent">
+        <label id="bkcol-form-updated-label" class="uk-form-label" for="form-horizontal-text">Update Date</label>
+        <div id="bkcol-form-updated-controls" class="uk-form-controls">
+            <div id="bkcol-form-updated-inline" class="uk-inline">
+                <input title="{% translate 'Collection updated on' %}" id="bkcol-form-complete-checkbox" type="date" name="updated_on" value="{{ bookmark_collection.updated_on }}"> 
+            </div>
+        </div>
+    </div>
+    {% if settings.AllowComments %}
     <div class="uk-margin" id="bkcol-form-allow-comments-parent">
         <label id="bkcol-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
         <div id="bkcol-form-allow-comments-controls" class="uk-form-controls">
@@ -196,12 +154,46 @@ function removeBookmark(event, bookmark_id) {
     </div>
     {% endif %}
     <hr/>
+    <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Tags help' %}"></sup>
+        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
+    </span>
+    {% include "object_attributes_form.html" with object='Bookmark Collection' attribute_types=bookmark_collection.attribute_types show_header=False %}
+    {% include "edit_tags.html" with object='bookmark_collection' show_header=False %}
+    <hr id="bkcol-form-tags-hr"/>
+    <h3 id="obj-attrs-form-header">Details</h3>
+    <div class="uk-margin" id="bkcol-bookmarks-list">
+        {% if bookmark_collection.bookmarks_readonly %}<div class="uk-margin-medium-left"><h4 id="obj-attrs-form-header">Bookmarks</h4></div>{% endif %}
+        <ul id="bookmarks_readonly_list" class="uk-margin-medium-left"> 
+        {% for bookmark in bookmark_collection.bookmarks_readonly %}
+            <input type="hidden" id="bookmarks_{{bookmark.id}}" name="bookmarksidstoadd_{{bookmark.id}}" value="bookmarksidstoadd_{{bookmark.id}}"/>
+            <li id="bookmarks_{{bookmark.id}}_li">{{bookmark.title|default:bookmark.work.title}} (<a onclick="removeBookmark(event, {{bookmark.id}})">Remove</a>)</li>
+        {% endfor %}
+        </ul>
+        <div id="bkcol-form-bookmarks-parent" class="uk-margin uk-margin-medium-top">
+            <label id="bkcol-form-bookmarks-label" class="uk-form-label" for="form-horizontal-text">Add Bookmark <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Bookmark help' %}"></sup>    
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for your bookmarks by title.{% endblocktranslate %}</div>
+            </label>
+            <div id="bkcol-form-bookmarks-form-control" class="uk-form-controls">
+                <div id="bkcol-form-bookmarks-inline-div" class="uk-inline">
+                    <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="Search for bookmark..." id="bookmark_entry" oninput="doBookmarkAutocomplete(this.value)">
+                    <div id="bookmark-autocomplete-dropdown" uk-drop></div>
+                    <a class="uk-margin-left" href="#" id="collection-add-bookmark-modal-toggle" uk-toggle="target: #collection-add-bookmark-modal">Add from list</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="bkcol-form-description-parent" class="uk-margin">
+        <label id="bkcol-form-description-label" class="uk-form-label" for="form-horizontal-text">Description</label>
+        {% include 'ourchive_tinymce_template.html' with form_field_value=bookmark_collection.description form_field='description' obj_name='bkcol' %}
+    </div>
+    <hr/>
     <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bkcol-form-actions-footer-parent" uk-grid>
         <div class="uk-text-right uk-width-1-1" id="bkcol-form-actions-footer-child">
-            <input id="bkcol-form-actions-footer-cancel" class="uk-button uk-button-secondary" type="button" onclick="history.back()" value="Cancel"/>
+            <input id="bkcol-form-actions-footer-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
             <input id="bkcol-form-actions-footer-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
         </div>
     </div>    
 </form>
 </div>
+{% include 'collection_form_bookmark_modal.html' %}
 {% endblock %}

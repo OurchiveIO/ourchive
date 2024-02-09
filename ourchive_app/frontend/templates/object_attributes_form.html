@@ -1,4 +1,4 @@
-{% if show_header != False %}<h3 id="obj-attrs-form-header">{{ object }} Attributes <sup uk-icon="icon: question"></sup></h3>{% endif %}
+{% if show_header != False %}<h3 id="obj-attrs-form-header">{{ object }} Attributes <sup uk-icon="icon: ourchive-help;ratio:.75"></sup></h3>{% endif %}
 {% for attribute in attribute_types %}
 <div class="uk-margin" id="{{attribute.id}}-attr-form-parent-div">
     <label id="{{attribute.id}}-attr-form-label" class="uk-form-label" for="form-horizontal-text">{{attribute.display_name}}</label>
@@ -7,7 +7,7 @@
             {% for attribute_val in attribute.attribute_values %}
                 <div class="uk-margin-right uk-inline">
                     <input class="uk-checkbox uk-inline" type="checkbox" title="{{object}} {{attribute.name}}: {{attribute_val.name}}" id="{{object}}_attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute.name}}|_|{{attribute_val.name}}" name="attributevals" {% if attribute_val.checked %} checked {% endif %}>
-                    <label id="{{attribute_val.name}}-attr-label" for="attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute_val.display_name}}">{{ attribute_val.display_name }}</option>
+                    <label id="{{attribute_val.name}}-attr-label" for="attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute_val.display_name}}">{{ attribute_val.display_name }}</label>
                 </div>
             {% endfor %}
         </div>
@@ -16,7 +16,7 @@
         {% for attribute_val in attribute.attribute_values %}
             <div class="uk-margin-right uk-inline">
                 <input class="uk-radio" type="radio" title="{{object}} {{attribute.name}}: {{attribute_val.name}}" id="{{object}}_attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute.name}}|_|{{attribute_val.name}}" name="attributevals" {% if attribute_val.checked %} checked {% endif %}>
-                <label for="attribute_{{attribute.name}}_{{attribute_val.name}}" id="{{attribute_val.name}}-attr-label" value="{{attribute_val.display_name}}">{{ attribute_val.display_name }}</option>
+                <label for="attribute_{{attribute.name}}_{{attribute_val.name}}" id="{{attribute_val.name}}-attr-label" value="{{attribute_val.display_name}}">{{ attribute_val.display_name }}</label>
             </div>
         {% endfor %}
         </div>
