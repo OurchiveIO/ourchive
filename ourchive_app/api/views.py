@@ -17,7 +17,7 @@ from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     AdminAnnouncement
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
     UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
-    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked, WorkIsNotDraft
+    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked, WorkIsNotDraft, ObjectIsPrivate
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
@@ -313,6 +313,10 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
             attributes = self.request.data['attributes']
         serializer.save(attributes=attributes)
 
+    def retrieve(self, request, *args, **kwargs):
+        response = super(UserDetail, self).retrieve(request, args, kwargs)
+        return response
+
 
 class UserWorkList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer
@@ -324,7 +328,7 @@ class UserWorkList(generics.ListCreateAPIView):
 
 class UserBookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, ObjectIsPrivate]
 
     def list(self, request, *args, **kwargs):
         response = super(UserBookmarkList, self).list(request, args, kwargs)
@@ -415,6 +419,17 @@ class UserBlocksDetail(generics.RetrieveUpdateDestroyAPIView):
         return UserBlocks.objects.filter(id=self.kwargs['pk'])
 
 
+class UserBlockSingleDetail(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id):
+        blocked_user = UserBlocks.objects.filter(user__id=request.user.id, blocked_user__id=user_id).first()
+        if blocked_user:
+            return Response({'user_blocked': True, 'block_id': blocked_user.id}, status=200)
+        else:
+            return Response({'user_blocked': False}, status=200)
+
 class UserReportList(generics.ListCreateAPIView):
     serializer_class = UserReportSerializer
     permission_classes = [IsOwner]
@@ -447,7 +462,7 @@ class UserSubscriptionList(generics.ListCreateAPIView):
 
 class UserSubscriptionBookmarkList(generics.ListAPIView):
     serializer_class = BookmarkSummarySerializer
-    permission_classes = [IsOwner]
+    permission_classes = [IsOwner, ObjectIsPrivate]
 
     def get_queryset(self):
         subscriptions = UserSubscription.objects.filter(
@@ -717,7 +732,7 @@ class ChapterCommentDetail(generics.ListCreateAPIView):
 
 class BookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
-    permission_classes = [IsOwnerOrReadOnly, WorkIsNotDraft]
+    permission_classes = [IsOwnerOrReadOnly, WorkIsNotDraft, ObjectIsPrivate]
 
     def list(self, request, *args, **kwargs):
         response = super(BookmarkList, self).list(request, args, kwargs)
@@ -741,7 +756,7 @@ class BookmarkList(generics.ListCreateAPIView):
         if self.request.GET.get('draft', 'true').lower() == 'false':
             return Bookmark.objects.filter(draft=False).order_by('-updated_on')
         else:
-            return Bookmark.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+            return Bookmark.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).filter(Q(is_private=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -749,7 +764,7 @@ class BookmarkList(generics.ListCreateAPIView):
 
 class BookmarkByTagList(generics.ListAPIView):
     serializer_class = BookmarkSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly, ObjectIsPrivate]
 
     def get_queryset(self):
         return Bookmark.objects.filter(tags__id=self.kwargs['pk']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
@@ -757,7 +772,7 @@ class BookmarkByTagList(generics.ListAPIView):
 
 class BookmarkDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkSerializer
-    permission_classes = [IsOwnerOrReadOnly, WorkIsNotDraft]
+    permission_classes = [IsOwnerOrReadOnly, WorkIsNotDraft, ObjectIsPrivate]
 
     def retrieve(self, request, *args, **kwargs):
         response = super(BookmarkDetail, self).retrieve(request, args, kwargs)
@@ -866,7 +881,7 @@ class CommentList(generics.ListCreateAPIView):
         return ChapterComment.objects.get_queryset().order_by('id')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, offset=self.request.data['offset'], comment_thread=self.request.data.get('comment_thread', None), comment_count=self.request.data.get('comment_count', None))
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):

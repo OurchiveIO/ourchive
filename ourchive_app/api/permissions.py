@@ -21,6 +21,17 @@ class ObjectIsLocked(permissions.BasePermission):
         return True
 
 
+class ObjectIsPrivate(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if not obj.is_private:
+            return True
+        if request.user.is_superuser:
+            return True
+        if request.user == obj.user:
+            return True
+        return False
+
+
 class WorkIsNotDraft(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:

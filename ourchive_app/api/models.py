@@ -5,12 +5,20 @@ from django.contrib.auth.models import AbstractUser
 import nh3
 import unidecode
 from .utils import clean_tag_text
+from django_registration.validators import ReservedNameValidator
 
 
 class User(AbstractUser):
+    username_validator = ReservedNameValidator()
 
     __tablename__ = 'user'
     id = models.AutoField(primary_key=True)
+    username = models.CharField(
+        "Username",
+        max_length = 150,
+        unique = True,
+        validators = [username_validator]
+    )
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
@@ -143,8 +151,10 @@ class Work(models.Model):
     cover_url = models.CharField(max_length=600, null=True, blank=True)
     cover_alt_text = models.CharField(max_length=600, null=True, blank=True)
     preferred_download_url = models.CharField(max_length=600, null=True, blank=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(null=True, blank=True)
+    updated_on = models.DateTimeField(null=True, blank=True)
+    system_created_on = models.DateTimeField(auto_now_add=True)
+    system_updated_on = models.DateTimeField(auto_now=True)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
     word_count = models.IntegerField(default=0)
@@ -250,8 +260,10 @@ class Chapter(models.Model):
     __tablename__ = 'chapters'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(null=True, blank=True)
+    updated_on = models.DateTimeField(null=True, blank=True)
+    system_created_on = models.DateTimeField(auto_now_add=True)
+    system_updated_on = models.DateTimeField(auto_now=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     number = models.IntegerField(default=1)
     text = models.TextField(null=True, blank=True)
@@ -307,7 +319,7 @@ class Comment(models.Model):
     __tablename__ = 'comments'
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    text = models.TextField(null=True, blank=True)
+    text = models.TextField()
 
     user = models.ForeignKey(
         User,
@@ -460,8 +472,10 @@ class BookmarkCollection(models.Model):
     header_alt_text = models.CharField(max_length=600, null=True, blank=True)
     short_description = models.CharField(max_length=300, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(null=True, blank=True)
+    updated_on = models.DateTimeField(null=True, blank=True)
+    system_created_on = models.DateTimeField(auto_now_add=True)
+    system_updated_on = models.DateTimeField(auto_now=True)
     draft = models.BooleanField(default=False)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
@@ -493,8 +507,10 @@ class Bookmark(models.Model):
     title = models.CharField(max_length=200, default='', blank=True)
     rating = models.IntegerField()
     description = models.TextField(null=True, blank=True)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(null=True, blank=True)
+    updated_on = models.DateTimeField(null=True, blank=True)
+    system_created_on = models.DateTimeField(auto_now_add=True)
+    system_updated_on = models.DateTimeField(auto_now=True)
     draft = models.BooleanField(default=False)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)

@@ -27,6 +27,9 @@ class WorkFilter(object):
             'tags': {
                 'tags__text__icontains': [],
             },
+            'attributes': {
+                'attributes__name__icontains': [],
+            },
             'word_count': {
                 'word_count__gte': [],
                 'word_count__lte': [],
@@ -56,6 +59,9 @@ class WorkFilter(object):
                 'tags__text__icontains': [],
                 # 'tags__text__exact': [],
             },
+            'attributes': {
+                'attributes__name__icontains': [],
+            },
             'word_count': {
                 'word_count__gte': [],
                 'word_count__lte': [],
@@ -76,6 +82,7 @@ class WorkFilter(object):
             self.include_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
             self.include_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
             self.include_filters['tags']['tags__text__icontains'] = tags
+            self.include_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
             for range_tuple in dict_obj.get('audio_length_range', []):
                 self.include_filters['audio_length_range']['ranges'].append(range_tuple)
             self.include_filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
@@ -87,6 +94,7 @@ class WorkFilter(object):
             self.exclude_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
             self.exclude_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
             self.exclude_filters['tags']['tags__text__icontains'] = tags
+            self.exclude_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
             for range_tuple in dict_obj.get('audio_length_range', []):
                 self.exclude_filters['audio_length_range']['ranges'].append(range_tuple)
             self.exclude_filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
@@ -106,6 +114,9 @@ class BookmarkFilter(object):
             'rating': {
                 'rating__gte': [],
             },
+            'attributes': {
+                'attributes__name__icontains': [],
+            },
             'tags': {
                 'tags__text__icontains': [],
             }
@@ -113,6 +124,9 @@ class BookmarkFilter(object):
         self.exclude_filters = {
             'rating': {
                 'rating__gte': [],
+            },
+            'attributes': {
+                'attributes__name__icontains': [],
             },
             'tags': {
                 'tags__text__icontains': [],
@@ -123,9 +137,11 @@ class BookmarkFilter(object):
         tags = Common.get_tags(dict_obj)
         if include:
             self.include_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
+            self.include_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
             self.include_filters['tags']['tags__text__icontains'] = tags
         else:
             self.exclude_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
+            self.exclude_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
             self.exclude_filters['tags']['tags__text__icontains'] = tags
 
     def to_dict(self):
@@ -218,8 +234,8 @@ class BookmarkSearch(object):
         self.include_mode = ""
         self.exclude_mode = ""
         self.order_by = ""
-        self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
-        self.term_search_fields = ['title', 'description', 'tags__text']
+        self.reserved_fields = ['_state', 'uid', 'created_on']
+        self.term_search_fields = ['title', 'description', 'tags__text', 'attributes__name']
         self.page = 1
 
     def from_dict(self, dict_obj):
@@ -246,7 +262,7 @@ class CollectionSearch(object):
         self.include_mode = ""
         self.exclude_mode = ""
         self.order_by = ""
-        self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
+        self.reserved_fields = ['_state', 'uid', 'created_on']
         self.term_search_fields = ['title', 'short_description', 'tags__text', 'attributes__name']
         self.page = 1
 
@@ -302,7 +318,7 @@ class UserSearch(object):
         self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on', 'password', 'is_superuser', 'first_name',
                                 'last_name', 'is_staff', 'email', 'date_joined', 'last_login', 'is_active']
-        self.term_search_fields = ['username']
+        self.term_search_fields = ['username', 'attributes__name']
         self.page = 1
 
     def from_dict(self, dict_obj):
@@ -323,7 +339,7 @@ class WorkSearch(object):
         self.include_mode = ""
         self.exclude_mode = ""
         self.order_by = ""
-        self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
+        self.reserved_fields = ['_state', 'uid', 'created_on']
         self.term_search_fields = ['title', 'summary',
                                    'chapters__title', 'chapters__summary', 'tags__text', 'attributes__name']
         self.page = 1

@@ -1,6 +1,6 @@
 {% extends 'index.html' %}
 {% load i18n %}
-{% block title %}Bookmark - {{ bookmark.title }}{% endblock %}
+{% block title %}Bookmark - {{ bookmark.title|default:bookmark.work.title }}{% endblock %}
 {% block content %}	
 <script>
 	function loadMoreComments(next, chapterId) {
@@ -27,7 +27,7 @@
 <article class="uk-article uk-width-expand uk-padding-remove" id="bookmark-uk-article">
     <div class="uk-child-width-2-1 ourchive-parent-grid" id="bookmark-uk-child-grid" uk-grid>
         <div class="uk-width-2-3" id="bookmark-title-parent">
-            <h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bookmark.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large uk-margin-left"> {% translate 'bookmarked by' %} </span><a href="{% url 'user-profile-parent' bookmark.user_id %}"><span id="bookmark-username-span" class="uk-text-large">{{bookmark.user}}</span></a>
+            <h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bookmark.title|default:bookmark.work.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large uk-margin-left"> {% translate 'bookmarked by' %} </span><a href="{% url 'user-profile-parent' bookmark.user_id %}"><span id="bookmark-username-span" class="uk-text-large">{{bookmark.user}}</span></a>
             {% if bookmark.draft %}
             <div id="bookmark-draft-badge" class="uk-width-auto">
                 <span id="bookmark-draft-span" class="uk-label uk-label-warning"><strong id="bookmark-draft-text">DRAFT</strong></span>
@@ -37,12 +37,12 @@
         <div class="uk-text-right uk-width-1-3" id="bookmark-user-controls-parent">
             {% if bookmark.user == request.user.username %}
             {% if bookmark.draft %}
-            <a id="bookmark-publish-link" href="/bookmarks/{{ bookmark.id }}/publish"><span uk-icon="icon: check" title="Publish"></span> </a>
+            <a class="ourchive-icon-wrapper" id="bookmark-publish-link" href="/bookmarks/{{ bookmark.id }}/publish"><span uk-icon="icon: ourchive-publish;ratio:.75" title="Publish"></span> </a>
             {% endif %}
-            <a id="bookmark-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: file-edit"></span> </a>
-            <a id="bookmark-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: trash"></span> </a>
+            <a class="ourchive-icon-wrapper" id="bookmark-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: ourchive-edit;ratio:.75"></span> </a>
+            <a class="ourchive-icon-wrapper" id="bookmark-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: ourchive-delete;ratio:.75"></span> </a>
             {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
-            {% if not bookmark.draft %}<a title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: plus"></span> </a>{% endif %}
+            {% if not bookmark.draft %}<a class="ourchive-icon-wrapper" title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: ourchive-bookmark;ratio:.75"></span> </a>{% endif %}
             {% include "bookmark_collection_modal.html" %}
             {% endif %}
         </div>
@@ -80,7 +80,7 @@
         {% include 'bookmark_metadata.html' %}
         </div>
         {% if settings.AllowComments %}<div id="bookmark-comments-divider-hr" class="uk-margin-top"><hr id="bookmark-comments-hr" class="ourchive-hr"/></div>{% endif %}
-        <div class="uk-width-1" id="bookmark-parent-comments-include-container">{% include 'comments_parent.html' with object_name='bookmark' comments=comments object=bookmark edit_action_url=bookmark.edit_action_url post_action_url=bookmark.post_action_url comment_offset=comment_offset delete_obj='bookmark-comment' load_more_base=load_more_base view_thread_base=view_thread_base %}</div>  
+        <div class="uk-width-1" id="bookmark-parent-comments-include-container">{% include 'comments_parent.html' with object_name='bookmark' comments=comments object=bookmark edit_action_url=bookmark.edit_action_url post_action_url=bookmark.post_action_url comment_offset=comment_offset delete_obj='bookmark-comment' load_more_base=load_more_base view_thread_base=view_thread_base comment_count=bookmark.comment_count %}</div>  
     </div>
 </article>
 {% if scroll_comment_id %}

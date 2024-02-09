@@ -22,26 +22,29 @@ def get_star_count(rating_star_count=None):
 
 
 def clean_text(text):
-    return nh3.clean(text, 
-        tags={
-            'a', 'abbr', 'acronym', 'area', 'article', 'aside', 'b', 'bdi',
-            'bdo', 'blockquote', 'br', 'caption', 'center', 'cite', 'code',
-            'col', 'colgroup', 'data', 'dd', 'del', 'details', 'dfn', 'div',
-            'dl', 'dt', 'em', 'figcaption', 'figure', 'footer', 'h1', 'h2',
-            'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'i', 'img',
-            'ins', 'kbd', 'kbd', 'li', 'map', 'mark', 'nav', 'ol', 'p', 'pre',
-            'q', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'small', 'span',
-            'strike', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody',
-            'td', 'th', 'thead', 'time', 'tr', 'tt', 'u', 'ul', 'var', 'wbr',
-            'iframe'
-        }, 
-        attributes={
-            "*": {'style'}, 
-            "iframe": {'src', 'width', 'height', 'frameborder', 'allow', 'title', 'allowfullscreen'},
-            "img": {'src', 'alt', 'width', 'height'},
-            "a": {'href', 'alt', 'title', 'target'}
-        }
-    )
+    return nh3.clean(text,
+                     tags={
+                         'a', 'abbr', 'acronym', 'area', 'article', 'aside', 'b', 'bdi',
+                         'bdo', 'blockquote', 'br', 'caption', 'center', 'cite', 'code',
+                         'col', 'colgroup', 'data', 'dd', 'del', 'details', 'dfn', 'div',
+                         'dl', 'dt', 'em', 'figcaption', 'figure', 'footer', 'h1', 'h2',
+                         'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'i', 'img',
+                         'ins', 'kbd', 'kbd', 'li', 'map', 'mark', 'nav', 'ol', 'p', 'pre',
+                         'q', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'small', 'source', 'span',
+                         'strike', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody',
+                         'td', 'th', 'thead', 'time', 'tr', 'tt', 'u', 'ul', 'var', 'video',
+                         'wbr', 'iframe'
+                     },
+                     attributes={
+                         "*": {'style'},
+                         "iframe": {'src', 'width', 'height', 'frameborder', 'allow', 'title', 'allowfullscreen'},
+                         "img": {'src', 'alt', 'width', 'height'},
+                         "a": {'href', 'alt', 'title', 'target'},
+                         "video": {'controls', 'width', 'height'},
+                         "source": {'src', 'type'},
+                     }
+                     )
+
 
 def clean_tag_text(tag_text):
     return unidecode.unidecode(nh3.clean(tag_text.lower()))

@@ -87,6 +87,14 @@ class UserBlocksSerializer(serializers.HyperlinkedModelSerializer):
     )
     blocked_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
 
+    def create(self, validated_data):
+        existing_block = UserBlocks.objects.filter(user__id=validated_data['user'].id, blocked_user__id=validated_data['blocked_user'].id).first()
+        if existing_block:
+            raise serializers.ValidationError({"message": ["User block exists."]})
+        else:
+            block = UserBlocks.objects.create(**validated_data)
+            return block
+
     class Meta:
         model = UserBlocks
         fields = '__all__'
@@ -221,7 +229,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         return user
 
     def update(self, user, validated_data):
-        if not validated_data['icon'] or validated_data['icon'].lower() == 'none':
+        if 'icon' in validated_data and not validated_data['icon'] or validated_data['icon'].lower() == 'none':
             validated_data['icon_alt_text'] = "Default icon"
             icon = OurchiveSetting.objects.filter(name='Default Icon URL').first()
             if icon is not None:
@@ -371,7 +379,7 @@ class NotificationSerializer(serializers.HyperlinkedModelSerializer):
 class CommentUserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'icon', 'icon_alt_text']
+        fields = ['username', 'icon', 'icon_alt_text', 'id']
 
 
 class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
@@ -387,6 +395,12 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
         model = ChapterComment
         fields = '__all__'
 
+    def get_comment_link(self, comment, offset, comment_thread, comment_count):
+        if not comment_thread:
+            return f'/works/{comment.chapter.work.id}/{offset}?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'
+        else:
+            return f'/works/{comment.chapter.work.id}/{offset}?expandComments=true&scrollCommentId={comment.id}&comment_offset={comment_thread}&comment_count={comment_count}'
+
     def update(self, comment, validated_data):
         if isinstance(serializers.CurrentUserDefault(), AnonymousUser):
             validated_data.pop('user')
@@ -396,20 +410,32 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         if 'user' in validated_data and isinstance(validated_data['user'], AnonymousUser):
             validated_data.pop('user')
+        chapter_offset = validated_data.pop('offset') if 'offset' in validated_data else 0
+        comment_thread = validated_data.pop('comment_thread') if 'comment_thread' in validated_data else None
+        comment_count = validated_data.pop('comment_count') if 'comment_count' in validated_data else None
         validated_data['text'] = clean_text(validated_data['text']) if validated_data['text'] is not None else ''
         comment = ChapterComment.objects.create(**validated_data)
-        comment.chapter.comment_count += 1
-        comment.chapter.work.comment_count += 1
+        comment.chapter.comment_count = ChapterComment.objects.filter(chapter__id=comment.chapter.id).count()
+        comment.chapter.work.comment_count = ChapterComment.objects.filter(chapter__work__id=comment.chapter.work.id).count()
         comment.chapter.save()
         comment.chapter.work.save()
+        comment_link = self.get_comment_link(comment, chapter_offset, comment_thread, comment_count)
         user = User.objects.filter(id=comment.chapter.user.id).first()
         notification_type = NotificationType.objects.filter(
             type_label="Comment Notification").first()
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Chapter Comment",
-                                                   content=f"""A new comment has been left on your chapter! <a href='/works/{comment.chapter.work.id}'>Click here</a> to view.""")
+                                                   content=f"""A new comment has been left on your chapter! <a href='{comment_link}'>Click here</a> to view.""")
         notification.save()
         user.has_notifications = True
         user.save()
+        if comment.parent_comment is not None and comment.parent_comment.user.id != comment.chapter.user.id:
+            user = User.objects.filter(id=comment.parent_comment.user.id).first()
+            notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Reply",
+                                                       content=f"""A new reply has been made to your comment. <a href='{comment_link}'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         return comment
 
     def to_representation(self, instance):
@@ -446,12 +472,20 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification_type = NotificationType.objects.filter(
             type_label="Comment Notification").first()
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Bookmark Comment",
-                                                   content=f"""A new comment has been left on your bookmark! <a href='/bookmarks/{comment.bookmark.id}'>Click here</a> to view.""")
+                                                   content=f"""A new comment has been left on your bookmark! <a href='/bookmarks/{comment.bookmark.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
         notification.save()
         user.has_notifications = True
         user.save()
-        comment.bookmark.comment_count = comment.bookmark.comment_count + 1
+        comment.bookmark.comment_count = BookmarkComment.objects.filter(bookmark__id=comment.bookmark.id).count()
         comment.bookmark.save()
+        if comment.parent_comment is not None and comment.parent_comment.user.id != comment.bookmark.user.id:
+            user = User.objects.filter(id=comment.parent_comment.user.id).first()
+            notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Reply",
+                                                       content=f"""A new reply has been made to your comment. <a href='/bookmarks/{comment.bookmark.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         return comment
 
     def to_representation(self, instance):
@@ -488,12 +522,20 @@ class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification_type = NotificationType.objects.filter(
             type_label="Comment Notification").first()
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Collection Comment",
-                                                   content=f"""A new comment has been left on your collection! <a href='/bookmark-collections/{comment.collection.id}'>Click here</a> to view.""")
+                                                   content=f"""A new comment has been left on your collection! <a href='/bookmark-collections/{comment.collection.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
         notification.save()
         user.has_notifications = True
         user.save()
-        comment.collection.comment_count = comment.collection.comment_count + 1
+        comment.collection.comment_count = CollectionComment.objects.filter(collection__id=comment.collection.id).count()
         comment.collection.save()
+        if comment.parent_comment is not None and comment.parent_comment.user.id != comment.collection.user.id:
+            user = User.objects.filter(id=comment.parent_comment.user.id).first()
+            notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Reply",
+                                                       content=f"""A new reply has been made to your comment. <a href='/bookmark-collections/{comment.collection.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         return comment
 
     def to_representation(self, instance):
@@ -522,6 +564,8 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.IntegerField(read_only=True)
     word_count = serializers.IntegerField(read_only=True)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
 
     class Meta:
         model = Chapter
@@ -534,9 +578,17 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
                 if chapter_id and existing_number.first().id != chapter_id:
                     raise serializers.ValidationError({"message": [f"Chapter with number {validated_data['number']} already exists. Please review chapter numbers."]})
 
+    def clean_rich_text(self, rich_fields, validated_data):
+        for field in rich_fields:
+            if field in validated_data:
+                validated_data[field] = clean_text(validated_data[field]) if field in validated_data and validated_data[field] is not None else ''
+        return validated_data
+
+    def get_rich_text_fields(self):
+        return ['text', 'notes', 'end_notes']
+
     def update(self, chapter, validated_data):
-        if 'text' in validated_data:
-            validated_data['text'] = clean_text(validated_data['text']) if 'text' in validated_data and validated_data['text'] is not None else ''
+        validated_data = self.clean_rich_text(self.get_rich_text_fields(), validated_data)
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
@@ -556,7 +608,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         validated_data['word_count'] = 0 if not (
             'text' in validated_data and validated_data['text']) else len(validated_data['text'].split())
-        validated_data['text'] = clean_text(validated_data['text']) if validated_data['text'] is not None else ''
+        validated_data = self.clean_rich_text(self.get_rich_text_fields(), validated_data)
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -610,7 +662,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         view_name='work-detail', read_only=True)
     id = serializers.ReadOnlyField()
     word_count = serializers.IntegerField(read_only=True)
-    audio_length = serializers.IntegerField(read_only=True)
+    audio_length = serializers.IntegerField(read_only=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
     chapter_count = serializers.IntegerField(
@@ -622,7 +674,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True
     )
     has_drafts = serializers.SerializerMethodField()
-
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
 
     class Meta:
         model = Work
@@ -680,6 +733,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         if 'cover_url' in validated_data:
             if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
                 validated_data['cover_url'] = ''
+        if 'updated_on' not in validated_data:
+            validated_data['updated_on'] = datetime.datetime.now()
         # always create a fresh file
         validated_data['epub_url'] = ''
         validated_data['zip_url'] = ''
@@ -696,6 +751,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 validated_data['cover_url'] = ''
         validated_data['summary'] = clean_text(validated_data['summary']) if validated_data['summary'] is not None else ''
         validated_data['notes'] = clean_text(validated_data['notes']) if validated_data['notes'] is not None else ''
+        if 'updated_on' not in validated_data:
+            validated_data['updated_on'] = datetime.datetime.now()
         work = Work.objects.create(**validated_data)
         work = self.process_tags(work, validated_data, tags)
         if attributes is not None:
@@ -728,6 +785,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
 
     # TODO: gotta be a better way to do this
     class Meta:
@@ -840,6 +899,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     works = AttributeValueSerializer(many=True, required=False)
     bookmarks_readonly = BookmarkSerializer(many=True, required=False, source='bookmarks')
     bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), required=False, many=True)
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
 
     class Meta:
         model = BookmarkCollection

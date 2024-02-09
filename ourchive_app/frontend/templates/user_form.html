@@ -2,15 +2,8 @@
 {% load i18n %} 
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
-{% load static %}
-<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
 <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="user-form-parent-div"> 
-	<form class="uk-form-horizontal"  method="post" id="userForm" onsubmit="return getProfileText()">
-		<script>
-	        function getProfileText() {
-	        	document.getElementById('profile').value = tinymce.get("profileEditor").getContent().replace(/\r?\n?/g, '');
-	        }
-    	</script>
+	<form class="uk-form-horizontal"  method="post" id="userForm" onsubmit="return getRichText(['profile'])">
 		{% csrf_token %}
 		<div id="user-form-buttons-top-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
 			<div class="uk-width-1-2@m uk-width-1-1@s" id="edit-profile-header-parent">
@@ -48,7 +41,7 @@
         </div>   
         {% endif %}
         <div class="uk-margin" id="default-content-parent">
-            <label id="default-content-label" class="uk-form-label" for="form-horizontal-text">Default Content <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Default content help' %}"></sup>
+            <label id="default-content-label" class="uk-form-label" for="form-horizontal-text">Default Content <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Default content help' %}"></sup>
                     <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This determines the content a user sees first when visiting your profile.{% endblocktranslate %}</div></label>
             <div class="uk-form-controls" id="default-content-controls">
             	<select id="default-content-select" class="uk-select uk-form-width-small" name="default_content" title="{% translate 'Default content select' %}">
@@ -74,7 +67,7 @@
         </div> 
 
         <div class="uk-margin" id="default-content-parent">
-            <label id="default-work-type-label" class="uk-form-label" for="form-horizontal-text">Default Work Type <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Default work type help' %}"></sup>    
+            <label id="default-work-type-label" class="uk-form-label" for="form-horizontal-text">Default Work Type <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Default work type help' %}"></sup>    
                     <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This determines the default work type shown on the work form.{% endblocktranslate %}</div></label>
             <div class="uk-form-controls" id="default-content-controls">
                 <select id="work-form-type-select" class="uk-select uk-form-width-small" name="default_work_type" title="{% translate 'Default work type select' %}">
@@ -86,7 +79,7 @@
         </div> 
 
         <div class="uk-margin" id="profile-collapse-image-parent">
-            <label id="profile-collapse-image-label" class="uk-form-label" for="form-horizontal-text">Collapse image fields? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Collapse image fields help' %}"></sup>    
+            <label id="profile-collapse-image-label" class="uk-form-label" for="form-horizontal-text">Collapse image fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse image fields help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter image fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
             </label>
             <div id="profile-collapse-image-controls" class="uk-form-controls">
@@ -97,7 +90,7 @@
         </div> 
 
         <div class="uk-margin" id="profile-collapse-audio-parent">
-            <label id="profile-collapse-audio-label" class="uk-form-label" for="form-horizontal-text">Collapse audio fields? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Collapse audio fields help' %}"></sup>    
+            <label id="profile-collapse-audio-label" class="uk-form-label" for="form-horizontal-text">Collapse audio fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse audio fields help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter audio fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
             </label>
             <div id="profile-collapse-audio-controls" class="uk-form-controls">
@@ -108,7 +101,7 @@
         </div>   
 
         <div class="uk-margin" id="profile-collapse-text-parent">
-            <label id="profile-collapse-text-label" class="uk-form-label" for="form-horizontal-text">Collapse text fields? <sup class="uk-margin-small-left" uk-icon="icon: question" title="{% translate 'Collapse text fields help' %}"></sup>    
+            <label id="profile-collapse-text-label" class="uk-form-label" for="form-horizontal-text">Collapse text fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse text fields help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter text fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
             </label>
             <div id="profile-collapse-text-controls" class="uk-form-controls">
@@ -120,35 +113,7 @@
 
         <div class="uk-margin" id="profile-text-parent">
             <label id="profile-text-label" class="uk-form-label" for="form-horizontal-text">Profile Text</label>
-            <div class="uk-form-controls" id="profile-text-controls">
-                <div class="uk-inline uk-child-width-expand uk-width-expand" id="profile-text-inline">
-                	<input type="hidden" id="profile" name="profile" value="{{ user.profile|safe|default_if_none:'' }}">
-                    <textarea id="profileEditor"></textarea>
-                    <script type="text/javascript">
-                                      tinymce.init({
-                                        selector: '#profileEditor',
-                                        width: '100%',
-                                        contextmenu: false,
-                                        convert_urls:false,
-                                        relative_urls:false,
-                                        height: 300,
-                                        plugins: [
-                                          'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                                          'fullscreen', 'insertdatetime',
-                                          'media', 'table', 'emoticons'
-                                        ],
-                                        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                                          'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-                                          'forecolor backcolor emoticons | help',
-                                        menubar: '',
-                                        init_instance_callback : function(editor) {
-                                        	var profileText = document.getElementById('profile').value;
-                                            editor.setContent(profileText);
-                                        }
-                                      });
-                   </script>
-                </div>
-            </div>
+            {% include 'ourchive_tinymce_template.html' with form_field_value=user.profile form_field='profile' obj_name='user' min_height=300 %}
         </div>
         {% if user.attribute_types %}
             <hr id="chapter-attributes-hr"/>

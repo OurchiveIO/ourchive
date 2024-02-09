@@ -212,9 +212,9 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '1000/day',
-        'user': '30000/day'
-    }
+        'anon': '200000/day',
+        'user': '500000/day'
+    },
 }
 
 LOGGING = {
@@ -232,9 +232,12 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'class': 'logging.FileHandler',
+            'level' : 'INFO',
+            'maxBytes' : 1024*1024*10, # 10MB
+            'backupCount' : 10,
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'ourchive.log',
-            'formatter': 'simple',
+            'formatter': 'verbose',
         }
     },
     'loggers': {

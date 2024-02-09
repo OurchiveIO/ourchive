@@ -41,7 +41,7 @@
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl-flyover">	
 			        {% for facet in facets %} 
 						{% include "facet_tile.html" with include='include' keys=keys_include %}     
-				    {% endfor %}		        
+				    {% endfor %}	        
 				</dl>
 				<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl-flyover">	
 					<dt><span class="uk-text-bold">Include all/any</span></dt>
@@ -58,7 +58,8 @@
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-facet-dl-flyover">	
 			        {% for facet in facets %} 
 						{% include "facet_tile.html" with include='exclude' keys=keys_exclude %}     
-				    {% endfor %}		        
+				    {% endfor %}	
+
 				</dl>
 				<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-type-dl-flyover">	
 					<dt><span class="uk-text-bold">Exclude all/any</span></dt>
@@ -154,8 +155,8 @@
         <li id="results-switcher-li-works"><a href="#" id="works_tab">Works ({{ works.page.count }})</a></li>
         <li id="results-switcher-li-bookmarks"><a href="#" id="bookmarks_tab">Bookmarks ({{ bookmarks.page.count }})</a></li>
         <li id="results-switcher-li-users"><a href="#" id="users_tab">Collections ({{ collections.page.count }})</a></li>
-        <li id="results-switcher-li-tags"><a href="#" id="tags_tab">Tags ({{ tags.page.count }})</a></li>
-        <li id="results-switcher-li-users"><a href="#" id="users_tab">Users ({{ users.data|length }})</a></li>
+        {% if not tag_id %}<li id="results-switcher-li-tags"><a href="#" id="tags_tab">Tags ({{ tags.page.count }})</a></li>
+        <li id="results-switcher-li-users"><a href="#" id="users_tab">Users ({{ users.data|length }})</a></li>{% endif %}
 	</ul>
 
 	<ul class="uk-switcher uk-margin-remove search-switcher" id="search-results-work-facet-switcher">
@@ -164,7 +165,7 @@
 				{% for work in works.data %} 
 					<div class="uk-margin-bottom">{% include "work_tile.html" %} </div>    
 			    {% endfor %}
-			    {% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' %}
+			    {% if works.data %}{% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}{% endif %}
 			</div>
 		</li>
 		<li id="search-results-bookmarks-li" class="uk-width-expand"> 
@@ -172,7 +173,7 @@
 		        {% for bookmark in bookmarks.data %} 
 					<div class="uk-margin-bottom">{% include "bookmark_tile.html" %} </div>   
 			    {% endfor %}
-			    {% include 'pagination.html' with previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' %}
+			    {% include 'pagination.html' with previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
 			</div>     
 		</li>
 		<li id="search-results-collections-li" class="uk-width-expand"> 
@@ -180,13 +181,14 @@
 		        {% for bookmark_collection in collections.data %} 
 					<div class="uk-margin-bottom">{% include "bookmark_collection_tile.html" %}</div>  
 			    {% endfor %}
-			    {% include 'pagination.html' with previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' %}
+			    {% include 'pagination.html' with previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
 			</div>     
 		</li>
 		<li id="search-results-tags-li" class="uk-width-expand"> 
 			<div class="uk-width-expand" id="search-results-tags-content">
 		        <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
 		        {% include "tag_partial.html" with obj_name='tag' tags=tags.data.items %}
+		        {% include 'pagination.html' with previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
 				</dl>
 			</div>     
 		</li>
