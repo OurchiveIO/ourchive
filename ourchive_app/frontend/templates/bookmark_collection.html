@@ -2,6 +2,7 @@
 {% block title %}Bookmark Collection - {{ bkcol.title }}{% endblock %}
 {% block content %}	
 {% load static %}
+{% load i18n %}
 <div class="uk-text-left uk-width-1-1" id="bk-collection-uk-grid">
 	<script>
 		function loadMoreComments(next, chapterId) {
@@ -40,58 +41,37 @@
         {% endif %}
 	    </div>
 	    <div id="bkcol-content" class="uk-width-1-1 uk-padding-remove">
-	    	<hr/>
+	    	<hr class="ourchive-hr" id="bkcol-short-desc-hr"/>
 	        <p class="uk-article-meta uk-width-1-1">{{ bkcol.short_description }}</p>
 	        <p class="uk-width-1-1" id="bkcol-{{bkcol.id}}-tile-attributes-p">{% include "object_attributes.html" with object='bkcol' object_id=bkcol.id attributes=bkcol.attributes %}</p>
 	        {% include "tag_partial.html" with obj_name='bkcol' tags=bkcol.tags.items %}
 	        <div class="uk-align-right">{% include 'bookmark_collection_metadata.html' with bookmark_collection=bkcol %}</div>
 	   	</div>
-	   	<div class="uk-margin-remove-bottom uk-margin-remove-top uk-width-1-1 uk-padding-remove"><hr id="bkcol-title-hr"/></div>
+	   	<div class="uk-margin-remove-bottom uk-margin-remove-top uk-width-1-1 uk-padding-remove"><hr id="bkcol-title-hr" class="ourchive-hr"/></div>
+	   	{% if bkcol.description %}
 	   	<div id="bkcol-description-parent" class="uk-width-1-1 uk-padding-remove">
 	   		<span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description|safe}}</span>
+	   		<hr class="ourchive-hr" id="bkcol-desc-hr"/>
 	   	</div>
+	   	{% endif %}
 	   	<div class="uk-width-1-1 uk-margin-bottom uk-padding-remove" id="bkcol-slideshow-parent">
 	   		{% if bkcol.works %}
 	   		<div id="bkcol-bookmarks-parent-sm">
-	   			<ul class="uk-list uk-list-divider">
+	   			<span class="uk-text-lead">Works</span>
+	   			<ul class="uk-list uk-list-sriped">
 	   			{% for work in bkcol.works %} 
-					<li class="ourchive-mobile-list">
+					<li class="ourchive-mobile-list uk-padding-small uk-margin-small-top uk-margin-small-bottom">
 	                	<span class="uk-inline uk-text-uppercase uk-text-medium"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> by {{work.user}}</span>
 	                	{% if work.summary %}
-	            			<p class="uk-margin-remove uk-width-medium uk-text-center ourchive-collection-sm-desc">{{work.summary|safe}}</p>
-	            			<p class="uk-margin-remove uk-width-medium uk-text-right"><span style="opacity: .5" class="uk-inline uk-" uk-icon="icon: quote-right; ratio: 1"></span></p>
+	            			<div class="uk-margin-left uk-margin-small-top uk-width-medium ourchive-collection-sm-desc">{{work.summary|safe}}</div>
 	            		{% endif %}
             		</li>       
 				{% endfor %}
 			</ul>
 	   		</div>
-	   		<div id="bkcol-bookmarks-parent" class="uk-position-relative uk-visible-toggle uk-visible@s" tabindex="-1" uk-slideshow="animation: push" uk-slideshow>
-	   			<ul class="uk-slideshow-items">
-		   			{% for work in bkcol.works %}
-		   			<li>
-			   			{% if work.cover_url %}
-			            <img src="{{work.cover_url}}" alt="{{work.cover_alt_text}}" uk-cover>
-			            {% else %}
-			            <img src="{% static 'default_cover.jpg' %}" alt="Default blank cover" uk-cover>
-			            {% endif %}
-			            <div class="uk-overlay uk-overlay-default uk-position-center uk-position-small uk-text-center uk-dark">
-		                	<h3 class="uk-margin-remove"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</h3></a> <span class="uk-text-meta"> by {{work.user}}</span>
-		                	{% if work.summary %}
-		            			<p class="uk-margin-remove uk-width-medium uk-text-center ourchive-collection-lg-desc">{{work.summary|safe}}</p>
-		            			<p class="uk-margin-remove uk-width-medium uk-text-right uk-align-right"><span style="opacity: .5" class="uk-inline uk-" uk-icon="icon: quote-right; ratio: 3"></span></p>
-		            		{% endif %}
-	            		</div>
-		        	</li>
-		   			{% endfor %}
-	   			</ul>
-			   	<div class="uk-dark">
-			        <a class="uk-position-center-left uk-position-small uk-hidden-hover" href="#" uk-slidenav-previous uk-slideshow-item="previous"></a>
-			        <a class="uk-position-center-right uk-position-small uk-hidden-hover" href="#" uk-slidenav-next uk-slideshow-item="next"></a>
-			    </div>
-			</div>
 			{% endif %}
 		</div>
-		{% if comments %}<div class="uk-width-1-1 uk-padding-remove"><hr/></div>{% endif %}
+		{% if comments %}<div class="uk-width-1-1 uk-padding-remove"><hr class="ourchive-hr" id="bkcol-comment-hr"/></div>{% endif %}
 		<div class="uk-width-1-1 uk-padding-remove">
 			{% include 'comments_parent.html' with object_name='collection' comments=comments object=bkcol edit_action_url=bkcol.edit_action_url post_action_url=bkcol.post_action_url comment_offset=comment_offset delete_obj='collection-comment' load_more_base=load_more_base view_thread_base=view_thread_base comment_count=bkcol.comment_count %}
 		</div>
