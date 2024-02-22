@@ -87,7 +87,6 @@
 		        <ul class="uk-navbar-nav uk-visible@s">
 		            <li class="uk-active" id="nav-home"><a href="/" title="Home" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
 		            <li><a href="/works/" id="nav-works">{% translate 'Works' %}</a></li>
-		            <li><a href="/bookmarks/" id="nav-bookmarks">{% translate 'Bookmarks' %}</a></li>
 		            <li><a href="/bookmark-collections/" id="nav-bookmark-collections">{% translate 'Collections' %}</a></li>
 		        </ul>
 		    </div>	    
@@ -175,7 +174,6 @@
 			<ul class="uk-nav" id="sidenav-ul">
 				<li id="sidenav-home-li" class="uk-active"><a id="sidenav-home-link" href="/">{% translate 'Home' %}</a></li>
 	            <li id="sidenav-works-li"><a id="sidenav-works-link" href="/works/">{% translate 'Works' %}</a></li>
-	            <li id="sidenav-bookmarks-li"><a id="sidenav-bookmarks-link" href="/bookmarks/">{% translate 'Bookmarks' %}</a></li>
 	            <li id="sidenav-bookmark-collections-li"><a id="sidenav-bookmark-collections-link" href="/bookmark-collections/">{% translate 'Collections' %}</a></li>
 	            <li id="sidenav-search-li"><a id="sidenav-search-link" href="/search">Search</a></li>
 	            {% if not request.user.is_authenticated %}

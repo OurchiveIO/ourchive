@@ -18,6 +18,7 @@ from django.core.exceptions import ValidationError
 import unidecode
 from etl.models import WorkImport
 from django.db.models.signals import post_save
+import itertools
 
 logger = logging.getLogger(__name__)
 
@@ -910,7 +911,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-    works = AttributeValueSerializer(many=True, required=False)
+    works = WorkSerializer(many=True, required=False)
     bookmarks_readonly = BookmarkSerializer(many=True, required=False, source='bookmarks')
     bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), required=False, many=True)
     created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
