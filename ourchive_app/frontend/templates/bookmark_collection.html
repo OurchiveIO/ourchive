@@ -55,11 +55,11 @@
 	   	</div>
 	   	{% endif %}
 	   	<div class="uk-width-1-1 uk-margin-bottom uk-padding-remove" id="bkcol-slideshow-parent">
-	   		{% if bkcol.works %}
+	   		{% if bkcol.works_readonly %}
 	   		<div id="bkcol-bookmarks-parent-sm">
 	   			<span class="uk-text-lead">Works</span>
 	   			<ul class="uk-list uk-list-sriped">
-	   			{% for work in bkcol.works %} 
+	   			{% for work in bkcol.works_readonly %} 
 					<li class="ourchive-mobile-list uk-padding-small uk-margin-small-top uk-margin-small-bottom">
 	                	<span class="uk-inline uk-text-uppercase uk-text-medium"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> by {{work.user}}</span>
 	                	{% if work.summary %}

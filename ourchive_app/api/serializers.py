@@ -911,7 +911,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-    works = WorkSerializer(many=True, required=False)
+    works_readonly = WorkSerializer(many=True, required=False, read_only=True, source='works')
+    works = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all(), required=False, many=True)
     bookmarks_readonly = BookmarkSerializer(many=True, required=False, source='bookmarks')
     bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), required=False, many=True)
     created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
@@ -957,15 +958,17 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             validated_data['short_description'] = clean_text(validated_data['short_description']) if validated_data['short_description'] is not None else ''
         if 'description' in validated_data:
             validated_data['description'] = clean_text(validated_data['description']) if validated_data['description'] is not None else ''
+        if 'works' in validated_data:
+            works = validated_data.pop('works')
+            collection = BookmarkCollection.objects.get(id=bookmark.id)
+            collection.works.clear()
+            for work in works:
+                if work.draft:
+                    raise serializers.ValidationError({"message": ["Cannot add draft work to collection."]})
+                collection.works.add(work)
+            work.save()
         if 'bookmarks' in validated_data:
-            bookmarks = validated_data.pop('bookmarks')
-            bookmark = BookmarkCollection.objects.get(id=bookmark.id)
-            bookmark.bookmarks.clear()
-            for bookmark_child in bookmarks:
-                if bookmark_child.draft:
-                    raise serializers.ValidationError({"message": ["Cannot add draft bookmark to collection."]})
-                bookmark.bookmarks.add(bookmark_child)
-            bookmark.save()
+            validated_data.pop('bookmarks')
         BookmarkCollection.objects.filter(
             id=bookmark.id).update(**validated_data)
         return BookmarkCollection.objects.filter(id=bookmark.id).first()

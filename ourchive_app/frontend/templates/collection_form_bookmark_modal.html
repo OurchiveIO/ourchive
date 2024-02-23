@@ -1,5 +1,5 @@
 <script>
-function getBookmarks(params) {
+function getWorks(params) {
   var replace_selector = 'collection-add-bookmark-modal';
   fetch('{% url 'collection-eligible-bookmarks' %}'+params)
     .then((response) => {

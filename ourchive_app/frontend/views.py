@@ -965,6 +965,7 @@ def new_bookmark_collection(request):
 def edit_bookmark_collection(request, pk):
 	if request.method == 'POST':
 		collection_dict = get_bookmark_collection_obj(request)
+		print(collection_dict)
 		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict, object_name='Bookmark Collection')
 		process_message(request, response)
 		return redirect(f'/bookmark-collections/{pk}')
@@ -1018,8 +1019,6 @@ def bookmark_collection(request, pk):
 		comments = do_get(f'api/bookmarkcollections/{pk}/comments?limit=10&offset={comment_offset}', request, 'Bookmark Collection Comments').response_data
 		bookmark_collection['post_action_url'] = f"/bookmark-collections/{pk}/comments/new"
 		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit"""
-	for bookmark in bookmark_collection['bookmarks_readonly']:
-		bookmark['description'] = bookmark['description'].replace('<p>', '<br/>').replace('</p>', '').replace('<br/>', '', 1)
 	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
 	bookmark_collection['new_action_url'] = f"/bookmark-collections/{pk}/comments/new"
 	comments['results'] = format_comments_for_template(comments['results'])

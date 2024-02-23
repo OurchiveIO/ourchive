@@ -239,7 +239,7 @@ def get_bookmark_collection_obj(request):
 				continue
 			tags.append(tag)
 			collection_dict.pop(item)
-		if 'bookmarksidstoadd' in request.POST[item]:
+		if 'workidstoadd' in request.POST[item]:
 			json_item = request.POST[item].split("_")
 			if len(json_item) < 2:
 				continue
@@ -247,7 +247,7 @@ def get_bookmark_collection_obj(request):
 			bookmarks.append(bookmark_id)
 			collection_dict.pop(item)
 	collection_dict["tags"] = tags
-	collection_dict["bookmarks"] = bookmarks
+	collection_dict["works"] = bookmarks
 	comments_permitted = collection_dict["comments_permitted"]
 	collection_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
 	collection_dict["anon_comments_permitted"] = comments_permitted == "All"

@@ -4,7 +4,7 @@
 {% block content %}	
 {% load static %}
 <script>
-function doBookmarkAutocomplete(term) {
+function doWorkAutocomplete(term) {
   if (term.length < 2)
   {
     return;
@@ -21,37 +21,37 @@ function doBookmarkAutocomplete(term) {
     });
 }
 
-function populateBookmarkInput(bookmark_id, bookmark_display) {
+function populateWorkInput(bookmark_id, bookmark_display) {
     // visible list
     var list = document.getElementById("bookmarks_readonly_list")
     // bookmark to add
     var final = bookmark_display;
     var wrapper= document.createElement('div');
-    wrapper.innerHTML= '<input type="hidden" id="bookmarks_'+bookmark_id+'" name="bookmarksidstoadd_'+bookmark_id+'" value="bookmarksidstoadd_'+bookmark_id+'">';
+    wrapper.innerHTML= '<input type="hidden" id="works_'+bookmark_id+'" name="workidstoadd_'+bookmark_id+'" value="workidstoadd_'+bookmark_id+'">';
     var div = wrapper.firstChild;
     list.appendChild(div);
     var li = document.createElement('li');
-    li.setAttribute('id', 'bookmarks_'+bookmark_id+'_li');
-    li.innerHTML = bookmark_display+' (<a onclick="removeBookmark(event,'+bookmark_id+')">Remove</a>)';
+    li.setAttribute('id', 'works_'+bookmark_id+'_li');
+    li.innerHTML = bookmark_display+' (<a onclick="removeWork(event,'+bookmark_id+')">Remove</a>)';
     list.appendChild(li);
     document.getElementById("bookmark_entry").value = '';
     document.getElementById("bookmark_entry").focus();
     document.getElementById("bookmark-autocomplete-dropdown").innerHTML = "";
 }
-function removeBookmark(event, bookmark_id) {
-    var li = document.getElementById("bookmarks_"+bookmark_id+"_li");
-    var hidden = document.getElementById("bookmarks_"+bookmark_id);
+function removeWork(event, bookmark_id) {
+    var li = document.getElementById("works_"+bookmark_id+"_li");
+    var hidden = document.getElementById("works_"+bookmark_id);
     li.remove();
     hidden.remove();
 }
 
-function addSelectedBookmarks() {
+function addSelectedWorks() {
     var bookmarks = document.querySelectorAll('.add-to-collection-checkbox');
     bookmarks.forEach((bookmark) => {
         if (bookmark.checked) {
-            console.log(bookmark.name);
+            console.log(bookmark);
             var bookmark_display = document.getElementById("bookmark-"+bookmark.name+"-bookmark").innerHTML;
-            populateBookmarkInput(bookmark.name, bookmark_display);
+            populateWorkInput(bookmark.name, bookmark_display);
         }
     });
 }
@@ -163,20 +163,20 @@ function addSelectedBookmarks() {
     <hr id="bkcol-form-tags-hr"/>
     <h3 id="obj-attrs-form-header">Details</h3>
     <div class="uk-margin" id="bkcol-bookmarks-list">
-        {% if bookmark_collection.bookmarks_readonly %}<div class="uk-margin-medium-left"><h4 id="obj-attrs-form-header">Bookmarks</h4></div>{% endif %}
+        {% if bookmark_collection.works %}<div class="uk-margin-medium-left"><h4 id="obj-attrs-form-header">{% translate 'Works' %}</h4></div>{% endif %}
         <ul id="bookmarks_readonly_list" class="uk-margin-medium-left"> 
-        {% for bookmark in bookmark_collection.bookmarks_readonly %}
-            <input type="hidden" id="bookmarks_{{bookmark.id}}" name="bookmarksidstoadd_{{bookmark.id}}" value="bookmarksidstoadd_{{bookmark.id}}"/>
-            <li id="bookmarks_{{bookmark.id}}_li">{{bookmark.title|default:bookmark.work.title}} (<a onclick="removeBookmark(event, {{bookmark.id}})">Remove</a>)</li>
+        {% for work in bookmark_collection.works_readonly %}
+            <input type="hidden" id="works_{{work.id}}" name="workidstoadd_{{work.id}}" value="workidstoadd_{{work.id}}"/>
+            <li id="works_{{work.id}}_li">{{work.title}} (<a onclick="removeWork(event, {{work.id}})">Remove</a>)</li>
         {% endfor %}
         </ul>
         <div id="bkcol-form-bookmarks-parent" class="uk-margin uk-margin-medium-top">
-            <label id="bkcol-form-bookmarks-label" class="uk-form-label" for="form-horizontal-text">Add Bookmark <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Bookmark help' %}"></sup>    
-                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for your bookmarks by title.{% endblocktranslate %}</div>
+            <label id="bkcol-form-bookmarks-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Add Work' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work help' %}"></sup>    
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for works by title.{% endblocktranslate %}</div>
             </label>
             <div id="bkcol-form-bookmarks-form-control" class="uk-form-controls">
                 <div id="bkcol-form-bookmarks-inline-div" class="uk-inline">
-                    <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="Search for bookmark..." id="bookmark_entry" oninput="doBookmarkAutocomplete(this.value)">
+                    <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="Search for work..." id="bookmark_entry" oninput="doWorkAutocomplete(this.value)">
                     <div id="bookmark-autocomplete-dropdown" uk-drop></div>
                     <a class="uk-margin-left" href="#" id="collection-add-bookmark-modal-toggle" uk-toggle="target: #collection-add-bookmark-modal">Add from list</a>
                 </div>
