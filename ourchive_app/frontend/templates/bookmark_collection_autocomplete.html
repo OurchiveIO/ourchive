@@ -2,7 +2,7 @@
 {% if works %}
 <div class="uk-background-muted">
 	{% for work in works %}
-	<div id="search-bookmark-autocomplete-graf-{{bookmark.id}}" class="uk-background-default uk-padding-small" onclick="populateWorkInput('{{work.work.id}}', '{{work.work.title_clean|default:work.work.work.title_clean}}')"><span class="ourchive-autocomplete uk-text-small uk-link uk-text-bold" id="collection-autocomplete-span-{{tag.tag}}">{{work.work.title}}</span></div>
+	<div id="search-bookmark-autocomplete-graf-{{bookmark.id}}" class="uk-background-default uk-padding-small" onclick="populateWorkInput('{{work.work.id}}', '{{work.work.title_clean}}')"><span class="ourchive-autocomplete uk-text-small uk-link uk-text-bold" id="collection-autocomplete-span-{{tag.tag}}">{{work.work.title}}</span></div>
 	{% endfor %}
 </div>
 {% else %}

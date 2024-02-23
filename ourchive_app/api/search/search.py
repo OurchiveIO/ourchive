@@ -428,17 +428,13 @@ class PostgresProvider:
         results = []
         resultset = None
         term = term.lower()
-        resultset = Bookmark.objects.filter(user__id=user,draft=False).filter(
-            Q(title__icontains=term) | Q(work__title__icontains=term)).prefetch_related('work')
+        resultset = Work.objects.filter(user__id=user,draft=False).filter(
+            Q(title__icontains=term) | Q(summary__icontains=term))
         for result in resultset:
-            work_dict = vars(result.work)
+            work_dict = vars(result)
             if '_state' in work_dict:
                 work_dict.pop('_state')
-            bookmark_dict = vars(result)
-            if '_state' in bookmark_dict:
-                bookmark_dict.pop('_state')
-            bookmark_dict['work'] = work_dict
-            results.append({"bookmark": bookmark_dict})
+            results.append({"work": work_dict})
         return results
 
     def search_tags(self, **kwargs):
