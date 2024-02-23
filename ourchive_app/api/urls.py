@@ -45,6 +45,8 @@ urlpatterns = [
          name='bookmark-collection-list'),
     path('bookmarkcollections/<int:pk>/', views.BookmarkCollectionDetail.as_view(),
          name='bookmarkcollection-detail'),
+    path('bookmarkcollections/add-work', views.BookmarkCollectionWork.as_view(),
+         name='bookmarkcollection-add-work'),
     path('bookmarkcollections/<int:pk>/comments',
          views.BookmarkCollectionCommentDetail.as_view(), name='bookmarkcollectioncomment-detail'),
     path('collectioncomments/', views.CollectionCommentList.as_view(),

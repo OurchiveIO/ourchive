@@ -2,7 +2,7 @@
 <div id="bookmark-add-collection-modal" uk-modal>
     <div class="uk-modal-dialog uk-modal-body" id="bookmark-add-collection-modal-body">
         <h2 id="bookmark-add-collection-modal-header" class="uk-modal-title">Add to Collection</h2>
-        <p class="uk-text-medium">{% blocktranslate %}Add this bookmark to any of your 10 most recent collections.{% endblocktranslate %}</p>
+        <p class="uk-text-medium">{% blocktranslate %}Add this work to any of your 10 most recent collections.{% endblocktranslate %}</p>
         <div class="uk-overflow-auto uk-width-1-1 uk-padding-remove-horizontal">
             <table class="uk-table uk-table-striped">
                 <thead>
@@ -13,9 +13,9 @@
                 </thead>
                 <tbody>
                     {% for collection in collections.results %}
-                        <tr id="collection-{{ bookmark.id }}-parent">
-                            <td id="collection-{{ bookmark.id }}-bookmark">{{ collection.title }}</td>
-                            <td id="collection-{{ bookmark.id }}-radio"><input type="radio" name="{{collection.id}}" id="add-to-bookmark-radio-{{ collection.id }}" class="add-to-bookmark-radio"/></td>
+                        <tr id="collection-{{ work.id }}-parent">
+                            <td id="collection-{{ work.id }}-bookmark">{{ collection.title }}</td>
+                            <td id="collection-{{ work.id }}-radio"><input type="radio" name="{{collection.id}}" id="add-to-bookmark-radio-{{ collection.id }}" class="add-to-bookmark-radio"/></td>
                         </tr>
                     {% endfor %}
                 </tbody>

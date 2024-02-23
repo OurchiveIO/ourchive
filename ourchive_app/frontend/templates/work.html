@@ -2,6 +2,16 @@
 {% load i18n %}
 {% block title %}Work - {{ work.title }}{% endblock %}
 {% block content %}	
+<script>
+    function addSelectedCollection() {
+        var collection = document.querySelector('.add-to-bookmark-radio');
+        if (collection.checked !== true) {
+            return;
+        }
+        var url = "{% url 'fe-add-collection-to-bookmark' work.id %}";
+        window.location.replace(url + '?collection_id=' + collection.name);
+    }
+</script>
 <article id="work-article" class="uk-article uk-width-expand uk-padding-remove">
     <div id="work-article-grid" class="uk-child-width-2-1 ourchive-parent-grid" uk-grid>
         {% if work.user == request.user.username %}
@@ -15,6 +25,8 @@
         {% else %}
         <div id="work-controls-parent" class="uk-text-right uk-align-right uk-width-1-1 uk-margin-remove">
         {% endif %}
+        {% if not work.draft %}<a class="ourchive-icon-wrapper" title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: ourchive-bookmark;ratio:.75"></span> </a>{% endif %}
+            {% include "bookmark_collection_modal.html" %}
             {% if not work.draft %}<a id="work-bookmark-link" class="ourchive-icon-wrapper" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span" uk-icon="icon: ourchive-bookmark;ratio: .75" title="{% translate 'Bookmark' %}"></span> </a>{% endif %}
             <a id="work-fingerguns-link" href="/fingerguns/{{ id }}" class="ourchive-icon-wrapper"><span id="work-fingerguns-span" uk-icon="icon: ourchive-like; ratio: .75" title="{% translate 'Fingerguns' %}"></span> </a>
             <div class="uk-inline">

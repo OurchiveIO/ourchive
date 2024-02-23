@@ -969,6 +969,26 @@ class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer.save(user=self.request.user, attributes=attributes)
 
 
+class BookmarkCollectionWork(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, format=None):
+        target_collection = request.data.get('collection_id', None)
+        work_id = request.data.get('work_id', None)
+        if not target_collection or not work_id:
+            return Response({'message': [_('Missing field: collection_id and work_id required for POST request.')]}, status=400)
+        collection = BookmarkCollection.objects.get(id=target_collection)
+        work_to_add = Work.objects.get(id=work_id)
+        if not collection or not work_to_add:
+            return Response({'message': [_('Collection or work not found.')]}, status=404)
+        if not collection.user.id == request.user.id:
+            return Response({'message': [_('You do not have permission to modify this collection')]}, status=403)
+        collection.works.add(work_to_add)
+        collection.save()
+        return Response({'message': ['Work added to collection.']})
+
+
 class CommentList(generics.ListCreateAPIView):
     serializer_class = ChapterCommentSerializer
     permission_classes = [UserAllowsWorkComments, UserAllowsWorkAnonComments]

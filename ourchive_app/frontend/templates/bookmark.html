@@ -14,15 +14,6 @@
 			document.getElementById('bookmark-{{bookmark.id}}-comments-child-container').scrollIntoView();
 		  });
 	}
-
-    function addSelectedCollection() {
-        var collection = document.querySelector('.add-to-bookmark-radio');
-        if (collection.checked !== true) {
-            return;
-        }
-        var url = "{% url 'fe-add-collection-to-bookmark' bookmark.id %}";
-        window.location.replace(url + '?collection_id=' + collection.name);
-    }
 </script>
 <article class="uk-article uk-width-expand uk-padding-remove" id="bookmark-uk-article">
     <div class="uk-child-width-2-1 ourchive-parent-grid" id="bookmark-uk-child-grid" uk-grid>
@@ -42,8 +33,6 @@
             <a class="ourchive-icon-wrapper" id="bookmark-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: ourchive-edit;ratio:.75"></span> </a>
             <a class="ourchive-icon-wrapper" id="bookmark-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: ourchive-delete;ratio:.75"></span> </a>
             {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
-            {% if not bookmark.draft %}<a class="ourchive-icon-wrapper" title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: ourchive-bookmark;ratio:.75"></span> </a>{% endif %}
-            {% include "bookmark_collection_modal.html" %}
             {% endif %}
         </div>
     </div>

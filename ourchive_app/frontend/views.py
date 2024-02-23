@@ -1233,9 +1233,11 @@ def work(request, pk, chapter_offset=0):
 			chapters[-1]['post_action_url'] = f"/works/{pk}/chapters/{chapters[-1]['id']}/comments/new?view_full=true&offset={comment_offset}"
 			chapters[-1]['edit_action_url'] = f"""/works/{pk}/chapters/{chapters[-1]['id']}/comments/edit?view_full=true&offset={comment_offset}"""
 		work['last_chapter_id'] = chapters[-1]['id']
+	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections', request, 'Collections').response_data
 	page_content = render(request, 'work.html', {
 		'work_types': work_types['results'],
 		'work': work,
+		'collections': collections,
 		'user_can_comment': user_can_comment,
 		'expand_comments': expand_comments,
 		'scroll_comment_id': request.GET.get("scrollCommentId") if request.GET.get("scrollCommentId") is not None else None,
@@ -1522,10 +1524,8 @@ def bookmark(request, pk):
 	comments['results'] = format_comments_for_template(comments['results'])
 	bookmark['new_action_url'] = f"/bookmarks/{pk}/comments/new"
 	user_can_comment = (bookmark['comments_permitted'] and (bookmark['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark else False
-	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections', request, 'Collections').response_data
 	page_content = render(request, 'bookmark.html', {
 		'bookmark': bookmark,
-		'collections': collections,
 		'load_more_base': f"/bookmarks/{pk}",
 		'view_thread_base': f"/bookmarks/{pk}",
 		'tags': tags,
@@ -1544,13 +1544,13 @@ def bookmark(request, pk):
 def add_collection_to_bookmark(request, pk):
 	collection_id = request.GET.get('collection_id')
 	if not collection_id:
-		return redirect(f'/bookmarks/{pk}')
+		return redirect(f'/works/{pk}')
 	if not request.user.is_authenticated:
 		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'add-collection-to-bookmark-noauth')
-	response = do_patch(f'api/bookmarks/{pk}/', request, data={'id': pk, 'collection': collection_id}, object_name="Collection")
+	response = do_post(f'api/bookmarkcollections/add-work', request, data={'collection_id': collection_id, 'work_id': pk}, object_name="Collection")
 	message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 	messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
-	return redirect(f'/bookmarks/{pk}')
+	return redirect(f'/works/{pk}')
 
 
 def works_by_tag(request, tag):
