@@ -17,7 +17,8 @@ from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     AdminAnnouncement, UserWork, UserCollection
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
     UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
-    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked, WorkIsNotDraft, ObjectIsPrivate
+    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked, WorkIsNotDraft, \
+    ObjectIsPrivate, IsWorkOwner, IsWorkOwnerOrReadOnly, IsMultiOwner, IsMultiOwnerOrReadOnly
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
@@ -432,7 +433,7 @@ class GroupList(generics.ListAPIView):
 
 class UserWorkList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
         return Work.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
@@ -462,7 +463,7 @@ class UserBookmarkList(generics.ListCreateAPIView):
 
 class UserBookmarkCollectionList(generics.ListCreateAPIView):
     serializer_class = BookmarkCollectionSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
         return BookmarkCollection.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
@@ -491,7 +492,7 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 class WorkList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
         return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
@@ -508,7 +509,7 @@ class WorkList(generics.ListCreateAPIView):
 
 class UserWorkDraftList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
         return Work.objects.filter(draft=True, user__username=self.kwargs['username']).order_by('-updated_on')
@@ -622,7 +623,7 @@ class UserSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = WorkSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
         return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
@@ -660,7 +661,7 @@ class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
 class WorkDraftDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Work.objects.get_queryset().order_by('id')
     serializer_class = WorkSerializer
-    permission_classes = [IsOwner]
+    permission_classes = [IsMultiOwner]
 
 
 class FingergunDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -773,7 +774,7 @@ class TagDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class ChapterList(generics.ListCreateAPIView):
     serializer_class = ChapterSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsWorkOwnerOrReadOnly]
 
     def get_queryset(self):
         return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('number')
@@ -794,7 +795,7 @@ class ChapterList(generics.ListCreateAPIView):
 
 class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ChapterSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsWorkOwnerOrReadOnly]
 
     def get_queryset(self):
         return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
@@ -830,7 +831,7 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class WorkChapterDetail(generics.ListCreateAPIView):
     serializer_class = ChapterSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsWorkOwnerOrReadOnly]
 
     def get_queryset(self):
         return Chapter.objects.filter(work__id=self.kwargs['work_id']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('number')
@@ -841,7 +842,7 @@ class WorkChapterDetail(generics.ListCreateAPIView):
 
 class ChapterDraftList(generics.ListCreateAPIView):
     serializer_class = ChapterSerializer
-    permission_classes = [IsOwner]
+    permission_classes = [IsWorkOwner]
 
     def get_queryset(self):
         return Chapter.objects.get_queryset().order_by('number')
@@ -853,12 +854,12 @@ class ChapterDraftList(generics.ListCreateAPIView):
 class ChapterDraftDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Chapter.objects.get_queryset().order_by('id')
     serializer_class = ChapterSerializer
-    permission_classes = [IsOwner]
+    permission_classes = [IsWorkOwner]
 
 
 class WorkChapterDetailAll(generics.ListCreateAPIView):
     serializer_class = ChapterSerializer
-    permission_classes = [IsOwner]
+    permission_classes = [IsWorkOwner]
     pagination_class = None
 
     def get_queryset(self):
@@ -870,7 +871,7 @@ class WorkChapterDetailAll(generics.ListCreateAPIView):
 
 class WorkCommentList(generics.ListCreateAPIView):
     serializer_class = ChapterCommentSerializer
-    permission_classes = [IsOwnerOrReadOnly,
+    permission_classes = [IsMultiOwnerOrReadOnly,
                           UserAllowsWorkComments, UserAllowsWorkAnonComments]
 
     def get_queryset(self):
@@ -879,7 +880,7 @@ class WorkCommentList(generics.ListCreateAPIView):
 
 class ChapterCommentDetail(generics.ListCreateAPIView):
     serializer_class = ChapterCommentSerializer
-    permission_classes = [IsOwnerOrReadOnly,
+    permission_classes = [IsWorkOwnerOrReadOnly,
                           UserAllowsWorkComments, UserAllowsWorkAnonComments]
 
     def get_queryset(self):
@@ -1009,7 +1010,7 @@ class BookmarkPrimaryCommentDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class BookmarkCollectionList(generics.ListCreateAPIView):
     serializer_class = BookmarkCollectionSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
         return BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
@@ -1026,7 +1027,7 @@ class BookmarkCollectionList(generics.ListCreateAPIView):
 
 class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkCollectionSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
         return BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
@@ -1128,7 +1129,7 @@ class CollectionCommentList(generics.ListCreateAPIView):
 class CollectionCommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = CollectionComment.objects.get_queryset().order_by('id')
     serializer_class = CollectionCommentSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly]
 
     def perform_destroy(self, instance):
         instance.collection.comment_count = instance.collection.comment_count - 1
