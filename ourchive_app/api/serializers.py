@@ -747,15 +747,26 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     def process_users(self, work, users):
         backup_users = list(work.users.all())
         work.users.clear()
+        new_users = set()
         try:
             for user in users:
                 work.users.add(user)
+                if user not in backup_users:
+                    new_users.add(user)
             work.save()
         except:
             logger.error(f'Error trying to add new cocreators.')
             for user in backup_users:
                 work.users.add(user)
             work.save()
+        for user in new_users:
+            notification_type = NotificationType.objects.filter(
+                type_label="System Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="Pending Approvals",
+                                                       content=f"""You have co-creator listings pending approval. <a href='/users/cocreator-approvals'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         return work
 
     def update(self, work, validated_data):
@@ -956,15 +967,26 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     def process_users(self, collection, users):
         backup_users = list(collection.users.all())
         collection.users.clear()
+        new_users = set()
         try:
             for user in users:
                 collection.users.add(user)
+                if user not in backup_users:
+                    new_users.add(user)
             collection.save()
         except:
             logger.error(f'Error trying to add new cocreators on collection.')
             for user in backup_users:
                 collection.users.add(user)
             collection.save()
+        for user in new_users:
+            notification_type = NotificationType.objects.filter(
+                type_label="System Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="Pending Approvals",
+                                                       content=f"""You have co-creator listings pending approval. <a href='/users/cocreator-approvals'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         return collection
 
     def update(self, bookmark, validated_data):
