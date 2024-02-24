@@ -753,6 +753,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 work.users.add(user)
                 if user not in backup_users:
                     new_users.add(user)
+            if not any(work.users):
+                work.users.add(work.user)
             work.save()
         except:
             logger.error(f'Error trying to add new cocreators.')
@@ -792,6 +794,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         validated_data['zip_url'] = ''
         Work.objects.filter(id=work.id).update(**validated_data)
         self.process_users(work, users)
+        work.draft = validated_data['draft']
+        work.save()
         return Work.objects.filter(id=work.id).first()
 
     def create(self, validated_data):
@@ -810,6 +814,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         work = Work.objects.create(**validated_data)
         work = self.process_tags(work, validated_data, tags)
         work = self.process_users(work, users)
+        work.draft = validated_data['draft']
+        work.save()
         if attributes is not None:
             work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
         return work
@@ -904,6 +910,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
             attributes = validated_data.pop('attributes')
             bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)
+        bookmark.draft = validated_data['draft']
+        bookmark.save()
         return Bookmark.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
@@ -921,6 +929,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         validated_data['work_id'] = validated_data['work_id'].id
         bookmark = Bookmark.objects.create(**validated_data)
         bookmark = self.process_tags(bookmark, validated_data, tags)
+        bookmark.draft = validated_data['draft']
+        bookmark.save()
         if attributes is not None:
             bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
         return bookmark
@@ -973,6 +983,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                 collection.users.add(user)
                 if user not in backup_users:
                     new_users.add(user)
+            if not any(collection.users):
+                collection.users.add(collection.user)
             collection.save()
         except:
             logger.error(f'Error trying to add new cocreators on collection.')
@@ -1040,6 +1052,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         BookmarkCollection.objects.filter(
             id=bookmark.id).update(**validated_data)
         self.process_users(bookmark, users)
+        bookmark.draft = validated_data['draft']
+        bookmark.save()
         return BookmarkCollection.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
@@ -1072,6 +1086,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             bookmark_collection.bookmarks.add(bookmark)
         bookmark_collection.save()
         bookmark_collection = self.process_users(bookmark_collection, users)
+        bookmark_collection.draft = validated_data['draft']
+        bookmark_collection.save()
         if attributes is not None:
             bookmark_collection = AttributeValueSerializer.process_attributes(bookmark_collection, validated_data, attributes)
         return bookmark_collection
