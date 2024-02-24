@@ -246,6 +246,9 @@ def user_works(request, username):
 	prev_params = response['prev_params']
 	works = response['works']
 	works = format_date_for_template(works, 'updated_on', True)
+	# TODO: there is a better/DRYer way to do this
+	for work in works:
+		work['owner'] = get_owns_object(work, request)
 	return render(request, 'works.html', {
 		'works': works,
 		'next': f"/username/{username}/works/{next_params}" if next_params is not None else None,
@@ -259,6 +262,8 @@ def user_works_drafts(request, username):
 	works = response.response_data['results']
 	works = get_object_tags(works)
 	works = format_date_for_template(works, 'updated_on', True)
+	for work in works:
+		work['owner'] = get_owns_object(work, request)
 	return render(request, 'works.html', {
 		'works': works,
 		'user_filter': username,
@@ -375,6 +380,8 @@ def user_bookmark_collections(request, username):
 	bookmark_collections = response.response_data['results']
 	bookmark_collections = get_object_tags(bookmark_collections)
 	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
+	for collection in bookmark_collections:
+		collection['owner'] = get_owns_object(collection, request)
 	return render(request, 'bookmark_collections.html', {
 		'bookmark_collections': bookmark_collections,
 		'next': f"/username/{username}/bookmarkcollections/{response.response_data['next_params']}" if response.response_data["next_params"] is not None else None,
@@ -593,6 +600,8 @@ def works(request):
 	works = get_object_tags(works)
 	works = get_array_attributes_for_display(works, 'attributes')
 	works = format_date_for_template(works, 'updated_on', True)
+	for work in works:
+		work['owner'] = get_owns_object(work, request)
 	return render(request, 'works.html', {
 		'works': works,
 		'next': f"/works/{works_response['next_params']}" if works_response['next_params'] is not None else None,
@@ -928,6 +937,7 @@ def bookmark_collections(request):
 	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
 	for bkcol in bookmark_collections:
 		bkcol['attributes'] = get_attributes_for_display(bkcol['attributes'])
+		bkcol['owner'] = get_owns_object(bkcol, request)
 	return render(request, 'bookmark_collections.html', {
 		'bookmark_collections': bookmark_collections,
 		'next': f"/bookmarkcollections/{response['next_params']}" if response['next_params'] is not None else None,
@@ -1017,6 +1027,7 @@ def bookmark_collection(request, pk):
 	bookmark_collection['tags'] = tags
 	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
 	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on')
+	bookmark_collection['owner'] = get_owns_object(bookmark_collection, request)
 	if 'comment_thread' in request.GET:
 		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
 		comment_offset = 0
@@ -1196,6 +1207,7 @@ def work(request, pk, chapter_offset=0):
 	tags = group_tags(work['tags']) if 'tags' in work else {}
 	work['attributes'] = get_attributes_for_display(work['attributes'])
 	work = format_date_for_template(work, 'updated_on')
+	work['owner'] = get_owns_object(work, request)
 	chapter_url_string = f'api/works/{pk}/chapters{"?limit=1" if view_full is False else "/all"}'
 	if chapter_offset > 0:
 		chapter_url_string = f'{chapter_url_string}&offset={chapter_offset}'

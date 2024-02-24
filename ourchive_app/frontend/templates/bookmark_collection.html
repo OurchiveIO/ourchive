@@ -32,7 +32,7 @@
 	        {% endif %}
 	    </div>
 	    <div class="uk-text-right uk-width-1-3 uk-padding-remove" id="bkcol-user-controls-parent">
-        {% if bkcol.user == request.user.username %}
+        {% if bkcol.owner %}
 	        {% if bkcol.draft %}
 	        <a class="ourchive-icon-wrapper" id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: ourchive-publish; ratio: .75" title="Publish"></span> </a>
 	        {% endif %}

@@ -14,7 +14,7 @@
 </script>
 <article id="work-article" class="uk-article uk-width-expand uk-padding-remove">
     <div id="work-article-grid" class="uk-child-width-2-1 ourchive-parent-grid" uk-grid>
-        {% if work.user == request.user.username %}
+        {% if work.owner %}
             <div id="work-controls-parent" class="uk-text-left uk-width-1-2@m uk-width-1-1@s uk-margin-small-bottom">
                 {% if work.has_drafts %}<a id="work-publish-all-link" href="/works/{{ id }}/publish-full" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-publish; ratio: .75" title="{% translate 'Publish All' %}"></span> </a>{% endif %}
                 <a class="ourchive-icon-wrapper" id="work-edit-link" href="/works/{{ id }}/edit"><span uk-icon="icon: ourchive-edit; ratio: .75" title="{% translate 'Edit' %}"></span></a>

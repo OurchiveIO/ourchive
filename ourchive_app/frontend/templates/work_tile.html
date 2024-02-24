@@ -16,7 +16,7 @@
 	                	<span id="work-{{work.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {% for user in work.users %}<a id="work-{{work.id}}-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
 	                {% endif %}
 	            </div>
-	            {% if work.user == request.user.username %}
+	            {% if work.owner %}
 		        <div class="uk-align-right uk-text-right uk-margin-small-top uk-visible@s uk-margin-remove-bottom" id="work-{{work.id}}-header-user-controls">
 		            <a id="work-{{work.id}}-header-edit-link" title="Edit Work {{ work.id }}" href="/works/{{ work.id }}/edit" class="ourchive-icon-wrapper"><span id="work={{work.id}}-header-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="{% translate 'Edit Work' %} {{ work.id }}"></span></a>
 		            <a id="work-{{work.id}}-header-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete" class="ourchive-icon-wrapper"><span id="work-{{work.id}}-header-delete-span" uk-icon="icon: ourchive-delete;ratio:.75" title="{% translate 'Delete Work' %} {{ work.id }}"></span></a>
