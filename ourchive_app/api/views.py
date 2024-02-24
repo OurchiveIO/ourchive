@@ -14,7 +14,7 @@ from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
     NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
     AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment, \
-    AdminAnnouncement
+    AdminAnnouncement, UserWork, UserCollection
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
     UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
     UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked, WorkIsNotDraft, ObjectIsPrivate
@@ -300,7 +300,7 @@ class ExportChives(APIView):
 
     def post(self, request, format=None):
         if not 'export_works' in request.data and not 'export_bookmarks' in request.data and not 'export_collections' in request.data:
-            return Response({'message': "export_works, export_bookmarks, or export_collections required."}, status=400)
+            return Response({'message': ["export_works, export_bookmarks, or export_collections required."]}, status=400)
         export_job = ChiveExport(
             user_id=request.user.id,
             export_works=request.data.get('export_works', "false").lower() == "true",
@@ -312,6 +312,78 @@ class ExportChives(APIView):
     def get(self, request, format=None):
         return Response({'export_works': 'false', 'export_bookmarks': 'false', 'export_collections': 'false'}, status=200)
 
+class UserApprovalList(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        data = []
+        pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
+        pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
+        for work in pending_works:
+            approval = {
+                'id': f'{work.id}_work',
+                'type': 'work',
+                'creating_user': {'id': work.work.user.id, 'username': work.work.user.username},
+                'chive': work.work.id,
+                'title': work.work.title
+            }
+            data.append(approval)
+        for collection in pending_collections:
+            approval = {
+                'id': f'{collection.id}_collection',
+                'type': 'collection',
+                'creating_user': {'id': collection.collection.user.id, 'username': collection.collection.user.username},
+                'chive': collection.collection.id,
+                'title': collection.collection.title
+            }
+            data.append(approval)
+        return Response(data, status=200)
+
+class UserApprovalRemove(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, format=None):
+        user_to_remove = request.user.id
+        type_to_remove = request.data.get('type', None)
+        approval_id = request.data.get('id', None)
+        approval = None
+        if type_to_remove == 'work':
+            approval = UserWork.objects.get(id=approval_id)
+        elif type_to_remove == 'collection':
+            approval = UserCollection.objects.get(id=approval_id)
+        else:
+            return Response({'message': [_('type_to_remove must be in POST request and must be work or collection.')]}, status=400)
+        if not approval:
+            return Response({'message': [_(f'Approval having id {approval_id} does not exist.')]}, status=403)
+        if approval.user.id != user_to_remove:
+            return Response({'message': [_('Request user is not record user.')]}, status=403)
+        approval.delete()
+        return Response({'message': _('Association removed.')}, status=200)
+
+class UserApprovalApprove(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, format=None):
+        user_to_approve = request.user.id
+        type_to_approve = request.data.get('type', None)
+        approval_id = request.data.get('id', None)
+        approval = None
+        if type_to_approve == 'work':
+            approval = UserWork.objects.get(id=approval_id)
+        elif type_to_approve == 'collection':
+            approval = UserCollection.objects.get(id=approval_id)
+        else:
+            return Response({'message': [_('type_to_remove must be in POST request and must be work or collection.')]}, status=400)
+        if not approval:
+            return Response({'message': [_(f'Approval having id {approval_id} does not exist.')]}, status=403)
+        if approval.user.id != user_to_approve:
+            return Response({'message': [_('Request user is not record user.')]}, status=403)
+        approval.approved = True
+        approval.save()
+        return Response({'message': _('Association approved.')}, status=200)
 
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')

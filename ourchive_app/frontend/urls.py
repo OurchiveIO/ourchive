@@ -94,6 +94,9 @@ urlpatterns = [
     path('user-autocomplete', views.user_autocomplete),
     path('content-pages/<int:pk>', views.content_page, name='fe-content-page'),
     path('accept-cookies', views.accept_cookies, name='accept-cookies'),
-    path('export-chives', views.export_chives, name='fe-export-chives')
+    path('export-chives', views.export_chives, name='fe-export-chives'),
+    path('users/remove-cocreator', views.remove_as_cocreator, name='fe-remove-as-cocreator'),
+    path('users/approve-cocreator', views.approve_as_cocreator, name='fe-approve-as-cocreator'),
+    path('users/cocreator-approvals', views.cocreator_approvals, name='fe-view-approvals'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

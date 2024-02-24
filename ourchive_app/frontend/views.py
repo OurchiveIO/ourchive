@@ -1591,6 +1591,47 @@ def works_by_tag_next(request, tag_id):
 	return render(request, 'paginated_works.html', {'works': works, 'tag_id': tag_id})
 
 
+def remove_as_cocreator(request):
+	if request.user.is_authenticated:
+		form_data = request.POST.copy()
+		form_data['id'] = form_data['id'].partition('_')[0]
+		response = do_post(f'api/users/remove-cocreator/', request, data=form_data)
+		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
+		user_message = response.response_info.message if message_type == messages.ERROR else ('Relationship rejected.')
+		messages.add_message(request, message_type, user_message, response.response_info.type_label)
+		return redirect(f'/users/cocreator-approvals')
+	else:
+		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'user-unauthorized-error')
+		return redirect('/login')
+
+
+def approve_as_cocreator(request):
+	if request.user.is_authenticated:
+		form_data = request.POST.copy()
+		form_data['id'] = form_data['id'].partition('_')[0]
+		response = do_post(f'api/users/approve-cocreator/', request, data=form_data)
+		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
+		user_message = response.response_info.message if message_type == messages.ERROR else ('Relationship approved.')
+		messages.add_message(request, message_type, user_message, response.response_info.type_label)
+		return redirect(f'/users/cocreator-approvals')
+	else:
+		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'user-unauthorized-error')
+		return redirect('/login')
+
+
+def cocreator_approvals(request):
+	if request.user.is_authenticated:
+		pending_approvals = do_get(f'api/users/approvals/', request)
+		if pending_approvals.response_info.status_code >= 400:
+			messages.add_message(request, messages.ERROR, pending_approvals.response_info.message, pending_approvals.response_info.type_label)
+			return redirect(f'/username/{request.user.id}')
+		else:
+			return render(request, 'user_cocreation_approval.html', {'approvals': pending_approvals.response_data})
+	else:
+		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'user-unauthorized-error')
+		return redirect('/login')
+
+
 @never_cache
 def switch_css_mode(request):
 	request.session['css_mode'] = "dark" if request.session.get('css_mode') == "light" or request.session.get('css_mode') is None else "light"
