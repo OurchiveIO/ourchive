@@ -9,3 +9,4 @@ updates:
     directory: "/ourchive_app" # Location of package manifests
     schedule:
       interval: "weekly" 
+    target-branch: "development"
