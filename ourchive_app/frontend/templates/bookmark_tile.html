@@ -29,6 +29,9 @@
 	        {% if settings.RatingsEnabled %}<p id="bk-tile-rating-body"><strong id="bk-tile-rating-body-label">Rating</strong>: {{ bookmark.rating }} stars</p>{% endif %}
 	        {% if bookmark.tags.items %}{% include "tag_partial.html" with obj_name='bookmark' tags=bookmark.tags.items %}{% endif %}
 		   	{% if bookmark.attributes %}{% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}{% endif %}
+		   	{% if bookmark.description %}
+            <div id="bookmark-description-text"><span class="uk-text-medium uk-text-bold"><strong>{{ bookmark.user }}'s {% translate 'comments' %}</strong></span> <div class="uk-margin-left">{{ bookmark.description|safe }}</div></div>	   
+        {% endif %}
 		</div>
 	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="bk-tile-footer-parent">
 			<div class="uk-width-1-1 uk-padding-small uk-margin-small">
