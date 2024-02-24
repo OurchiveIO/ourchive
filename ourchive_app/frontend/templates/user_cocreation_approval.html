@@ -2,18 +2,13 @@
 {% load i18n %}
 {% block title %}{% translate 'Co-Creator Approvals' %}{% endblock %}
 {% block content %}	
-	<div id="user-cocreator-header" class="uk-width-1-1 uk-padding-remove-horizontal">
+	<div id="user-cocreator-parent" class="uk-width-1-1 uk-padding-remove-horizontal">
 		<h1 id="user-cocreator-h1">{% translate 'Co-Creator Approvals' %}</h1>
 		<hr/>
-	</div>
-	<div id="user-cocreator-detail" class="uk-width-1-1 uk-padding-remove-horizontal uk-margin-remove-top">
 		<p class="uk-text-large">{% blocktranslate %}The following chives have you listed as a co-creator. You can approve or reject this relationship. If you reject it, you will be removed as a co-creator and will no longer be able to modify the chive.{% endblocktranslate %}</p>
-	</div>
-	<div id="user-cocreator-content" class="uk-width-1-1 uk-padding-remove-horizontal">
 		{% if not approvals %}
 		<p id="user-cocreator-none-message">{% blocktranslate %}Nothing to approve.{% endblocktranslate %}</p>
 		{% endif %}
-	</div>
 	{% if approvals %}
 	<div class="uk-overflow-auto uk-width-1-1 uk-padding-remove-horizontal">
 		<table class="uk-table uk-table-striped">
@@ -74,4 +69,5 @@
 		</table>
 	</div>
 	{% endif %}
+	</div>
 {% endblock %}
