@@ -45,6 +45,8 @@ class User(AbstractUser):
     default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True, blank=True)
     copy_work_metadata = models.BooleanField(default=False)
     chive_export_url = models.CharField(max_length=200, blank=True, null=True)
+    works = models.ManyToManyField('Work', related_name='users', through='UserWork')
+    collections = models.ManyToManyField('BookmarkCollection', related_name='users', through='UserCollection')
 
     def save(self, *args, **kwargs):
         self.display_username = self.username
@@ -189,6 +191,54 @@ class Work(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class UserWork(models.Model):
+
+    id = models.AutoField(primary_key=True)
+    work = models.ForeignKey(
+        'Work',
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE
+    )
+    approved = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['id']
+        db_table = 'api_user_works'
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<UserWork: {}>'.format(self.id)
+
+
+class UserCollection(models.Model):
+
+    id = models.AutoField(primary_key=True)
+    collection = models.ForeignKey(
+        'BookmarkCollection',
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE
+    )
+    approved = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['id']
+        db_table = 'api_user_collections'
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<UserCollection: {}>'.format(self.id)
 
 
 class UserBlocks(models.Model):

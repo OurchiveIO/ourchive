@@ -158,6 +158,15 @@ class ImportSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class MiniUserSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    username = serializers.ReadOnlyField()
+
+    class Meta:
+        model = User
+        fields = ('id', 'username')
+
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     work_set = serializers.HyperlinkedRelatedField(
         many=True, view_name='work-detail', read_only=True)
@@ -679,6 +688,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     word_count = serializers.IntegerField(read_only=True)
     audio_length = serializers.IntegerField(read_only=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    users = MiniUserSerializer(many=True, required=False, read_only=True)
+    users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
     chapter_count = serializers.IntegerField(
         source='chapters.count',
@@ -733,7 +744,22 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         work.save()
         return work
 
+    def process_users(self, work, users):
+        backup_users = list(work.users.all())
+        work.users.clear()
+        try:
+            for user in users:
+                work.users.add(user)
+            work.save()
+        except:
+            logger.error(f'Error trying to add new cocreators.')
+            for user in backup_users:
+                work.users.add(user)
+            work.save()
+        return work
+
     def update(self, work, validated_data):
+        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
         if 'tags' in validated_data:
             tags = validated_data.pop('tags') if 'tags' in validated_data else []
             work = self.process_tags(work, validated_data, tags)
@@ -754,10 +780,12 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         validated_data['epub_url'] = ''
         validated_data['zip_url'] = ''
         Work.objects.filter(id=work.id).update(**validated_data)
+        self.process_users(work, users)
         return Work.objects.filter(id=work.id).first()
 
     def create(self, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -770,6 +798,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             validated_data['updated_on'] = datetime.datetime.now()
         work = Work.objects.create(**validated_data)
         work = self.process_tags(work, validated_data, tags)
+        work = self.process_users(work, users)
         if attributes is not None:
             work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
         return work
@@ -908,6 +937,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+    users = MiniUserSerializer(many=True, required=False, read_only=True)
+    users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
@@ -922,7 +953,22 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         model = BookmarkCollection
         fields = '__all__'
 
+    def process_users(self, collection, users):
+        backup_users = list(collection.users.all())
+        collection.users.clear()
+        try:
+            for user in users:
+                collection.users.add(user)
+            collection.save()
+        except:
+            logger.error(f'Error trying to add new cocreators on collection.')
+            for user in backup_users:
+                collection.users.add(user)
+            collection.save()
+        return collection
+
     def update(self, bookmark, validated_data):
+        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
             tags_to_add = []
@@ -971,10 +1017,12 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             validated_data.pop('bookmarks')
         BookmarkCollection.objects.filter(
             id=bookmark.id).update(**validated_data)
+        self.process_users(bookmark, users)
         return BookmarkCollection.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
         bookmark_list = validated_data.pop('bookmarks') if 'bookmarks' in validated_data else []
+        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
         tags = []
         attributes = None
         if 'tags' in validated_data:
@@ -1001,6 +1049,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                 raise serializers.ValidationError({"message": ["Cannot add draft bookmark to collection."]})
             bookmark_collection.bookmarks.add(bookmark)
         bookmark_collection.save()
+        bookmark_collection = self.process_users(bookmark_collection, users)
         if attributes is not None:
             bookmark_collection = AttributeValueSerializer.process_attributes(bookmark_collection, validated_data, attributes)
         return bookmark_collection

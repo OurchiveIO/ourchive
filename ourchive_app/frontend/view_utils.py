@@ -124,6 +124,7 @@ def get_work_obj(request, work_id=None):
 	tags = []
 	tag_types = {}
 	chapters = []
+	users = []
 	result = do_get(f'api/tagtypes', request)
 	for item in result.response_data['results']:
 		tag_types[item['type_name']] = item
@@ -155,6 +156,10 @@ def get_work_obj(request, work_id=None):
 			chapter_id = item[9:]
 			chapter_number = request.POST[item]
 			chapters.append({'id': chapter_id, 'number': chapter_number, 'work': work_id})
+		elif item.startswith('work_cocreators_'):
+			user_id = item[16:]
+			users.append(user_id)
+	work_dict["users_to_add"] = users
 	work_dict["tags"] = tags
 	chapter_dict = None if multichapter else chapter_dict
 	if work_id and chapter_dict:
@@ -226,6 +231,7 @@ def get_bookmark_collection_obj(request):
 	tags = []
 	bookmarks = []
 	tag_types = {}
+	users = []
 	result = do_get(f'api/tagtypes', request)
 	for item in result.response_data['results']:
 		tag_types[item['type_name']] = item
@@ -246,6 +252,10 @@ def get_bookmark_collection_obj(request):
 			bookmark_id = json_item[1]
 			bookmarks.append(bookmark_id)
 			collection_dict.pop(item)
+		elif item.startswith('collection_cocreators_'):
+			user_id = item[22:]
+			users.append(user_id)
+	collection_dict["users_to_add"] = users
 	collection_dict["tags"] = tags
 	collection_dict["works"] = bookmarks
 	comments_permitted = collection_dict["comments_permitted"]

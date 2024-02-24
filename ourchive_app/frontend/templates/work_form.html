@@ -4,6 +4,49 @@
 {% block content %}	
 {% load static %}
 <script src="{% static 'frontend/js/ourchive-chapter.js' %}"></script>
+<script>
+function doUserAutocomplete(term) {
+  if (term.length < 2)
+  {
+    return;
+  }
+  var complete_select = 'work-find-user-dropdown';
+  fetch('/user-autocomplete?text='+term)
+    .then((response) => {
+      return response.text();
+    })
+    .then((templateText) => {      
+    document.getElementById(complete_select).innerHTML = "";
+    document.getElementById(complete_select).innerHTML = templateText;
+    UIkit.drop(document.getElementById(complete_select)).show();
+    });
+}
+
+function removeUser(user_id) {
+    var parent = document.getElementById("work-form-user-"+user_id+"-parent");
+    parent.remove();
+}
+
+function populateUserInput(user_id, username) {
+    // parent div
+    var parent = document.getElementById("work-form-users")
+    // user to add
+    var final = username;
+    var wrapper= document.createElement('div');
+    wrapper.classList.add('uk-margin-small');
+    wrapper.classList.add('uk-inline');
+    wrapper.classList.add('uk-margin-remove-top');
+    wrapper.setAttribute('id', 'work-form-user-'+user_id+'-parent');
+    wrapper.innerHTML= '<input id="work-form-cocreator-'+user_id+'-hidden" type="hidden" name="work_cocreators_'+user_id+'" value="'+user_id+'"> <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="work_user_'+user_id+'_display">'+username+' <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser('+user_id+')" id="work_user_'+user_id+'_delete"></span></span>';
+    var input = document.getElementById("work-form-user-search");
+    input.remove();
+    parent.appendChild(wrapper);
+    parent.appendChild(input);
+    document.getElementById("work_form_new_user").value = '';
+    document.getElementById("work_form_new_user").focus();
+    document.getElementById("work-find-user-dropdown").innerHTML = "";
+}
+</script>
 <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="work-form-parent"> 
 <form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
     <script>
@@ -60,7 +103,23 @@
                     <input id="work-form-title-input" class="uk-input uk-form-width-large" type="text" name="title" title="{% translate 'Work title input' %}" value="{{ work.title|default_if_none:'' }}">
                 </div>
             </div>
-            
+        </div>
+        <div class="uk-margin" id="work-form-cocreator-form-parent">
+            <label id="work-form-cocreator-form-label" class="uk-form-label" for="work-form-cocreator-controls">{% translate 'Co-creators' %}</label>
+            <div id="work-form-cocreator-controls" class="uk-form-controls">                
+                <div id="work-form-cocreator-inline" class="uk-inline">
+                    <div id="work-form-users">
+                        {% for user in work.users %}
+                            <div class="uk-margin-small uk-inline uk-margin-remove-top" id="work-form-user-{{user.id}}-parent">
+                                <input title="{% translate 'Work user' %}" id="work-form-cocreator-{{user.id}}-hidden" type="hidden" name="work_cocreators_{{user.id}}" value="{{ user.id }}"> 
+                                <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="work_user_{{user.id}}_display">{{ user.username }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser({{user.id}})" id="work_user_{{user.id}}_delete"></span></span>
+                            </div>
+                        {% endfor %}
+                        <div class="uk-margin-small uk-inline" id="work-form-user-search"><input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry uk-margin-small-bottom" type="text" placeholder="Find user..." id="work_form_new_user" oninput="doUserAutocomplete(this.value)">
+                        <div id="work-find-user-dropdown" uk-drop></div></div>
+                    </div>
+                </div>
+            </div>
         </div>
         <hr/>
         <h4 id="obj-attrs-form-header">Work Settings</h4>

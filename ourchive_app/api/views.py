@@ -134,6 +134,17 @@ class BookmarkAutocomplete(APIView):
         return Response({'results': results})
 
 
+class UserAutocomplete(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, format=None):
+        searcher = OurchiveSearch()
+        results = searcher.do_user_search(request.GET.get(
+            'term'), request.user.id)
+        return Response({'results': results})
+
+
 class FileUpload(APIView):
     parser_classes = [MultiPartParser]
     permission_classes = [permissions.AllowAny]

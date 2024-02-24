@@ -437,6 +437,19 @@ class PostgresProvider:
             results.append({"work": work_dict})
         return results
 
+    def autocomplete_users(self, term, user):
+        results = []
+        resultset = None
+        term = term.lower()
+        resultset = User.objects.filter(
+            Q(username__icontains=term))
+        for result in resultset:
+            user_dict = vars(result)
+            if '_state' in user_dict:
+                user_dict.pop('_state')
+            results.append(user_dict)
+        return results
+
     def search_tags(self, **kwargs):
         tag_search = TagSearch()
         tag_search.from_dict(kwargs)

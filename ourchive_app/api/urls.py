@@ -125,6 +125,8 @@ urlpatterns = [
     path('file-upload/', views.FileUpload.as_view(), name='api-file-upload'),
     path('bookmark-autocomplete', views.BookmarkAutocomplete.as_view(),
          name='bookmark-autocomplete'),
+    path('user-autocomplete', views.UserAutocomplete.as_view(),
+         name='api-user-autocomplete'),
     path('contentpages/', views.ContentPageList.as_view(), name='content-page-list'),
     path('contentpages/<int:pk>', views.ContentPageDetail.as_view(),
          name='content-page-detail'),

@@ -568,12 +568,21 @@ def bookmark_autocomplete(request):
 	params = {'term': term}
 	response = do_get(f'api/bookmark-autocomplete', request, params, 'Work')
 	works = response.response_data['results']
-	print(works)
 	for work in works:
 		work['work']['title_clean'] = work['work']['title'].replace("'", "\\'")
 	template = 'bookmark_collection_autocomplete.html'
 	return render(request, template, {
 		'works': works})
+
+
+def user_autocomplete(request):
+	term = request.GET.get('text')
+	params = {'term': term}
+	response = do_get(f'api/user-autocomplete', request, params, 'User')
+	users = response.response_data['results']
+	template = 'user_autocomplete.html'
+	return render(request, template, {
+		'users': users})
 
 
 @require_http_methods(["GET"])
@@ -965,7 +974,6 @@ def new_bookmark_collection(request):
 def edit_bookmark_collection(request, pk):
 	if request.method == 'POST':
 		collection_dict = get_bookmark_collection_obj(request)
-		print(collection_dict)
 		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict, object_name='Bookmark Collection')
 		process_message(request, response)
 		return redirect(f'/bookmark-collections/{pk}')
