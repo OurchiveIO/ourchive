@@ -80,5 +80,5 @@
   fields:
     uid: 9250a09d-b2fd-400b-b1e8-41fd9bc5cd7f
     name: Auto-Allow Upload
-    value: 'true'
+    value: 'false'
     valtype: truefalse
