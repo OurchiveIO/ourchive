@@ -16,19 +16,19 @@ class ParentSearch():
 
 
 class ObjectSearch():
-	def __init__(self, mode, order_by, term, filters={'tags': [], 'attributes': []}):
+	def __init__(self, mode, order_by, term, include_filter=None, exclude_filter=None):
 		self.term = term
 		self.include_mode = mode[0]
 		self.exclude_mode = mode[1]
 		self.page = 1
 		self.order_by = order_by
-		self.include_filter = filters.copy()
-		self.exclude_filter = filters.copy()
+		self.include_filter = {'tags': [], 'attributes': []} if not include_filter else include_filter
+		self.exclude_filter = {'tags': [], 'attributes': []} if not exclude_filter else exclude_filter
 
 
 class TagSearch(ObjectSearch):
 	def __init__(self, mode, order_by, term):
-		super(TagSearch, self).__init__(mode, order_by, term, {'tag_type': [], 'text': []})
+		super(TagSearch, self).__init__(mode, order_by, term, {'tag_type': [], 'text': []}, {'tag_type': [], 'text': []})
 
 
 class WorkSearch(object):
@@ -74,7 +74,6 @@ class SearchObject(object):
 				return_obj.tag_search.page = pagination['page']
 			elif obj == 'bookmarkcollection':
 				return_obj.collection_search.page = pagination['page']
-
 		return return_obj.get_dict()
 
 	def get_object_type(self, filter_term):

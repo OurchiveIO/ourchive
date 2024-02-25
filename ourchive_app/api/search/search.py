@@ -157,15 +157,15 @@ class PostgresProvider:
                         full_filters = Q(full_filters & join_filters)
         return full_filters
 
-    def process_results(self, resultset, page, obj):
+    def process_results(self, resultset, page, obj, base_string='/search/?'):
         page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
         paginator = Paginator(resultset, page_size)
         count = paginator.count if resultset else 0
         resultset = paginator.get_page(page) if resultset else []
         next_params = None if not resultset or not resultset.has_next(
-        ) else f"/search/?limit={page_size}&page={page+1}&object_type={obj.__name__}"
+        ) else f"{base_string}limit={page_size}&page={page+1}&object_type={obj.__name__}"
         prev_params = None if not resultset or not resultset.has_previous(
-        ) else f"/search/?limit={page_size}&page={page-1}&object_type={obj.__name__}"
+        ) else f"{base_string}limit={page_size}&page={page-1}&object_type={obj.__name__}"
         return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
 
     # todo: move to kwargs or obj. my god.
@@ -498,13 +498,23 @@ class PostgresProvider:
         collection_filters = self.get_filters(collection_search)
 
         page = kwargs['page'] if 'page' in kwargs else 1
+        
+
+        if 'page' in kwargs['work_search']:
+            work_search.page = int(kwargs['work_search']['page'])
+        if 'page' in kwargs['bookmark_search']:
+            bookmark_search.page = int(kwargs['bookmark_search']['page'])
+        if 'page' in kwargs['collection_search']:
+            collection_search.page = int(kwargs['collection_search']['page'])
+
         tag = Tag.objects.get(pk=kwargs['tag_id'])
         works = Work.objects.filter(tags__id__exact=tag.id)
+
         if work_filters[0]:
             works = works.filter(work_filters[0])
         if work_filters[1]:
             works = works.filter(work_filters[1])
-        works = works.filter(draft=False).order_by('-updated_on').distinct()
+        works = works.filter(draft=False).distinct().order_by('-updated_on')
         bookmarks = Bookmark.objects.filter(tags__id__exact=tag.id)
         if bookmark_filters[0]:
             bookmarks = bookmarks.filter(bookmark_filters[0])
@@ -518,9 +528,11 @@ class PostgresProvider:
             collections = collections.filter(collection_filters[1])
         collections = collections.filter(draft=False).order_by('-updated_on').distinct()
 
-        works_processed = self.process_results(works, page, Work)
-        bookmarks_processed = self.process_results(bookmarks, page, Bookmark)
-        collections_processed = self.process_results(collections, page, BookmarkCollection)
+        base_string = f'/tags/{kwargs["tag_id"]}?tag_id={kwargs["tag_id"]}&'
+
+        works_processed = self.process_results(works, work_search.page, Work, base_string)
+        bookmarks_processed = self.process_results(bookmarks, bookmark_search.page, Bookmark, base_string)
+        collections_processed = self.process_results(collections, collection_search.page, BookmarkCollection, base_string)
 
         # tag result object
         result_json = []
@@ -555,6 +567,14 @@ class PostgresProvider:
         collection_filters = self.get_filters(collection_search)
 
         page = kwargs['page'] if 'page' in kwargs else 1
+
+        if 'page' in kwargs['work_search']:
+            work_search.page = int(kwargs['work_search']['page'])
+        if 'page' in kwargs['bookmark_search']:
+            bookmark_search.page = int(kwargs['bookmark_search']['page'])
+        if 'page' in kwargs['collection_search']:
+            collection_search.page = int(kwargs['collection_search']['page'])
+
         attribute = AttributeValue.objects.get(pk=kwargs['attr_id'])
         works = Work.objects.filter(attributes__id__exact=attribute.id)
         if work_filters[0]:
@@ -575,9 +595,11 @@ class PostgresProvider:
             collections = collections.filter(collection_filters[1])
         collections = collections.filter(draft=False).order_by('-updated_on').distinct()
 
-        works_processed = self.process_results(works, page, Work)
-        bookmarks_processed = self.process_results(bookmarks, page, Bookmark)
-        collections_processed = self.process_results(collections, page, BookmarkCollection)
+        base_string = f'/attributes/{kwargs["attr_id"]}?attr_id={kwargs["attr_id"]}&'
+
+        works_processed = self.process_results(works, work_search.page, Work, base_string)
+        bookmarks_processed = self.process_results(bookmarks, bookmark_search.page, Bookmark, base_string)
+        collections_processed = self.process_results(collections, bookmark_search.page, BookmarkCollection, base_string)
 
         # tag result object
         tag_results = {'data': {}, 'page': {'count': 0}}

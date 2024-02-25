@@ -107,7 +107,6 @@ def iterate_facets(facets, item, excluded=True):
 
 def get_response_facets(response_json, request_object):
 	facets = response_json['results']['facet']
-	print(request_object[1]['exclude'])
 	for item in request_object[1]['exclude']:
 		facets = iterate_facets(facets, item)
 	for item in request_object[1]['include']:
@@ -122,6 +121,8 @@ def get_empty_response_obj():
 def get_search_request(request, request_object, request_builder):
 	return_keys = {'include': [], 'exclude': []}
 	for key in request.POST:
+		if key == 'tag_id' or key == 'attr_id':
+			continue
 		filter_val = request.POST.get(key, None)
 		include_exclude = 'exclude' if 'exclude_' in key else 'include'
 		key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
@@ -152,17 +153,22 @@ def build_and_execute_search(request):
 	# prepare search & preserve request data
 	tag_id = None
 	attr_id = None
+	valid_search = False
 	if 'term' in request.GET:
 		term = request.GET['term']
+		valid_search = True
 	elif 'term' in request.POST:
 		term = request.POST['term']
-	elif 'tag_id' in request.GET:
+		valid_search = True
+	if 'tag_id' in request.GET:
 		tag_id = request.GET['tag_id']
 		term = ""
+		valid_search = True
 	elif 'attr_id' in request.GET:
 		attr_id = request.GET['attr_id']
 		term = ""
-	else:
+		valid_search = True
+	if not valid_search:
 		return None
 	active_tab = request.POST.get('active_tab', None)
 	include_filter_any = 'any' if request.POST.get('include_any_all') == 'on' else 'all'
