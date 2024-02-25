@@ -444,7 +444,7 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification_type = NotificationType.objects.filter(
             type_label="Comment Notification").first()
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Chapter Comment",
-                                                   content=f"""A new comment has been left on your chapter! <a href='{comment_link}'>Click here</a> to view.""")
+                                                   content=f"""A new comment for the work {comment.chapter.work.title} has been left on chapter {comment.chapter.title}! <a href='{comment_link}'>Click here</a> to view.""")
         notification.save()
         user.has_notifications = True
         user.save()
@@ -452,7 +452,7 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
             user = User.objects.filter(id=comment.parent_comment.user.id).first()
             notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
             notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Reply",
-                                                       content=f"""A new reply has been made to your comment. <a href='{comment_link}'>Click here</a> to view.""")
+                                                       content=f"""A new reply has been made to your comment on {comment.chapter.work.title}. <a href='{comment_link}'>Click here</a> to view.""")
             notification.save()
             user.has_notifications = True
             user.save()
@@ -492,7 +492,7 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification_type = NotificationType.objects.filter(
             type_label="Comment Notification").first()
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Bookmark Comment",
-                                                   content=f"""A new comment has been left on your bookmark! <a href='/bookmarks/{comment.bookmark.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
+                                                   content=f"""A new comment has been left on your bookmark titled {comment.bookmark.title}! <a href='/bookmarks/{comment.bookmark.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
         notification.save()
         user.has_notifications = True
         user.save()
@@ -502,7 +502,7 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
             user = User.objects.filter(id=comment.parent_comment.user.id).first()
             notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
             notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Reply",
-                                                       content=f"""A new reply has been made to your comment. <a href='/bookmarks/{comment.bookmark.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
+                                                       content=f"""A new reply has been made to your comment on the bookmark titled {comment.bookmark.title}. <a href='/bookmarks/{comment.bookmark.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
             notification.save()
             user.has_notifications = True
             user.save()
@@ -542,7 +542,7 @@ class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification_type = NotificationType.objects.filter(
             type_label="Comment Notification").first()
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Collection Comment",
-                                                   content=f"""A new comment has been left on your collection! <a href='/bookmark-collections/{comment.collection.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
+                                                   content=f"""A new comment has been left on your collection titled {comment.collection.title}! <a href='/bookmark-collections/{comment.collection.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
         notification.save()
         user.has_notifications = True
         user.save()
@@ -552,7 +552,7 @@ class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
             user = User.objects.filter(id=comment.parent_comment.user.id).first()
             notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
             notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Reply",
-                                                       content=f"""A new reply has been made to your comment. <a href='/bookmark-collections/{comment.collection.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
+                                                       content=f"""A new reply has been made to your comment on the collection titled {comment.collection.title}! <a href='/bookmark-collections/{comment.collection.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
             notification.save()
             user.has_notifications = True
             user.save()
