@@ -1570,7 +1570,7 @@ def add_collection_to_bookmark(request, pk):
 	response = do_post(f'api/bookmarkcollections/add-work', request, data={'collection_id': collection_id, 'work_id': pk}, object_name="Collection")
 	message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 	messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
-	return redirect(f'/works/{pk}')
+	return redirect(f'/bookmark-collections/{collection_id}')
 
 
 def works_by_tag(request, tag):
