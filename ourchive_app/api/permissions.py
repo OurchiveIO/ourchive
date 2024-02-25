@@ -14,14 +14,14 @@ class IsWorkOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return request.user in obj.work.users.all() or request.user.is_superuser
+        return request.user in obj.work.users.all() or request.user == obj.work.user or request.user.is_superuser
 
 
 class IsMultiOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return request.user in obj.users.all() or request.user.is_superuser
+        return request.user in obj.users.all() or request.user == obj.user or request.user.is_superuser
 
 
 class ObjectIsLocked(permissions.BasePermission):
@@ -210,7 +210,7 @@ class IsOwner(permissions.BasePermission):
 
 class IsMultiOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user in obj.users.all() or request.user.is_superuser
+        return request.user in obj.users.all() or request.user == obj.user or request.user.is_superuser
 
 
 class IsUser(permissions.BasePermission):
@@ -220,4 +220,4 @@ class IsUser(permissions.BasePermission):
 
 class IsWorkOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user in obj.work.users.all() or request.user.is_superuser
+        return request.user in obj.work.users.all() or request.user == obj.work.user or request.user.is_superuser
