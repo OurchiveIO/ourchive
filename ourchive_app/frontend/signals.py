@@ -54,6 +54,14 @@ def spoil_cache_create(sender, instance, created, **kwargs):
 def spoil_work_cache_update(sender, instance, **kwargs):
     spoil_work_cache(instance)
 
+@receiver(post_save, sender=api.UserWork)
+def spoil_work_user_cache_update(sender, instance, **kwargs):
+    spoil_work_cache(instance.work)
+
+@receiver(post_save, sender=api.UserWork)
+def spoil_work_user_cache_delete(sender, instance, **kwargs):
+    spoil_work_cache(instance.work)
+
 @receiver(post_delete, sender=api.Work)
 def spoil_work_cache_delete(sender, instance, **kwargs):
     spoil_work_cache(instance)
@@ -89,3 +97,11 @@ def spoil_collection_cache_update(sender, instance, **kwargs):
 @receiver(post_delete, sender=api.BookmarkCollection)
 def spoil_collection_cache_delete(sender, instance, **kwargs):
     spoil_collection_cache(instance)
+
+@receiver(post_save, sender=api.UserCollection)
+def spoil_user_collection_cache_update(sender, instance, **kwargs):
+    spoil_collection_cache(instance.collection)
+
+@receiver(post_delete, sender=api.UserCollection)
+def spoil_user_collection_cache_delete(sender, instance, **kwargs):
+    spoil_collection_cache(instance.collection)

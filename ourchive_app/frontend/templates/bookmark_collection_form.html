@@ -128,10 +128,12 @@ function populateUserInput(user_id, username) {
                 <div id="collection-form-cocreator-inline" class="uk-inline">
                     <div id="collection-form-users">
                         {% for user in bookmark_collection.users %}
+                        {% if user.username != request.user.username %}
                             <div class="uk-margin-small uk-inline uk-margin-remove-top" id="collection-form-user-{{user.id}}-parent">
                                 <input title="{% translate 'Collection user' %}" id="collection-form-cocreator-{{user.id}}-hidden" type="hidden" name="collection_cocreators_{{user.id}}" value="{{ user.id }}"> 
                                 <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="collection_user_{{user.id}}_display">{{ user.username }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser({{user.id}})" id="collection_user_{{user.id}}_delete"></span></span>
                             </div>
+                        {% endif %}
                         {% endfor %}
                         <div class="uk-margin-small uk-inline" id="collection-form-user-search"><input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry uk-margin-small-bottom" type="text" placeholder="Find user..." id="collection_form_new_user" oninput="doUserAutocomplete(this.value)">
                         <div id="collection-find-user-dropdown" uk-drop></div></div>

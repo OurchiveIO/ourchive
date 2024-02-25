@@ -753,15 +753,17 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 work.users.add(user)
                 if user not in backup_users:
                     new_users.add(user)
-            if not any(work.users):
+            if not work.users or len(work.users.all()) == 0 or work.user not in list(work.users.all()):
                 work.users.add(work.user)
             work.save()
-        except:
-            logger.error(f'Error trying to add new cocreators.')
+        except Exception as e:
+            logger.error(f'Error trying to add new cocreators: {e}.')
             for user in backup_users:
                 work.users.add(user)
             work.save()
         for user in new_users:
+            if user == work.user:
+                continue
             notification_type = NotificationType.objects.filter(
                 type_label="System Notification").first()
             notification = Notification.objects.create(notification_type=notification_type, user=user, title="Pending Approvals",
@@ -983,15 +985,17 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                 collection.users.add(user)
                 if user not in backup_users:
                     new_users.add(user)
-            if not any(collection.users):
+            if not collection.users or len(collection.users.all()) == 0 or collection.user not in list(collection.users.all()):
                 collection.users.add(collection.user)
             collection.save()
-        except:
-            logger.error(f'Error trying to add new cocreators on collection.')
+        except Exception as e:
+            logger.error(f'Error trying to add new cocreators on collection: {e}')
             for user in backup_users:
                 collection.users.add(user)
             collection.save()
         for user in new_users:
+            if user == collection.user:
+                continue
             notification_type = NotificationType.objects.filter(
                 type_label="System Notification").first()
             notification = Notification.objects.create(notification_type=notification_type, user=user, title="Pending Approvals",
