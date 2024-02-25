@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         from api.models import OurchiveSetting
 
         if not OurchiveSetting.objects.filter(name='Auto-Allow Upload').exists():
-            OurchiveSetting.objects.create(name='Auto-Allow Upload', value='true', valtype='truefalse')
+            OurchiveSetting.objects.create(name='Auto-Allow Upload', value='false', valtype='truefalse')
 
     operations = [
         migrations.RunPython(add_auto_allow_upload),
