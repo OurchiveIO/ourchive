@@ -762,7 +762,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 work.users.add(user)
             work.save()
         for user in new_users:
-            if user == work.user:
+            if user.id == work.user.id:
                 continue
             notification_type = NotificationType.objects.filter(
                 type_label="System Notification").first()
@@ -994,7 +994,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                 collection.users.add(user)
             collection.save()
         for user in new_users:
-            if user == collection.user:
+            if user.id == collection.user.id:
                 continue
             notification_type = NotificationType.objects.filter(
                 type_label="System Notification").first()
