@@ -3,7 +3,6 @@
     <form class="uk-form" id="reply-{{comment.id}}-form" action="{{ post_action }}" method="post" uk-grid>
         {% csrf_token %}
         <div class="uk-width-1-1" id="reply-{{comment.id}}-parent-div">
-            <label id="reply-{{comment.id}}-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Reply' %}</label>
             <div id="reply-{{comment.id}}-parent-controls" class="uk-form-controls">
                 <div class="uk-inline uk-width-expand" id="reply-{{comment.id}}-fields">
                     <input type="hidden" id="parent_comment" name="parent_comment" value="{{ comment.id }}">
