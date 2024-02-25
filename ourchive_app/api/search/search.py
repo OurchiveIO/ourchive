@@ -249,6 +249,16 @@ class PostgresProvider:
             search_object.filter.exclude_filters, search_object.exclude_mode, False)
         return [include_filters, exclude_filters]
 
+    def get_user_dict(self, users):
+        users_dict = []
+        for result in users:
+            user = {
+                'id': result.id,
+                'username': result.username
+            }
+            users_dict.append(user)
+        return users_dict
+
     def build_work_resultset(self, resultset, reserved_fields):
         # build final resultset
         result_json = []
@@ -272,11 +282,13 @@ class PostgresProvider:
                 attribute_dict["id"] = attribute.id
                 attribute_dict["order"] = attribute.order
                 attributes.append(attribute_dict)
+            users = self.get_user_dict(result.users.all())
             work_type = None if result.work_type is None else result.work_type.type_name
             result_dict = result.__dict__
             for field in reserved_fields:
                 result_dict.pop(field, None)
             result_dict["user"] = username
+            result_dict["users"] = users
             result_dict["work_type_name"] = work_type
             result_dict["tags"] = tags
             result_dict["attributes"] = attributes
@@ -339,10 +351,12 @@ class PostgresProvider:
                 attribute_dict["id"] = attribute.id
                 attribute_dict["order"] = attribute.order
                 attributes.append(attribute_dict)
+            users = self.get_user_dict(result.users.all())
             result_dict = result.__dict__
             result_dict["tags"] = tags
             result_dict["attributes"] = attributes
             result_dict["user"] = username
+            result_dict["users"] = users
             for field in reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
