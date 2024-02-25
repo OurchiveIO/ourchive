@@ -444,7 +444,7 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification_type = NotificationType.objects.filter(
             type_label="Comment Notification").first()
         notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Chapter Comment",
-                                                   content=f"""A new comment for the work {comment.chapter.work.title} has been left on chapter {comment.chapter.title}! <a href='{comment_link}'>Click here</a> to view.""")
+                                                   content=f"""A new comment for the work {comment.chapter.work.title} has been left on chapter {comment.chapter.number}! <a href='{comment_link}'>Click here</a> to view.""")
         notification.save()
         user.has_notifications = True
         user.save()
