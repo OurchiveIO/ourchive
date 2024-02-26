@@ -422,7 +422,7 @@ class EtlWorkImport(object):
                 else:
                     logger.error('No work types found. Configure work types.')
                     return None
-        else:
+        elif not work_type:
             type_name = work_type_mapping.first().destination_field
             try:
                 work_type = api.WorkType.objects.filter(
