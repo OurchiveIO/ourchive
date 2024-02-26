@@ -189,8 +189,9 @@ def build_and_execute_search(request):
 	request_object = get_search_request(request, request_object, request_builder)
 	post_request = request_object.post_data.get_dict()
 	# make request
-	print(request_object)
+	logger.debug(f'Search request data: {post_request}')
 	response_json = do_post(f'api/search/', request, data=post_request).response_data
+	logger.debug(f'Search response data: {response_json}')
 	# process results
 	works = get_chive_results(response_json['results']['work']) if 'results' in response_json and 'work' in response_json['results'] else get_empty_response_obj()
 	bookmarks = get_chive_results(response_json['results']['bookmark']) if 'results' in response_json and 'bookmark' in response_json['results'] else get_empty_response_obj()

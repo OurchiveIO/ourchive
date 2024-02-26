@@ -239,7 +239,7 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level' : 'INFO',
+            'level' : 'INFO' if not DEBUG else 'DEBUG',
             'maxBytes' : 1024*1024*10, # 10MB
             'backupCount' : 10,
             'class': 'logging.handlers.RotatingFileHandler',
