@@ -1,6 +1,9 @@
 from django.conf import settings
-from .search_models import SearchObject
+from .search_models import SearchObject, ReturnKeys, SearchRequest
 from .view_utils import *
+import logging
+
+logger = logging.getLogger(__name__)
 
 # values we don't want to send to the API
 NONFILTER_VALS = ['csrfmiddlewaretoken', 'term']
@@ -19,48 +22,49 @@ def get_default_search_result_tab(resultsets):
 
 
 def build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val):
-	filter_key = f'{include_exclude}_filter'
+	# TODO: split this into two methods, include and exclude. refactor first with include, then split. (see line 29)
 	filter_options = key.split('|')
 	if 'ranges' in key:
-		if filter_options[0] not in request_object['work_search'][filter_key]:
-			request_object['work_search'][filter_key][filter_options[0]] = [([filter_options[3], filter_options[2]])]
+		if filter_options[0] not in request_object.work_search.include_filter:
+			request_object.work_search.include_filter[filter_options[0]] = [([filter_options[3], filter_options[2]])]
 		else:
-			request_object['work_search'][filter_key][filter_options[0]].append((filter_options[3], filter_options[2]))
+			request_object.work_search.include_filter[filter_options[0]].append((filter_options[3], filter_options[2]))
 	else:
 		# TODO: refactor: request object should stay a true object, __dict__ should be called
 		# on making the API request, and collections.defaultdict should be used to prevent cluttered logic
 		for option in filter_options:
 			filter_details = option.split('$')
-			filter_type = request_builder.get_object_type(filter_details[0])
+			filter_key = filter_details[0]
+			filter_type = request_builder.get_object_type(filter_key)
 			if len(filter_details) == 1:
 				if not filter_val:
 					continue
 			else:
 				filter_val = filter_details[1]
 			if filter_type == 'work':
-				if filter_details[0] in request_object['work_search'][filter_key] and len(request_object['work_search'][filter_key][filter_details[0]]) > 0:
-					request_object['work_search'][filter_key][filter_details[0]].append(filter_val)
+				if filter_key in request_object.work_search.include_filter and len(request_object.work_search.include_filter[filter_key]) > 0:
+					request_object.work_search.include_filter[filter_key].append(filter_val)
 				else:
-					request_object['work_search'][filter_key][filter_details[0]] = []
-					request_object['work_search'][filter_key][filter_details[0]].append(filter_val)
+					request_object.work_search.include_filter[filter_key] = []
+					request_object.work_search.include_filter[filter_key].append(filter_val)
 			elif filter_type == 'tag':
-				tag_type = filter_details[0].split(',')[1]
+				tag_type = filter_key.split(',')[1]
 				tag_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
-				request_object['tag_search'][filter_key]['tag_type'].append(tag_type)
-				request_object['tag_search'][filter_key]['text'].append(tag_text)
-				request_object['work_search'][filter_key]['tags'].append(tag_text)
-				request_object['bookmark_search'][filter_key]['tags'].append(tag_text)
+				request_object.tag_search.include_filter['tag_type'].append(tag_type)
+				request_object.tag_search.include_filter['text'].append(tag_text)
+				request_object.work_search.include_filter['tags'].append(tag_text)
+				request_object.bookmark_search.include_filter['tags'].append(tag_text)
 			elif filter_type == 'attribute':
 				attribute_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
-				request_object['work_search'][filter_key]['attributes'].append(attribute_text)
-				request_object['bookmark_search'][filter_key]['attributes'].append(attribute_text)
-				request_object['collection_search'][filter_key]['attributes'].append(attribute_text)
+				request_object.work_search.include_filter['attributes'].append(attribute_text)
+				request_object.bookmark_search.include_filter['attributes'].append(attribute_text)
+				request_object.collection_search.include_filter['attributes'].append(attribute_text)
 			elif filter_type == 'bookmark':
-				if filter_details[0] in request_object['bookmark_search'][filter_key] and len(request_object['bookmark_search'][filter_key][filter_details[0]]) > 0:
-					request_object['bookmark_search'][filter_key][filter_details[0]].append(filter_val)
+				if filter_details[0] in request_object.bookmark_search.include_filter and len(request_object.bookmark_search.include_filter[filter_key]) > 0:
+					request_object.bookmark_search.include_filter[filter_key].append(filter_val)
 				else:
-					request_object['bookmark_search'][filter_key][filter_details[0]] = []
-					request_object['bookmark_search'][filter_key][filter_details[0]].append(filter_val)
+					request_object.bookmark_search.include_filter[filter_key] = []
+					request_object.bookmark_search.include_filter[filter_key].append(filter_val)
 	return request_object
 
 
@@ -107,9 +111,9 @@ def iterate_facets(facets, item, excluded=True):
 
 def get_response_facets(response_json, request_object):
 	facets = response_json['results']['facet']
-	for item in request_object[1]['exclude']:
+	for item in request_object.return_keys.exclude:
 		facets = iterate_facets(facets, item)
-	for item in request_object[1]['include']:
+	for item in request_object.return_keys.include:
 		facets = iterate_facets(facets, item, False)
 	return facets
 
@@ -119,7 +123,7 @@ def get_empty_response_obj():
 
 
 def get_search_request(request, request_object, request_builder):
-	return_keys = {'include': [], 'exclude': []}
+	return_keys = ReturnKeys()
 	for key in request.POST:
 		if key == 'tag_id' or key == 'attr_id':
 			continue
@@ -130,11 +134,11 @@ def get_search_request(request, request_object, request_builder):
 			continue
 		else:
 			if '$' in key:
-				return_keys[include_exclude].append(key)
+				return_keys.add_val(include_exclude, key)
 			elif filter_val:
-				return_keys[include_exclude].append(f'{key}${filter_val}')
+				return_keys.add_val(include_exclude, f'{key}${filter_val}')
 		request_object = build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val)
-	return [request_object, return_keys]
+	return SearchRequest(request_object, return_keys)
 
 
 def get_chive_results(response_obj):
@@ -169,6 +173,7 @@ def build_and_execute_search(request):
 		term = ""
 		valid_search = True
 	if not valid_search:
+		logger.info(f'Not a valid search. Returning. Request get: {request.GET} Request post: {request.POST}')
 		return None
 	active_tab = request.POST.get('active_tab', None)
 	include_filter_any = 'any' if request.POST.get('include_any_all') == 'on' else 'all'
@@ -178,12 +183,14 @@ def build_and_execute_search(request):
 	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
 	request_object = request_builder.with_term(term, pagination, (include_filter_any, exclude_filter_any), order_by)
 	if tag_id:
-		request_object["tag_id"] = tag_id
+		request_object.tag_id = tag_id
 	if attr_id:
-		request_object["attr_id"] = attr_id
+		request_object.attr_id = attr_id
 	request_object = get_search_request(request, request_object, request_builder)
+	post_request = request_object.post_data.get_dict()
 	# make request
-	response_json = do_post(f'api/search/', request, data=request_object[0]).response_data
+	print(request_object)
+	response_json = do_post(f'api/search/', request, data=post_request).response_data
 	# process results
 	works = get_chive_results(response_json['results']['work']) if 'results' in response_json and 'work' in response_json['results'] else get_empty_response_obj()
 	bookmarks = get_chive_results(response_json['results']['bookmark']) if 'results' in response_json and 'bookmark' in response_json['results'] else get_empty_response_obj()
@@ -214,8 +221,8 @@ def build_and_execute_search(request):
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
 		'root': settings.ROOT_URL, 'term': term,
-		'keys_include': request_object[1]['include'],
-		'keys_exclude': request_object[1]['exclude']
+		'keys_include': request_object.return_keys.include,
+		'keys_exclude': request_object.return_keys.exclude
 	}
 	if tag_id:
 		template_data['tag_id'] = tag_id
