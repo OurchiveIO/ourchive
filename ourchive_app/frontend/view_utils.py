@@ -116,7 +116,7 @@ def get_work_obj(request, work_id=None):
 		'video_url-upload': '',
 		'text': '',
 		'work': '',
-		'draft': 'chapter_draft' in request.POST,
+		'draft': "true" if 'chapter_draft' in request.POST else "false",
 		'end_notes': '',
 		'created_on': str(datetime.now().date()),
 		'updated_on': str(datetime.now().date())
@@ -172,7 +172,7 @@ def get_work_obj(request, work_id=None):
 	work_dict["anon_comments_permitted"] = comments_permitted == "All"
 	redirect_toc = work_dict.pop('redirect_toc')[0]
 	work_dict["is_complete"] = "is_complete" in work_dict
-	work_dict["draft"] = "work_draft" in work_dict
+	work_dict["draft"] = "true" if "work_draft" in work_dict else "false"
 	work_dict = work_dict.dict()
 	work_dict["user"] = str(request.user)
 	work_dict["attributes"] = get_attributes_from_form_data(request)
@@ -218,7 +218,8 @@ def get_bookmark_obj(request):
 	bookmark_dict["anon_comments_permitted"] = comments_permitted == "All"
 	bookmark_dict = bookmark_dict.dict()
 	bookmark_dict["user"] = str(request.user)
-	bookmark_dict["draft"] = 'draft' in bookmark_dict
+	bookmark_dict["draft"] = 'true' if 'draft' in bookmark_dict else 'false'
+	bookmark_dict["is_private"] = 'true' if 'is_private' in bookmark_dict else 'false'
 	bookmark_dict["attributes"] = get_attributes_from_form_data(request)
 	if bookmark_dict["updated_on"] == bookmark_dict["updated_on_original"]:
 		bookmark_dict["updated_on"] = str(datetime.now().date())
@@ -263,8 +264,8 @@ def get_bookmark_collection_obj(request):
 	collection_dict["anon_comments_permitted"] = comments_permitted == "All"
 	collection_dict = collection_dict.dict()
 	collection_dict["user"] = str(request.user)
-	collection_dict["draft"] = 'draft' in collection_dict
-	collection_dict["is_private"] = False
+	collection_dict["draft"] = 'true' if 'draft' in collection_dict else 'false'
+	collection_dict["is_private"] = 'false'
 	collection_dict["attributes"] = get_attributes_from_form_data(request)
 	if collection_dict["updated_on"] == collection_dict["updated_on_original"]:
 		collection_dict["updated_on"] = str(datetime.now().date())
