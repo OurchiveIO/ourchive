@@ -4,7 +4,7 @@ from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 import json
 import re
 from django.db.models import Q
-from .search_obj import WorkSearch, BookmarkSearch, TagSearch, UserSearch, CollectionSearch
+from .search_obj import WorkSearch, BookmarkSearch, TagSearch, UserSearch, CollectionSearch, TagFacet, ResultFacet
 from django.contrib.postgres.search import TrigramDistance, TrigramWordDistance
 from api.utils import get_star_count
 from django.core.paginator import Paginator
@@ -615,6 +615,44 @@ class PostgresProvider:
         results['user'] = {'data': [], 'page': {}}
         return results
 
+    def process_tag_tags(self, tags, tags_dict):
+        for result in tags:
+            if result['display_text'] not in tags_dict[result['tag_type']]:
+                tags_dict[result['tag_type']].append(result['display_text'])
+        return tags_dict
+
+    def process_chive_tags(self, tags, tags_dict):
+        for result in tags:
+            if len(result['tags']) > 0:
+                tags_dict = self.process_tag_tags(result['tags'], tags_dict)
+        return tags_dict
+
+    def get_tag_facets(self, tag_id, results, result_json):
+        tag_filter_name = None
+        if tag_id:
+            tag_filter = Tag.objects.filter(id=tag_id).first()
+            if tag_filter:
+                tag_filter_name = tag_filter.display_text
+        tags_dict = {}
+        for tag_type in TagType.objects.all():
+            tags_dict[tag_type.label] = []
+        tags_dict = self.process_chive_tags(results['work']['data'], tags_dict)
+        tags_dict = self.process_chive_tags(results['bookmark']['data'], tags_dict)
+        tags_dict = self.process_chive_tags(results['collection']['data'], tags_dict)
+        tags_dict = self.process_tag_tags(results['tag']['data'], tags_dict)
+        
+        for key in tags_dict:
+            if len(tags_dict[key]) > 0:
+                tag_filter_vals = []
+                for val in tags_dict[key]:
+                    checked_tag = False
+                    if tag_id and tag_filter_name and tag_filter_name == val:
+                        checked_tag = True
+                    filter_val = "tag_type," + str(key) + "$tag_text," + val
+                    tag_filter_vals.append({"label": val, "filter_val": filter_val, "checked": checked_tag})
+                result_json.append({'label': key, 'values': tag_filter_vals})
+        return result_json
+
     def get_result_facets(self, results, tag_id=None):
         # todo: refactor - move attribute & tag processing to individual functions,
         # change facet dicts to pull from consts, use translation on labels,
@@ -659,42 +697,7 @@ class PostgresProvider:
         result_json.append(complete_dict)
 
         # TODO: DRY
-        tag_filter_name = None
-        if tag_id:
-            tag_filter = Tag.objects.filter(id=tag_id).first()
-            if tag_filter:
-                tag_filter_name = tag_filter.display_text
-        tags_dict = {}
-        for tag_type in TagType.objects.all():
-            tags_dict[tag_type.label] = []
-        for result in results['work']['data']:
-            if len(result['tags']) > 0:
-                for tag in result['tags']:
-                    if tag['display_text'] not in tags_dict[tag['tag_type']]:
-                        tags_dict[tag['tag_type']].append(tag['display_text'])
-        for result in results['bookmark']['data']:
-            if len(result['tags']) > 0:
-                for tag in result['tags']:
-                    if tag['display_text'] not in tags_dict[tag['tag_type']]:
-                        tags_dict[tag['tag_type']].append(tag['display_text'])
-        for result in results['collection']['data']:
-            if len(result['tags']) > 0:
-                for tag in result['tags']:
-                    if tag['display_text'] not in tags_dict[tag['tag_type']]:
-                        tags_dict[tag['tag_type']].append(tag['display_text'])
-        for result in results['tag']['data']:
-            if result['display_text'] not in tags_dict[result['tag_type']]:
-                tags_dict[result['tag_type']].append(result['display_text'])
-        for key in tags_dict:
-            if len(tags_dict[key]) > 0:
-                tag_filter_vals = []
-                for val in tags_dict[key]:
-                    checked_tag = False
-                    if tag_id and tag_filter_name and tag_filter_name == val:
-                        checked_tag = True
-                    filter_val = "tag_type," + str(key) + "$tag_text," + val
-                    tag_filter_vals.append({"label": val, "filter_val": filter_val, "checked": checked_tag})
-                result_json.append({'label': key, 'values': tag_filter_vals})
+        result_json = self.get_tag_facets(tag_id, results, result_json)
 
         attributes_dict = {}
         for result in results['work']['data']:

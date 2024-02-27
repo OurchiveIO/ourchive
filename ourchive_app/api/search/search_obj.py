@@ -381,3 +381,15 @@ class GlobalSearch(object):
 
     def to_dict(self):
         return self.__dict__
+
+class TagFacet(object):
+    def __init__(self):
+        self.id = None
+        self.label = None
+        self.filter_val = None
+
+class ResultFacet(object):
+    def __init__(self, id, label):
+        self.id = None
+        self.label = None
+        self.values = []
