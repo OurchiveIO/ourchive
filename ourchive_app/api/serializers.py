@@ -141,6 +141,7 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, subscription, validated_data):
         UserSubscription.objects.filter(id=subscription.id).update(**validated_data)
+        subscription = UserSubscription.objects.filter(id=subscription.id)
         post_save.send(UserSubscription, instance=subscription, created=False)
         subscription = UserSubscription.objects.get(id=subscription.id)
         if not subscription.subscribed_to_bookmark and not subscription.subscribed_to_collection:
@@ -795,6 +796,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         validated_data['epub_url'] = ''
         validated_data['zip_url'] = ''
         Work.objects.filter(id=work.id).update(**validated_data)
+        work = Work.objects.get(id=work.id)
         self.process_users(work, users)
         work.draft = validated_data['draft']
         work.save()
@@ -912,6 +914,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
             attributes = validated_data.pop('attributes')
             bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)
+        bookmark = Bookmark.objects.get(id=bookmark.id)
         bookmark.draft = validated_data['draft']
         bookmark.save()
         return Bookmark.objects.filter(id=bookmark.id).first()
@@ -1055,6 +1058,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             validated_data.pop('bookmarks')
         BookmarkCollection.objects.filter(
             id=bookmark.id).update(**validated_data)
+        bookmark = BookmarkCollection.objects.get(id=bookmark.id)
         self.process_users(bookmark, users)
         bookmark.draft = validated_data['draft']
         bookmark.save()
