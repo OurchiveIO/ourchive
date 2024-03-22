@@ -1,10 +1,12 @@
-from api.models import AttributeValue, Work, Tag, User, Chapter, TagType, WorkType, Bookmark, BookmarkComment, BookmarkCollection, ChapterComment, Message, NotificationType, Notification, OurchiveSetting
+from api.models import AttributeValue, Work, Tag, User, Chapter, TagType, WorkType, \
+                       Bookmark, BookmarkComment, BookmarkCollection, ChapterComment, \
+                       Message, NotificationType, Notification, OurchiveSetting, AttributeType
 from api import object_factory
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 import json
 import re
 from django.db.models import Q
-from .search_obj import WorkSearch, BookmarkSearch, TagSearch, UserSearch, CollectionSearch, TagFacet, ResultFacet
+from .search_obj import WorkSearch, BookmarkSearch, TagSearch, UserSearch, CollectionSearch, FilterFacet, ResultFacet
 from django.contrib.postgres.search import TrigramDistance, TrigramWordDistance
 from api.utils import get_star_count
 from django.core.paginator import Paginator
@@ -617,8 +619,8 @@ class PostgresProvider:
 
     def process_tag_tags(self, tags, tags_dict):
         for result in tags:
-            if result['display_text'] not in tags_dict[result['tag_type']]:
-                tags_dict[result['tag_type']].append(result['display_text'])
+            if result['display_text'] not in tags_dict[result['tag_type']]['tags']:
+                tags_dict[result['tag_type']]['tags'].append(result['display_text'])
         return tags_dict
 
     def process_chive_tags(self, tags, tags_dict):
@@ -626,6 +628,16 @@ class PostgresProvider:
             if len(result['tags']) > 0:
                 tags_dict = self.process_tag_tags(result['tags'], tags_dict)
         return tags_dict
+
+    def build_final_tag_facets(self, tag_id, tag_filter_name, result_json, tags_dict):
+        for key in tags_dict:
+            if len(tags_dict[key]['tags']) > 0:
+                tag_filter_vals = []
+                for val in tags_dict[key]['tags']:
+                    checked_tag = True if (tag_id and tag_filter_name and tag_filter_name == val) else False
+                    tag_filter_vals.append(FilterFacet(val, checked_tag))
+                result_json.append(ResultFacet(tags_dict[key]['type_id'], key, tag_filter_vals, 'tag').to_dict())
+        return result_json
 
     def get_tag_facets(self, tag_id, results, result_json):
         tag_filter_name = None
@@ -635,22 +647,37 @@ class PostgresProvider:
                 tag_filter_name = tag_filter.display_text
         tags_dict = {}
         for tag_type in TagType.objects.all():
-            tags_dict[tag_type.label] = []
+            tags_dict[tag_type.label] = {'tags': [], 'type_id': tag_type.id, 'type_label': tag_type.label}
         tags_dict = self.process_chive_tags(results['work']['data'], tags_dict)
         tags_dict = self.process_chive_tags(results['bookmark']['data'], tags_dict)
         tags_dict = self.process_chive_tags(results['collection']['data'], tags_dict)
         tags_dict = self.process_tag_tags(results['tag']['data'], tags_dict)
-        
-        for key in tags_dict:
-            if len(tags_dict[key]) > 0:
-                tag_filter_vals = []
-                for val in tags_dict[key]:
-                    checked_tag = False
-                    if tag_id and tag_filter_name and tag_filter_name == val:
-                        checked_tag = True
-                    filter_val = "tag_type," + str(key) + "$tag_text," + val
-                    tag_filter_vals.append({"label": val, "filter_val": filter_val, "checked": checked_tag})
-                result_json.append({'label': key, 'values': tag_filter_vals})
+        result_json = self.build_final_tag_facets(tag_id, tag_filter_name, result_json, tags_dict)
+        return result_json
+
+    def process_chive_attributes(self, results, attributes_dict):
+        for result in results:
+            if len(result['attributes']) > 0:
+                for attribute in result['attributes']:
+                    if attribute['attribute_type'] not in attributes_dict:
+                        attributes_dict[attribute['attribute_type']] = [attribute['display_name']]
+                    elif attribute['display_name'] not in attributes_dict[attribute['attribute_type']]['attrs']:
+                        attributes_dict[attribute['attribute_type']]['attrs'].append(attribute['display_name'])
+        return attributes_dict
+
+    def get_attribute_facets(self, results, result_json):
+        attributes_dict = {}
+        for attribute_type in AttributeType.objects.all():
+            attributes_dict[attribute_type.display_name] = {'attrs': [], 'type_id': attribute_type.id, 'type_label': attribute_type.display_name}
+        attributes_dict = self.process_chive_attributes(results['work']['data'], attributes_dict)
+        attributes_dict = self.process_chive_attributes(results['bookmark']['data'], attributes_dict)
+        attributes_dict = self.process_chive_attributes(results['collection']['data'], attributes_dict)
+        for key in attributes_dict:
+            if len(attributes_dict[key]['attrs']) > 0:
+                attribute_filter_vals = []
+                for val in attributes_dict[key]['attrs']:
+                    attribute_filter_vals.append(FilterFacet(val, False))
+                result_json.append(ResultFacet(attributes_dict[key]['type_id'], key, attribute_filter_vals, 'attribute').to_dict())
         return result_json
 
     def get_result_facets(self, results, tag_id=None):
@@ -662,15 +689,17 @@ class PostgresProvider:
         work_types_list = []
         for work_type in work_types:
             work_types_list.append(
-                {"label": work_type.type_name, "filter_val": "work_type$" + work_type.type_name})
+                {"label": work_type.type_name})
         work_types_dict = {}
         work_types_dict["label"] = "Work Type"
         work_types_dict["values"] = work_types_list
+        work_types_dict["object_type"] = 'work'
         result_json.append(work_types_dict)
 
-        # todo move to db setting
+        # todo move to separate class
         word_count_dict = {}
         word_count_dict["label"] = "Work Word Count"
+        word_count_dict["object_type"] = 'work'
         word_count_dict["filters"] = ["word_count_gte", "word_count_lte"]
         word_count_dict["values"] = [{"label": "From", "filter_val": "word_count_gte", "type": "text_range"},
                                      {"label": "To","filter_val": "word_count_lte", "type": "text_range"}]
@@ -691,43 +720,14 @@ class PostgresProvider:
 
         # todo move to db setting
         complete_dict = {}
-        complete_dict["label"] = "Complete?"
-        complete_dict["values"] = [{"label": "Complete", "filter_val": "complete$1"},
-                                   {"label": "Work In Progress", "filter_val": "complete$0"}]
+        complete_dict["label"] = "Completion Status"
+        complete_dict["object_type"] = 'work'
+        complete_dict["values"] = [{"label": "Complete", "filter_val": "1"},
+                                   {"label": "Work In Progress", "filter_val": "0"}]
         result_json.append(complete_dict)
 
-        # TODO: DRY
         result_json = self.get_tag_facets(tag_id, results, result_json)
-
-        attributes_dict = {}
-        for result in results['work']['data']:
-            if len(result['attributes']) > 0:
-                for attribute in result['attributes']:
-                    if attribute['attribute_type'] not in attributes_dict:
-                        attributes_dict[attribute['attribute_type']] = [attribute['display_name']]
-                    elif attribute['display_name'] not in attributes_dict[attribute['attribute_type']]:
-                        attributes_dict[attribute['attribute_type']].append(attribute['display_name'])
-        for result in results['bookmark']['data']:
-            if len(result['attributes']) > 0:
-                for attribute in result['attributes']:
-                    if attribute['attribute_type'] not in attributes_dict:
-                        attributes_dict[attribute['attribute_type']] = [attribute['display_name']]
-                    elif attribute['display_name'] not in attributes_dict[attribute['attribute_type']]:
-                        attributes_dict[attribute['attribute_type']].append(attribute['display_name'])
-        for result in results['collection']['data']:
-            if len(result['attributes']) > 0:
-                for attribute in result['attributes']:
-                    if attribute['attribute_type'] not in attributes_dict:
-                        attributes_dict[attribute['attribute_type']] = [attribute['display_name']]
-                    elif attribute['display_name'] not in attributes_dict[attribute['attribute_type']]:
-                        attributes_dict[attribute['attribute_type']].append(attribute['display_name'])
-        for key in attributes_dict:
-            if len(attributes_dict[key]) > 0:
-                attribute_filter_vals = []
-                for val in attributes_dict[key]:
-                    filter_val = "attribute_type," + str(key) + "$attribute_text," + val
-                    attribute_filter_vals.append({"label": val, "filter_val": filter_val})
-                result_json.append({'label': key, 'values': attribute_filter_vals})
+        result_json = self.get_attribute_facets(results, result_json)
 
         stars = OurchiveSetting.objects.get(name='Rating Star Count')
         bookmark_rating_dict = {}

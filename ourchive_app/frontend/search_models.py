@@ -81,18 +81,17 @@ class SearchObject(object):
 	def get_object_type(self, filter_term):
 		if 'audio' in filter_term:
 			return 'work'
-		elif 'tag_type' in filter_term:
+		elif 'tag' in filter_term:
 			return 'tag'
-		elif 'attribute_type' in filter_term:
+		elif 'attribute' in filter_term:
 			return 'attribute'
-		elif 'work_type' in filter_term:
-			return 'work'
-		elif 'word_count' in filter_term:
+		elif 'work' in filter_term:
 			return 'work'
 		elif 'complete' in filter_term:
 			return 'work'
 		elif 'rating' in filter_term:
 			return 'bookmark'
+
 
 class ReturnKeys(object):
 	def __init__(self):
@@ -104,6 +103,7 @@ class ReturnKeys(object):
 			self.include.append(val)
 		if include_exclude == 'exclude':
 			self.exclude.append(val)
+
 
 class SearchRequest(object):
 	def __init__(self, post_data, return_keys):

@@ -22,86 +22,95 @@ def get_default_search_result_tab(resultsets):
 
 
 def build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val):
-	# TODO: split this into two methods, include and exclude. refactor first with include, then split. (see line 29)
-	filter_options = key.split('|')
-	if 'ranges' in key:
-		if filter_options[0] not in request_object.work_search.include_filter:
-			request_object.work_search.include_filter[filter_options[0]] = [([filter_options[3], filter_options[2]])]
-		else:
-			request_object.work_search.include_filter[filter_options[0]].append((filter_options[3], filter_options[2]))
-	else:
-		# TODO: refactor: request object should stay a true object, __dict__ should be called
-		# on making the API request, and collections.defaultdict should be used to prevent cluttered logic
-		for option in filter_options:
-			filter_details = option.split('$')
+	# TODO: split this into two methods, include and exclude. refactor first with include, then split.
+	filter_details = key.split(',')
+	# TODO: refactor: request object should stay a true object, __dict__ should be called
+	# on making the API request, and collections.defaultdict should be used to prevent cluttered logic
+	filter_key = filter_details[2] if len(filter_details) > 2 else filter_details[0]
+	filter_type = request_builder.get_object_type(filter_key)
+	if len(filter_details) == 1:
+		if not filter_val:
+			return request_object
+	elif filter_type == 'tag' or filter_type == 'attribute':
+		filter_val = filter_details[1]
+	if filter_type == 'work':
+		if not filter_val:
 			filter_key = filter_details[0]
-			filter_type = request_builder.get_object_type(filter_key)
-			if len(filter_details) == 1:
-				if not filter_val:
-					continue
-			else:
-				filter_val = filter_details[1]
-			if filter_type == 'work':
-				if filter_key in request_object.work_search.include_filter and len(request_object.work_search.include_filter[filter_key]) > 0:
-					request_object.work_search.include_filter[filter_key].append(filter_val)
-				else:
-					request_object.work_search.include_filter[filter_key] = []
-					request_object.work_search.include_filter[filter_key].append(filter_val)
-			elif filter_type == 'tag':
-				tag_type = filter_key.split(',')[1]
-				tag_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
-				request_object.tag_search.include_filter['tag_type'].append(tag_type)
-				request_object.tag_search.include_filter['text'].append(tag_text)
-				request_object.work_search.include_filter['tags'].append(tag_text)
-				request_object.bookmark_search.include_filter['tags'].append(tag_text)
-			elif filter_type == 'attribute':
-				attribute_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
-				request_object.work_search.include_filter['attributes'].append(attribute_text)
-				request_object.bookmark_search.include_filter['attributes'].append(attribute_text)
-				request_object.collection_search.include_filter['attributes'].append(attribute_text)
-			elif filter_type == 'bookmark':
-				if filter_details[0] in request_object.bookmark_search.include_filter and len(request_object.bookmark_search.include_filter[filter_key]) > 0:
-					request_object.bookmark_search.include_filter[filter_key].append(filter_val)
-				else:
-					request_object.bookmark_search.include_filter[filter_key] = []
-					request_object.bookmark_search.include_filter[filter_key].append(filter_val)
+			filter_val = filter_details[1]
+		else:
+			filter_key = filter_details[1]
+		if filter_key in request_object.work_search.include_filter and len(request_object.work_search.include_filter[filter_key]) > 0:
+			request_object.work_search.include_filter[filter_key].append(filter_val)
+		else:
+			request_object.work_search.include_filter[filter_key] = []
+			request_object.work_search.include_filter[filter_key].append(filter_val)
+	elif filter_type == 'tag':
+		tag_type = filter_details[0]
+		tag_text = filter_val.lower() if filter_val else ''
+		request_object.tag_search.include_filter['tag_type'].append(tag_type)
+		request_object.tag_search.include_filter['text'].append(tag_text)
+		request_object.work_search.include_filter['tags'].append(tag_text)
+		request_object.bookmark_search.include_filter['tags'].append(tag_text)
+	elif filter_type == 'attribute':
+		# TODO: validate & test
+		attribute_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
+		request_object.work_search.include_filter['attributes'].append(attribute_text)
+		request_object.bookmark_search.include_filter['attributes'].append(attribute_text)
+		request_object.collection_search.include_filter['attributes'].append(attribute_text)
+	elif filter_type == 'bookmark':
+		# TODO: validate & test
+		if filter_details[0] in request_object.bookmark_search.include_filter and len(request_object.bookmark_search.include_filter[filter_key]) > 0:
+			request_object.bookmark_search.include_filter[filter_key].append(filter_val)
+		else:
+			request_object.bookmark_search.include_filter[filter_key] = []
+			request_object.bookmark_search.include_filter[filter_key].append(filter_val)
 	return request_object
 
 
-def add_facet_to_filters(facets, label, value, item, excluded=True):
+def add_facet_to_filters(facets, label, value, item, excluded=True, checkbox=True):
 	if label in NONRETAIN_VALS:
 		return facets
 	facet_added = False
 	for facet in facets:
-		if facet['label'] == label:
+		# checkbox filter
+		if checkbox:
+			selector = 'label' if facet['label'] == label else None
+			if not selector:
+				continue
 			for val in facet['values']:
-				if val['label'] == value:
+				if val[selector] == value or val.get('filter_val', '') == value:
+					val['checked'] = True
 					facet_added = True
 					break
 			if not facet_added:
-				facet['values'].append({'label': value, 'filter_val': item})
+				facet['values'].append({'label': value, 'checked': True})
 			facet_added = True
 			break
-		elif label in facet.get('filters', []):
+		# range/freeform filter
+		elif facet['label'] == label and not checkbox:
 			key_field = 'include_value' if not excluded else 'exclude_value'
+			item = item.split(',')
 			for val in facet['values']:
-				if val['filter_val'] == label:
+				if val['filter_val'] == item[1]:
 					val[key_field] = value
 					facet_added = True
 					break
 	if not facet_added:
-		facets.append({'label': label, 'excluded': excluded, 'values': [{'label': value, 'filter_val': item}]})
+		facets.append({'label': label, 'excluded': excluded, 'values': [{'label': value, 'checked': False}]})
 	return facets
 
 
 def iterate_facets(facets, item, excluded=True):
 	if item == 'any_all':
 		return facets
-	if '$' in item and ',' in item:
-		split = item.split('$')
-		label_split = split[0].split(',')
-		val_split = split[1].split(',')
-		facets = add_facet_to_filters(facets, label_split[1], val_split[1], item, excluded)
+	if ',' in item:
+		# checkbox. format: [type label],[checkbox label]
+		split = item.split(',')
+		if len(split) <= 3:
+			facets = add_facet_to_filters(facets, split[0], split[1], item, excluded)
+		# input. format: [filter facet label],[filter val e.g. word_count__gte],[object e.g. work],[value e.g. 1]
+		elif len(split) > 3:
+			facets = add_facet_to_filters(facets, split[0], split[3], item, excluded, False)
 	elif '$' in item:
 		# assumes text format e.g. word count: word_count_gte$20000
 		split = item.split('$')
@@ -127,17 +136,19 @@ def get_search_request(request, request_object, request_builder):
 	for key in request.POST:
 		if key == 'tag_id' or key == 'attr_id':
 			continue
-		filter_val = request.POST.get(key, None)
+		filter_val = request.POST.get(key, None) if request.POST.get(key, None) != 'on' else None
 		include_exclude = 'exclude' if 'exclude_' in key else 'include'
 		key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
 		if key in NONFILTER_VALS:
 			continue
 		else:
-			if '$' in key:
+			if ',' in key and not filter_val and not key.endswith(',input'):
 				return_keys.add_val(include_exclude, key)
 			elif filter_val:
-				return_keys.add_val(include_exclude, f'{key}${filter_val}')
+				key = key.replace(',input', '')
+				return_keys.add_val(include_exclude, f'{key},{filter_val}')
 		request_object = build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val)
+	print(return_keys.__dict__)
 	return SearchRequest(request_object, return_keys)
 
 
