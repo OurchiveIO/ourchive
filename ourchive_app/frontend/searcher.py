@@ -2,6 +2,7 @@ from django.conf import settings
 from .search_models import SearchObject, ReturnKeys, SearchRequest
 from .view_utils import *
 import logging
+from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,48 @@ def get_default_search_result_tab(resultsets):
 	return default_tab
 
 
+def add_filter_to_work(filter_val, filter_details, work_filter):
+	if not filter_val:
+		filter_key = filter_details[0]
+		filter_val = filter_details[1]
+	else:
+		filter_key = filter_details[1]
+	if filter_key in work_filter and len(work_filter[filter_key]) > 0:
+		work_filter[filter_key].append(filter_val)
+	else:
+		work_filter[filter_key] = []
+		work_filter[filter_key].append(filter_val)
+	return work_filter
+
+
+def add_filter_to_tag(filter_val, filter_details, tag_filter, work_filter, bookmark_filter):
+	tag_type = filter_details[0]
+	tag_text = filter_val.lower() if filter_val else ''
+	tag_filter['tag_type'].append(tag_type)
+	tag_filter['text'].append(tag_text)
+	work_filter['tags'].append(tag_text)
+	bookmark_filter['tags'].append(tag_text)
+	return [tag_filter, work_filter, bookmark_filter]
+
+
+def add_filter_to_attribute(filter_val, work_filter, bookmark_filter, collection_filter):
+	attribute_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
+	work_filter['attributes'].append(attribute_text)
+	bookmark_filter['attributes'].append(attribute_text)
+	collection_filter['attributes'].append(attribute_text)
+	return [work_filter, bookmark_filter, collection_filter]
+
+
+def add_filter_to_bookmark(filter_val, filter_details, bookmark_filter):
+	filter_key = filter_details[2] if len(filter_details) > 2 else filter_details[0]
+	if filter_details[0] in bookmark_filter and len(bookmark_filter[filter_key]) > 0:
+		bookmark_filter[filter_key].append(filter_val)
+	else:
+		bookmark_filter[filter_key] = []
+		bookmark_filter[filter_key].append(filter_val)
+	return bookmark_filter
+
+
 def build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val):
 	# TODO: split this into two methods, include and exclude. refactor first with include, then split.
 	filter_details = key.split(',')
@@ -34,36 +77,57 @@ def build_request_filters(request, include_exclude, request_object, request_buil
 	elif filter_type == 'tag' or filter_type == 'attribute':
 		filter_val = filter_details[1]
 	if filter_type == 'work':
-		if not filter_val:
-			filter_key = filter_details[0]
-			filter_val = filter_details[1]
+		if include_exclude == 'include':
+			request_object.work_search.include_filter = add_filter_to_work(filter_val, filter_details, request_object.work_search.include_filter)
 		else:
-			filter_key = filter_details[1]
-		if filter_key in request_object.work_search.include_filter and len(request_object.work_search.include_filter[filter_key]) > 0:
-			request_object.work_search.include_filter[filter_key].append(filter_val)
-		else:
-			request_object.work_search.include_filter[filter_key] = []
-			request_object.work_search.include_filter[filter_key].append(filter_val)
+			request_object.work_search.exclude_filter = add_filter_to_work(filter_val, filter_details, request_object.work_search.exclude_filter)
 	elif filter_type == 'tag':
-		tag_type = filter_details[0]
-		tag_text = filter_val.lower() if filter_val else ''
-		request_object.tag_search.include_filter['tag_type'].append(tag_type)
-		request_object.tag_search.include_filter['text'].append(tag_text)
-		request_object.work_search.include_filter['tags'].append(tag_text)
-		request_object.bookmark_search.include_filter['tags'].append(tag_text)
+		if include_exclude == 'include':
+			updated_filters = add_filter_to_tag(
+				filter_val,
+				filter_details,
+				request_object.tag_search.include_filter,
+				request_object.work_search.include_filter,
+				request_object.bookmark_search.include_filter)
+			request_object.tag_search.include_filter = updated_filters[0]
+			request_object.work_search.include_filter = updated_filters[1]
+			request_object.bookmark_search.include_filter = updated_filters[2]
+		else:
+			updated_filters = add_filter_to_tag(
+				filter_val,
+				filter_details,
+				request_object.tag_search.exclude_filter,
+				request_object.work_search.exclude_filter,
+				request_object.bookmark_search.exclude_filter)
+			request_object.tag_search.exclude_filter = updated_filters[0]
+			request_object.work_search.exclude_filter = updated_filters[1]
+			request_object.bookmark_search.exclude_filter = updated_filters[2]
 	elif filter_type == 'attribute':
 		# TODO: validate & test
-		attribute_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
-		request_object.work_search.include_filter['attributes'].append(attribute_text)
-		request_object.bookmark_search.include_filter['attributes'].append(attribute_text)
-		request_object.collection_search.include_filter['attributes'].append(attribute_text)
+		if include_exclude == 'include':
+			updated_filters = add_filter_to_attribute(
+				filter_val,
+				request_object.work_search.include_filter,
+				request_object.bookmark_search.include_filter,
+				request_object.collection_search.include_filter)
+			request_object.work_search.include_filter = updated_filters[0]
+			request_object.bookmark_search.include_filter = updated_filters[1]
+			request_object.collection_search.include_filter = updated_filters[2]
+		else:
+			updated_filters = add_filter_to_attribute(
+				filter_val,
+				request_object.work_search.exclude_filter,
+				request_object.bookmark_search.exclude_filter,
+				request_object.collection_search.exclude_filter)
+			request_object.work_search.exclude_filter = updated_filters[0]
+			request_object.bookmark_search.exclude_filter = updated_filters[1]
+			request_object.collection_search.exclude_filter = updated_filters[2]
 	elif filter_type == 'bookmark':
 		# TODO: validate & test
-		if filter_details[0] in request_object.bookmark_search.include_filter and len(request_object.bookmark_search.include_filter[filter_key]) > 0:
-			request_object.bookmark_search.include_filter[filter_key].append(filter_val)
+		if include_exclude == 'include':
+			request_object.bookmark_search.include_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.include_filter)
 		else:
-			request_object.bookmark_search.include_filter[filter_key] = []
-			request_object.bookmark_search.include_filter[filter_key].append(filter_val)
+			request_object.bookmark_search.exclude_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.exclude_filter)
 	return request_object
 
 
@@ -120,11 +184,13 @@ def iterate_facets(facets, item, excluded=True):
 
 def get_response_facets(response_json, request_object):
 	facets = response_json['results']['facet']
+	include_facets = deepcopy(facets)
+	exclude_facets = deepcopy(facets)
 	for item in request_object.return_keys.exclude:
-		facets = iterate_facets(facets, item)
+		exclude_facets = iterate_facets(exclude_facets, item)
 	for item in request_object.return_keys.include:
-		facets = iterate_facets(facets, item, False)
-	return facets
+		include_facets = iterate_facets(include_facets, item, False)
+	return (include_facets, exclude_facets)
 
 
 def get_empty_response_obj():
@@ -148,7 +214,6 @@ def get_search_request(request, request_object, request_builder):
 				key = key.replace(',input', '')
 				return_keys.add_val(include_exclude, f'{key},{filter_val}')
 		request_object = build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val)
-	print(return_keys.__dict__)
 	return SearchRequest(request_object, return_keys)
 
 
@@ -229,7 +294,8 @@ def build_and_execute_search(request):
 		'users': users,
 		'tag_count': tag_count,
 		'collections': collections,
-		'facets': facets,
+		'include_facets': facets[0],
+		'exclude_facets': facets[1],
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
 		'root': settings.ROOT_URL, 'term': term,

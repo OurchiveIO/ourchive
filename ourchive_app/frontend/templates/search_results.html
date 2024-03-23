@@ -43,7 +43,7 @@
 		<ul class="uk-switcher uk-margin-remove filter-switcher" id="search-results-filter-switcher-flyover">
 			<li id="search-results-include-switcher-li-flyover" class="uk-width-expand ourchive-li-flyover"> 
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl-flyover">	
-			        {% for facet in facets %} 
+			        {% for facet in include_facets %} 
 						{% include "facet_tile.html" with include='include' keys=keys_include %}     
 				    {% endfor %}	        
 				</dl>
@@ -60,7 +60,7 @@
 		    </li>
 		    <li id="search-results-exclude-switcher-li-flyover" class="uk-width-expand ourchive-li-flyover"> 
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-facet-dl-flyover">	
-			        {% for facet in facets %} 
+			        {% for facet in exclude_facets %} 
 						{% include "facet_tile.html" with include='exclude' keys=keys_exclude %}     
 				    {% endfor %}	
 
@@ -105,7 +105,7 @@
 		<ul class="uk-switcher uk-margin-remove filter-switcher" id="search-results-filter-switcher">
 			<li id="search-results-include-switcher-li" class="uk-width-expand"> 
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl">	
-			        {% for facet in facets %} 
+			        {% for facet in include_facets %} 
 						{% include "facet_tile.html" with include='include' keys=keys_include %}     
 				    {% endfor %}		        
 				</dl>
@@ -122,7 +122,7 @@
 		    </li>
 		    <li id="search-results-exclude-switcher-li" class="uk-width-expand"> 
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-facet-dl">	
-			        {% for facet in facets %} 
+			        {% for facet in exclude_facets %} 
 						{% include "facet_tile.html" with include='exclude' keys=keys_exclude %}     
 				    {% endfor %}		        
 				</dl>
