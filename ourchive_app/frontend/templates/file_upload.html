@@ -1,8 +1,10 @@
+{% load i18n %}
 <div id="{{ object }}-upload-parent" class="js-upload-{{ object_type }} uk-placeholder uk-text-right uk-width-medium">
-    <div id="{{ object }}-upload-form" uk-form-custom="target: true">
+    <div id="{{ object }}-upload-form" uk-form-custom="target: true" class="uk-inline">
         <input type="file" id="{{ object }}-file-input">
         <input id="{{ object }}-file-uk-input" class="uk-input uk-form-width-medium" type="text" placeholder="{{ upload_placeholder }}" name="{{ object }}-upload">
     </div>
+    <a onclick="removeFile('{{object}}')" title="{% translate 'Delete file' %}"><span uk-icon="icon: ourchive-delete; ratio: .75"></span></a>
     <progress id="{{ object }}-progressbar-{{ object_type }}" class="uk-progress" value="0" max="100" hidden></progress>
     <script>
 	    var bar = document.getElementById('{{ object }}-progressbar-{{ object_type }}');
