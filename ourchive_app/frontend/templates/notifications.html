@@ -6,10 +6,11 @@
     <h1 class="uk-text-lead uk-inline">{{ page_title }}</h1>
     {% if notifications %}
     <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-notifications-mark-all-read' request.user %}">{% translate 'Mark all read' %}</a>
+    <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-notifications-delete-all' request.user %}">{% translate 'Delete all' %}</a>
     {% endif %}
     <hr class="ourchive-hr"/>
     {% if not notifications %}
-    <p id="notifications-empty-message">{% translate "You don't have any notifications yet." %}</p>
+    <p id="notifications-empty-message">{% translate "You don't have any notifications. When you do, they'll appear here." %}</p>
     {% endif %}
 </div>
 {% for notification in notifications %} 

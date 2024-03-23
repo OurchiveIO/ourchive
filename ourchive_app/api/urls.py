@@ -64,6 +64,7 @@ urlpatterns = [
     path('messages/<int:pk>/', views.MessageDetail.as_view(), name='message-detail'),
     path('notifications/', views.NotificationList.as_view(), name='notification-list'),
     path('notifications/read/', views.NotificationRead.as_view(), name='notification-read'),
+    path('notifications/delete-all/', views.NotificationDelete.as_view(), name='notification-delete-all'),
     path('notifications/<int:pk>/', views.NotificationDetail.as_view(),
          name='notification-detail'),
     path('notifications/<int:pk>/read', views.NotificationDetail.as_view(),

@@ -1206,6 +1206,21 @@ class NotificationRead(APIView):
         return Response({'results': 'Notifications marked as read.'})
 
 
+class NotificationDelete(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsOwner]
+
+    def patch(self, request, format=None):
+        notifications = Notification.objects.filter(
+            user__id=request.user.id).all()
+        for notification in notifications:
+            notification.delete()
+        user = User.objects.get(id=request.user.id)
+        user.has_notifications = False
+        user.save()
+        return Response({'results': 'Notifications marked as read.'})
+
+
 class UserNotificationList(generics.ListCreateAPIView):
     serializer_class = NotificationSerializer
     permission_classes = [IsOwner]

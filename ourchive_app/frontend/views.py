@@ -420,12 +420,22 @@ def mark_notification_read(request, username, notification_id):
 	messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
 	return redirect(f'/username/{username}/notifications')
 
+
 def user_notifications_all_read(request, username):
 	data = {'user': username}
 	response = do_patch(f'api/notifications/read/', request, data, object_name='Notification')
 	message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 	messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
 	return redirect(f'/username/{username}/notifications')
+
+
+def user_notifications_delete_all(request, username):
+	data = {'user': username}
+	response = do_patch(f'api/notifications/delete-all/', request, data, object_name='Notification')
+	message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
+	messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
+	return redirect(f'/username/{username}/notifications')
+
 
 def user_bookmarks_drafts(request, username):
 	response = do_get(f'api/users/{username}/bookmarks/drafts', request, 'User Bookmarks')
