@@ -6,7 +6,10 @@
 		<h1 id="user-cocreator-h1">{% translate 'Co-Creator Approvals' %}</h1>
 		<hr/>
 		<p class="uk-text-large">{% blocktranslate %}The following chives have you listed as a co-creator. You can approve or reject this relationship. If you reject it, you will be removed as a co-creator and will no longer be able to modify the chive.{% endblocktranslate %}</p>
-		{% if not approvals %}
+		{% if approvals %}
+	    <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-cocreator-bulk-approve' %}">{% translate 'Approve all' %}</a>
+	    <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-cocreator-bulk-reject' %}">{% translate 'Reject all' %}</a>
+	    {% else %}
 		<p id="user-cocreator-none-message">{% blocktranslate %}Nothing to approve.{% endblocktranslate %}</p>
 		{% endif %}
 	{% if approvals %}

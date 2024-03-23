@@ -86,6 +86,8 @@ urlpatterns = [
     path('users/approvals/', views.UserApprovalList.as_view(), name='user-approvals'),
     path('users/remove-cocreator/', views.UserApprovalRemove.as_view(), name='be-remove-cocreator'),
     path('users/approve-cocreator/', views.UserApprovalApprove.as_view(), name='be-approve-cocreator'),
+    path('users/cocreator-bulk-approve/', views.CocreateApproveBulk.as_view(), name='bulk-approve-cocreator'),
+    path('users/cocreator-bulk-reject/', views.CocreateRejectBulk.as_view(), name='bulk-reject-cocreator'),
     path('users/<str:username>/works',
          views.UserWorkList.as_view(), name='user-works-drafts'),
     path('users/<str:username>/works/drafts',

@@ -39,7 +39,7 @@
             </div>
         </div>
         <div class="uk-width-1-1@s uk-width-3-4@m uk-margin-remove-top" id="work-header-parent">
-            <h1 id="work-title-h1" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="work-title-link" href="/works/{{ id }}">{{ work.title }}</a></h1> <span id="work-user-span" class="uk-text-large" style="padding-left: 10px;">by {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+            <h1 id="work-title-h1" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="work-title-link" href="/works/{{ id }}">{{ work.title }}</a></h1> <span id="work-user-span" class="uk-text-large" style="padding-left: 10px;">by {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
             {% if work.draft %}
             <div class="uk-width-auto" id="work-draft-div">
                 <span id="work-draft-span" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>

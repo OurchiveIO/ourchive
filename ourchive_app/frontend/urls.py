@@ -99,5 +99,7 @@ urlpatterns = [
     path('users/remove-cocreator', views.remove_as_cocreator, name='fe-remove-as-cocreator'),
     path('users/approve-cocreator', views.approve_as_cocreator, name='fe-approve-as-cocreator'),
     path('users/cocreator-approvals', views.cocreator_approvals, name='fe-view-approvals'),
+    path('users/cocreator-approvals/bulk-approve', views.bulk_approve_cocreator, name='fe-cocreator-bulk-approve'),
+    path('users/cocreator-approvals/bulk-reject', views.bulk_reject_cocreator, name='fe-cocreator-bulk-reject'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

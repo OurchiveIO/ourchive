@@ -1629,6 +1629,30 @@ def approve_as_cocreator(request):
 		return redirect('/login')
 
 
+def bulk_approve_cocreator(request):
+	if request.user.is_authenticated:
+		response = do_patch(f'api/users/cocreator-bulk-approve/', request)
+		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
+		user_message = response.response_info.message if message_type == messages.ERROR else ('Relationships approved.')
+		messages.add_message(request, message_type, user_message, response.response_info.type_label)
+		return redirect(f'/users/cocreator-approvals')
+	else:
+		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'user-unauthorized-error')
+		return redirect('/login')
+
+
+def bulk_reject_cocreator(request):
+	if request.user.is_authenticated:
+		response = do_patch(f'api/users/cocreator-bulk-reject/', request)
+		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
+		user_message = response.response_info.message if message_type == messages.ERROR else ('Relationships rejected.')
+		messages.add_message(request, message_type, user_message, response.response_info.type_label)
+		return redirect(f'/users/cocreator-approvals')
+	else:
+		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'user-unauthorized-error')
+		return redirect('/login')
+
+
 def cocreator_approvals(request):
 	if request.user.is_authenticated:
 		pending_approvals = do_get(f'api/users/approvals/', request)

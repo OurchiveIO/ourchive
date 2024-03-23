@@ -313,6 +313,9 @@ class ExportChives(APIView):
     def get(self, request, format=None):
         return Response({'export_works': 'false', 'export_bookmarks': 'false', 'export_collections': 'false'}, status=200)
 
+
+# TODO: these classes are redundant, probably not best practice! Some approval operations aren't RESTful
+# but this should be improved
 class UserApprovalList(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.IsAuthenticated]
@@ -341,6 +344,7 @@ class UserApprovalList(APIView):
             data.append(approval)
         return Response(data, status=200)
 
+
 class UserApprovalRemove(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.IsAuthenticated]
@@ -362,6 +366,7 @@ class UserApprovalRemove(APIView):
             return Response({'message': [_('Request user is not record user.')]}, status=403)
         approval.delete()
         return Response({'message': _('Association removed.')}, status=200)
+
 
 class UserApprovalApprove(APIView):
     parser_classes = [JSONParser]
@@ -385,6 +390,37 @@ class UserApprovalApprove(APIView):
         approval.approved = True
         approval.save()
         return Response({'message': _('Association approved.')}, status=200)
+
+
+class CocreateApproveBulk(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request):
+        pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
+        pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
+        for work in pending_works:
+            work.approved = True
+            work.save()
+        for collection in pending_collections:
+            collection.approved = True
+            collection.save()
+        return Response({'message': _('Cocreators approved.')}, status=200)
+
+
+class CocreateRejectBulk(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request):
+        pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
+        pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
+        for work in pending_works:
+            work.delete()
+        for collection in pending_collections:
+            collection.delete()
+        return Response({'message': _('Cocreators rejected.')}, status=200)
+
 
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.get_queryset().order_by('id')
