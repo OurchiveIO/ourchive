@@ -47,7 +47,7 @@
 				        <div class="uk-grid" uk-grid>
 				        	{% if subscription.subscribed_to_bookmark and subscription.subscribed_to_collection %}
 				            <div class="uk-width-1-1" id="unsubscribe-{{subscription.id}}-form-parent">
-				                <label id="unsubscribe-{{subscription.id}}-all-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Unsubscribe All' %}
+				                <label id="unsubscribe-{{subscription.id}}-all-label" class="uk-form-label" for="unsubscribe-{{subscription.id}}-all-checkbox">{% translate 'Unsubscribe All' %}
 				                </label>
 				                <div class="uk-form-controls" id="unsubscribe-{{subscription.id}}-all-controls">
 				                    <label id="unsubscribe-{{subscription.id}}-all-switch" class="switch"><input class="uk-checkbox" id="unsubscribe-{{subscription.id}}-all-checkbox" type="checkbox" name="unsubscribe_all"> <span id="unsubscribe-{{subscription.id}}-all-slider" class="slider round"></span></label>
@@ -56,7 +56,7 @@
 				            {% endif %}
 				            {% if subscription.subscribed_to_bookmark %}
 				            <div class="uk-width-1-1" id="unsubscribe-{{subscription.id}}-bookmarks-parent">
-				                <label id="unsubscribe-{{subscription.id}}-bookmarks-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Unsubscribe Bookmarks' %}
+				                <label id="unsubscribe-{{subscription.id}}-bookmarks-label" class="uk-form-label" for="unsubscribe-{{subscription.id}}-bookmarks-checkbox">{% translate 'Unsubscribe Bookmarks' %}
 				                </label>
 				                <div class="uk-form-controls" id="unsubscribe-{{subscription.id}}-bookmarks-controls">
 				                    <label id="unsubscribe-{{subscription.id}}-bookmarks-switch" class="switch"><input class="uk-checkbox" id="unsubscribe-{{subscription.id}}-bookmarks-checkbox" type="checkbox" name="subscribed_to_bookmark"> <span id="unsubscribe-{{subscription.id}}-bookmarks-slider" class="slider round"></span></label>
@@ -65,7 +65,7 @@
 				            {% endif %}
 				            {% if subscription.subscribed_to_collection %}
 				            <div class="uk-width-1-1" id="unsubscribe-{{subscription.id}}-collections-parent">
-				                <label id="unsubscribe-{{subscription.id}}-collections-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Unsubscribe Collections' %}
+				                <label id="unsubscribe-{{subscription.id}}-collections-label" class="uk-form-label" for="unsubscribe-{{subscription.id}}-collections-checkbox">{% translate 'Unsubscribe Collections' %}
 				                </label>
 				                <div class="uk-form-controls" id="unsubscribe-{{subscription.id}}-collections-controls">
 				                    <label id="unsubscribe-{{subscription.id}}-collections-switch" class="switch"><input class="uk-checkbox" id="unsubscribe-{{subscription.id}}-collections-checkbox" type="checkbox" name="subscribed_to_collection"> <span id="unsubscribe-{{subscription.id}}-collections-slider" class="slider round"></span></label>
@@ -74,7 +74,7 @@
 				            {% endif %}
 				            {% if subscription.subscribed_to_work %}
 				            <div class="uk-width-1-1" id="unsubscribe-{{subscription.id}}-works-parent">
-				                <label id="unsubscribe-{{subscription.id}}-works-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Unsubscribe Works' %}
+				                <label id="unsubscribe-{{subscription.id}}-works-label" class="uk-form-label" for="unsubscribe-{{subscription.id}}-works-checkbox">{% translate 'Unsubscribe Works' %}
 				                </label>
 				                <div class="uk-form-controls" id="unsubscribe-{{subscription.id}}-works-controls">
 				                    <label id="unsubscribe-{{subscription.id}}-works-switch" class="switch"><input class="uk-checkbox" id="unsubscribe-{{subscription.id}}-works-checkbox" type="checkbox" name="subscribed_to_collection"> <span id="unsubscribe-{{subscription.id}}-works-slider" class="slider round"></span></label>

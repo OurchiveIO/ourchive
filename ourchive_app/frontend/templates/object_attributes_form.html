@@ -1,7 +1,7 @@
 {% if show_header != False %}<h3 id="obj-attrs-form-header">{{ object }} Attributes <sup uk-icon="icon: ourchive-help;ratio:.75"></sup></h3>{% endif %}
 {% for attribute in attribute_types %}
 <div class="uk-margin" id="{{attribute.id}}-attr-form-parent-div">
-    <label id="{{attribute.id}}-attr-form-label" class="uk-form-label" for="form-horizontal-text">{{attribute.display_name}}</label>
+    <label id="{{attribute.id}}-attr-form-label" class="uk-form-label" for="{{attribute.id}}-attr-multiselect-parent-div">{{attribute.display_name}}</label>
     {% if attribute.allow_multiselect %}
         <div class="uk-form-controls" id="{{attribute.id}}-attr-multiselect-parent-div">
             {% for attribute_val in attribute.attribute_values %}

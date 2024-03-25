@@ -5,7 +5,7 @@
 <form class="uk-form-horizontal" id="login-form" method="post">
 	{% csrf_token %}
     <div class="uk-margin" id="login-username-parent">
-    	<label id="login-username-label" class="uk-form-label" for="form-horizontal-text">Username</label>
+    	<label id="login-username-label" class="uk-form-label" for="login-username-input">Username</label>
         <div class="uk-form-controls" id="login-username-form-controls">
             <div class="uk-inline" id="login-username-inline">
 	            <span id="login-username-icon" class="uk-form-icon" uk-icon="icon: ourchive-user;ratio:.75"></span>
@@ -16,7 +16,7 @@
     </div>
     <input id="login-referrer" type="hidden" name="referrer" value="{{ referrer }}">
     <div id="login-password-parent" class="uk-margin">
-    	<label id="login-password-label" class="uk-form-label" for="form-horizontal-text">Password</label>
+    	<label id="login-password-label" class="uk-form-label" for="login-password-input">Password</label>
         <div id="login-password-form-controls" class="uk-form-controls">
 	        <div id="login-password-inline" class="uk-inline">
 	            <span id="login-password-icon" class="uk-form-icon uk-form-icon" uk-icon="icon: ourchive-lock;ratio:.75"></span>
@@ -25,7 +25,7 @@
 	    </div>
     </div>
     <div class="uk-margin" id="login-submit-parent">
-    	<label id="login-submit-label" class="uk-form-label" for="form-horizontal-text"></label>
+    	<label id="login-submit-label" class="uk-form-label" for="login-submit-button"></label>
         <div id="login-submit-form-controls" class="uk-form-controls">
         	<div id="login-submit-inline" class="uk-inline">
 	    		<input id="login-submit-button" class="uk-button uk-button-default" type="submit" value="Log In"/>	

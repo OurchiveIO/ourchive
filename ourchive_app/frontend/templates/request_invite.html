@@ -11,7 +11,7 @@
 <form class="uk-form-horizontal"  method="post" id="request-invite-form">
 	{% csrf_token %}
     <div class="uk-margin" id="request-invite-email-parent">
-        <label id="request-invite-email-label" class="uk-form-label" for="form-horizontal-text">Email</label>
+        <label id="request-invite-email-label" class="uk-form-label" for="request-invite-email-input">Email</label>
         <div id="request-invite-email-controls" class="uk-form-controls">
             <div class="uk-inline" id="request-invite-email-input-parent">
                 <span class="uk-form-icon" uk-icon="icon: ourchive-mail;ratio:.75" id="request-invite-email-icon"></span>
@@ -21,7 +21,7 @@
         
     </div>
     <div class="uk-margin" id="request-invite-join-reason-parent">
-        <label id="request-invite-join-reason-label" class="uk-form-label" for="form-horizontal-text">Join Reason</label>
+        <label id="request-invite-join-reason-label" class="uk-form-label" for="request-invite-join-reason-input">Join Reason</label>
         <div id="request-invite-join-reason-controls" class="uk-form-controls">
             <div class="uk-inline" id="request-invite-join-reason-input-parent">
                 <textarea class="uk-textarea" rows="3" name="join_reason" id="request-invite-join-reason-input"></textarea>

@@ -13,7 +13,7 @@
      <div id="{{object_name}}-{{object.id}}-new" class="uk-width-1-1 uk-margin-top">
         <form id="{{object_name}}-comment-form" action="{{object.new_action_url}}" method="post" class="uk-form uk-grid-small" uk-grid>
             {% csrf_token %}
-            <label id="post-new-comment-label" class="uk-form-label uk-text-large" for="form-horizontal-text">New Comment</label>
+            <label id="post-new-comment-label" class="uk-form-label uk-text-large" for="{{object_name}}-comment-textarea">New Comment</label>
             <div id="{{object_name}}-comment-id-div" class="uk-width-1-1">
             	<input type="hidden" id="{{object_name}}-comment-id-hidden" name="{{object_name}}" value="{{ object.id }}">
             	<input type="hidden" id="{{object_name}}-comment-count" name="{{object_name}}_comment_count" value="{{comments.count|default:0}}"/>

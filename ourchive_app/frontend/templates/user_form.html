@@ -22,7 +22,7 @@
 		<input type="hidden" id="user" name="user" value="{{ user.username }}">
         {% if request.user.can_upload_images %}
         <div class="uk-margin" id="user-icon-parent-div">
-            <label id="user-icon-label" class="uk-form-label" for="form-horizontal-text">User Icon</label>
+            <label id="user-icon-label" class="uk-form-label" for="user-icon-inline">User Icon</label>
             <div class="uk-form-controls" id="user-icon-controls">
                 <div class="uk-inline" id="user-icon-inline">
                 	<img id="user-icon-img" src="{{ user.icon }}" style="border-radius: 50%; max-height: 50px; max-width: 50px;"/>
@@ -32,7 +32,7 @@
         </div>
 
         <div class="uk-margin" id="icon-alt-text-parent">
-            <label id="icon-alt-text-label" class="uk-form-label" for="form-horizontal-text">Icon Alt Text</label>
+            <label id="icon-alt-text-label" class="uk-form-label" for="icon-alt-text-area">Icon Alt Text</label>
             <div class="uk-form-controls" id="icon-alt-text-controls">
                 <div class="uk-inline" id="icon-alt-text-inline">
                     <textarea id="icon-alt-text-area" class="uk-textarea uk-form-width-large" rows="2" placeholder="Image alt text" name="icon_alt_text" maxlength="600">{{ user.icon_alt_text|default_if_none:'' }}</textarea>
@@ -41,7 +41,7 @@
         </div>   
         {% endif %}
         <div class="uk-margin" id="default-content-parent">
-            <label id="default-content-label" class="uk-form-label" for="form-horizontal-text">Default Content <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Default content help' %}"></sup>
+            <label id="default-content-label" class="uk-form-label" for="default-content-select">Default Content <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Default content help' %}"></sup>
                     <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This determines the content a user sees first when visiting your profile.{% endblocktranslate %}</div></label>
             <div class="uk-form-controls" id="default-content-controls">
             	<select id="default-content-select" class="uk-select uk-form-width-small" name="default_content" title="{% translate 'Default content select' %}">
@@ -67,7 +67,7 @@
         </div> 
 
         <div class="uk-margin" id="default-content-parent">
-            <label id="default-work-type-label" class="uk-form-label" for="form-horizontal-text">Default Work Type <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Default work type help' %}"></sup>    
+            <label id="default-work-type-label" class="uk-form-label" for="work-form-type-select">Default Work Type <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Default work type help' %}"></sup>    
                     <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This determines the default work type shown on the work form.{% endblocktranslate %}</div></label>
             <div class="uk-form-controls" id="default-content-controls">
                 <select id="work-form-type-select" class="uk-select uk-form-width-small" name="default_work_type" title="{% translate 'Default work type select' %}">
@@ -79,7 +79,7 @@
         </div> 
 
         <div class="uk-margin" id="profile-collapse-image-parent">
-            <label id="profile-collapse-image-label" class="uk-form-label" for="form-horizontal-text">Collapse image fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse image fields help' %}"></sup>    
+            <label id="profile-collapse-image-label" class="uk-form-label" for="profile-collapse-image-checkbox">Collapse image fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse image fields help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter image fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
             </label>
             <div id="profile-collapse-image-controls" class="uk-form-controls">
@@ -90,7 +90,7 @@
         </div> 
 
         <div class="uk-margin" id="profile-collapse-audio-parent">
-            <label id="profile-collapse-audio-label" class="uk-form-label" for="form-horizontal-text">Collapse audio fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse audio fields help' %}"></sup>    
+            <label id="profile-collapse-audio-label" class="uk-form-label" for="profile-collapse-audio-checkbox">Collapse audio fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse audio fields help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter audio fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
             </label>
             <div id="profile-collapse-audio-controls" class="uk-form-controls">
@@ -101,7 +101,7 @@
         </div>   
 
         <div class="uk-margin" id="profile-collapse-video-parent">
-            <label id="profile-collapse-video-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Collapse video fields?' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse video fields help' %}"></sup>    
+            <label id="profile-collapse-video-label" class="uk-form-label" for="profile-collapse-video-checkbox">{% translate 'Collapse video fields?' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse video fields help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter video fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
             </label>
             <div id="profile-collapse-video-controls" class="uk-form-controls">
@@ -112,7 +112,7 @@
         </div>  
 
         <div class="uk-margin" id="profile-collapse-text-parent">
-            <label id="profile-collapse-text-label" class="uk-form-label" for="form-horizontal-text">Collapse text fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse text fields help' %}"></sup>    
+            <label id="profile-collapse-text-label" class="uk-form-label" for="profile-collapse-text-checkbox">Collapse text fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse text fields help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter text fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
             </label>
             <div id="profile-collapse-text-controls" class="uk-form-controls">
@@ -122,7 +122,7 @@
             </div>
         </div>   
         <div class="uk-margin" id="copy-work-metadata-parent">
-            <label id="copy-work-metadata-label" class="uk-form-label" for="form-horizontal-text">Copy work metadata? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Copy work metadata help' %}"></sup>    
+            <label id="copy-work-metadata-label" class="uk-form-label" for="copy-work-metadata-checkbox">Copy work metadata? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Copy work metadata help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, your bookmark of a work will be auto-populated with the work's title and tags. You can always remove or modify this data before saving your bookmark.{% endblocktranslate %}</div>
             </label>
             <div id="copy-work-metadata-controls" class="uk-form-controls">
@@ -132,7 +132,7 @@
             </div>
         </div>
         <div class="uk-margin" id="profile-text-parent">
-            <label id="profile-text-label" class="uk-form-label" for="form-horizontal-text">Profile Text</label>
+            <label id="profile-text-label" class="uk-form-label" for="profileEditor">Profile Text</label>
             {% include 'ourchive_tinymce_template.html' with form_field_value=user.profile form_field='profile' obj_name='user' min_height=300 %}
         </div>
         {% if user.attribute_types %}

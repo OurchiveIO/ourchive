@@ -133,8 +133,8 @@
 			            	</li>
 			            {% endif %}
 			            {% if request.user.is_authenticated %}
-			            	<a class="uk-width-auto uk-text-truncate" title="{{ request.user }}" href="{% url 'user-profile-parent' request.user.id %}" id="nav-username">{{ request.user }}</a>
-			            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div">
+			            	<a class="uk-width-auto uk-text-truncate" title="{{ request.user }}" href="#" id="nav-username">{{ request.user }}</a>
+			            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div" uk-dropdown="delay-hide: 1500">
 	                    		<ul class="uk-nav uk-navbar-dropdown-nav uk-list-divider uk-list-collapse" id="nav-user-dropdown-ul">
 	                    			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
 	                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>

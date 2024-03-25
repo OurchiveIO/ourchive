@@ -25,7 +25,7 @@
     <input type="hidden" id="referer-hidden" name="referer" value="{{ referer }}">
     <div id="work-import-form-content-parent" class="uk-child-width-1-1@m uk-child-width-1@s uk-text-left uk-margin-top" uk-grid>
         <div class="uk-margin" id="work-import-form-complete-parent">
-            <label id="work-import-form-complete-label" class="uk-form-label" for="form-horizontal-text">Import single work</label>
+            <label id="work-import-form-complete-label" class="uk-form-label" for="work-import-form-complete-checkbox">Import single work</label>
             <div id="work-import-form-complete-controls" class="uk-form-controls">
                 <div id="work-import-form-complete-inline" class="uk-inline">
                     <label id="work-import-form-complete-switch-label" class="switch"><input class="uk-checkbox" title="{% translate 'Import single toggle' %}" id="work-import-form-complete-checkbox" type="checkbox" name="mode" uk-toggle="target: .toggle"> <span id="work-import-form-complete-slider" class="slider round"></span> </label>
@@ -33,7 +33,7 @@
             </div>
         </div>
         <div class="uk-margin toggle" id="work-import-form-username-parent">
-            <label id="work-import-form-username-label" class="uk-form-label" for="form-horizontal-text">AO3 Username</label>
+            <label id="work-import-form-username-label" class="uk-form-label" for="work-import-form-username-input">AO3 Username</label>
             <div id="work-import-form-username-controls" class="uk-form-controls">
                 <div id="work-import-form-username-inline" class="uk-inline">
                     <input title="{% translate 'AO3 Username field' %}" id="work-import-form-username-input" class="uk-input uk-form-width-large" type="text" name="username">
@@ -41,7 +41,7 @@
             </div>
         </div>
         <div class="uk-margin toggle" id="work-import-form-username-parent" hidden>
-            <label id="work-import-form-username-label" class="uk-form-label" for="form-horizontal-text">Work ID or URL <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work ID help' %}"></sup>    
+            <label id="work-import-form-username-label" class="uk-form-label" for="work-import-form-work-id-input">Work ID or URL <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work ID help' %}"></sup>    
                     <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The work ID is the unique number that follows 'works/' in the URL (ex: archiveofourown.org/works/<strong>33568501</strong> ){% endblocktranslate %}</div></label>
             <div id="work-import-form-work-id-controls" class="uk-form-controls">
                 <div id="work-import-form-work-id-inline" class="uk-inline">
@@ -50,7 +50,7 @@
             </div>
         </div>
         <div class="uk-margin" id="work-import-form-draft-parent">
-            <label id="work-import-form-draft-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Save work(s) as draft' %}</label>
+            <label id="work-import-form-draft-label" class="uk-form-label" for="work-import-form-draft-checkbox">{% translate 'Save work(s) as draft' %}</label>
             <div id="work-import-form-draft-controls" class="uk-form-controls">
                 <div id="work-import-form-draft-inline" class="uk-inline">
                     <label id="work-import-form-draft-switch-label" class="switch"><input class="uk-checkbox" title="{% translate 'Save as draft toggle' %}" id="work-import-form-draft-checkbox" type="checkbox" name="save_as_draft"> <span id="work-import-form-draft-slider" class="slider round"></span> </label>
@@ -58,7 +58,7 @@
             </div>
         </div>
         <div class="uk-margin" id="work-import-form-comments-parent">
-            <label id="work-import-form-comments-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Allow any comments on work(s)' %}</label>
+            <label id="work-import-form-comments-label" class="uk-form-label" for="work-import-form-comments-checkbox">{% translate 'Allow any comments on work(s)' %}</label>
             <div id="work-import-form-comments-controls" class="uk-form-controls">
                 <div id="work-import-form-comments-inline" class="uk-inline">
                     <label id="work-import-form-comments-switch-label" class="switch"><input class="uk-checkbox" title="{% translate 'Allow any comments toggle' %}" id="work-import-form-comments-checkbox" type="checkbox" name="allow_comments" uk-toggle="target: #work-import-form-anon-parent" checked> <span id="work-import-form-comments-slider" class="slider round"></span> </label>
@@ -66,7 +66,7 @@
             </div>
         </div>
         <div class="uk-margin" id="work-import-form-anon-parent" hidden>
-            <label id="work-import-form-anon-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Allow anon comments on work(s)' %}</label>
+            <label id="work-import-form-anon-label" class="uk-form-label" for="work-import-form-anon-checkbox">{% translate 'Allow anon comments on work(s)' %}</label>
             <div id="work-import-form-anon-controls" class="uk-form-controls">
                 <div id="work-import-form-anon-inline" class="uk-inline">
                     <label id="work-import-form-anon-switch-label" class="switch"><input class="uk-checkbox" title="{% translate 'Allow anon comments toggle' %}" id="work-import-form-anon-checkbox" type="checkbox" name="allow_anon_comments"> <span id="work-import-form-anon-slider" class="slider round"></span> </label>

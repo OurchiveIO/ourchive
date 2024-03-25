@@ -80,7 +80,7 @@ function populateUserInput(user_id, username) {
         </div>
         <input type="hidden" id="redirect_toc" name="redirect_toc">
         <div class="uk-margin" id="work-form-type-parent">
-            <label id="work-form-type-label" class="uk-form-label" for="form-horizontal-text">Work Type <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work type help' %}"></sup>    
+            <label id="work-form-type-label" class="uk-form-label" for="work-form-type-select">Work Type <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work type help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Work types are admin-configured. Select the one that best matches what kind of work you're posting.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-type-controls" class="uk-form-controls">
@@ -97,7 +97,7 @@ function populateUserInput(user_id, username) {
         </div>
 
         <div class="uk-margin" id="work-form-title-form-parent">
-            <label id="work-form-title-form-label" class="uk-form-label" for="form-horizontal-text">Title</label>
+            <label id="work-form-title-form-label" class="uk-form-label" for="work-form-title-input">Title</label>
             <div id="work-form-title-controls" class="uk-form-controls">
                 <div id="work-form-title-inline" class="uk-inline">
                     <input id="work-form-title-input" class="uk-input uk-form-width-large" type="text" name="title" title="{% translate 'Work title input' %}" value="{{ work.title|default_if_none:'' }}">
@@ -105,7 +105,7 @@ function populateUserInput(user_id, username) {
             </div>
         </div>
         <div class="uk-margin" id="work-form-cocreator-form-parent">
-            <label id="work-form-cocreator-form-label" class="uk-form-label" for="work-form-cocreator-controls">{% translate 'Co-creators' %}</label>
+            <label id="work-form-cocreator-form-label" class="uk-form-label" for="work_form_new_user">{% translate 'Co-creators' %}</label>
             <div id="work-form-cocreator-controls" class="uk-form-controls">                
                 <div id="work-form-cocreator-inline" class="uk-inline">
                     <div id="work-form-users">
@@ -126,7 +126,7 @@ function populateUserInput(user_id, username) {
         <hr/>
         <h4 id="obj-attrs-form-header">Work Settings</h4>
         <div class="uk-margin" id="work-form-complete-parent">
-            <label id="work-form-complete-label" class="uk-form-label" for="form-horizontal-text">Complete?</label>
+            <label id="work-form-complete-label" class="uk-form-label" for="work-form-complete-checkbox">Complete?</label>
             <div id="work-form-complete-controls" class="uk-form-controls">
                 <div id="work-form-complete-inline" class="uk-inline">
                     <label id="work-form-complete-switch-label" class="switch"><input title="{% translate 'Work complete toggle' %}" class="uk-checkbox" id="work-form-complete-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}> <span id="work-form-complete-slider" class="slider round"></span> </label>
@@ -134,7 +134,7 @@ function populateUserInput(user_id, username) {
             </div>
         </div>
         <div class="uk-margin" id="work-form-draft-parent">
-            <label id="work-form-draft-label" class="uk-form-label" for="form-horizontal-text">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work draft help' %}"></sup>    
+            <label id="work-form-draft-label" class="uk-form-label" for="work-form-draft-checkbox">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work draft help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-draft-controls" class="uk-form-controls">
@@ -144,7 +144,7 @@ function populateUserInput(user_id, username) {
             </div>
         </div>
         <div class="uk-margin" id="work-form-publish-all-parent">
-            <label id="work-form-publish-all-label" class="uk-form-label" for="form-horizontal-text">{% translate 'Publish All' %}? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work draft help' %}"></sup>    
+            <label id="work-form-publish-all-label" class="uk-form-label" for="work-form-publish-all-checkbox">{% translate 'Publish All' %}? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work draft help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your work and all chapters will no longer be in draft state.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-publish-all-controls" class="uk-form-controls">
@@ -154,7 +154,7 @@ function populateUserInput(user_id, username) {
             </div>
         </div>
         <div class="uk-margin" id="work-form-created-parent">
-            <label id="work-form-created-label" class="uk-form-label" for="form-horizontal-text">Post Date</label>
+            <label id="work-form-created-label" class="uk-form-label" for="work-form-created-on-input">Post Date</label>
             <div id="work-form-created-controls" class="uk-form-controls">
                 <div id="work-form-created-inline" class="uk-inline">
                     <input title="{% translate 'Work created on' %}" id="work-form-created-on-input" type="date" name="created_on" value="{{ work.created_on }}"> 
@@ -162,7 +162,7 @@ function populateUserInput(user_id, username) {
             </div>
         </div>
         <div class="uk-margin" id="work-form-updated-parent">
-            <label id="work-form-updated-label" class="uk-form-label" for="form-horizontal-text">Update Date</label>
+            <label id="work-form-updated-label" class="uk-form-label" for="work-form-updated-on-hidden">Update Date</label>
             <div id="work-form-updated-controls" class="uk-form-controls">
                 <div id="work-form-updated-inline" class="uk-inline">
                     <input title="{% translate 'Work updated on' %}" id="work-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ work.updated_on }}"> 
@@ -172,7 +172,7 @@ function populateUserInput(user_id, username) {
         </div>
         {% if settings.AllowComments %}
         <div class="uk-margin" id="work-form-allow-comments-parent">
-            <label id="work-form-allow-comments-label" class="uk-form-label" for="form-horizontal-text">Allow Comments?</label>
+            <label id="work-form-allow-comments-label" class="uk-form-label" for="work-form-allow-comments-select">Allow Comments?</label>
             <div id="work-form-allow-comments-controls" class="uk-form-controls">
                 <select id="work-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted" title="{% translate 'Comment settings' %}">                    
                     <option id="work-form-allow-comments-all" {% if work.anon_comments_permitted and work.comments_permitted %} selected {% endif %}>All</option>
@@ -185,7 +185,7 @@ function populateUserInput(user_id, username) {
         {% endif %}
         {% if user.can_upload_export_files %}
         <div class="uk-margin" id="work-form-preferred-download-parent">
-            <label id="work-form-preferred-download-label" class="uk-form-label" for="form-horizontal-text">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Preferred export help' %}"></sup>    
+            <label id="work-form-preferred-download-label" class="uk-form-label" for="work-form-preferred-download-select">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Preferred export help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you have a file for your work that you'd prefer users download, you can upload here and it will display at the top of the download list.{% endblocktranslate %}</div>
             </label>
             <div id="work-form-preferred-download-controls" class="uk-form-controls">
@@ -198,7 +198,7 @@ function populateUserInput(user_id, username) {
             </div>
         </div>
         <div class="uk-margin" id="work-export-file-parent">
-            <label id="work-export-file-parent" class="uk-form-label" for="form-horizontal-text">Export File</label>
+            <label id="work-export-file-parent" class="uk-form-label" for="work-export-file-inline">Export File</label>
             {% if work.preferred_download_url %}
             <div id="work-export-preferred-download" class="uk-form-controls">
                 <p>Existing file: {{ work.preferred_download_url }}</p>
@@ -219,7 +219,7 @@ function populateUserInput(user_id, username) {
         <hr/>
         <h4 id="obj-attrs-form-header">Work Details</h4>
         <div class="uk-margin" id="work-form-summary-parent">
-            <label id="work-form-summary-label" class="uk-form-label" for="form-horizontal-text">Summary</label>
+            <label id="work-form-summary-label" class="uk-form-label" for="summaryEditor">Summary</label>
             {% include 'ourchive_tinymce_template.html' with form_field_value=work.summary form_field='summary' obj_name='work' min_height=200 %}
         </div>
         <div class="uk-margin uk-width-1-6"><a href="#" id="work-notes-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-notes-hidden-parent">{% translate 'Notes' %}</a></div>
@@ -244,7 +244,7 @@ function populateUserInput(user_id, username) {
             </div>
         </div>
         <div id="work-form-cover-alt-parent" class="uk-margin" {% if not work.cover_url %}hidden{% endif %}>
-            <label id="work-form-cover-alt-label" class="uk-form-label" for="form-horizontal-text">Cover Alt Text</label>
+            <label id="work-form-cover-alt-label" class="uk-form-label" for="work-form-cover-alt-input">Cover Alt Text</label>
             <div id="work-form-cover-alt-controls" class="uk-form-controls">
                 <div id="work-form-cover-alt-inline" class="uk-inline">
                     <input id="work-form-cover-alt-input" class="uk-input uk-form-width-large" placeholder="Add a description for your cover image" type="text" name="cover_alt_text" value="{{ work.cover_alt_text|default_if_none:'' }}">
@@ -257,7 +257,7 @@ function populateUserInput(user_id, username) {
     </div>
     <div><hr/></div>
     <div id="multichapter-select" class="uk-width-1-1">
-        <label class="uk-form-label" for="form-horizontal-text">Multichapter?</label>
+        <label class="uk-form-label" for="work-form-multichapter-checkbox">Multichapter?</label>
         <div id="work-form-multichapter-control" class="uk-form-controls">
             <label id="work-form-multichapter-switch" class="switch"><input class="uk-checkbox" id="work-form-multichapter-checkbox" title="{% translate 'Multichapter toggle' %}" type="checkbox" uk-toggle="target: .work-chapter-content" {% if chapters|length > 1 or multichapter == 'true' %} checked {% endif %} name="multichapter"><span id="work-form-multichapter-slider" class="slider round"></span></label>
         </div>
