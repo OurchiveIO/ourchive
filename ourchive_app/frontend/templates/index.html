@@ -147,9 +147,9 @@
 	                    			<li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a></li>
 								    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a></li>
 								    	<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="profile-subnav">
-	                    				<li id="nav-edit-profile-li"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-edit-profile-link">{% translate 'Edit Profile' %}</a></li>
+	                    				<li id="nav-edit-profile-li"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-edit-profile-link">{% translate 'User Settings' %}</a></li>
+	                    				<li id="nav-edit-account-li"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-edit-account-link">{% translate 'Account Settings' %}</a></li>
 	                    				<li id="nav-cocreator-approval-li"><a href="{% url 'fe-view-approvals'%}" id="nav-view-approvals-link">{% translate 'Approvals' %}</a></li>
-	                    				<li id="nav-edit-account-li"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-edit-account-link">{% translate 'Edit Account' %}</a></li>
 	                    				<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">{% translate 'Blocklist' %}</a></li>
 	                    			</ul>
 	                    			<li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link">{% translate 'Import Work(s)' %}</a></li>
