@@ -79,6 +79,15 @@ class LocalFileHelper:
 class S3FileHelper:
     common = FileCommon()
 
+    obj_config = {
+        "aws_access_key_id": os.getenv('OURCHIVE_S3_SECRET_KEY'),
+        "aws_secret_access_key": os.getenv('OURCHIVE_S3_SECRET_ACCESS_KEY'),
+        "endpoint_url": f"{os.getenv('OURCHIVE_S3_ENDPOINT_PROTOCOL')}://{os.getenv('OURCHIVE_S3_ENDPOINT_URL')}",
+    }
+
+    def get_full_url(self, filename):
+        return f"{os.getenv('OURCHIVE_S3_ENDPOINT_PROTOCOL')}://{settings.S3_BUCKET}.{os.getenv('OURCHIVE_S3_ENDPOINT_URL')}/{filename}"
+
     def handle_uploaded_file(self, file, name, username):
         """Upload a file to an S3 bucket
 
@@ -87,11 +96,13 @@ class S3FileHelper:
         :return: True if file was uploaded, else False
         """
         # Upload the file
-        s3_client = boto3.client('s3')
+        s3_client = boto3.client('s3', **self.obj_config)
         filename = self.common.get_filename(file.name)
         try:
-            response = s3_client.upload_fileobj(file, settings.S3_BUCKET, filename)
+            response = s3_client.upload_fileobj(file, settings.S3_BUCKET, filename, ExtraArgs={'ACL': 'public-read'})
+            logging.debug(f'S3 file upload: {response}')
         except ClientError as e:
             logging.error(e)
-            return filename
-        return None
+            print(e)
+            return None
+        return self.get_full_url(filename)

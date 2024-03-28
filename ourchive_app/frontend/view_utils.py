@@ -331,8 +331,10 @@ def format_date_for_template(obj, field_name, is_list=False):
 	obj[field_name] = parse(obj[field_name]).date()
 	return obj
 
+
 def get_owns_object(obj, request):
-	return any(user['username'] == request.user.username for user in obj['users'])
+	return any(user['username'] == request.user.username for user in obj['users']) or obj.get('user_id', 0) == request.user.id
+
 
 def format_comments_for_template(comments):
 	for comment in comments:
@@ -340,6 +342,7 @@ def format_comments_for_template(comments):
 		if comment['replies']:
 			comment['replies'] = format_comments_for_template(comment['replies'])
 	return comments
+
 
 def referrer_redirect(request, alternate_url=None):
 	response = None
