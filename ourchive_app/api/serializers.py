@@ -19,6 +19,7 @@ import unidecode
 from etl.models import WorkImport
 from django.db.models.signals import post_save
 import itertools
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -434,7 +435,7 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
         chapter_offset = validated_data.pop('offset') if 'offset' in validated_data else 0
         comment_thread = validated_data.pop('comment_thread') if 'comment_thread' in validated_data else None
         comment_count = validated_data.pop('comment_count') if 'comment_count' in validated_data else None
-        validated_data['text'] = clean_text(validated_data['text']) if validated_data['text'] is not None else ''
+        validated_data['text'] = clean_text(validated_data['text'], self.context['request'].user) if validated_data['text'] is not None else ''
         comment = ChapterComment.objects.create(**validated_data)
         comment.chapter.comment_count = ChapterComment.objects.filter(chapter__id=comment.chapter.id).count()
         comment.chapter.work.comment_count = ChapterComment.objects.filter(chapter__work__id=comment.chapter.work.id).count()
@@ -461,7 +462,7 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['text'] = clean_text(ret['text']) if ret['text'] is not None else ''
+        ret['text'] = clean_text(ret['text'], self.context['request'].user) if ret['text'] is not None else ''
         return ret
 
 
@@ -487,7 +488,7 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         if 'user' in validated_data and isinstance(validated_data['user'], AnonymousUser):
             validated_data.pop('user')
-        validated_data['text'] = clean_text(validated_data['text'])
+        validated_data['text'] = clean_text(validated_data['text'], self.context['request'].user)
         comment = BookmarkComment.objects.create(**validated_data)
         user = User.objects.filter(id=comment.bookmark.user.id).first()
         notification_type = NotificationType.objects.filter(
@@ -511,7 +512,7 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['text'] = clean_text(ret['text'])
+        ret['text'] = clean_text(ret['text'], self.context['request'].user)
         return ret
 
 
@@ -537,7 +538,7 @@ class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         if 'user' in validated_data and isinstance(validated_data['user'], AnonymousUser):
             validated_data.pop('user')
-        validated_data['text'] = clean_text(validated_data['text'])
+        validated_data['text'] = clean_text(validated_data['text'], self.context['request'].user)
         comment = CollectionComment.objects.create(**validated_data)
         user = User.objects.filter(id=comment.collection.user.id).first()
         notification_type = NotificationType.objects.filter(
@@ -561,7 +562,7 @@ class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['text'] = clean_text(ret['text'])
+        ret['text'] = clean_text(ret['text'], self.context['request'].user)
         return ret
 
 
@@ -602,7 +603,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     def clean_rich_text(self, rich_fields, validated_data):
         for field in rich_fields:
             if field in validated_data:
-                validated_data[field] = clean_text(validated_data[field]) if field in validated_data and validated_data[field] is not None else ''
+                validated_data[field] = clean_text(validated_data[field], self.context['request'].user) if field in validated_data and validated_data[field] is not None else ''
         return validated_data
 
     def get_rich_text_fields(self):
@@ -784,9 +785,9 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             work = AttributeValueSerializer.process_attributes(work, validated_data, attributes)
         validated_data['word_count'] = work.word_count
         if 'summary' in validated_data:
-            validated_data['summary'] = clean_text(validated_data['summary']) if validated_data['summary'] is not None else ''
+            validated_data['summary'] = clean_text(validated_data['summary'], self.context['request'].user) if validated_data['summary'] is not None else ''
         if 'notes' in validated_data:
-            validated_data['notes'] = clean_text(validated_data['notes']) if validated_data['notes'] is not None else ''
+            validated_data['notes'] = clean_text(validated_data['notes'], self.context['request'].user) if validated_data['notes'] is not None else ''
         if 'cover_url' in validated_data:
             if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
                 validated_data['cover_url'] = ''
@@ -811,8 +812,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         if 'cover_url' in validated_data:
             if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
                 validated_data['cover_url'] = ''
-        validated_data['summary'] = clean_text(validated_data['summary']) if validated_data['summary'] is not None else ''
-        validated_data['notes'] = clean_text(validated_data['notes']) if validated_data['notes'] is not None else ''
+        validated_data['summary'] = clean_text(validated_data['summary'], self.context['request'].user) if validated_data['summary'] is not None else ''
+        validated_data['notes'] = clean_text(validated_data['notes'], self.context['request'].user) if validated_data['notes'] is not None else ''
         if 'updated_on' not in validated_data:
             validated_data['updated_on'] = datetime.datetime.now()
         work = Work.objects.create(**validated_data)
@@ -906,7 +907,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
             if 'rating' in validated_data:
                 validated_data.pop('rating')
         if 'description' in validated_data:
-            validated_data['description'] = clean_text(validated_data['description']) if validated_data['description'] is not None else ''
+            validated_data['description'] = clean_text(validated_data['description'], self.context['request'].user) if validated_data['description'] is not None else ''
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
             bookmark = self.process_tags(bookmark, validated_data, tags)
@@ -927,7 +928,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
                 validated_data.pop('rating')
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
-        validated_data['description'] = clean_text(validated_data['description']) if validated_data['description'] is not None else ''
+        validated_data['description'] = clean_text(validated_data['description'], self.context['request'].user) if validated_data['description'] is not None else ''
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -1042,9 +1043,9 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             attributes = validated_data.pop('attributes')
             bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
         if 'short_description' in validated_data:
-            validated_data['short_description'] = clean_text(validated_data['short_description']) if validated_data['short_description'] is not None else ''
+            validated_data['short_description'] = clean_text(validated_data['short_description'], self.context['request'].user) if validated_data['short_description'] is not None else ''
         if 'description' in validated_data:
-            validated_data['description'] = clean_text(validated_data['description']) if validated_data['description'] is not None else ''
+            validated_data['description'] = clean_text(validated_data['description'], self.context['request'].user) if validated_data['description'] is not None else ''
         if 'works' in validated_data:
             works = validated_data.pop('works')
             collection = BookmarkCollection.objects.get(id=bookmark.id)
@@ -1066,6 +1067,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         bookmark_list = validated_data.pop('bookmarks') if 'bookmarks' in validated_data else []
+        works_list = validated_data.pop('works') if 'works' in validated_data else []
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
         tags = []
         attributes = None
@@ -1073,6 +1075,10 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             tags = validated_data.pop('tags')
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
+        if 'short_description' in validated_data:
+            validated_data['short_description'] = clean_text(validated_data['short_description'], self.context['request'].user) if validated_data['short_description'] is not None else ''
+        if 'description' in validated_data:
+            validated_data['description'] = clean_text(validated_data['description'], self.context['request'].user) if validated_data['description'] is not None else ''
         bookmark_collection = BookmarkCollection.objects.create(**validated_data)
         for item in tags:
             tag_id = unidecode.unidecode(clean_text(item['text'].lower()))
@@ -1092,6 +1098,10 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             if bookmark.draft:
                 raise serializers.ValidationError({"message": ["Cannot add draft bookmark to collection."]})
             bookmark_collection.bookmarks.add(bookmark)
+        for work in works_list:
+            if work.draft:
+                raise serializers.ValidationError({"message": [_("Cannot add draft work to collection.")]})
+            bookmark_collection.bookmarks.add(work)
         bookmark_collection.save()
         bookmark_collection = self.process_users(bookmark_collection, users)
         bookmark_collection.draft = validated_data['draft']
