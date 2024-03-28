@@ -201,7 +201,7 @@ function populateUserInput(user_id, username) {
             <label id="work-export-file-parent" class="uk-form-label" for="work-export-file-inline">Export File</label>
             {% if work.preferred_download_url %}
             <div id="work-export-preferred-download" class="uk-form-controls">
-                <p>Existing file: {{ work.preferred_download_url }}</p>
+                <p class="uk-text-break">Existing file: {{ work.preferred_download_url }}</p>
             </div>
             {% endif %}
             <div id="work-export-file-controls" class="uk-form-controls">
