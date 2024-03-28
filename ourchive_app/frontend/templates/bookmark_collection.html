@@ -3,7 +3,7 @@
 {% block content %}	
 {% load static %}
 {% load i18n %}
-<div class="uk-text-left uk-width-1-1" id="bk-collection-uk-grid">
+<div class="uk-text-left uk-width-1-1 ourchive-article-parent" id="bk-collection-uk-grid">
 	<script>
 		function loadMoreComments(next, chapterId) {
 			fetch(next)
@@ -54,7 +54,7 @@
 	   		<hr class="ourchive-hr" id="bkcol-desc-hr"/>
 	   	</div>
 	   	{% endif %}
-	   	<div class="uk-width-1-1 uk-margin-bottom uk-padding-remove" id="bkcol-slideshow-parent">
+	   	<div class="uk-width-1-1 uk-margin-bottom uk-padding-remove ourchive-read-div" id="bkcol-slideshow-parent">
 	   		{% if bkcol.works_readonly %}
 	   		<div id="bkcol-bookmarks-parent-sm">
 	   			<span class="uk-text-lead">Works</span>
