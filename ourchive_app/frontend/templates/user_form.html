@@ -7,7 +7,7 @@
 		{% csrf_token %}
 		<div id="user-form-buttons-top-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
 			<div class="uk-width-1-2@m uk-width-1-1@s" id="edit-profile-header-parent">
-            	<span id="edit-profile-header-span" class="uk-text-large">Edit Profile Information</span>
+            	<span id="edit-profile-header-span" class="uk-text-large">{% translate 'User Settings' %}</span>
         	</div>
 	        <div class="uk-text-right uk-width-1-2@m uk-width-1-1@s" id="user-form-buttons-container">
 	        	<input id="user-form-cancel" class="uk-button uk-width-small uk-button-default" onclick="history.back()" value="Cancel"/>
@@ -15,7 +15,7 @@
 	            <input id="user-form-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
 	        </div>
 	    </div>
-    <hr id="user-form-fieldset-hr"/>
+    <hr id="user-form-fieldset-hr" class="ourchive-hr"/>
 		<input type="hidden" id="unaltered_icon" name="unaltered_icon" value="{{ user.icon }}">
 		<input type="hidden" id="user_id" name="user_id" value="{{ user.id }}">
 		<input type="hidden" id="user" name="user" value="{{ user.username }}">
@@ -77,6 +77,17 @@
             </div>
         </div> 
 
+        {% if user.attribute_types %}
+            {% include "object_attributes_form.html" with object='User' attribute_types=user.attribute_types show_header=False %}
+        {% endif %}
+
+        <div class="uk-margin" id="profile-text-parent">
+            <label id="profile-text-label" class="uk-form-label" for="profileEditor">Profile Text</label>
+            {% include 'ourchive_tinymce_template.html' with form_field_value=user.profile form_field='profile' obj_name='user' min_height=300 %}
+        </div>
+        
+
+        <hr class="ourchive-hr" id="user-settings-hr"/>
         <div class="uk-margin" id="profile-collapse-image-parent">
             <label id="profile-collapse-image-label" class="uk-form-label" for="profile-collapse-image-checkbox">Collapse image fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse image fields help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter image fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
@@ -130,14 +141,6 @@
                 </div>
             </div>
         </div>
-        <div class="uk-margin" id="profile-text-parent">
-            <label id="profile-text-label" class="uk-form-label" for="profileEditor">Profile Text</label>
-            {% include 'ourchive_tinymce_template.html' with form_field_value=user.profile form_field='profile' obj_name='user' min_height=300 %}
-        </div>
-        {% if user.attribute_types %}
-            <hr id="chapter-attributes-hr"/>
-            {% include "object_attributes_form.html" with object='User' attribute_types=user.attribute_types show_header=False %}
-        {% endif %}
     <div id="user-form-buttons-bottom-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
         <div class="uk-text-right uk-align-right uk-width-1-1" id="user-form-buttons-btm-container">
             <input id="user-form-btm-cancel" class="uk-button uk-width-small uk-button-default" onclick="history.back()" value="Cancel" title="{% translate 'Cancel' %}"/>
