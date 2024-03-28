@@ -24,7 +24,7 @@
 	   	</div>
 	   	{% endif %}
 	   	<div id="bkcol-header-title" class="uk-width-2-3 uk-padding-remove">
-	   		<h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bkcol.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large" style="padding-left: 10px;"> by {% for user in bkcol.users %}<a id="bkcol-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="bkcol-user-link" href="{% url 'user-profile-parent' bkcol.user_id %}">{{ bkcol.user }}</a>{% endfor %}</span>
+	   		<h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bkcol.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large" style="padding-left: 10px;"> by {% for user in bkcol.users %}<a id="bkcol-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="bkcol-user-link" href="{% url 'user-profile-parent' bkcol.user_id %}">{{ bkcol.user }}</a>{% endfor %}</span>
 	   		{% if bkcol.draft %}
 	            <div id="bkcol-draft-badge" class="uk-width-auto uk-margin-bottom">
 	                <span id="bkcol-draft-span" class="uk-label uk-label-warning"><strong id="bkcol-draft-text">DRAFT</strong></span>
