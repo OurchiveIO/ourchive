@@ -12,21 +12,6 @@
 	        url: '{% url 'api-file-upload' %}',
 	        multiple: false,
 	        beforeSend: function () {
-	            function getCookie(name) {
-	                var cookieValue = null;
-	                if (document.cookie && document.cookie !== '') {
-	                    var cookies = document.cookie.split(';');
-	                    cookies.forEach(function (value) { 
-	                        var cookie = value.trim();
-	                        // Does this cookie string begin with the name we want?
-	                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-	                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-	                            return;
-	                        }
-	                    });
-	                }
-	                return cookieValue;
-	            }
 	            var csrftoken = getCookie('csrftoken');
 	            arguments[0]['headers']['X-CSRFToken'] = csrftoken;
 	        },

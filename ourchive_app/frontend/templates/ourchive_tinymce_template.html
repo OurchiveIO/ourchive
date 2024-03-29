@@ -3,6 +3,9 @@
         <input type="hidden" id="{{form_field}}" name="{{form_field}}" value="{{form_field_value|safe|default_if_none:''}}">
         <textarea id="{{form_field}}Editor"></textarea>
         <script type="text/javascript">
+          var theme = localStorage.getItem('fe-theme');
+          var skin = theme === 'dark' ? 'oxide-dark' : 'oxide';
+          var content_css = theme === 'dark' ? 'dark' : 'default';
                           tinymce.init({
                             selector: '#{{form_field}}Editor',
                     width: '100%',
@@ -12,6 +15,9 @@
                     height: {% if min_height is None %}400{% else %}{{min_height}}{% endif %},
                     autoresize_min_height: {% if min_height is None %}400{% else %}{{min_height}}{% endif %},
                     autoresize_max_height: 800,
+                    skin: skin,
+                    content_css: content_css,
+                    toolbar_mode: 'sliding',
                     plugins: [
                       'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
                       'fullscreen', 'insertdatetime',
