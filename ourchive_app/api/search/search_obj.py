@@ -12,7 +12,7 @@ class Common():
         return tags
 
     def get_completes(dict_obj):
-        completes = dict_obj.get('complete', [])
+        completes = dict_obj.get('Completion Status', [])
         new_completes = []
         for item in completes:
             new_completes.append(int(item))
@@ -97,7 +97,7 @@ class WorkFilter(object):
                 self.include_filters['audio_length_range']['ranges'].append(range_tuple)
             self.include_filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
             self.include_filters['word_count']['word_count__gte'] = dict_obj.get('word_count_gte', [])
-            self.include_filters['type']['work_type__type_name__exact'] = dict_obj.get('work_type', [])
+            self.include_filters['type']['work_type__type_name__exact'] = dict_obj.get('Work Type', [])
             for range_tuple in dict_obj.get('word_count_range', []):
                 self.include_filters['word_count_range']['ranges'].append(range_tuple)
         else:
@@ -109,7 +109,7 @@ class WorkFilter(object):
                 self.exclude_filters['audio_length_range']['ranges'].append(range_tuple)
             self.exclude_filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
             self.exclude_filters['word_count']['word_count__gte'] = dict_obj.get('word_count_gte', [])
-            self.exclude_filters['type']['work_type__type_name__exact'] = dict_obj.get('work_type', [])
+            self.exclude_filters['type']['work_type__type_name__exact'] = dict_obj.get('Work Type', [])
             for range_tuple in dict_obj.get('word_count_range', []):
                 self.exclude_filters['word_count_range']['ranges'].append(range_tuple)
 
@@ -380,4 +380,22 @@ class GlobalSearch(object):
         self.collection_search = CollectionSearch().to_dict()
 
     def to_dict(self):
+        return self.__dict__
+
+
+class FilterFacet(object):
+    def __init__(self, label, checked):
+        self.label = label
+        self.checked = checked
+
+
+class ResultFacet(object):
+    def __init__(self, id, label, values=[], object_type=None):
+        self.id = id
+        self.label = label
+        self.values = values
+        self.object_type = object_type
+
+    def to_dict(self):
+        self.values = [x.__dict__ for x in self.values]
         return self.__dict__

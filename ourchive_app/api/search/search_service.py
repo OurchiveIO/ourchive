@@ -10,9 +10,9 @@ class OurchiveSearch:
 
 	def do_search(self, **kwargs):
 		results = {}
-		if 'tag_id' in kwargs:
+		if 'tag_id' in kwargs and kwargs['tag_id']:
 			return self.filter_by_tag(**kwargs)
-		if 'attr_id' in kwargs:
+		if 'attr_id' in kwargs and kwargs['attr_id']:
 			return self.filter_by_attribute(**kwargs)
 		if ('work_search') in kwargs:
 			results['work'] = self.searcher.search_works(**kwargs['work_search'])
