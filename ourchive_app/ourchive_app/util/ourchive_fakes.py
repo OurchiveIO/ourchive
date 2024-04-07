@@ -43,6 +43,7 @@ class OurchiveFakes():
 			if persist_db:
 				work.save()
 			if chapter_count > 0:
+				chapters = []
 				for y in range(1, chapter_count+1):
 					chapter = models.Chapter(user_id=user_id,
 						work=work,
@@ -67,8 +68,9 @@ class OurchiveFakes():
 						comment_count=self.fake.pyint())
 					if persist_db:
 						chapter.save()
+					chapters.append(chapter)
 			works.append(work)
-		return works
+		return (works, chapters)
 
 	def generate_bookmarks(self, obj_count=1, persist_db=False):
 		pass
