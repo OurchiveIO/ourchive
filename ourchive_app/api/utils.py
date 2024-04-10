@@ -1,6 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 import nh3
 import unidecode
+from django.contrib.auth.models import AnonymousUser
 
 
 def count_words(text):
