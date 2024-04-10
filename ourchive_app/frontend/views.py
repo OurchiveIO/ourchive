@@ -1239,7 +1239,7 @@ def work(request, pk, chapter_offset=0):
 					chapter_comments = {'results': [chapter_comments], 'count': comment_count}
 					chapter['post_action_url'] = f"/works/{pk}/chapters/{chapter['id']}/comments/new?offset={chapter_offset}&comment_thread={comment_id}"
 					chapter['edit_action_url'] = f"""/works/{pk}/chapters/{chapter['id']}/comments/edit?offset={chapter_offset}&comment_thread={comment_id}"""
-				chapter_comments['results'] = format_comments_for_template(chapter_comments['results'])
+				chapter_comments['results'] = format_comments_for_template(chapter_comments.get('results', []))
 				chapter['comments'] = chapter_comments
 				chapter['comment_offset'] = comment_offset
 				chapter['load_more_base'] = f"/works/{pk}/chapters/{chapter['id']}/{chapter_offset}/comments"

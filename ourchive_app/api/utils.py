@@ -43,13 +43,13 @@ def clean_text(text, user=None):
                   "img": {'src', 'alt', 'width', 'height'},
                   "video": {'controls', 'width', 'height'}
                   }
-    if user and not user.can_upload_images:
+    if user and not isinstance(user, AnonymousUser) and not user.can_upload_images:
         tags.remove('img')
         attributes.remove('video')
-    if user and not user.can_upload_video:
+    if user and not isinstance(user, AnonymousUser) and not user.can_upload_video:
         tags.remove('video')
         attributes.remove('video')
-    if user and (not user.can_upload_video and not user.can_upload_audio and not user.can_upload_export_files and not user.can_upload_images):
+    if user and not isinstance(user, AnonymousUser) and (not user.can_upload_video and not user.can_upload_audio and not user.can_upload_export_files and not user.can_upload_images):
         # if absolutely no upload permissions have been configured to be true then you also can't embed iframes
         tags.remove('iframe')
         attributes.remove('iframe')
