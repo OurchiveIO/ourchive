@@ -511,7 +511,6 @@ class PostgresProvider:
 
         tag = Tag.objects.get(pk=kwargs['tag_id'])
         works = Work.objects.filter(tags__id__exact=tag.id)
-
         if work_filters[0]:
             works = works.filter(work_filters[0])
         if work_filters[1]:

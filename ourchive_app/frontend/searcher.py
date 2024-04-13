@@ -186,6 +186,11 @@ def get_response_facets(response_json, request_object):
 	facets = response_json['results']['facet']
 	include_facets = deepcopy(facets)
 	exclude_facets = deepcopy(facets)
+	for item in exclude_facets:
+		for value in item.get('values', []):
+			if value.get('checked', None):
+				value['checked'] = False
+	print(exclude_facets)
 	for item in request_object.return_keys.exclude:
 		exclude_facets = iterate_facets(exclude_facets, item)
 	for item in request_object.return_keys.include:
