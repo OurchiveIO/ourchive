@@ -2,55 +2,52 @@
 
 # ourchive
 
-Ourchive is a configurable, multi-media archive application. It grew out of a need for archival web apps that focus on browsability and searchability, and are able to be easily installed and maintained by a non-technical administrator.
+Ourchive is a configurable, multi-media archive application. We aim to meet the need for archival web apps that focus on browsability and searchability, and are able to be easily installed and maintained by a non-technical administrator.
 
 <!-- MarkdownTOC -->
 
-- [installation](#installation)
-- [contributor guidelines](#contributor-guidelines)
-    - [ways to contribute](#ways-to-contribute)
-- [code of conduct](#code-of-conduct)
+- [Installation](#links)
+- [Installation](#installation)
+- [Contributor Guidelines](#contributor-guidelines)
+    - [Ways to Contribute](#ways-to-contribute)
+- [Code of Conduct](#code-of-conduct)
+- [Thanks](#thanks)
 
 <!-- /MarkdownTOC -->
 
+<a name="links"></a>
+## Links
+
+- [Project Homepage](https://getourchive.io)
+- [Developers](https://developer.getourchive.io)
+- [Admin Docs](https://docs.getourchive.io/tag/admin-docs/)
+- [Blog](https://docs.getourchive.io/tag/blog/)
+
+
 <a name="installation"></a>
-## installation
+## Installation
 
-### Stack
+Ourchive runs on Django.
 
-Ourchive runs on Django, using Django Rest Framework for the backend. The following stack is recommended:
+To set up as an admin, see [Getting Started](https://docs.getourchive.io/admin-getting-started/) for futher instructions.
 
-Host: Debian Linux
-
-Server: NGINX
-
-Database: Postgres
-
-Task scheduler: Advanced Python Scheduler
-
-Search: Postgres 
-
-File Upload: Django 
-
-FFMPEG should be installed on the Linux machine to enable audio processing. Audio processing is a configurable setting.
-
-see [local-dev](local-dev.md) for further local dev set up.
+For local development, check out our [developer docs](https://developer.getourchive.io).
 
 
 <a name="contributor-guidelines"></a>
-## contributor guidelines
+## Contributor Guidelines
 
 <a name="ways-to-contribute"></a>
-### ways to contribute
+### Ways to Contribute
 
 - USE THIS APP! spin up an archive, play around with it, and when you run into issues, please log them as [github issues][github issues]! [good bug reporting guidelines](https://www.joelonsoftware.com/2000/11/08/painless-bug-tracking/)
 - Tell others about this app - word of mouth is always helpful.
 
 We welcome technical contributions as well:
 
-- Submit a code fix for a bug. Grab a bug out of the [issue tracker][github issues] and fix that sucker! Then make a pull request to the repo. [pull request guidelines]
+- Submit a code fix for a bug. Grab a bug out of the [issue tracker][github issues] and fix that sucker! Then make a pull request to the repo.
 - Submit a new feature request [as a GitHub issue][github issues].
-- Work on a feature that's on the roadmap, or unassigned in [the release version]()! Then make a pull request to the repo. [pull request guidelines]
+- Work on a feature that's on the roadmap, or unassigned in [the release version](https://tree.taiga.io/project/c-e-p-v06/kanban).
 - Submit a unit test.
 - Submit another unit test. Maybe even a ui test if you're feeling frisky!
 
@@ -60,11 +57,12 @@ Please see the [wiki](https://github.com/c-e-p/ourchive/wiki) for more on techni
 
 
 <a name="code-of-conduct"></a>
-## code of conduct
+## Code of Conduct
 
 Please see [the code of conduct and diversity statement](codeofconduct.md).
 
-## thanks
+<a name="thanks"></a>
+## Thanks
 
 We have used Unsplash free images for icon defaults.
 
