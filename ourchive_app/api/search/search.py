@@ -64,6 +64,13 @@ class ElasticSearchServiceBuilder:
 
 class PostgresProvider:
 
+    def __init__(self):
+        self.work_search = WorkSearch()
+        self.bookmark_search = BookmarkSearch()
+        self.tag_search = TagSearch()
+        self.collection_search = CollectionSearch()
+        self.user_search = UserSearch()
+
     def init_provider():
         print('init provider')
 
@@ -365,57 +372,55 @@ class PostgresProvider:
         return result_json
 
     def search_works(self, **kwargs):
-        work_search = WorkSearch()
-        work_search.from_dict(kwargs)
-        work_filters = self.get_filters(work_search)
+        self.work_search.from_dict(kwargs)
+        work_filters = self.get_filters(self.work_search)
         # TODO: this is global - shouldn't really be here
-        self.include_mode = work_search.include_mode
-        self.exclude_mode = work_search.exclude_mode
+        self.include_mode = self.work_search.include_mode
+        self.exclude_mode = self.work_search.exclude_mode
         # build query
-        query = self.get_query(work_search.term, work_search.term_search_fields)
+        query = self.get_query(self.work_search.term, self.work_search.term_search_fields)
         if not query and not work_filters:
             return {'data': []}
         resultset = self.run_queries(work_filters, query, Work, [
-                                     'title', 'summary'], work_search.term, kwargs['page'], work_search.order_by, True)
-        result_json = self.build_work_resultset(resultset[0], work_search.reserved_fields)
+                                     'title', 'summary'], self.work_search.term, kwargs['page'], self.work_search.order_by, True)
+        result_json = self.build_work_resultset(resultset[0], self.work_search.reserved_fields)
+        print(self.work_search.filter.include_filters)
+        print(self.work_search.filter.exclude_filters)
         return {'data': result_json, 'page': resultset[1]}
 
     def search_bookmarks(self, **kwargs):
-        bookmark_search = BookmarkSearch()
-        bookmark_search.from_dict(kwargs)
-        bookmark_filters = self.get_filters(bookmark_search)
-        query = self.get_query(bookmark_search.term, bookmark_search.term_search_fields)
+        self.bookmark_search.from_dict(kwargs)
+        bookmark_filters = self.get_filters(self.bookmark_search)
+        query = self.get_query(self.bookmark_search.term, self.bookmark_search.term_search_fields)
         if not query and not bookmark_filters:
             return {'data': []}
         resultset = self.run_queries(bookmark_filters, query, Bookmark, [
-                                     'title', 'description'], bookmark_search.term, kwargs.get('page', 1), bookmark_search.order_by, True, .85, True, True)
-        result_json = self.build_bookmark_resultset(resultset[0], bookmark_search.reserved_fields)
+                                     'title', 'description'], self.bookmark_search.term, kwargs.get('page', 1), self.bookmark_search.order_by, True, .85, True, True)
+        result_json = self.build_bookmark_resultset(resultset[0], self.bookmark_search.reserved_fields)
         return {'data': result_json, 'page': resultset[1]}
 
     def search_collections(self, **kwargs):
-        collection_search = CollectionSearch()
-        collection_search.from_dict(kwargs)
-        collection_filters = self.get_filters(collection_search)
-        query = self.get_query(collection_search.term,
-                               collection_search.term_search_fields)
+        self.collection_search.from_dict(kwargs)
+        collection_filters = self.get_filters(self.collection_search)
+        query = self.get_query(self.collection_search.term,
+                               self.collection_search.term_search_fields)
         if not query and not collection_filters:
             return {'data': []}
         resultset = self.run_queries(collection_filters, query, BookmarkCollection, [
-                                     'title', 'short_description'], collection_search.term, kwargs.get('page', 1), collection_search.order_by, True)
-        result_json = self.build_collection_resultset(resultset[0], collection_search.reserved_fields)
+                                     'title', 'short_description'], self.collection_search.term, kwargs.get('page', 1), self.collection_search.order_by, True)
+        result_json = self.build_collection_resultset(resultset[0], self.collection_search.reserved_fields)
         return {'data': result_json, 'page': resultset[1]}
 
     def search_users(self, **kwargs):
-        user_search = UserSearch()
-        user_search.from_dict(kwargs)
-        query = self.get_query(user_search.term, user_search.term_search_fields)
+        self.user_search.from_dict(kwargs)
+        query = self.get_query(self.user_search.term, self.user_search.term_search_fields)
         if query is None:
             return {'data': []}
         resultset = User.objects.filter(is_active=True).filter(query)[:20]
         result_json = []
         for result in resultset:
             result_dict = result.__dict__
-            for field in user_search.reserved_fields:
+            for field in self.user_search.reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
         return {'data': result_json, 'page': {}}
@@ -467,47 +472,42 @@ class PostgresProvider:
         return results
 
     def search_tags(self, **kwargs):
-        tag_search = TagSearch()
-        tag_search.from_dict(kwargs)
-        tag_filters = self.get_filters(tag_search)
-        query = self.get_query(tag_search.term, tag_search.term_search_fields)
+        self.tag_search.from_dict(kwargs)
+        tag_filters = self.get_filters(self.tag_search)
+        query = self.get_query(self.tag_search.term, self.tag_search.term_search_fields)
         if not query and not tag_filters:
             return {'data': []}
         resultset = self.run_queries(tag_filters, query, Tag, [
-                                     'text'], tag_search.term, kwargs.get('page', 1), tag_search.order_by, False, 0.6, False, False, True)
+                                     'text'], self.tag_search.term, kwargs.get('page', 1), self.tag_search.order_by, False, 0.6, False, False, True)
         result_json = []
         if resultset is None:
             return result_json
         for result in resultset[0]:
             tag_type = result.tag_type.label
             result_dict = result.__dict__
-            for field in tag_search.reserved_fields:
+            for field in self.tag_search.reserved_fields:
                 result_dict.pop(field, None)
             result_dict['tag_type'] = tag_type
             result_json.append(result_dict)
         return {'data': result_json, 'page': resultset[1]}
 
     def filter_by_tag(self, **kwargs):
-        tag_search = TagSearch()
-        work_search = WorkSearch()
-        work_search.from_dict(kwargs['work_search'])
-        work_filters = self.get_filters(work_search)
-        bookmark_search = BookmarkSearch()
-        bookmark_search.from_dict(kwargs['bookmark_search'])
-        bookmark_filters = self.get_filters(bookmark_search)
-        collection_search = CollectionSearch()
-        collection_search.from_dict(kwargs['collection_search'])
-        collection_filters = self.get_filters(collection_search)
+        self.work_search.from_dict(kwargs['work_search'])
+        work_filters = self.get_filters(self.work_search)
+        self.bookmark_search.from_dict(kwargs['bookmark_search'])
+        bookmark_filters = self.get_filters(self.bookmark_search)
+        self.collection_search.from_dict(kwargs['collection_search'])
+        collection_filters = self.get_filters(self.collection_search)
 
         page = kwargs['page'] if 'page' in kwargs else 1
         
 
         if 'page' in kwargs['work_search']:
-            work_search.page = int(kwargs['work_search']['page'])
+            self.work_search.page = int(kwargs['work_search']['page'])
         if 'page' in kwargs['bookmark_search']:
-            bookmark_search.page = int(kwargs['bookmark_search']['page'])
+            self.bookmark_search.page = int(kwargs['bookmark_search']['page'])
         if 'page' in kwargs['collection_search']:
-            collection_search.page = int(kwargs['collection_search']['page'])
+            self.collection_search.page = int(kwargs['collection_search']['page'])
 
         tag = Tag.objects.get(pk=kwargs['tag_id'])
         works = Work.objects.filter(tags__id__exact=tag.id)
@@ -531,23 +531,23 @@ class PostgresProvider:
 
         base_string = f'/tags/{kwargs["tag_id"]}?tag_id={kwargs["tag_id"]}&'
 
-        works_processed = self.process_results(works, work_search.page, Work, base_string)
-        bookmarks_processed = self.process_results(bookmarks, bookmark_search.page, Bookmark, base_string)
-        collections_processed = self.process_results(collections, collection_search.page, BookmarkCollection, base_string)
+        works_processed = self.process_results(works, self.work_search.page, Work, base_string)
+        bookmarks_processed = self.process_results(bookmarks, self.bookmark_search.page, Bookmark, base_string)
+        collections_processed = self.process_results(collections, self.collection_search.page, BookmarkCollection, base_string)
 
         # tag result object
         result_json = []
         tag_type = tag.tag_type.label
         result_dict = tag.__dict__
-        for field in tag_search.reserved_fields:
+        for field in self.tag_search.reserved_fields:
             result_dict.pop(field, None)
         result_dict['tag_type'] = tag_type
         result_json.append(result_dict)
         tag_results = {'data': result_json, 'page': {'count': len(result_json)}}
 
-        work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
-        bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
-        collection_results = {'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
+        work_results = {'data': self.build_work_resultset(works_processed[0], self.work_search.reserved_fields), 'page': works_processed[1]}
+        bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], self.bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
+        collection_results = {'data': self.build_collection_resultset(collections_processed[0], self.collection_search.reserved_fields), 'page': collections_processed[1]}
         results = {}
         results['work'] = work_results
         results['bookmark'] = bookmark_results
@@ -557,24 +557,21 @@ class PostgresProvider:
         return results
 
     def filter_by_attribute(self, **kwargs):
-        work_search = WorkSearch()
-        work_search.from_dict(kwargs['work_search'])
-        work_filters = self.get_filters(work_search)
-        bookmark_search = BookmarkSearch()
-        bookmark_search.from_dict(kwargs['bookmark_search'])
-        bookmark_filters = self.get_filters(bookmark_search)
-        collection_search = CollectionSearch()
-        collection_search.from_dict(kwargs['collection_search'])
-        collection_filters = self.get_filters(collection_search)
+        self.work_search.from_dict(kwargs['work_search'])
+        work_filters = self.get_filters(self.work_search)
+        self.bookmark_search.from_dict(kwargs['bookmark_search'])
+        bookmark_filters = self.get_filters(self.bookmark_search)
+        self.collection_search.from_dict(kwargs['collection_search'])
+        collection_filters = self.get_filters(self.collection_search)
 
         page = kwargs['page'] if 'page' in kwargs else 1
 
         if 'page' in kwargs['work_search']:
-            work_search.page = int(kwargs['work_search']['page'])
+            self.work_search.page = int(kwargs['work_search']['page'])
         if 'page' in kwargs['bookmark_search']:
-            bookmark_search.page = int(kwargs['bookmark_search']['page'])
+            self.bookmark_search.page = int(kwargs['bookmark_search']['page'])
         if 'page' in kwargs['collection_search']:
-            collection_search.page = int(kwargs['collection_search']['page'])
+            self.collection_search.page = int(kwargs['collection_search']['page'])
 
         attribute = AttributeValue.objects.get(pk=kwargs['attr_id'])
         works = Work.objects.filter(attributes__id__exact=attribute.id)
@@ -598,16 +595,16 @@ class PostgresProvider:
 
         base_string = f'/attributes/{kwargs["attr_id"]}?attr_id={kwargs["attr_id"]}&'
 
-        works_processed = self.process_results(works, work_search.page, Work, base_string)
-        bookmarks_processed = self.process_results(bookmarks, bookmark_search.page, Bookmark, base_string)
-        collections_processed = self.process_results(collections, bookmark_search.page, BookmarkCollection, base_string)
+        works_processed = self.process_results(works, self.work_search.page, Work, base_string)
+        bookmarks_processed = self.process_results(bookmarks, self.bookmark_search.page, Bookmark, base_string)
+        collections_processed = self.process_results(collections, self.bookmark_search.page, BookmarkCollection, base_string)
 
         # tag result object
         tag_results = {'data': {}, 'page': {'count': 0}}
 
-        work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
-        bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
-        collection_results = {'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
+        work_results = {'data': self.build_work_resultset(works_processed[0], self.work_search.reserved_fields), 'page': works_processed[1]}
+        bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], self.bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
+        collection_results = {'data': self.build_collection_resultset(collections_processed[0], self.collection_search.reserved_fields), 'page': collections_processed[1]}
         results = {}
         results['work'] = work_results
         results['bookmark'] = bookmark_results
