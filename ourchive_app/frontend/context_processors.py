@@ -42,5 +42,5 @@ def load_settings(request):
 
 def load_announcements(request):
     announcements = do_get(f'api/adminannouncements/active', request).response_data
-    announcements = [x for x in announcements['results'] if not request.COOKIES.get(f'dismiss_announcement_{x["id"]}')]
+    announcements = [x for x in announcements.get('results', []) if not request.COOKIES.get(f'dismiss_announcement_{x["id"]}')]
     return {'admin_announcements': announcements}
