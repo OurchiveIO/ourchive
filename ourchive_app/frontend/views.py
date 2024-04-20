@@ -30,17 +30,18 @@ def index(request):
 	response = do_get(f'api/tags/top', request, params=request.GET, object_name='top tags')
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
 		top_tags = response.response_data['results']
-		top_tags = sorted(top_tags, key=itemgetter('tag_count'), reverse=True)
-		highest_count = top_tags[0]['tag_count']
-		tag_max_size = 3
-		for tag in top_tags:
-			tag_count = tag['tag_count']
-			font_size = tag_count / highest_count * tag_max_size
-			font_size = abs(float(font_size))
-			if (font_size <= 1):
-				font_size = font_size + 1
-			tag['font_size'] = f'{font_size}em'
-		random.shuffle(top_tags)
+		if len(top_tags) > 0:
+			top_tags = sorted(top_tags, key=itemgetter('tag_count'), reverse=True)
+			highest_count = top_tags[0]['tag_count']
+			tag_max_size = 3
+			for tag in top_tags:
+				tag_count = tag['tag_count']
+				font_size = tag_count / highest_count * tag_max_size
+				font_size = abs(float(font_size))
+				if (font_size <= 1):
+					font_size = font_size + 1
+				tag['font_size'] = f'{font_size}em'
+			random.shuffle(top_tags)
 	response = do_get(f'api/works/recent', request, params=request.GET, object_name='recent works')
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
 		recent_works = response.response_data['results']
