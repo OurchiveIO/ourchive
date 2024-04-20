@@ -2,6 +2,7 @@
   pk: 1
   fields:
     label: Fandom
+    type_name: fandom
     admin_administrated: false
     required: false
     sort_order: 1
@@ -9,6 +10,7 @@
   pk: 2
   fields:
     label: Trope
+    type_name: trope
     admin_administrated: true
     required: false
     sort_order: 4
@@ -16,6 +18,7 @@
   pk: 169
   fields:
     label: Language
+    type_name: language
     admin_administrated: false
     required: false
     sort_order: 5
@@ -23,6 +26,7 @@
   pk: 170
   fields:
     label: Pairing
+    type_name: pairing
     admin_administrated: false
     required: false
     sort_order: 2
@@ -30,6 +34,7 @@
   pk: 171
   fields:
     label: Warnings
+    type_name: warnings
     admin_administrated: false
     required: false
     sort_order: 6
@@ -37,6 +42,7 @@
   pk: 172
   fields:
     label: Additional Tags
+    type_name: additionaltags
     admin_administrated: false
     required: false
     sort_order: 7
@@ -44,6 +50,7 @@
   pk: 173
   fields:
     label: Characters
+    type_name: characters
     admin_administrated: false
     required: false
     sort_order: 3
