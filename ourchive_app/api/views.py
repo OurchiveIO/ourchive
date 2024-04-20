@@ -783,7 +783,7 @@ class TopTagList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return Tag.objects.filter(tag_type__show_in_aggregate=True).annotate(num_uses=Count("bookmark") + Count("work")).order_by("-num_uses")[:15]
+        return Tag.objects.filter(tag_type__show_in_aggregate=True).annotate(num_uses=Count("bookmark") + Count("work")).filter(num_uses__gt=1).order_by("-num_uses")[:15]
 
 
 class RecentWorksList(generics.ListAPIView):
