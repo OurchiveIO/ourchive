@@ -643,7 +643,6 @@ class PostgresProvider:
         return tags_dict
 
     def process_include_tags(self, tags_dict):
-        print(self.work_search.filter.include_filters)
         for tag in self.work_search.filter.include_filters['tags']['tags__text__icontains']:
             tags_dict = self.get_fe_filter_tag(tag, tags_dict)
         for tag in self.bookmark_search.filter.include_filters['tags']['tags__text__icontains']:
@@ -721,7 +720,7 @@ class PostgresProvider:
         # todo: refactor - move attribute & tag processing to individual functions,
         # change facet dicts to pull from consts, use translation on labels,
         # move ranges to a dynamic number
-        result_json = []
+        result_json = {'include_facets': [], 'exclude_facets': []}
         work_types = WorkType.objects.all()
         work_types_list = []
         for work_type in work_types:
@@ -731,7 +730,8 @@ class PostgresProvider:
         work_types_dict["label"] = "Work Type"
         work_types_dict["values"] = work_types_list
         work_types_dict["object_type"] = 'work'
-        result_json.append(work_types_dict)
+        result_json['include_facets'].append(work_types_dict)
+        result_json['exclude_facets'].append(work_types_dict)
 
         # todo move to separate class
         word_count_dict = {}
@@ -740,7 +740,8 @@ class PostgresProvider:
         word_count_dict["filters"] = ["word_count_gte", "word_count_lte"]
         word_count_dict["values"] = [{"label": "From", "filter_val": "word_count_gte", "type": "text_range"},
                                      {"label": "To","filter_val": "word_count_lte", "type": "text_range"}]
-        result_json.append(word_count_dict)
+        result_json['include_facets'].append(word_count_dict)
+        result_json['exclude_facets'].append(word_count_dict)
 
         # todo move to db setting
         audio_length_dict = {}
@@ -753,7 +754,8 @@ class PostgresProvider:
                                        {"label": "2:00:00 - 3:00:00",
                                         "filter_val": "audio_length_range|ranges|120|180"},
                                        {"label": "3:00:00+", "filter_val": "audio_length_range|ranges|20000|180"}]
-        result_json.append(audio_length_dict)
+        result_json['include_facets'].append(audio_length_dict)
+        result_json['exclude_facets'].append(audio_length_dict)
 
         # todo move to db setting
         complete_dict = {}
@@ -761,7 +763,8 @@ class PostgresProvider:
         complete_dict["object_type"] = 'work'
         complete_dict["values"] = [{"label": "Complete", "filter_val": "1"},
                                    {"label": "Work In Progress", "filter_val": "0"}]
-        result_json.append(complete_dict)
+        result_json['include_facets'].append(complete_dict)
+        result_json['exclude_facets'].append(complete_dict)
 
         result_json = self.get_tag_facets(tag_id, results, result_json)
         result_json = self.get_attribute_facets(results, result_json)
