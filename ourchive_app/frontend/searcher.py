@@ -279,7 +279,9 @@ def build_and_execute_search(request):
 	tags = get_tag_results(response_json['results']['tag']) if 'results' in response_json and 'tag' in response_json['results'] else get_empty_response_obj()
 	users = response_json['results']['user'] if 'results' in response_json and 'user' in response_json['results'] else get_empty_response_obj()
 	collections = get_chive_results(response_json['results']['collection']) if 'results' in response_json and 'collection' in response_json['results'] else get_empty_response_obj()
-	facets = get_response_facets(response_json, request_object) if 'results' in response_json and 'facet' in response_json['results'] else {}
+	# facets = get_response_facets(response_json, request_object) if 'results' in response_json and 'facet' in response_json['results'] else {}
+	include_facets = response_json['results'].get('include_facets', [])
+	exclude_facets = response_json['results'].get('exclude_facets', [])
 	works_count = works['page']['count'] if 'page' in works else 0
 	bookmarks_count = bookmarks['page']['count'] if 'page' in bookmarks else 0
 	collections_count = collections['page']['count'] if 'page' in collections else 0
@@ -299,8 +301,8 @@ def build_and_execute_search(request):
 		'users': users,
 		'tag_count': tag_count,
 		'collections': collections,
-		'include_facets': facets[0],
-		'exclude_facets': facets[1],
+		'include_facets': include_facets,
+		'exclude_facets': exclude_facets,
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
 		'root': settings.ROOT_URL, 'term': term,

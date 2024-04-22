@@ -681,3 +681,93 @@ class ApiTests(TestCase):
         """
         word_count = count_words(test_string)
         self.assertEquals(148, word_count)
+
+    def test_search_tag_include_facet(self):
+        test_request = {
+            "work_search": {
+                "term": "untitled",
+                "include_mode": "all",
+                "exclude_mode": "all",
+                "page": 1,
+                "order_by": "-updated_on",
+                "include_filter": {
+                    "tags": ["Buffy/Faith"],
+                    "attributes": [],
+                    "Work Word Count": ["word_count_gte", "word_count_lte"],
+                    "Completion Status": []
+                },
+                "exclude_filter": {
+                    "tags": [],
+                    "attributes": [],
+                    "Work Word Count": ["word_count_gte", "word_count_lte"]
+                }
+            },
+            "bookmark_search": {
+                "term": "untitled",
+                "include_mode": "all",
+                "exclude_mode": "all",
+                "page": 1,
+                "order_by": "-updated_on",
+                "include_filter": {
+                    "tags": ["Buffy/Faith"],
+                    "attributes": [],
+                    "Work Word Count": ["word_count_gte", "word_count_lte"],
+                    "Completion Status": []
+                },
+                "exclude_filter": {
+                    "tags": [],
+                    "attributes": [],
+                    "Work Word Count": ["word_count_gte", "word_count_lte"]
+                }
+            },
+            "collection_search": {
+                "term": "untitled",
+                "include_mode": "all",
+                "exclude_mode": "all",
+                "page": 1,
+                "order_by": "-updated_on",
+                "include_filter": {
+                    "tags": ["Buffy/Faith"],
+                    "attributes": [],
+                    "Work Word Count": ["word_count_gte", "word_count_lte"],
+                    "Completion Status": []
+                },
+                "exclude_filter": {
+                    "tags": [],
+                    "attributes": [],
+                    "Work Word Count": ["word_count_gte", "word_count_lte"]
+                }
+            },
+            "user_search": {
+                "term": "untitled",
+                "include_mode": "all",
+                "exclude_mode": "all",
+                "page": 1,
+                "order_by": "-updated_on",
+                "include_filter": {"tags": [], "attributes": []},
+                "exclude_filter": {"tags": [], "attributes": []}
+            },
+            "tag_search": {
+                "term": "untitled",
+                "include_mode": "all",
+                "exclude_mode": "all",
+                "page": 1,
+                "order_by": "-updated_on",
+                "include_filter": {"tag_type": [], "text": []},
+                "exclude_filter": {"tag_type": [], "text": []}
+            }
+        }
+        factory = APIRequestFactory()
+        view = api_views.SearchList.as_view()
+        request = factory.post(f'/search/', test_request, format='json')
+        response = view(request)
+        self.assertEquals(response.status_code, 200)
+        facets = response.data['facet']
+        facet_found = False
+        for facet in facets:
+            if facet['label'] == 'Pairing':
+                for value in facet['values']:
+                    if value['label'] == 'Buffy/Faith':
+                        self.assertEquals(value['checked'], True)
+                        facet_found = True
+        self.assertEquals(facet_found, True)

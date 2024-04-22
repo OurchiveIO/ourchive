@@ -11,6 +11,7 @@ from django.contrib.postgres.search import TrigramDistance, TrigramWordDistance
 from api.utils import get_star_count
 from django.core.paginator import Paginator
 from django.conf import settings
+from copy import deepcopy
 
 
 class ElasticSearchProvider:
@@ -616,7 +617,7 @@ class PostgresProvider:
     def process_tag_tags(self, tags, tags_dict):
         for result in tags:
             if result['display_text'] not in tags_dict[result['tag_type']]['tags']:
-                tags_dict[result['tag_type']]['tags'].append(result['display_text'])
+                tags_dict[result['tag_type']]['tags'].append({'label': result['display_text'], 'checked': False})
         return tags_dict
 
     def process_chive_tags(self, tags, tags_dict):
@@ -625,13 +626,51 @@ class PostgresProvider:
                 tags_dict = self.process_tag_tags(result['tags'], tags_dict)
         return tags_dict
 
-    def build_final_tag_facets(self, tag_id, tag_filter_name, result_json, tags_dict):
+    def get_fe_filter_tag(self, tag, tags_dict):
+        tag_objs = Tag.objects.filter(display_text__iexact=tag).all()
+        if tag_objs:
+            for tag_obj in tag_objs:
+                tags_dict[tag_obj.tag_type.label]['tags'].append({'label': tag_obj.display_text, 'checked': True})
+        return tags_dict
+
+    def process_exclude_tags(self, tags_dict):
+        for tag in self.work_search.filter.exclude_filters['tags']['tags__text__icontains']:
+            tags_dict = self.get_fe_filter_tag(tag, tags_dict)
+        for tag in self.bookmark_search.filter.exclude_filters['tags']['tags__text__icontains']:
+            tags_dict = self.get_fe_filter_tag(tag, tags_dict)
+        for tag in self.collection_search.filter.exclude_filters['tags']['tags__text__icontains']:
+            tags_dict = self.get_fe_filter_tag(tag, tags_dict)
+        return tags_dict
+
+    def process_include_tags(self, tags_dict):
+        print(self.work_search.filter.include_filters)
+        for tag in self.work_search.filter.include_filters['tags']['tags__text__icontains']:
+            tags_dict = self.get_fe_filter_tag(tag, tags_dict)
+        for tag in self.bookmark_search.filter.include_filters['tags']['tags__text__icontains']:
+            tags_dict = self.get_fe_filter_tag(tag, tags_dict)
+        for tag in self.collection_search.filter.include_filters['tags']['tags__text__icontains']:
+            tags_dict = self.get_fe_filter_tag(tag, tags_dict)
+        return tags_dict
+
+    def build_final_tag_facets(self, tag_id, tag_filter_name, result_json, tags_dict, exclude_tags_dict):
         for key in tags_dict:
             if len(tags_dict[key]['tags']) > 0:
                 tag_filter_vals = []
+                vals = set()
                 for val in tags_dict[key]['tags']:
-                    checked_tag = True if (tag_id and tag_filter_name and tag_filter_name == val) else False
-                    tag_filter_vals.append(FilterFacet(val, checked_tag))
+                    label = val['label']
+                    checked_tag = val['checked']
+                    if not checked_tag:
+                        # tag is checked if the user is browsing a specific tag
+                        # but if it was set true because it's part of a frontend filter we don't even need to check this
+                        checked_tag = True if (tag_id and tag_filter_name and tag_filter_name == label) else False
+                    if label not in vals:
+                        tag_filter_vals.append(FilterFacet(label, checked_tag))
+                        vals.add(label)
+                    else:
+                        for tag_val in tag_filter_vals:
+                            if tag_val.label == label:
+                                tag_val.checked = checked_tag
                 result_json.append(ResultFacet(tags_dict[key]['type_id'], key, tag_filter_vals, 'tag').to_dict())
         return result_json
 
@@ -648,7 +687,9 @@ class PostgresProvider:
         tags_dict = self.process_chive_tags(results['bookmark']['data'], tags_dict)
         tags_dict = self.process_chive_tags(results['collection']['data'], tags_dict)
         tags_dict = self.process_tag_tags(results['tag']['data'], tags_dict)
-        result_json = self.build_final_tag_facets(tag_id, tag_filter_name, result_json, tags_dict)
+        exclude_tags_dict = self.process_exclude_tags(deepcopy(tags_dict))
+        tags_dict = self.process_include_tags(tags_dict)
+        result_json = self.build_final_tag_facets(tag_id, tag_filter_name, result_json, tags_dict, exclude_tags_dict)
         return result_json
 
     def process_chive_attributes(self, results, attributes_dict):
