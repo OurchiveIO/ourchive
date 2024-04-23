@@ -651,7 +651,8 @@ class PostgresProvider:
             tags_dict = self.get_fe_filter_tag(tag, tags_dict)
         return tags_dict
 
-    def build_final_tag_facets(self, tag_id, tag_filter_name, result_json, tags_dict, exclude_tags_dict):
+    def build_final_tag_facets(self, tag_id, tag_filter_name, tags_dict):
+        result_json = []
         for key in tags_dict:
             if len(tags_dict[key]['tags']) > 0:
                 tag_filter_vals = []
@@ -688,33 +689,86 @@ class PostgresProvider:
         tags_dict = self.process_tag_tags(results['tag']['data'], tags_dict)
         exclude_tags_dict = self.process_exclude_tags(deepcopy(tags_dict))
         tags_dict = self.process_include_tags(tags_dict)
-        result_json = self.build_final_tag_facets(tag_id, tag_filter_name, result_json, tags_dict, exclude_tags_dict)
-        return result_json
+        include_json = self.build_final_tag_facets(tag_id, tag_filter_name, tags_dict)
+        exclude_json = self.build_final_tag_facets(tag_id, tag_filter_name, exclude_tags_dict)
+        return {'include_facets': include_json, 'exclude_facets': exclude_json}
+
+    def get_fe_filter_attr(self, attr, attr_dict):
+        attrs = AttributeValue.objects.filter(display_name__iexact=attr).all()
+        for attr in attrs:
+            type_name = attr.attribute_type.display_name
+            display_name = attr.display_name
+            if type_name not in attr_dict:
+                attr_dict[type_name] = [{'label': display_name, 'checked': True}]
+            else:
+                label_found = False
+                for attr_val in attr_dict[type_name]['attrs']:
+                    if attr_val['label'] == display_name:
+                        label_found = True
+                        attr_val['checked'] = True
+                        break
+                if not label_found:
+                    attr_dict[type_name]['attrs'].append({'label': display_name, 'checked': True})
+        return attr_dict
+
+    def process_exclude_attrs(self, attr_dict):
+        for attr in self.work_search.filter.exclude_filters['attributes']['attributes__name__icontains']:
+            attr_dict = self.get_fe_filter_attr(attr, attr_dict)
+        for tag in self.bookmark_search.filter.exclude_filters['attributes']['attributes__name__icontains']:
+            attr_dict = self.get_fe_filter_attr(attr, attr_dict)
+        for attr in self.collection_search.filter.exclude_filters['attributes']['attributes__name__icontains']:
+            attr_dict = self.get_fe_filter_attr(attr, attr_dict)
+        return attr_dict
+
+    def process_include_attrs(self, attr_dict):
+        for attr in self.work_search.filter.include_filters['attributes']['attributes__name__icontains']:
+            attr_dict = self.get_fe_filter_attr(attr, attr_dict)
+        for attr in self.bookmark_search.filter.include_filters['attributes']['attributes__name__icontains']:
+            attr_dict = self.get_fe_filter_attr(attr, attr_dict)
+        for attr in self.collection_search.filter.include_filters['attributes']['attributes__name__icontains']:
+            attr_dict = self.get_fe_filter_attr(attr, attr_dict)
+        return attr_dict
 
     def process_chive_attributes(self, results, attributes_dict):
         for result in results:
             if len(result['attributes']) > 0:
                 for attribute in result['attributes']:
                     if attribute['attribute_type'] not in attributes_dict:
-                        attributes_dict[attribute['attribute_type']] = [attribute['display_name']]
-                    elif attribute['display_name'] not in attributes_dict[attribute['attribute_type']]['attrs']:
-                        attributes_dict[attribute['attribute_type']]['attrs'].append(attribute['display_name'])
+                        attributes_dict[attribute['attribute_type']] = [{'label': attribute['display_name'], 'checked': False}]
+                    else:
+                        label_found = False
+                        for attr_val in attributes_dict[attribute['attribute_type']]['attrs']:
+                            if attr_val['label'] == attribute['display_name']:
+                                label_found = True
+                                break
+                        if not label_found:
+                            attributes_dict[attribute['attribute_type']]['attrs'].append({'label': attribute['display_name'], 'checked': False})
         return attributes_dict
 
-    def get_attribute_facets(self, results, result_json):
+    def build_final_attribute_facets(self, attr_dict):
+        result_json = []
+        for key in attr_dict:
+            if len(attr_dict[key]['attrs']) > 0:
+                attribute_filter_vals = []
+                for val in attr_dict[key]['attrs']:
+                    label = val['label']
+                    checked_tag = val['checked']
+                    attribute_filter_vals.append(FilterFacet(label, checked_tag))
+                result_json.append(ResultFacet(attr_dict[key]['type_id'], key, attribute_filter_vals, 'attribute').to_dict())
+        return result_json
+
+    def get_attribute_facets(self, results):
         attributes_dict = {}
         for attribute_type in AttributeType.objects.all():
             attributes_dict[attribute_type.display_name] = {'attrs': [], 'type_id': attribute_type.id, 'type_label': attribute_type.display_name}
         attributes_dict = self.process_chive_attributes(results['work']['data'], attributes_dict)
         attributes_dict = self.process_chive_attributes(results['bookmark']['data'], attributes_dict)
         attributes_dict = self.process_chive_attributes(results['collection']['data'], attributes_dict)
-        for key in attributes_dict:
-            if len(attributes_dict[key]['attrs']) > 0:
-                attribute_filter_vals = []
-                for val in attributes_dict[key]['attrs']:
-                    attribute_filter_vals.append(FilterFacet(val, False))
-                result_json.append(ResultFacet(attributes_dict[key]['type_id'], key, attribute_filter_vals, 'attribute').to_dict())
-        return result_json
+        attributes_dict = self.process_include_attrs(attributes_dict)
+        exclude_attrs_dict = self.process_exclude_attrs(deepcopy(attributes_dict))
+        attributes_dict = self.build_final_attribute_facets(attributes_dict)
+        exclude_attrs_dict = self.build_final_attribute_facets(exclude_attrs_dict)
+        return {'include_facets': attributes_dict, 'exclude_facets': exclude_attrs_dict}
 
     def get_result_facets(self, results, tag_id=None):
         # todo: refactor - move attribute & tag processing to individual functions,
@@ -766,8 +820,12 @@ class PostgresProvider:
         result_json['include_facets'].append(complete_dict)
         result_json['exclude_facets'].append(complete_dict)
 
-        result_json = self.get_tag_facets(tag_id, results, result_json)
-        result_json = self.get_attribute_facets(results, result_json)
+        tag_facets = self.get_tag_facets(tag_id, results, result_json)
+        result_json['include_facets'] = result_json['include_facets'] + tag_facets['include_facets']
+        result_json['exclude_facets'] = result_json['exclude_facets'] + tag_facets['exclude_facets']
+        attr_facets = self.get_attribute_facets(results)
+        result_json['include_facets'] = result_json['include_facets'] + attr_facets['include_facets']
+        result_json['exclude_facets'] = result_json['exclude_facets'] + attr_facets['exclude_facets']
 
         stars = OurchiveSetting.objects.get(name='Rating Star Count')
         bookmark_rating_dict = {}
@@ -777,7 +835,8 @@ class PostgresProvider:
         for star in stars:
             bookmark_rating_dict["values"].append(
                 {"label": f"{star}", "filter_val": f"rating_gte${star}"})
-        result_json.append(bookmark_rating_dict)
+        result_json['include_facets'].append(bookmark_rating_dict)
+        result_json['exclude_facets'].append(bookmark_rating_dict)
 
         return result_json
 

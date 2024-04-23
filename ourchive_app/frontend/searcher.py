@@ -47,7 +47,7 @@ def add_filter_to_tag(filter_val, filter_details, tag_filter, work_filter, bookm
 
 
 def add_filter_to_attribute(filter_val, work_filter, bookmark_filter, collection_filter):
-	attribute_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
+	attribute_text = filter_val
 	work_filter['attributes'].append(attribute_text)
 	bookmark_filter['attributes'].append(attribute_text)
 	collection_filter['attributes'].append(attribute_text)
