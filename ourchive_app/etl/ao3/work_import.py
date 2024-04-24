@@ -405,24 +405,22 @@ class EtlWorkImport(object):
         mappings = ObjectMapping.objects.filter(
             import_type='ao3', object_type='work').all()
         work_type_mapping = None
-        work_type = None
-        work_type_mapping = api.User.objects.filter(id=self.user_id).first().default_work_type
-        if not work_type_mapping:
+        work_type = api.User.objects.filter(id=self.user_id).first().default_work_type
+        if not work_type:
             work_type_mapping = ObjectMapping.objects.filter(
                 import_type='ao3', object_type='work_type')
-        if not work_type_mapping:
-            logger.error('Work type mapping not found. Trying to find Fic work type...')
-            work_type_mapping = api.WorkType.objects.filter(type_name__iexact='Fic')
+            if not work_type_mapping:
+                logger.error('Work type mapping not found. Trying to find Fic work type...')
+                work_type_mapping = api.WorkType.objects.filter(type_name__iexact='Fic')
+            if not work_type_mapping:
+                logger.error('Work type mapping not found. Trying to find any work type...')
+                work_type_mapping = api.WorkTypes.objects.all()
             if work_type_mapping is not None:
                 work_type = work_type_mapping.first()
             else:
-                work_type_mapping = api.WorkTypes.objects.all()
-                if work_type_mapping is not None:
-                    work_type = work_type_mapping.first()
-                else:
-                    logger.error('No work types found. Configure work types.')
-                    return None
-        elif not work_type:
+                logger.error('No work types found. Configure work types.')
+                return None
+        if not work_type:
             type_name = work_type_mapping.first().destination_field
             try:
                 work_type = api.WorkType.objects.filter(
