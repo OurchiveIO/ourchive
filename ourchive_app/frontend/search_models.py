@@ -93,19 +93,6 @@ class SearchObject(object):
 			return 'bookmark'
 
 
-class ReturnKeys(object):
-	def __init__(self):
-		self.include = []
-		self.exclude = []
-
-	def add_val(self, include_exclude, val):
-		if include_exclude == 'include':
-			self.include.append(val)
-		if include_exclude == 'exclude':
-			self.exclude.append(val)
-
-
 class SearchRequest(object):
-	def __init__(self, post_data, return_keys):
+	def __init__(self, post_data):
 		self.post_data = post_data
-		self.return_keys = return_keys

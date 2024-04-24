@@ -49,7 +49,7 @@ class WorkFilter(object):
                 'less_than': 'word_count__lte'
             },
             'type': {
-                'work_type__type_name__icontains': []
+                'work_type__type_name__exact': []
             }
         }
         self.exclude_filters = {
@@ -81,7 +81,7 @@ class WorkFilter(object):
                 'less_than': 'word_count__lte'
             },
             'type': {
-                'work_type__type_name__icontains': []
+                'work_type__type_name__exact': []
             }
         }
 

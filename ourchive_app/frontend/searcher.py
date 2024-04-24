@@ -1,5 +1,5 @@
 from django.conf import settings
-from .search_models import SearchObject, ReturnKeys, SearchRequest
+from .search_models import SearchObject, SearchRequest
 from .view_utils import *
 import logging
 from copy import deepcopy
@@ -131,79 +131,11 @@ def build_request_filters(request, include_exclude, request_object, request_buil
 	return request_object
 
 
-def add_facet_to_filters(facets, label, value, item, excluded=True, checkbox=True):
-	if label in NONRETAIN_VALS:
-		return facets
-	facet_added = False
-	for facet in facets:
-		# checkbox filter
-		if checkbox:
-			selector = 'label' if facet['label'] == label else None
-			if not selector:
-				continue
-			for val in facet['values']:
-				if val[selector] == value or val.get('filter_val', '') == value:
-					val['checked'] = True
-					facet_added = True
-					break
-			if not facet_added:
-				facet['values'].append({'label': value, 'checked': True})
-			facet_added = True
-			break
-		# range/freeform filter
-		elif facet['label'] == label and not checkbox:
-			key_field = 'include_value' if not excluded else 'exclude_value'
-			item = item.split(',')
-			for val in facet['values']:
-				if val['filter_val'] == item[1]:
-					val[key_field] = value
-					facet_added = True
-					break
-	if not facet_added:
-		facets.append({'label': label, 'excluded': excluded, 'values': [{'label': value, 'checked': False}]})
-	return facets
-
-
-def iterate_facets(facets, item, excluded=True):
-	if item == 'any_all':
-		return facets
-	if ',' in item:
-		# checkbox. format: [type label],[checkbox label]
-		split = item.split(',')
-		if len(split) <= 3:
-			facets = add_facet_to_filters(facets, split[0], split[1], item, excluded)
-		# input. format: [filter facet label],[filter val e.g. word_count__gte],[object e.g. work],[value e.g. 1]
-		elif len(split) > 3:
-			facets = add_facet_to_filters(facets, split[0], split[3], item, excluded, False)
-	elif '$' in item:
-		# assumes text format e.g. word count: word_count_gte$20000
-		split = item.split('$')
-		facets = add_facet_to_filters(facets, split[0], split[1], split[0], excluded)
-	return facets
-
-
-def get_response_facets(response_json, request_object):
-	facets = response_json['results']['facet']
-	include_facets = deepcopy(facets)
-	exclude_facets = deepcopy(facets)
-	for item in exclude_facets:
-		for value in item.get('values', []):
-			if value.get('checked', None):
-				value['checked'] = False
-	print(exclude_facets)
-	for item in request_object.return_keys.exclude:
-		exclude_facets = iterate_facets(exclude_facets, item)
-	for item in request_object.return_keys.include:
-		include_facets = iterate_facets(include_facets, item, False)
-	return (include_facets, exclude_facets)
-
-
 def get_empty_response_obj():
 	return {'data': []}
 
 
 def get_search_request(request, request_object, request_builder):
-	return_keys = ReturnKeys()
 	for key in request.POST:
 		if key == 'tag_id' or key == 'attr_id':
 			continue
@@ -212,14 +144,8 @@ def get_search_request(request, request_object, request_builder):
 		key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
 		if key in NONFILTER_VALS:
 			continue
-		else:
-			if ',' in key and not filter_val and not key.endswith(',input'):
-				return_keys.add_val(include_exclude, key)
-			elif filter_val:
-				key = key.replace(',input', '')
-				return_keys.add_val(include_exclude, f'{key},{filter_val}')
 		request_object = build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val)
-	return SearchRequest(request_object, return_keys)
+	return SearchRequest(request_object)
 
 
 def get_chive_results(response_obj):
@@ -279,9 +205,10 @@ def build_and_execute_search(request):
 	tags = get_tag_results(response_json['results']['tag']) if 'results' in response_json and 'tag' in response_json['results'] else get_empty_response_obj()
 	users = response_json['results']['user'] if 'results' in response_json and 'user' in response_json['results'] else get_empty_response_obj()
 	collections = get_chive_results(response_json['results']['collection']) if 'results' in response_json and 'collection' in response_json['results'] else get_empty_response_obj()
-	# facets = get_response_facets(response_json, request_object) if 'results' in response_json and 'facet' in response_json['results'] else {}
 	include_facets = response_json['results'].get('include_facets', [])
 	exclude_facets = response_json['results'].get('exclude_facets', [])
+	include_mode = response_json['results'].get('include_mode', 'all')
+	exclude_mode = response_json['results'].get('exclude_mode', 'all')
 	works_count = works['page']['count'] if 'page' in works else 0
 	bookmarks_count = bookmarks['page']['count'] if 'page' in bookmarks else 0
 	collections_count = collections['page']['count'] if 'page' in collections else 0
@@ -306,8 +233,8 @@ def build_and_execute_search(request):
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
 		'root': settings.ROOT_URL, 'term': term,
-		'keys_include': request_object.return_keys.include,
-		'keys_exclude': request_object.return_keys.exclude
+		'include_mode': include_mode,
+		'exclude_mode': exclude_mode
 	}
 	if tag_id:
 		template_data['tag_id'] = tag_id

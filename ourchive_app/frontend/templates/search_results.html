@@ -44,35 +44,35 @@
 			<li id="search-results-include-switcher-li-flyover" class="uk-width-expand ourchive-li-flyover"> 
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl-flyover">	
 			        {% for facet in include_facets %} 
-						{% include "facet_tile.html" with include='include' keys=keys_include %}     
+						{% include "facet_tile.html" with include='include' %}     
 				    {% endfor %}	        
 				</dl>
 				<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl-flyover">	
 					<dt><span class="uk-text-bold">Include all/any</span></dt>
 					<dr>
-						<label id="all-toggle-label-flyover" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+						<label id="all-toggle-label-flyover" {% if include_mode == 'any' %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
 		                <div id="any-all-toggle-inline-flyover" class="uk-inline">
-		                    <label id="include-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="any-all-toggle-flyover" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="include_any_all" onclick="toggleAnyAll('include', 'flyover')"> <span id="any-all-slider-flyover" class="slider round"></span></label>
+		                    <label id="include-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="any-all-toggle-flyover" type="checkbox" {% if include_mode == 'any' %}checked{%endif%} name="include_any_all" onclick="toggleAnyAll('include', 'flyover')"> <span id="any-all-slider-flyover" class="slider round"></span></label>
 		                </div>
-		                <label id="include-any-toggle-label-flyover" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+		                <label id="include-any-toggle-label-flyover" {% if include_mode == 'all' %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
 		            </dr>
 		        </dl>
 		    </li>
 		    <li id="search-results-exclude-switcher-li-flyover" class="uk-width-expand ourchive-li-flyover"> 
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-facet-dl-flyover">	
 			        {% for facet in exclude_facets %} 
-						{% include "facet_tile.html" with include='exclude' keys=keys_exclude %}     
+						{% include "facet_tile.html" with include='exclude' %}     
 				    {% endfor %}	
 
 				</dl>
 				<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-type-dl-flyover">	
 					<dt><span class="uk-text-bold">Exclude all/any</span></dt>
 					<dr>
-						<label id="exclude-all-toggle-label-flyover" {% if 'any_all' in keys_exclude %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+						<label id="exclude-all-toggle-label-flyover" {% if exclude_mode == 'any' %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
 		                <div id="exclude-any-all-toggle-inline-flyover" class="uk-inline">
-		                    <label id="exclude-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll('exclude', 'flyover')"> <span id="exclude-any-all-slider-flyover" class="slider round"></span></label>
+		                    <label id="exclude-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if exclude_mode == 'any' %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll('exclude', 'flyover')"> <span id="exclude-any-all-slider-flyover" class="slider round"></span></label>
 		                </div>
-		                <label id="exclude-any-toggle-label-flyover" {% if 'any_all' not in keys_exclude %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+		                <label id="exclude-any-toggle-label-flyover" {% if exclude_mode == 'all' %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
 		            </dr>
 		        </dl>
 		    </li>
@@ -106,34 +106,34 @@
 			<li id="search-results-include-switcher-li" class="uk-width-expand"> 
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl">	
 			        {% for facet in include_facets %} 
-						{% include "facet_tile.html" with include='include' keys=keys_include %}     
+						{% include "facet_tile.html" with include='include' %}     
 				    {% endfor %}		        
 				</dl>
 				<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl">	
 					<dt><span class="uk-text-bold">Include all/any</span></dt>
 					<dr>
-						<label id="include-all-toggle-label" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+						<label id="include-all-toggle-label" {% if include_mode == 'any' %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
 		                <div id="any-all-toggle-inline" class="uk-inline">
-		                    <label id="any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="any-all-toggle" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="include_any_all" onclick="toggleAnyAll('include', null)"> <span id="any-all-slider" class="slider round"></span></label>
+		                    <label id="any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="any-all-toggle" type="checkbox" {% if include_mode == 'any' %}checked{%endif%} name="include_any_all" onclick="toggleAnyAll('include', null)"> <span id="any-all-slider" class="slider round"></span></label>
 		                </div>
-		                <label id="include-any-toggle-label" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+		                <label id="include-any-toggle-label" {% if include_mode == 'all' %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
 		            </dr>
 		        </dl>
 		    </li>
 		    <li id="search-results-exclude-switcher-li" class="uk-width-expand"> 
 	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-facet-dl">	
 			        {% for facet in exclude_facets %} 
-						{% include "facet_tile.html" with include='exclude' keys=keys_exclude %}     
+						{% include "facet_tile.html" with include='exclude' %}     
 				    {% endfor %}		        
 				</dl>
 				<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-type-dl">	
 					<dt><span class="uk-text-bold">Exclude all/any</span></dt>
 					<dr>
-						<label id="exclude-all-toggle-label" {% if 'any_all' in keys_exclude %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+						<label id="exclude-all-toggle-label" {% if exclude_mode == 'any' %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
 		                <div id="exclude-any-all-toggle-inline" class="uk-inline">
-		                    <label id="exclude-any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll('exclude', null)"> <span id="exclude-any-all-slider" class="slider round"></span></label>
+		                    <label id="exclude-any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if exclude_mode == 'any' %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll('exclude', null)"> <span id="exclude-any-all-slider" class="slider round"></span></label>
 		                </div>
-		                <label id="exclude-any-toggle-label" {% if 'any_all' not in keys_exclude %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+		                <label id="exclude-any-toggle-label" {% if exclude_mode == 'all' %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
 		            </dr>
 		        </dl>
 		    </li>

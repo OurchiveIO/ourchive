@@ -385,8 +385,6 @@ class PostgresProvider:
         resultset = self.run_queries(work_filters, query, Work, [
                                      'title', 'summary'], self.work_search.term, kwargs['page'], self.work_search.order_by, True)
         result_json = self.build_work_resultset(resultset[0], self.work_search.reserved_fields)
-        print(self.work_search.filter.include_filters)
-        print(self.work_search.filter.exclude_filters)
         return {'data': result_json, 'page': resultset[1]}
 
     def search_bookmarks(self, **kwargs):
@@ -784,8 +782,13 @@ class PostgresProvider:
         work_types_dict["label"] = "Work Type"
         work_types_dict["values"] = work_types_list
         work_types_dict["object_type"] = 'work'
+        work_types_dict_exclude = deepcopy(work_types_dict)
+        for value in work_types_dict["values"]:
+            value['checked'] = value['label'] in self.work_search.filter.include_filters['type']['work_type__type_name__exact']
+        for value in work_types_dict_exclude["values"]:
+            value['checked'] = value['label'] in self.work_search.filter.exclude_filters['type']['work_type__type_name__exact']
         result_json['include_facets'].append(work_types_dict)
-        result_json['exclude_facets'].append(work_types_dict)
+        result_json['exclude_facets'].append(work_types_dict_exclude)
 
         # todo move to separate class
         word_count_dict = {}
@@ -826,17 +829,6 @@ class PostgresProvider:
         attr_facets = self.get_attribute_facets(results)
         result_json['include_facets'] = result_json['include_facets'] + attr_facets['include_facets']
         result_json['exclude_facets'] = result_json['exclude_facets'] + attr_facets['exclude_facets']
-
-        stars = OurchiveSetting.objects.get(name='Rating Star Count')
-        bookmark_rating_dict = {}
-        bookmark_rating_dict["label"] = "Rating"
-        bookmark_rating_dict["values"] = []
-        stars = get_star_count(stars)
-        for star in stars:
-            bookmark_rating_dict["values"].append(
-                {"label": f"{star}", "filter_val": f"rating_gte${star}"})
-        result_json['include_facets'].append(bookmark_rating_dict)
-        result_json['exclude_facets'].append(bookmark_rating_dict)
 
         return result_json
 

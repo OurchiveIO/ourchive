@@ -27,6 +27,8 @@ class OurchiveSearch:
 		facets = self.searcher.get_result_facets(results)
 		results['include_facets'] = facets['include_facets']
 		results['exclude_facets'] = facets['exclude_facets']
+		results['include_mode'] = self.searcher.include_mode
+		results['exclude_mode'] = self.searcher.exclude_mode
 		return results
 
 	def filter_by_tag(self, **kwargs):
@@ -36,6 +38,8 @@ class OurchiveSearch:
 		facets = self.searcher.get_result_facets(results, kwargs['tag_id'])
 		results['include_facets'] = facets['include_facets']
 		results['exclude_facets'] = facets['exclude_facets']
+		results['include_mode'] = kwargs['include_mode']
+		results['exclude_mode'] = kwargs['exclude_mode']
 		return results
 
 	def filter_by_attribute(self, **kwargs):
@@ -45,6 +49,8 @@ class OurchiveSearch:
 		facets = self.searcher.get_result_facets(results, kwargs['attr_id'])
 		results['include_facets'] = facets['include_facets']
 		results['exclude_facets'] = facets['exclude_facets']
+		results['include_mode'] = kwargs['include_mode']
+		results['exclude_mode'] = kwargs['exclude_mode']
 		return results
 
 	def do_tag_search(self, term, tag_type, fetch_all):
