@@ -688,7 +688,7 @@ class ApiTests(TestCase):
         word_count = count_words(test_string)
         self.assertEquals(148, word_count)
 
-    def todo_search_tag_include_facet(self):
+    def test_search_tag_include_facet(self):
         test_request = {
             "work_search": {
                 "term": "untitled",
@@ -768,12 +768,12 @@ class ApiTests(TestCase):
         request = factory.post(f'/search/', test_request, format='json')
         response = view(request)
         self.assertEquals(response.status_code, 200)
-        facets = response.data['facet']
+        facets = response.data['results']['include_facets']
         facet_found = False
         for facet in facets:
             if facet['label'] == 'Fandom':
                 for value in facet['values']:
-                    if value['label'] == 'buffy the vampire slayer':
+                    if value['label'] == 'Buffy the Vampire Slayer':
                         self.assertEquals(value['checked'], True)
                         facet_found = True
         self.assertEquals(facet_found, True)
