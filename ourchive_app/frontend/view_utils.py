@@ -324,11 +324,11 @@ def format_date_for_template(obj, field_name, is_list=False):
 		return obj
 	if is_list:
 		for item in obj:
-			if field_name not in item:
+			if field_name not in item or item[field_name] is None:
 				continue
 			item[field_name] = parse(item[field_name]).date()
 		return obj
-	obj[field_name] = parse(obj[field_name]).date()
+	obj[field_name] = parse(obj[field_name]).date() if obj[field_name] is not None else None
 	return obj
 
 
