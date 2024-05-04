@@ -170,6 +170,18 @@ function populateUserInput(user_id, username) {
                 </div>
             </div>
         </div>
+        <div class="uk-margin" id="work-form-languages-parent">
+            <label id="work-form-languages-label" class="uk-form-label" for="work-form-languages">{% translate 'Languages' %}</label>
+            <div id="work-form-languages-controls" class="uk-form-controls">
+                <div id="work-form-languages-inline" class="uk-inline">
+                    <select name="languages" id="work-form-languages" class="uk-select" multiple>
+                        {% for language in languages %}
+                            <option value="{{language.display_name|lower}}">{{language.display_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
         {% if settings.AllowComments %}
         <div class="uk-margin" id="work-form-allow-comments-parent">
             <label id="work-form-allow-comments-label" class="uk-form-label" for="work-form-allow-comments-select">Allow Comments?</label>

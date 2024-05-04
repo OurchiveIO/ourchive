@@ -325,7 +325,7 @@ def edit_user(request, pk):
 		return redirect(f'/username/{pk}/')
 	else:
 		if request.user.is_authenticated:
-			work_types = do_get(f'api/worktypes', request, 'Work').response_data['results']
+			work_types = get_work_types(request)
 			response = do_get(f"api/users/profile/{request.user.id}", request, 'User Profile')
 			if response.response_info.status_code >= 400:
 				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
@@ -339,7 +339,7 @@ def edit_user(request, pk):
 			return render(request, 'user_form.html', {
 				'user': user, 'form_title': 'Edit User',
 				'work_types': work_types,
-				})
+			})
 		else:
 			messages.add_message(request, messages.ERROR, _('You must log in as this user to perform this action.'), 'user-profile-unauthorized-error')
 			return redirect('/login')
@@ -630,7 +630,7 @@ def works_by_type(request, type_id):
 
 
 def new_work(request):
-	work_types = do_get(f'api/worktypes', request, 'Work').response_data
+	work_types = get_work_types(request)
 	if request.user.is_authenticated and request.method != 'POST':
 		work = {
 			'title': 'Untitled Work',
@@ -649,17 +649,19 @@ def new_work(request):
 			'created_on': str(datetime.now().date()),
 			'updated_on': str(datetime.now().date())
 		}
-		tag_types = do_get(f'api/tagtypes', request, 'Tag').response_data
+		tag_types = do_get(f'api/tagtypes', request, {}, 'Tag').response_data
 		tags = group_tags_for_edit([], tag_types)
 		work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Work Attributes')
 		work['attribute_types'] = process_attributes([], work_attributes.response_data['results'])
+		languages = get_languages(request)
 		return render(request, 'work_form.html', {
 			'tags': tags,
 			'divider': settings.TAG_DIVIDER,
 			'form_title': 'New Work',
-			'work_types': work_types['results'],
+			'work_types': work_types,
 			'work': work,
-			'work_chapter': work_chapter})
+			'work_chapter': work_chapter,
+			'languages': languages})
 	elif request.user.is_authenticated:
 		work_data = get_work_obj(request)
 		chapter_dict = work_data[3]
@@ -781,8 +783,8 @@ def edit_work(request, id):
 	else:
 		if request.user.is_authenticated:
 			multichapter = request.GET.get('multichapter', 'false')
-			work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
-			tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+			work_types = get_work_types(request)
+			tag_types = do_get(f'api/tagtypes', request, {}, 'Tag Type').response_data
 			works_response = do_get(f'api/works/{id}/', request, 'Work')
 			if works_response.response_info.status_code >= 400:
 				messages.add_message(request, messages.ERROR, works_response.response_info.message, works_response.response_info.type_label)
@@ -792,6 +794,7 @@ def edit_work(request, id):
 			work['notes'] = sanitize_rich_text(work['notes'])
 			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Attribute')
 			work['attribute_types'] = process_attributes(work['attributes'], work_attributes.response_data['results'])
+			languages = get_languages(request)
 			chapters = do_get(f'api/works/{id}/chapters/all', request, 'Chapter').response_data
 			chapter_count = int(work['chapter_count'])
 			if chapter_count < 2:
@@ -801,7 +804,7 @@ def edit_work(request, id):
 			work_chapter = prepare_chapter_data(work_chapter, request)
 			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else group_tags_for_edit([], tag_types)
 			return render(request, 'work_form.html', {
-				'work_types': work_types['results'],
+				'work_types': work_types,
 				'form_title': 'Edit Work',
 				'work': work,
 				'tags': tags,
@@ -810,7 +813,8 @@ def edit_work(request, id):
 				'show_chapter': request.GET.get('show_chapter') if 'show_chapter' in request.GET else None,
 				'chapters': chapters,
 				'work_chapter': work_chapter,
-				'chapter_count': len(chapters)})
+				'chapter_count': len(chapters),
+				'languages': languages})
 		else:
 			return get_unauthorized_message(request, '/login', 'work-update-unauthorized-error')
 
@@ -917,7 +921,7 @@ def edit_bookmark(request, pk):
 		return redirect(f'/bookmarks/{pk}')
 	else:
 		if request.user.is_authenticated:
-			tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+			tag_types = do_get(f'api/tagtypes', request, {}, 'Tag Type').response_data
 			bookmark = do_get(f'api/bookmarks/{pk}/draft', request, 'Bookmark').response_data
 			bookmark['description'] = sanitize_rich_text(bookmark['description'])
 			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
@@ -971,7 +975,7 @@ def new_bookmark_collection(request):
 		}
 		bookmark_collection_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
 		bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes.response_data['results'])
-		tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+		tag_types = do_get(f'api/tagtypes', request, {}, 'Tag Type').response_data
 		tags = group_tags_for_edit([], tag_types)
 		bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks').response_data
 		return render(request, 'bookmark_collection_form.html', {
@@ -1000,7 +1004,7 @@ def edit_bookmark_collection(request, pk):
 		return redirect(f'/bookmark-collections/{pk}')
 	else:
 		if request.user.is_authenticated:
-			tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+			tag_types = do_get(f'api/tagtypes', request, {}, 'Tag Type').response_data
 			bookmark_collection = do_get(f'api/bookmarkcollections/{pk}/', request).response_data
 			bookmark_collection['description'] = sanitize_rich_text(bookmark_collection['description'])
 			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
@@ -1208,7 +1212,7 @@ def work(request, pk, chapter_offset=0):
 	cache_key = f'work_{pk}_{chapter_offset}_{request.user}_{view_full}_{expand_comments}_{comment_offset}_{comment_id}_{comment_count}'
 	if cache.get(cache_key):
 		return cache.get(cache_key)
-	work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
+	work_types = get_work_types(request)
 	url = f'api/works/{pk}/'
 	work_response = do_get(url, request, 'Work')
 	if work_response.response_info.status_code >= 400:
@@ -1266,7 +1270,7 @@ def work(request, pk, chapter_offset=0):
 		work['last_chapter_id'] = chapters[-1]['id']
 	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections', request, 'Collections').response_data
 	page_content = render(request, 'work.html', {
-		'work_types': work_types['results'],
+		'work_types': work_types,
 		'work': work,
 		'collections': collections,
 		'user_can_comment': user_can_comment,

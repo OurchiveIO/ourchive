@@ -9,12 +9,12 @@ from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
     UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
     UserReportSerializer, UserSubscriptionSerializer, AdminAnnouncementSerializer, \
     BookmarkSummarySerializer, BookmarkCollectionSummarySerializer, CollectionCommentSerializer, \
-    ImportSerializer, TopTagSerializer
+    ImportSerializer, TopTagSerializer, LanguageSerializer
 from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
     BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
     NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
     AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment, \
-    AdminAnnouncement, UserWork, UserCollection
+    AdminAnnouncement, UserWork, UserCollection, Language
 from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
     UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
     UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked, WorkIsNotDraft, \
@@ -1376,3 +1376,9 @@ class AdminAnnouncementDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = AdminAnnouncement.objects.get_queryset()
     serializer_class = AdminAnnouncementSerializer
     permission_classes = [permissions.IsAdminUser]
+
+
+class LanguageList(generics.ListAPIView):
+    queryset = Language.objects.get_queryset()
+    serializer_class = LanguageSerializer
+    permission_classes = [IsAdminOrReadOnly]

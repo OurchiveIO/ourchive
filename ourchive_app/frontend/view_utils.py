@@ -390,3 +390,11 @@ def convert_bool(post_data):
 		if post_data[key] == 'on':
 			post_data[key] = 'true'
 	return post_data
+
+
+def get_languages(request):
+	return do_get(f'api/languages', request, params={}, object_name='Languages').response_data.get('results', [])
+
+
+def get_work_types(request):
+	return do_get(f'api/worktypes', request, {}, 'Work Type').response_data.get('results', [])

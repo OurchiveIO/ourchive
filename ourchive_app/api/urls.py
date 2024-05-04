@@ -147,6 +147,7 @@ urlpatterns = [
          name='admin-announcements-list'),
     path('adminannouncements/<int:pk>', views.AdminAnnouncementDetail.as_view(),
          name='adminannouncement-detail'),
+    path('languages/', views.LanguageList.as_view(), name='language-list'),
     path('openapi', get_schema_view(
         title="Ourchive",
         description="A fan-created archive software package",

@@ -47,6 +47,7 @@ class User(AbstractUser):
     chive_export_url = models.CharField(max_length=200, blank=True, null=True)
     works = models.ManyToManyField('Work', related_name='users', through='UserWork')
     collections = models.ManyToManyField('BookmarkCollection', related_name='users', through='UserCollection')
+    default_languages = models.ManyToManyField('Language', related_name='users')
 
     def save(self, *args, **kwargs):
         self.display_username = self.username
@@ -139,6 +140,16 @@ class UserSubscription(models.Model):
         ordering = ['-updated_on']
 
 
+class Language(models.Model):
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    display_name = models.CharField(max_length=200)
+    ietf_code = models.CharField(max_length=40)
+
+    def __str__(self):
+        return self.display_name
+
+
 class Work(models.Model):
 
     __tablename__ = 'works'
@@ -180,7 +191,8 @@ class Work(models.Model):
         on_delete=models.CASCADE,
     )
 
-    work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True)
+    work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE, null=True)
+    languages = models.ManyToManyField('Language')
 
     tags = models.ManyToManyField('Tag')
 
@@ -550,6 +562,7 @@ class BookmarkCollection(models.Model):
     tags = models.ManyToManyField('Tag')
     attributes = models.ManyToManyField('AttributeValue')
     works = models.ManyToManyField('Work')
+    languages = models.ManyToManyField('Language')
 
     def __str__(self):
         return self.title
@@ -576,6 +589,7 @@ class Bookmark(models.Model):
     comment_count = models.IntegerField(default=0)
     public_notes = models.TextField(null=True, blank=True)
     private_notes = models.TextField(null=True, blank=True)
+    is_private = models.BooleanField(default=False)
 
     collection = models.ForeignKey(
         BookmarkCollection,
@@ -583,21 +597,13 @@ class Bookmark(models.Model):
         null=True, blank=True,
         related_name='bookmarks')
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    is_private = models.BooleanField(default=False)
-
-    work = models.ForeignKey(
-        'Work',
-        on_delete=models.CASCADE,
-    )
+    work = models.ForeignKey('Work',on_delete=models.SET_NULL, null=True)
 
     tags = models.ManyToManyField('Tag')
-
     attributes = models.ManyToManyField('AttributeValue')
+    languages = models.ManyToManyField('Language')
 
     def __str__(self):
         return self.title

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, \
     ContentPage, Tag, Invitation, AttributeType, AttributeValue, UserReportReason, \
-    UserReport, UserSubscription, AdminAnnouncement
+    UserReport, UserSubscription, AdminAnnouncement, Language
 from django.db import models
 from django.forms.widgets import Input
 from django.core.mail import send_mail
@@ -197,3 +197,4 @@ admin.site.register(UserReportReason)
 admin.site.register(UserReport, UserReportAdmin)
 admin.site.register(UserSubscription, UserSubscriptionAdmin)
 admin.site.register(AdminAnnouncement, AdminAnnouncementAdmin)
+admin.site.register(Language)
