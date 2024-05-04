@@ -824,7 +824,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         Work.objects.filter(id=work.id).update(**validated_data)
         work = Work.objects.get(id=work.id)
         self.process_users(work, users)
-        self.process_languages(work, languages)
+        work = self.process_languages(work, languages)
         work.draft = validated_data['draft']
         work.save()
         return Work.objects.filter(id=work.id).first()
@@ -870,6 +870,8 @@ class BookmarkWorkSerializer(serializers.HyperlinkedModelSerializer):
 class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     work = BookmarkWorkSerializer(required=False)
     work_id = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all())
+    languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
+    languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
@@ -928,6 +930,19 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         bookmark.save()
         return bookmark
 
+    def process_languages(self, bookmark, languages):
+        backup_languages = list(bookmark.languages.all())
+        bookmark.languages.clear()
+        try:
+            for language in languages:
+                bookmark.languages.add(language)
+            bookmark.save()
+        except Exception:
+            for language in backup_languages:
+                bookmark.languages.add(language)
+            bookmark.save()
+        return bookmark
+
     def update(self, bookmark, validated_data):
         if 'title' in validated_data and validated_data['title'] == '':
             validated_data['title'] = f'Bookmark: {bookmark.work.title}'
@@ -942,10 +957,12 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)
         bookmark = Bookmark.objects.get(id=bookmark.id)
         bookmark.draft = validated_data['draft']
         bookmark.save()
+        self.process_languages(bookmark, languages)
         return Bookmark.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
@@ -994,6 +1011,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     users = MiniUserSerializer(many=True, required=False, read_only=True)
     users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
+    languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
+    languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
@@ -1035,6 +1054,19 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             notification.save()
             user.has_notifications = True
             user.save()
+        return collection
+
+    def process_languages(self, collection, languages):
+        backup_languages = list(collection.languages.all())
+        collection.languages.clear()
+        try:
+            for language in languages:
+                collection.languages.add(language)
+            collection.save()
+        except Exception:
+            for language in backup_languages:
+                collection.languages.add(language)
+            collection.save()
         return collection
 
     def update(self, bookmark, validated_data):
@@ -1085,10 +1117,12 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             collection.save()
         if 'bookmarks' in validated_data:
             validated_data.pop('bookmarks')
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
         BookmarkCollection.objects.filter(
             id=bookmark.id).update(**validated_data)
         bookmark = BookmarkCollection.objects.get(id=bookmark.id)
         self.process_users(bookmark, users)
+        self.process_languages(bookmark, languages)
         bookmark.draft = validated_data['draft']
         bookmark.save()
         return BookmarkCollection.objects.filter(id=bookmark.id).first()

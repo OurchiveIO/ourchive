@@ -227,6 +227,9 @@ def get_bookmark_obj(request):
 	if bookmark_dict["updated_on"] == bookmark_dict["updated_on_original"]:
 		bookmark_dict["updated_on"] = str(datetime.now().date())
 	bookmark_dict.pop("updated_on_original")
+	if 'languages[]' in bookmark_dict:
+		bookmark_dict['languages'] = [int(x) for x in request.POST.getlist("languages[]")]
+		bookmark_dict.pop('languages[]')
 	return bookmark_dict
 
 
@@ -273,6 +276,9 @@ def get_bookmark_collection_obj(request):
 	if collection_dict["updated_on"] == collection_dict["updated_on_original"]:
 		collection_dict["updated_on"] = str(datetime.now().date())
 	collection_dict.pop("updated_on_original")
+	if 'languages[]' in collection_dict:
+		collection_dict['languages'] = [int(x) for x in request.POST.getlist("languages[]")]
+		collection_dict.pop('languages[]')
 	return collection_dict
 
 

@@ -1,6 +1,7 @@
 from api.models import AttributeValue, Work, Tag, User, Chapter, TagType, WorkType, \
                        Bookmark, BookmarkComment, BookmarkCollection, ChapterComment, \
-                       Message, NotificationType, Notification, OurchiveSetting, AttributeType
+                       Message, NotificationType, Notification, OurchiveSetting, AttributeType, \
+                       Language
 from api import object_factory
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 import json
@@ -694,6 +695,17 @@ class PostgresProvider:
         work_types_dict["values"] = work_types_list
         work_types_dict["object_type"] = 'work'
         result_json.append(work_types_dict)
+
+        languages = Language.objects.all()
+        languages_list = []
+        for language in languages:
+            languages_list.append(
+                {"label": language.display_name, "filter_val": language.display_name})
+        languages_dict = {}
+        languages_dict["label"] = "Language"
+        languages_dict["values"] = languages_list
+        languages_dict["object_type"] = "chive"
+        result_json.append(languages_dict)
 
         # todo move to separate class
         word_count_dict = {}

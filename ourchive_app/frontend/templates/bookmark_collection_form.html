@@ -89,7 +89,7 @@ function populateUserInput(user_id, username) {
     wrapper.classList.add('uk-inline');
     wrapper.classList.add('uk-margin-remove-top');
     wrapper.setAttribute('id', 'collection-form-user-'+user_id+'-parent');
-    wrapper.innerHTML= '<input id="work-form-cocreator-'+user_id+'-hidden" type="hidden" name="collection_cocreators_'+user_id+'" value="'+user_id+'"> <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="collection_user_'+user_id+'_display">'+username+' <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser('+user_id+')" id="collection_user_'+user_id+'_delete"></span></span>';
+    wrapper.innerHTML= '<input id="bkcol-form-cocreator-'+user_id+'-hidden" type="hidden" name="collection_cocreators_'+user_id+'" value="'+user_id+'"> <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="collection_user_'+user_id+'_display">'+username+' <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser('+user_id+')" id="collection_user_'+user_id+'_delete"></span></span>';
     var input = document.getElementById("collection-form-user-search");
     input.remove();
     parent.appendChild(wrapper);
@@ -140,7 +140,19 @@ function populateUserInput(user_id, username) {
                     </div>
                 </div>
             </div>
+    </div>
+    <div class="uk-margin" id="bkcol-form-languages-parent">
+        <label id="bkcol-form-languages-label" class="uk-form-label" for="bkcol-form-languages">{% translate 'Languages' %}</label>
+        <div id="bkcol-form-languages-controls" class="uk-form-controls">
+            <div id="bkcol-form-languages-inline" class="uk-inline">
+                <select name="languages[]" id="bkcol-form-languages" class="uk-select" multiple="">
+                    {% for language in languages %}
+                        <option value="{{language.id}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
+    </div>
     <div id="bkcol-form-short-desc-parent" class="uk-margin">
         <label id="bkcol-form-short-desc-label" class="uk-form-label" for="bkcol-form-short-desc-input">Short Description</label>
         <div id="bkcol-form-short-desc-form-control" class="uk-form-controls">

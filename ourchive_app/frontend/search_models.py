@@ -91,6 +91,8 @@ class SearchObject(object):
 			return 'work'
 		elif 'rating' in filter_term:
 			return 'bookmark'
+		elif 'chive' in filter_term:
+			return 'chive'
 
 
 class ReturnKeys(object):

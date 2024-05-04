@@ -50,6 +50,9 @@ class WorkFilter(object):
             },
             'type': {
                 'work_type__type_name__icontains': []
+            },
+            'languages': {
+                'languages__display_name__iexact': [],
             }
         }
         self.exclude_filters = {
@@ -82,6 +85,9 @@ class WorkFilter(object):
             },
             'type': {
                 'work_type__type_name__icontains': []
+            },
+            'languages': {
+                'languages__display_name__iexact': [],
             }
         }
 
@@ -90,6 +96,7 @@ class WorkFilter(object):
         completes = Common.get_completes(dict_obj)
         if include:
             self.include_filters['complete']['is_complete__exact'] = completes
+            self.include_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.include_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
             self.include_filters['tags']['tags__text__icontains'] = tags
             self.include_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
@@ -102,6 +109,7 @@ class WorkFilter(object):
                 self.include_filters['word_count_range']['ranges'].append(range_tuple)
         else:
             self.exclude_filters['complete']['is_complete__exact'] = completes
+            self.exclude_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.exclude_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
             self.exclude_filters['tags']['tags__text__icontains'] = tags
             self.exclude_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
@@ -129,6 +137,9 @@ class BookmarkFilter(object):
             },
             'tags': {
                 'tags__text__icontains': [],
+            },
+            'languages': {
+                'languages__display_name__iexact': [],
             }
         }
         self.exclude_filters = {
@@ -140,6 +151,9 @@ class BookmarkFilter(object):
             },
             'tags': {
                 'tags__text__icontains': [],
+            },
+            'languages': {
+                'languages__display_name__iexact': [],
             }
         }
 
@@ -147,10 +161,12 @@ class BookmarkFilter(object):
         tags = Common.get_tags(dict_obj)
         if include:
             self.include_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
+            self.include_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.include_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
             self.include_filters['tags']['tags__text__icontains'] = tags
         else:
             self.exclude_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
+            self.exclude_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.exclude_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
             self.exclude_filters['tags']['tags__text__icontains'] = tags
 
@@ -207,6 +223,9 @@ class CollectionFilter(object):
             },
             'tags': {
                 'tags__text__icontains': [],
+            },
+            'languages': {
+                'languages__display_name__iexact': [],
             }
         }
         self.exclude_filters = {
@@ -218,6 +237,9 @@ class CollectionFilter(object):
             },
             'tags': {
                 'tags__text__icontains': [],
+            },
+            'languages': {
+                'languages__display_name__iexact': [],
             }
         }
 
@@ -225,10 +247,12 @@ class CollectionFilter(object):
         tags = Common.get_tags(dict_obj)
         if include:
             self.include_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+            self.include_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.include_filters['tags']['tags__text__icontains'] = tags
             self.include_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
         else:
             self.exclude_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
+            self.exclude_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.exclude_filters['tags']['tags__text__icontains'] = tags
             self.exclude_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
 

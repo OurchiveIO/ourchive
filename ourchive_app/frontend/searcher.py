@@ -36,6 +36,20 @@ def add_filter_to_work(filter_val, filter_details, work_filter):
 	return work_filter
 
 
+def add_filter_to_collection(filter_val, filter_details, collection_filter):
+	if not filter_val:
+		filter_key = filter_details[0]
+		filter_val = filter_details[1]
+	else:
+		filter_key = filter_details[1]
+	if filter_key in collection_filter and len(collection_filter[filter_key]) > 0:
+		collection_filter[filter_key].append(filter_val)
+	else:
+		collection_filter[filter_key] = []
+		collection_filter[filter_key].append(filter_val)
+	return collection_filter
+
+
 def add_filter_to_tag(filter_val, filter_details, tag_filter, work_filter, bookmark_filter):
 	tag_type = filter_details[0]
 	tag_text = filter_val.lower() if filter_val else ''
@@ -128,6 +142,15 @@ def build_request_filters(request, include_exclude, request_object, request_buil
 			request_object.bookmark_search.include_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.include_filter)
 		else:
 			request_object.bookmark_search.exclude_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.exclude_filter)
+	elif filter_type == "chive":
+		if include_exclude == 'include':
+			request_object.bookmark_search.include_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.include_filter)
+			request_object.work_search.include_filter = add_filter_to_work(filter_val, filter_details, request_object.work_search.include_filter)
+			request_object.collection_search.include_filter = add_filter_to_collection(filter_val, filter_details, request_object.collection_search.include_filter)
+		else:
+			request_object.bookmark_search.exclude_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.exclude_filter)
+			request_object.work_search.exclude_filter = add_filter_to_work(filter_val, filter_details, request_object.work_search.exclude_filter)
+			request_object.collection_search.include_filter = add_filter_to_collection(filter_val, filter_details, request_object.collection_search.include_filter)
 	return request_object
 
 
@@ -190,7 +213,6 @@ def get_response_facets(response_json, request_object):
 		for value in item.get('values', []):
 			if value.get('checked', None):
 				value['checked'] = False
-	print(exclude_facets)
 	for item in request_object.return_keys.exclude:
 		exclude_facets = iterate_facets(exclude_facets, item)
 	for item in request_object.return_keys.include:

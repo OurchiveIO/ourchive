@@ -885,12 +885,14 @@ def delete_chapter(request, work_id, chapter_id):
 def new_bookmark(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
 		bookmark_boilerplate = get_bookmark_boilerplate(request, work_id)
+		languages = get_languages(request)
 		return render(request, 'bookmark_form.html', {
 			'tags': bookmark_boilerplate[1],
 			'divider': settings.TAG_DIVIDER,
 			'rating_range': bookmark_boilerplate[2],
 			'form_title': 'New Bookmark',
-			'bookmark': bookmark_boilerplate[0]
+			'bookmark': bookmark_boilerplate[0],
+			'languages': languages
 		})
 	elif request.user.is_authenticated:
 		bookmark_dict = get_bookmark_obj(request)
@@ -928,12 +930,15 @@ def edit_bookmark(request, pk):
 			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
 			bookmark['attribute_types'] = process_attributes(bookmark['attributes'], bookmark_attributes.response_data['results'])
 			tags = group_tags_for_edit(bookmark['tags'], tag_types) if 'tags' in bookmark else group_tags_for_edit([], tag_types)
+			languages = get_languages(request)
+			languages = process_languages(languages, bookmark['languages_readonly'])
 			return render(request, 'bookmark_form.html', {
 				'rating_range': bookmark['star_count'],
 				'divider': settings.TAG_DIVIDER,
 				'form_title': 'Edit Bookmark',
 				'bookmark': bookmark,
-				'tags': tags})
+				'tags': tags,
+				'languages': languages})
 		else:
 			return get_unauthorized_message(request, '/login', 'bookmark-update-login-error')
 
@@ -979,12 +984,14 @@ def new_bookmark_collection(request):
 		tag_types = do_get(f'api/tagtypes', request, {}, 'Tag Type').response_data
 		tags = group_tags_for_edit([], tag_types)
 		bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks').response_data
+		languages = get_languages(request)
 		return render(request, 'bookmark_collection_form.html', {
 			'tags': tags,
 			'divider': settings.TAG_DIVIDER,
 			'form_title': _('New Collection'),
 			'bookmark_collection': bookmark_collection,
-			'bookmarks': bookmarks})
+			'bookmarks': bookmarks,
+			'languages': languages})
 	elif request.user.is_authenticated:
 		collection_dict = get_bookmark_collection_obj(request)
 		response = do_post(f'api/bookmarkcollections/', request, data=collection_dict, object_name='Bookmark Collection')
@@ -1012,12 +1019,15 @@ def edit_bookmark_collection(request, pk):
 			bookmark_collection['attribute_types'] = process_attributes(bookmark_collection['attributes'], bookmark_attributes.response_data['results'])
 			tags = group_tags_for_edit(bookmark_collection['tags'], tag_types) if 'tags' in bookmark_collection else []
 			bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks')
+			languages = get_languages(request)
+			languages = process_languages(languages, bookmark_collection['languages_readonly'])
 			return render(request, 'bookmark_collection_form.html', {
 				'bookmark_collection': bookmark_collection,
 				'bookmarks': bookmarks,
 				'divider': settings.TAG_DIVIDER,
 				'form_title': 'Edit Bookmark Collection',
-				'tags': tags})
+				'tags': tags,
+				'languages': languages})
 		else:
 			return get_unauthorized_message(request, '/login', 'bookmark-collection-update-login-error')
 
@@ -1438,7 +1448,6 @@ def edit_comment_common(request, object_name, error_redirect, redirect_url, redi
 		comment_dict["user"] = str(request.user)
 	else:
 		comment_dict["user"] = None
-	print(comment_dict)
 	response = do_patch(f"api/{object_name}comments/{comment_dict['id']}/", request, data=comment_dict, object_name='Comment')
 	process_message(request, response)
 	redirect_url = f'{redirect_url}expandComments=true&scrollCommentId={comment_dict["id"]}&comment_offset={comment_offset}'
