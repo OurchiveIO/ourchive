@@ -795,6 +795,7 @@ def edit_work(request, id):
 			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Attribute')
 			work['attribute_types'] = process_attributes(work['attributes'], work_attributes.response_data['results'])
 			languages = get_languages(request)
+			languages = process_languages(languages, work['languages_readonly'])
 			chapters = do_get(f'api/works/{id}/chapters/all', request, 'Chapter').response_data
 			chapter_count = int(work['chapter_count'])
 			if chapter_count < 2:

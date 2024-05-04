@@ -100,6 +100,9 @@ def get_work_obj(request, work_id=None):
 		work_dict['preferred_download_url'] = ''
 	if 'preferred_download' in work_dict and work_dict['preferred_download'] == 'None':
 		work_dict.pop('preferred_download')
+	if 'languages[]' in work_dict:
+		work_dict['languages'] = [int(x) for x in request.POST.getlist("languages[]")]
+		work_dict.pop('languages[]')
 	multichapter = work_dict.pop('multichapter') if 'multichapter' in work_dict else None
 	chapter_dict = {
 		'title': '',
@@ -394,6 +397,14 @@ def convert_bool(post_data):
 
 def get_languages(request):
 	return do_get(f'api/languages', request, params={}, object_name='Languages').response_data.get('results', [])
+
+
+def process_languages(languages, obj_languages):
+	for language in languages:
+		for obj_language in obj_languages:
+			if language.get('id', None) == obj_language.get('id'):
+				language['selected'] = True
+	return languages
 
 
 def get_work_types(request):

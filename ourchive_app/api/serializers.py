@@ -60,6 +60,14 @@ class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
+class LanguageSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = Language
+        fields = '__all__'
+
+
 class ContentPageSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     name = serializers.ReadOnlyField()
@@ -682,6 +690,8 @@ class TopTagSerializer(serializers.HyperlinkedModelSerializer):
 
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
+    languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
+    languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
@@ -747,6 +757,19 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         work.save()
         return work
 
+    def process_languages(self, work, languages):
+        backup_languages = list(work.languages.all())
+        work.languages.clear()
+        try:
+            for language in languages:
+                work.languages.add(language)
+            work.save()
+        except Exception:
+            for language in backup_languages:
+                work.languages.add(language)
+            work.save()
+        return work
+
     def process_users(self, work, users):
         backup_users = list(work.users.all())
         work.users.clear()
@@ -778,6 +801,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, work, validated_data):
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
         if 'tags' in validated_data:
             tags = validated_data.pop('tags') if 'tags' in validated_data else []
             work = self.process_tags(work, validated_data, tags)
@@ -800,6 +824,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         Work.objects.filter(id=work.id).update(**validated_data)
         work = Work.objects.get(id=work.id)
         self.process_users(work, users)
+        self.process_languages(work, languages)
         work.draft = validated_data['draft']
         work.save()
         return Work.objects.filter(id=work.id).first()
@@ -807,6 +832,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -820,6 +846,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         work = Work.objects.create(**validated_data)
         work = self.process_tags(work, validated_data, tags)
         work = self.process_users(work, users)
+        work = self.process_languages(work, languages)
         work.draft = validated_data['draft']
         work.save()
         if attributes is not None:
@@ -1151,12 +1178,4 @@ class AdminAnnouncementSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = AdminAnnouncement
-        fields = '__all__'
-
-
-class LanguageSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
-
-    class Meta:
-        model = Language
         fields = '__all__'
