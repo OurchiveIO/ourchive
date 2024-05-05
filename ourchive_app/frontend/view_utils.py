@@ -88,6 +88,20 @@ def sanitize_rich_text(rich_text):
 		rich_text = ''
 	return rich_text
 
+def get_list_from_form(form_key, obj_dict, request):
+	if f'{form_key}[]' in obj_dict:
+		obj_dict[form_key] = [int(x) for x in request.POST.getlist(f"{form_key}[]")]
+		obj_dict.pop(f'{form_key}[]')
+	return obj_dict
+
+
+def populate_default_languages(languages, request):
+	for language in languages:
+		for default_language in request.user.default_languages.all():
+			if default_language.id == language['id']:
+				language['selected'] = True
+	return languages
+
 
 def get_work_obj(request, work_id=None):
 	work_dict = request.POST.copy()
@@ -100,9 +114,7 @@ def get_work_obj(request, work_id=None):
 		work_dict['preferred_download_url'] = ''
 	if 'preferred_download' in work_dict and work_dict['preferred_download'] == 'None':
 		work_dict.pop('preferred_download')
-	if 'languages[]' in work_dict:
-		work_dict['languages'] = [int(x) for x in request.POST.getlist("languages[]")]
-		work_dict.pop('languages[]')
+	work_dict = get_list_from_form('languages', work_dict, request)
 	multichapter = work_dict.pop('multichapter') if 'multichapter' in work_dict else None
 	chapter_dict = {
 		'title': '',
@@ -227,9 +239,7 @@ def get_bookmark_obj(request):
 	if bookmark_dict["updated_on"] == bookmark_dict["updated_on_original"]:
 		bookmark_dict["updated_on"] = str(datetime.now().date())
 	bookmark_dict.pop("updated_on_original")
-	if 'languages[]' in bookmark_dict:
-		bookmark_dict['languages'] = [int(x) for x in request.POST.getlist("languages[]")]
-		bookmark_dict.pop('languages[]')
+	bookmark_dict = get_list_from_form('languages', bookmark_dict, request)
 	return bookmark_dict
 
 
@@ -276,9 +286,7 @@ def get_bookmark_collection_obj(request):
 	if collection_dict["updated_on"] == collection_dict["updated_on_original"]:
 		collection_dict["updated_on"] = str(datetime.now().date())
 	collection_dict.pop("updated_on_original")
-	if 'languages[]' in collection_dict:
-		collection_dict['languages'] = [int(x) for x in request.POST.getlist("languages[]")]
-		collection_dict.pop('languages[]')
+	collection_dict = get_list_from_form('languages', collection_dict, request)
 	return collection_dict
 
 

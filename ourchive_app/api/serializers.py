@@ -193,6 +193,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     can_upload_export_files = serializers.ReadOnlyField(required=False)
     can_upload_video = serializers.ReadOnlyField(required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    default_languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='default_languages')
+    default_languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
     default_work_type = serializers.SlugRelatedField(
         queryset=WorkType.objects.all(),
         slug_field='type_name', required=False)
@@ -204,8 +206,22 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
                   'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files',
                   'can_upload_images', 'can_upload_video', 'default_work_type', 'collapse_chapter_image',
-                  'collapse_chapter_audio', 'collapse_chapter_text', 'copy_work_metadata', 'chive_export_url')
+                  'collapse_chapter_audio', 'collapse_chapter_text', 'copy_work_metadata', 'chive_export_url',
+                  'default_languages_readonly', 'default_languages')
         extra_kwargs = {'password': {'write_only': True}}
+
+    def process_languages(self, user, languages):
+        backup_languages = list(user.default_languages.all())
+        user.default_languages.clear()
+        try:
+            for language in languages:
+                user.default_languages.add(language)
+            user.save()
+        except Exception:
+            for language in backup_languages:
+                user.default_languages.add(language)
+            user.save()
+        return user
 
     def create(self, validated_data):
         require_invite = OurchiveSetting.objects.filter(
@@ -237,6 +253,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             attributes = validated_data.pop('attributes')
         else:
             attributes = None
+        languages = validated_data.pop('default_languages') if 'default_languages' in validated_data else []
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -257,9 +274,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         user.save()
         if attributes is not None:
             user = AttributeValueSerializer.process_attributes(user, validated_data, attributes)
+        user = self.process_languages(user, languages)
         return user
 
     def update(self, user, validated_data):
+        languages = validated_data.pop('default_languages') if 'default_languages' in validated_data else []
         if 'icon' in validated_data and not validated_data['icon'] or validated_data['icon'].lower() == 'none':
             validated_data['icon_alt_text'] = "Default icon"
             icon = OurchiveSetting.objects.filter(name='Default Icon URL').first()
@@ -273,6 +292,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             attributes = validated_data.pop('attributes')
             user = AttributeValueSerializer.process_attributes(user, validated_data, attributes)
         User.objects.filter(id=user.id).update(**validated_data)
+        user = self.process_languages(user, languages)
         return user
 
 

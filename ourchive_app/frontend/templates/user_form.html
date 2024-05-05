@@ -77,6 +77,19 @@
             </div>
         </div> 
 
+        <div class="uk-margin" id="user-form-languages-parent">
+            <label id="user-form-languages-label" class="uk-form-label" for="user-form-languages">{% translate 'Default Languages' %}</label>
+            <div id="user-form-languages-controls" class="uk-form-controls">
+                <div id="user-form-languages-inline" class="uk-inline">
+                    <select name="default_languages[]" id="user-form-languages" class="uk-select" multiple="">
+                        {% for language in default_languages %}
+                            <option value="{{language.id}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
         {% if user.attribute_types %}
             {% include "object_attributes_form.html" with object='User' attribute_types=user.attribute_types show_header=False %}
         {% endif %}

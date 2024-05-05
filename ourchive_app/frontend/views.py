@@ -319,6 +319,7 @@ def edit_user(request, pk):
 		user_data['collapse_chapter_audio'] = 'collapse_chapter_audio' in user_data
 		user_data['collapse_chapter_text'] = 'collapse_chapter_text' in user_data
 		user_data["attributes"] = get_attributes_from_form_data(request)
+		user_data = get_list_from_form('default_languages', user_data, request)
 		response = do_patch(f'api/users/{user_id}/', request, data=user_data, object_name='User Profile')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
@@ -326,6 +327,7 @@ def edit_user(request, pk):
 	else:
 		if request.user.is_authenticated:
 			work_types = get_work_types(request)
+			languages = get_languages(request)
 			response = do_get(f"api/users/profile/{request.user.id}", request, 'User Profile')
 			if response.response_info.status_code >= 400:
 				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
@@ -336,9 +338,14 @@ def edit_user(request, pk):
 				user['profile'] = sanitize_rich_text(user['profile'])
 			user_attributes = do_get(f'api/attributetypes', request, params={'allow_on_user': True}, object_name='Attribute')
 			user['attribute_types'] = process_attributes(user['attributes'], user_attributes.response_data['results'])
+			for language in languages:
+				for user_language in user['default_languages']:
+					if user_language == language['id']:
+						language['selected'] = True
 			return render(request, 'user_form.html', {
 				'user': user, 'form_title': 'Edit User',
 				'work_types': work_types,
+				'default_languages': languages
 			})
 		else:
 			messages.add_message(request, messages.ERROR, _('You must log in as this user to perform this action.'), 'user-profile-unauthorized-error')
@@ -654,6 +661,7 @@ def new_work(request):
 		work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Work Attributes')
 		work['attribute_types'] = process_attributes([], work_attributes.response_data['results'])
 		languages = get_languages(request)
+		languages = populate_default_languages(languages, request)
 		return render(request, 'work_form.html', {
 			'tags': tags,
 			'divider': settings.TAG_DIVIDER,
@@ -886,6 +894,7 @@ def new_bookmark(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
 		bookmark_boilerplate = get_bookmark_boilerplate(request, work_id)
 		languages = get_languages(request)
+		languages = populate_default_languages(languages, request)
 		return render(request, 'bookmark_form.html', {
 			'tags': bookmark_boilerplate[1],
 			'divider': settings.TAG_DIVIDER,
@@ -985,6 +994,7 @@ def new_bookmark_collection(request):
 		tags = group_tags_for_edit([], tag_types)
 		bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks').response_data
 		languages = get_languages(request)
+		languages = populate_default_languages(languages, request)
 		return render(request, 'bookmark_collection_form.html', {
 			'tags': tags,
 			'divider': settings.TAG_DIVIDER,
