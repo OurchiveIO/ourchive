@@ -32,3 +32,12 @@
 <div class="uk-inline ourchive-metadata-list">
 	<span class="uk-inline uk-text-bold" id="work-metadata-word-count">{% blocktranslate with wc=work.word_count %}Words: {{ wc }}{% endblocktranslate %}</span>
 </div>
+{% if work.languages_readonly %}
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-languages-divider" class="uk-inline uk-text-bold">-</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span class="uk-inline uk-text-bold" id="work-metadata-language">{% translate 'Languages' %}: {% for language in work.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}
+    {% endfor %}</span>
+</div>
+{% endif %}

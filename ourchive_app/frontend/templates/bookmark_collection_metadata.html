@@ -1,19 +1,27 @@
 {% load i18n %}
-
-	<div class="uk-inline ourchive-metadata-list" id="bk-metadata-p">
-		<span id="bkcol-metadata-complete" class="uk-inline uk-text-bold">Status: {% if bookmark_collection.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
-	</div>
-	<div class="uk-inline ourchive-metadata-list">
-		<span id="bookmark-metadata-status-divider" class="uk-inline uk-text-bold">-</span>
-	</div>
-	{% if settings.AllowComments %}
-	<div class="uk-inline ourchive-metadata-list">
-		<span id="bk-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark_collection.comment_count %}Comments: {{ cc }}{% endblocktranslate %}</span>
-	</div>
-	<div class="uk-inline ourchive-metadata-list">
-		<span id="bookmark-metadata-status-divider" class="uk-inline uk-text-bold">-</span>
-	</div>
-	{% endif %}
-	<div class="uk-inline ourchive-metadata-list">
-		<span id="bookmark-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{bookmark_collection.updated_on|date:'d M Y'}}</span>
-	</div>
+<div class="uk-inline ourchive-metadata-list" id="bk-metadata-p">
+	<span id="bkcol-metadata-complete" class="uk-inline uk-text-bold">Status: {% if bookmark_collection.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="collection-metadata-status-divider" class="uk-inline uk-text-bold">-</span>
+</div>
+{% if settings.AllowComments %}
+<div class="uk-inline ourchive-metadata-list">
+	<span id="bk-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark_collection.comment_count %}Comments: {{ cc }}{% endblocktranslate %}</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="collection-metadata-status-divider" class="uk-inline uk-text-bold">-</span>
+</div>
+{% endif %}
+<div class="uk-inline ourchive-metadata-list">
+	<span id="collection-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{bookmark_collection.updated_on|date:'d M Y'}}</span>
+</div>
+{% if bookmark_collection.languages_readonly %}
+<div class="uk-inline ourchive-metadata-list">
+	<span id="collection-metadata-languages-divider" class="uk-inline uk-text-bold">-</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span class="uk-inline uk-text-bold" id="collection-metadata-language">{% translate 'Languages' %}: {% for language in bookmark_collection.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}
+    {% endfor %}</span>
+</div>
+{% endif %}
