@@ -45,6 +45,7 @@ def index(request):
 	response = do_get(f'api/works/recent', request, params=request.GET, object_name='recent works')
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
 		recent_works = response.response_data['results']
+	news = get_news(request).response_data.get('results', [])
 	return render(request, 'index.html', {
 		'heading_message': _('ourchive_welcome'),
 		'long_message': _('ourchive_intro_copy'),
@@ -52,7 +53,8 @@ def index(request):
 		'top_tags': top_tags,
 		'recent_works': recent_works,
 		'stylesheet_name': 'ourchive-light.css',
-		'has_notifications': request.session.get('has_notifications')
+		'has_notifications': request.session.get('has_notifications'),
+		'news': news
 	})
 
 
@@ -1689,6 +1691,29 @@ def cocreator_approvals(request):
 	else:
 		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'user-unauthorized-error')
 		return redirect('/login')
+
+
+def news_list(request):
+	response = do_get(f'api/news/', request, params=request.GET, object_name='News')
+	news_response = response.response_data
+	news = response.response_data.get('results', [])
+	news = format_date_for_template(news, 'updated_on', True)
+	next_params = news_response.get('next_params', None)
+	prev_params = news_response.get('prev_params', None)
+	return render(request, 'news.html', {
+		'news': news,
+		'next': f"/news/{next_params}" if next_params is not None else None,
+		'previous': f"/news/{prev_params}" if prev_params is not None else None,
+		'root': settings.ROOT_URL})
+
+
+def news(request, pk):
+	response = do_get(f'api/news/{pk}', request, params=request.GET, object_name='News')
+	news = response.response_data
+	news = format_date_for_template(news, 'updated_on', False)
+	return render(request, 'news_detail.html', {
+		'news': news,
+		'root': settings.ROOT_URL})
 
 
 @never_cache

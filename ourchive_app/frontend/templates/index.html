@@ -84,7 +84,13 @@
 	{% include 'index_navbar.html' %}
 	{% include 'index_sidenav.html' %}
 	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="icon:ourchive-up;ratio:.75"></span></button>
-	{% include 'index_body.html' %}
+	<div class="uk-width-expand uk-container uk-margin content-block-parent ourchive-content-block-parent" id="content-block-parent">	
+		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true" class="uk-grid uk-margin-remove ourchive-top-level-grid">
+		{% block content %}
+		{% include 'index_body.html' %}
+		{% endblock %}
+	</div>
+	</div>
 	<hr id="footer-hr" class="ourchive-hr">
 	<div id="footer-parent-grid" class="uk-grid uk-padding-small uk-margin-bottom uk-margin-left uk-margin-right" uk-grid>
 	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">

@@ -8,7 +8,7 @@ from api.models import Work, Tag, Chapter, TagType, WorkType, \
     NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
     Invitation, AttributeType, AttributeValue, User, ContentPage, UserReport, \
     UserReportReason, UserSubscription, CollectionComment, AdminAnnouncement, \
-    Language
+    Language, News
 import datetime
 import logging
 from django.conf import settings
@@ -1232,4 +1232,11 @@ class AdminAnnouncementSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = AdminAnnouncement
+        fields = '__all__'
+
+class NewsSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = News
         fields = '__all__'

@@ -1,65 +1,61 @@
 {% load i18n %}
 {% load cache %}
-<div class="uk-width-expand uk-container uk-margin content-block-parent ourchive-content-block-parent" id="content-block-parent">	
-<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true" class="uk-grid uk-margin-remove ourchive-top-level-grid">
-	{% block content %}
-		<div class="uk-width-3-4" id="homepage-intro-and-browse">
-			<div class="uk-grid" uk-grid>
-				{% cache 43200 homepage-intro %}
-				<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-bottom ourchive-parent-grid" id="index-content-intro-div">
-				        <h1 id="index-content-heading" class="uk-heading-medium">{{ heading_message }}</h1>
-				  		<span id="index-content-message">{{ long_message }}</span>
-				</div>
-				<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-bottom ourchive-parent-grid">
-					<ul uk-tab>
-					    <li class="uk-active"><a href="#">Work Type</a></li>
-					    <li><a href="#">Fandom</a></li>
-					    <li><a href="#">Relationship Type</a></li>
-					</ul>
-					<div class="uk-switcher">
-						{% for item in browse_cards %}
-					    <div class="uk-grid uk-margin-right" id="browse-cards-item-{{ item.label }}" uk-grid>
-					    	{% for card in item.cards %}
-					    	<div class="uk-width-1-3">
-					    		<div class="uk-card ourchive-homepage-card" id="browse-cards-{{ card.label }}"><a href="#">{{card.label}}</a></div>
-					    	</div>
-					    	{% endfor %}
-					    </div>
-					    {% endfor %}
-					</div>
-				</div>
-				{% endcache %}
+<div class="uk-width-3-4" id="homepage-intro-and-browse">
+	<div class="uk-grid" uk-grid>
+		{% cache 43200 homepage-intro %}
+		<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-bottom ourchive-parent-grid" id="index-content-intro-div">
+		        <h1 id="index-content-heading" class="uk-heading-medium">{{ heading_message }}</h1>
+		  		<span id="index-content-message">{{ long_message }}</span>
+		</div>
+		<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-bottom ourchive-parent-grid">
+			<ul uk-tab>
+				{% for item in browse_cards %}
+			    <li class="uk-active"><a href="#">{{ item.label }}</a></li>
+			    <li><a href="#">{{ item.label }}</a></li>
+			    <li><a href="#">{{ item.label }}</a></li>
+			    {% endfor %}
+			</ul>
+			<div class="uk-switcher">
+				{% for item in browse_cards %}
+			    <div class="uk-grid uk-margin-right" id="browse-cards-item-{{ item.label }}" uk-grid>
+			    	{% for card in item.cards %}
+			    	<div class="uk-width-1-3">
+			    		<div class="uk-card ourchive-homepage-card" id="browse-cards-{{ card.label }}"><a href="#">{{card.label}}</a></div>
+			    	</div>
+			    	{% endfor %}
+			    </div>
+			    {% endfor %}
 			</div>
 		</div>
-		<div class="uk-width-1-4" id="homepage-news-and-recent-works">
-			<div class="uk-grid ourchive-border-left" uk-grid>
-			{% cache 300 homepage-news %}
-				<div class="uk-width-1-1 uk-margin-remove-right uk-padding-remove-horizontal uk-margin-small-bottom" id="news-column">
-					<h2 id="news-header">{% translate 'News' %}</h2>
-					<ul class="uk-list" id="news-ul">
-							{% for item in news %}
-							<li id="news-li-{{ item.id }}">{{ item.title }}</li>
-							{% endfor %}
-							<li id="news-see-more"><a href="#">See All News >>></a></li>
-					</ul>
-				</div>
-			{% endcache %}
-			<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-right uk-margin-small-top uk-margin-small-bottom uk-padding-remove" id="news-and-recent-separator">
-				<hr class="ourchive-hr uk-width-expand"/>
-			</div>
-			{% cache 300 homepage-recent-works %}
-				<div class="uk-width-1-1 uk-margin-remove-right uk-padding-remove-horizontal uk-margin-small-top" id="recent-works-column">
-					<h2 id="recent-works-header">{% translate 'Recent Works' %}</h2>
-					<ul class="uk-list" id="recent-works-ul">
-						{% for work in recent_works %}
-							<li id="recent-works-li-{{work.id}}"><a href="{% url 'fe-work-view' work.id %}" title="{{ work.title }}">{{ work.title }} {% translate 'by' %} {{ work.user }}</a></li>
-						{% endfor %}
-						<li id="recent-works-see-more"><a href="#">See All Works >>></a></li>
-					</ul>
-				</div>
-			{% endcache %}
-			</div>
-		</div>
-	{% endblock %}
+		{% endcache %}
+	</div>
 </div>
+<div class="uk-width-1-4" id="homepage-news-and-recent-works">
+	<div class="uk-grid ourchive-border-left" uk-grid>
+	{% cache 300 homepage-news %}
+		<div class="uk-width-1-1 uk-margin-remove-right uk-padding-remove-horizontal uk-margin-small-bottom" id="news-column">
+			<h2 id="news-header">{% translate 'News' %}</h2>
+			<ul class="uk-list" id="news-ul">
+					{% for item in news %}
+					<li id="news-li-{{ item.id }}"><a href="{% url 'fe-news-detail' item.id %}">{{ item.title }}</a></li>
+					{% endfor %}
+					<li id="news-see-more"><a href="{% url 'fe-news-list' %}">See All News >>></a></li>
+			</ul>
+		</div>
+	{% endcache %}
+	<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-right uk-margin-small-top uk-margin-small-bottom uk-padding-remove" id="news-and-recent-separator">
+		<hr class="ourchive-hr uk-width-expand"/>
+	</div>
+	{% cache 300 homepage-recent-works %}
+		<div class="uk-width-1-1 uk-margin-remove-right uk-padding-remove-horizontal uk-margin-small-top" id="recent-works-column">
+			<h2 id="recent-works-header">{% translate 'Recent Works' %}</h2>
+			<ul class="uk-list" id="recent-works-ul">
+				{% for work in recent_works %}
+					<li id="recent-works-li-{{work.id}}"><a href="{% url 'fe-work-view' work.id %}" title="{{ work.title }}">{{ work.title }} {% translate 'by' %} {{ work.user }}</a></li>
+				{% endfor %}
+				<li id="recent-works-see-more"><a href="{% url 'fe-all-works' %}">See All Works >>></a></li>
+			</ul>
+		</div>
+	{% endcache %}
+	</div>
 </div>

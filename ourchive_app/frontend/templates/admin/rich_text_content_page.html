@@ -37,7 +37,7 @@
 <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}{% if form_url %}action="{{ form_url }}" {% endif %}method="post" id="{{ opts.model_name }}_form" novalidate onsubmit="return getRichText(this.submitted)">
 <script>
     function getRichText(submitted) {
-        document.getElementById('contentpage_value').value = tinymce.get("valueEditor").getContent().replace(/\r?\n?/g, '');
+        document.getElementById('contentpage_content').value = tinymce.get("valueEditor").getContent().replace(/\r?\n?/g, '');
     }
 </script>
     {% csrf_token %}{% block form_top %}{% endblock %}

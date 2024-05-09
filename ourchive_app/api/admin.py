@@ -1,7 +1,7 @@
 from django.contrib import admin
 from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, \
     ContentPage, Tag, Invitation, AttributeType, AttributeValue, UserReportReason, \
-    UserReport, UserSubscription, AdminAnnouncement, Language
+    UserReport, UserSubscription, AdminAnnouncement, Language, News
 from django.db import models
 from django.forms.widgets import Input
 from django.core.mail import send_mail
@@ -75,6 +75,15 @@ class ContentPageAdmin(admin.ModelAdmin):
     }
     readonly_fields = ["id"]
     list_display = ('name', 'id', 'order')
+
+
+class NewsAdmin(admin.ModelAdmin):
+    change_form_template = "admin/rich_text_content_page.html"
+    formfield_overrides = {
+        models.TextField: {"widget": RichTextEditorWidget},
+    }
+    readonly_fields = ["id"]
+    list_display = ('title', 'id')
 
 
 SETTING_VALUE_CHOICES = [
@@ -198,3 +207,4 @@ admin.site.register(UserReport, UserReportAdmin)
 admin.site.register(UserSubscription, UserSubscriptionAdmin)
 admin.site.register(AdminAnnouncement, AdminAnnouncementAdmin)
 admin.site.register(Language)
+admin.site.register(News, NewsAdmin)

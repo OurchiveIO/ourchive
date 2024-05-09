@@ -705,6 +705,26 @@ class AdminAnnouncement(models.Model):
         return '<AdminAnnouncement: {}>'.format(self.id)
 
 
+class News(models.Model):
+
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    title = models.CharField(max_length=200, default='')
+    content = models.TextField(blank=True, default='')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name_plural = "news"
+
+    def save(self, *args, **kwargs):
+        self.value = nh3.clean(self.content)
+        super(News, self).save(*args, **kwargs)
+
+
 class NotificationType(models.Model):
     __tablename__ = 'notification_types'
     id = models.AutoField(primary_key=True)
@@ -741,7 +761,7 @@ class ContentPage(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
-    value = models.TextField(null=True, blank=True)
+    content = models.TextField(null=True, blank=True)
     order = models.IntegerField(default=1)
     locked_to_users = models.BooleanField(default=False)
     agree_on_signup = models.BooleanField(default=False)
@@ -756,7 +776,7 @@ class ContentPage(models.Model):
         ordering = ('order', 'id',)
 
     def save(self, *args, **kwargs):
-        self.value = nh3.clean(self.value)
+        self.value = nh3.clean(self.content)
         super(ContentPage, self).save(*args, **kwargs)
 
 

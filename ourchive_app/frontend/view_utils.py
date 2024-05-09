@@ -423,3 +423,12 @@ def process_languages(languages, obj_languages):
 
 def get_work_types(request):
 	return do_get(f'api/worktypes', request, {}, 'Work Type').response_data.get('results', [])
+
+
+def create_browse_cards(request):
+	work_types = get_work_types(request)
+	# get tag and attributes that are browsable
+
+
+def get_news(request):
+	return do_get(f'api/news', request, {}, 'News')

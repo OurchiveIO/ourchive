@@ -8,7 +8,7 @@ urlpatterns = [
     path('', views.index),
     path('search/', views.search),
     path('search/filter', views.search_filter),
-    path('works/', views.works),
+    path('works/', views.works, name='fe-all-works'),
     path('works/new/', views.new_work),
     path('works/<int:id>/edit/', views.edit_work, name='edit-work'),
     path('works/<int:id>/publish/', views.publish_work, name='publish-work'),
@@ -101,5 +101,7 @@ urlpatterns = [
     path('users/cocreator-approvals', views.cocreator_approvals, name='fe-view-approvals'),
     path('users/cocreator-approvals/bulk-approve', views.bulk_approve_cocreator, name='fe-cocreator-bulk-approve'),
     path('users/cocreator-approvals/bulk-reject', views.bulk_reject_cocreator, name='fe-cocreator-bulk-reject'),
+    path('news', views.news_list, name='fe-news-list'),
+    path('news/<int:pk>', views.news, name='fe-news-detail')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
