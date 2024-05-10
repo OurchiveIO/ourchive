@@ -10,14 +10,12 @@
 		<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-bottom ourchive-parent-grid">
 			<ul uk-tab>
 				{% for item in browse_cards %}
-			    <li class="uk-active"><a href="#">{{ item.label }}</a></li>
-			    <li><a href="#">{{ item.label }}</a></li>
 			    <li><a href="#">{{ item.label }}</a></li>
 			    {% endfor %}
 			</ul>
 			<div class="uk-switcher">
 				{% for item in browse_cards %}
-			    <div class="uk-grid uk-margin-right" id="browse-cards-item-{{ item.label }}" uk-grid>
+			    <div class="uk-grid uk-margin-right uk-margin-remove-top" id="browse-cards-item-{{ item.label }}" uk-grid>
 			    	{% for card in item.cards %}
 			    	<div class="uk-width-1-3">
 			    		<div class="uk-card ourchive-homepage-card" id="browse-cards-{{ card.label }}"><a href="#">{{card.label}}</a></div>

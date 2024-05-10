@@ -54,6 +54,7 @@ class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
 
 class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
     attribute_values = AttributeValueSerializer(many=True, required=False)
+    id = serializers.IntegerField()
 
     class Meta:
         model = AttributeType
@@ -310,6 +311,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TagTypeSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.IntegerField()
     class Meta:
         model = TagType
         fields = '__all__'
@@ -1233,6 +1235,7 @@ class AdminAnnouncementSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = AdminAnnouncement
         fields = '__all__'
+
 
 class NewsSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()

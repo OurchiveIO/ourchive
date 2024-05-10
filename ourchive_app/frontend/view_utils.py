@@ -427,7 +427,41 @@ def get_work_types(request):
 
 def create_browse_cards(request):
 	work_types = get_work_types(request)
-	# get tag and attributes that are browsable
+	tag_types = do_get(f'api/tagtypes/browsable', request, {}, 'Tag Type').response_data.get('results', [])
+	attribute_types = do_get(f'api/attributetypes/browsable', request, {}, 'Attribute Type').response_data.get('results', [])
+	browse_cards = [{'label': 'Work Types', 'cards': []}]
+	for wt in work_types:
+		browse_cards[0]['cards'].append({
+			'label': wt['type_name'],
+			'url': f'/search/?work_type={wt["id"]}',
+			'id': f'{wt["id"]}'
+		})
+	for tt in tag_types:
+		tag_type = {
+			'label': tt['label'],
+			'cards': []
+		}
+		tags = do_get(f'api/tagtypes/browsable/tags', request, {'tag_type': tt['id']}, 'Tag Type').response_data.get('results', [])
+		for tag in tags:
+			tag_type['cards'].append({
+				'label': tag['display_text'],
+				'id': tag['id'],
+				'url': f'/tags/{tag["id"]}?tag_id={tag["id"]}'
+			})
+		browse_cards.append(tag_type)
+	for at in attribute_types:
+		attribute_type = {
+			'label': at['display_name'],
+			'cards': []
+		}
+		for attribute in at['attribute_values']:
+			attribute_type['cards'].append({
+				'label': attribute['display_name'],
+				'id': attribute['id'],
+				'url': f'/attributes/{attribute["id"]}?attr_id={attribute["id"]}'
+			})
+		browse_cards.append(attribute_type)
+	return browse_cards
 
 
 def get_news(request):

@@ -514,7 +514,7 @@ class TagType(models.Model):
     sort_order = models.IntegerField(default=1)
     filterable = models.BooleanField(default=True)
     show_in_aggregate = models.BooleanField(default=True)
-    show_on_homepage = models.BooleanField(default=False)
+    show_for_browse = models.BooleanField(default=False)
 
     class Meta:
         indexes = [
@@ -812,7 +812,7 @@ class AttributeType(models.Model):
     allow_multiselect = models.BooleanField(default=True)
     allow_on_bookmark_collection = models.BooleanField(default=False)
     sort_order = models.IntegerField(default=1)
-    show_on_homepage = models.BooleanField(default=False)
+    show_for_browse = models.BooleanField(default=False)
 
     class Meta:
         indexes = [

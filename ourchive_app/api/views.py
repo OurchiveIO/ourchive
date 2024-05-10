@@ -764,6 +764,22 @@ class TagTypeList(generics.ListCreateAPIView):
         return TagType.objects.all()
 
 
+class BrowsableTagType(generics.ListCreateAPIView):
+    serializer_class = TagTypeSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return TagType.objects.filter(show_for_browse=True)
+
+
+class TagsByType(generics.ListCreateAPIView):
+    serializer_class = TagSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return Tag.objects.filter(tag_type_id=self.request.GET.get('tag_type'))
+
+
 class TagList(generics.ListCreateAPIView):
     queryset = Tag.objects.get_queryset().order_by('id')
     serializer_class = TagSerializer
@@ -1311,6 +1327,22 @@ class AttributeTypeList(generics.ListCreateAPIView):
         else:
             return AttributeType.objects.order_by('name')
         return queryset.order_by('name')
+
+
+class BrowsableAttributeType(generics.ListCreateAPIView):
+    serializer_class = AttributeTypeSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return AttributeType.objects.filter(show_for_browse=True)
+
+
+class AttributesByType(generics.ListCreateAPIView):
+    serializer_class = AttributeValueSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return AttributeValue.objects.filter(attribute_type_id=self.request.GET.get('attribute_type'))
 
 
 class AttributeTypeDetail(generics.RetrieveUpdateDestroyAPIView):
