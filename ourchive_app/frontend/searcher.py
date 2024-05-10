@@ -260,6 +260,7 @@ def build_and_execute_search(request):
 	# prepare search & preserve request data
 	tag_id = None
 	attr_id = None
+	work_type_id = None
 	valid_search = False
 	if 'term' in request.GET:
 		term = request.GET['term']
@@ -273,6 +274,10 @@ def build_and_execute_search(request):
 		valid_search = True
 	elif 'attr_id' in request.GET:
 		attr_id = request.GET['attr_id']
+		term = ""
+		valid_search = True
+	elif 'work_type' in request.GET:
+		work_type_id = request.GET['work_type']
 		term = ""
 		valid_search = True
 	if not valid_search:
@@ -289,6 +294,8 @@ def build_and_execute_search(request):
 		request_object.tag_id = tag_id
 	if attr_id:
 		request_object.attr_id = attr_id
+	if work_type_id:
+		request_object.work_type_id = work_type_id
 	request_object = get_search_request(request, request_object, request_builder)
 	post_request = request_object.post_data.get_dict()
 	# make request

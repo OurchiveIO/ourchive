@@ -7,6 +7,7 @@ class ParentSearch():
 		self.tag_search = tag_search
 		self.tag_id = None
 		self.attr_id = None
+		self.work_type_id = None
 
 	def get_dict(self):
 		self.work_search = self.work_search.__dict__
