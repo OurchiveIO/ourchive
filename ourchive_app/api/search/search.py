@@ -617,6 +617,35 @@ class PostgresProvider:
         results['user'] = {'data': [], 'page': {}}
         return results
 
+    def filter_by_work_type(self, **kwargs):
+        work_type_id = kwargs.get('work_type_id')
+        work_search = WorkSearch()
+        work_search.from_dict(kwargs['work_search'])
+        work_filters = self.get_filters(work_search)
+
+        if 'page' in kwargs['work_search']:
+            work_search.page = int(kwargs['work_search']['page'])
+
+        works = Work.objects.filter(work_type__id__exact=work_type_id)
+        if work_filters[0]:
+            works = works.filter(work_filters[0])
+        if work_filters[1]:
+            works = works.filter(work_filters[1])
+        works = works.filter(draft=False).order_by('-updated_on').distinct()
+
+        base_string = f'/attributes/{kwargs["attr_id"]}?attr_id={kwargs["attr_id"]}&'
+
+        works_processed = self.process_results(works, work_search.page, Work, base_string)
+
+        work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
+        results = {}
+        results['work'] = work_results
+        results['bookmark'] = {'data': []}
+        results['collection'] = {'data': []}
+        results['tag'] = {'data': []}
+        results['user'] = {'data': []}
+        return results
+
     def process_tag_tags(self, tags, tags_dict):
         for result in tags:
             if result['display_text'] not in tags_dict[result['tag_type']]['tags']:
@@ -680,7 +709,7 @@ class PostgresProvider:
                 result_json.append(ResultFacet(attributes_dict[key]['type_id'], key, attribute_filter_vals, 'attribute').to_dict())
         return result_json
 
-    def get_result_facets(self, results, tag_id=None):
+    def get_result_facets(self, results, tag_id=None, work_type_id=None):
         # todo: refactor - move attribute & tag processing to individual functions,
         # change facet dicts to pull from consts, use translation on labels,
         # move ranges to a dynamic number
@@ -689,7 +718,7 @@ class PostgresProvider:
         work_types_list = []
         for work_type in work_types:
             work_types_list.append(
-                {"label": work_type.type_name})
+                {"label": work_type.type_name, "checked": work_type_id and work_type_id == str(work_type.id)})
         work_types_dict = {}
         work_types_dict["label"] = "Work Type"
         work_types_dict["values"] = work_types_list

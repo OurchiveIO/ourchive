@@ -227,7 +227,7 @@ def get_empty_response_obj():
 def get_search_request(request, request_object, request_builder):
 	return_keys = ReturnKeys()
 	for key in request.POST:
-		if key == 'tag_id' or key == 'attr_id':
+		if key == 'tag_id' or key == 'attr_id' or key == 'work_type_id':
 			continue
 		filter_val = request.POST.get(key, None) if request.POST.get(key, None) != 'on' else None
 		include_exclude = 'exclude' if 'exclude_' in key else 'include'

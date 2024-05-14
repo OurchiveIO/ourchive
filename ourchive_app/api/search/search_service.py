@@ -14,6 +14,8 @@ class OurchiveSearch:
 			return self.filter_by_tag(**kwargs)
 		if 'attr_id' in kwargs and kwargs['attr_id']:
 			return self.filter_by_attribute(**kwargs)
+		if 'work_type_id' in kwargs and kwargs['work_type_id']:
+			return self.filter_by_work_type(**kwargs)
 		if ('work_search') in kwargs:
 			results['work'] = self.searcher.search_works(**kwargs['work_search'])
 		if ('bookmark_search') in kwargs:
@@ -25,6 +27,13 @@ class OurchiveSearch:
 		if ('collection_search') in kwargs:
 			results['collection'] = self.searcher.search_collections(**kwargs['collection_search'])
 		results['facet'] = self.searcher.get_result_facets(results)
+		return results
+
+	def filter_by_work_type(self, **kwargs):
+		if not kwargs['work_type_id'].isdigit():
+			return {'results': {'errors': ['Work type id must be a number.']}}
+		results = self.searcher.filter_by_work_type(**kwargs)
+		results['facet'] = self.searcher.get_result_facets(results, None, kwargs['work_type_id'])
 		return results
 
 	def filter_by_tag(self, **kwargs):

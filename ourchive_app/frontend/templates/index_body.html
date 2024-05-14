@@ -7,6 +7,7 @@
 		        <h1 id="index-content-heading" class="uk-heading-medium">{{ heading_message }}</h1>
 		  		<span id="index-content-message">{{ long_message }}</span>
 		</div>
+		{% endcache %}
 		<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-bottom ourchive-parent-grid">
 			<ul uk-tab>
 				{% for item in browse_cards %}
@@ -25,7 +26,6 @@
 			    {% endfor %}
 			</div>
 		</div>
-		{% endcache %}
 	</div>
 </div>
 <div class="uk-width-1-4" id="homepage-news-and-recent-works">
