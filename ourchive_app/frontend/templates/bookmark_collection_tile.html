@@ -1,6 +1,6 @@
 {% load i18n %}
-<div id="bkcol-tile-parent" class="uk-width-1-1 uk-padding-remove-horizontal">
-	<div id="bkcol-tile-card" class="uk-card uk-card-default">
+<div id="bkcol-tile-parent-{{ bookmark_collection.id }}" class="uk-width-1-1 uk-padding-remove-horizontal">
+	<div id="bkcol-tile-card-{{ bookmark_collection.id }}" class="uk-card uk-card-default">
 	    <div id="bkcol-tile-header-parent" class="uk-card-header uk-padding-small ourchive-card-head">
 	        <div id="bkcol-tile-header-grid" class="uk-grid uk-child-width-expand" uk-grid>
 		        <span id="collection-{{ bookmark_collection.id }}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="collection-{{ bookmark_collection.id }}-tile-title-link" href="{% url 'fe-view-collection' bookmark_collection.id %}">{{ bookmark_collection.title }}</a> by {% for user in bookmark_collection.users %}<a id="bkcol-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="bkcol-user-link" href="{% url 'user-profile-parent' bookmark_collection.user_id %}">{{ bookmark_collection.user }}</a>{% endfor %}</span>

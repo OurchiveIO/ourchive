@@ -98,7 +98,7 @@
 <div class="uk-width-1-4@s uk-visible@s" id="search-results-work-facet-child"> 
 	<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">	
 		<ul uk-tab="animation: uk-animation-fade;" class="uk-inline" id="search-filter-switcher-controls">
-            <li id="filter-switcher-li-include" class="uk-inline"><a href="#" id="include_tab">Include</a></li>
+            <li id="filter-switcher-li-include" class="uk-inline"><a href="#" id="include_tab" data-testid="include-tab">Include</a></li>
             <li id="filter-switcher-li-exclude" class="uk-inline"><a href="#" id="exclude_tab">Exclude</a></li>
 		</ul>
 		{% csrf_token %}
@@ -157,7 +157,7 @@
 </div>
 <div class="uk-width-3-4@s uk-width-1-1@xs ourchive-padding-remove-horizontal" id="search-results-tab-parent">
 	<ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade;connect: .search-switcher;active: {{default_tab}}" id="search-results-switcher-controls">
-        <li id="results-switcher-li-works"><a href="#" id="works_tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
+        <li id="results-switcher-li-works"><a href="#" id="works_tab" data-testid="works-tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
         <li id="results-switcher-li-bookmarks"><a href="#" id="bookmarks_tab" onclick="updateActiveTab(1)">Bookmarks ({{ bookmarks.page.count }})</a></li>
         <li id="results-switcher-li-users"><a href="#" id="users_tab" onclick="updateActiveTab(2)">Collections ({{ collections.page.count }})</a></li>
         {% if not tag_id %}<li id="results-switcher-li-tags"><a href="#" id="tags_tab" onclick="updateActiveTab(3)">Tags ({{ tags.page.count }})</a></li>

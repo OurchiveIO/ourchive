@@ -19,7 +19,7 @@
 			    <div class="uk-grid uk-margin-right uk-margin-remove-top" id="browse-cards-item-{{ item.label }}" uk-grid>
 			    	{% for card in item.cards %}
 			    	<div class="uk-width-1-3">
-			    		<div class="uk-card ourchive-homepage-card" id="browse-cards-{{ card.label }}"><a href="{{card.url}}">{{card.label}}</a></div>
+			    		<div class="uk-card ourchive-homepage-card" id="browse-cards-{{ card.label }}"><a data-testid="browse-cards" href="{{card.url}}">{{card.label}}</a></div>
 			    	</div>
 			    	{% endfor %}
 			    </div>

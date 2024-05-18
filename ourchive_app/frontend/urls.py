@@ -9,7 +9,7 @@ urlpatterns = [
     path('search/', views.search),
     path('search/filter', views.search_filter),
     path('works/', views.works, name='fe-all-works'),
-    path('works/new/', views.new_work),
+    path('works/new/', views.new_work, name='fe-new-work'),
     path('works/<int:id>/edit/', views.edit_work, name='edit-work'),
     path('works/<int:id>/publish/', views.publish_work, name='publish-work'),
     path('works/<int:id>/publish-full/', views.publish_work_and_chapters, name='publish-full'),

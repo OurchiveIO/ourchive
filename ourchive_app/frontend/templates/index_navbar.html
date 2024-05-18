@@ -1,45 +1,98 @@
 {% load i18n %}
 {% load static %}
+{% if request.user.is_authenticated %}
+<div class="ourchive-navbar ourchive-top-nav" id="ourchive-navbar-parent-stack">
+	<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small uk-padding-remove-vertical" uk-navbar id="uk-nav-parent-stack">
+	    <div class="uk-navbar-right" id="uk-nav-right-stack">
+	    	<ul class="uk-navbar-nav" id="uk-nav-right-ul">
+	    	 	<li id="theme-switcher-li">
+	    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper stack-nav-item" title="Switch Modes">
+	    	 			{% if request.session.css_mode == "dark" %}
+	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: .9" title="Light Mode" id="theme-switcher-light"></span>
+	    	 			{% else %}
+	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: .9" title="Dark Mode" id="theme-switcher-dark"></span>
+	    	 			{% endif %}
+	    	 		</a>
+	    	 	</li>
+	    	 	<li id="nav-right-main">
+		            <a class="uk-width-auto uk-text-truncate stack-nav-item" title="{{ request.user }}" href="#" id="nav-username">{% translate 'Account' %}</a>
+		            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div" uk-dropdown="delay-hide: 1500; offset: -5">
+	                		<ul class="uk-nav uk-navbar-dropdown-nav uk-list-divider uk-list-collapse" id="nav-user-dropdown-ul">
+	                			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
+	                			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
+	                			<li id="nav-creations-li"><a href="#" id="nav-creations-link">{% translate 'My Chives' %}</a></li>
+	                			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="creations-subnav">
+	                				<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link">Bookmarks</a></li>
+	                				<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link">{% translate 'Collections' %}</a></li>
+	                				<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">Works</a></li>
+	                			</ul>
+	                			<li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a></li>
+							    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a></li>
+							    	<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="profile-subnav">
+	                				<li id="nav-edit-profile-li"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-edit-profile-link">{% translate 'User Settings' %}</a></li>
+	                				<li id="nav-edit-account-li"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-edit-account-link">{% translate 'Account Settings' %}</a></li>
+	                				<li id="nav-cocreator-approval-li"><a href="{% url 'fe-view-approvals'%}" id="nav-view-approvals-link">{% translate 'Approvals' %}</a></li>
+	                				<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">{% translate 'Blocklist' %}</a></li>
+	                			</ul>
+	                			<li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link">{% translate 'Import Work(s)' %}</a></li>
+	                			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="imports-subnav">
+							            <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}">{% translate 'Import Status' %}</a></li>
+							        </ul>
+	                			{% if request.session.has_notifications %}
+	                			<li id="nav-notifications-unread-li"><a class="uk-text-emphasis uk-text-secondary" href="/username/{{request.user}}/notifications" id="nav-notifications-unread-link">Notifications (Unread)</a></li>
+	                			{% else %}
+	                			<li id="nav-notifications-li"><a href="/username/{{request.user}}/notifications" id="nav-notifications-link">Notifications</a></li>
+	                			{% endif %}
+				            	<li id="nav-signout-li"><a href="/logout" id="nav-signout-link">Log Out</a></li>
+		        			</ul>
+		        	</div>	
+		        </li>
+	    	 </ul>
+	    	</div></nav></div>
+	    	<hr class="ourchive-nav-hr"/>
+{% endif %}
 <div class="ourchive-navbar" id="ourchive-navbar-parent">
 	<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small uk-padding-remove-vertical" uk-navbar id="uk-nav-parent">
 	    <div class="uk-navbar-left" id="uk-nav-left">
 	    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
 	        <ul class="uk-navbar-nav uk-visible@s">
 	            <li class="uk-active" id="nav-home"><a href="/" title="Home" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
-	            <li><a href="/works/" id="nav-works">{% translate 'Works' %}</a></li>
-	            <li><a href="/bookmark-collections/" id="nav-bookmark-collections">{% translate 'Collections' %}</a></li>
+	            {% if request.user.is_authenticated %}
+	            <li><a href="{% url 'fe-user-works' request.user.username %}" id="nav-works" data-testid="nav-works">{% translate 'Works' %}</a></li>
+	            <li><a href="{% url 'fe-user-collections' request.user.username %}" id="nav-bookmark-collections" data-testid="nav-collections">{% translate 'Collections' %}</a></li>
+	            <li><a href="{% url 'fe-new-work' %}" id="nav-bookmark-collections" data-testid="nav-new-work">{% translate 'Post' %}</a></li>
+	            {% endif %}
 	        </ul>
-	    </div>	    
-	    <div class="uk-navbar-right uk-margin-right" id="uk-nav-right">
-	    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
+	    </div>	 
+	    {% if not request.user.is_authenticated %}   
+	    <div class="uk-navbar-center uk-visible@s" id="uk-nav-center">
+	    	 <ul class="uk-navbar-nav" id="uk-nav-center-ul">
 	    	 	<li id="nav-search-li">
-		                {% if not term %}<div class="nav-overlay uk-navbar-right">
-		                	<a class="uk-navbar-toggle ourchive-icon-wrapper" id="search-toggle-overlay" uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"><span uk-icon="icon: ourchive-search; ratio: .75" title="Search" id="ourchive-nav-search-icon"></a>
-		                </div>{% endif %}
-					{% if not term %}<div class="nav-overlay uk-navbar-left uk-flex-1" hidden>
-					{% else %}<div class="nav-overlay uk-navbar-left uk-flex-1">{% endif %}
-    					<div class="uk-navbar-item uk-width-expand uk-margin-small-left">
-            				<form class="uk-search uk-search-navbar uk-width-1-1" action="/search/" method="post" id="nav-search-form">
+    					<div class="uk-navbar-item uk-margin-small-left">
+            				<form class="uk-search uk-search-default ourchive-nav-search" action="/search/" method="post" id="nav-search-form">
 			                	{% csrf_token %}
-			                    <input class="uk-search-input ourchive-nav-search" autocomplete="off" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
+			                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>
+			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
 							<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
 			                </form>
     					</div>
-    					{% if not term %}<a class="uk-navbar-toggle" uk-close uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"></a>{% endif %}
-
-					</div>
 	        	</li>
+	        </ul>
+	    </div>
+	    {% endif %}
+	    <div class="uk-navbar-right" id="uk-nav-right">
+	    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
+	    	 	{% if not request.user.is_authenticated %}
 	    	 	<li id="theme-switcher-li">
 	    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper" title="Switch Modes">
 	    	 			{% if request.session.css_mode == "dark" %}
-	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Light Mode" id="theme-switcher-light">
+	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Light Mode" id="theme-switcher-light"></span>
 	    	 			{% else %}
-	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Dark Mode" id="theme-switcher-dark">
+	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Dark Mode" id="theme-switcher-dark"></span>
 	    	 			{% endif %}
-	    	 		</a></span>
+	    	 		</a>
 	    	 	</li>
 	        	<li id="nav-right-main">		        
-		            {% if not request.user.is_authenticated %}
 		            	<li class="uk-active" id="nav-login-li">
 		            		<a href="/login" id="nav-login-link">
 		            			<span uk-icon="icon: ourchive-login;ratio:.75" title="Sign In" id="nav-login-icon"></span>
@@ -50,42 +103,20 @@
 		            			<span uk-icon="icon: ourchive-register;ratio:.75" title="Register" id="nav-register-icon"></span>
 		            		</a>
 		            	</li>
-		            {% endif %}
-		            {% if request.user.is_authenticated %}
-		            	<a class="uk-width-auto uk-text-truncate" title="{{ request.user }}" href="#" id="nav-username">{{ request.user }}</a>
-		            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div" uk-dropdown="delay-hide: 1500">
-                    		<ul class="uk-nav uk-navbar-dropdown-nav uk-list-divider uk-list-collapse" id="nav-user-dropdown-ul">
-                    			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
-                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
-                    			<li id="nav-creations-li"><a href="#" id="nav-creations-link">{% translate 'My Chives' %}</a></li>
-                    			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="creations-subnav">
-                    				<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link">Bookmarks</a></li>
-                    				<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link">{% translate 'Collections' %}</a></li>
-                    				<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">Works</a></li>
-                    			</ul>
-                    			<li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a></li>
-							    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a></li>
-							    	<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="profile-subnav">
-                    				<li id="nav-edit-profile-li"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-edit-profile-link">{% translate 'User Settings' %}</a></li>
-                    				<li id="nav-edit-account-li"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-edit-account-link">{% translate 'Account Settings' %}</a></li>
-                    				<li id="nav-cocreator-approval-li"><a href="{% url 'fe-view-approvals'%}" id="nav-view-approvals-link">{% translate 'Approvals' %}</a></li>
-                    				<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">{% translate 'Blocklist' %}</a></li>
-                    			</ul>
-                    			<li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link">{% translate 'Import Work(s)' %}</a></li>
-                    			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="imports-subnav">
-							            <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}">{% translate 'Import Status' %}</a></li>
-							        </ul>
-                    			{% if request.session.has_notifications %}
-                    			<li id="nav-notifications-unread-li"><a class="uk-text-emphasis uk-text-secondary" href="/username/{{request.user}}/notifications" id="nav-notifications-unread-link">Notifications (Unread)</a></li>
-                    			{% else %}
-                    			<li id="nav-notifications-li"><a href="/username/{{request.user}}/notifications" id="nav-notifications-link">Notifications</a></li>
-                    			{% endif %}
-				            	<li id="nav-signout-li"><a href="/logout" id="nav-signout-link">Log Out</a></li>
-		        			</ul>
-		        	</div>
-		        	{% endif %}
 		        </li>
-	    </ul>
-    </div>
+		        {% else %}
+		        <li id="nav-search-li">
+    					<div class="uk-navbar-item uk-margin-small-left">
+            				<form class="uk-search uk-search-default ourchive-nav-search" action="/search/" method="post" id="nav-search-form">
+			                	{% csrf_token %}
+			                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>
+			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
+							<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
+			                </form>
+    					</div>
+	        	</li>
+		        {% endif %}
+	    	</ul>
+    	</div>
 	</nav>
 </div>

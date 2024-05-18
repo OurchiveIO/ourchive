@@ -640,10 +640,10 @@ class PostgresProvider:
         work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
         results = {}
         results['work'] = work_results
-        results['bookmark'] = {'data': []}
-        results['collection'] = {'data': []}
-        results['tag'] = {'data': []}
-        results['user'] = {'data': []}
+        results['bookmark'] = {'data': [], 'page': {'count': 0}}
+        results['collection'] = {'data': [], 'page': {'count': 0}}
+        results['tag'] = {'data': [], 'page': {'count': 0}}
+        results['user'] = {'data': [], 'page': {'count': 0}}
         return results
 
     def process_tag_tags(self, tags, tags_dict):
