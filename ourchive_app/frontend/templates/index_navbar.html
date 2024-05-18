@@ -93,16 +93,11 @@
 	    	 		</a>
 	    	 	</li>
 	        	<li id="nav-right-main">		        
-		            	<li class="uk-active" id="nav-login-li">
-		            		<a href="/login" id="nav-login-link">
-		            			<span uk-icon="icon: ourchive-login;ratio:.75" title="Sign In" id="nav-login-icon"></span>
-		            		</a>
-		            	</li>
-		            	<li class="uk-active" id="nav-register-li">
-		            		<a href="/register" id="nav-register-link">
-		            			<span uk-icon="icon: ourchive-register;ratio:.75" title="Register" id="nav-register-icon"></span>
-		            		</a>
-		            	</li>
+            		<div id="nav-login-link" class="uk-navbar-item">
+            			<a href="{ url 'fe-login' %}" class="uk-button nav-button-default">
+            			{% translate 'Sign In' %}
+            			<span class="uk-margin-small-left" uk-icon="icon: ourchive-user;ratio:.75" title="Sign In" id="nav-login-icon"></span></a>
+            		</div>
 		        </li>
 		        {% else %}
 		        <li id="nav-search-li">
