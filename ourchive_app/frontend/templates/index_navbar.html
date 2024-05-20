@@ -1,21 +1,54 @@
 {% load i18n %}
 {% load static %}
-{% if request.user.is_authenticated %}
-<div class="ourchive-navbar ourchive-top-nav" id="ourchive-navbar-parent-stack">
-	<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small uk-padding-remove-vertical" uk-navbar id="uk-nav-parent-stack">
-	    <div class="uk-navbar-right" id="uk-nav-right-stack">
-	    	<ul class="uk-navbar-nav" id="uk-nav-right-ul">
+<div class="ourchive-navbar" id="ourchive-navbar-parent">
+	<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small uk-padding-remove-vertical" uk-navbar id="uk-nav-parent">
+	    <div class="uk-navbar-left" id="uk-nav-left">
+	    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
+	        <ul class="uk-navbar-nav uk-visible@s">
+	            <li class="uk-active" id="nav-home"><a href="/" title="Home" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
+	            {% if request.user.is_authenticated %}
+	            <li><a href="{% url 'fe-user-works' request.user.username %}" id="nav-works" data-testid="nav-works">{% translate 'Works' %}</a></li>
+	            <li><a href="{% url 'fe-user-collections' request.user.username %}" id="nav-bookmark-collections" data-testid="nav-collections">{% translate 'Collections' %}</a></li>
+	            <li><a href="{% url 'fe-new-work' %}" id="nav-bookmark-collections" data-testid="nav-new-work">{% translate 'Post' %}</a></li>
+	            {% endif %}
+	        </ul>
+	    </div>	 
+	    <div class="uk-navbar-center uk-visible@s" id="uk-nav-center">
+	    	 <ul class="uk-navbar-nav" id="uk-nav-center-ul">
+	    	 	<li id="nav-search-li">
+    					<div class="uk-navbar-item uk-margin-small-left">
+            				<form class="uk-search uk-search-default ourchive-nav-search" action="/search/" method="post" id="nav-search-form">
+			                	{% csrf_token %}
+			                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>
+			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
+							<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
+			                </form>
+    					</div>
+	        	</li>
+	        </ul>
+	    </div>
+	    <div class="uk-navbar-right" id="uk-nav-right">
+	    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
 	    	 	<li id="theme-switcher-li">
-	    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper stack-nav-item" title="Switch Modes">
+	    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper" title="Switch Modes">
 	    	 			{% if request.session.css_mode == "dark" %}
-	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: .9" title="Light Mode" id="theme-switcher-light"></span>
+	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Light Mode" id="theme-switcher-light"></span>
 	    	 			{% else %}
-	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: .9" title="Dark Mode" id="theme-switcher-dark"></span>
+	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Dark Mode" id="theme-switcher-dark"></span>
 	    	 			{% endif %}
 	    	 		</a>
 	    	 	</li>
-	    	 	<li id="nav-right-main">
-		            <a class="uk-width-auto uk-text-truncate stack-nav-item" title="{{ request.user }}" href="#" id="nav-username">{% translate 'Account' %}</a>
+	    	 	{% if not request.user.is_authenticated %}
+	        	<li id="nav-right-main">		        
+            		<div id="nav-login-link" class="uk-navbar-item">
+            			<a href="{ url 'fe-login' %}" class="uk-button nav-button-default">
+            			{% translate 'Sign In' %}
+            			<span class="uk-margin-small-left" uk-icon="icon: ourchive-user;ratio:.75" title="Sign In" id="nav-login-icon"></span></a>
+            		</div>
+		        </li>
+		        {% else %}
+		        <li id="nav-right-main">
+		            <a class="uk-width-auto uk-text-truncate uk-navbar-item" title="{{ request.user }}" href="#" id="nav-username">{% translate 'Account' %}</a>
 		            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div" uk-dropdown="delay-hide: 1500; offset: -5">
 	                		<ul class="uk-nav uk-navbar-dropdown-nav uk-list-divider uk-list-collapse" id="nav-user-dropdown-ul">
 	                			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
@@ -47,69 +80,6 @@
 		        			</ul>
 		        	</div>	
 		        </li>
-	    	 </ul>
-	    	</div></nav></div>
-	    	<hr class="ourchive-nav-hr"/>
-{% endif %}
-<div class="ourchive-navbar" id="ourchive-navbar-parent">
-	<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small uk-padding-remove-vertical" uk-navbar id="uk-nav-parent">
-	    <div class="uk-navbar-left" id="uk-nav-left">
-	    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
-	        <ul class="uk-navbar-nav uk-visible@s">
-	            <li class="uk-active" id="nav-home"><a href="/" title="Home" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
-	            {% if request.user.is_authenticated %}
-	            <li><a href="{% url 'fe-user-works' request.user.username %}" id="nav-works" data-testid="nav-works">{% translate 'Works' %}</a></li>
-	            <li><a href="{% url 'fe-user-collections' request.user.username %}" id="nav-bookmark-collections" data-testid="nav-collections">{% translate 'Collections' %}</a></li>
-	            <li><a href="{% url 'fe-new-work' %}" id="nav-bookmark-collections" data-testid="nav-new-work">{% translate 'Post' %}</a></li>
-	            {% endif %}
-	        </ul>
-	    </div>	 
-	    {% if not request.user.is_authenticated %}   
-	    <div class="uk-navbar-center uk-visible@s" id="uk-nav-center">
-	    	 <ul class="uk-navbar-nav" id="uk-nav-center-ul">
-	    	 	<li id="nav-search-li">
-    					<div class="uk-navbar-item uk-margin-small-left">
-            				<form class="uk-search uk-search-default ourchive-nav-search" action="/search/" method="post" id="nav-search-form">
-			                	{% csrf_token %}
-			                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>
-			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
-							<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
-			                </form>
-    					</div>
-	        	</li>
-	        </ul>
-	    </div>
-	    {% endif %}
-	    <div class="uk-navbar-right" id="uk-nav-right">
-	    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
-	    	 	{% if not request.user.is_authenticated %}
-	    	 	<li id="theme-switcher-li">
-	    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper" title="Switch Modes">
-	    	 			{% if request.session.css_mode == "dark" %}
-	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Light Mode" id="theme-switcher-light"></span>
-	    	 			{% else %}
-	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Dark Mode" id="theme-switcher-dark"></span>
-	    	 			{% endif %}
-	    	 		</a>
-	    	 	</li>
-	        	<li id="nav-right-main">		        
-            		<div id="nav-login-link" class="uk-navbar-item">
-            			<a href="{ url 'fe-login' %}" class="uk-button nav-button-default">
-            			{% translate 'Sign In' %}
-            			<span class="uk-margin-small-left" uk-icon="icon: ourchive-user;ratio:.75" title="Sign In" id="nav-login-icon"></span></a>
-            		</div>
-		        </li>
-		        {% else %}
-		        <li id="nav-search-li">
-    					<div class="uk-navbar-item uk-margin-small-left">
-            				<form class="uk-search uk-search-default ourchive-nav-search" action="/search/" method="post" id="nav-search-form">
-			                	{% csrf_token %}
-			                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>
-			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
-							<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
-			                </form>
-    					</div>
-	        	</li>
 		        {% endif %}
 	    	</ul>
     	</div>
