@@ -3,12 +3,7 @@ from rest_framework import serializers
 from django.db import IntegrityError
 from rest_framework_recursive.fields import RecursiveField
 from .custom_fields import UserPrivateField
-from api.models import Work, Tag, Chapter, TagType, WorkType, \
-    Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, \
-    NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
-    Invitation, AttributeType, AttributeValue, User, ContentPage, UserReport, \
-    UserReportReason, UserSubscription, CollectionComment, AdminAnnouncement, \
-    Language, News
+from api.models import *
 import datetime
 import logging
 from django.conf import settings
@@ -1242,4 +1237,18 @@ class NewsSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = News
+        fields = '__all__'
+
+
+class SeriesSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    works_readonly = WorkSerializer(many=True, required=False, read_only=True, source='works')
+    works = serializers.PrimaryKeyRelatedField(many=True, queryset=Work.objects.all())
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+
+    class Meta:
+        model = WorkSeries
         fields = '__all__'

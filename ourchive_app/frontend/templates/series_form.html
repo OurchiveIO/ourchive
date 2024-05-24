@@ -1,0 +1,123 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block title %}{{ form_title }}{% endblock %}
+{% block content %}	
+{% load static %}
+<script>
+function doWorkAutocomplete(term) {
+  if (term.length < 2)
+  {
+    return;
+  }
+  var complete_select = 'series-autocomplete-dropdown';
+  fetch('/bookmark-autocomplete?text='+term+"&source=edit")
+    .then((response) => {
+      return response.text();
+    })
+    .then((templateText) => {      
+    document.getElementById(complete_select).innerHTML = "";
+    document.getElementById(complete_select).innerHTML = templateText;
+    UIkit.drop(document.getElementById(complete_select)).show();
+    });
+}
+
+function populateWorkInput(bookmark_id, bookmark_display) {
+    // visible list
+    var list = document.getElementById("works_readonly_list")
+    // bookmark to add
+    var final = bookmark_display;
+    var wrapper= document.createElement('div');
+    wrapper.innerHTML= '<input type="hidden" id="works_'+bookmark_id+'" name="workidstoadd_'+bookmark_id+'" value="workidstoadd_'+bookmark_id+'">';
+    var div = wrapper.firstChild;
+    list.appendChild(div);
+    var li = document.createElement('li');
+    li.setAttribute('id', 'works_'+bookmark_id+'_li');
+    li.innerHTML = bookmark_display+' (<a onclick="removeWork(event,'+bookmark_id+')">Remove</a>)';
+    list.appendChild(li);
+    document.getElementById("series_entry").value = '';
+    document.getElementById("series_entry").focus();
+    document.getElementById("series-autocomplete-dropdown").innerHTML = "";
+}
+function removeWork(event, bookmark_id) {
+    var li = document.getElementById("works_"+bookmark_id+"_li");
+    var hidden = document.getElementById("works_"+bookmark_id);
+    li.remove();
+    hidden.remove();
+}
+</script>
+<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="series-form-parent-grid">  
+<form class="uk-form-horizontal" method="post" id="seriesForm" onsubmit="return getRichText(['description'])">
+    {% csrf_token %}
+    <input id="series-form-hidden-id" type="hidden" name="series_id" value="{{ series.id }}"/>
+    <div id="series-form-actions-parent" class="uk-grid" uk-grid>
+        <div id="series-form-header-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
+            <span id="series-form-header-span" class="uk-text-large">{{ form_title }}</span>
+        </div>
+        <div id="series-form-actions-group" class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right">
+            <input id="series-form-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
+            <button id="series-form-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
+            <input id="series-form-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+        </div>
+    </div>
+    <hr id="series-form-hr" class="ourchive-hr"/>
+    <div id="series-form-title-parent" class="uk-margin">
+        <label id="series-form-title-label" class="uk-form-label" for="series-form-title-input">Title</label>
+        <div id="series-form-title-form-control" class="uk-form-controls">
+            <div id="series-form-title-inline-div" class="uk-inline">
+                <input id="series-form-title-input" title="{% translate 'Series Title' %}" class="uk-input uk-form-width-large" type="text" name="title" value="{{ series.title|default_if_none:'' }}">
+            </div>
+        </div>
+    </div>
+    <div class="uk-margin" id="series-form-created-parent">
+        <label id="series-form-created-label" class="uk-form-label" for="series-form-created-on">Post Date</label>
+        <div id="series-form-created-controls" class="uk-form-controls">
+            <div id="series-form-created-inline" class="uk-inline">
+                <input title="{% translate 'Series created on' %}" id="series-form-created-on" type="date" name="created_on" value="{{ series.created_on }}"> 
+            </div>
+        </div>
+    </div>
+    <div class="uk-margin" id="series-form-updated-parent">
+        <label id="series-form-updated-label" class="uk-form-label" for="series-form-updated-on">Update Date</label>
+        <div id="series-form-updated-controls" class="uk-form-controls">
+            <div id="series-form-updated-inline" class="uk-inline">
+                <input title="{% translate 'Series updated on' %}" id="series-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ series.updated_on }}"> 
+                <input title="{% translate 'Series updated on' %}" id="series-form-updated-on" type="date" name="updated_on" value="{{ series.updated_on }}"> 
+            </div>
+        </div>
+    </div>
+    <hr id="series-form-details-hr" class="ourchive-hr"/>
+    <h3 id="series-form-header">Details</h3>
+    <div class="uk-margin" id="series-works-list">
+        {% if series.works %}<div class="uk-margin-medium-left"><h4 id="series-works-form-header">{% translate 'Works' %}</h4></div>{% endif %}
+        <ul id="works_readonly_list" class="uk-margin-medium-left"> 
+        {% for work in series.works_readonly %}
+            <input type="hidden" id="works_{{work.id}}" name="workidstoadd_{{work.id}}" value="workidstoadd_{{work.id}}"/>
+            <li id="works_{{work.id}}_li">{{work.title}} (<a onclick="removeWork(event, {{work.id}})">Remove</a>)</li>
+        {% endfor %}
+        </ul>
+        <div id="series-form-bookmarks-parent" class="uk-margin uk-margin-medium-top">
+            <label id="series-form-bookmarks-label" class="uk-form-label" for="series_entry">{% translate 'Add Work' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work help' %}"></sup>    
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for works by title.{% endblocktranslate %}</div>
+            </label>
+            <div id="series-form-bookmarks-form-control" class="uk-form-controls">
+                <div id="series-form-bookmarks-inline-div" class="uk-inline">
+                    <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="Search for work..." id="series_entry" oninput="doWorkAutocomplete(this.value)">
+                    <div id="series-autocomplete-dropdown" uk-drop></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="series-form-description-parent" class="uk-margin">
+        <label id="series-form-description-label" class="uk-form-label" for="descriptionEditor">Description</label>
+        {% include 'ourchive_tinymce_template.html' with form_field_value=series.description form_field='description' obj_name='series' %}
+    </div>
+    <hr id="series-actions-footer-hr" class="ourchive-hr"/>
+    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="series-form-actions-footer-parent" uk-grid>
+        <div class="uk-text-right uk-width-1-1" id="series-form-actions-footer-child">
+            <input id="series-form-actions-footer-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
+            <input id="series-form-actions-footer-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+        </div>
+    </div>    
+</form>
+</div>
+{% endblock %}

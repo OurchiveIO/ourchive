@@ -24,6 +24,15 @@ class IsMultiOwnerOrReadOnly(permissions.BasePermission):
         return request.user in obj.users.all() or request.user == obj.user or request.user.is_superuser
 
 
+class IsWorksMultiOwnerOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if any(user == request.user for user in [work.user for work in obj.works.all()]):
+            return True
+        return request.user == obj.user or request.user.is_superuser
+
+
 class ObjectIsLocked(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:

@@ -102,6 +102,8 @@ urlpatterns = [
     path('users/cocreator-approvals/bulk-approve', views.bulk_approve_cocreator, name='fe-cocreator-bulk-approve'),
     path('users/cocreator-approvals/bulk-reject', views.bulk_reject_cocreator, name='fe-cocreator-bulk-reject'),
     path('news', views.news_list, name='fe-news-list'),
-    path('news/<int:pk>', views.news, name='fe-news-detail')
+    path('news/<int:pk>', views.news, name='fe-news-detail'),
+    path('series/create', views.create_series, name='fe-create-series'),
+    path('series/<int:pk>/edit', views.edit_series, name='fe-edit-series'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

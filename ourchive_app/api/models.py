@@ -191,7 +191,9 @@ class Work(models.Model):
         on_delete=models.CASCADE,
     )
 
-    work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE, null=True)
+    work_type = models.ForeignKey('WorkType', on_delete=models.SET_NULL, null=True)
+    series = models.ForeignKey('WorkSeries', on_delete=models.SET_NULL, null=True, related_name='works')
+    series_num = models.IntegerField(null=True, blank=True)
     languages = models.ManyToManyField('Language')
 
     tags = models.ManyToManyField('Tag')
@@ -205,16 +207,33 @@ class Work(models.Model):
         return self.title
 
 
-class UserWork(models.Model):
+class WorkSeries(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    is_complete = models.BooleanField(default=False)
+    created_on = models.DateTimeField(null=True, blank=True)
+    updated_on = models.DateTimeField(null=True, blank=True)
+    system_created_on = models.DateTimeField(auto_now_add=True)
+    system_updated_on = models.DateTimeField(auto_now=True)
 
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+
+
+class UserWork(models.Model):
     id = models.AutoField(primary_key=True)
     work = models.ForeignKey(
         'Work',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='work_users'
     )
     user = models.ForeignKey(
         'User',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='user_works'
     )
     approved = models.BooleanField(default=False)
 

@@ -1,24 +1,8 @@
 from django.contrib.auth.models import Group
 from rest_framework import viewsets, generics, permissions
-from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
-    UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, \
-    BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, \
-    WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, \
-    BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, \
-    NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, \
-    UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
-    UserReportSerializer, UserSubscriptionSerializer, AdminAnnouncementSerializer, \
-    BookmarkSummarySerializer, BookmarkCollectionSummarySerializer, CollectionCommentSerializer, \
-    ImportSerializer, TopTagSerializer, LanguageSerializer, NewsSerializer
-from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
-    BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
-    NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
-    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment, \
-    AdminAnnouncement, UserWork, UserCollection, Language, News
-from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
-    UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
-    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked, WorkIsNotDraft, \
-    ObjectIsPrivate, IsWorkOwner, IsWorkOwnerOrReadOnly, IsMultiOwner, IsMultiOwnerOrReadOnly
+from api.serializers import *
+from api.models import *
+from api.permissions import *
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
@@ -1426,3 +1410,37 @@ class NewsDetail(generics.RetrieveAPIView):
     queryset = News.objects.get_queryset()
     serializer_class = NewsSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+
+class SeriesList(generics.ListCreateAPIView):
+    queryset = WorkSeries.objects.get_queryset()
+    serializer_class = SeriesSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def perform_create(self, serializer):
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
+        serializer.save(user=self.request.user)
+
+
+class SeriesDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = WorkSeries.objects.get_queryset()
+    serializer_class = SeriesSerializer
+    permission_classes = [IsWorksMultiOwnerOrReadOnly]
+
+    def perform_update(self, serializer):
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
+        serializer.save(user=self.request.user)
+
+
+class UserSeriesList(generics.ListCreateAPIView):
+    serializer_class = SeriesSerializer
+    permission_classes = [IsWorksMultiOwnerOrReadOnly]
+
+    def get_queryset(self):
+        return WorkSeries.objects.filter(works__work_users__user__username=self.kwargs['username']).order_by('-updated_on')

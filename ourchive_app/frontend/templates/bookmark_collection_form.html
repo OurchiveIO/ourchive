@@ -113,7 +113,7 @@ function populateUserInput(user_id, username) {
             <input id="bkcol-form-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
         </div>
     </div>
-    <hr id="bkcol-form-hr"/>
+    <hr id="bkcol-form-hr" class="ourchive-hr"/>
     <div id="bkcol-form-title-parent" class="uk-margin">
         <label id="bkcol-form-title-label" class="uk-form-label" for="bkcol-form-title-input">Title</label>
         <div id="bkcol-form-title-form-control" class="uk-form-controls">
@@ -186,7 +186,7 @@ function populateUserInput(user_id, username) {
             </div>
         </div>
     {% endif %}
-    <hr id="bkcol-comments-hr"/>
+    <hr id="bkcol-comments-hr" class="ourchive-hr"/>
     <h3 id="bkcol-settings-header">Settings</h3>
     <div class="uk-margin" id="bkcol-form-draft-parent">
         <label id="bkcol-form-draft-label" class="uk-form-label" for="bkcol-form-draft-input">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Draft help' %}"></sup>    
@@ -228,13 +228,13 @@ function populateUserInput(user_id, username) {
         </div>
     </div>
     {% endif %}
-    <hr/>
+    <hr class="ourchive-hr"/>
     <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Tags help' %}"></sup>
         <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
     </span>
     {% include "object_attributes_form.html" with object='Bookmark Collection' attribute_types=bookmark_collection.attribute_types show_header=False %}
     {% include "edit_tags.html" with object='bookmark_collection' show_header=False %}
-    <hr id="bkcol-form-tags-hr"/>
+    <hr id="bkcol-form-tags-hr" class="ourchive-hr"/>
     <h3 id="obj-attrs-form-header">Details</h3>
     <div class="uk-margin" id="bkcol-bookmarks-list">
         {% if bookmark_collection.works %}<div class="uk-margin-medium-left"><h4 id="obj-attrs-form-header">{% translate 'Works' %}</h4></div>{% endif %}
@@ -261,7 +261,7 @@ function populateUserInput(user_id, username) {
         <label id="bkcol-form-description-label" class="uk-form-label" for="descriptionEditor">Description</label>
         {% include 'ourchive_tinymce_template.html' with form_field_value=bookmark_collection.description form_field='description' obj_name='bkcol' %}
     </div>
-    <hr/>
+    <hr class="ourchive-hr"/>
     <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bkcol-form-actions-footer-parent" uk-grid>
         <div class="uk-text-right uk-width-1-1" id="bkcol-form-actions-footer-child">
             <input id="bkcol-form-actions-footer-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>

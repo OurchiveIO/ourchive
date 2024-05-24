@@ -1718,6 +1718,43 @@ def news(request, pk):
 		'root': settings.ROOT_URL})
 
 
+def create_series(request):
+	if request.user.is_authenticated and request.method != 'POST':
+		series = {
+			'title': 'New Series',
+			'user': request.user.username,
+			'description': '',
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date())
+		}
+		return render(request, 'series_form.html', {
+			'form_title': _('New Series'),
+			'series': series})
+	else:
+		series_dict = get_series_obj(request)
+		response = do_post(f'api/series/', request, data=series_dict, object_name='Series')
+		process_message(request, response)
+		if 'id' in response.response_data:
+			return redirect(f'/series/{response.response_data["id"]}')
+		else:
+			return redirect(f'/series/new')
+
+
+def edit_series(request, pk):
+	if request.user.is_authenticated and request.method != 'POST':
+		response = do_get(f'api/series/{pk}', request, params=request.GET, object_name='Series')
+		series = response.response_data
+		return render(request, 'series_form.html', {
+			'form_title': _('New Series'),
+			'series': series})
+	else:
+		series_dict = get_series_obj(request)
+		print(series_dict)
+		response = do_patch(f'api/series/{pk}/', request, data=series_dict, object_name='Series')
+		process_message(request, response)
+		return redirect(f'/series/{pk}')
+
+
 @never_cache
 def switch_css_mode(request):
 	request.session['css_mode'] = "dark" if request.session.get('css_mode') == "light" or request.session.get('css_mode') is None else "light"

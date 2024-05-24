@@ -290,6 +290,25 @@ def get_bookmark_collection_obj(request):
 	return collection_dict
 
 
+def get_series_obj(request):
+	series_dict = request.POST.copy()
+	works = []
+	for item in request.POST:
+		if 'workidstoadd' in request.POST[item]:
+			json_item = request.POST[item].split("_")
+			if len(json_item) < 2:
+				continue
+			work_id = json_item[1]
+			works.append(work_id)
+			series_dict.pop(item)
+	series_dict["works"] = works
+	series_dict["user"] = str(request.user)
+	if series_dict["updated_on"] == series_dict["updated_on_original"]:
+		series_dict["updated_on"] = str(datetime.now().date())
+	series_dict.pop("updated_on_original")
+	return series_dict
+
+
 def prepare_chapter_data(chapter, request):
 	if 'text' in chapter:
 		chapter['text'] = sanitize_rich_text(chapter['text'])
