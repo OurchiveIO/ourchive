@@ -590,6 +590,7 @@ def unsubscribe(request, username):
 			patch_data['subscribed_to_collection'] = False
 		if request.POST.get('subscribed_to_work'):
 			patch_data['subscribed_to_work'] = False
+		print(patch_data)
 		response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
 		process_message(request, response)
 	return referrer_redirect(request)
@@ -605,6 +606,7 @@ def subscribe(request):
 	post_data['subscribed_to_bookmark'] = True if request.POST.get('subscribed_to_bookmark') else False
 	post_data['subscribed_to_collection'] = True if request.POST.get('subscribed_to_collection') else False
 	post_data['subscribed_to_work'] = True if request.POST.get('subscribed_to_work') else False
+	post_data['subscribed_to_series'] = True if request.POST.get('subscribed_to_series') else False
 	post_data['user'] = request.user.username
 	post_data['subscribed_user'] = request.POST.get('subscribed_to')
 	if 'subscription_id' in request.POST:

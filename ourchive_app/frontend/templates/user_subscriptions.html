@@ -47,7 +47,6 @@
 						{% csrf_token %}
 						<input type="hidden" id="unsubscribe-subscription-id" name="subscription_id" value="{{ subscription.id }}">
 				        <div class="uk-grid" uk-grid>
-				        	{% if subscription.subscribed_to_bookmark and subscription.subscribed_to_collection %}
 				            <div class="uk-width-1-1" id="unsubscribe-{{subscription.id}}-form-parent">
 				                <label id="unsubscribe-{{subscription.id}}-all-label" class="uk-form-label" for="unsubscribe-{{subscription.id}}-all-checkbox">{% translate 'Unsubscribe All' %}
 				                </label>
@@ -55,7 +54,6 @@
 				                    <label id="unsubscribe-{{subscription.id}}-all-switch" class="switch"><input class="uk-checkbox" id="unsubscribe-{{subscription.id}}-all-checkbox" type="checkbox" name="unsubscribe_all"> <span id="unsubscribe-{{subscription.id}}-all-slider" class="slider round"></span></label>
 				                </div>
 				            </div>
-				            {% endif %}
 				            {% if subscription.subscribed_to_bookmark %}
 				            <div class="uk-width-1-1" id="unsubscribe-{{subscription.id}}-bookmarks-parent">
 				                <label id="unsubscribe-{{subscription.id}}-bookmarks-label" class="uk-form-label" for="unsubscribe-{{subscription.id}}-bookmarks-checkbox">{% translate 'Unsubscribe Bookmarks' %}

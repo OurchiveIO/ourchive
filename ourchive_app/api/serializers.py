@@ -147,10 +147,10 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, subscription, validated_data):
         UserSubscription.objects.filter(id=subscription.id).update(**validated_data)
-        subscription = UserSubscription.objects.filter(id=subscription.id)
+        subscription = UserSubscription.objects.filter(id=subscription.id).first()
         post_save.send(UserSubscription, instance=subscription, created=False)
         subscription = UserSubscription.objects.get(id=subscription.id)
-        if not subscription.subscribed_to_bookmark and not subscription.subscribed_to_collection:
+        if not subscription.subscribed_to_bookmark and not subscription.subscribed_to_collection and not subscription.subscribed_to_work and not subscription.subscribed_to_series:
             subscription.delete()
         return subscription
 
