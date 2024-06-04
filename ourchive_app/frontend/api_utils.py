@@ -6,8 +6,9 @@ from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
+
 class ResponseInfo():
-	status_code = None 
+	status_code = None
 	message = None
 	type_label = None
 
@@ -15,6 +16,7 @@ class ResponseInfo():
 		self.status_code = status_code
 		self.message = message
 		self.type_label = type_label
+
 
 class ResponseFull():
 	response_data = {}

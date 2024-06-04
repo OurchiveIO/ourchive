@@ -67,3 +67,9 @@ class OurchiveSearch:
 		if term is not None:
 			results = self.searcher.autocomplete_users(term, user)
 		return results
+
+	def do_series_search(self, term, user):
+		results = {}
+		if term is not None:
+			results = self.searcher.autocomplete_series(term, user)
+		return results

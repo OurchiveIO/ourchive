@@ -105,5 +105,8 @@ urlpatterns = [
     path('news/<int:pk>', views.news, name='fe-news-detail'),
     path('series/create', views.create_series, name='fe-create-series'),
     path('series/<int:pk>/edit', views.edit_series, name='fe-edit-series'),
+    path('series-autocomplete', views.series_autocomplete, name='fe-series-autocomplete'),
+    path('series/<int:pk>', views.series, name='fe-series'),
+    path('series/<int:pk>/delete', views.delete_series, name='delete-series'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

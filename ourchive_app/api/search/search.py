@@ -1,7 +1,4 @@
-from api.models import AttributeValue, Work, Tag, User, Chapter, TagType, WorkType, \
-                       Bookmark, BookmarkComment, BookmarkCollection, ChapterComment, \
-                       Message, NotificationType, Notification, OurchiveSetting, AttributeType, \
-                       Language
+from api.models import *
 from api import object_factory
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 import json
@@ -465,6 +462,19 @@ class PostgresProvider:
             if '_state' in user_dict:
                 user_dict.pop('_state')
             results.append(user_dict)
+        return results
+
+    def autocomplete_series(self, term, user):
+        results = []
+        resultset = None
+        term = term.lower()
+        resultset = WorkSeries.objects.filter(works__work_users__user__id=user).filter(
+            Q(title__icontains=term)).order_by('-updated_on')
+        for result in resultset:
+            series_dict = vars(result)
+            if '_state' in series_dict:
+                series_dict.pop('_state')
+            results.append(series_dict)
         return results
 
     def search_tags(self, **kwargs):

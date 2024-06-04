@@ -46,6 +46,56 @@ function populateUserInput(user_id, username) {
     document.getElementById("work_form_new_user").focus();
     document.getElementById("work-find-user-dropdown").innerHTML = "";
 }
+function doSeriesAutocomplete(term) {
+  if (term.length < 2)
+  {
+    return;
+  }
+  var complete_select = 'work-series-dropdown';
+  fetch('/series-autocomplete?text='+term)
+    .then((response) => {
+      return response.text();
+    })
+    .then((templateText) => {      
+    document.getElementById(complete_select).innerHTML = "";
+    document.getElementById(complete_select).innerHTML = templateText;
+    UIkit.drop(document.getElementById(complete_select)).show();
+    });
+}
+
+function removeSeries(series_id) {
+    var parent = document.getElementById("work-form-series-parent");
+    parent.remove();
+}
+
+function populateSeriesInput(title, series_id) {
+    if (series_id === null) {
+        series_id = title;
+    }
+    var existing_value = document.getElementById("work-form-series-parent");
+    if (existing_value) {
+        existing_value.remove();
+    }
+    // parent div
+    var parent = document.getElementById("work-form-series-parent-parent");
+    var wrapper= document.createElement('div');
+    wrapper.classList.add('uk-margin-small');
+    wrapper.classList.add('uk-margin-remove-top');
+    wrapper.setAttribute('id', 'work-form-series-parent');
+    wrapper.innerHTML= '<input id="work-form-series-hidden" type="hidden" name="series_id" value="'+series_id+'"> <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="work_series_display">'+title+' <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeSeries('+series_id+')" id="work_series_delete"></span></span>';
+    parent.appendChild(wrapper);
+    document.getElementById("work-form-series").value = '';
+    document.getElementById("work-form-series").focus();
+    document.getElementById("work-series-dropdown").innerHTML = "";
+}
+function addSeries(event) {
+    populateSeriesInput(document.getElementById("work-form-series").value, null);
+}
+function seriesCheck (e) {
+    if (e.keyCode == 188 || e.keyCode == 13) {
+        addSeries(e);
+    }
+}
 </script>
 <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="work-form-parent"> 
 <form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
@@ -180,6 +230,21 @@ function populateUserInput(user_id, username) {
                         {% endfor %}
                     </select>
                 </div>
+            </div>
+        </div>
+        <div class="uk-margin" id="work-form-languages-parent">
+            <label id="work-form-series-label" class="uk-form-label" for="work-form-work-series">{% translate 'Series' %}</label>
+            <div id="work-form-work-series" class="uk-form-controls">
+                <div class="uk-margin-remove" id="work-form-series-parent-parent">
+                {% if work.series %}
+                    <div class="uk-margin-small uk-margin-remove-top" id="work-form-series-parent">
+                        <input type="hidden" id="work-form-series-hidden" name="series_id" value="{{work.series.id}}">
+                        <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="work_series__display">{{ work.series.title }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeSeries({{series.id}})" id="work_series_{{work.series.id}}_delete"></span></span>
+                    </div>
+                {% endif %}
+                </div>
+                <input autocomplete="off" class="uk-input uk-form-width-large ourchive-tag-entry" type="text" placeholder="Search for or create series..." id="work-form-series" oninput="doSeriesAutocomplete(this.value)" onkeyup="seriesCheck(event)"> <span title="Create series" uk-icon="icon:ourchive-add;ratio:.6" onclick="addSeries(event)"></span>
+                <div class="uk-card-small" id="work-series-dropdown" uk-drop="target: #work-form-series"></div>
             </div>
         </div>
         {% if settings.AllowComments %}

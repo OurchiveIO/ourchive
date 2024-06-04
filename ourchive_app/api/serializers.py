@@ -705,8 +705,18 @@ class TopTagSerializer(serializers.HyperlinkedModelSerializer):
         return tag_count
 
 
+class WorkSeriesSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = WorkSeries
+        fields = ['title', 'id']
+
+
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
+    series = WorkSeriesSerializer(required=False)
+    series_id = serializers.PrimaryKeyRelatedField(queryset=WorkSeries.objects.all(), required=False)
     languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
     languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
     user = serializers.SlugRelatedField(
@@ -817,6 +827,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         return work
 
     def update(self, work, validated_data):
+        print(validated_data)
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
         languages = validated_data.pop('languages') if 'languages' in validated_data else []
         if 'tags' in validated_data:
@@ -1244,6 +1255,7 @@ class SeriesSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     works_readonly = WorkSerializer(many=True, required=False, read_only=True, source='works')
     works = serializers.PrimaryKeyRelatedField(many=True, queryset=Work.objects.all())
     created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)

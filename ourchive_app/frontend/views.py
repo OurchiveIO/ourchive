@@ -21,6 +21,7 @@ from operator import itemgetter
 from .searcher import build_and_execute_search
 from .view_utils import *
 from datetime import *
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
@@ -388,7 +389,7 @@ def user_bookmarks(request, username):
 
 
 def user_bookmark_collections(request, username):
-	response = do_get(f'api/users/{username}/bookmarkcollections', request, params=request.GET, object_name='Bookmark Collections')
+	response = do_get(f'api/users/{username}/bookmarkcollections', request, params=request.GET, object_name='Collections')
 	bookmark_collections = response.response_data['results']
 	bookmark_collections = get_object_tags(bookmark_collections)
 	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
@@ -614,6 +615,16 @@ def user_autocomplete(request):
 		'users': users})
 
 
+def series_autocomplete(request):
+	term = request.GET.get('text')
+	params = {'term': term}
+	response = do_get(f'api/series-autocomplete', request, params, 'Series')
+	series = response.response_data['results']
+	template = 'series_autocomplete.html'
+	return render(request, template, {
+		'series': series})
+
+
 @require_http_methods(["GET"])
 def works(request):
 	response = do_get(f'api/works/', request, params=request.GET, object_name='Work')
@@ -689,6 +700,10 @@ def new_work(request):
 				'work_types': work_types['results'],
 				'work': work_data[0],
 				'work_chapter': chapter_dict})
+		if not work_data[5].isdigit():
+			series_id = create_work_series(request, work_data[5], work['id'])
+			if not series_id:
+				messages.add_message(request, messages.ERROR, _('Series could not be created. Please contact an administrator for help.'), 'Series')
 		if chapter_dict:
 			chapter_dict['work'] = work['id']
 			response = do_post(f'api/chapters/', request, chapter_dict, 'Chapter')
@@ -769,6 +784,10 @@ def edit_work(request, id):
 		work_dict = get_work_obj(request, id)
 		chapters = work_dict[2]
 		chapter_dict = work_dict[3]
+		if not work_dict[5].isdigit():
+			series_id = create_work_series(request, work_dict[5], id)
+			if not series_id:
+				messages.add_message(request, messages.ERROR, _('Series could not be created. Please contact an administrator for help.'), 'Series')
 		response = do_patch(f'api/works/{id}/', request, data=work_dict[0], object_name='Work')
 		if response.response_info.status_code == 200:
 			messages.add_message(request, messages.SUCCESS, response.response_info.message, response.response_info.type_label)
@@ -965,7 +984,7 @@ def delete_bookmark(request, bookmark_id):
 
 
 def bookmark_collections(request):
-	response = do_get(f'api/bookmarkcollections/', request, 'Bookmark Collection').response_data
+	response = do_get(f'api/bookmarkcollections/', request, 'Collection').response_data
 	bookmark_collections = response['results']
 	bookmark_collections = get_object_tags(bookmark_collections)
 	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
@@ -982,7 +1001,7 @@ def bookmark_collections(request):
 def new_bookmark_collection(request):
 	if request.user.is_authenticated and request.method != 'POST':
 		bookmark_collection = {
-			'title': 'New Bookmark Collection',
+			'title': 'New Collection',
 			'description': '',
 			'user': request.user.username,
 			'is_private': True,
@@ -1008,7 +1027,7 @@ def new_bookmark_collection(request):
 			'languages': languages})
 	elif request.user.is_authenticated:
 		collection_dict = get_bookmark_collection_obj(request)
-		response = do_post(f'api/bookmarkcollections/', request, data=collection_dict, object_name='Bookmark Collection')
+		response = do_post(f'api/bookmarkcollections/', request, data=collection_dict, object_name='Collection')
 		process_message(request, response)
 		if 'id' in response.response_data:
 			return redirect(f'/bookmark-collections/{response.response_data["id"]}')
@@ -1021,7 +1040,7 @@ def new_bookmark_collection(request):
 def edit_bookmark_collection(request, pk):
 	if request.method == 'POST':
 		collection_dict = get_bookmark_collection_obj(request)
-		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict, object_name='Bookmark Collection')
+		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict, object_name='Collection')
 		process_message(request, response)
 		return redirect(f'/bookmark-collections/{pk}')
 	else:
@@ -1039,7 +1058,7 @@ def edit_bookmark_collection(request, pk):
 				'bookmark_collection': bookmark_collection,
 				'bookmarks': bookmarks,
 				'divider': settings.TAG_DIVIDER,
-				'form_title': 'Edit Bookmark Collection',
+				'form_title': 'Edit Collection',
 				'tags': tags,
 				'languages': languages})
 		else:
@@ -1062,20 +1081,20 @@ def bookmark_collection(request, pk):
 	cache_key = f'collection_{pk}_{request.user}_{expand_comments}_{scroll_comment_id}_{comment_id}_{comment_offset}_{comment_count}'
 	if cache.get(cache_key):
 		return cache.get(cache_key)
-	bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request, 'Bookmark Collection').response_data
+	bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request, 'Collection').response_data
 	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
 	bookmark_collection['tags'] = tags
 	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
 	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on')
 	bookmark_collection['owner'] = get_owns_object(bookmark_collection, request)
 	if 'comment_thread' in request.GET:
-		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
+		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Collection Comments').response_data
 		comment_offset = 0
 		comments = {'results': [comments], 'count': comment_count}
 		bookmark_collection['post_action_url'] = f"/bookmark-collections/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
 		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
 	else:
-		comments = do_get(f'api/bookmarkcollections/{pk}/comments?limit=10&offset={comment_offset}', request, 'Bookmark Collection Comments').response_data
+		comments = do_get(f'api/bookmarkcollections/{pk}/comments?limit=10&offset={comment_offset}', request, 'Collection Comments').response_data
 		bookmark_collection['post_action_url'] = f"/bookmark-collections/{pk}/comments/new"
 		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit"""
 	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
@@ -1096,7 +1115,7 @@ def bookmark_collection(request, pk):
 
 
 def delete_bookmark_collection(request, pk):
-	response = do_delete(f'api/bookmarkcollections/{pk}/', request, 'Bookmark Collection')
+	response = do_delete(f'api/bookmarkcollections/{pk}/', request, 'Collection')
 	process_message(request, response)
 	if request.META is not None and 'HTTP_REFERER' in request.META and str(pk) in request.META.get('HTTP_REFERER'):
 		return redirect('/bookmark-collections')
@@ -1105,7 +1124,7 @@ def delete_bookmark_collection(request, pk):
 
 def publish_bookmark_collection(request, pk):
 	data = {'id': pk, 'draft': False}
-	response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=data, object_name='Bookmark Collection')
+	response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=data, object_name='Collection')
 	process_message(request, response)
 	return redirect(f'/bookmark-collections/{pk}')
 
@@ -1749,10 +1768,33 @@ def edit_series(request, pk):
 			'series': series})
 	else:
 		series_dict = get_series_obj(request)
-		print(series_dict)
 		response = do_patch(f'api/series/{pk}/', request, data=series_dict, object_name='Series')
 		process_message(request, response)
 		return redirect(f'/series/{pk}')
+
+
+def delete_series(request, pk):
+	response = do_delete(f'api/series/{pk}/', request, 'Series')
+	process_message(request, response)
+	if str(pk) in request.META.get('HTTP_REFERER'):
+		return redirect(f'/username/{request.user.id}')
+	return referrer_redirect(request)
+
+
+def series(request, pk):
+	response = do_get(f'api/series/{pk}/', request, object_name='Series')
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	series = response.response_data
+	series['owner'] = request.user.id == series['user_id']
+	series['users'] = []
+	for work in series['works_readonly']:
+		for user in work['users']:
+			series['users'].append(user)
+	return render(request, 'series.html', {
+		'series': series
+	})
 
 
 @never_cache

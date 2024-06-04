@@ -207,7 +207,22 @@ def get_work_obj(request, work_id=None):
 		if chapter_dict and chapter_dict.get("updated_on", "") == chapter_dict.get("updated_on_original", ""):
 			chapter_dict["updated_on"] = str(datetime.now().date())
 			chapter_dict.pop('updated_on_original')
-	return [work_dict, redirect_toc, chapters, chapter_dict, publish_all]
+	series_id = work_dict.get('series_id', None)
+	if series_id and not series_id.isdigit():
+		work_dict.pop('series_id')
+	return [work_dict, redirect_toc, chapters, chapter_dict, publish_all, series_id]
+
+
+def create_work_series(request, title, work_id):
+	new_series = {
+		"user": request.user.username,
+		"works": [work_id],
+		"title": title,
+		"description": "",
+		"is_complete": False
+	}
+	series_response = do_post(f'api/series/', request, new_series, 'Series')
+	return series_response.response_data.get('id', None)
 
 
 def get_bookmark_obj(request):
