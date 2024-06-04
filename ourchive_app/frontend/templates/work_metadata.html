@@ -41,3 +41,11 @@
     {% endfor %}</span>
 </div>
 {% endif %}
+{% if work.series %}
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-series-divider" class="uk-inline uk-text-bold">-</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span class="uk-inline uk-text-bold" id="work-metadata-series">{% translate 'Series' %}: <a href="{% url 'fe-series' work.series.id%}">{{work.series.title}}</a></span>
+</div>
+{% endif %}

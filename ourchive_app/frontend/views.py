@@ -1749,7 +1749,7 @@ def create_series(request):
 		return render(request, 'series_form.html', {
 			'form_title': _('New Series'),
 			'series': series})
-	else:
+	elif request.user.is_authenticated and request.method == 'POST':
 		series_dict = get_series_obj(request)
 		response = do_post(f'api/series/', request, data=series_dict, object_name='Series')
 		process_message(request, response)
@@ -1757,6 +1757,9 @@ def create_series(request):
 			return redirect(f'/series/{response.response_data["id"]}')
 		else:
 			return redirect(f'/series/new')
+	else:
+		messages.add_message(request, messages.ERROR, _('You must be logged in to create a series.'), 'Not Authorized')
+		return redirect('/')
 
 
 def edit_series(request, pk):
@@ -1764,11 +1767,18 @@ def edit_series(request, pk):
 		response = do_get(f'api/series/{pk}', request, params=request.GET, object_name='Series')
 		series = response.response_data
 		return render(request, 'series_form.html', {
-			'form_title': _('New Series'),
+			'form_title': _('Edit Series'),
 			'series': series})
 	else:
 		series_dict = get_series_obj(request)
+		work_ids = get_work_series_nums(series_dict)
 		response = do_patch(f'api/series/{pk}/', request, data=series_dict, object_name='Series')
+		if response.response_info.status_code < 400:
+			work_response = do_patch(f'api/series/{pk}/works', request, data=work_ids, object_name='Series works')
+			if work_response.response_info.status_code >= 400:
+				# we don't need to show duplicate success messages
+				# but if something went wrong with this step let's show it
+				process_message(request, work_response)
 		process_message(request, response)
 		return redirect(f'/series/{pk}')
 
@@ -1788,13 +1798,34 @@ def series(request, pk):
 		return redirect('/')
 	series = response.response_data
 	series['owner'] = request.user.id == series['user_id']
+	users = set()
 	series['users'] = []
 	for work in series['works_readonly']:
 		for user in work['users']:
-			series['users'].append(user)
+			if user['username'] not in users:
+				users.add(user['username'])
+				series['users'].append(user)
 	return render(request, 'series.html', {
 		'series': series
 	})
+
+
+def render_series_work(request, pk):
+	work_id = request.GET.get('work_id')
+	response = do_get(f'api/series/{pk}/', request, 'Series')
+	series = response.response_data
+	response = do_get(f'api/works/{work_id}', request, 'Work')
+	work = response.response_data
+	template = 'series_form_work.html'
+	return render(request, template, {
+		'series': series,
+		'work': work})
+
+
+def delete_work_series(request, pk, work_id):
+	response = do_delete(f'api/series/{pk}/work/{work_id}', request, 'Series')
+	process_message(request, response)
+	return referrer_redirect(f'/series/{pk}')
 
 
 @never_cache

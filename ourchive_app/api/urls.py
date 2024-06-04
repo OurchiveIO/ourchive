@@ -158,6 +158,7 @@ urlpatterns = [
     path('series/<int:pk>/', views.SeriesDetail.as_view(), name='workseries-detail'),
     path('users/<str:username>/series', views.UserSeriesList.as_view(), name='user-series-list'),
     path('series-autocomplete', views.SeriesAutocomplete.as_view(), name='be-user-autocomplete'),
+    path('series/<int:pk>/works', views.WorkSeriesList.as_view(), name='be-series-works'),
     path('openapi', get_schema_view(
         title="Ourchive",
         description="A fan-created archive software package",

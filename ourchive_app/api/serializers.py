@@ -1256,10 +1256,14 @@ class SeriesSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
-    works_readonly = WorkSerializer(many=True, required=False, read_only=True, source='works')
+    works_readonly = serializers.SerializerMethodField()
     works = serializers.PrimaryKeyRelatedField(many=True, queryset=Work.objects.all())
     created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
     updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+
+    def get_works_readonly(self, instance):
+        works = instance.works.all().order_by('series_num')
+        return WorkSerializer(works, many=True, required=False, read_only=True, context={'request': self.context['request']}).data
 
     class Meta:
         model = WorkSeries

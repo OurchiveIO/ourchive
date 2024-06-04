@@ -60,7 +60,7 @@
 			<script>
 				var status = '{{message.tags}}' === 'success' ? 'primary' : 'danger';
 				UIkit.notification({
-				    message: '<div id="{{message.extra_tags}}"><strong>{{ message }}</strong></div>',
+				    message: '<div id="{{message.extra_tags}}" class="uk-padding-small uk-padding-remove-vertical"><strong>{{ message }}</strong></div>',
 				    status: status,
 				    pos: 'top-center',
 				    timeout: 8000

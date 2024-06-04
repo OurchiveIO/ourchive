@@ -21,26 +21,30 @@ function doWorkAutocomplete(term) {
     });
 }
 
-function populateWorkInput(bookmark_id, bookmark_display) {
+function populateWorkInput(work_id, work_display) {
     // visible list
-    var list = document.getElementById("works_readonly_list")
-    // bookmark to add
-    var final = bookmark_display;
-    var wrapper= document.createElement('div');
-    wrapper.innerHTML= '<input type="hidden" id="works_'+bookmark_id+'" name="workidstoadd_'+bookmark_id+'" value="workidstoadd_'+bookmark_id+'">';
-    var div = wrapper.firstChild;
-    list.appendChild(div);
+    var list = document.getElementById("series-list")
+    // todo
+    // call api
+    // render li template
+    // append to ul
     var li = document.createElement('li');
-    li.setAttribute('id', 'works_'+bookmark_id+'_li');
-    li.innerHTML = bookmark_display+' (<a onclick="removeWork(event,'+bookmark_id+')">Remove</a>)';
-    list.appendChild(li);
-    document.getElementById("series_entry").value = '';
-    document.getElementById("series_entry").focus();
-    document.getElementById("series-autocomplete-dropdown").innerHTML = "";
+    li.setAttribute('id', 'work-list-'+work_id);
+    fetch('/series/{{series.id}}/works/render?work_id='+work_id)
+        .then((response) => {
+          return response.text();
+        })
+            .then((templateText) => {   
+                li.innerHTML = templateText;   
+                list.appendChild(li);
+                document.getElementById("series_entry").value = '';
+                document.getElementById("series_entry").focus();
+                document.getElementById("series-autocomplete-dropdown").innerHTML = "";
+            });
 }
-function removeWork(event, bookmark_id) {
-    var li = document.getElementById("works_"+bookmark_id+"_li");
-    var hidden = document.getElementById("works_"+bookmark_id);
+function removeWork(event, work_id) {
+    var li = document.getElementById("works_"+work_id+"_li");
+    var hidden = document.getElementById("works_"+work_id);
     li.remove();
     hidden.remove();
 }
@@ -88,13 +92,33 @@ function removeWork(event, bookmark_id) {
     <hr id="series-form-details-hr" class="ourchive-hr"/>
     <h3 id="series-form-header">Details</h3>
     <div class="uk-margin" id="series-works-list">
-        {% if series.works %}<div class="uk-margin-medium-left"><h4 id="series-works-form-header">{% translate 'Works' %}</h4></div>{% endif %}
-        <ul id="works_readonly_list" class="uk-margin-medium-left"> 
-        {% for work in series.works_readonly %}
-            <input type="hidden" id="works_{{work.id}}" name="workidstoadd_{{work.id}}" value="workidstoadd_{{work.id}}"/>
-            <li id="works_{{work.id}}_li">{{work.title}} (<a onclick="removeWork(event, {{work.id}})">Remove</a>)</li>
-        {% endfor %}
-        </ul>
+            <label id="series-works-form-label" class="uk-form-label" for="series-list">Works</label>
+            <script>
+                var util = UIkit.util;
+
+                util.ready(function () {
+
+                    util.on(document.body, 'stop', function (e, sortable, el) {
+                        var list = document.getElementById("series-list").getElementsByTagName("li");
+                        var tracking = 1;
+                        for (let item of list) {
+                            var child = item.querySelector('.series-tracker')
+                            child.value = tracking;
+                            tracking += 1;
+                        }
+                    });
+                });
+            </script>
+            <div class="uk-form-controls" id="series-form-controls">
+            <ul class="uk-grid-small uk-child-width-1 uk-text-left" uk-sortable="handle: .uk-sortable-handle" uk-grid id="series-list">
+                {% for work in series.works_readonly %}
+                <li id="work-list-{{work.id}}">
+                    {% include "series_form_work.html" with work=work series=series %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
         <div id="series-form-bookmarks-parent" class="uk-margin uk-margin-medium-top">
             <label id="series-form-bookmarks-label" class="uk-form-label" for="series_entry">{% translate 'Add Work' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work help' %}"></sup>    
                     <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for works by title.{% endblocktranslate %}</div>
@@ -106,7 +130,6 @@ function removeWork(event, bookmark_id) {
                 </div>
             </div>
         </div>
-    </div>
     <div id="series-form-description-parent" class="uk-margin">
         <label id="series-form-description-label" class="uk-form-label" for="descriptionEditor">Description</label>
         {% include 'ourchive_tinymce_template.html' with form_field_value=series.description form_field='description' obj_name='series' %}

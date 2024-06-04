@@ -324,6 +324,18 @@ def get_series_obj(request):
 	return series_dict
 
 
+def get_work_series_nums(series_dict):
+	work_ids = []
+	for key in series_dict.keys():
+		if key.startswith('work_series_num'):
+			work_id = key.split('work_series_num_')
+			work_ids.append({
+				'work': work_id[1],
+				'series_num': series_dict[key]
+			})
+	return work_ids
+
+
 def prepare_chapter_data(chapter, request):
 	if 'text' in chapter:
 		chapter['text'] = sanitize_rich_text(chapter['text'])

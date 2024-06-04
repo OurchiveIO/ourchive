@@ -1449,6 +1449,19 @@ class SeriesDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer.save(user=self.request.user)
 
 
+class WorkSeriesList(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def patch(self, request, pk):
+        works = request.data
+        for work_obj in works:
+            work = Work.objects.get(id=work_obj['work'])
+            work.series_num = int(work_obj['series_num'])
+            work.save()
+        return Response({'message': 'Work series numbers updated.'}, status=200)
+
+
 class UserSeriesList(generics.ListCreateAPIView):
     serializer_class = SeriesSerializer
     permission_classes = [IsWorksMultiOwnerOrReadOnly]
