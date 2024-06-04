@@ -123,6 +123,7 @@ class UserSubscription(models.Model):
     subscribed_to_bookmark = models.BooleanField(default=False)
     subscribed_to_collection = models.BooleanField(default=False)
     subscribed_to_work = models.BooleanField(default=False)
+    subscribed_to_series = models.BooleanField(default=False)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE

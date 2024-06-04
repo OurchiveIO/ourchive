@@ -543,6 +543,24 @@ def user_work_subscriptions(request, username):
 	return page_content
 
 
+def user_series_subscriptions(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
+		return redirect('/')
+	cache_key = f'subscription_{username}_{request.user}_series'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
+	response = do_get(f'api/users/{username}/subscriptions/series', request, params=request.GET)
+	page_content = render(request, 'user_series_subscriptions.html', {
+		'series': response.response_data,
+		'next': f"/users/{username}/subscriptions/series/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
+		'previous': f"/users/{username}/subscriptions/series/{response.response_data['prev_params']}" if response.response_data['prev_params'] is not None else None,
+	})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
+
+
 def user_subscriptions(request, username):
 	if not request.user.is_authenticated or not request.user.username == username:
 		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')

@@ -108,6 +108,8 @@ urlpatterns = [
          views.UserSubscriptionBookmarkCollectionList.as_view(), name='user-subscriptions-collections'),
     path('users/<str:username>/subscriptions/works',
          views.UserSubscriptionWorkList.as_view(), name='user-subscriptions-works'),
+    path('users/<str:username>/subscriptions/series',
+         views.UserSubscriptionSeriesList.as_view(), name='user-subscriptions-series'),
     path('users/<str:username>/bookmarks/drafts',
          views.UserBookmarkDraftList.as_view(), name='user-bookmarks-drafts'),
     path('users/<str:username>/series', views.UserSeriesList.as_view(), name='user-series-list'),

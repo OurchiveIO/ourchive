@@ -644,6 +644,18 @@ class UserSubscriptionWorkList(generics.ListAPIView):
         return Work.objects.filter(draft=False).filter(user__id__in=ids).order_by('-created_on')
 
 
+class UserSubscriptionSeriesList(generics.ListAPIView):
+    serializer_class = WorkSerializer
+    permission_classes = [IsOwner, ObjectIsPrivate]
+
+    def get_queryset(self):
+        subscriptions = UserSubscription.objects.filter(
+            user__id=self.request.user.id).filter(
+            subscribed_to_series=True)
+        ids = subscriptions.values_list('subscribed_user', flat=True).all()
+        return WorkSeries.objects.filter(user__id__in=ids).order_by('-created_on')
+
+
 class UserSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSubscriptionSerializer
     permission_classes = [IsOwner]
