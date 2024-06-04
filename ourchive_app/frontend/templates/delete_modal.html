@@ -5,6 +5,7 @@
         <p id="{{object}}-{{object_id}}-modal-delete-confirm">{% if not delete_msg %} {% translate 'Are you sure you want to delete this' %} {{object_friendly|default:object}}?{% else %}{{delete_msg}}{% endif %}</p>
         <p id="{{object}}-{{object_id}}-modal-delete-buttons" class="uk-text-right">
             <a id="{{object}}-{{object_id}}-modal-delete-cancel" class="uk-button uk-button-default uk-modal-close uk-margin-right">{% translate 'Cancel' %}</a>
+            {% if not handle_js %}
             {% if parent_object_id %}
             	{% if root_object_id %}
             		<a id="{{object}}-{{object_id}}-modal-delete-root-link" class="uk-button uk-button-primary" href="{% url 'delete-'|add:object root_object_id parent_object_id object_id%}">{% if not delete_verb %}{% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
@@ -13,6 +14,17 @@
             	{% endif %}
             {% else %}
             	<a id="{{object}}-{{object_id}}-modal-delete-default-link" class="uk-button uk-button-primary" href="{% url 'delete-'|add:object object_id%}">{% if not delete_verb %} {% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
+            {% endif %}
+            {% else %}
+            {% if parent_object_id %}
+                {% if root_object_id %}
+                    <a id="{{object}}-{{object_id}}-modal-delete-root-link" class="uk-button uk-button-primary" href="#" onclick=handleModalDelete("{% url 'delete-'|add:object root_object_id parent_object_id object_id%}")>{% if not delete_verb %}{% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
+                {% else %}
+                    <a id="{{object}}-{{object_id}}-modal-delete-parent-link" class="uk-button uk-button-primary" href="#" onclick=handleModalDelete("{% url 'delete-'|add:object parent_object_id object_id%}")>{% if not delete_verb %} {% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
+                {% endif %}
+            {% else %}
+                <a id="{{object}}-{{object_id}}-modal-delete-default-link" class="uk-button uk-button-primary" href="#" onclick=handleModalDelete("{% url 'delete-'|add:object object_id%}")>{% if not delete_verb %} {% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
+            {% endif %}
             {% endif %}
         </p>
     </div>

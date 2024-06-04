@@ -1455,11 +1455,25 @@ class WorkSeriesList(APIView):
 
     def patch(self, request, pk):
         works = request.data
+        tracking = 1
         for work_obj in works:
             work = Work.objects.get(id=work_obj['work'])
-            work.series_num = int(work_obj['series_num'])
+            work.series_num = int(work_obj['series_num']) if work_obj['series_num'].isdigit() else tracking
             work.save()
+            tracking = tracking + 1
         return Response({'message': 'Work series numbers updated.'}, status=200)
+
+
+class WorkSeriesDetail(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def delete(self, request, pk, work_id):
+        work = Work.objects.get(id=work_id)
+        work.series = None
+        work.series_num = None
+        work.save()
+        return Response({'message': 'Work removed from series.'}, status=200)
 
 
 class UserSeriesList(generics.ListCreateAPIView):

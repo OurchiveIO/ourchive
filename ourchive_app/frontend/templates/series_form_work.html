@@ -8,4 +8,4 @@
 
 <input type="hidden" class="series-tracker" id="work_{{work.id}}" name="work_series_num_{{work.id}}" value="{{work.series_num}}">
 <input type="hidden" id="works_{{work.id}}" name="workidstoadd_{{work.id}}" value="workidstoadd_{{work.id}}"/>
-{% include "delete_modal.html" with object='work-series' parent_object_id=series.id object_id=work.id delete_verb="Remove" delete_msg="Are you sure you want to remove this work from the series?" %}
+{% include "delete_modal.html" with object='work-series' parent_object_id=series.id object_id=work.id delete_verb="Remove" delete_msg="Are you sure you want to remove this work from the series?" handle_js=True %}

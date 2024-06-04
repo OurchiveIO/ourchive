@@ -48,6 +48,15 @@ function removeWork(event, work_id) {
     li.remove();
     hidden.remove();
 }
+
+function handleModalDelete(url) {
+    fetch(url)
+    .then((response) => {
+      work_id = url.replace('/series/'+{{series.id}}+'/work/', '').replace('/delete', '');
+      UIkit.modal(document.getElementById('work-series-'+work_id+'-modal-delete')).hide();
+      document.getElementById('work-list-'+work_id).remove();
+    });
+}
 </script>
 <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="series-form-parent-grid">  
 <form class="uk-form-horizontal" method="post" id="seriesForm" onsubmit="return getRichText(['description'])">

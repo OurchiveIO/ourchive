@@ -1825,7 +1825,7 @@ def render_series_work(request, pk):
 def delete_work_series(request, pk, work_id):
 	response = do_delete(f'api/series/{pk}/work/{work_id}', request, 'Series')
 	process_message(request, response)
-	return referrer_redirect(f'/series/{pk}')
+	return redirect(f'/series/{pk}/edit')
 
 
 @never_cache
