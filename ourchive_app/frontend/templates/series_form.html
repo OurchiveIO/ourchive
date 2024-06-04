@@ -30,7 +30,12 @@ function populateWorkInput(work_id, work_display) {
     // append to ul
     var li = document.createElement('li');
     li.setAttribute('id', 'work-list-'+work_id);
-    fetch('/series/{{series.id}}/works/render?work_id='+work_id)
+    {% if series.id %}
+    var fetch_url = '/series/{{series.id}}/works/render?work_id='+work_id;
+    {% else %}
+    var fetch_url = '/series/0/works/render?work_id='+work_id;
+    {% endif %}
+    fetch(fetch_url)
         .then((response) => {
           return response.text();
         })
@@ -52,7 +57,11 @@ function removeWork(event, work_id) {
 function handleModalDelete(url) {
     fetch(url)
     .then((response) => {
-      work_id = url.replace('/series/'+{{series.id}}+'/work/', '').replace('/delete', '');
+        {% if series.id %}
+            work_id = url.replace('/series/'+{{series.id}}+'/work/', '').replace('/delete', '');
+        {% else %}
+            work_id = url.replace('/series/1/work/', '').replace('/delete', '');
+        {% endif %}
       UIkit.modal(document.getElementById('work-series-'+work_id+'-modal-delete')).hide();
       document.getElementById('work-list-'+work_id).remove();
     });
@@ -61,7 +70,7 @@ function handleModalDelete(url) {
 <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="series-form-parent-grid">  
 <form class="uk-form-horizontal" method="post" id="seriesForm" onsubmit="return getRichText(['description'])">
     {% csrf_token %}
-    <input id="series-form-hidden-id" type="hidden" name="series_id" value="{{ series.id }}"/>
+    <input id="series-form-hidden-id" type="hidden" name="series_id" {% if series.id != 0 %}value="{{ series.id }}"{% else %} value=""{% endif %}/>
     <div id="series-form-actions-parent" class="uk-grid" uk-grid>
         <div id="series-form-header-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
             <span id="series-form-header-span" class="uk-text-large">{{ form_title }}</span>

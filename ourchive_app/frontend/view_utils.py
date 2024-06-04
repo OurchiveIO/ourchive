@@ -387,7 +387,7 @@ def format_date_for_template(obj, field_name, is_list=False):
 		return obj
 	if is_list:
 		for item in obj:
-			if field_name not in item:
+			if not item.get(field_name):
 				continue
 			item[field_name] = parse(item[field_name]).date()
 		return obj
@@ -512,3 +512,15 @@ def create_browse_cards(request):
 
 def get_news(request):
 	return do_get(f'api/news', request, {}, 'News')
+
+
+def get_series_users(request, series):
+	series['owner'] = request.user.id == series['user_id']
+	users = set()
+	series['users'] = []
+	for work in series['works_readonly']:
+		for user in work['users']:
+			if user['username'] not in users:
+				users.add(user['username'])
+				series['users'].append(user)
+	return series

@@ -1,0 +1,6 @@
+{% load i18n %}
+{% if series.updated_on %}
+<div class="uk-inline ourchive-metadata-list">
+	<span id="series-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{series.updated_on|date:'d M Y'}}</span>
+</div>
+{% endif %}

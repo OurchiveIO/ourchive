@@ -91,6 +91,7 @@ def user_name(request, pk):
 	work_params = {}
 	bookmark_params = {}
 	bookmark_collection_params = {}
+	series_params = {}
 	anchor = None
 	if 'work_offset' in request.GET:
 		work_params['offset'] = request.GET['work_offset']
@@ -104,6 +105,10 @@ def user_name(request, pk):
 		bookmark_collection_params['offset'] = request.GET['bookmark_collection_offset']
 		bookmark_collection_params['limit'] = request.GET['bookmark_collection_limit']
 		anchor = "bookmark_collection_tab"
+	if 'series_offset' in request.GET:
+		series_params['offset'] = request.GET['series_offset']
+		series_params['limit'] = request.GET['series_limit']
+		anchor = "series_tab"
 	works_response = do_get(f'api/users/{username}/works', request, params=work_params, object_name='Works')
 	works = works_response.response_data['results']
 	works = get_object_tags(works)
@@ -122,6 +127,11 @@ def user_name(request, pk):
 	bookmark_collection_previous = f'/username/{pk}/{bookmark_collection_response["prev_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["prev_params"] is not None else None
 	bookmark_collection = get_object_tags(bookmark_collection)
 	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on', True)
+	series_response = do_get(f'api/users/{username}/series', request, params=series_params).response_data
+	series = series_response['results']
+	series_next = f'/username/{pk}/{series_response["next_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["next_params"] is not None else None
+	series_previous = f'/username/{pk}/{series_response["prev_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["prev_params"] is not None else None
+	series = format_date_for_template(series, 'updated_on', True)
 	user = user.response_data['results'][0]
 	user['attributes'] = get_attributes_for_display(user['attributes'])
 	subscription = do_get(f"api/subscriptions/", request, params={'subscribed_to': username}, object_name='Subscription')
@@ -143,6 +153,9 @@ def user_name(request, pk):
 		'bookmark_collections': bookmark_collection,
 		'bookmark_collections_next': bookmark_collection_next,
 		'bookmark_collections_previous': bookmark_collection_previous,
+		'series': series,
+		'series_next': series_next,
+		'series_previous': series_previous,
 		'user': user,
 		'subscription' : subscription
 	})
@@ -259,6 +272,27 @@ def user_works(request, username):
 		'works': works,
 		'next': f"/username/{username}/works/{next_params}" if next_params is not None else None,
 		'previous': f"/username/{username}/works/{prev_params}" if prev_params is not None else None,
+		'user_filter': username,
+		'root': settings.ROOT_URL})
+
+
+def user_series(request, username):
+	response = do_get(f'api/users/{username}/series', request, params=request.GET, object_name='User series')
+	series = {}
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	else:
+		series = response.response_data['results']
+	next_params = response.response_data['next_params'] if 'next_params' in response.response_data else None
+	prev_params = response.response_data['prev_params'] if 'prev_params' in response.response_data else None
+	series = format_date_for_template(series, 'updated_on', True)
+	for single_series in series:
+		single_series = get_series_users(request, single_series)
+	return render(request, 'series_list.html', {
+		'series': series,
+		'next': f"/username/{username}/series/{next_params}" if next_params is not None else None,
+		'previous': f"/username/{username}/series/{prev_params}" if prev_params is not None else None,
 		'user_filter': username,
 		'root': settings.ROOT_URL})
 
@@ -1744,7 +1778,8 @@ def create_series(request):
 			'user': request.user.username,
 			'description': '',
 			'created_on': str(datetime.now().date()),
-			'updated_on': str(datetime.now().date())
+			'updated_on': str(datetime.now().date()),
+			'id': 0
 		}
 		return render(request, 'series_form.html', {
 			'form_title': _('New Series'),
@@ -1797,14 +1832,7 @@ def series(request, pk):
 		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
 		return redirect('/')
 	series = response.response_data
-	series['owner'] = request.user.id == series['user_id']
-	users = set()
-	series['users'] = []
-	for work in series['works_readonly']:
-		for user in work['users']:
-			if user['username'] not in users:
-				users.add(user['username'])
-				series['users'].append(user)
+	series = get_series_users(request, series)
 	return render(request, 'series.html', {
 		'series': series
 	})
@@ -1812,8 +1840,13 @@ def series(request, pk):
 
 def render_series_work(request, pk):
 	work_id = request.GET.get('work_id')
-	response = do_get(f'api/series/{pk}/', request, 'Series')
-	series = response.response_data
+	if pk > 0:
+		response = do_get(f'api/series/{pk}/', request, 'Series')
+		series = response.response_data
+	else:
+		series = {
+			'id': 1
+		}
 	response = do_get(f'api/works/{work_id}', request, 'Work')
 	work = response.response_data
 	template = 'series_form_work.html'
@@ -1825,7 +1858,10 @@ def render_series_work(request, pk):
 def delete_work_series(request, pk, work_id):
 	response = do_delete(f'api/series/{pk}/work/{work_id}', request, 'Series')
 	process_message(request, response)
-	return redirect(f'/series/{pk}/edit')
+	if pk > 0:
+		return redirect(f'/series/{pk}/edit')
+	else:
+		return redirect(f'/series/create')
 
 
 @never_cache
