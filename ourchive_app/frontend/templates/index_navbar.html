@@ -6,11 +6,6 @@
 	    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
 	        <ul class="uk-navbar-nav uk-visible@s">
 	            <li class="uk-active" id="nav-home"><a href="/" title="Home" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
-	            {% if request.user.is_authenticated %}
-	            <li><a href="{% url 'fe-user-works' request.user.username %}" id="nav-works" data-testid="nav-works">{% translate 'Works' %}</a></li>
-	            <li><a href="{% url 'fe-user-collections' request.user.username %}" id="nav-bookmark-collections" data-testid="nav-collections">{% translate 'Collections' %}</a></li>
-	            <li><a href="{% url 'fe-new-work' %}" id="nav-bookmark-collections" data-testid="nav-new-work">{% translate 'Post' %}</a></li>
-	            {% endif %}
 	        </ul>
 	    </div>	 
 	    <div class="uk-navbar-center uk-visible@s" id="uk-nav-center">
