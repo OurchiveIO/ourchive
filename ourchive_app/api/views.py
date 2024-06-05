@@ -502,7 +502,10 @@ class UserBookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return BookmarkCollection.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+        queryset = BookmarkCollection.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id))
+        if (self.request.GET.get('work_id', None)):
+            queryset = queryset.exclude(works__id=self.request.GET.get('work_id'))
+        return queryset.order_by('-updated_on')
 
 
 class UserBookmarkDraftList(generics.ListCreateAPIView):
@@ -582,6 +585,7 @@ class UserBlockSingleDetail(APIView):
             return Response({'user_blocked': True, 'block_id': blocked_user.id}, status=200)
         else:
             return Response({'user_blocked': False}, status=200)
+
 
 class UserReportList(generics.ListCreateAPIView):
     serializer_class = UserReportSerializer
