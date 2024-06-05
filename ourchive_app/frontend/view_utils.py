@@ -88,6 +88,7 @@ def sanitize_rich_text(rich_text):
 		rich_text = ''
 	return rich_text
 
+
 def get_list_from_form(form_key, obj_dict, request):
 	if f'{form_key}[]' in obj_dict:
 		obj_dict[form_key] = [int(x) for x in request.POST.getlist(f"{form_key}[]")]
@@ -391,7 +392,7 @@ def format_date_for_template(obj, field_name, is_list=False):
 				continue
 			item[field_name] = parse(item[field_name]).date()
 		return obj
-	obj[field_name] = parse(obj[field_name]).date()
+	obj[field_name] = parse(obj[field_name]).date() if obj[field_name] is not None else None
 	return obj
 
 

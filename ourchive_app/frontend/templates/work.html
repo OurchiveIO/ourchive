@@ -4,12 +4,14 @@
 {% block content %}	
 <script>
     function addSelectedCollection() {
-        var collection = document.querySelector('.add-to-bookmark-radio');
-        if (collection.checked !== true) {
-            return;
-        }
-        var url = "{% url 'fe-add-collection-to-bookmark' work.id %}";
-        window.location.replace(url + '?collection_id=' + collection.name);
+        var collections = document.querySelectorAll('.add-to-bookmark-radio').forEach(function(elm)
+        {
+            if (elm.checked === true) {
+                var url = "{% url 'fe-add-collection-to-bookmark' work.id %}";
+                window.open(url + '?collection_id=' + elm.name, '_blank');
+            }
+        });
+        
     }
 </script>
 <article id="work-article" class="uk-article uk-width-expand uk-padding-remove">

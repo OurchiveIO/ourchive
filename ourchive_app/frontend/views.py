@@ -1366,7 +1366,7 @@ def work(request, pk, chapter_offset=0):
 			chapters[-1]['post_action_url'] = f"/works/{pk}/chapters/{chapters[-1]['id']}/comments/new?view_full=true&offset={comment_offset}"
 			chapters[-1]['edit_action_url'] = f"""/works/{pk}/chapters/{chapters[-1]['id']}/comments/edit?view_full=true&offset={comment_offset}"""
 		work['last_chapter_id'] = chapters[-1]['id']
-	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections', request, 'Collections').response_data
+	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections?work_id={pk}', request, object_name='Collections').response_data
 	page_content = render(request, 'work.html', {
 		'work_types': work_types,
 		'work': work,
