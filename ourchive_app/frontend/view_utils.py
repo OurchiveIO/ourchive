@@ -322,6 +322,10 @@ def get_series_obj(request):
 	if series_dict["updated_on"] == series_dict["updated_on_original"]:
 		series_dict["updated_on"] = str(datetime.now().date())
 	series_dict.pop("updated_on_original")
+	if not series_dict["updated_on"]:
+		series_dict.pop("updated_on")
+	if not series_dict["created_on"]:
+		series_dict.pop("created_on")
 	return series_dict
 
 

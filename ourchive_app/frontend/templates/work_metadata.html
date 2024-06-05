@@ -1,4 +1,9 @@
 {% load i18n %}
+{% if work.series %}
+<div class="uk-align-left ourchive-metadata-list">
+	<span class="uk-inline uk-text-bold" id="work-metadata-series">{% blocktranslate with series_num=work.series_num %}Part {{ series_num }} of {% endblocktranslate %}<a href="{% url 'fe-series' work.series.id%}">{{work.series.title}}</a></span>
+</div>
+{% endif %}
 <div class="uk-inline ourchive-metadata-list">
 	<span id="work-metadata-complete" class="uk-inline uk-text-bold">{% translate 'Status' %}: {% if work.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
 </div>
@@ -39,13 +44,5 @@
 <div class="uk-inline ourchive-metadata-list">
 	<span class="uk-inline uk-text-bold" id="work-metadata-language">{% translate 'Languages' %}: {% for language in work.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}
     {% endfor %}</span>
-</div>
-{% endif %}
-{% if work.series %}
-<div class="uk-inline ourchive-metadata-list">
-	<span id="work-metadata-series-divider" class="uk-inline uk-text-bold">-</span>
-</div>
-<div class="uk-inline ourchive-metadata-list">
-	<span class="uk-inline uk-text-bold" id="work-metadata-series">{% translate 'Series' %}: <a href="{% url 'fe-series' work.series.id%}">{{work.series.title}}</a></span>
 </div>
 {% endif %}
