@@ -22,7 +22,32 @@
 	        	</li>
 	        </ul>
 	    </div>
-	    <div class="uk-navbar-right" id="uk-nav-right">
+	    <div class="uk-navbar-right uk-hidden@s" id="uk-search-right">
+	    	 <ul class="uk-navbar-nav" id="uk-nav-mobile-ul">
+	    	 	<li id="nav-search-li">
+					<div class="uk-navbar-item">
+        				<form class="uk-search uk-search-default" action="/search/" method="post" id="nav-search-form">
+		                	{% csrf_token %}
+		                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>
+		                    <input class="uk-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
+						<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
+		                </form>
+					</div>
+	        	</li>
+	        	<li id="theme-switcher-li">
+	        		<div class="uk-navbar-item">
+		    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper uk-margin-small-top" title="Switch Modes">
+		    	 			{% if request.session.css_mode == "dark" %}
+		    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1" title="Light Mode" id="theme-switcher-light"></span>
+		    	 			{% else %}
+		    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1" title="Dark Mode" id="theme-switcher-dark"></span>
+		    	 			{% endif %}
+		    	 		</a>
+		    	 	</div>
+	    	 	</li>
+	        </ul>
+	    </div>
+	    <div class="uk-navbar-right uk-visible@s" id="uk-nav-right">
 	    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
 	    	 	<li id="theme-switcher-li">
 	    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper" title="Switch Modes">
@@ -42,7 +67,7 @@
             		</div>
 		        </li>
 		        {% else %}
-		        <li id="nav-right-main">
+		        <li id="nav-right-main" class="uk-visible@s">
 		            <a class="uk-width-auto uk-text-truncate uk-navbar-item" title="{{ request.user }}" href="{% url 'user-profile-parent' request.user.id %}" id="nav-username">{% translate 'Account' %}</a>
 		            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div" uk-dropdown="delay-hide: 1500; offset: -5">
 	                		<ul class="uk-nav uk-navbar-dropdown-nav uk-list-divider uk-list-collapse" id="nav-user-dropdown-ul">

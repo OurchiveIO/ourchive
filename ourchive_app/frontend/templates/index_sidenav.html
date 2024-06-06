@@ -3,19 +3,52 @@
 	<div class="uk-offcanvas-bar" id="sidenav-parent-div">
 		<ul class="uk-nav" id="sidenav-ul">
 			<li id="sidenav-home-li" class="uk-active"><a id="sidenav-home-link" href="/">{% translate 'Home' %}</a></li>
-            <li id="sidenav-works-li"><a id="sidenav-works-link" href="/works/">{% translate 'Works' %}</a></li>
-            <li id="sidenav-bookmark-collections-li"><a id="sidenav-bookmark-collections-link" href="/bookmark-collections/">{% translate 'Collections' %}</a></li>
             <li id="sidenav-search-li"><a id="sidenav-search-link" href="/search">Search</a></li>
             {% if not request.user.is_authenticated %}
             	<li id="sidenav-sign-in-li" class="uk-active">
-            		<a id="sidenav-sign-in-link" href="/login">Sign In</a></li>
+            		<a id="sidenav-sign-in-link" href="/login">Sign In</a>
+                </li>
             	<li id="sidenav-register-li" class="uk-active">
-            		<a id="sidenav-register-link" href="/register">Register</a></li>
+            		<a id="sidenav-register-link" href="/register">Register</a>
+                </li>
             {% endif %}
-            {% if request.user.is_authenticated %}
-            	<li id="sidenav-signout-li" class="uk-active">
-            		<a id="sidenav-signout-link" href="/logout"><span uk-icon="icon: ourchive-logout; ratio: .75;" title="Sign out"></span></a></li>
-            {% endif %}
+            {% if not request.user.is_authenticated %}
+            <li id="sidenav-right-main">                
+                <div id="nav-login-link" class="uk-navbar-item">
+                    <a href="{ url 'fe-login' %}" class="uk-button nav-button-default">
+                    {% translate 'Sign In' %}
+                    <span class="uk-margin-small-left" uk-icon="icon: ourchive-user;ratio:.75" title="Sign In" id="nav-login-icon"></span></a>
+                </div>
+            </li>
+            {% else %}
+                <li id="sidenav-right-main">
+                    <a title="{{ request.user }}">{% translate 'Account' %}</a>
+                            <ul class="uk-nav uk-list-divider uk-list-collapse uk-margin-small-left" id="nav-user-dropdown-ul">
+                                <li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
+                                <li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
+                                <li id="nav-new-series-li"><a href="{% url 'fe-create-series' %}" id="nav-new-series-link">{% translate 'New Series' %}</a></li>
+                                <li id="nav-creations-li"><a href="{% url 'user-profile-parent' request.user.id %}" id="nav-creations-link">{% translate 'My Chives' %}</a></li>
+                                <li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a></li>
+                                <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a></li>
+                                    <ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="profile-subnav">
+                                    <li id="nav-edit-profile-li"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-edit-profile-link">{% translate 'User Settings' %}</a></li>
+                                    <li id="nav-edit-account-li"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-edit-account-link">{% translate 'Account Settings' %}</a></li>
+                                    <li id="nav-cocreator-approval-li"><a href="{% url 'fe-view-approvals'%}" id="nav-view-approvals-link">{% translate 'Approvals' %}</a></li>
+                                    <li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">{% translate 'Blocklist' %}</a></li>
+                                </ul>
+                                <li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link">{% translate 'Import Work(s)' %}</a></li>
+                                <ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="imports-subnav">
+                                        <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}">{% translate 'Import Status' %}</a></li>
+                                    </ul>
+                                {% if request.session.has_notifications %}
+                                <li id="nav-notifications-unread-li"><a class="uk-text-emphasis uk-text-secondary" href="/username/{{request.user}}/notifications" id="nav-notifications-unread-link">Notifications (Unread)</a></li>
+                                {% else %}
+                                <li id="nav-notifications-li"><a href="/username/{{request.user}}/notifications" id="nav-notifications-link">Notifications</a></li>
+                                {% endif %}
+                                <li id="nav-signout-li"><a href="/logout" id="nav-signout-link">Log Out</a></li>
+                            </ul>
+                </li>
+                {% endif %}
 		</ul>
 	</div>
 </div>
