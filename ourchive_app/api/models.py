@@ -208,22 +208,6 @@ class Work(models.Model):
         return self.title
 
 
-class WorkSeries(models.Model):
-    id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=200)
-    description = models.TextField(null=True, blank=True)
-    is_complete = models.BooleanField(default=False)
-    created_on = models.DateTimeField(null=True, blank=True)
-    updated_on = models.DateTimeField(null=True, blank=True)
-    system_created_on = models.DateTimeField(auto_now_add=True)
-    system_updated_on = models.DateTimeField(auto_now=True)
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-    )
-
-
 class UserWork(models.Model):
     id = models.AutoField(primary_key=True)
     work = models.ForeignKey(
@@ -243,10 +227,86 @@ class UserWork(models.Model):
         db_table = 'api_user_works'
 
     def __str__(self):
-        return self.id
+        return f'{self.id}'
 
     def __repr__(self):
         return '<UserWork: {}>'.format(self.id)
+
+
+class WorkSeries(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    is_complete = models.BooleanField(default=False)
+    created_on = models.DateTimeField(null=True, blank=True)
+    updated_on = models.DateTimeField(null=True, blank=True)
+    system_created_on = models.DateTimeField(auto_now_add=True)
+    system_updated_on = models.DateTimeField(auto_now=True)
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+
+
+class Anthology(models.Model):
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    is_complete = models.BooleanField(default=False)
+    header_url = models.CharField(max_length=600, null=True, blank=True)
+    header_alt_text = models.CharField(max_length=600, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    created_on = models.DateTimeField(null=True, blank=True)
+    updated_on = models.DateTimeField(null=True, blank=True)
+    system_created_on = models.DateTimeField(auto_now_add=True)
+    system_updated_on = models.DateTimeField(auto_now=True)
+    creating_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='creating_user'
+    )
+
+    owners = models.ManyToManyField('User')
+
+    tags = models.ManyToManyField('Tag')
+    attributes = models.ManyToManyField('AttributeValue')
+    works = models.ManyToManyField('Work', related_name='anthologies', through='AnthologyWork')
+    languages = models.ManyToManyField('Language')
+
+    def __str__(self):
+        return self.title
+
+    def __repr__(self):
+        return '<Anthology: {}>'.format(self.id)
+
+    class Meta:
+        verbose_name_plural = "anthologies"
+
+
+class AnthologyWork(models.Model):
+    id = models.AutoField(primary_key=True)
+    work = models.ForeignKey(
+        'Work',
+        on_delete=models.CASCADE,
+        related_name='anthology_work'
+    )
+    anthology = models.ForeignKey(
+        'Anthology',
+        on_delete=models.CASCADE,
+        related_name='work_anthology'
+    )
+    sort_order = models.IntegerField(default=1)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+        db_table = 'api_anthology_works'
+
+    def __str__(self):
+        return f'{self.id}'
+
+    def __repr__(self):
+        return '<AnthologyWork: {}>'.format(self.id)
 
 
 class UserCollection(models.Model):

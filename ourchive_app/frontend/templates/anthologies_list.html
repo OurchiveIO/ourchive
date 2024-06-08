@@ -1,0 +1,11 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block title %}{% translate 'Anthologies' %}{% endblock %}
+{% block content %}	
+	{% if user_filter %}
+    	<div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="anthologies-list-user-filter-parent">
+			<h1 id="anthologies-list-user-h1" class="uk-heading-line uk-text-center"> <span id="user_anthologies_header">{% blocktranslate with user=user_filter %}Anthologies by {{ user }} {% endblocktranslate %}</span> </h1> 
+		</div>
+	{% endif %}
+<div class="uk-padding-remove-horizontal uk-width-expand" uk-height-viewport="expand: true">{% include 'anthologies_list_body.html' %}</div>
+{% endblock %}

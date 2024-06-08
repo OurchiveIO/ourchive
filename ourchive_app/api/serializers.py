@@ -1268,3 +1268,24 @@ class SeriesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = WorkSeries
         fields = '__all__'
+
+
+class AnthologySerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    creating_user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    creating_user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+    works_readonly = serializers.SerializerMethodField()
+    works = serializers.PrimaryKeyRelatedField(many=True, queryset=Work.objects.all())
+    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
+    languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
+
+    def get_works_readonly(self, instance):
+        works = instance.works.all().order_by('anthology_work__sort_order')
+        return WorkSerializer(works, many=True, required=False, read_only=True, context={'request': self.context['request']}).data
+
+    class Meta:
+        model = Anthology
+        fields = '__all__'

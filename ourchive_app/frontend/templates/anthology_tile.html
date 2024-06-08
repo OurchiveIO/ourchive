@@ -1,0 +1,22 @@
+{% load i18n %}
+<div id="anthology-tile-parent-{{ anthology.id }}" class="uk-width-1-1 uk-padding-remove-horizontal">
+	<div id="anthology-tile-card-{{ anthology.id }}" class="uk-card uk-card-default">
+	    <div id="anthology-tile-header-parent" class="uk-card-header uk-padding-small ourchive-card-head">
+	        <div id="anthology-tile-header-grid" class="uk-grid uk-child-width-expand" uk-grid>
+		        <span id="anthology-{{ anthology.id }}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="anthology-{{ anthology.id }}-tile-title-link" href="{% url 'fe-anthology' anthology.id %}">{{ anthology.title }}</a> by {% for user in anthology.owners %}<a id="anthology-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="anthology-user-link" href="{% url 'user-profile-parent' anthology.creating_user_id %}">{{ anthology.user }}</a>{% endfor %}</span>
+		        {% if anthology.owner %}
+		        <div id="anthology-tile-actions-parent" class="uk-align-right uk-text-right uk-margin-remove">
+		            <a class="ourchive-icon-wrapper" id="anthology-tile-edit-{{ anthology.id }}-link" href="{% url 'fe-edit-anthology' anthology.id %}"><span id="anthology-tile-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="Edit anthology {{ anthology.id }}"></span> </a>
+		            <a class="ourchive-icon-wrapper" id="anthology-tile-delete-link" uk-toggle="target: #anthology-{{anthology.id}}-modal-delete"><span uk-icon="icon: ourchive-delete;ratio:.75" id="anthology-tile-delete-span" title="Delete"></span> </a>
+			    <p>{% include "delete_modal.html" with object='anthology' object_friendly='anthology' object_id=anthology.id %}</p>
+		        </div>
+		        {% endif %}
+		    </div>
+		</div>
+	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="anthology-tile-footer-parent">
+	        <div class="uk-width-1-1 uk-padding-small uk-margin-small">
+	        	{% include 'anthology_metadata.html' %}
+	        </div>
+	    </div>
+	</div>  
+</div>

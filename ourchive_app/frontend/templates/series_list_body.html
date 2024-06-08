@@ -1,6 +1,4 @@
-<div class="uk-padding-remove-horizontal uk-width-expand">
-	{% for single_series in series %} 
-		<div class="uk-margin-bottom">{% include "series_tile.html" with series=single_series %}</div>
-	{% endfor %}
+{% for single_series in series %} 
+	<div class="uk-margin-bottom">{% include "series_tile.html" with series=single_series %}</div>
+{% endfor %}
 {% include 'pagination.html' with previous=previous next=next object_name='series' %}
-</div>

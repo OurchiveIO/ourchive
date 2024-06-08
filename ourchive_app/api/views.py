@@ -141,6 +141,17 @@ class SeriesAutocomplete(APIView):
         return Response({'results': results})
 
 
+class AnthologyAutocomplete(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, format=None):
+        searcher = OurchiveSearch()
+        results = searcher.do_anthology_search(request.GET.get(
+            'term'), request.user.id)
+        return Response({'results': results})
+
+
 class FileUpload(APIView):
     parser_classes = [MultiPartParser]
     permission_classes = [permissions.AllowAny]
@@ -1498,3 +1509,61 @@ class UserSeriesList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return WorkSeries.objects.filter(works__work_users__user__username=self.kwargs['username']).order_by('-updated_on')
+
+
+class AnthologyList(generics.ListCreateAPIView):
+    queryset = Anthology.objects.get_queryset()
+    serializer_class = AnthologySerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def perform_create(self, serializer):
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
+        serializer.save(user=self.request.user)
+
+
+class AnthologyDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Anthology.objects.get_queryset()
+    serializer_class = AnthologySerializer
+    permission_classes = [IsWorksMultiOwnerOrReadOnly]
+
+    def perform_update(self, serializer):
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
+        serializer.save(user=self.request.user)
+
+
+class WorkAnthologyList(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def patch(self, request, pk):
+        works = request.data
+        tracking = 1
+        for work_obj in works:
+            anthology_work = AnthologyWork.objects.get(work__id=work_obj['work'], anthology__id=work_obj['anthology'])
+            anthology_work.sort_order = int(work_obj['sort_order']) if work_obj['sort_order'].isdigit() else tracking
+            anthology_work.save()
+            tracking = tracking + 1
+        return Response({'message': 'Work anthology order updated.'}, status=200)
+
+
+class WorkAnthologyDetail(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def delete(self, request, pk, work_id):
+        AnthologyWork.objects.delete(work__id=work_id, anthology__id=pk)
+        return Response({'message': 'Work removed from anthology.'}, status=200)
+
+
+class UserAnthologyList(generics.ListCreateAPIView):
+    serializer_class = SeriesSerializer
+    permission_classes = [IsWorksMultiOwnerOrReadOnly]
+
+    def get_queryset(self):
+        return Anthology.objects.filter(works__work_users__user__username=self.kwargs['username']).order_by('-updated_on')

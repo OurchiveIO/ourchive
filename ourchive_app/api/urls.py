@@ -162,6 +162,11 @@ urlpatterns = [
     path('series-autocomplete', views.SeriesAutocomplete.as_view(), name='be-user-autocomplete'),
     path('series/<int:pk>/works', views.WorkSeriesList.as_view(), name='be-series-works'),
     path('series/<int:pk>/work/<int:work_id>', views.WorkSeriesDetail.as_view(), name='be-series-work-detail'),
+    path('anthologies/', views.AnthologyList.as_view(), name='anthology-list'),
+    path('anthologies/<int:pk>/', views.AnthologyDetail.as_view(), name='anthology-detail'),
+    path('anthology-autocomplete', views.AnthologyAutocomplete.as_view(), name='be-anthology-autocomplete'),
+    path('anthologies/<int:pk>/works', views.WorkAnthologyList.as_view(), name='be-anthology-works'),
+    path('anthologies/<int:pk>/work/<int:work_id>', views.WorkAnthologyDetail.as_view(), name='be-series-anthology-detail'),
     path('openapi', get_schema_view(
         title="Ourchive",
         description="A fan-created archive software package",

@@ -477,6 +477,19 @@ class PostgresProvider:
             results.append(series_dict)
         return results
 
+    def autocomplete_anthologies(self, term, user):
+        results = []
+        resultset = None
+        term = term.lower()
+        resultset = Anthology.objects.filter(works__work_users__user__id=user).filter(
+            Q(title__icontains=term)).order_by('-updated_on')
+        for result in resultset:
+            anthology_dict = vars(result)
+            if '_state' in anthology_dict:
+                anthology_dict.pop('_state')
+            results.append(anthology_dict)
+        return results
+
     def search_tags(self, **kwargs):
         tag_search = TagSearch()
         tag_search.from_dict(kwargs)

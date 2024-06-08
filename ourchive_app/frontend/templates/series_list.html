@@ -1,10 +1,11 @@
 {% extends 'index.html' %}
-{% block title %}Series{% endblock %}
+{% load i18n %}
+{% block title %}{% translate 'Series' %}{% endblock %}
 {% block content %}	
 	{% if user_filter %}
     	<div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="series-list-user-filter-parent">
-			<h1 id="series-list-user-h1" class="uk-heading-line uk-text-center"> <span id="user_series_header"> Series by {{ user_filter }}</span> </h1> 
+			<h1 id="series-list-user-h1" class="uk-heading-line uk-text-center"> <span id="user_series_header">{% blocktranslate with user=user_filter %}Series by {{ user }}{% endblocktranslate %}</span> </h1> 
 		</div>
 	{% endif %}
-{% include 'series_list_body.html' %}
+<div class="uk-padding-remove-horizontal uk-width-expand" uk-height-viewport="expand: true">{% include 'series_list_body.html' %}</div>
 {% endblock %}

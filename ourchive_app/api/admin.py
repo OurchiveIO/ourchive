@@ -1,7 +1,7 @@
 from django.contrib import admin
 from api.models import User, TagType, WorkType, NotificationType, OurchiveSetting, \
     ContentPage, Tag, Invitation, AttributeType, AttributeValue, UserReportReason, \
-    UserReport, UserSubscription, AdminAnnouncement, Language, News
+    UserReport, UserSubscription, AdminAnnouncement, Language, News, Anthology, AnthologyWork
 from django.db import models
 from django.forms.widgets import Input
 from django.core.mail import send_mail
@@ -38,6 +38,7 @@ def send_invite_email(invitation, approved=False):
             [invitation.email],
             fail_silently=False,
         )
+
 
 @admin.action(description="Approve selected invitations")
 def approve_invitations(modeladmin, request, queryset):
@@ -208,3 +209,5 @@ admin.site.register(UserSubscription, UserSubscriptionAdmin)
 admin.site.register(AdminAnnouncement, AdminAnnouncementAdmin)
 admin.site.register(Language)
 admin.site.register(News, NewsAdmin)
+admin.site.register(Anthology)
+admin.site.register(AnthologyWork)

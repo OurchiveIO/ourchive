@@ -1,0 +1,160 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block title %}{{ form_title }}{% endblock %}
+{% block content %}	
+{% load static %}
+<script>
+function doWorkAutocomplete(term) {
+  if (term.length < 2)
+  {
+    return;
+  }
+  var complete_select = 'anthology-autocomplete-dropdown';
+  fetch('/bookmark-autocomplete?text='+term+"&source=edit")
+    .then((response) => {
+      return response.text();
+    })
+    .then((templateText) => {      
+    document.getElementById(complete_select).innerHTML = "";
+    document.getElementById(complete_select).innerHTML = templateText;
+    UIkit.drop(document.getElementById(complete_select)).show();
+    });
+}
+
+function populateWorkInput(work_id, work_display) {
+    // visible list
+    var list = document.getElementById("anthology-list")
+    var li = document.createElement('li');
+    li.setAttribute('id', 'work-list-'+work_id);
+    {% if series.id %}
+    var fetch_url = '/anthologies/{{anthology.id}}/works/render?work_id='+work_id;
+    {% else %}
+    var fetch_url = '/anthologies/0/works/render?work_id='+work_id;
+    {% endif %}
+    fetch(fetch_url)
+        .then((response) => {
+          return response.text();
+        })
+            .then((templateText) => {   
+                li.innerHTML = templateText;   
+                list.appendChild(li);
+                document.getElementById("anthology_entry").value = '';
+                document.getElementById("anthology_entry").focus();
+                document.getElementById("anthology-autocomplete-dropdown").innerHTML = "";
+            });
+}
+function removeWork(event, work_id) {
+    var li = document.getElementById("works_"+work_id+"_li");
+    var hidden = document.getElementById("works_"+work_id);
+    li.remove();
+    hidden.remove();
+}
+
+function handleModalDelete(url) {
+    fetch(url)
+    .then((response) => {
+        {% if anthology.id %}
+            work_id = url.replace('/anthologies/'+{{anthology.id}}+'/work/', '').replace('/delete', '');
+        {% else %}
+            work_id = url.replace('/anthologies/1/work/', '').replace('/delete', '');
+        {% endif %}
+      UIkit.modal(document.getElementById('work-anthology-'+work_id+'-modal-delete')).hide();
+      document.getElementById('work-list-'+work_id).remove();
+    });
+}
+</script>
+<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="anthology-form-parent-grid">  
+<form class="uk-form-horizontal" method="post" id="anthologyForm" onsubmit="return getRichText(['description'])">
+    {% csrf_token %}
+    <input id="anthology-form-hidden-id" type="hidden" name="anthology_id" {% if anthology.id != 0 %}value="{{ anthology.id }}"{% else %} value=""{% endif %}/>
+    <div id="anthology-form-actions-parent" class="uk-grid" uk-grid>
+        <div id="anthology-form-header-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
+            <span id="anthology-form-header-span" class="uk-text-large">{{ form_title }}</span>
+        </div>
+        <div id="anthology-form-actions-group" class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right">
+            <input id="anthology-form-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
+            <button id="anthology-form-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
+            <input id="anthology-form-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+        </div>
+    </div>
+    <hr id="anthology-form-hr" class="ourchive-hr"/>
+    <div id="anthology-form-title-parent" class="uk-margin">
+        <label id="anthology-form-title-label" class="uk-form-label" for="anthology-form-title-input">{% translate 'Title' %}</label>
+        <div id="anthology-form-title-form-control" class="uk-form-controls">
+            <div id="anthology-form-title-inline-div" class="uk-inline">
+                <input id="anthology-form-title-input" title="{% translate 'Anthology Title' %}" class="uk-input uk-form-width-large" type="text" name="title" value="{{ anthology.title|default_if_none:'' }}">
+            </div>
+        </div>
+    </div>
+    <div class="uk-margin" id="anthology-form-created-parent">
+        <label id="anthology-form-created-label" class="uk-form-label" for="anthology-form-created-on">{% translate 'Post Date' %}</label>
+        <div id="anthology-form-created-controls" class="uk-form-controls">
+            <div id="anthology-form-created-inline" class="uk-inline">
+                <input title="{% translate 'Anthology created on' %}" id="anthology-form-created-on" type="date" name="created_on" value="{{ anthology.created_on }}"> 
+            </div>
+        </div>
+    </div>
+    <div class="uk-margin" id="anthology-form-updated-parent">
+        <label id="anthology-form-updated-label" class="uk-form-label" for="anthology-form-updated-on">{% translate 'Update Date' %}</label>
+        <div id="anthology-form-updated-controls" class="uk-form-controls">
+            <div id="anthology-form-updated-inline" class="uk-inline">
+                <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ anthology.updated_on }}"> 
+                <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on" type="date" name="updated_on" value="{{ anthology.updated_on }}"> 
+            </div>
+        </div>
+    </div>
+    <hr id="anthology-form-details-hr" class="ourchive-hr"/>
+    <h3 id="anthology-form-header">{% translate 'Details' %}</h3>
+    <div class="uk-margin" id="anthology-works-list">
+            <label id="anthology-works-form-label" class="uk-form-label" for="anthology-list">{% translate 'Works' %}</label>
+            <script>
+                var util = UIkit.util;
+
+                util.ready(function () {
+
+                    util.on(document.body, 'stop', function (e, sortable, el) {
+                        var list = document.getElementById("anthology-list").getElementsByTagName("li");
+                        var tracking = 1;
+                        for (let item of list) {
+                            var child = item.querySelector('.anthology-tracker')
+                            child.value = tracking;
+                            tracking += 1;
+                        }
+                    });
+                });
+            </script>
+            <div class="uk-form-controls" id="anthology-form-controls">
+            <ul class="uk-grid-small uk-child-width-1 uk-text-left" uk-sortable="handle: .uk-sortable-handle" uk-grid id="anthology-list">
+                {% for work in anthology.works_readonly %}
+                <li id="work-list-{{work.id}}">
+                    {% include "anthology_form_work.html" with work=work anthology=anthology %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+        <div id="anthology-form-works-parent" class="uk-margin uk-margin-medium-top">
+            <label id="anthology-form-works-label" class="uk-form-label" for="anthology-entry">{% translate 'Add Work' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work help' %}"></sup>    
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for works by title.{% endblocktranslate %}</div>
+            </label>
+            <div id="anthology-form-works-form-control" class="uk-form-controls">
+                <div id="anthology-form-works-inline-div" class="uk-inline">
+                    <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="Search for work..." id="anthology-entry" oninput="doWorkAutocomplete(this.value)">
+                    <div id="anthology-autocomplete-dropdown" uk-drop></div>
+                </div>
+            </div>
+        </div>
+    <div id="anthology-form-description-parent" class="uk-margin">
+        <label id="anthology-form-description-label" class="uk-form-label" for="descriptionEditor">Description</label>
+        {% include 'ourchive_tinymce_template.html' with form_field_value=anthology.description form_field='description' obj_name='anthology' %}
+    </div>
+    <hr id="anthology-actions-footer-hr" class="ourchive-hr"/>
+    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="anthology-form-actions-footer-parent" uk-grid>
+        <div class="uk-text-right uk-width-1-1" id="anthology-form-actions-footer-child">
+            <input id="anthology-form-actions-footer-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
+            <input id="anthology-form-actions-footer-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+        </div>
+    </div>    
+</form>
+</div>
+{% endblock %}
