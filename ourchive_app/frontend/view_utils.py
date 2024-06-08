@@ -326,6 +326,7 @@ def get_series_obj(request):
 		series_dict.pop("updated_on")
 	if not series_dict["created_on"]:
 		series_dict.pop("created_on")
+	series_dict["is_complete"] = "is_complete" in series_dict
 	return series_dict
 
 

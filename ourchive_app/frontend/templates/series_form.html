@@ -72,7 +72,7 @@ function handleModalDelete(url) {
             <span id="series-form-header-span" class="uk-text-large">{{ form_title }}</span>
         </div>
         <div id="series-form-actions-group" class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right">
-            <input id="series-form-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="%{ translate 'Cancel' %}"/>
+            <input id="series-form-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="{% translate 'Cancel' %}"/>
             <button id="series-form-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
             <input id="series-form-submit" class="uk-button uk-button-primary" type="submit" value="{% translate 'Submit' %}"/>
         </div>
@@ -100,6 +100,14 @@ function handleModalDelete(url) {
             <div id="series-form-updated-inline" class="uk-inline">
                 <input title="{% translate 'Series updated on' %}" id="series-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ series.updated_on }}"> 
                 <input title="{% translate 'Series updated on' %}" id="series-form-updated-on" type="date" name="updated_on" value="{{ series.updated_on }}"> 
+            </div>
+        </div>
+    </div>
+    <div class="uk-margin" id="series-form-complete-parent">
+        <label id="series-form-complete-label" class="uk-form-label" for="series-form-complete-checkbox">{% translate 'Complete?' %}</label>
+        <div id="series-form-complete-controls" class="uk-form-controls">
+            <div id="series-form-complete-inline" class="uk-inline">
+                <label id="series-form-complete-switch-label" class="switch"><input title="{% translate 'Series complete toggle' %}" class="uk-checkbox" id="series-form-complete-checkbox" type="checkbox" name="is_complete" {% if series.is_complete %} checked {% endif %}> <span id="series-form-complete-slider" class="slider round"></span> </label>
             </div>
         </div>
     </div>

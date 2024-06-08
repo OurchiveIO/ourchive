@@ -3,6 +3,9 @@
 <div class="uk-align-left ourchive-metadata-list">
 	<span class="uk-inline uk-text-bold" id="work-metadata-series">{% blocktranslate with series_num=work.series_num %}Part {{ series_num }} of {% endblocktranslate %}<a href="{% url 'fe-series' work.series.id%}">{{work.series.title}}</a></span>
 </div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="work-metadata-series-divider" class="uk-inline uk-text-bold">-</span>
+</div>
 {% endif %}
 <div class="uk-inline ourchive-metadata-list">
 	<span id="work-metadata-complete" class="uk-inline uk-text-bold">{% translate 'Status' %}: {% if work.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>

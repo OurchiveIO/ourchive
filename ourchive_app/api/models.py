@@ -256,6 +256,8 @@ class Anthology(models.Model):
     is_complete = models.BooleanField(default=False)
     header_url = models.CharField(max_length=600, null=True, blank=True)
     header_alt_text = models.CharField(max_length=600, null=True, blank=True)
+    cover_url = models.CharField(max_length=600, null=True, blank=True)
+    cover_alt_text = models.CharField(max_length=600, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     created_on = models.DateTimeField(null=True, blank=True)
     updated_on = models.DateTimeField(null=True, blank=True)

@@ -1852,6 +1852,7 @@ def series(request, pk):
 		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
 		return redirect('/')
 	series = response.response_data
+	series = format_date_for_template(series, 'updated_on')
 	series = get_series_users(request, series)
 	return render(request, 'series.html', {
 		'series': series

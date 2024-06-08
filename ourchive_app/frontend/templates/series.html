@@ -17,9 +17,16 @@
         {% if series.description %}
         <div id="series-description-parent" class="uk-width-1-1 uk-padding-remove">
             <span class="uk-text-medium" id="series-description-text">{{series.description|safe}}</span>
-            <hr class="ourchive-hr" id="series-desc-hr"/>
         </div>
         {% endif %}
+        <div class="uk-width-1-1 uk-padding-remove">
+            <div class="uk-align-right">
+                {% include 'series_metadata.html' %}
+            </div>
+        </div>
+        <div class="uk-width-1-1 uk-padding-remove">
+            <hr class="ourchive-hr" id="series-desc-hr"/>
+        </div>
         <div class="uk-width-1-1 uk-margin-bottom uk-padding-remove ourchive-read-div" id="series-slideshow-parent">
             {% if series.works_readonly %}
             <div id="series-parent-sm">

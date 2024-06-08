@@ -174,9 +174,9 @@ function seriesCheck (e) {
             </div>
         </div>
         <hr/>
-        <h4 id="obj-attrs-form-header">Work Settings</h4>
+        <h4 id="obj-attrs-form-header">{% translate 'Work Settings' %}</h4>
         <div class="uk-margin" id="work-form-complete-parent">
-            <label id="work-form-complete-label" class="uk-form-label" for="work-form-complete-checkbox">Complete?</label>
+            <label id="work-form-complete-label" class="uk-form-label" for="work-form-complete-checkbox">{% translate 'Complete?' %}</label>
             <div id="work-form-complete-controls" class="uk-form-controls">
                 <div id="work-form-complete-inline" class="uk-inline">
                     <label id="work-form-complete-switch-label" class="switch"><input title="{% translate 'Work complete toggle' %}" class="uk-checkbox" id="work-form-complete-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}> <span id="work-form-complete-slider" class="slider round"></span> </label>
@@ -232,7 +232,7 @@ function seriesCheck (e) {
                 </div>
             </div>
         </div>
-        <div class="uk-margin" id="work-form-languages-parent">
+        <div class="uk-margin" id="work-form-series-parent">
             <label id="work-form-series-label" class="uk-form-label" for="work-form-work-series">{% translate 'Series' %}</label>
             <div id="work-form-work-series" class="uk-form-controls">
                 <div class="uk-margin-remove" id="work-form-series-parent-parent">
@@ -288,15 +288,15 @@ function seriesCheck (e) {
             </div>
         </div>
         {% endif %}
-        <hr id="work-attributes-hr"/>
-        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">Work Tags</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work tags help' %}"></sup>    
+        <hr id="work-attributes-hr" class="ourchive-hr"/>
+        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">{% translate 'Work Tags' %}</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work tags help' %}"></sup>    
                 <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
         {% include "object_attributes_form.html" with object='Work' attribute_types=work.attribute_types show_header=False %}
         {% include "edit_tags.html" with object='work' object_friendly='Work' show_header=False %}
-        <hr/>
-        <h4 id="obj-attrs-form-header">Work Details</h4>
+        <hr class="ourchive-hr"/>
+        <h4 id="obj-attrs-form-header">{% translate 'Work Details' %}</h4>
         <div class="uk-margin" id="work-form-summary-parent">
-            <label id="work-form-summary-label" class="uk-form-label" for="summaryEditor">Summary</label>
+            <label id="work-form-summary-label" class="uk-form-label" for="summaryEditor">{% translate 'Summary' %}</label>
             {% include 'ourchive_tinymce_template.html' with form_field_value=work.summary form_field='summary' obj_name='work' min_height=200 %}
         </div>
         <div class="uk-margin uk-width-1-6"><a href="#" id="work-notes-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-notes-hidden-parent">{% translate 'Notes' %}</a></div>
