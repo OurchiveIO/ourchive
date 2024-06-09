@@ -113,12 +113,12 @@ urlpatterns = [
     path('series/<int:pk>/work/<int:work_id>/delete', views.delete_work_series, name='delete-work-series'),
     path('series/<int:pk>/works/render', views.render_series_work, name='fe-series-work-render'),
     # TODO: ANTHOLOGIES
-    path('anthologies/create', views.create_series, name='fe-create-anthology'),
-    path('anthologies/<int:pk>/edit', views.edit_series, name='fe-edit-anthology'),
-    path('anthologies-autocomplete', views.series_autocomplete, name='fe-anthology-autocomplete'),
-    path('anthologies/<int:pk>', views.series, name='fe-anthology'),
-    path('anthologies/<int:pk>/delete', views.delete_series, name='delete-anthology'),
-    path('anthologies/<int:pk>/work/<int:work_id>/delete', views.delete_work_series, name='delete-work-anthology'),
-    path('antholoties/<int:pk>/works/render', views.render_series_work, name='fe-anthology-work-render'),
+    path('anthologies/create', views.create_anthology, name='fe-create-anthology'),
+    path('anthologies/<int:pk>/edit', views.edit_anthology, name='fe-edit-anthology'),
+    path('anthologies-autocomplete', views.anthology_autocomplete, name='fe-anthology-autocomplete'),
+    path('anthologies/<int:pk>', views.anthology, name='fe-anthology'),
+    path('anthologies/<int:pk>/delete', views.delete_anthology, name='delete-anthology'),
+    path('anthologies/<int:pk>/work/<int:work_id>/delete', views.delete_work_anthology, name='delete-work-anthology'),
+    path('anthologies/<int:pk>/works/render', views.render_anthology_work, name='fe-anthology-work-render'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

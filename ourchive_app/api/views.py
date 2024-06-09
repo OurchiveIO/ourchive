@@ -1346,6 +1346,9 @@ class AttributeTypeList(generics.ListCreateAPIView):
         elif 'allow_on_bookmark_collection' in self.request.GET:
             queryset = queryset.filter(
                 allow_on_bookmark_collection=self.request.GET['allow_on_bookmark_collection'])
+        elif self.request.GET.get('allow_on_anthology', None):
+            queryset = queryset.filter(
+                allow_on_anthology=self.request.GET.get('allow_on_anthology'))
         else:
             return AttributeType.objects.order_by('name')
         return queryset.order_by('name')

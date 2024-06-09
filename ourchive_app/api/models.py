@@ -893,6 +893,7 @@ class AttributeType(models.Model):
     allow_on_user = models.BooleanField(default=False)
     allow_multiselect = models.BooleanField(default=True)
     allow_on_bookmark_collection = models.BooleanField(default=False)
+    allow_on_anthology = models.BooleanField(default=False)
     sort_order = models.IntegerField(default=1)
     show_for_browse = models.BooleanField(default=False)
 

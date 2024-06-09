@@ -1,0 +1,55 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load i18n %}
+{% block title %}{{ anthology.title }} - {% translate 'Anthology' %}{% endblock %}
+{% block content %}	
+<div class="uk-text-left uk-width-1-1 ourchive-article-parent" id="anthology-uk-grid">
+	<article class="uk-article uk-padding" id="anthology-uk-article" uk-grid>
+		{% if anthology.header_url %}
+	   	<div id="anthology-header-image" class="uk-width-1-1 uk-padding-remove">
+	   		<img src="{{anthology.header_url}}" title="{{anthology.header_alt_text}}" alt="{{anthology.header_alt_text}}" class="uk-align-center"/>
+	   	</div>
+	   	{% endif %}
+	   	<div id="anthology-header-title" class="uk-width-2-3 uk-padding-remove">
+	   		<h1 id="anthology-title-header" class="uk-article-title uk-inline"><a class="uk-link" id="anthology-title-link" href="{% url 'fe-anthology' anthology.id %}">{{ anthology.title }}</a></h1> <span id="anthology-user-span" class="uk-text-large"> {% translate 'by' %} {% for user in anthology.owners %}<a id="anthology-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="anthology-user-link" href="{% url 'user-profile-parent' anthology.creating_user_id %}">{{ anthology.creating_user }}</a>{% endfor %}</span>
+	    </div>
+	    <div class="uk-text-right uk-width-1-3 uk-padding-remove" id="anthology-user-controls-parent">
+        {% if anthology.owner %}
+	        <a id="anthology-edit-link" class="ourchive-icon-wrapper" href="{% url 'fe-edit-anthology' anthology.id %}"><span uk-icon="icon: ourchive-edit; ratio: .75" title="Edit"></span> </a>
+	        <a id="anthology-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #anthology-{{anthology.id}}-modal-delete"><span title="Delete" uk-icon="icon: ourchive-delete; ratio: .75"></span> </a> 
+        {% endif %}
+	    </div>
+	    <div id="anthology-content" class="uk-width-1-1 uk-padding-remove">
+	    	<hr class="ourchive-hr" id="anthology-tags-hr"/>
+	        <p class="uk-width-1-1" id="anthology-{{anthology.id}}-tile-attributes-p">{% include "object_attributes.html" with object='anthology' object_id=anthology.id attributes=anthology.attributes %}</p>
+	        {% include "tag_partial.html" with obj_name='anthology' tags=anthology.tags.items %}
+	        <div class="uk-align-right">{% include 'anthology_metadata.html' %}</div>
+	   	</div>
+	   	<div class="uk-margin-remove-bottom uk-margin-remove-top uk-width-1-1 uk-padding-remove"><hr id="anthology-title-hr" class="ourchive-hr"/></div>
+	   	{% if anthology.description %}
+	   	<div id="anthology-description-parent" class="uk-width-1-1 uk-padding-remove">
+	   		<span class="uk-text-medium" id="anthology-description-text">{{anthology.description|safe}}</span>
+	   		<hr class="ourchive-hr" id="anthology-desc-hr"/>
+	   	</div>
+	   	{% endif %}
+	   	<div class="uk-width-1-1 uk-margin-bottom uk-padding-remove ourchive-read-div" id="anthology-slideshow-parent">
+	   		{% if anthology.works_readonly %}
+	   		<div id="anthology-works-parent-sm">
+	   			<span class="uk-text-lead">{% translate 'Works' %}</span>
+	   			<ul class="uk-list uk-list-sriped">
+	   			{% for work in anthology.works_readonly %} 
+					<li class="ourchive-mobile-list uk-padding-small uk-margin-small-top uk-margin-small-bottom">
+	                	<span class="uk-inline uk-text-uppercase uk-text-medium"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
+	                	{% if work.summary %}
+	            			<div class="uk-margin-left uk-margin-small-top uk-width-medium ourchive-collection-sm-desc">{{work.summary|safe}}</div>
+	            		{% endif %}
+            		</li>       
+				{% endfor %}
+			</ul>
+	   		</div>
+			{% endif %}
+		</div>
+	</article>
+</div>
+{% include "delete_modal.html" with object='anthology' object_friendly='anthology' object_id=anthology.id %}
+{% endblock %}

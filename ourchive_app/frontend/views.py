@@ -679,6 +679,16 @@ def series_autocomplete(request):
 		'series': series})
 
 
+def anthology_autocomplete(request):
+	term = request.GET.get('text')
+	params = {'term': term}
+	response = do_get(f'api/anthology-autocomplete', request, params, 'Anthology')
+	anthology = response.response_data['results']
+	template = 'anthology_autocomplete.html'
+	return render(request, template, {
+		'anthology': anthology})
+
+
 @require_http_methods(["GET"])
 def works(request):
 	response = do_get(f'api/works/', request, params=request.GET, object_name='Work')
@@ -1794,7 +1804,7 @@ def news(request, pk):
 def create_series(request):
 	if request.user.is_authenticated and request.method != 'POST':
 		series = {
-			'title': 'New Series',
+			'title': _('New Series'),
 			'user': request.user.username,
 			'description': '',
 			'created_on': str(datetime.now().date()),
@@ -1806,7 +1816,14 @@ def create_series(request):
 			'series': series})
 	elif request.user.is_authenticated and request.method == 'POST':
 		series_dict = get_series_obj(request)
+		work_ids = get_work_order_nums(series_dict, 'series_num')
 		response = do_post(f'api/series/', request, data=series_dict, object_name='Series')
+		if response.response_info.status_code < 400:
+			work_response = do_patch(f'api/series/{response.response_data["id"]}/works', request, data=work_ids, object_name='Series works')
+			if work_response.response_info.status_code >= 400:
+				# we don't need to show duplicate success messages
+				# but if something went wrong with this step let's show it
+				process_message(request, work_response)
 		process_message(request, response)
 		if 'id' in response.response_data:
 			return redirect(f'/series/{response.response_data["id"]}')
@@ -1826,7 +1843,7 @@ def edit_series(request, pk):
 			'series': series})
 	else:
 		series_dict = get_series_obj(request)
-		work_ids = get_work_series_nums(series_dict)
+		work_ids = get_work_order_nums(series_dict, 'series_num')
 		response = do_patch(f'api/series/{pk}/', request, data=series_dict, object_name='Series')
 		if response.response_info.status_code < 400:
 			work_response = do_patch(f'api/series/{pk}/works', request, data=work_ids, object_name='Series works')
@@ -1883,6 +1900,126 @@ def delete_work_series(request, pk, work_id):
 		return redirect(f'/series/{pk}/edit')
 	else:
 		return redirect(f'/series/create')
+
+
+def create_anthology(request):
+	if request.user.is_authenticated and request.method != 'POST':
+		anthology = {
+			'title': _('New Anthology'),
+			'user': request.user.username,
+			'description': '',
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date()),
+			'id': 0
+		}
+		tag_types = do_get(f'api/tagtypes', request, {}, 'Tag').response_data
+		tags = group_tags_for_edit([], tag_types)
+		anthology_attributes = do_get(f'api/attributetypes', request, params={'allow_on_anthology': True}, object_name='Anthology attributes')
+		anthology['attribute_types'] = process_attributes([], anthology_attributes.response_data['results'])
+		languages = get_languages(request)
+		languages = populate_default_languages(languages, request)
+		return render(request, 'anthology_form.html', {
+			'form_title': _('New Anthology'),
+			'anthology': anthology,
+			'tags': tags,
+			'languages': languages
+		})
+	elif request.user.is_authenticated and request.method == 'POST':
+		anthology_dict = get_anthology_obj(request)
+		work_ids = get_work_order_nums(anthology_dict, 'sort_order')
+		response = do_post(f'api/anthologies/', request, data=anthology_dict, object_name='Anthology')
+		if response.response_info.status_code < 400:
+			work_response = do_patch(f'api/anthologies/{pk}/works', request, data=work_ids, object_name='Anthology works')
+			if work_response.response_info.status_code >= 400:
+				# we don't need to show duplicate success messages
+				# but if something went wrong with this step let's show it
+				process_message(request, work_response)
+		process_message(request, response)
+		if 'id' in response.response_data:
+			return redirect(f'/anthologies/{response.response_data["id"]}')
+		else:
+			return redirect(f'/anthologies/new')
+	else:
+		messages.add_message(request, messages.ERROR, _('You must be logged in to create an anthology.'), 'Not Authorized')
+		return redirect('/')
+
+
+def edit_anthology(request, pk):
+	if request.user.is_authenticated and request.method != 'POST':
+		response = do_get(f'api/anthologies/{pk}', request, params=request.GET, object_name='Anthology')
+		anthology = response.response_data
+		tag_types = do_get(f'api/tagtypes', request, {}, 'Tag').response_data
+		tags = group_tags_for_edit(anthology.get('tags', []), tag_types)
+		anthology_attributes = do_get(f'api/attributetypes', request, params={'allow_on_anthology': True}, object_name='Anthology attributes')
+		anthology['attribute_types'] = process_attributes(anthology.get('attributes', []), anthology_attributes.response_data['results'])
+		languages = get_languages(request)
+		languages = process_languages(languages, anthology.get('languages_readonly', []))
+		return render(request, 'anthology_form.html', {
+			'form_title': _('Edit Anthology'),
+			'anthology': anthology,
+			'tags': tags,
+			'languages': languages})
+	else:
+		anthology_dict = get_anthology_obj(request)
+		work_ids = get_work_order_nums(anthology_dict, 'sort_order')
+		response = do_patch(f'api/anthologies/{pk}/', request, data=anthology_dict, object_name='Anthology')
+		if response.response_info.status_code < 400:
+			work_response = do_patch(f'api/anthologies/{pk}/works', request, data=work_ids, object_name='Anthology works')
+			if work_response.response_info.status_code >= 400:
+				# we don't need to show duplicate success messages
+				# but if something went wrong with this step let's show it
+				process_message(request, work_response)
+		process_message(request, response)
+		return redirect(f'/anthologies/{pk}')
+
+
+def delete_anthology(request, pk):
+	response = do_delete(f'api/anthology/{pk}/', request, 'Anthology')
+	process_message(request, response)
+	if str(pk) in request.META.get('HTTP_REFERER'):
+		return redirect(f'/username/{request.user.id}')
+	return referrer_redirect(request)
+
+
+def anthology(request, pk):
+	response = do_get(f'api/anthologies/{pk}/', request, object_name='Anthology')
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	anthology = response.response_data
+	anthology = format_date_for_template(anthology, 'updated_on')
+	anthology = get_anthology_users(request, anthology)
+	anthology['attributes'] = get_attributes_for_display(anthology['attributes'])
+	anthology['tags'] = group_tags(anthology['tags']) if 'tags' in anthology else {}
+	return render(request, 'anthology.html', {
+		'anthology': anthology
+	})
+
+
+def render_anthology_work(request, pk):
+	work_id = request.GET.get('work_id')
+	if pk > 0:
+		response = do_get(f'api/anthology/{pk}/', request, 'Anthology')
+		anthology = response.response_data
+	else:
+		anthology = {
+			'id': 1
+		}
+	response = do_get(f'api/works/{work_id}', request, 'Work')
+	work = response.response_data
+	template = 'anthology_form_work.html'
+	return render(request, template, {
+		'anthology': anthology,
+		'work': work})
+
+
+def delete_work_anthology(request, pk, work_id):
+	response = do_delete(f'api/anthologies/{pk}/work/{work_id}', request, 'Anthology')
+	process_message(request, response)
+	if pk > 0:
+		return redirect(f'/anthologies/{pk}/edit')
+	else:
+		return redirect(f'/anthologies/create')
 
 
 @never_cache

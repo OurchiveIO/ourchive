@@ -330,16 +330,62 @@ def get_series_obj(request):
 	return series_dict
 
 
-def get_work_series_nums(series_dict):
+def get_work_order_nums(ordering_dict, order_key):
 	work_ids = []
-	for key in series_dict.keys():
-		if key.startswith('work_series_num'):
-			work_id = key.split('work_series_num_')
+	for key in ordering_dict.keys():
+		if key.startswith(f'work_{order_key}_'):
+			work_id = key.split('work_{order_key}_num_')
 			work_ids.append({
 				'work': work_id[1],
-				'series_num': series_dict[key]
+				order_key: ordering_dict[key]
 			})
 	return work_ids
+
+
+def get_anthology_obj(request):
+	anthology_dict = request.POST.copy()
+	works = []
+	tags = []
+	tag_types = {}
+	users = []
+	result = do_get(f'api/tagtypes', request)
+	for item in result.response_data['results']:
+		tag_types[item['type_name']] = item
+	for item in request.POST:
+		if 'workidstoadd' in request.POST[item]:
+			json_item = request.POST[item].split("_")
+			if len(json_item) < 2:
+				continue
+			work_id = json_item[1]
+			works.append(work_id)
+			anthology_dict.pop(item)
+		elif 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
+			tag = {}
+			json_item = request.POST[item].split(settings.TAG_DIVIDER)
+			tag['tag_type'] = tag_types[json_item[2]]['label']
+			tag['text'] = json_item[1]
+			if not json_item[1].strip():
+				continue
+			tags.append(tag)
+			anthology_dict.pop(item)
+		elif item.startswith('anthology_cocreators_'):
+			user_id = item[16:]
+			users.append(user_id)
+	anthology_dict = get_list_from_form('languages', anthology_dict, request)
+	anthology_dict["users_to_add"] = users
+	anthology_dict["tags"] = tags
+	anthology_dict["works"] = works
+	anthology_dict["creating_user"] = str(request.user)
+	if anthology_dict["updated_on"] == anthology_dict["updated_on_original"]:
+		anthology_dict["updated_on"] = str(datetime.now().date())
+	anthology_dict.pop("updated_on_original")
+	if not anthology_dict["updated_on"]:
+		anthology_dict.pop("updated_on")
+	if not anthology_dict["created_on"]:
+		anthology_dict.pop("created_on")
+	anthology_dict["is_complete"] = "is_complete" in anthology_dict
+	anthology_dict["attributes"] = get_attributes_from_form_data(request)
+	return anthology_dict
 
 
 def prepare_chapter_data(chapter, request):
@@ -530,3 +576,15 @@ def get_series_users(request, series):
 				users.add(user['username'])
 				series['users'].append(user)
 	return series
+
+
+def get_anthology_users(request, anthology):
+	anthology['owner'] = request.user.id == anthology['creating_user_id']
+	users = set()
+	anthology['users'] = []
+	for work in anthology['works_readonly']:
+		for user in anthology['users']:
+			if user['username'] not in users:
+				users.add(user['username'])
+				anthology['users'].append(user)
+	return anthology

@@ -6,6 +6,6 @@
     <div id="work-{{work.id}}-controls-div"><a title="{% translate 'Remove from series' %} {{ work.id }}" id="work-{{work.id}}-delete-link" uk-toggle="target: #work-anthology-{{work.id}}-modal-delete">{% translate 'Remove' %}</a></div>
 </div>
 
-<input type="hidden" class="anthology-tracker" id="work_{{work.id}}" name="work_anthology_num_{{work.id}}" value="{{work.anthology_num}}">
+<input type="hidden" class="anthology-tracker" id="work_{{work.id}}" name="work_sort_order_{{work.id}}" value="{{work.sort_order}}">
 <input type="hidden" id="works_{{work.id}}" name="workidstoadd_{{work.id}}" value="workidstoadd_{{work.id}}"/>
 {% include "delete_modal.html" with object='work-anthology' parent_object_id=anthology.id object_id=work.id delete_verb="Remove" delete_msg="Are you sure you want to remove this work from the anthology?" handle_js=True %}

@@ -123,7 +123,7 @@ function seriesCheck (e) {
             <input id="work-form-submit-top" class="uk-button uk-button-primary" onclick="this.form.submitted=this.value;" type="submit" value="Submit"/>
         </div>
     </div>
-    <hr id="work-form-title-content-divider"/>
+    <hr id="work-form-title-content-divider" class="ourchive-hr"/>
     <div id="work-form-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left">
         <div class="uk-width-1-3 uk-align-right">
             <a class="uk-button uk-button-default uk-button-medium uk-align-right" href="#work-form-chapter-content-parent">Jump to chapters</a>
@@ -173,7 +173,7 @@ function seriesCheck (e) {
                 </div>
             </div>
         </div>
-        <hr/>
+        <hr class="ourchive-hr"/>
         <h4 id="obj-attrs-form-header">{% translate 'Work Settings' %}</h4>
         <div class="uk-margin" id="work-form-complete-parent">
             <label id="work-form-complete-label" class="uk-form-label" for="work-form-complete-checkbox">{% translate 'Complete?' %}</label>
@@ -289,8 +289,8 @@ function seriesCheck (e) {
         </div>
         {% endif %}
         <hr id="work-attributes-hr" class="ourchive-hr"/>
-        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">{% translate 'Work Tags' %}</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work tags help' %}"></sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
+        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">{% translate 'Work Tags' %}</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work tags help' %}"></sup>
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div></span>
         {% include "object_attributes_form.html" with object='Work' attribute_types=work.attribute_types show_header=False %}
         {% include "edit_tags.html" with object='work' object_friendly='Work' show_header=False %}
         <hr class="ourchive-hr"/>
@@ -332,7 +332,7 @@ function seriesCheck (e) {
         {% endif %}
         
     </div>
-    <div><hr/></div>
+    <div><hr class="ourchive-hr"/></div>
     <div id="multichapter-select" class="uk-width-1-1">
         <label class="uk-form-label" for="work-form-multichapter-checkbox">Multichapter?</label>
         <div id="work-form-multichapter-control" class="uk-form-controls">
@@ -385,7 +385,7 @@ function seriesCheck (e) {
         </ul>
     </div>
     </div>
-    <hr/>
+    <hr class="ourchive-hr"/>
     <div id="work-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
         <div class="uk-align-right uk-width-1-1@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="work-form-bottom-buttons-group">
              <button id="work-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>

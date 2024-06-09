@@ -4,6 +4,47 @@
 {% block content %}	
 {% load static %}
 <script>
+function doUserAutocomplete(term) {
+  if (term.length < 2)
+  {
+    return;
+  }
+  var complete_select = 'anthology-find-user-dropdown';
+  fetch('/user-autocomplete?text='+term)
+    .then((response) => {
+      return response.text();
+    })
+    .then((templateText) => {      
+    document.getElementById(complete_select).innerHTML = "";
+    document.getElementById(complete_select).innerHTML = templateText;
+    UIkit.drop(document.getElementById(complete_select)).show();
+    });
+}
+
+function removeUser(user_id) {
+    var parent = document.getElementById("anthology-form-user-"+user_id+"-parent");
+    parent.remove();
+}
+
+function populateUserInput(user_id, username) {
+    // parent div
+    var parent = document.getElementById("anthology-form-users")
+    // user to add
+    var final = username;
+    var wrapper= document.createElement('div');
+    wrapper.classList.add('uk-margin-small');
+    wrapper.classList.add('uk-inline');
+    wrapper.classList.add('uk-margin-remove-top');
+    wrapper.setAttribute('id', 'anthology-form-user-'+user_id+'-parent');
+    wrapper.innerHTML= '<input id="anthology-form-cocreator-'+user_id+'-hidden" type="hidden" name="anthology_cocreators_'+user_id+'" value="'+user_id+'"> <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="anthology-user-'+user_id+'-display">'+username+' <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser('+user_id+')" id="anthology-user-'+user_id+'-delete"></span></span>';
+    var input = document.getElementById("anthology-form-user-search");
+    input.remove();
+    parent.appendChild(wrapper);
+    parent.appendChild(input);
+    document.getElementById("anthology-form-new-user").value = '';
+    document.getElementById("anthology-form-new-user").focus();
+    document.getElementById("anthology-find-user-dropdown").innerHTML = "";
+}
 function doWorkAutocomplete(term) {
   if (term.length < 2)
   {
@@ -86,6 +127,25 @@ function handleModalDelete(url) {
             </div>
         </div>
     </div>
+    <div class="uk-margin" id="anthology-form-cocreator-form-parent">
+            <label id="anthology-form-cocreator-form-label" class="uk-form-label" for="anthology-form-new-user">{% translate 'Co-creators' %}</label>
+            <div id="anthology-form-cocreator-controls" class="uk-form-controls">                
+                <div id="anthology-form-cocreator-inline" class="uk-inline">
+                    <div id="anthology-form-users">
+                        {% for user in anthology.owners %}
+                        {% if user.username != request.user.username %}
+                            <div class="uk-margin-small uk-inline uk-margin-remove-top" id="anthology-form-user-{{user.id}}-parent">
+                                <input title="{% translate 'Anthology user' %}" id="anthology-form-cocreator-{{user.id}}-hidden" type="hidden" name="anthology_cocreators_{{user.id}}" value="{{ user.id }}"> 
+                                <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="anthology-user-{{user.id}}-display">{{ user.username }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser({{user.id}})" id="anthology-user-{{user.id}}-delete"></span></span>
+                            </div>
+                        {% endif %}
+                        {% endfor %}
+                        <div class="uk-margin-small uk-inline" id="anthology-form-user-search"><input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry uk-margin-small-bottom" type="text" placeholder="Find user..." id="anthology-form-new-user" oninput="doUserAutocomplete(this.value)">
+                        <div id="anthology-find-user-dropdown" uk-drop></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     <div class="uk-margin" id="anthology-form-complete-parent">
         <label id="anthology-form-complete-label" class="uk-form-label" for="anthology-form-complete-checkbox">{% translate 'Complete?' %}</label>
         <div id="anthology-form-complete-controls" class="uk-form-controls">
@@ -217,13 +277,14 @@ function handleModalDelete(url) {
         {% include 'ourchive_tinymce_template.html' with form_field_value=anthology.description form_field='description' obj_name='anthology' %}
     </div>
     <hr id="anthology-attributes-hr" class="ourchive-hr"/>
-        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">{% translate 'Anthology Tags' %}</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Anthology tags help' %}"></sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your anthology, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
+    <div id="anthology-form-tags-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left">
+        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">{% translate 'Anthology Tags' %}</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Anthology tags help' %}"></sup>
+                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your anthology, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div></span>
         {% include "object_attributes_form.html" with object='Anthology' attribute_types=anthology.attribute_types show_header=False %}
         {% include "edit_tags.html" with object='anthology' object_friendly='Anthology' show_header=False %}
-    <hr class="ourchive-hr"/>
+    </div>
     <hr id="anthology-actions-footer-hr" class="ourchive-hr"/>
-    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="anthology-form-actions-footer-parent" uk-grid>
+    <div class="uk-child-width-1-1@m uk-child-width-1@s uk-text-left" id="anthology-form-actions-footer-parent" uk-grid>
         <div class="uk-text-right uk-width-1-1" id="anthology-form-actions-footer-child">
             <input id="anthology-form-actions-footer-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
             <input id="anthology-form-actions-footer-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>

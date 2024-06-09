@@ -1281,6 +1281,9 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
     updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
     languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
     languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
+    tags = TagSerializer(many=True, required=False)
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    owners = MiniUserSerializer(many=True, required=False, read_only=True)
 
     def get_works_readonly(self, instance):
         works = instance.works.all().order_by('anthology_work__sort_order')

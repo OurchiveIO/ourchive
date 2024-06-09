@@ -4,3 +4,14 @@
 	<span id="anthology-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{anthology.updated_on|date:'d M Y'}}</span>
 </div>
 {% endif %}
+{% if anthology.languages_readonly %}
+{% if anthology.updated_on %}
+<div class="uk-inline ourchive-metadata-list">
+	<span id="anthology-metadata-languages-divider" class="uk-inline uk-text-bold">-</span>
+</div>
+{% endif %}
+<div class="uk-inline ourchive-metadata-list">
+	<span class="uk-inline uk-text-bold" id="anthology-metadata-language">{% translate 'Languages' %}: {% for language in anthology.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}
+    {% endfor %}</span>
+</div>
+{% endif %}
