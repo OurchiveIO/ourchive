@@ -113,6 +113,7 @@ urlpatterns = [
     path('users/<str:username>/bookmarks/drafts',
          views.UserBookmarkDraftList.as_view(), name='user-bookmarks-drafts'),
     path('users/<str:username>/series', views.UserSeriesList.as_view(), name='user-series-list'),
+    path('users/<str:username>/anthologies', views.UserAnthologyList.as_view(), name='user-anthologies-list'),
     path('userblocks', views.UserBlocksList.as_view(), name='user-blocks-list'),
     path('userblocks/<int:pk>/', views.UserBlocksDetail.as_view(), name='userblocks-detail'),
     path('userblocks/blocked/<int:user_id>', views.UserBlockSingleDetail.as_view(), name='userblocks-single-detail'),

@@ -1514,6 +1514,14 @@ class UserSeriesList(generics.ListCreateAPIView):
         return WorkSeries.objects.filter(works__work_users__user__username=self.kwargs['username']).order_by('-updated_on')
 
 
+class UserAnthologyList(generics.ListCreateAPIView):
+    serializer_class = AnthologySerializer
+    permission_classes = [IsWorksMultiOwnerOrReadOnly]
+
+    def get_queryset(self):
+        return Anthology.objects.filter(owners__username=self.kwargs['username']).order_by('-updated_on')
+
+
 class AnthologyList(generics.ListCreateAPIView):
     queryset = Anthology.objects.get_queryset()
     serializer_class = AnthologySerializer
@@ -1563,10 +1571,3 @@ class WorkAnthologyDetail(APIView):
         AnthologyWork.objects.delete(work__id=work_id, anthology__id=pk)
         return Response({'message': 'Work removed from anthology.'}, status=200)
 
-
-class UserAnthologyList(generics.ListCreateAPIView):
-    serializer_class = SeriesSerializer
-    permission_classes = [IsWorksMultiOwnerOrReadOnly]
-
-    def get_queryset(self):
-        return Anthology.objects.filter(works__work_users__user__username=self.kwargs['username']).order_by('-updated_on')

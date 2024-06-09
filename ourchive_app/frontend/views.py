@@ -297,6 +297,28 @@ def user_series(request, username):
 		'root': settings.ROOT_URL})
 
 
+def user_anthologies(request, username):
+	response = do_get(f'api/users/{username}/anthologies', request, params=request.GET, object_name='chive list')
+	anthologies = {}
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	else:
+		anthologies = response.response_data['results']
+	next_params = response.response_data['next_params'] if 'next_params' in response.response_data else None
+	prev_params = response.response_data['prev_params'] if 'prev_params' in response.response_data else None
+	anthologies = format_date_for_template(anthologies, 'updated_on', True)
+	anthologies = get_object_tags(anthologies)
+	for anthology in anthologies:
+		anthology['attributes'] = get_attributes_for_display(anthology.get('attributes', []))
+	return render(request, 'anthologies_list.html', {
+		'anthologies': anthologies,
+		'next': f"/username/{username}/anthologies/{next_params}" if next_params is not None else None,
+		'previous': f"/username/{username}/anthologies/{prev_params}" if prev_params is not None else None,
+		'user_filter': username,
+		'root': settings.ROOT_URL})
+
+
 def user_works_drafts(request, username):
 	response = do_get(f'api/users/{username}works/drafts', request)
 	works = response.response_data['results']

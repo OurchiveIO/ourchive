@@ -497,6 +497,8 @@ def get_works_list(request, username=None):
 	else:
 		works = response.response_data['results']
 		works = get_object_tags(works)
+		for work in works:
+			work['attributes'] = get_attributes_for_display(work.get('attributes', []))
 	return {'works': works, 'next_params': response.response_data['next_params'] if 'next_params' in response.response_data else None, 'prev_params': response.response_data['prev_params'] if 'prev_params' in response.response_data else None}
 
 

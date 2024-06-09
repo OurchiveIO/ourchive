@@ -12,6 +12,11 @@
 		        </div>
 		        {% endif %}
 		    </div>
+		    {% if anthology.attributes or anthology.tags or anthology.description %}<div class="uk-card-body ourchive-card-body uk-padding-small" id="anthology-{{anthology.id}}-tile-card-body">
+		    	{% if anthology.description %}<p id="anthology-{{anthology.id}}-tile-description-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ anthology.description }}{% endautoescape %}</p>{% endif %}
+	        {% if anthology.attributes %}{% include "object_attributes.html" with object='anthology' object_id=anthology.id attributes=anthology.attributes %}{% endif %}
+		    {% if anthology.tags %}{% include "tag_partial.html" with obj_name='anthology' tags=anthology.tags.items %}{% endif %}
+	    </div>{% endif %}
 		</div>
 	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="anthology-tile-footer-parent">
 	        <div class="uk-width-1-1 uk-padding-small uk-margin-small">
