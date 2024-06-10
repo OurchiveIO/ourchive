@@ -1,6 +1,7 @@
 .idea/*
 uploads/*
 audio/*
+tmp/*
 ourchive_app/files/*
 ourchive_app/django_cache/*
 venv/*

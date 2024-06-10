@@ -263,6 +263,7 @@ def get_bookmark_obj(request):
 
 def get_bookmark_collection_obj(request):
 	collection_dict = request.POST.copy()
+	print(collection_dict)
 	tags = []
 	bookmarks = []
 	tag_types = {}
@@ -348,6 +349,7 @@ def get_work_order_nums(ordering_dict, order_key):
 
 def get_anthology_obj(request):
 	anthology_dict = request.POST.copy()
+	print(anthology_dict)
 	works = []
 	tags = []
 	tag_types = {}

@@ -1,4 +1,10 @@
 {% load i18n %}
+<div class="uk-inline ourchive-metadata-list">
+	<span id="anthology-metadata-complete" class="uk-inline uk-text-bold">{% translate 'Status' %}: {% if anthology.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
+</div>
+<div class="uk-inline ourchive-metadata-list">
+	<span id="anthology-metadata-complete-divider" class="uk-inline uk-text-bold">-</span>
+</div>
 {% if anthology.updated_on %}
 <div class="uk-inline ourchive-metadata-list">
 	<span id="anthology-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{anthology.updated_on|date:'d M Y'}}</span>

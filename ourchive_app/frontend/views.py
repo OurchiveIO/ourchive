@@ -1968,7 +1968,8 @@ def create_anthology(request):
 			'description': '',
 			'created_on': str(datetime.now().date()),
 			'updated_on': str(datetime.now().date()),
-			'id': 0
+			'id': 0,
+			'divider': settings.TAG_DIVIDER
 		}
 		tag_types = do_get(f'api/tagtypes', request, {}, 'Tag').response_data
 		tags = group_tags_for_edit([], tag_types)
@@ -1987,7 +1988,7 @@ def create_anthology(request):
 		work_ids = get_work_order_nums(anthology_dict, 'sort_order')
 		response = do_post(f'api/anthologies/', request, data=anthology_dict, object_name='Anthology')
 		if response.response_info.status_code < 400:
-			work_response = do_patch(f'api/anthologies/{pk}/works', request, data=work_ids, object_name='Anthology works')
+			work_response = do_patch(f'api/anthologies/{response.response_data["id"]}/works', request, data=work_ids, object_name='Anthology works')
 			if work_response.response_info.status_code >= 400:
 				# we don't need to show duplicate success messages
 				# but if something went wrong with this step let's show it
@@ -1996,7 +1997,7 @@ def create_anthology(request):
 		if 'id' in response.response_data:
 			return redirect(f'/anthologies/{response.response_data["id"]}')
 		else:
-			return redirect(f'/anthologies/new')
+			return redirect(f'/anthologies/create')
 	else:
 		messages.add_message(request, messages.ERROR, _('You must be logged in to create an anthology.'), 'Not Authorized')
 		return redirect('/')
@@ -2014,6 +2015,7 @@ def edit_anthology(request, pk):
 		languages = process_languages(languages, anthology.get('languages_readonly', []))
 		return render(request, 'anthology_form.html', {
 			'form_title': _('Edit Anthology'),
+			'divider': settings.TAG_DIVIDER,
 			'anthology': anthology,
 			'tags': tags,
 			'languages': languages})

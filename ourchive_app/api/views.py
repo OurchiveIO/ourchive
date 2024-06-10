@@ -564,13 +564,16 @@ class WorkList(generics.ListCreateAPIView):
         return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
     def perform_create(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'cover_url' in self.request.data:
             self.request.data.pop('cover_url')
         if 'created_on' in self.request.data and not self.request.data['created_on']:
             self.request.data['created_on'] = str(datetime.datetime.now().date())
         if 'updated_on' in self.request.data and not self.request.data['updated_on']:
             self.request.data['updated_on'] = str(datetime.datetime.now().date())
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, attributes=attributes)
 
 
 class UserWorkDraftList(generics.ListCreateAPIView):
@@ -1123,13 +1126,16 @@ class BookmarkCollectionList(generics.ListCreateAPIView):
         return BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
     def perform_create(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
             self.request.data.pop('header_url')
         if 'created_on' in self.request.data and not self.request.data['created_on']:
             self.request.data['created_on'] = str(datetime.datetime.now().date())
         if 'updated_on' in self.request.data and not self.request.data['updated_on']:
             self.request.data['updated_on'] = str(datetime.datetime.now().date())
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, attributes=attributes)
 
 
 class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -1561,24 +1567,30 @@ class AnthologyList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def perform_create(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if 'created_on' in self.request.data and not self.request.data['created_on']:
             self.request.data['created_on'] = str(datetime.datetime.now().date())
         if 'updated_on' in self.request.data and not self.request.data['updated_on']:
             self.request.data['updated_on'] = str(datetime.datetime.now().date())
-        serializer.save(user=self.request.user)
+        serializer.save(creating_user=self.request.user, attributes=attributes)
 
 
 class AnthologyDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Anthology.objects.get_queryset()
     serializer_class = AnthologySerializer
-    permission_classes = [IsWorksMultiOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly]
 
     def perform_update(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if 'created_on' in self.request.data and not self.request.data['created_on']:
             self.request.data['created_on'] = str(datetime.datetime.now().date())
         if 'updated_on' in self.request.data and not self.request.data['updated_on']:
             self.request.data['updated_on'] = str(datetime.datetime.now().date())
-        serializer.save(user=self.request.user)
+        serializer.save(creating_user=self.request.user, attributes=attributes)
 
 
 class WorkAnthologyList(APIView):

@@ -1190,8 +1190,10 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         bookmark_list = validated_data.pop('bookmarks') if 'bookmarks' in validated_data else []
         works_list = validated_data.pop('works') if 'works' in validated_data else []
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
         tags = []
         attributes = None
+        print(validated_data)
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
         if 'attributes' in validated_data:
@@ -1227,6 +1229,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         bookmark_collection = self.process_users(bookmark_collection, users)
         bookmark_collection.draft = validated_data['draft']
         bookmark_collection.save()
+        self.process_languages(bookmark_collection, languages)
         if attributes is not None:
             bookmark_collection = AttributeValueSerializer.process_attributes(bookmark_collection, validated_data, attributes)
         return bookmark_collection
@@ -1306,8 +1309,7 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
     creating_user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     creating_user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
-    works_readonly = serializers.SerializerMethodField()
-    works = serializers.PrimaryKeyRelatedField(many=True, queryset=Work.objects.all())
+    works = serializers.SerializerMethodField()
     created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
     updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
     languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
@@ -1419,6 +1421,7 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        print(tags)
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
         languages = validated_data.pop('languages') if 'languages' in validated_data else []
         attributes = None
@@ -1441,7 +1444,7 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
             anthology = AttributeValueSerializer.process_attributes(anthology, validated_data, attributes)
         return anthology
 
-    def get_works_readonly(self, instance):
+    def get_works(self, instance):
         works = instance.works.all().order_by('anthology_work__sort_order')
         return WorkSerializer(works, many=True, required=False, read_only=True, context={'request': self.context['request']}).data
 
