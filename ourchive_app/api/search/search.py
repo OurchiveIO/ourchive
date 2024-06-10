@@ -438,7 +438,7 @@ class PostgresProvider:
                             "id": result.id, "type": result.tag_type.label, "type_name": result.tag_type.type_name})
         return results
 
-    def autocomplete_bookmarks(self, term, user):
+    def autocomplete_works(self, term, user):
         results = []
         resultset = None
         term = term.lower()

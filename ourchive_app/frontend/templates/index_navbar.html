@@ -61,7 +61,7 @@
 	    	 	{% if not request.user.is_authenticated %}
 	        	<li id="nav-right-main">		        
             		<div id="nav-login-link" class="uk-navbar-item">
-            			<a href="{ url 'fe-login' %}" class="uk-button nav-button-default">
+            			<a href="{% url 'fe-login' %}" class="uk-button nav-button-default">
             			{% translate 'Sign In' %}
             			<span class="uk-margin-small-left" uk-icon="icon: ourchive-user;ratio:.75" title="Sign In" id="nav-login-icon"></span></a>
             		</div>

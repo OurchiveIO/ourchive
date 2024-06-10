@@ -139,7 +139,7 @@ urlpatterns = [
     path('attributevalues/<int:pk>/', views.AttributeValueDetail.as_view(),
          name='attributevalue-detail'),
     path('file-upload/', views.FileUpload.as_view(), name='api-file-upload'),
-    path('bookmark-autocomplete', views.BookmarkAutocomplete.as_view(),
+    path('bookmark-autocomplete', views.WorkAutocomplete.as_view(),
          name='bookmark-autocomplete'),
     path('user-autocomplete', views.UserAutocomplete.as_view(),
          name='api-user-autocomplete'),

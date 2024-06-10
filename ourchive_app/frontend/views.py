@@ -324,6 +324,7 @@ def user_anthologies(request, username):
 	anthologies = get_object_tags(anthologies)
 	for anthology in anthologies:
 		anthology['attributes'] = get_attributes_for_display(anthology.get('attributes', []))
+		anthology['owner'] = get_owns_object(anthology, request, 'owners', 'creating_user_id')
 	return render(request, 'anthologies_list.html', {
 		'anthologies': anthologies,
 		'next': f"/username/{username}/anthologies/{next_params}" if next_params is not None else None,

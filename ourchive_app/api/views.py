@@ -108,13 +108,13 @@ class TagAutocomplete(APIView):
         return Response({'results': results})
 
 
-class BookmarkAutocomplete(APIView):
+class WorkAutocomplete(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, format=None):
         searcher = OurchiveSearch()
-        results = searcher.do_bookmark_search(request.GET.get(
+        results = searcher.do_work_search(request.GET.get(
             'term'), request.user.id)
         return Response({'results': results})
 
@@ -1521,7 +1521,7 @@ class WorkSeriesList(APIView):
         tracking = 1
         for work_obj in works:
             work = Work.objects.get(id=work_obj['work'])
-            work.series_num = int(work_obj['series_num']) if work_obj['series_num'].isdigit() else tracking
+            work.series_num = int(work_obj['series_num']) if str(work_obj['series_num']).isdigit() else tracking
             work.save()
             tracking = tracking + 1
         return Response({'message': 'Work series numbers updated.'}, status=200)
@@ -1590,7 +1590,7 @@ class WorkAnthologyList(APIView):
         tracking = 1
         for work_obj in works:
             anthology_work = AnthologyWork.objects.get(work__id=work_obj['work'], anthology__id=work_obj['anthology'])
-            anthology_work.sort_order = int(work_obj['sort_order']) if work_obj['sort_order'].isdigit() else tracking
+            anthology_work.sort_order = int(work_obj['sort_order']) if str(work_obj['sort_order']).isdigit() else tracking
             anthology_work.save()
             tracking = tracking + 1
         return Response({'message': 'Work anthology order updated.'}, status=200)

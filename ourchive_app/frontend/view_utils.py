@@ -334,13 +334,15 @@ def get_series_obj(request):
 
 def get_work_order_nums(ordering_dict, order_key):
 	work_ids = []
+	series_tracker = 1
 	for key in ordering_dict.keys():
 		if key.startswith(f'work_{order_key}_'):
-			work_id = key.split('work_{order_key}_num_')
+			work_id = key.replace(f'work_{order_key}_', '')
 			work_ids.append({
-				'work': work_id[1],
-				order_key: ordering_dict[key]
+				'work': work_id,
+				order_key: series_tracker
 			})
+			series_tracker = series_tracker + 1
 	return work_ids
 
 
@@ -452,8 +454,8 @@ def format_date_for_template(obj, field_name, is_list=False):
 	return obj
 
 
-def get_owns_object(obj, request):
-	return any(user['username'] == request.user.username for user in obj['users']) or obj.get('user_id', 0) == request.user.id
+def get_owns_object(obj, request, key='users', creating_key='user_id'):
+	return any(user['username'] == request.user.username for user in obj[key]) or obj.get('user_id', 0) == request.user.id
 
 
 def format_comments_for_template(comments):
@@ -588,11 +590,9 @@ def get_series_users(request, series):
 
 def get_anthology_users(request, anthology):
 	anthology['owner'] = request.user.id == anthology['creating_user_id']
-	users = set()
-	anthology['users'] = []
-	for work in anthology['works_readonly']:
-		for user in anthology['users']:
-			if user['username'] not in users:
-				users.add(user['username'])
-				anthology['users'].append(user)
+	if not anthology['owner']:
+		for owner in anthology['owners']:
+			if owner['id'] == request.user.id:
+				anthology['owner'] = True
+				break
 	return anthology

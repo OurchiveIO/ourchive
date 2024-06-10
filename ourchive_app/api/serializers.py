@@ -743,6 +743,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     anthology_work = WorkAnthologySerializer(many=True, required=False, read_only=True)
     users = serializers.SerializerMethodField()
+    pending_users = serializers.SerializerMethodField()
     users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
     chapter_count = serializers.IntegerField(
@@ -767,6 +768,10 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_users(self, obj):
         users = obj.users.filter((Q(user_works__work_id=obj.id) & Q(user_works__approved=True)) | Q(id=obj.user.id)).all()
+        return MiniUserSerializer(users, many=True, required=False, read_only=True).data
+
+    def get_pending_users(self, obj):
+        users = obj.users.filter((Q(user_works__work_id=obj.id) & Q(user_works__approved=False) & ~Q(user_works__user_id=obj.user.id))).all()
         return MiniUserSerializer(users, many=True, required=False, read_only=True).data
 
     def process_tags(self, work, validated_data, tags):
@@ -837,8 +842,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 continue
             notification_type = NotificationType.objects.filter(
                 type_label="System Notification").first()
-            notification = Notification.objects.create(notification_type=notification_type, user=user, title="Pending Approvals",
-                                                       content=f"""You have co-creator listings pending approval. <a href='/users/cocreator-approvals'>Click here</a> to view.""")
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title=_("Work Pending Approval"),
+                                                       content=f"""{_("Someone added you as a cocreator to the work")} <strong>{work.title}</strong>. <a href='/users/cocreator-approvals'>{_("Click to approve or reject the relationship.</a>")}""")
             notification.save()
             user.has_notifications = True
             user.save()
@@ -1055,6 +1060,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     users = serializers.SerializerMethodField()
+    pending_users = serializers.SerializerMethodField()
     users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
     languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
@@ -1070,6 +1076,10 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_users(self, obj):
         users = obj.users.filter((Q(user_collections__collection_id=obj.id) & Q(user_collections__approved=True)) | Q(id=obj.user.id)).all()
+        return MiniUserSerializer(users, many=True, required=False, read_only=True).data
+
+    def get_pending_users(self, obj):
+        users = obj.users.filter((Q(user_collections__collection_id=obj.id) & Q(user_collections__approved=False) & ~Q(user_collections__user_id=obj.user.id))).all()
         return MiniUserSerializer(users, many=True, required=False, read_only=True).data
 
     class Meta:
@@ -1098,8 +1108,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                 continue
             notification_type = NotificationType.objects.filter(
                 type_label="System Notification").first()
-            notification = Notification.objects.create(notification_type=notification_type, user=user, title="Pending Approvals",
-                                                       content=f"""You have co-creator listings pending approval. <a href='/users/cocreator-approvals'>Click here</a> to view.""")
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title=_("Collection Pending Approval"),
+                                                       content=f"""{_("Someone added you as a cocreator to the collection")} <strong>{collection.title}</strong>. <a href='/users/cocreator-approvals'>{_("Click to approve or reject the relationship.</a>")}""")
             notification.save()
             user.has_notifications = True
             user.save()
@@ -1305,6 +1315,7 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     owners = serializers.SerializerMethodField()
+    pending_owners = serializers.SerializerMethodField()
 
     def process_tags(self, anthology, validated_data, tags):
         tags_to_add = []
@@ -1374,8 +1385,8 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
                 continue
             notification_type = NotificationType.objects.filter(
                 type_label="System Notification").first()
-            notification = Notification.objects.create(notification_type=notification_type, user=user, title="Pending Approvals",
-                                                       content=f"""You have co-creator listings pending approval. <a href='/users/cocreator-approvals'>Click here</a> to view.""")
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title=_("Anthology Pending Approval"),
+                                                       content=f"""{_("Someone added you as a cocreator to the anthology")} <strong>{anthology.title}</strong>. <a href='/users/cocreator-approvals'>{_("Click to approve or reject the relationship.</a>")}""")
             notification.save()
             user.has_notifications = True
             user.save()
@@ -1438,6 +1449,10 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
         # TODO: this is a very dumb hack, gotta be a better way
         owners = obj.owners.filter((Q(user_anthologies__anthology_id=obj.id) & Q(user_anthologies__approved=True)) | Q(id=obj.creating_user.id)).all() | User.objects.filter(id=obj.creating_user.id)
         return MiniUserSerializer(owners, many=True, required=False, read_only=True).data
+
+    def get_pending_owners(self, obj):
+        users = obj.owners.filter((Q(user_anthologies__anthology_id=obj.id) & Q(user_anthologies__approved=False) & ~Q(user_anthologies__user_id=obj.creating_user.id))).all()
+        return MiniUserSerializer(users, many=True, required=False, read_only=True).data
 
     class Meta:
         model = Anthology

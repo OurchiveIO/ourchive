@@ -124,7 +124,8 @@ function populateUserInput(user_id, username) {
     </div>
     <div class="uk-margin" id="collection-form-cocreator-form-parent">
             <label id="collection-form-cocreator-form-label" class="uk-form-label" for="collection_form_new_user">{% translate 'Co-creators' %}</label>
-            <div id="collection-form-cocreator-controls" class="uk-form-controls">                
+            <div id="collection-form-cocreator-controls" class="uk-form-controls">
+                <div id="pending-cocreators" class="uk-margin-small-bottom"><span class="uk-text-small">{% translate 'Pending cocreators' %}: </span>{% for user in bookmark_collection.pending_users %}{{user.username}}{% if not forloop.last %}, {% endif %}{% endfor %}</div>  
                 <div id="collection-form-cocreator-inline" class="uk-inline">
                     <div id="collection-form-users">
                         {% for user in bookmark_collection.users %}

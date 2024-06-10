@@ -56,10 +56,10 @@ class OurchiveSearch:
 			results = self.searcher.autocomplete_tags(term, tag_type, fetch_all)
 		return results
 
-	def do_bookmark_search(self, term, user):
+	def do_work_search(self, term, user):
 		results = {}
 		if term is not None:
-			results = self.searcher.autocomplete_bookmarks(term, user)
+			results = self.searcher.autocomplete_works(term, user)
 		return results
 
 	def do_user_search(self, term, user):

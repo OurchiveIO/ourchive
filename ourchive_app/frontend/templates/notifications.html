@@ -14,7 +14,8 @@
     {% endif %}
 </div>
 {% for notification in notifications %} 
-	<div class="uk-margin-bottom uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">{% include "notification_tile.html" %}</div>
+{% if forloop.first and forloop.last %}<div class="uk-margin-bottom uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal" uk-height-viewport="expand: true">{% else %}<div class="uk-margin-bottom uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">{% endif %}
+	{% include "notification_tile.html" %}</div>
 {% endfor %}
 <div class="uk-width-1-1 uk-text-center" id="notifications-pagination-parent">
     <div id="notifications-pagination-child">
