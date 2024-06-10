@@ -43,6 +43,8 @@ class ChiveExport(models.Model):
     export_works = models.BooleanField(default=True)
     export_bookmarks = models.BooleanField(default=True)
     export_collections = models.BooleanField(default=True)
+    export_series = models.BooleanField(default=True)
+    export_anthologies = models.BooleanField(default=True)
 
     user = models.ForeignKey(
         api.User,

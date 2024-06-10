@@ -2,9 +2,10 @@ from django.contrib import admin
 from etl.models import WorkImport, ObjectMapping, AdditionalMapping, ChiveExport
 from .ao3 import work_import as importer
 
+
 def process_work_import(work_import):
-    importer = importer.WorkImport()
-    importer.get_single_work(work_import.work_id)
+    work_importer = importer.WorkImport()
+    work_importer.get_single_work(work_import.work_id)
 
 
 @admin.action(description="Process unprocessed imports")
@@ -12,9 +13,11 @@ def process_imports(modeladmin, request, queryset):
     for work_import in queryset:
         process_work_import(work_import)
 
+
 class WorkImportAdmin(admin.ModelAdmin):
     list_display = ('id', 'work_id', 'job_uid', 'job_success', 'job_finished', 'created_on', 'job_processing', 'user')
     # actions = [process_imports]
+
 
 class ObjectMappingAdmin(admin.ModelAdmin):
     list_display = ('id', 'object_type', 'origin_field', 'destination_field')
@@ -26,7 +29,11 @@ class AdditionalMappingAdmin(admin.ModelAdmin):
     search_fields = ('original_value', 'destination_object', 'destination_type')
 
 
+class ChiveExportAdmin(admin.ModelAdmin):
+    list_display = ('uid', 'id', 'job_success', 'job_finished', 'created_on', 'job_processing', 'user')
+
+
 admin.site.register(WorkImport, WorkImportAdmin)
 admin.site.register(ObjectMapping, ObjectMappingAdmin)
 admin.site.register(AdditionalMapping, AdditionalMappingAdmin)
-admin.site.register(ChiveExport)
+admin.site.register(ChiveExport, ChiveExportAdmin)
