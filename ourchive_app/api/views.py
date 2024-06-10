@@ -330,6 +330,7 @@ class UserApprovalList(APIView):
         data = []
         pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
+        pending_anthologies = UserAnthology.objects.filter(user__id=request.user.id).filter(approved=False)
         for work in pending_works:
             approval = {
                 'id': f'{work.id}_work',
@@ -348,6 +349,15 @@ class UserApprovalList(APIView):
                 'title': collection.collection.title
             }
             data.append(approval)
+        for anthology in pending_anthologies:
+            approval = {
+                'id': f'{anthology.id}_anthology',
+                'type': 'anthology',
+                'creating_user': {'id': anthology.anthology.user.id, 'username': anthology.anthology.creating_user.username},
+                'chive': anthology.anthology.id,
+                'title': anthology.anthology.title
+            }
+            data.append(approval)
         return Response(data, status=200)
 
 
@@ -364,8 +374,10 @@ class UserApprovalRemove(APIView):
             approval = UserWork.objects.get(id=approval_id)
         elif type_to_remove == 'collection':
             approval = UserCollection.objects.get(id=approval_id)
+        elif type_to_remove == 'anthology':
+            approval = UserAnthology.objects.get(id=approval_id)
         else:
-            return Response({'message': [_('type_to_remove must be in POST request and must be work or collection.')]}, status=400)
+            return Response({'message': [_('type_to_remove must be in POST request and must be work, anthology or collection.')]}, status=400)
         if not approval:
             return Response({'message': [_(f'Approval having id {approval_id} does not exist.')]}, status=403)
         if approval.user.id != user_to_remove:
@@ -387,8 +399,10 @@ class UserApprovalApprove(APIView):
             approval = UserWork.objects.get(id=approval_id)
         elif type_to_approve == 'collection':
             approval = UserCollection.objects.get(id=approval_id)
+        elif type_to_approve == 'anthology':
+            approval = UserAnthology.objects.get(id=approval_id)
         else:
-            return Response({'message': [_('type_to_remove must be in POST request and must be work or collection.')]}, status=400)
+            return Response({'message': [_('type_to_remove must be in POST request and must be work, anthology or collection.')]}, status=400)
         if not approval:
             return Response({'message': [_(f'Approval having id {approval_id} does not exist.')]}, status=403)
         if approval.user.id != user_to_approve:
@@ -405,12 +419,16 @@ class CocreateApproveBulk(APIView):
     def patch(self, request):
         pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
+        pending_anthologies = UserAnthology.objects.filter(user__id=request.user.id).filter(approved=False)
         for work in pending_works:
             work.approved = True
             work.save()
         for collection in pending_collections:
             collection.approved = True
             collection.save()
+        for anthology in pending_anthologies:
+            anthology.approved = True
+            anthology.save()
         return Response({'message': _('Cocreators approved.')}, status=200)
 
 
@@ -421,10 +439,13 @@ class CocreateRejectBulk(APIView):
     def patch(self, request):
         pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
+        pending_anthologies = UserAnthology.objects.filter(user__id=request.user.id).filter(approved=False)
         for work in pending_works:
             work.delete()
         for collection in pending_collections:
             collection.delete()
+        for anthology in pending_anthologies:
+            anthology.delete()
         return Response({'message': _('Cocreators rejected.')}, status=200)
 
 
@@ -661,7 +682,7 @@ class UserSubscriptionWorkList(generics.ListAPIView):
 
 class UserSubscriptionSeriesList(generics.ListAPIView):
     serializer_class = WorkSerializer
-    permission_classes = [IsOwner, ObjectIsPrivate]
+    permission_classes = [IsOwner]
 
     def get_queryset(self):
         subscriptions = UserSubscription.objects.filter(
@@ -669,6 +690,18 @@ class UserSubscriptionSeriesList(generics.ListAPIView):
             subscribed_to_series=True)
         ids = subscriptions.values_list('subscribed_user', flat=True).all()
         return WorkSeries.objects.filter(user__id__in=ids).order_by('-created_on')
+
+
+class UserSubscriptionAnthologyList(generics.ListAPIView):
+    serializer_class = AnthologySerializer
+    permission_classes = [IsOwner]
+
+    def get_queryset(self):
+        anthologies = UserSubscription.objects.filter(
+            user__id=self.request.user.id).filter(
+            subscribed_to_anthology=True)
+        ids = anthologies.values_list('subscribed_user', flat=True).all()
+        return Anthology.objects.filter(owners__id__in=ids).order_by('-created_on')
 
 
 class UserSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -1519,7 +1552,7 @@ class UserAnthologyList(generics.ListCreateAPIView):
     permission_classes = [IsWorksMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Anthology.objects.filter(owners__username=self.kwargs['username']).order_by('-updated_on')
+        return Anthology.objects.filter(Q(owners__username=self.kwargs['username']) | Q(creating_user__username=self.kwargs['username'])).order_by('-updated_on')
 
 
 class AnthologyList(generics.ListCreateAPIView):

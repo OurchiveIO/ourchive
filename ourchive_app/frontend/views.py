@@ -92,6 +92,7 @@ def user_name(request, pk):
 	bookmark_params = {}
 	bookmark_collection_params = {}
 	series_params = {}
+	anthology_params = {}
 	anchor = None
 	if 'work_offset' in request.GET:
 		work_params['offset'] = request.GET['work_offset']
@@ -109,12 +110,14 @@ def user_name(request, pk):
 		series_params['offset'] = request.GET['series_offset']
 		series_params['limit'] = request.GET['series_limit']
 		anchor = "series_tab"
-	works_response = do_get(f'api/users/{username}/works', request, params=work_params, object_name='Works')
-	works = works_response.response_data['results']
-	works = get_object_tags(works)
-	works = format_date_for_template(works, 'updated_on', True)
-	work_next = f'/username/{pk}/{works_response.response_data["next_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=")}' if works_response.response_data["next_params"] is not None else None
-	work_previous = f'/username/{pk}/{works_response.response_data["prev_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=")}' if works_response.response_data["prev_params"] is not None else None
+	if 'anthology_offset' in request.GET:
+		anthology_params['offset'] = request.GET['anthology_offset']
+		anthology_params['limit'] = request.GET['anthology_limit']
+		anchor = "anthology_tab"
+	works_list = get_works_list(request, username)
+	works = works_list['works']
+	work_next = works_list['next_params'].replace("limit=", "work_limit=").replace("offset=", "work_offset=") if works_list['next_params'] else None
+	work_previous = works_list["prev_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=") if works_list["prev_params"] else None
 	bookmarks_response = do_get(f'api/users/{username}/bookmarks', request, params=bookmark_params).response_data
 	bookmarks = bookmarks_response['results']
 	bookmark_next = f'/username/{pk}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
@@ -132,6 +135,14 @@ def user_name(request, pk):
 	series_next = f'/username/{pk}/{series_response["next_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["next_params"] is not None else None
 	series_previous = f'/username/{pk}/{series_response["prev_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["prev_params"] is not None else None
 	series = format_date_for_template(series, 'updated_on', True)
+	anthologies_response = do_get(f'api/users/{username}/anthologies', request, params=anthology_params).response_data
+	anthologies = anthologies_response['results']
+	anthology_next = f'/username/{pk}/{anthologies_response["next_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["next_params"] is not None else None
+	anthology_previous = f'/username/{pk}/{anthologies_response["prev_params"].replace("limit=", "series_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["prev_params"] is not None else None
+	anthologies = format_date_for_template(anthologies, 'updated_on', True)
+	anthologies = get_object_tags(anthologies)
+	for anthology in anthologies:
+		anthology['attributes'] = get_attributes_for_display(anthology.get('attributes', []))
 	user = user.response_data['results'][0]
 	user['attributes'] = get_attributes_for_display(user['attributes'])
 	subscription = do_get(f"api/subscriptions/", request, params={'subscribed_to': username}, object_name='Subscription')
@@ -156,6 +167,9 @@ def user_name(request, pk):
 		'series': series,
 		'series_next': series_next,
 		'series_previous': series_previous,
+		'anthologies': anthologies,
+		'anthologies_next': anthology_next,
+		'anthologies_previous': anthology_previous,
 		'user': user,
 		'subscription' : subscription
 	})
@@ -264,7 +278,6 @@ def user_works(request, username):
 	next_params = response['next_params']
 	prev_params = response['prev_params']
 	works = response['works']
-	works = format_date_for_template(works, 'updated_on', True)
 	# TODO: there is a better/DRYer way to do this
 	for work in works:
 		work['owner'] = get_owns_object(work, request)
@@ -583,6 +596,24 @@ def user_series_subscriptions(request, username):
 	return page_content
 
 
+def user_anthology_subscriptions(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
+		return redirect('/')
+	cache_key = f'subscription_{username}_{request.user}_anthology'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
+	response = do_get(f'api/users/{username}/subscriptions/anthologies', request, params=request.GET)
+	page_content = render(request, 'user_anthology_subscriptions.html', {
+		'anthologies': response.response_data,
+		'next': f"/users/{username}/subscriptions/anthologies/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
+		'previous': f"/users/{username}/subscriptions/anthologies/{response.response_data['prev_params']}" if response.response_data['prev_params'] is not None else None,
+	})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
+
+
 def user_subscriptions(request, username):
 	if not request.user.is_authenticated or not request.user.username == username:
 		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
@@ -612,7 +643,10 @@ def unsubscribe(request, username):
 			patch_data['subscribed_to_collection'] = False
 		if request.POST.get('subscribed_to_work'):
 			patch_data['subscribed_to_work'] = False
-		print(patch_data)
+		if request.POST.get('subscribed_to_series'):
+			patch_data['subscribed_to_series'] = False
+		if request.POST.get('subscribed_to_anthology'):
+			patch_data['subscribed_to_anthology'] = False
 		response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
 		process_message(request, response)
 	return referrer_redirect(request)
@@ -629,6 +663,7 @@ def subscribe(request):
 	post_data['subscribed_to_collection'] = True if request.POST.get('subscribed_to_collection') else False
 	post_data['subscribed_to_work'] = True if request.POST.get('subscribed_to_work') else False
 	post_data['subscribed_to_series'] = True if request.POST.get('subscribed_to_series') else False
+	post_data['subscribed_to_anthology'] = True if request.POST.get('subscribed_to_anthology') else False
 	post_data['user'] = request.user.username
 	post_data['subscribed_user'] = request.POST.get('subscribed_to')
 	if 'subscription_id' in request.POST:
@@ -786,7 +821,7 @@ def new_work(request):
 				'work_types': work_types['results'],
 				'work': work_data[0],
 				'work_chapter': chapter_dict})
-		if not work_data[5].isdigit():
+		if work_data[5] and not work_data[5].isdigit():
 			series_id = create_work_series(request, work_data[5], work['id'])
 			if not series_id:
 				messages.add_message(request, messages.ERROR, _('Series could not be created. Please contact an administrator for help.'), 'Series')
@@ -870,7 +905,7 @@ def edit_work(request, id):
 		work_dict = get_work_obj(request, id)
 		chapters = work_dict[2]
 		chapter_dict = work_dict[3]
-		if not work_dict[5].isdigit():
+		if work_dict[5] and not work_dict[5].isdigit():
 			series_id = create_work_series(request, work_dict[5], id)
 			if not series_id:
 				messages.add_message(request, messages.ERROR, _('Series could not be created. Please contact an administrator for help.'), 'Series')

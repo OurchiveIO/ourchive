@@ -16,6 +16,7 @@ from etl.models import WorkImport
 from django.db.models.signals import post_save
 import itertools
 from django.utils.translation import gettext as _
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -713,6 +714,18 @@ class WorkSeriesSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['title', 'id']
 
 
+class WorkAnthologySerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    anthology = serializers.SerializerMethodField()
+
+    def get_anthology(self, obj):
+        return obj.anthology.title
+
+    class Meta:
+        model = AnthologyWork
+        fields = ['anthology', 'id']
+
+
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
     series = WorkSeriesSerializer(required=False)
@@ -728,7 +741,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     word_count = serializers.IntegerField(read_only=True)
     audio_length = serializers.IntegerField(read_only=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-    users = MiniUserSerializer(many=True, required=False, read_only=True)
+    anthology_work = WorkAnthologySerializer(many=True, required=False, read_only=True)
+    users = serializers.SerializerMethodField()
     users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
     chapter_count = serializers.IntegerField(
@@ -750,6 +764,10 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     def get_has_drafts(self, obj):
         has_drafts = obj.draft or obj.chapters.all().filter(draft=True).exists()
         return has_drafts
+
+    def get_users(self, obj):
+        users = obj.users.filter((Q(user_works__work_id=obj.id) & Q(user_works__approved=True)) | Q(id=obj.user.id)).all()
+        return MiniUserSerializer(users, many=True, required=False, read_only=True).data
 
     def process_tags(self, work, validated_data, tags):
         tags_to_add = []
@@ -827,7 +845,6 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         return work
 
     def update(self, work, validated_data):
-        print(validated_data)
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
         languages = validated_data.pop('languages') if 'languages' in validated_data else []
         if 'tags' in validated_data:
@@ -1037,7 +1054,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
-    users = MiniUserSerializer(many=True, required=False, read_only=True)
+    users = serializers.SerializerMethodField()
     users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
     languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
@@ -1050,6 +1067,10 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), required=False, many=True)
     created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
     updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+
+    def get_users(self, obj):
+        users = obj.users.filter((Q(user_collections__collection_id=obj.id) & Q(user_collections__approved=True)) | Q(id=obj.user.id)).all()
+        return MiniUserSerializer(users, many=True, required=False, read_only=True).data
 
     class Meta:
         model = BookmarkCollection
@@ -1283,11 +1304,140 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
     languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-    owners = MiniUserSerializer(many=True, required=False, read_only=True)
+    owners = serializers.SerializerMethodField()
+
+    def process_tags(self, anthology, validated_data, tags):
+        tags_to_add = []
+        required_tag_types = list(TagType.objects.filter(required=True))
+        has_any_required = len(required_tag_types) > 0
+        for item in tags:
+            tag_id = unidecode.unidecode(clean_text(item['text'].lower()))
+            tag_friendly_name = item['text']
+            tag_type = item['tag_type']
+            tag_type_id = tag_type.id
+            if tag_type in required_tag_types:
+                if tag_id is None or tag_id == '':
+                    # todo: error
+                    return None
+                else:
+                    required_tag_types.pop()
+            try:
+                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+            except IntegrityError:
+                logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Anthology: {anthology.id}')
+                continue
+            if tag.display_text == '':
+                tag.display_text = tag_friendly_name
+                tag.save()
+            tags_to_add.append(tag)
+        if has_any_required and len(required_tag_types) > 0:
+            # todo: error
+            return None
+        anthology.tags.clear()
+        for tag in tags_to_add:
+            anthology.tags.add(tag)
+        anthology.save()
+        return anthology
+
+    def process_languages(self, anthology, languages):
+        backup_languages = list(anthology.languages.all())
+        anthology.languages.clear()
+        try:
+            for language in languages:
+                anthology.languages.add(language)
+            anthology.save()
+        except Exception:
+            for language in backup_languages:
+                anthology.languages.add(language)
+            anthology.save()
+        return anthology
+
+    def process_owners(self, anthology, users):
+        backup_users = list(anthology.owners.all())
+        anthology.owners.clear()
+        new_users = set()
+        try:
+            for user in users:
+                anthology.owners.add(user)
+                if user not in backup_users:
+                    new_users.add(user)
+            if not anthology.owners or len(anthology.users.all()) == 0 or anthology.creating_user not in list(anthology.owners.all()):
+                anthology.owners.add(anthology.creating_user)
+            anthology.save()
+        except Exception as e:
+            logger.error(f'Error trying to add new anthology owners: {e}.')
+            for user in backup_users:
+                anthology.owners.add(user)
+            anthology.save()
+        for user in new_users:
+            if user.id == anthology.creating_user.id:
+                continue
+            notification_type = NotificationType.objects.filter(
+                type_label="System Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="Pending Approvals",
+                                                       content=f"""You have co-creator listings pending approval. <a href='/users/cocreator-approvals'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
+        return anthology
+
+    def update(self, anthology, validated_data):
+        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
+        if 'tags' in validated_data:
+            tags = validated_data.pop('tags') if 'tags' in validated_data else []
+            anthology = self.process_tags(anthology, validated_data, tags)
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+            anthology = AttributeValueSerializer.process_attributes(anthology, validated_data, attributes)
+        if 'description' in validated_data:
+            validated_data['description'] = clean_text(validated_data['description'], self.context['request'].user) if validated_data['description'] is not None else ''
+        if 'cover_url' in validated_data:
+            if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
+                validated_data['cover_url'] = ''
+        if 'header_url' in validated_data:
+            if validated_data['header_url'] is None or validated_data['header_url'] == "None":
+                validated_data['header_url'] = ''
+        if 'updated_on' not in validated_data:
+            validated_data['updated_on'] = datetime.datetime.now()
+        Anthology.objects.filter(id=anthology.id).update(**validated_data)
+        anthology = Anthology.objects.get(id=anthology.id)
+        self.process_owners(anthology, users)
+        self.process_languages(anthology, languages)
+        return Anthology.objects.filter(id=anthology.id).first()
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
+        attributes = None
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+        if 'cover_url' in validated_data:
+            if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
+                validated_data['cover_url'] = ''
+        if 'header_url' in validated_data:
+            if validated_data['header_url'] is None or validated_data['header_url'] == "None":
+                validated_data['header_url'] = ''
+        validated_data['description'] = clean_text(validated_data['description'], self.context['request'].user) if validated_data['description'] is not None else ''
+        if 'updated_on' not in validated_data:
+            validated_data['updated_on'] = datetime.datetime.now()
+        anthology = Anthology.objects.create(**validated_data)
+        anthology = self.process_tags(anthology, validated_data, tags)
+        anthology = self.process_owners(anthology, users)
+        anthology = self.process_languages(anthology, languages)
+        if attributes is not None:
+            anthology = AttributeValueSerializer.process_attributes(anthology, validated_data, attributes)
+        return anthology
 
     def get_works_readonly(self, instance):
         works = instance.works.all().order_by('anthology_work__sort_order')
         return WorkSerializer(works, many=True, required=False, read_only=True, context={'request': self.context['request']}).data
+
+    def get_owners(self, obj):
+        # TODO: this is a very dumb hack, gotta be a better way
+        owners = obj.owners.filter((Q(user_anthologies__anthology_id=obj.id) & Q(user_anthologies__approved=True)) | Q(id=obj.creating_user.id)).all() | User.objects.filter(id=obj.creating_user.id)
+        return MiniUserSerializer(owners, many=True, required=False, read_only=True).data
 
     class Meta:
         model = Anthology

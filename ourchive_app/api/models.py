@@ -124,6 +124,7 @@ class UserSubscription(models.Model):
     subscribed_to_collection = models.BooleanField(default=False)
     subscribed_to_work = models.BooleanField(default=False)
     subscribed_to_series = models.BooleanField(default=False)
+    subscribed_to_anthology = models.BooleanField(default=False)
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE
@@ -269,7 +270,7 @@ class Anthology(models.Model):
         related_name='creating_user'
     )
 
-    owners = models.ManyToManyField('User')
+    owners = models.ManyToManyField('User', through='UserAnthology')
 
     tags = models.ManyToManyField('Tag')
     attributes = models.ManyToManyField('AttributeValue')
@@ -320,7 +321,8 @@ class UserCollection(models.Model):
     )
     user = models.ForeignKey(
         'User',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='user_collections'
     )
     approved = models.BooleanField(default=False)
 
@@ -333,6 +335,30 @@ class UserCollection(models.Model):
 
     def __repr__(self):
         return '<UserCollection: {}>'.format(self.id)
+
+
+class UserAnthology(models.Model):
+    id = models.AutoField(primary_key=True)
+    anthology = models.ForeignKey(
+        'Anthology',
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+        related_name='user_anthologies'
+    )
+    approved = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['id']
+        db_table = 'api_user_anthologies'
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<UserAnthology: {}>'.format(self.id)
 
 
 class UserBlocks(models.Model):

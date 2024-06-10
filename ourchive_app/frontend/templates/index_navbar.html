@@ -74,12 +74,14 @@
 	                			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
 	                			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
 	                			<li id="nav-new-series-li"><a href="{% url 'fe-create-series' %}" id="nav-new-series-link">{% translate 'New Series' %}</a></li>
+	                			<li id="nav-new-anthology-li"><a href="{% url 'fe-create-anthology' %}" id="nav-new-anthology-link">{% translate 'New Anthology' %}</a></li>
 	                			<li id="nav-creations-li"><a href="#" id="nav-creations-link">{% translate 'My Chives' %}</a></li>
 	                			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="creations-subnav">
 	                				<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link">{% translate 'Bookmarks' %}</a></li>
 	                				<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link">{% translate 'Collections' %}</a></li>
 	                				<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">{% translate 'Works' %}</a></li>
 	                				<li id="nav-series-li"><a href="{% url 'fe-user-series' request.user.username %}" id="nav-series-link">{% translate 'Series' %}</a></li>
+	                				<li id="nav-anthologies-li"><a href="{% url 'fe-user-anthologies' request.user.username %}" id="nav-anthologies-link">{% translate 'Anthologies' %}</a></li>
 	                			</ul>
 	                			<li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a></li>
 							    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a></li>

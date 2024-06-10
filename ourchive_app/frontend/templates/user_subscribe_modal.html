@@ -37,6 +37,13 @@
                         <label id="user-subscribe-series-switch" class="switch"><input class="uk-checkbox" id="user-subscribe-series-checkbox" type="checkbox" name="subscribed_to_series" {% if subscription.subscribed_to_series %} checked {% endif %}> <span id="user-subscribe-series-slider" class="slider round"></span></label>
                     </div>
                 </div>
+                <div class="uk-width-1-1" id="user-subscribe-anthologies-parent">
+                    <label id="user-subscribe-anthologies-label" class="uk-form-label" for="user-subscribe-anthologies-checkbox">{% translate 'Subscribe to anthologies' %}
+                    </label>
+                    <div class="uk-form-controls" id="user-subscribe-anthologies-controls">
+                        <label id="user-subscribe-anthologies-switch" class="switch"><input class="uk-checkbox" id="user-subscribe-anthologies-checkbox" type="checkbox" name="subscribed_to_anthology" {% if subscription.subscribed_to_anthology %} checked {% endif %}> <span id="user-subscribe-anthologies-slider" class="slider round"></span></label>
+                    </div>
+                </div>
                 <div class="uk-text-right uk-width-1-1" id="user-subscribe-buttons-container">
                     <input id="user-subscribe-cancel" class="uk-button uk-width-small uk-button-default uk-modal-close" onclick="" value="Cancel"/>
                     <button id="user-subscribe-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>

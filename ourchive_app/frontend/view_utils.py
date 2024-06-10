@@ -20,6 +20,8 @@ from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
 from datetime import *
 
+logger = logging.getLogger(__name__)
+
 def group_tags(tags):
 	tag_parent = {}
 	for tag in tags:
@@ -443,7 +445,10 @@ def format_date_for_template(obj, field_name, is_list=False):
 				continue
 			item[field_name] = parse(item[field_name]).date()
 		return obj
-	obj[field_name] = parse(obj[field_name]).date() if obj[field_name] is not None else None
+	try:
+		obj[field_name] = parse(obj[field_name]).date() if obj[field_name] is not None else None
+	except Exception as ex:
+		logger.error(f"Error formatting date for template: {ex}")
 	return obj
 
 
@@ -497,6 +502,7 @@ def get_works_list(request, username=None):
 	else:
 		works = response.response_data['results']
 		works = get_object_tags(works)
+		works = format_date_for_template(works, 'updated_on', True)
 		for work in works:
 			work['attributes'] = get_attributes_for_display(work.get('attributes', []))
 	return {'works': works, 'next_params': response.response_data['next_params'] if 'next_params' in response.response_data else None, 'prev_params': response.response_data['prev_params'] if 'prev_params' in response.response_data else None}

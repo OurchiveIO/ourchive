@@ -48,6 +48,7 @@
             {% if bookmarks %}<li><a href="#" id="user_bookmarks_selector">{% translate 'Bookmarks' %}</a></li>{% endif %}
             {% if bookmark_collections %}<li><a href="#" id="user_collections_selector">{% translate 'Collections' %}</a></li>{% endif %}
             {% if series %}<li><a href="#" id="user_series_selector">{% translate 'Series' %}</a></li>{% endif %}
+            {% if anthologies %}<li><a href="#" id="user_anthologies_selector">{% translate 'Anthologies' %}</a></li>{% endif %}
         </ul>
         <ul class="uk-switcher uk-margin" id="user_content_switcher">
             {% if works %}
@@ -66,6 +67,9 @@
             </li>
             <li id="series_tab">
                 {% include "series_list_body.html" with series=series next=series_next previous=series_previous include_header=False %}
+            </li>
+            <li id="anthology_tab">
+                {% include "anthologies_list_body.html" with anthologies=anthologies next=anthologies_next previous=anthologies_previous include_header=False %}
             </li>
             {% endif %}
         </ul>

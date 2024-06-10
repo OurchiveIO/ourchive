@@ -81,6 +81,7 @@ urlpatterns = [
     path('users/<str:username>/subscriptions/collections', views.user_collection_subscriptions, name='fe-user-collection-subscriptions'),
     path('users/<str:username>/subscriptions/works', views.user_work_subscriptions, name='fe-user-work-subscriptions'),
     path('users/<str:username>/subscriptions/series', views.user_series_subscriptions, name='fe-user-series-subscriptions'),
+    path('users/<str:username>/subscriptions/anthologies', views.user_anthology_subscriptions, name='fe-user-anthology-subscriptions'),
     path('works/<int:work_id>/chapters/<int:id>/edit', views.edit_chapter),
     path('works/<int:work_id>/chapters/new', views.new_chapter),
     path('workcomments/<int:work_id>/chapter/<int:chapter_id>', views.render_work_comments),

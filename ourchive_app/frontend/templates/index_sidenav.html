@@ -27,6 +27,7 @@
                                 <li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
                                 <li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
                                 <li id="nav-new-series-li"><a href="{% url 'fe-create-series' %}" id="nav-new-series-link">{% translate 'New Series' %}</a></li>
+                                <li id="nav-new-anthology-li"><a href="{% url 'fe-create-anthology' %}" id="nav-new-anthology-link">{% translate 'New Anthology' %}</a></li>
                                 <li id="nav-creations-li"><a href="{% url 'user-profile-parent' request.user.id %}" id="nav-creations-link">{% translate 'My Chives' %}</a></li>
                                 <li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a></li>
                                 <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a></li>
