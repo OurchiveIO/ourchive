@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0015_migrate_language_tags'),
+        ('api', '0014_language_alter_bookmark_work_bookmark_language_and_more'),
     ]
 
     operations = [

@@ -8,8 +8,6 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser, MultiPartParser
-from .search.search_service import OurchiveSearch
-from .search.search_obj import GlobalSearch
 from django.db.models import Q
 import datetime
 from django.utils.crypto import get_random_string
@@ -30,6 +28,8 @@ from django.utils.translation import gettext as _
 from django.db.models import Count
 from api.custom_pagination import NonPaginatedResultSetPagination
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
+from search.search.search_service import OurchiveSearch
+from search.search.search_obj import GlobalSearch
 
 
 @api_view(['GET'])

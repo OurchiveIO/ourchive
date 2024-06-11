@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'corsheaders',
     'anymail',
+    'search',
     'api',
     'etl',
     'django_apscheduler'

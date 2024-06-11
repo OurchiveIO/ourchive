@@ -6,6 +6,7 @@ from django.core.management import call_command
 from api.utils import count_words
 from unittest import skip
 
+
 class ApiTests(TestCase):
 
     @classmethod

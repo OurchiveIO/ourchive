@@ -1,7 +1,7 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 from etl.ao3.work_import import EtlWorkImport
-from etl.export.chive_export import ChiveExport
+from etl.export.chive_export import ChiveExportOrchestrator
 import json
 import api.models as models
 from django.core.management import call_command
@@ -39,20 +39,23 @@ class Ao3ImportTests(TestCase):
 
 	def test_create_work_export(self):
 		works = models.Work.objects.all()
-		exporter = ChiveExport()
-		exporter.write_csv(works)
+		exporter = ChiveExportOrchestrator()
+		file_info = ('works.csv', f'/tmp/works.csv')
+		exporter.write_csv(works, file_info)
 		for work in works:
-			exporter.write_csv(work.chapters.all())
+			exporter.write_csv(work.chapters.all(), file_info)
 
 	def test_create_bookmark_export(self):
 		bookmarks = models.Bookmark.objects.all()
-		exporter = ChiveExport()
-		exporter.write_csv(bookmarks)
+		exporter = ChiveExportOrchestrator()
+		file_info = ('bookmarks.csv', f'/tmp/bookmarks.csv')
+		exporter.write_csv(bookmarks, file_info)
 
 	def test_create_collection_export(self):
 		collections = models.BookmarkCollection.objects.all()
-		exporter = ChiveExport()
-		exporter.write_csv(collections)
+		exporter = ChiveExportOrchestrator()
+		file_info = ('collections.csv', f'/tmp/collections.csv')
+		exporter.write_csv(collections, file_info)
 
 	test_work_data =  r"""{
                 "id": 8878807,

@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0012_chive_collab_data_migration'),
+        ('api', '0011_usercollection_user_collections_userwork_user_works'),
     ]
 
     def add_auto_allow_upload(apps, schema_editor):

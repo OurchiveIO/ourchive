@@ -1,0 +1,121 @@
+<div id="flyover-results" uk-offcanvas="flip: true" class="uk-offcanvas">
+	<div class="uk-offcanvas-bar" id="flyover-results-child">
+		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form-flyover">	
+		<ul uk-tab="animation: uk-animation-fade;" class="uk-inline" id="search-filter-switcher-controls-flyover">
+            <li id="filter-switcher-li-include" class="uk-inline"><a href="#" id="include_tab_flyover">Include</a></li>
+            <li id="filter-switcher-li-exclude" class="uk-inline"><a href="#" id="exclude_tab_flyover">Exclude</a></li>
+		</ul>
+		{% csrf_token %}
+		<ul class="uk-switcher uk-margin-remove filter-switcher" id="search-results-filter-switcher-flyover">
+			<li id="search-results-include-switcher-li-flyover" class="uk-width-expand ourchive-li-flyover"> 
+	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl-flyover">	
+			        {% for facet in include_facets %} 
+						{% include "facet_tile.html" with include='include' keys=keys_include %}     
+				    {% endfor %}	        
+				</dl>
+				<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl-flyover">	
+					<dt><span class="uk-text-bold">Include all/any</span></dt>
+					<dr>
+						<label id="all-toggle-label-flyover" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+		                <div id="any-all-toggle-inline-flyover" class="uk-inline">
+		                    <label id="include-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="any-all-toggle-flyover" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="include_any_all" onclick="toggleAnyAll('include', 'flyover')"> <span id="any-all-slider-flyover" class="slider round"></span></label>
+		                </div>
+		                <label id="include-any-toggle-label-flyover" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+		            </dr>
+		        </dl>
+		    </li>
+		    <li id="search-results-exclude-switcher-li-flyover" class="uk-width-expand ourchive-li-flyover"> 
+	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-facet-dl-flyover">	
+			        {% for facet in exclude_facets %} 
+						{% include "facet_tile.html" with include='exclude' keys=keys_exclude %}     
+				    {% endfor %}	
+
+				</dl>
+				<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-type-dl-flyover">	
+					<dt><span class="uk-text-bold">Exclude all/any</span></dt>
+					<dr>
+						<label id="exclude-all-toggle-label-flyover" {% if 'any_all' in keys_exclude %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+		                <div id="exclude-any-all-toggle-inline-flyover" class="uk-inline">
+		                    <label id="exclude-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll('exclude', 'flyover')"> <span id="exclude-any-all-slider-flyover" class="slider round"></span></label>
+		                </div>
+		                <label id="exclude-any-toggle-label-flyover" {% if 'any_all' not in keys_exclude %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+		            </dr>
+		        </dl>
+		    </li>
+	    </ul>
+	    <dl class="uk-description-list uk-description-list-divider" id="order-by-dl">
+	    	<dt><span class="uk-text-bold">Sort by...</span></dt>
+            <dr>
+	            <select id="search-results-sort-select" name="order_by" class="uk-select">
+	                <option id="search-results-sort-newest" value="-updated_on">Newest</option>
+	                <option id="search-results-sort-oldest" value="created_on">Oldest</option>
+	            </select>
+	        </dr>
+	    </dl>
+		<input type="hidden" id="term" name="term" value="{{ term }}">
+		{% if tag_id %}
+		<input type="hidden" id="tag_id" name="tag_id" value="{{ tag_id }}">
+		{% endif %}
+		<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default uk-margin-top" type="submit" value="Submit"/>
+	</form>
+	</div>
+</div>
+<div class="uk-width-1-1 uk-text-right uk-align-right uk-hidden@s"><a class="uk-button uk-button-default uk-button-small uk-hidden@s" uk-toggle="target: #flyover-results" id="show-filters-link">Toggle Filters</a></div> 
+<div class="uk-width-1-4 uk-visible@s search-results-toggle" id="search-results-work-facet-child" hidden> 
+	<div class="uk-inline uk-align-left"><span class="uk-text-bold uk-inline uk-text-large">Filters</span></div><div class="uk-inline uk-align-right"><span uk-icon="icon: close; ratio: 1.5" title="Close filters" id="search-results-close-desktop-filter" class="search-results-toggle" uk-toggle="target: .search-results-toggle"></span></div>
+	<div class="uk-align-left uk-width-expand">
+		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">	
+		{% csrf_token %}
+		<ul uk-accordion>
+    <li class="uk-open">
+        <a class="uk-accordion-title" href>Item 1</a>
+        <div class="uk-accordion-content">
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        </div>
+    </li>
+    <li>
+        <a class="uk-accordion-title" href>Item 2</a>
+        <div class="uk-accordion-content">
+            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor reprehenderit.</p>
+        </div>
+    </li>
+    <li>
+        <a class="uk-accordion-title" href>Item 3</a>
+        <div class="uk-accordion-content">
+            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat proident.</p>
+        </div>
+    </li>
+</ul>
+    	<!--<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl">	
+	        {% for facet in include_facets %} 
+				{% include "facet_tile.html" with include='include' keys=keys_include %}     
+		    {% endfor %}		        
+		</dl>
+		<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl">	
+			<dt><span class="uk-text-bold">Include all/any</span></dt>
+			<dr>
+				<label id="include-all-toggle-label" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
+                <div id="any-all-toggle-inline" class="uk-inline">
+                    <label id="any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="any-all-toggle" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="include_any_all" onclick="toggleAnyAll('include', null)"> <span id="any-all-slider" class="slider round"></span></label>
+                </div>
+                <label id="include-any-toggle-label" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
+            </dr>
+        </dl>
+	    <dl class="uk-description-list uk-description-list-divider" id="order-by-dl">
+	    	<dt><span class="uk-text-bold">Sort by...</span></dt>
+            <dr>
+	            <select id="search-results-sort-select" name="order_by" class="uk-select">
+	                <option id="search-results-sort-newest" value="-updated_on">Newest</option>
+	                <option id="search-results-sort-oldest" value="created_on">Oldest</option>
+	            </select>
+	        </dr>
+	    </dl>
+		<input type="hidden" id="term" name="term" value="{{ term }}">
+		{% if tag_id %}
+		<input type="hidden" id="tag_id" name="tag_id" value="{{ tag_id }}">
+		{% endif %}
+		<input type="hidden" id="active_tab" name="active_tab" value="{{ default_tab }}">
+		<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default uk-margin-top" type="submit" value="Submit"/>-->
+	</form>
+	</div>
+</div>
