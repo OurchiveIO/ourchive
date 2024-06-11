@@ -349,7 +349,6 @@ def get_work_order_nums(ordering_dict, order_key):
 
 def get_anthology_obj(request):
 	anthology_dict = request.POST.copy()
-	print(anthology_dict)
 	works = []
 	tags = []
 	tag_types = {}
@@ -375,7 +374,7 @@ def get_anthology_obj(request):
 			tags.append(tag)
 			anthology_dict.pop(item)
 		elif item.startswith('anthology_cocreators_'):
-			user_id = item[16:]
+			user_id = item[21:]
 			users.append(user_id)
 	anthology_dict = get_list_from_form('languages', anthology_dict, request)
 	anthology_dict["users_to_add"] = users

@@ -353,7 +353,7 @@ class UserApprovalList(APIView):
             approval = {
                 'id': f'{anthology.id}_anthology',
                 'type': 'anthology',
-                'creating_user': {'id': anthology.anthology.user.id, 'username': anthology.anthology.creating_user.username},
+                'creating_user': {'id': anthology.anthology.creating_user.id, 'username': anthology.anthology.creating_user.username},
                 'chive': anthology.anthology.id,
                 'title': anthology.anthology.title
             }

@@ -1193,7 +1193,6 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         languages = validated_data.pop('languages') if 'languages' in validated_data else []
         tags = []
         attributes = None
-        print(validated_data)
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
         if 'attributes' in validated_data:
@@ -1308,6 +1307,7 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     creating_user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
+    users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     creating_user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     works = serializers.SerializerMethodField()
     created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
@@ -1421,7 +1421,6 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
-        print(tags)
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
         languages = validated_data.pop('languages') if 'languages' in validated_data else []
         attributes = None
