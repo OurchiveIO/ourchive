@@ -134,10 +134,18 @@ function createToken(wrapper, value, id="") {
     wrapper.insertBefore(token, search);
 }
 
+function handleFacetCheckUncheck(event) {
+    if (event.target.checked) {
+        createToken(document.getElementById("selected-filters-list"), event.target.parentNode.innerText, event.target.getAttribute("id")+"_badge");
+    }
+    else {
+        document.getElementById(event.target.getAttribute("id")+"_badge").remove();
+    }
+}
+
 
 // Listen for clicks in the dropdown option
 function clickDropdown(e) {
-
     const dropdown = e.target;
     const wrapper = dropdown.parentNode.parentNode;
     const input_search = wrapper.querySelector(".selected-input");
@@ -319,17 +327,24 @@ function removeToken(e) {
     }
     else {
         otherId = token_id.replace('_badge', '_dropdown');
-        wrapper = document.getElementById(otherId).parentNode;
+        if (document.getElementById(otherId) !== null) {
+            wrapper = document.getElementById(otherId).parentNode;
+        }
+        else {
+            document.getElementById(token_id.replace('_badge', '')).checked = false;
+        }
     }
-    const input_search = wrapper.querySelector(".selected-input");
-    const dropdown = wrapper.querySelector(".dropdown-icon");
-    // Get the options in the select to be unselected
-    const option_to_unselect = wrapper.querySelector(`select option[value="${value_to_remove}"]`);
-    option_to_unselect.removeAttribute("selected");
-    dropdown.classList.remove("active");
+    if (wrapper !== null) {
+        const input_search = wrapper.querySelector(".selected-input");
+        const dropdown = wrapper.querySelector(".dropdown-icon");
+        // Get the options in the select to be unselected
+        const option_to_unselect = wrapper.querySelector(`select option[value="${value_to_remove}"]`);
+        option_to_unselect.removeAttribute("selected");
+        dropdown.classList.remove("active");
+        document.getElementById(otherId).remove();
+    }
     // Remove token attribute
     e.target.parentNode.remove();
-    document.getElementById(otherId).remove();
     e.stopPropagation();
 }
 
