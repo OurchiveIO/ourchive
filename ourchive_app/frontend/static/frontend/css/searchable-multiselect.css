@@ -10,7 +10,7 @@ select[data-multi-select-plugin] {
     flex-direction: row;
     flex-wrap: wrap;
     height: auto;
-    width: 100%;
+    width: 80%;
     padding: 3px 8px;
     font-size: 14px;
     line-height: 1.42857143;
@@ -54,7 +54,7 @@ select[data-multi-select-plugin] {
     background-color: #ededed;
     white-space: nowrap;
     margin: 1px 5px 5px 0;
-    height: 22px;
+    height: 1.55em;
     vertical-align: top;
     cursor: default;
 }

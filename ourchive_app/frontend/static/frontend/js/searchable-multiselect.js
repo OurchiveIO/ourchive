@@ -112,11 +112,12 @@ function openOptions(e) {
 }
 
 // Function that create a token inside of a wrapper with the given value
-function createToken(wrapper, value) {
+function createToken(wrapper, value, id="") {
     const search = wrapper.querySelector(".search-container");
     // Create token wrapper
     const token = document.createElement("div");
     token.classList.add("selected-wrapper");
+    token.setAttribute("id", id);
     const token_span = document.createElement("span");
     token_span.classList.add("selected-label");
     token_span.innerText = value;
@@ -171,9 +172,9 @@ function clearAutocompleteList(select) {
 // Populate the autocomplete list following a given query from the user
 function populateAutocompleteList(select, query, dropdown = false) {
     const {
-        autocomplete_options
+        autocomplete_options,
+        all_options
     } = getOptions(select);
-
 
     let options_to_show;
 
@@ -193,6 +194,7 @@ function populateAutocompleteList(select, query, dropdown = false) {
         const li = document.createElement("li");
         li.innerText = options_to_show[0];
         li.setAttribute('data-value', options_to_show[0]);
+        li.setAttribute('id', all_options[0].id);
         li.addEventListener("click", selectOption);
         autocomplete_list.appendChild(li);
         if (query.length == options_to_show[0].length) {
@@ -206,6 +208,7 @@ function populateAutocompleteList(select, query, dropdown = false) {
             const li = document.createElement("li");
             li.innerText = options_to_show[i];
             li.setAttribute('data-value', options_to_show[i]);
+            li.setAttribute('id', all_options[i].id);
             li.addEventListener("click", selectOption);
             autocomplete_list.appendChild(li);
         }
@@ -225,7 +228,8 @@ function selectOption(e) {
     const option = wrapper.querySelector(`select option[value="${e.target.dataset.value}"]`);
 
     option.setAttribute("selected", "");
-    createToken(wrapper, e.target.dataset.value);
+    createToken(wrapper, e.target.dataset.value, option.getAttribute("id")+"_dropdown");
+    createToken(document.getElementById("selected-filters-list"), e.target.dataset.value, option.getAttribute("id")+"_badge");
     if (input_search.value) {
         input_search.value = "";
     }
@@ -271,7 +275,12 @@ function getOptions(select) {
     // Select all the options available
     const all_options = Array.from(
         select.querySelectorAll("option")
-    ).map(el => el.value);
+    ).map(function(el) {
+        const newOption = Object.assign({}, el);
+        newOption.value = el.value;
+        newOption.id = el.id;
+        return newOption;
+    });
 
     // Get the options that are selected from the user
     const options_selected = Array.from(
@@ -280,9 +289,10 @@ function getOptions(select) {
 
     // Create an autocomplete options array with the options that are not selected by the user
     const autocomplete_options = [];
+    const autocomplete_options_ids = [];
     all_options.forEach(option => {
-        if (!options_selected.includes(option)) {
-            autocomplete_options.push(option);
+        if (!options_selected.includes(option.value)) {
+            autocomplete_options.push(option.value);
         }
     });
 
@@ -290,7 +300,8 @@ function getOptions(select) {
 
     return {
         options_selected,
-        autocomplete_options
+        autocomplete_options,
+        all_options
     };
 
 }
@@ -299,18 +310,26 @@ function getOptions(select) {
 function removeToken(e) {
     // Get the value to remove
     const value_to_remove = e.target.dataset.option;
-    const wrapper = e.target.parentNode.parentNode;
+    const token_id = e.target.parentNode.getAttribute('id');
+    let wrapper = null;
+    let otherId = null;
+    if (token_id.endsWith('_dropdown')) {
+        wrapper = e.target.parentNode.parentNode;
+        otherId = token_id.replace('_dropdown', '_badge');
+    }
+    else {
+        otherId = token_id.replace('_badge', '_dropdown');
+        wrapper = document.getElementById(otherId).parentNode;
+    }
     const input_search = wrapper.querySelector(".selected-input");
     const dropdown = wrapper.querySelector(".dropdown-icon");
     // Get the options in the select to be unselected
     const option_to_unselect = wrapper.querySelector(`select option[value="${value_to_remove}"]`);
     option_to_unselect.removeAttribute("selected");
+    dropdown.classList.remove("active");
     // Remove token attribute
     e.target.parentNode.remove();
-    input_search.focus();
-    dropdown.classList.remove("active");
-    const event = new Event('click');
-    dropdown.dispatchEvent(event);
+    document.getElementById(otherId).remove();
     e.stopPropagation();
 }
 
