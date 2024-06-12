@@ -123,11 +123,13 @@ function createToken(wrapper, value, text_value, id="") {
     token_span.innerHTML = value;
     const close = document.createElement("a");
     close.classList.add("selected-close");
+    close.classList.add("uk-icon");
+    close.classList.add("ourchive-search-badge-exclude");
     close.setAttribute("tabindex", "-1");
     close.setAttribute("data-option", text_value);
     close.setAttribute("data-hits", 0);
     close.setAttribute("href", "#");
-    close.innerText = "x";
+    close.setAttribute("uk-icon", "icon: close; ratio: .8");
     close.addEventListener("click", removeToken)
     token.appendChild(token_span);
     token.appendChild(close);
@@ -331,18 +333,25 @@ function getOptions(select) {
 // Listener for when the user wants to remove a given token.
 function removeToken(e) {
     // Get the value to remove
-    const value_to_remove = e.target.dataset.option;
-    const token_id = e.target.parentNode.getAttribute('id');
+    const value_to_remove = e.target.closest("a").getAttribute("data-option");
+    var ancestor = e.target.closest(".selected-wrapper");
+    let token_id = ancestor.getAttribute('id');
+    if (token_id == null) {
+        token_id = e.target.parentNode.getAttribute('id');
+        if (token_id == null) {
+            token_id = e.target.parentNode.parentNode.parentNode;   
+        }
+    }
     let wrapper = null;
     let otherId = null;
     if (token_id.endsWith('_dropdown')) {
-        wrapper = e.target.parentNode.parentNode;
+        wrapper = e.target.closest(".selected-wrapper").parentNode;
         otherId = token_id.replace('_dropdown', '_badge');
     }
     else {
         otherId = token_id.replace('_badge', '_dropdown');
         if (document.getElementById(otherId) !== null) {
-            wrapper = document.getElementById(otherId).parentNode;
+            wrapper = document.getElementById(otherId).closest(".multi-select-component");
         }
         else {
             if (document.getElementById(token_id.replace('_badge', '')).checked) {
@@ -363,7 +372,7 @@ function removeToken(e) {
         document.getElementById(otherId).remove();
     }
     // Remove token attribute
-    e.target.parentNode.remove();
+    e.target.parentNode.parentNode.remove();
     e.stopPropagation();
 }
 

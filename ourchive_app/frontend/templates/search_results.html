@@ -51,13 +51,15 @@
 </div>
 {% include 'search_results_filters.html' %}
 <div class="uk-width-expand">
+	<div id="selected-filters-list" class="uk-width-expand uk-margin-small-bottom">
+		<!-- Selected filters go here -->
+	</div>
 	<div class="uk-width-expand uk-margin-bottom">
 		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden>Filter</button>
 		<select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium" onchange="updateSortOrder(value)">
             <option id="search-results-sort-newest" value="-updated_on">Sort By: Last Updated</option>
             <option id="search-results-sort-oldest" value="-comment_count">Sort By: Comments</option>
         </select>
-        <div id="selected-filters-list" class="uk-inline"></div>
 	</div>
 	<div class="uk-switcher uk-margin-remove-left search-switcher uk-width-expand ourchive-padding-remove-horizontal uk-inline uk-height-viewport">
 		<div class="uk-width-expand" id="search-results-works-parent">		
