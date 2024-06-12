@@ -372,7 +372,7 @@ function removeToken(e) {
         document.getElementById(otherId).remove();
     }
     // Remove token attribute
-    e.target.parentNode.parentNode.remove();
+    ancestor.remove();
     e.stopPropagation();
 }
 
@@ -421,7 +421,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // get select that has the options available
     const select = document.querySelectorAll("[data-multi-select-plugin]");
     select.forEach(select => {
-
         init(select);
     });
 
