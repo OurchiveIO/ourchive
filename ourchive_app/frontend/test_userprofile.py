@@ -1,6 +1,6 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
-import api.models as models
+import core.models as models
 from django.core.management import call_command
 
 class UserViewTests(TestCase):

@@ -3,12 +3,12 @@ from rest_framework import serializers
 from django.db import IntegrityError
 from rest_framework_recursive.fields import RecursiveField
 from .custom_fields import UserPrivateField
-from api.models import *
+from core.models import *
 import datetime
 import logging
 from django.conf import settings
 from django.core.mail import send_mail
-from .utils import convert_boolean, clean_text, count_words
+from core.utils import convert_boolean, clean_text, count_words
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 import unidecode
@@ -51,6 +51,7 @@ class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
 class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
     attribute_values = AttributeValueSerializer(many=True, required=False)
     id = serializers.IntegerField()
+    search_group = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = AttributeType
@@ -308,6 +309,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 class TagTypeSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.IntegerField()
+    search_group = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = TagType
         fields = '__all__'

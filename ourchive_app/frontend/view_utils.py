@@ -3,13 +3,13 @@ from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
-from .search_models import SearchObject
+from frontend.search_models import SearchObject
 from html import escape, unescape
 from django.http import HttpResponse, FileResponse
 import logging
-from .api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
+from frontend.api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from django.utils.translation import gettext as _
-from api import utils
+from core import utils
 from django.views.decorators.cache import never_cache
 from dateutil.parser import *
 from dateutil import tz

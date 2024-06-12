@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 from rest_framework import viewsets, generics, permissions
 from api.serializers import *
-from api.models import *
+from core.models import *
 from api.permissions import *
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -22,7 +22,7 @@ from etl import ao3
 import threading
 from etl.models import WorkImport, ChiveExport
 from etl.ao3 import util
-from .utils import get_star_count
+from core.utils import get_star_count
 from django.core.mail import send_mail
 from django.utils.translation import gettext as _
 from django.db.models import Count

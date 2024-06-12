@@ -1,5 +1,5 @@
 import unidecode
-from api.utils import clean_tag_text
+from core.utils import clean_tag_text
 
 
 class Common():
@@ -422,4 +422,14 @@ class ResultFacet(object):
 
     def to_dict(self):
         self.values = [x.__dict__ for x in self.values]
+        return self.__dict__
+
+class GroupFacet(object):
+    def __init__(self, id, label, facets=[]):
+        self.id = id
+        self.label = label
+        self.facets = []
+
+    def to_dict(self):
+        self.facets = [x.__dict__ for x in self.facets]
         return self.__dict__

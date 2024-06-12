@@ -31,20 +31,29 @@
 			document.getElementById(all_toggle_label).style.visibility = "visible";
 		}
 	}
+
+	function updateSortOrder(selected) {
+		document.getElementById("search-results-sort-select-hidden").value = selected;
+		document.forms["searchResultsForm_work"].submit()
+	}
 </script>
 <div class="uk-width-1-1">
 	<ul uk-tab="animation: uk-animation-fade; active: {{default_tab}}; connect: .search-switcher" id="search-results-switcher-controls" class="uk-flex-center uk-width-1-1 ourchive-padding-remove-horizontal">
-	    <li id="results-switcher-li-works"><a href="#" id="works_tab" data-testid="works-tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
-	    <li id="results-switcher-li-bookmarks"><a href="#" id="bookmarks_tab" onclick="updateActiveTab(1)">Bookmarks ({{ bookmarks.page.count }})</a></li>
-	    <li id="results-switcher-li-users"><a href="#" id="users_tab" onclick="updateActiveTab(2)">Collections ({{ collections.page.count }})</a></li>
-	    {% if not tag_id %}<li id="results-switcher-li-tags"><a href="#" id="tags_tab" onclick="updateActiveTab(3)">Tags ({{ tags.page.count }})</a></li>
-	    <li id="results-switcher-li-users"><a href="#" id="users_tab" onclick="updateActiveTab(4)">Users ({{ users.data|length }})</a></li>{% endif %}
+	    <li id="results-switcher-li-works" class="ourchive-search-tab"><a href="#" id="works_tab" data-testid="works-tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
+	    <li id="results-switcher-li-bookmarks" class="ourchive-search-tab"><a href="#" id="bookmarks_tab" onclick="updateActiveTab(1)">Bookmarks ({{ bookmarks.page.count }})</a></li>
+	    <li id="results-switcher-li-users" class="ourchive-search-tab"><a href="#" id="users_tab" onclick="updateActiveTab(2)">Collections ({{ collections.page.count }})</a></li>
+	    {% if not tag_id %}<li id="results-switcher-li-tags" class="ourchive-search-tab"><a href="#" id="tags_tab" onclick="updateActiveTab(3)">Tags ({{ tags.page.count }})</a></li>
+	    <li id="results-switcher-li-users" class="ourchive-search-tab"><a href="#" id="users_tab" onclick="updateActiveTab(4)">Users ({{ users.data|length }})</a></li>{% endif %}
 	</ul>
 </div>
 {% include 'search_results_filters.html' %}
-<div class="uk-width-3-4@s uk-width-1-1@xs">
+<div class="uk-width-expand">
 	<div class="uk-width-expand uk-margin-bottom">
-		<button class="uk-button uk-button-default search-results-toggle" type="button" uk-toggle="target: .search-results-toggle">Toggle</button>
+		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle">Filter</button>
+		<select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium" onchange="updateSortOrder(value)">
+            <option id="search-results-sort-newest" value="-updated_on">Sort By: Last Updated</option>
+            <option id="search-results-sort-oldest" value="-comment_count">Sort By: Comments</option>
+        </select>
 	</div>
 	<div class="uk-switcher uk-margin-remove-left search-switcher uk-width-expand ourchive-padding-remove-horizontal uk-inline uk-height-viewport">
 		<div class="uk-width-expand" id="search-results-works-parent">		
