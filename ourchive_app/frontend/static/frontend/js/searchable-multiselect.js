@@ -59,7 +59,7 @@ function createInitialTokens(select) {
     } = getOptions(select);
     const wrapper = select.parentNode;
     for (let i = 0; i < options_selected.length; i++) {
-        createToken(wrapper, options_selected[i]);
+        createToken(wrapper, options_selected[i], options_selected[i]);
     }
 }
 
@@ -112,7 +112,7 @@ function openOptions(e) {
 }
 
 // Function that create a token inside of a wrapper with the given value
-function createToken(wrapper, value, id="") {
+function createToken(wrapper, value, text_value, id="") {
     const search = wrapper.querySelector(".search-container");
     // Create token wrapper
     const token = document.createElement("div");
@@ -120,11 +120,11 @@ function createToken(wrapper, value, id="") {
     token.setAttribute("id", id);
     const token_span = document.createElement("span");
     token_span.classList.add("selected-label");
-    token_span.innerText = value;
+    token_span.innerHTML = value;
     const close = document.createElement("a");
     close.classList.add("selected-close");
     close.setAttribute("tabindex", "-1");
-    close.setAttribute("data-option", value);
+    close.setAttribute("data-option", text_value);
     close.setAttribute("data-hits", 0);
     close.setAttribute("href", "#");
     close.innerText = "x";
@@ -136,10 +136,18 @@ function createToken(wrapper, value, id="") {
 
 function handleFacetCheckUncheck(event) {
     if (event.target.checked) {
-        createToken(document.getElementById("selected-filters-list"), event.target.parentNode.innerText, event.target.getAttribute("id")+"_badge");
+        createToken(document.getElementById("selected-filters-list"), event.target.parentNode.innerText, event.target.parentNode.innerText, event.target.getAttribute("id")+"_badge");
     }
     else {
         document.getElementById(event.target.getAttribute("id")+"_badge").remove();
+    }
+}
+
+function handleFacetInput(event) {
+    let labelParts = event.target.id.split(',');
+    let label = labelParts[1] + ": " + event.target.value; 
+    if ((event.target.value) && (event.target.value.trim() != '')) {
+        createToken(document.getElementById("selected-filters-list"), label, label, event.target.getAttribute("id")+"_badge");
     }
 }
 
@@ -236,8 +244,14 @@ function selectOption(e) {
     const option = wrapper.querySelector(`select option[value="${e.target.dataset.value}"]`);
 
     option.setAttribute("selected", "");
-    createToken(wrapper, e.target.dataset.value, option.getAttribute("id")+"_dropdown");
-    createToken(document.getElementById("selected-filters-list"), e.target.dataset.value, option.getAttribute("id")+"_badge");
+    let optionId = option.getAttribute("id");
+    let value = e.target.dataset.value;
+    if (optionId.includes(',exclude')) {
+         value = '<span><span class="uk-icon ourchive-search-badge-exclude" uk-icon="icon: ban; ratio: .8"></span> ' 
+            + " " + value + "</span>";
+    }
+    createToken(wrapper, value, e.target.dataset.value, option.getAttribute("id")+"_dropdown");
+    createToken(document.getElementById("selected-filters-list"), value, e.target.dataset.value, optionId+"_badge");
     if (input_search.value) {
         input_search.value = "";
     }
@@ -331,7 +345,12 @@ function removeToken(e) {
             wrapper = document.getElementById(otherId).parentNode;
         }
         else {
-            document.getElementById(token_id.replace('_badge', '')).checked = false;
+            if (document.getElementById(token_id.replace('_badge', '')).checked) {
+                document.getElementById(token_id.replace('_badge', '')).checked = false;
+            }
+            else {
+                document.getElementById(token_id.replace('_badge', '')).value = '';
+            }
         }
     }
     if (wrapper !== null) {

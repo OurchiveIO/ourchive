@@ -4,6 +4,10 @@ select[data-multi-select-plugin] {
     display: none !important;
 }
 
+.ourchive-search-badge-exclude svg {
+    margin-bottom: 5px;
+}
+
 .multi-select-component {
     position: relative;
     display: flex;

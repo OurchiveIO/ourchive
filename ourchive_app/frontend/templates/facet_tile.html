@@ -1,9 +1,16 @@
 <dt><span class="uk-text-bold">{{ facet.label }}</span></dt>	
 	{% if facet.object_type == 'tag' %}
 	<dd class="uk-margin-bottom">
+		<span class="uk-text-bold uk-text-small">Include</span>
 		<select multiple data-multi-select-plugin>
 			{% for value in facet.values %} 
-            <option id="{{ facet.label }},{{ value.label }}" name="{{include}}_{{ facet.label }},{{ value.label }},{{facet.object_type}}" value={{value.label}} {% if value.checked %}selected{% endif %}>{{value.label}}</option>
+            <option id="{{ facet.label }},{{ value.label }},include" name="{{include}}_{{ facet.label }},{{ value.label }},{{facet.object_type}}" value={{value.label}} {% if value.checked %}selected{% endif %}>{{value.label}}</option>
+           {% endfor %}
+        </select>
+        <span class="uk-text-bold uk-text-small">Exclude</span>
+        <select multiple data-multi-select-plugin>
+			{% for value in facet.values %} 
+            <option id="{{ facet.label }},{{ value.label }},exclude" name="{{include}}_{{ facet.label }},{{ value.label }},{{facet.object_type}}" value={{value.label}} {% if value.checked %}selected{% endif %}>{{value.label}}</option>
            {% endfor %}
         </select>
     {% else %}		
@@ -11,11 +18,11 @@
 	<div class="uk-child-width-1 uk-grid uk-grid-small uk-margin" id="{{include}}-facet-parent">
 		{% for value in facet.values %} 
 			{% if facet.object_type == 'attribute' %}
-			<label id="{{include}}-facet-child-label-{{value.label}}"><input id="{{ facet.label }},{{ value.label }}" class="uk-checkbox" type="checkbox" name="{{include}}_{{ facet.label }},{{ value.label }}{% if facet.object_type %},{{facet.object_type}}{% endif %}" {% if value.label in keys %}checked{%endif%} {% if value.checked %}checked{%endif%}> {{ value.label }}</label>
+			<label id="{{include}}-facet-child-label-{{value.label}}"><input id="{{ facet.label }},{{ value.label }}" class="uk-checkbox" type="checkbox" name="{{include}}_{{ facet.label }},{{ value.label }}{% if facet.object_type %},{{facet.object_type}}{% endif %}" {% if value.label in keys %}checked{%endif%} {% if value.checked %}checked{%endif%} onchange="handleFacetCheckUncheck(event)"> {{ value.label }}</label>
 			{% elif facet.display_type == 'checkbox' %}
 			<label id="{{include}}-facet-child-label-{{value.label}}"><input id="{{ facet.label }},{{ value.label }}" class="uk-checkbox" type="checkbox" name="{{include}}_{{ facet.label }},{{ value.filter_val }}{% if facet.object_type %},{{facet.object_type}}{% endif %}" {% if value.label in keys %}checked{%endif%} {% if value.checked %}checked{%endif%} onchange="handleFacetCheckUncheck(event)"> {{ value.label }}</label>
 			{% else %}
-			<span class="uk-text-medium">{{value.label}}</span> <span><input id="{{include}}-facet-child-val" class="uk-input uk-width-small" type="text" name="{{include}}_{{ facet.label }},{{ value.filter_val }}{% if facet.object_type %},{{facet.object_type}},input{% endif %}" {% if include == 'include' %}value="{{value.include_value}}"{% else %}value="{{value.exclude_value}}"{% endif %}></label></span>
+			<span class="uk-text-medium">{{value.label}}</span> <span><input id="{{ facet.label }},{{ value.label }}" class="uk-input uk-width-small" type="text" name="{{include}}_{{ facet.label }},{{ value.filter_val }}{% if facet.object_type %},{{facet.object_type}},input{% endif %}" {% if include == 'include' %}value="{{value.include_value}}"{% else %}value="{{value.exclude_value}}"{% endif %} onblur="handleFacetInput(event)"></label></span>
 			{% endif %}
 	    {% endfor %}    
 	</div>
