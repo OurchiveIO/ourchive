@@ -89,8 +89,9 @@ class SearchResults(object):
         work_types_list = []
         for work_type in work_types:
             work_types_list.append(
-                {"label": work_type.type_name, "checked": work_type_id and work_type_id == str(work_type.id)})
+                {"label": work_type.type_name, "filter_val": work_type.type_name, "checked": work_type_id and work_type_id == str(work_type.id)})
         work_types_dict = {}
+        work_types_dict["display_type"] = 'checkbox'
         work_types_dict["label"] = "Work Type"
         work_types_dict["values"] = work_types_list
         work_types_dict["object_type"] = 'work'
@@ -102,6 +103,7 @@ class SearchResults(object):
             languages_list.append(
                 {"label": language.display_name, "filter_val": language.display_name})
         languages_dict = {}
+        languages_dict["display_type"] = 'checkbox'
         languages_dict["label"] = "Language"
         languages_dict["values"] = languages_list
         languages_dict["object_type"] = "chive"
@@ -109,6 +111,7 @@ class SearchResults(object):
 
         # todo move to separate class
         word_count_dict = {}
+        word_count_dict["display_type"] = 'input'
         word_count_dict["label"] = "Work Word Count"
         word_count_dict["object_type"] = 'work'
         word_count_dict["filters"] = ["word_count_gte", "word_count_lte"]
@@ -119,6 +122,7 @@ class SearchResults(object):
         # todo move to db setting
         audio_length_dict = {}
         audio_length_dict["label"] = "Audio Length"
+        audio_length_dict["display_type"] = 'checkbox'
         audio_length_dict["values"] = [{"label": "Under 30:00", "filter_val": "audio_length_range|ranges|0|30"},
                                        {"label": "30:00 - 1:00:00",
                                            "filter_val": "audio_length_range|ranges|30|60"},
@@ -133,6 +137,7 @@ class SearchResults(object):
         complete_dict = {}
         complete_dict["label"] = "Completion Status"
         complete_dict["object_type"] = 'work'
+        complete_dict['display_type'] = 'checkbox'
         complete_dict["values"] = [{"label": "Complete", "filter_val": "1"},
                                    {"label": "Work In Progress", "filter_val": "0"}]
         chive_info["facets"].append(complete_dict)

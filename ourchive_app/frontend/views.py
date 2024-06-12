@@ -683,7 +683,6 @@ def search(request):
 
 
 def search_filter(request):
-	print(request.POST)
 	template_data = build_and_execute_search(request)
 	if not template_data:
 		return redirect('/')

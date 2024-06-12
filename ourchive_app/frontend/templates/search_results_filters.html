@@ -61,12 +61,12 @@
 	</div>
 </div>
 <div class="uk-width-1-1 uk-text-right uk-align-right uk-hidden@s"><a class="uk-button uk-button-default uk-button-small uk-hidden@s" uk-toggle="target: #flyover-results" id="show-filters-link">Toggle Filters</a></div> 
-<div class="uk-width-1-4 uk-visible@s search-results-toggle" id="search-results-work-facet-child" hidden> 
+<div class="uk-width-1-4 uk-visible@s search-results-toggle" id="search-results-work-facet-child"> 
 	<div class="uk-inline uk-align-left"><span class="uk-text-bold uk-inline uk-text-large">Filters</span></div><div class="uk-inline uk-align-right"><a href="#" class="uk-link-reset"><span uk-icon="icon: close; ratio: 1.5" title="Close filters" id="search-results-close-desktop-filter" class="search-results-toggle" uk-toggle="target: .search-results-toggle"></span></a></div>
 	<div class="uk-align-left uk-width-expand">
 		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">	
 		{% csrf_token %}
-		<ul uk-accordion>
+		<ul uk-accordion="multiple: true;">
 	    	{% for facet_group in include_facets %} 
 	    	<li {% if forloop.first %}class="uk-open"{% endif %}>
 	    		<a class="uk-accordion-title" href>{{ facet_group.label }}</a>

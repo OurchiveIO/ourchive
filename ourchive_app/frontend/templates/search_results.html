@@ -1,6 +1,9 @@
 {% extends 'index.html' %}
+{% load static %}
 {% block title %}Search Results{% endblock %}
 {% block content %}	
+<link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
+<script src="{% static 'frontend/js/searchable-multiselect.js' %}"></script>
 <script>
 	function getFormVals(event) {
 		event.preventDefault();
@@ -49,7 +52,7 @@
 {% include 'search_results_filters.html' %}
 <div class="uk-width-expand">
 	<div class="uk-width-expand uk-margin-bottom">
-		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle">Filter</button>
+		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden>Filter</button>
 		<select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium" onchange="updateSortOrder(value)">
             <option id="search-results-sort-newest" value="-updated_on">Sort By: Last Updated</option>
             <option id="search-results-sort-oldest" value="-comment_count">Sort By: Comments</option>

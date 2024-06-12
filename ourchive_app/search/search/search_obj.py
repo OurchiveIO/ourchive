@@ -414,11 +414,12 @@ class FilterFacet(object):
 
 
 class ResultFacet(object):
-    def __init__(self, id, label, values=[], object_type=None):
+    def __init__(self, id, label, values=[], object_type=None, display_type='checkbox'):
         self.id = id
         self.label = label
         self.values = values
         self.object_type = object_type
+        self.display_type = display_type
 
     def to_dict(self):
         self.values = [x.__dict__ for x in self.values]
