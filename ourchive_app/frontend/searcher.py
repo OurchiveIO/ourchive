@@ -7,7 +7,7 @@ from copy import deepcopy
 logger = logging.getLogger(__name__)
 
 # values we don't want to send to the API
-NONFILTER_VALS = ['csrfmiddlewaretoken', 'term']
+NONFILTER_VALS = ['csrfmiddlewaretoken', 'term', 'order_by']
 # values we don't want to add to the frontend facets
 NONRETAIN_VALS = ['order_by', 'active_tab', 'work_type']
 
@@ -50,18 +50,19 @@ def add_filter_to_collection(filter_val, filter_details, collection_filter):
 	return collection_filter
 
 
-def add_filter_to_tag(filter_val, filter_details, tag_filter, work_filter, bookmark_filter):
+def add_filter_to_tag(filter_val, filter_details, tag_filter, work_filter, bookmark_filter, collection_filter):
 	tag_type = filter_details[0]
 	tag_text = filter_val.lower() if filter_val else ''
 	tag_filter['tag_type'].append(tag_type)
 	tag_filter['text'].append(tag_text)
 	work_filter['tags'].append(tag_text)
 	bookmark_filter['tags'].append(tag_text)
-	return [tag_filter, work_filter, bookmark_filter]
+	collection_filter['tags'].append(tag_text)
+	return [tag_filter, work_filter, bookmark_filter, collection_filter]
 
 
 def add_filter_to_attribute(filter_val, work_filter, bookmark_filter, collection_filter):
-	attribute_text = (filter_val.split(',')[1]).lower() if filter_val.split(',')[1] else ''
+	attribute_text = filter_val.lower() if filter_val else ''
 	work_filter['attributes'].append(attribute_text)
 	bookmark_filter['attributes'].append(attribute_text)
 	collection_filter['attributes'].append(attribute_text)
@@ -83,12 +84,12 @@ def build_request_filters(request, include_exclude, request_object, request_buil
 	filter_details = key.split(',')
 	# TODO: refactor: request object should stay a true object, __dict__ should be called
 	# on making the API request, and collections.defaultdict should be used to prevent cluttered logic
-	filter_key = filter_details[2] if len(filter_details) > 2 else filter_details[0]
+	filter_key = filter_details[2] if len(filter_details) > 2 else filter_details[1]
 	filter_type = request_builder.get_object_type(filter_key)
 	if len(filter_details) == 1:
 		if not filter_val:
 			return request_object
-	elif filter_type == 'tag' or filter_type == 'attribute':
+	elif filter_type == 'attribute':
 		filter_val = filter_details[1]
 	if filter_type == 'work':
 		if include_exclude == 'include':
@@ -102,20 +103,24 @@ def build_request_filters(request, include_exclude, request_object, request_buil
 				filter_details,
 				request_object.tag_search.include_filter,
 				request_object.work_search.include_filter,
-				request_object.bookmark_search.include_filter)
+				request_object.bookmark_search.include_filter,
+				request_object.collection_search.include_filter)
 			request_object.tag_search.include_filter = updated_filters[0]
 			request_object.work_search.include_filter = updated_filters[1]
 			request_object.bookmark_search.include_filter = updated_filters[2]
+			request_object.collection_search.include_filter = updated_filters[3]
 		else:
 			updated_filters = add_filter_to_tag(
 				filter_val,
 				filter_details,
 				request_object.tag_search.exclude_filter,
 				request_object.work_search.exclude_filter,
-				request_object.bookmark_search.exclude_filter)
+				request_object.bookmark_search.exclude_filter,
+				request_object.collection_search.exclude_filter)
 			request_object.tag_search.exclude_filter = updated_filters[0]
 			request_object.work_search.exclude_filter = updated_filters[1]
 			request_object.bookmark_search.exclude_filter = updated_filters[2]
+			request_object.collection_search.exclude_filter = updated_filters[3]
 	elif filter_type == 'attribute':
 		# TODO: validate & test
 		if include_exclude == 'include':
@@ -154,72 +159,6 @@ def build_request_filters(request, include_exclude, request_object, request_buil
 	return request_object
 
 
-def add_facet_to_filters(facets, label, value, item, excluded=True, checkbox=True):
-	if label in NONRETAIN_VALS:
-		return facets
-	facet_added = False
-	for facet in facets:
-		# checkbox filter
-		if checkbox:
-			selector = 'label' if facet['label'] == label else None
-			if not selector:
-				continue
-			for val in facet['values']:
-				if val[selector] == value or val.get('filter_val', '') == value:
-					val['checked'] = True
-					facet_added = True
-					break
-			if not facet_added:
-				facet['values'].append({'label': value, 'checked': True})
-			facet_added = True
-			break
-		# range/freeform filter
-		elif facet['label'] == label and not checkbox:
-			key_field = 'include_value' if not excluded else 'exclude_value'
-			item = item.split(',')
-			for val in facet['values']:
-				if val['filter_val'] == item[1]:
-					val[key_field] = value
-					facet_added = True
-					break
-	if not facet_added:
-		facets.append({'label': label, 'excluded': excluded, 'values': [{'label': value, 'checked': False}]})
-	return facets
-
-
-def iterate_facets(facets, item, excluded=True):
-	if item == 'any_all':
-		return facets
-	if ',' in item:
-		# checkbox. format: [type label],[checkbox label]
-		split = item.split(',')
-		if len(split) <= 3:
-			facets = add_facet_to_filters(facets, split[0], split[1], item, excluded)
-		# input. format: [filter facet label],[filter val e.g. word_count__gte],[object e.g. work],[value e.g. 1]
-		elif len(split) > 3:
-			facets = add_facet_to_filters(facets, split[0], split[3], item, excluded, False)
-	elif '$' in item:
-		# assumes text format e.g. word count: word_count_gte$20000
-		split = item.split('$')
-		facets = add_facet_to_filters(facets, split[0], split[1], split[0], excluded)
-	return facets
-
-
-def get_response_facets(response_json, request_object):
-	facets = response_json['results']['facet']
-	include_facets = deepcopy(facets)
-	exclude_facets = deepcopy(facets)
-	for item in exclude_facets:
-		for value in item.get('values', []):
-			if value.get('checked', None):
-				value['checked'] = False
-	for item in request_object.return_keys.exclude:
-		exclude_facets = iterate_facets(exclude_facets, item)
-	for item in request_object.return_keys.include:
-		include_facets = iterate_facets(include_facets, item, False)
-	return (include_facets, exclude_facets)
-
-
 def get_empty_response_obj():
 	return {'data': []}
 
@@ -232,7 +171,7 @@ def get_search_request(request, request_object, request_builder):
 		filter_val = request.POST.get(key, None) if request.POST.get(key, None) != 'on' else None
 		include_exclude = 'exclude' if 'exclude_' in key else 'include'
 		key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
-		if key in NONFILTER_VALS:
+		if key in NONFILTER_VALS or key in NONRETAIN_VALS:
 			continue
 		else:
 			if ',' in key and not filter_val and not key.endswith(',input'):
@@ -308,7 +247,7 @@ def build_and_execute_search(request):
 	tags = get_tag_results(response_json['results']['tag']) if 'results' in response_json and 'tag' in response_json['results'] else get_empty_response_obj()
 	users = response_json['results']['user'] if 'results' in response_json and 'user' in response_json['results'] else get_empty_response_obj()
 	collections = get_chive_results(response_json['results']['collection']) if 'results' in response_json and 'collection' in response_json['results'] else get_empty_response_obj()
-	facets = get_response_facets(response_json, request_object) if 'results' in response_json and 'facet' in response_json['results'] else {}
+	facets = response_json['results']['facets'] if 'results' in response_json and 'facets' in response_json['results'] else [{}, {}]
 	works_count = works['page']['count'] if 'page' in works else 0
 	bookmarks_count = bookmarks['page']['count'] if 'page' in bookmarks else 0
 	collections_count = collections['page']['count'] if 'page' in collections else 0
@@ -332,9 +271,8 @@ def build_and_execute_search(request):
 		'exclude_facets': facets[1],
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
-		'root': settings.ROOT_URL, 'term': term,
-		'keys_include': request_object.return_keys.include,
-		'keys_exclude': request_object.return_keys.exclude
+		'root': settings.ROOT_URL, 
+		'term': term
 	}
 	if tag_id:
 		template_data['tag_id'] = tag_id
