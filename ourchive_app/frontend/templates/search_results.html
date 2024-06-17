@@ -5,6 +5,23 @@
 <link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
 <script src="{% static 'frontend/js/searchable-multiselect.js' %}"></script>
 <script>
+	window.addEventListener("load", function(){
+	    var activeTabs = localStorage.getItem('ourchive-active-tabs');
+	  	if (activeTabs !== null) {
+	  		activeTabs = activeTabs.split(",");
+	  		activeTabs.forEach(function(tab) {
+	  			var accordionItem = document.getElementById('accordion-item-'+tab);
+    			if (!accordionItem.classList.contains('uk-open')) {
+    				UIkit.accordion(document.getElementById('search-accordion')).toggle(tab, false);
+    				UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(tab, false);
+    			}
+	  		});
+	  	}
+	  	else {
+	  		UIkit.accordion(document.getElementById('search-accordion')).toggle(0, false);
+	  		UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(0, false);
+	  	}
+	});
 	function getFormVals(event) {
 		event.preventDefault();
 		link = event.target.href;
@@ -56,6 +73,7 @@
 	</div>
 	<div class="uk-width-expand uk-margin-bottom">
 		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden>Filter</button>
+		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s" type="button" uk-toggle="target: #flyover-results">Filter</button>
 		<select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium" onchange="updateSortOrder(value)">
             <option id="search-results-sort-newest" value="-updated_on">Sort By: Last Updated</option>
             <option id="search-results-sort-oldest" value="-comment_count">Sort By: Comments</option>

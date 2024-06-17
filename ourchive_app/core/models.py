@@ -6,6 +6,7 @@ import nh3
 import unidecode
 from .utils import clean_tag_text, count_words
 from django_registration.validators import ReservedNameValidator
+from django.core.validators import validate_slug
 
 
 class User(AbstractUser):
@@ -1087,7 +1088,7 @@ class SearchGroup(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    label = models.CharField(max_length=200, blank=False, null=False)
+    label = models.CharField(max_length=200, blank=False, null=False, validators=[validate_slug])
     display_order = models.IntegerField(default=1)
 
     def __repr__(self):
