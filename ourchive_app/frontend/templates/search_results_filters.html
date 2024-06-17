@@ -8,14 +8,15 @@
 	    		<a class="uk-accordion-title" href>{{ facet_group.label }}</a>
 	    		<div class="uk-accordion-content">
 		    		{% for facet in facet_group.facets %}
-						{% include "facet_tile.html" with mobile='true' %}
+						{% include "facet_tile.html" with include='include' mobile='true' %}
 		    		{% endfor %}
 		    	</div>
 	    	</li>
 			{% endfor %}
-			<select id="search-results-sort-select-hidden" name="order_by" class="uk-select" hidden>
+			<select id="search-results-sort-select-hidden-mobile" name="order_by" class="uk-select" hidden>
 	            <option id="search-results-sort-newest" value="-updated_on">Sort By: Last Updated</option>
 	            <option id="search-results-sort-oldest" value="-comment_count">Sort By: Comments</option>
+	            <option id="search-results-sort-oldest" value="-fingerguns">Sort By: Fingerguns</option>
 	        </select>
 	        <input type="hidden" id="term" name="term" value="{{ term }}">
 			{% if tag_id %}
@@ -39,14 +40,15 @@
 	    		<a class="uk-accordion-title" href>{{ facet_group.label }}</a>
 	    		<div class="uk-accordion-content">
 		    		{% for facet in facet_group.facets %}
-						{% include "facet_tile.html" %}
+						{% include "facet_tile.html" with include='include'%}
 		    		{% endfor %}
 		    	</div>
 	    	</li>
 			{% endfor %}
 			<select id="search-results-sort-select-hidden" name="order_by" class="uk-select" hidden>
-	            <option id="search-results-sort-newest" value="-updated_on">Sort By: Last Updated</option>
-	            <option id="search-results-sort-oldest" value="-comment_count">Sort By: Comments</option>
+	            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
+	            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
+	            <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
 	        </select>
 	        <input type="hidden" id="term" name="term" value="{{ term }}">
 			{% if tag_id %}

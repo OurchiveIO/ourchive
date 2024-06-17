@@ -260,6 +260,7 @@ def build_and_execute_search(request):
 			[tag_count, 3],
 			[len(users['data']), 4]
 		]) if not active_tab else active_tab
+	order_by = response_json.get('results', {}).get('options', {}).get('order_by', '-updated_on')
 	template_data = {
 		'works': works,
 		'bookmarks': bookmarks,
@@ -271,7 +272,8 @@ def build_and_execute_search(request):
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
 		'root': settings.ROOT_URL, 
-		'term': term
+		'term': term,
+		'order_by': order_by
 	}
 	if tag_id:
 		template_data['tag_id'] = tag_id

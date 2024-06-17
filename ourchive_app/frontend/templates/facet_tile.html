@@ -18,11 +18,11 @@
 	<div class="uk-child-width-1 uk-grid uk-grid-small uk-margin" id="{{include}}-facet-parent">
 		{% for value in facet.values %} 
 			{% if facet.object_type == 'attribute' %}
-			<label id="{{include}}-facet-child-label-{{value.label}}"><input id="{{ facet.label }},{{ value.label }}" class="uk-checkbox" type="checkbox" name="{{include}}_{{ facet.label }},{{ value.label }}{% if facet.object_type %},{{facet.object_type}}{% endif %}" {% if value.checked %}checked{%endif%} onchange="handleFacetCheckUncheck(event)"> {{ value.label }}</label>
+			<label id="{{include}}-facet-child-label-{{value.label}}"><input id="{{ facet.label }},{{ value.label }}{% if mobile %},mobile{% endif %}" class="uk-checkbox" type="checkbox" name="{{include}}_{{ facet.label }},{{ value.label }}{% if facet.object_type %},{{facet.object_type}}{% endif %}" {% if value.checked %}checked{%endif%} onchange="handleFacetCheckUncheck(event)"> {{ value.label }}</label>
 			{% elif facet.display_type == 'checkbox' %}
-			<label id="{{include}}-facet-child-label-{{value.label}}"><input id="{{ facet.label }},{{ value.label }}" class="uk-checkbox" type="checkbox" name="{{include}}_{{ facet.label }},{{ value.filter_val }}{% if facet.object_type %},{{facet.object_type}}{% endif %}" {% if value.checked %}checked{%endif%} onchange="handleFacetCheckUncheck(event)"> {{ value.label }}</label>
+			<label id="{{include}}-facet-child-label-{{value.label}}"><input id="{{ facet.label }},{{ value.label }}{% if mobile %},mobile{% endif %}" class="uk-checkbox" type="checkbox" name="{{include}}_{{ facet.label }},{{ value.filter_val }}{% if facet.object_type %},{{facet.object_type}}{% endif %}" {% if value.checked %}checked{%endif%} onchange="handleFacetCheckUncheck(event)"> {{ value.label }}</label>
 			{% else %}
-			<span class="uk-text-medium">{{value.label}}</span> <span><input id="{{ facet.label }},{{ value.label }}" class="uk-input uk-width-small facet-val-input" {% if 'Count' in facet.label %}type="number"{% else %}type="text"{% endif %} name="{{include}}_{{ facet.label }},{{ value.filter_val }}{% if facet.object_type %},{{facet.object_type}},input{% endif %}" value="{{value.value}}" onblur="handleFacetInput(event)"></label></span>
+			<span class="uk-text-medium">{{value.label}}</span> <span><input id="{{ facet.label }},{{ value.label }}{% if mobile %},mobile{% endif %}" class="uk-input uk-width-small facet-val-input" {% if 'Count' in facet.label %}type="number"{% else %}type="text"{% endif %} name="{{include}}_{{ facet.label }},{{ value.filter_val }}{% if facet.object_type %},{{facet.object_type}},input{% endif %}" value="{{value.value}}" onblur="handleFacetInput(event)"></label></span>
 			{% endif %}
 	    {% endfor %}    
 	</div>

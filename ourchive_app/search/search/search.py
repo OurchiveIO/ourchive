@@ -214,8 +214,10 @@ class PostgresProvider:
                         one_distance__lte=trigram_max)
                 if resultset is not None and has_drafts:
                     resultset = resultset.filter(draft=False)
-                resultset = resultset.order_by(
-                    'zero_distance', 'one_distance', order_by)
+                if hasattr(obj, order_by.replace('-', '')):
+                    resultset = resultset.order_by('zero_distance', 'one_distance', order_by)
+                else:
+                    resultset = resultset.order_by('zero_distance', 'one_distance', '-updated_on')
             else:
                 resultset = obj.objects.annotate(
                     zero_distance=TrigramWordDistance(term, trigram_fields[0]))
@@ -232,13 +234,20 @@ class PostgresProvider:
                     resultset = resultset.filter(zero_distance__lte=trigram_max)
                 if resultset is not None and has_drafts:
                     resultset = resultset.filter(draft=False)
-                resultset = resultset.order_by('zero_distance', order_by)
+                if hasattr(obj, order_by.replace('-', '')):
+                    resultset = resultset.order_by('zero_distance', order_by) 
+                else:
+                    resultset = resultset.order_by('zero_distance', 'one_distance', '-updated_on')
             require_distinct = False
         if resultset and has_filterable:
             resultset = resultset.filter(filterable=True)
         if require_distinct and resultset:
             # remove any dupes & apply order_by
-            resultset = resultset.order_by(order_by).distinct()
+            if hasattr(obj, order_by.replace('-', '')):
+                resultset = resultset.order_by(order_by)
+            else:
+                resultset = resultset.order_by('zero_distance', 'one_distance', '-updated_on')
+            resultset = resultset.distinct()
         return self.process_results(resultset, page, obj)
 
     def get_filters(self, search_object):
@@ -368,7 +377,7 @@ class PostgresProvider:
             result_json.append(result_dict)
         return result_json
 
-    def search_works(self, **kwargs):
+    def search_works(self, options, **kwargs):
         work_search = WorkSearch()
         work_search.from_dict(kwargs)
         work_filters = self.get_filters(work_search)
@@ -380,11 +389,11 @@ class PostgresProvider:
         if not query and not work_filters:
             return {'data': []}
         resultset = self.run_queries(work_filters, query, Work, [
-                                     'title', 'summary'], work_search.term, kwargs['page'], work_search.order_by, True)
+                                     'title', 'summary'], work_search.term, kwargs['page'], options.get('order_by', '-updated_on'), True)
         result_json = self.build_work_resultset(resultset[0], work_search.reserved_fields)
         return {'data': result_json, 'page': resultset[1]}
 
-    def search_bookmarks(self, **kwargs):
+    def search_bookmarks(self, options, **kwargs):
         bookmark_search = BookmarkSearch()
         bookmark_search.from_dict(kwargs)
         bookmark_filters = self.get_filters(bookmark_search)
@@ -392,11 +401,11 @@ class PostgresProvider:
         if not query and not bookmark_filters:
             return {'data': []}
         resultset = self.run_queries(bookmark_filters, query, Bookmark, [
-                                     'title', 'description'], bookmark_search.term, kwargs.get('page', 1), bookmark_search.order_by, True, .85, True, True)
+                                     'title', 'description'], bookmark_search.term, kwargs.get('page', 1), options.get('order_by', '-updated_on'), True, .85, True, True)
         result_json = self.build_bookmark_resultset(resultset[0], bookmark_search.reserved_fields)
         return {'data': result_json, 'page': resultset[1]}
 
-    def search_collections(self, **kwargs):
+    def search_collections(self, options, **kwargs):
         collection_search = CollectionSearch()
         collection_search.from_dict(kwargs)
         collection_filters = self.get_filters(collection_search)
@@ -405,17 +414,20 @@ class PostgresProvider:
         if not query and not collection_filters:
             return {'data': []}
         resultset = self.run_queries(collection_filters, query, BookmarkCollection, [
-                                     'title', 'short_description'], collection_search.term, kwargs.get('page', 1), collection_search.order_by, True)
+                                     'title', 'short_description'], collection_search.term, kwargs.get('page', 1), options.get('order_by', '-updated_on'), True)
         result_json = self.build_collection_resultset(resultset[0], collection_search.reserved_fields)
         return {'data': result_json, 'page': resultset[1]}
 
-    def search_users(self, **kwargs):
+    def search_users(self, options, **kwargs):
         user_search = UserSearch()
         user_search.from_dict(kwargs)
         query = self.get_query(user_search.term, user_search.term_search_fields)
         if query is None:
             return {'data': []}
-        resultset = User.objects.filter(is_active=True).filter(query)[:20]
+        if hasattr(User, options.get('order_by', '-updated_on')):
+            resultset = User.objects.filter(is_active=True).filter(query).order_by(options.get('order_by', '-updated_on'))[:20]
+        else:
+            resultset = User.objects.filter(is_active=True).filter(query).order_by('-updated_on')[:20]
         result_json = []
         for result in resultset:
             result_dict = result.__dict__
@@ -449,7 +461,7 @@ class PostgresProvider:
         resultset = None
         term = term.lower()
         resultset = Work.objects.filter(user__id=user,draft=False).filter(
-            Q(title__icontains=term) | Q(summary__icontains=term))
+            Q(title__icontains=term) | Q(summary__icontains=term)).order_by('-updated_on')
         for result in resultset:
             work_dict = vars(result)
             if '_state' in work_dict:
@@ -496,7 +508,7 @@ class PostgresProvider:
             results.append(anthology_dict)
         return results
 
-    def search_tags(self, **kwargs):
+    def search_tags(self, options, **kwargs):
         tag_search = TagSearch()
         tag_search.from_dict(kwargs)
         tag_filters = self.get_filters(tag_search)
@@ -504,7 +516,7 @@ class PostgresProvider:
         if not query and not tag_filters:
             return {'data': []}
         resultset = self.run_queries(tag_filters, query, Tag, [
-                                     'text'], tag_search.term, kwargs.get('page', 1), tag_search.order_by, False, 0.6, False, False, True)
+                                     'text'], tag_search.term, kwargs.get('page', 1), options.get('order_by', '-updated_on'), False, 0.6, False, False, True)
         result_json = []
         if resultset is None:
             return result_json

@@ -267,7 +267,6 @@ class BookmarkSearch(object):
         self.term = ""
         self.include_mode = ""
         self.exclude_mode = ""
-        self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on']
         self.term_search_fields = ['title', 'description', 'tags__text', 'attributes__name']
         self.page = 1
@@ -279,7 +278,6 @@ class BookmarkSearch(object):
             self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
-        self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -295,7 +293,6 @@ class CollectionSearch(object):
         self.term = ""
         self.include_mode = ""
         self.exclude_mode = ""
-        self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on']
         self.term_search_fields = ['title', 'short_description', 'tags__text', 'attributes__name']
         self.page = 1
@@ -307,7 +304,6 @@ class CollectionSearch(object):
             self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
-        self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -323,7 +319,6 @@ class TagSearch(object):
         self.term = ""
         self.include_mode = ""
         self.exclude_mode = ""
-        self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['text']
         self.page = 1
@@ -335,7 +330,6 @@ class TagSearch(object):
             self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
-        self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -349,7 +343,6 @@ class UserSearch(object):
     def __init__(self):
         self.filter = None
         self.term = ""
-        self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on', 'password', 'is_superuser', 'first_name',
                                 'last_name', 'is_staff', 'email', 'date_joined', 'last_login', 'is_active']
         self.term_search_fields = ['username', 'attributes__name']
@@ -372,7 +365,6 @@ class WorkSearch(object):
         self.term = ""
         self.include_mode = ""
         self.exclude_mode = ""
-        self.order_by = ""
         self.reserved_fields = ['_state', 'uid', 'created_on']
         self.term_search_fields = ['title', 'summary',
                                    'chapters__title', 'chapters__summary', 'tags__text', 'attributes__name']
@@ -385,7 +377,6 @@ class WorkSearch(object):
             self.term = unidecode.unidecode(dict_obj['term'])
         self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
         self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
-        self.order_by = dict_obj['order_by'].lower() if 'order_by' in dict_obj else ''
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -446,6 +437,7 @@ class GroupFacet(object):
 class SearchOptions(object):
     def __init__(self):
         self.split_include_exclude = False
+        self.order_by = '-updated_on'
 
     def to_dict(self):
         return self.__dict__

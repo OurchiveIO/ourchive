@@ -19,37 +19,45 @@ class OurchiveSearch:
 		if 'work_type_id' in kwargs and kwargs['work_type_id']:
 			return self.filter_by_work_type(**kwargs)
 		if ('work_search') in kwargs:
-			results['work'] = self.searcher.search_works(**kwargs['work_search'])
+			results['work'] = self.searcher.search_works(kwargs['options'], **kwargs['work_search'])
 		if ('bookmark_search') in kwargs:
-			results['bookmark'] = self.searcher.search_bookmarks(**kwargs['bookmark_search'])
+			results['bookmark'] = self.searcher.search_bookmarks(kwargs['options'], **kwargs['bookmark_search'])
 		if ('tag_search') in kwargs:
-			results['tag'] = self.searcher.search_tags(**kwargs['tag_search'])
+			results['tag'] = self.searcher.search_tags(kwargs['options'], **kwargs['tag_search'])
 		if ('user_search') in kwargs:
-			results['user'] = self.searcher.search_users(**kwargs['user_search'])
+			results['user'] = self.searcher.search_users(kwargs['options'], **kwargs['user_search'])
 		if ('collection_search') in kwargs:
-			results['collection'] = self.searcher.search_collections(**kwargs['collection_search'])
-		results['facets'] = self.result_builder.get_result_facets(results, kwargs)
+			results['collection'] = self.searcher.search_collections(kwargs['options'], **kwargs['collection_search'])
+		facets = self.result_builder.get_result_facets(results, kwargs)
+		results['facets'] = facets[0]
+		results['options'] = facets[1]
 		return results
 
 	def filter_by_work_type(self, **kwargs):
 		if not kwargs['work_type_id'].isdigit():
 			return {'results': {'errors': ['Work type id must be a number.']}}
 		results = self.searcher.filter_by_work_type(**kwargs)
-		results['facets'] = self.result_builder.get_result_facets(results, None, kwargs['work_type_id'])
+		facets = self.result_builder.get_result_facets(results, None, kwargs['work_type_id'])
+		results['facets'] = facets[0]
+		results['options'] = facets[1]
 		return results
 
 	def filter_by_tag(self, **kwargs):
 		if not kwargs['tag_id'].isdigit():
 			return {'results': {'errors': ['Tag id must be a number.']}}
 		results = self.searcher.filter_by_tag(**kwargs)
-		results['facets'] = self.result_builder.get_result_facets(results, kwargs['tag_id'])
+		facets = self.result_builder.get_result_facets(results, kwargs['tag_id'])
+		results['facets'] = facets[0]
+		results['options'] = facets[1]
 		return results
 
 	def filter_by_attribute(self, **kwargs):
 		if not kwargs['attr_id'].isdigit():
 			return {'results': {'errors': ['Attribute id must be a number.']}}
 		results = self.searcher.filter_by_attribute(**kwargs)
-		results['facets'] = self.result_builder.get_result_facets(results, kwargs['attr_id'])
+		facets = self.result_builder.get_result_facets(results, kwargs['attr_id'])
+		results['facets'] = facets[0]
+		results['options'] = facets[1]
 		return results
 
 	def do_tag_search(self, term, tag_type, fetch_all):

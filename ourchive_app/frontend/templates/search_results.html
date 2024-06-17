@@ -28,6 +28,28 @@
 		if (localStorage.getItem('ourchive-show-filters') === '0') {
 			UIkit.toggle(document.getElementById('search-results-toggle-button')).toggle();
 		}
+
+		const checkboxes = document.querySelectorAll("input[type='checkbox']:checked");
+		checkboxes.forEach(function(checkbox) {
+			let checkbox_id = checkbox.getAttribute("id").replace(',mobile', '');
+			if (document.getElementById(checkbox_id+"_badge") !== null) {
+	            return;
+	        }
+			createToken(document.getElementById("selected-filters-list"), checkbox.parentNode.innerText, checkbox.parentNode.innerText, checkbox_id+"_badge");
+		});
+
+		const inputboxes = document.querySelectorAll(".facet-val-input");
+		inputboxes.forEach(function(inputbox) {
+			let input_id = inputbox.getAttribute("id").replace(',mobile', '');
+			if (document.getElementById(input_id+"_badge") !== null) {
+	            return;
+	        }
+			if (inputbox.value.trim() !== "") {
+				let labelParts = inputbox.id.split(',');
+			    let label = labelParts[1] + ": " + inputbox.value; 
+			    createToken(document.getElementById("selected-filters-list"), label, label, input_id+"_badge");
+			}
+		});
 	});
 	function updateFilterToggle() {
 		var showFilters = localStorage.getItem('ourchive-show-filters');
@@ -64,9 +86,15 @@
 		}
 	}
 
-	function updateSortOrder(selected) {
-		document.getElementById("search-results-sort-select-hidden").value = selected;
-		document.forms["searchResultsForm_work"].submit()
+	function updateSortOrder(selected, mobile) {
+		if (mobile === true) {
+			document.getElementById("search-results-sort-select-hidden-mobile").value = selected;
+			document.forms["searchResultsForm_work_mobile"].submit();
+		}
+		else {
+			document.getElementById("search-results-sort-select-hidden").value = selected;
+			document.forms["searchResultsForm_work"].submit();
+		}
 	}
 
 	function clearAll() {
@@ -105,9 +133,15 @@
 	<div class="uk-width-expand uk-margin-bottom">
 		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden id="search-results-toggle-button" onClick="updateFilterToggle()">Filter</button>
 		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
-		<select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium" onchange="updateSortOrder(value)">
-            <option id="search-results-sort-newest" value="-updated_on">Sort By: Last Updated</option>
-            <option id="search-results-sort-oldest" value="-comment_count">Sort By: Comments</option>
+		<select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-width-medium uk-hidden@s" onchange="updateSortOrder(value, true)">
+            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
+            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
+            <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
+        </select>
+        <select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium uk-visible@s" onchange="updateSortOrder(value, false)">
+            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
+            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
+            <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
         </select>
 	</div>
 	<div class="uk-switcher uk-margin-remove-left search-switcher uk-width-expand ourchive-padding-remove-horizontal uk-inline uk-height-viewport">

@@ -22,6 +22,7 @@ class SearchResults(object):
         self.tag_search_include = kwargs.get('tag_search', []).get('include_filter', {})
         self.tag_search_exclude = kwargs.get('tag_search', []).get('exclude_filter', {})
         self.split_include_exclude = str(kwargs.get('options', {}).get('split_include_exclude', 'true')).lower() == "true"
+        self.order_by = str(kwargs.get('options', {}).get('order_by', '-updated_on'))
 
     def flatten_search_groups(self, context):
         groups_array = []
@@ -183,7 +184,13 @@ class SearchResults(object):
         complete_dict["values"] = [{"label": "Complete", "filter_val": "1", "checked": "1" in getattr(self, f'work_search_{context}').get("Completion Status", [])},
                                    {"label": "Work In Progress", "filter_val": "0", "checked": "0" in getattr(self, f'work_search_{context}').get("Completion Status", [])}]
         chive_info["facets"].append(complete_dict)
+
         return chive_info
+
+    def get_options_facets(self):
+        options = {}
+        options["order_by"] = self.order_by
+        return options
 
     def get_contextual_result_facets(self, results, context):
         result_json = []
@@ -199,4 +206,5 @@ class SearchResults(object):
         self.set_shared_vals(kwargs)
         result_json_include = self.get_contextual_result_facets(results, 'include')
         result_json_exclude = self.get_contextual_result_facets(results, 'exclude')
-        return [result_json_include, result_json_exclude] if self.split_include_exclude else result_json_include
+        options = self.get_options_facets()
+        return [result_json_include, result_json_exclude, options] if self.split_include_exclude else [result_json_include, options]

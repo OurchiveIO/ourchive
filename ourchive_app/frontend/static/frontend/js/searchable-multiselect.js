@@ -148,20 +148,24 @@ function createToken(wrapper, value, text_value, id="") {
     wrapper.insertBefore(token, search);
 }
 
+// Checkboxes e.g. work type
 function handleFacetCheckUncheck(event) {
+    checkbox_id = event.target.getAttribute("id").replace(',mobile', '');
     if (event.target.checked) {
-        createToken(document.getElementById("selected-filters-list"), event.target.parentNode.innerText, event.target.parentNode.innerText, event.target.getAttribute("id")+"_badge");
+        createToken(document.getElementById("selected-filters-list"), event.target.parentNode.innerText, event.target.parentNode.innerText, checkbox_id+"_badge");
     }
     else {
-        document.getElementById(event.target.getAttribute("id")+"_badge").remove();
+        document.getElementById(checkbox_id+"_badge").remove();
     }
 }
 
+// Input e.g. word count
 function handleFacetInput(event) {
     let labelParts = event.target.id.split(',');
     let label = labelParts[1] + ": " + event.target.value; 
     if ((event.target.value) && (event.target.value.trim() != '')) {
-        createToken(document.getElementById("selected-filters-list"), label, label, event.target.getAttribute("id")+"_badge");
+        input_id = event.target.getAttribute("id").replace(',mobile', '');
+        createToken(document.getElementById("selected-filters-list"), label, label, input_id+"_badge");
     }
 }
 
@@ -367,11 +371,15 @@ function removeToken(e) {
             wrapper = document.getElementById(otherId).closest(".multi-select-component");
         }
         else {
-            if (document.getElementById(token_id.replace('_badge', '')).checked) {
-                document.getElementById(token_id.replace('_badge', '')).checked = false;
+            var desktop_id = token_id.replace('_badge', '');
+            var mobile_id = (token_id.replace('_badge', '')) +',mobile';
+            if (document.getElementById(desktop_id).checked || document.getElementById(mobile_id).checked) {
+                document.getElementById(desktop_id).checked = false;
+                document.getElementById(mobile_id).checked = false;
             }
             else {
-                document.getElementById(token_id.replace('_badge', '')).value = '';
+                document.getElementById(desktop_id).value = null;
+                document.getElementById(mobile_id).value = null;
             }
         }
     }
