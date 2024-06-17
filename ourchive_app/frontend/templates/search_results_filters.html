@@ -67,12 +67,12 @@
 		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">	
 		{% csrf_token %}
 		<ul uk-accordion="multiple: true;">
-	    	{% for facet_group in include_facets %} 
+	    	{% for facet_group in facets %} 
 	    	<li {% if forloop.first %}class="uk-open"{% endif %}>
 	    		<a class="uk-accordion-title" href>{{ facet_group.label }}</a>
 	    		<div class="uk-accordion-content">
 		    		{% for facet in facet_group.facets %}
-						{% include "facet_tile.html" with include='include' keys=keys_include %}
+						{% include "facet_tile.html" %}
 		    		{% endfor %}
 		    	</div>
 	    	</li>

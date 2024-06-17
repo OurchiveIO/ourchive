@@ -37,7 +37,7 @@ class WorkFilter(object):
                 'tags__text__icontains': [],
             },
             'attributes': {
-                'attributes__name__icontains': [],
+                'attributes__display_name__icontains': [],
             },
             'word_count': {
                 'word_count__gte': [],
@@ -72,7 +72,7 @@ class WorkFilter(object):
                 # 'tags__text__exact': [],
             },
             'attributes': {
-                'attributes__name__icontains': [],
+                'attributes__display_name__icontains': [],
             },
             'word_count': {
                 'word_count__gte': [],
@@ -99,7 +99,7 @@ class WorkFilter(object):
             self.include_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.include_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
             self.include_filters['tags']['tags__text__icontains'] = tags
-            self.include_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
+            self.include_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
             for range_tuple in dict_obj.get('audio_length_range', []):
                 self.include_filters['audio_length_range']['ranges'].append(range_tuple)
             self.include_filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
@@ -112,7 +112,7 @@ class WorkFilter(object):
             self.exclude_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.exclude_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
             self.exclude_filters['tags']['tags__text__icontains'] = tags
-            self.exclude_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
+            self.exclude_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
             for range_tuple in dict_obj.get('audio_length_range', []):
                 self.exclude_filters['audio_length_range']['ranges'].append(range_tuple)
             self.exclude_filters['word_count']['word_count__lte'] = dict_obj.get('word_count_lte', [])
@@ -133,7 +133,7 @@ class BookmarkFilter(object):
                 'rating__gte': [],
             },
             'attributes': {
-                'attributes__name__icontains': [],
+                'attributes__display_name__icontains': [],
             },
             'tags': {
                 'tags__text__icontains': [],
@@ -147,7 +147,7 @@ class BookmarkFilter(object):
                 'rating__gte': [],
             },
             'attributes': {
-                'attributes__name__icontains': [],
+                'attributes__display_name__icontains': [],
             },
             'tags': {
                 'tags__text__icontains': [],
@@ -162,12 +162,12 @@ class BookmarkFilter(object):
         if include:
             self.include_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
             self.include_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
-            self.include_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
+            self.include_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
             self.include_filters['tags']['tags__text__icontains'] = tags
         else:
             self.exclude_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
             self.exclude_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
-            self.exclude_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
+            self.exclude_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
             self.exclude_filters['tags']['tags__text__icontains'] = tags
 
     def to_dict(self):
@@ -216,7 +216,7 @@ class CollectionFilter(object):
     def __init__(self):
         self.include_filters = {
             'attributes': {
-                'attributes__name__icontains': [],
+                'attributes__display_name__icontains': [],
             },
             'complete': {
                 'is_complete__exact': [],
@@ -230,7 +230,7 @@ class CollectionFilter(object):
         }
         self.exclude_filters = {
             'attributes': {
-                'attributes__name__icontains': [],
+                'attributes__display_name__icontains': [],
             },
             'complete': {
                 'is_complete__exact': [],
@@ -249,12 +249,12 @@ class CollectionFilter(object):
             self.include_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
             self.include_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.include_filters['tags']['tags__text__icontains'] = tags
-            self.include_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
+            self.include_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
         else:
             self.exclude_filters['complete']['is_complete__exact'] = dict_obj.get('complete', [])
             self.exclude_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.exclude_filters['tags']['tags__text__icontains'] = tags
-            self.exclude_filters['attributes']['attributes__name__icontains'] = dict_obj.get('attributes', [])
+            self.exclude_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
 
     def to_dict(self):
         self_dict = self.__dict__
@@ -402,6 +402,7 @@ class GlobalSearch(object):
         self.tag_search = TagSearch().to_dict()
         self.user_search = UserSearch().to_dict()
         self.collection_search = CollectionSearch().to_dict()
+        self.options = SearchOptions().to_dict()
 
     def to_dict(self):
         return self.__dict__
@@ -411,6 +412,12 @@ class FilterFacet(object):
     def __init__(self, label, checked):
         self.label = label
         self.checked = checked
+
+
+class ContextualFilterFacet(FilterFacet):
+    def __init__(self, label, checked, inverse_checked):
+        super().__init__(label, checked)
+        self.inverse_checked = inverse_checked
 
 
 class ResultFacet(object):
@@ -433,4 +440,12 @@ class GroupFacet(object):
 
     def to_dict(self):
         self.facets = [x.__dict__ for x in self.facets]
+        return self.__dict__
+
+
+class SearchOptions(object):
+    def __init__(self):
+        self.split_include_exclude = False
+
+    def to_dict(self):
         return self.__dict__

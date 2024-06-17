@@ -281,6 +281,12 @@ class PostgresProvider:
                 attribute_dict["id"] = attribute.id
                 attribute_dict["order"] = attribute.order
                 attributes.append(attribute_dict)
+            languages = []
+            for language in result.languages.all():
+                languages.append(
+                    {
+                        "display_name": language.display_name
+                    })
             users = self.get_user_dict(result.users.all())
             work_type = None if result.work_type is None else result.work_type.type_name
             result_dict = result.__dict__
@@ -291,6 +297,7 @@ class PostgresProvider:
             result_dict["work_type_name"] = work_type
             result_dict["tags"] = tags
             result_dict["attributes"] = attributes
+            result_dict["languages_readonly"] = languages
             result_dict["chapter_count"] = len(chapters)
             result_json.append(result_dict)
         return result_json

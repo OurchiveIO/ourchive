@@ -59,7 +59,16 @@ function createInitialTokens(select) {
     } = getOptions(select);
     const wrapper = select.parentNode;
     for (let i = 0; i < options_selected.length; i++) {
-        createToken(wrapper, options_selected[i], options_selected[i]);
+        const input_search = wrapper.querySelector(".selected-input");
+        const option = wrapper.querySelector(`select option[value="${options_selected[i]}"]`);
+        let optionId = option.getAttribute("id");
+        let value = options_selected[i];
+        if (optionId.includes(',exclude')) {
+             value = '<span><span class="uk-icon ourchive-search-badge-exclude" uk-icon="icon: ban; ratio: .8"></span> ' 
+                + " " + value + "</span>";
+        }
+        createToken(wrapper, value, value, optionId+"_dropdown");
+        createToken(document.getElementById("selected-filters-list"), value, value, optionId+"_badge");
     }
 }
 

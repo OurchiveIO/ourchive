@@ -1,6 +1,7 @@
-from search.search.search_obj import FilterFacet, ResultFacet, GroupFacet
-from core.models import WorkType, OurchiveSetting, Tag, AttributeType, TagType, Language, SearchGroup
+from search.search.search_obj import FilterFacet, ResultFacet, GroupFacet, ContextualFilterFacet
+from core.models import WorkType, OurchiveSetting, Tag, AttributeType, TagType, Language, SearchGroup, AttributeValue
 from core.utils import get_star_count
+from copy import deepcopy
 
 class SearchResults(object):
 
@@ -20,6 +21,7 @@ class SearchResults(object):
         self.collection_search_exclude = kwargs.get('collection_search', []).get('exclude_filter', {})
         self.tag_search_include = kwargs.get('tag_search', []).get('include_filter', {})
         self.tag_search_exclude = kwargs.get('tag_search', []).get('exclude_filter', {})
+        self.split_include_exclude = str(kwargs.get('options', {}).get('split_include_exclude', 'true')).lower() == "true"
 
     def flatten_search_groups(self, context):
         groups_array = []
@@ -40,6 +42,9 @@ class SearchResults(object):
                 tags_dict = self.process_tag_tags(result['tags'], tags_dict)
         return tags_dict
 
+    def get_inverse_context(self, context):
+        return 'exclude' if context == 'include' else ('include' if context == 'exclude' else None)
+
     def build_final_tag_facets(self, tag_filter_name, result_json, tags_dict, context):
         for tag_type in tags_dict:
             if len(tags_dict[tag_type]['tags']) > 0:
@@ -48,7 +53,11 @@ class SearchResults(object):
                     checked_tag = True if (self.tag_id and tag_filter_name and tag_filter_name == tag_text) else False
                     if not checked_tag:
                         checked_tag = tag_text.lower() in getattr(self, f'work_search_{context}').get('tags', [])
-                    tag_filter_vals.append(FilterFacet(tag_text, checked_tag))
+                        if not self.split_include_exclude:
+                            inverse_checked = tag_text.lower() in getattr(self, f'work_search_{self.get_inverse_context(context)}').get('tags', [])
+                            tag_filter_vals.append(ContextualFilterFacet(tag_text, checked_tag, inverse_checked))
+                        else:
+                            tag_filter_vals.append(FilterFacet(tag_text, checked_tag))
                 result_facet = ResultFacet(tags_dict[tag_type]['type_id'], tag_type, tag_filter_vals, 'tag').to_dict()
                 getattr(self, f'{context}_search_groups')[tags_dict[tag_type]['group']].append(result_facet)
 
@@ -65,6 +74,12 @@ class SearchResults(object):
             db_tag_list = Tag.objects.filter(display_text__iexact=tag).all()
             for db_tag in db_tag_list:
                 tags_dict[db_tag.tag_type.label]['tags'].append(db_tag.display_text)
+        if not self.split_include_exclude:
+            for tag in getattr(self, f'work_search_{self.get_inverse_context(context)}').get('tags', []):
+                db_tag_list = Tag.objects.filter(display_text__iexact=tag).all()
+                for db_tag in db_tag_list:
+                    if db_tag.display_text not in tags_dict[db_tag.tag_type.label]['tags']:
+                        tags_dict[db_tag.tag_type.label]['tags'].append(db_tag.display_text)
         tags_dict = self.process_chive_tags(results['work']['data'], tags_dict)
         tags_dict = self.process_chive_tags(results['bookmark']['data'], tags_dict)
         tags_dict = self.process_chive_tags(results['collection']['data'], tags_dict)
@@ -86,6 +101,10 @@ class SearchResults(object):
         attributes_dict = {}
         for attribute_type in AttributeType.objects.filter(search_group__isnull=False).all():
             attributes_dict[attribute_type.display_name] = {'attrs': [], 'type_id': attribute_type.id, 'type_label': attribute_type.display_name, 'group': attribute_type.search_group.label}
+        for attribute in getattr(self, f'work_search_{context}').get('attributes', []):
+            db_attr_list = AttributeValue.objects.filter(display_name__iexact=attribute).all()
+            for db_attr in db_attr_list:
+                attributes_dict[db_attr.attribute_type.display_name]['attrs'].append(db_attr.display_name)
         attributes_dict = self.process_chive_attributes(results['work']['data'], attributes_dict)
         attributes_dict = self.process_chive_attributes(results['bookmark']['data'], attributes_dict)
         attributes_dict = self.process_chive_attributes(results['collection']['data'], attributes_dict)
@@ -93,7 +112,8 @@ class SearchResults(object):
             if len(attributes_dict[key]['attrs']) > 0:
                 attribute_filter_vals = []
                 for val in attributes_dict[key]['attrs']:
-                    attribute_filter_vals.append(FilterFacet(val, False))
+                    checked_attr = val.lower() in getattr(self, f'work_search_{context}').get('attributes', [])
+                    attribute_filter_vals.append(FilterFacet(val, checked_attr))
                 result_facet = ResultFacet(attributes_dict[key]['type_id'], key, attribute_filter_vals, 'attribute').to_dict()
                 getattr(self, f'{context}_search_groups')[attributes_dict[key]['group']].append(result_facet)
 
@@ -177,4 +197,4 @@ class SearchResults(object):
         self.set_shared_vals(kwargs)
         result_json_include = self.get_contextual_result_facets(results, 'include')
         result_json_exclude = self.get_contextual_result_facets(results, 'exclude')
-        return [result_json_include, result_json_exclude]
+        return [result_json_include, result_json_exclude] if self.split_include_exclude else result_json_include

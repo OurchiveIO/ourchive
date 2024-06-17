@@ -5,6 +5,7 @@ class ParentSearch():
 		self.collection_search = collection_search
 		self.user_search = user_search
 		self.tag_search = tag_search
+		self.options = {'split_include_exclude': False}
 		self.tag_id = None
 		self.attr_id = None
 		self.work_type_id = None
