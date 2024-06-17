@@ -74,6 +74,8 @@ class SearchResults(object):
             db_tag_list = Tag.objects.filter(display_text__iexact=tag).all()
             for db_tag in db_tag_list:
                 tags_dict[db_tag.tag_type.label]['tags'].append(db_tag.display_text)
+        # if we're including all tags and their include + exclude states, we need tags that might not 
+        # already be in the resultset e.g. excluded tags
         if not self.split_include_exclude:
             for tag in getattr(self, f'work_search_{self.get_inverse_context(context)}').get('tags', []):
                 db_tag_list = Tag.objects.filter(display_text__iexact=tag).all()

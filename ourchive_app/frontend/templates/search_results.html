@@ -21,7 +21,19 @@
 	  		UIkit.accordion(document.getElementById('search-accordion')).toggle(0, false);
 	  		UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(0, false);
 	  	}
+
+	  	if (localStorage.getItem('ourchive-show-filters') == null) {
+	  		localStorage.setItem('ourchive-show-filters', '1');
+		}
+		if (localStorage.getItem('ourchive-show-filters') === '0') {
+			UIkit.toggle(document.getElementById('search-results-toggle-button')).toggle();
+		}
 	});
+	function updateFilterToggle() {
+		var showFilters = localStorage.getItem('ourchive-show-filters');
+		showFilters = showFilters === '1' ? '0' : '1';
+		localStorage.setItem('ourchive-show-filters', showFilters);
+	}
 	function getFormVals(event) {
 		event.preventDefault();
 		link = event.target.href;
@@ -72,8 +84,8 @@
 		<!-- Selected filters go here -->
 	</div>
 	<div class="uk-width-expand uk-margin-bottom">
-		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden>Filter</button>
-		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s" type="button" uk-toggle="target: #flyover-results">Filter</button>
+		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden id="search-results-toggle-button" onClick="updateFilterToggle()">Filter</button>
+		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
 		<select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium" onchange="updateSortOrder(value)">
             <option id="search-results-sort-newest" value="-updated_on">Sort By: Last Updated</option>
             <option id="search-results-sort-oldest" value="-comment_count">Sort By: Comments</option>
