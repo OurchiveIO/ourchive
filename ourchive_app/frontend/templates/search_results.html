@@ -11,7 +11,7 @@
 	  		activeTabs = activeTabs.split(",");
 	  		activeTabs.forEach(function(tab) {
 	  			var accordionItem = document.getElementById('accordion-item-'+tab);
-    			if (!accordionItem.classList.contains('uk-open')) {
+    			if (accordionItem !== null && !accordionItem.classList.contains('uk-open')) {
     				UIkit.accordion(document.getElementById('search-accordion')).toggle(tab, false);
     				UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(tab, false);
     			}
