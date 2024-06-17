@@ -68,6 +68,25 @@
 		document.getElementById("search-results-sort-select-hidden").value = selected;
 		document.forms["searchResultsForm_work"].submit()
 	}
+
+	function clearAll() {
+		const options = document.querySelectorAll("option");
+		options.forEach(function(option) {
+			option.removeAttribute("selected");
+		});
+		const checkboxes = document.querySelectorAll("input[type='checkbox']");
+		checkboxes.forEach(function(checkbox) {
+			checkbox.checked = false;
+		});
+		const inputboxes = document.querySelectorAll(".facet-val-input");
+		inputboxes.forEach(function(inputbox) {
+			inputbox.value = "";
+		});
+		const filterList = document.querySelectorAll("div.selected-wrapper");
+		filterList.forEach(function(element) {
+			element.remove();
+		});
+	}
 </script>
 <div class="uk-width-1-1">
 	<ul uk-tab="animation: uk-animation-fade; active: {{default_tab}}; connect: .search-switcher" id="search-results-switcher-controls" class="uk-flex-center uk-width-1-1 ourchive-padding-remove-horizontal">

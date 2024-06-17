@@ -22,7 +22,7 @@
 			{% elif facet.display_type == 'checkbox' %}
 			<label id="{{include}}-facet-child-label-{{value.label}}"><input id="{{ facet.label }},{{ value.label }}" class="uk-checkbox" type="checkbox" name="{{include}}_{{ facet.label }},{{ value.filter_val }}{% if facet.object_type %},{{facet.object_type}}{% endif %}" {% if value.checked %}checked{%endif%} onchange="handleFacetCheckUncheck(event)"> {{ value.label }}</label>
 			{% else %}
-			<span class="uk-text-medium">{{value.label}}</span> <span><input id="{{ facet.label }},{{ value.label }}" class="uk-input uk-width-small" type="text" name="{{include}}_{{ facet.label }},{{ value.filter_val }}{% if facet.object_type %},{{facet.object_type}},input{% endif %}" value="{{value.value}}" onblur="handleFacetInput(event)"></label></span>
+			<span class="uk-text-medium">{{value.label}}</span> <span><input id="{{ facet.label }},{{ value.label }}" class="uk-input uk-width-small facet-val-input" type="text" name="{{include}}_{{ facet.label }},{{ value.filter_val }}{% if facet.object_type %},{{facet.object_type}},input{% endif %}" value="{{value.value}}" onblur="handleFacetInput(event)"></label></span>
 			{% endif %}
 	    {% endfor %}    
 	</div>
