@@ -67,8 +67,11 @@ function createInitialTokens(select) {
              value = '<span><span class="uk-icon ourchive-search-badge-exclude" uk-icon="icon: ban; ratio: .8"></span> ' 
                 + " " + value + "</span>";
         }
-        createToken(wrapper, value, value, optionId+"_dropdown");
-        createToken(document.getElementById("selected-filters-list"), value, value, optionId+"_badge");
+        createToken(wrapper, value, options_selected[i], optionId+"_dropdown");
+        if (document.getElementById(optionId.replace(',mobile', '')+"_badge") !== null) {
+            continue;
+        }
+        createToken(document.getElementById("selected-filters-list"), value, options_selected[i], optionId.replace(',mobile', '')+"_badge");
     }
 }
 
@@ -261,8 +264,8 @@ function selectOption(e) {
          value = '<span><span class="uk-icon ourchive-search-badge-exclude" uk-icon="icon: ban; ratio: .8"></span> ' 
             + " " + value + "</span>";
     }
-    createToken(wrapper, value, e.target.dataset.value, option.getAttribute("id")+"_dropdown");
-    createToken(document.getElementById("selected-filters-list"), value, e.target.dataset.value, optionId+"_badge");
+    createToken(wrapper, value, e.target.dataset.value, optionId+"_dropdown");
+    createToken(document.getElementById("selected-filters-list"), value, e.target.dataset.value, optionId.replace(',mobile', '')+"_badge");
     if (input_search.value) {
         input_search.value = "";
     }
@@ -353,9 +356,10 @@ function removeToken(e) {
     }
     let wrapper = null;
     let otherId = null;
+    let other_wrapper = null;
     if (token_id.endsWith('_dropdown')) {
         wrapper = e.target.closest(".selected-wrapper").parentNode;
-        otherId = token_id.replace('_dropdown', '_badge');
+        otherId = token_id.replace(',mobile', '').replace('_dropdown', '_badge');
     }
     else {
         otherId = token_id.replace('_badge', '_dropdown');

@@ -8,7 +8,7 @@
 	    		<a class="uk-accordion-title" href>{{ facet_group.label }}</a>
 	    		<div class="uk-accordion-content">
 		    		{% for facet in facet_group.facets %}
-						{% include "facet_tile.html" %}
+						{% include "facet_tile.html" with mobile='true' %}
 		    		{% endfor %}
 		    	</div>
 	    	</li>

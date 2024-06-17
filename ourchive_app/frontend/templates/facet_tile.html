@@ -4,13 +4,13 @@
 		<span class="uk-text-bold uk-text-small">Include</span>
 		<select multiple data-multi-select-plugin name="include_{{facet.label}},{{ facet.object_type }}">
 			{% for value in facet.values %} 
-            <option id="{{ facet.label }},{{ value.label }},include" name="include_{{ facet.label }},{{ value.label }},{{facet.object_type}}" value="{{value.label}}" {% if value.checked %}selected{% endif %}>{{value.label}}</option>
+            <option id="{{ facet.label }},{{ value.label }},include{% if mobile %},mobile{% endif %}" name="include_{{ facet.label }},{{ value.label }},{{facet.object_type}}" value="{{value.label}}" {% if value.checked %}selected{% endif %}>{{value.label}}</option>
            {% endfor %}
         </select>
         <span class="uk-text-bold uk-text-small">Exclude</span>
         <select multiple data-multi-select-plugin name="exclude_{{facet.label}},{{ facet.object_type }}">
 			{% for value in facet.values %} 
-            <option id="{{ facet.label }},{{ value.label }},exclude" name="exclude_{{ facet.label }},{{ value.label }},{{facet.object_type}}" value="{{value.label}}" {% if value.inverse_checked %}selected{% endif %}>{{value.label}}</option>
+            <option id="{{ facet.label }},{{ value.label }},exclude{% if mobile %},mobile{% endif %}" name="exclude_{{ facet.label }},{{ value.label }},{{facet.object_type}}" value="{{value.label}}" {% if value.inverse_checked %}selected{% endif %}>{{value.label}}</option>
            {% endfor %}
         </select>
     {% else %}		
