@@ -19,7 +19,6 @@ function init(element) {
     input.addEventListener("click", openOptions);
 
     const dropdown_icon = document.createElement("a");
-    dropdown_icon.setAttribute("href", "#");
     dropdown_icon.classList.add("dropdown-icon");
 
     dropdown_icon.addEventListener("click", clickDropdown);
