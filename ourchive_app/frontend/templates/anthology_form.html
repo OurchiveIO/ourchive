@@ -3,6 +3,8 @@
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
 {% load static %}
+<link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
+<script src="{% static 'frontend/js/searchable-multiselect-generic.js' %}"></script>
 <script>
 function doUserAutocomplete(term) {
   if (term.length < 2)
@@ -176,9 +178,9 @@ function handleModalDelete(url) {
         <label id="anthology-form-languages-label" class="uk-form-label" for="anthology-form-languages">{% translate 'Languages' %}</label>
         <div id="anthology-form-languages-controls" class="uk-form-controls">
             <div id="anthology-form-languages-inline" class="uk-inline">
-                <select name="languages[]" id="anthology-form-languages" class="uk-select" multiple="">
+                <select multiple data-multi-select-plugin name="languages[]" id="anthology-form-languages">
                     {% for language in languages %}
-                        <option value="{{language.id}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                        <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
                     {% endfor %}
                 </select>
             </div>

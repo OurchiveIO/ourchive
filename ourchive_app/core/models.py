@@ -152,6 +152,9 @@ class Language(models.Model):
 
     class Meta:
         db_table = 'core_language'
+        constraints = [
+            models.UniqueConstraint(Lower('display_name').desc(), name='unique_language_display_name')
+        ]
 
 
 class Work(models.Model):

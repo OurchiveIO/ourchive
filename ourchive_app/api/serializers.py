@@ -192,7 +192,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     can_upload_video = serializers.ReadOnlyField(required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     default_languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='default_languages')
-    default_languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
+    default_languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
     default_work_type = serializers.SlugRelatedField(
         queryset=WorkType.objects.all(),
         slug_field='type_name', required=False)
@@ -733,7 +733,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     series = WorkSeriesSerializer(required=False)
     series_id = serializers.PrimaryKeyRelatedField(queryset=WorkSeries.objects.all(), required=False)
     languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
-    languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
+    languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
@@ -923,7 +923,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     work = BookmarkWorkSerializer(required=False)
     work_id = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all())
     languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
-    languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
+    languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
@@ -1065,7 +1065,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     pending_users = serializers.SerializerMethodField()
     users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
-    languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
+    languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
@@ -1315,7 +1315,7 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
     created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
     updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
     languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
-    languages = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), required=False, many=True)
+    languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     owners = serializers.SerializerMethodField()
