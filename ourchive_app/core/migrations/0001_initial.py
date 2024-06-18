@@ -245,7 +245,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('uid', models.UUIDField(default=uuid.uuid4, editable=False)),
-                ('text', models.CharField(db_index=True, max_length=120)),
+                ('text', models.CharField(max_length=120)),
                 ('display_text', models.CharField(default='', max_length=120)),
                 ('created_on', models.DateTimeField(auto_now_add=True)),
                 ('updated_on', models.DateTimeField(auto_now=True)),
@@ -260,7 +260,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('label', models.CharField(max_length=200)),
-                ('type_name', models.CharField(blank=True, db_index=True, max_length=200, null=True)),
+                ('type_name', models.CharField(blank=True, max_length=200, null=True)),
                 ('admin_administrated', models.BooleanField(default=False)),
                 ('required', models.BooleanField(default=False)),
                 ('sort_order', models.IntegerField(default=1)),
@@ -472,7 +472,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'ordering': ['sort_order', 'name'],
-                'indexes': [models.Index(fields=['name'], name='core_attribu_name_8fc968_idx')],
             },
         ),
         migrations.AddConstraint(
@@ -620,10 +619,6 @@ class Migration(migrations.Migration):
             name='tags',
             field=models.ManyToManyField(to='core.tag'),
         ),
-        migrations.AddIndex(
-            model_name='tagtype',
-            index=models.Index(fields=['type_name'], name='core_tagtype_type_na_56cb9e_idx'),
-        ),
         migrations.AddField(
             model_name='tag',
             name='tag_type',
@@ -763,10 +758,6 @@ class Migration(migrations.Migration):
             name='default_work_type',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.worktype'),
         ),
-        migrations.AddIndex(
-            model_name='attributevalue',
-            index=models.Index(fields=['name'], name='core_attribu_name_0a819d_idx'),
-        ),
         migrations.AddConstraint(
             model_name='attributevalue',
             constraint=models.UniqueConstraint(models.OrderBy(django.db.models.functions.text.Lower('name'), descending=True), name='unique_attributevalue_name'),
@@ -785,10 +776,6 @@ class Migration(migrations.Migration):
             model_name='collectioncomment',
             name='collection',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='comments', to='core.bookmarkcollection'),
-        ),
-        migrations.AddIndex(
-            model_name='tag',
-            index=models.Index(fields=['text'], name='core_tag_text_e39765_idx'),
         ),
         migrations.AddConstraint(
             model_name='tag',
