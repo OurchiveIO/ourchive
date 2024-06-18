@@ -1,6 +1,7 @@
 from django.test import TestCase
-import api.models as models
+import core.models as models
 from ourchive_app.util.ourchive_fakes import OurchiveFakes
+
 
 class CoreTests(TestCase):
 

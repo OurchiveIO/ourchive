@@ -5,7 +5,7 @@
 	    <div class="uk-navbar-left" id="uk-nav-left">
 	    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger">{% if request.session.has_notifications %}<div class="ourchive-notification" role="status"></div>{%endif%}</a>
 	        <ul class="uk-navbar-nav uk-visible@s">
-	            <li class="uk-active" id="nav-home"><a href="/" title="Home" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
+	            <li class="uk-active" id="nav-home"><a href="/" title="Home" data-testid="ourchive-logo-link" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
 	        </ul>
 	    </div>	 
 	    <div class="uk-navbar-center uk-visible@s" id="uk-nav-center">
@@ -14,7 +14,7 @@
     					<div class="uk-navbar-item uk-margin-small-left">
             				<form class="uk-search uk-search-default ourchive-nav-search" action="/search/" method="post" id="nav-search-form">
 			                	{% csrf_token %}
-			                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>
+			                	<button type="submit" data-testid="navbar-search-submit" class="uk-search-icon-flip" uk-search-icon></button>
 			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
 							<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
 			                </form>
@@ -77,11 +77,11 @@
 	                			<li id="nav-new-anthology-li"><a href="{% url 'fe-create-anthology' %}" id="nav-new-anthology-link">{% translate 'New Anthology' %}</a></li>
 	                			<li id="nav-creations-li"><a href="#" id="nav-creations-link">{% translate 'My Chives' %}</a></li>
 	                			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="creations-subnav">
-	                				<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link">{% translate 'Bookmarks' %}</a></li>
-	                				<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link">{% translate 'Collections' %}</a></li>
+	                				<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link" data-testid="user-bookmarks">{% translate 'Bookmarks' %}</a></li>
+	                				<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link" data-testid="user-collections">{% translate 'Collections' %}</a></li>
 	                				<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">{% translate 'Works' %}</a></li>
-	                				<li id="nav-series-li"><a href="{% url 'fe-user-series' request.user.username %}" id="nav-series-link">{% translate 'Series' %}</a></li>
-	                				<li id="nav-anthologies-li"><a href="{% url 'fe-user-anthologies' request.user.username %}" id="nav-anthologies-link">{% translate 'Anthologies' %}</a></li>
+	                				<li id="nav-series-li"><a href="{% url 'fe-user-series' request.user.username %}" data-testid="user-series" id="nav-series-link">{% translate 'Series' %}</a></li>
+	                				<li id="nav-anthologies-li"><a href="{% url 'fe-user-anthologies' request.user.username %}" data-testid="user-anthologies" id="nav-anthologies-link">{% translate 'Anthologies' %}</a></li>
 	                			</ul>
 	                			<li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a></li>
 							    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a></li>

@@ -193,8 +193,10 @@ class SearchResults(object):
         result_json = result_json + self.flatten_search_groups(context)
         return result_json
 
-    def get_result_facets(self, results, kwargs, tags):
+    def get_result_facets(self, results, kwargs, tags=None):
         # TODO: use translation on labels, move ranges to a dynamic number
+        if tags is None:
+            tags = []
         self.set_shared_vals(kwargs)
         result_json_include = self.get_contextual_result_facets(results, 'include', tags)
         options = self.get_options_facets()

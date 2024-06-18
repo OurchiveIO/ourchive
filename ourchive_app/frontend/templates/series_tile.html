@@ -3,7 +3,7 @@
 	<div id="series-tile-card-{{ series.id }}" class="uk-card uk-card-default">
 	    <div id="series-tile-header-parent" class="uk-card-header uk-padding-small ourchive-card-head">
 	        <div id="series-tile-header-grid" class="uk-grid uk-child-width-expand" uk-grid>
-		        <span id="series-{{ series.id }}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="series-{{ series.id }}-tile-title-link" href="{% url 'fe-series' series.id %}">{{ series.title }}</a> by {% for user in series.users %}<a id="series-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="series-user-link" href="{% url 'user-profile-parent' series.user_id %}">{{ series.user }}</a>{% endfor %}</span>
+		        <span id="series-{{ series.id }}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="series-{{ series.id }}-tile-title-link" href="{% url 'fe-series' series.id %}" data-testid="series-card-title">{{ series.title }}</a> by {% for user in series.users %}<a id="series-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="series-user-link" href="{% url 'user-profile-parent' series.user_id %}">{{ series.user }}</a>{% endfor %}</span>
 		        {% if series.owner %}
 		        <div id="series-tile-actions-parent" class="uk-align-right uk-text-right uk-margin-remove">
 		            <a class="ourchive-icon-wrapper" id="series-tile-edit-{{ series.id }}-link" href="{% url 'fe-edit-series' series.id %}"><span id="series-tile-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="Edit series {{ series.id }}"></span> </a>
