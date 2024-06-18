@@ -8,7 +8,7 @@ class SearchResults(object):
     def __init__(self):
         self.include_search_groups = {}
         self.exclude_search_groups = {}
-        if not SearchGroup.objects.any():
+        if not SearchGroup.objects.all():
             self.include_search_groups['Facets'] = []
             self.exclude_search_groups['Facets'] = []
         for group in SearchGroup.objects.all():
