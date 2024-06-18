@@ -8,6 +8,9 @@ class SearchResults(object):
     def __init__(self):
         self.include_search_groups = {}
         self.exclude_search_groups = {}
+        if not SearchGroup.objects.any():
+            self.include_search_groups['Facets'] = []
+            self.exclude_search_groups['Facets'] = []
         for group in SearchGroup.objects.all():
             self.include_search_groups[group.label] = []
             self.exclude_search_groups[group.label] = []
@@ -64,7 +67,7 @@ class SearchResults(object):
                 tag_filter_name = tag_filter.display_text
         tags_dict = {}
         for tag_type in TagType.objects.all():
-            tags_dict[tag_type.label] = {'tags': [], 'type_id': tag_type.id, 'type_label': tag_type.label, 'group': tag_type.search_group.label}
+            tags_dict[tag_type.label] = {'tags': [], 'type_id': tag_type.id, 'type_label': tag_type.label, 'group': tag_type.search_group.label if tag_type.search_group else 'Facets'}
         for tag in getattr(self, f'work_search_{context}').get('tags', []):
             db_tag_list = Tag.objects.filter(display_text__iexact=tag).all()
             for db_tag in db_tag_list:
@@ -94,8 +97,8 @@ class SearchResults(object):
 
     def get_attribute_facets(self, results, result_json, context):
         attributes_dict = {}
-        for attribute_type in AttributeType.objects.filter(search_group__isnull=False).all():
-            attributes_dict[attribute_type.display_name] = {'attrs': [], 'type_id': attribute_type.id, 'type_label': attribute_type.display_name, 'group': attribute_type.search_group.label}
+        for attribute_type in AttributeType.objects.filter().all():
+            attributes_dict[attribute_type.display_name] = {'attrs': [], 'type_id': attribute_type.id, 'type_label': attribute_type.display_name, 'group': attribute_type.search_group.label if attribute_type.search_group else 'Facets'}
         for attribute in getattr(self, f'work_search_{context}').get('attributes', []):
             db_attr_list = AttributeValue.objects.filter(display_name__iexact=attribute).all()
             for db_attr in db_attr_list:
