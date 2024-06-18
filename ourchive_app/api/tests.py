@@ -1,10 +1,11 @@
 from django.test import TestCase
 from rest_framework.test import force_authenticate, APIRequestFactory
-import api.models as models
+import core.models as models
 import api.views as api_views
 from django.core.management import call_command
-from api.utils import count_words
+from core.utils import count_words
 from unittest import skip
+
 
 class ApiTests(TestCase):
 

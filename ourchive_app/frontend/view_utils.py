@@ -3,13 +3,13 @@ from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
-from .search_models import SearchObject
+from frontend.search_models import SearchObject
 from html import escape, unescape
 from django.http import HttpResponse, FileResponse
 import logging
-from .api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
+from frontend.api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from django.utils.translation import gettext as _
-from api import utils
+from core import utils
 from django.views.decorators.cache import never_cache
 from dateutil.parser import *
 from dateutil import tz
@@ -93,7 +93,7 @@ def sanitize_rich_text(rich_text):
 
 def get_list_from_form(form_key, obj_dict, request):
 	if f'{form_key}[]' in obj_dict:
-		obj_dict[form_key] = [int(x) for x in request.POST.getlist(f"{form_key}[]")]
+		obj_dict[form_key] = [x for x in request.POST.getlist(f"{form_key}[]")]
 		obj_dict.pop(f'{form_key}[]')
 	return obj_dict
 
@@ -525,7 +525,7 @@ def get_languages(request):
 def process_languages(languages, obj_languages):
 	for language in languages:
 		for obj_language in obj_languages:
-			if language.get('id', None) == obj_language.get('id'):
+			if language.get('display_name', None) == obj_language.get('display_name'):
 				language['selected'] = True
 	return languages
 

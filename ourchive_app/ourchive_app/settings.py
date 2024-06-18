@@ -43,10 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'oauth2_provider',
     'rest_framework',
+    'core',
     'frontend',
     'django.contrib.postgres',
     'corsheaders',
     'anymail',
+    'search',
     'api',
     'etl',
     'django_apscheduler'
@@ -92,6 +94,8 @@ MEDIA_ROOT = os.getenv('OURCHIVE_MEDIA_ROOT')
 MEDIA_URL = os.getenv('OURCHIVE_MEDIA_URL')
 
 TMP_ROOT = os.getenv('OURCHIVE_TMP_ROOT')
+
+SCRIPTS_ROOT = os.getenv('OURCHIVE_SCRIPTS_ROOT', 'scripts')
 
 FILE_PROCESSOR = os.getenv('OURCHIVE_FILE_PROCESSOR')
 
@@ -172,7 +176,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'api.User'
+AUTH_USER_MODEL = 'core.User'
 
 
 LOCALE_PATHS = [

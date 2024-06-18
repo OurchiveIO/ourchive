@@ -1,0 +1,180 @@
+/* Adapted from https://codepen.io/vdhug/pen/xxbPoJe */
+
+select[data-multi-select-plugin] {
+    display: none !important;
+}
+
+.ourchive-search-badge-exclude svg {
+    margin-bottom: 5px;
+}
+
+.multi-select-component {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: auto;
+    width: 80%;
+    padding: 3px 8px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    padding-bottom: 0px;
+    color: #555;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -webkit-transition: border-color ease-in-out 0.15s, -webkit-box-shadow ease-in-out 0.15s;
+    -o-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+    transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+.autocomplete-list {
+    border-radius: 4px 0px 0px 4px;
+}
+
+.multi-select-component:focus-within {
+    box-shadow: inset 0px 0px 0px 2px #78ABFE;
+}
+
+.multi-select-component .btn-group {
+    display: none !important;
+}
+
+.multiselect-native-select .multiselect-container {
+    width: 100%;
+}
+
+.selected-wrapper {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    display: inline-block;
+    background-color: #fdecce;
+    color: #333;
+    white-space: normal;
+    margin: 1px 5px 5px 0;
+    vertical-align: top;
+    cursor: default;
+    max-width: 80%;
+}
+
+.selected-wrapper .selected-label {
+    max-width: 514px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 4px;
+    vertical-align: top;
+}
+
+.selected-wrapper .selected-close {
+    text-decoration: none;
+    color: #333;
+    padding-left: .15em;
+    padding-right: .3em;
+}
+
+.search-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.search-container .selected-input {
+    background: none;
+    border: 0;
+    height: 20px;
+    width: 60px;
+    padding: 0;
+    margin-bottom: 6px;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.search-container .selected-input:focus {
+    outline: none;
+}
+
+.dropdown-icon.active {
+    transform: rotateX(180deg)
+}
+
+.search-container .dropdown-icon {
+    display: inline-block;
+    padding: 10px 5px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 10px;
+    height: 10px;
+    border: 0 !important;
+    /* needed */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    /* SVG background image */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Ctitle%3Edown-arrow%3C%2Ftitle%3E%3Cg%20fill%3D%22%23818181%22%3E%3Cpath%20d%3D%22M10.293%2C3.293%2C6%2C7.586%2C1.707%2C3.293A1%2C1%2C0%2C0%2C0%2C.293%2C4.707l5%2C5a1%2C1%2C0%2C0%2C0%2C1.414%2C0l5-5a1%2C1%2C0%2C1%2C0-1.414-1.414Z%22%20fill%3D%22%23818181%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+    background-position: center;
+    background-size: 10px;
+    background-repeat: no-repeat;
+}
+
+.search-container ul {
+    position: absolute;
+    list-style: none;
+    padding: 0;
+    z-index: 3;
+    margin-top: 29px;
+    width: 100%;
+    right: 0px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-bottom: none;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+
+.search-container ul :focus {
+    outline: none;
+}
+
+.search-container ul li {
+    display: block;
+    text-align: left;
+    padding: 8px 29px 2px 12px;
+    border-bottom: 1px solid #ccc;
+    font-size: 14px;
+    min-height: 31px;
+}
+
+.search-container ul li:first-child {
+    border-top: 1px solid #ccc;
+    border-radius: 4px 0px 0 0;
+}
+
+.search-container ul li:last-child {
+    border-radius: 4px 0px 0 0;
+}
+
+
+.search-container ul li:hover.not-cursor {
+    cursor: default;
+}
+
+.search-container ul li:hover {
+    color: #333;
+    background-color: rgb(251, 242, 152);
+    ;
+    border-color: #adadad;
+    cursor: pointer;
+}
+
+/* Adding scrool to select options */
+.autocomplete-list {
+    max-height: 130px;
+    overflow-y: auto;
+}

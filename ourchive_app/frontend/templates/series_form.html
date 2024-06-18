@@ -90,7 +90,7 @@ function handleModalDelete(url) {
         <label id="series-form-created-label" class="uk-form-label" for="series-form-created-on">{% translate 'Post Date' %}</label>
         <div id="series-form-created-controls" class="uk-form-controls">
             <div id="series-form-created-inline" class="uk-inline">
-                <input title="{% translate 'Series created on' %}" id="series-form-created-on" type="date" name="created_on" value="{{ series.created_on }}"> 
+                <input title="{% translate 'Series created on' %}" id="series-form-created-on" type="date" class="uk-input" name="created_on" value="{{ series.created_on }}"> 
             </div>
         </div>
     </div>
@@ -99,7 +99,7 @@ function handleModalDelete(url) {
         <div id="series-form-updated-controls" class="uk-form-controls">
             <div id="series-form-updated-inline" class="uk-inline">
                 <input title="{% translate 'Series updated on' %}" id="series-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ series.updated_on }}"> 
-                <input title="{% translate 'Series updated on' %}" id="series-form-updated-on" type="date" name="updated_on" value="{{ series.updated_on }}"> 
+                <input title="{% translate 'Series updated on' %}" id="series-form-updated-on" type="date" class="uk-input" name="updated_on" value="{{ series.updated_on }}"> 
             </div>
         </div>
     </div>

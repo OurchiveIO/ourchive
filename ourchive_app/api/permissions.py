@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from api.models import OurchiveSetting, Chapter, UserBlocks, Bookmark, BookmarkCollection
+from core.models import OurchiveSetting, Chapter, UserBlocks, Bookmark, BookmarkCollection
 from django.contrib.auth.models import AnonymousUser
 
 

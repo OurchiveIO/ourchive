@@ -1,6 +1,6 @@
 from .api_utils import do_get
 from django.conf import settings
-from api.utils import convert_boolean
+from core.utils import convert_boolean
 
 
 def set_style(request):

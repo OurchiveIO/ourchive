@@ -7,9 +7,9 @@ from .search_models import SearchObject
 from html import escape, unescape
 from django.http import HttpResponse, FileResponse
 import logging
-from .api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
+from frontend.api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from django.utils.translation import gettext as _
-from api import utils
+from core import utils
 from django.views.decorators.cache import never_cache
 from dateutil.parser import *
 from dateutil import tz
@@ -18,8 +18,8 @@ import random
 from django.core.cache import cache
 from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
-from .searcher import build_and_execute_search
-from .view_utils import *
+from frontend.searcher import build_and_execute_search
+from frontend.view_utils import *
 from datetime import *
 from django.urls import reverse
 

@@ -1,7 +1,61 @@
 {% extends 'index.html' %}
+{% load static %}
 {% block title %}Search Results{% endblock %}
 {% block content %}	
+<link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
+<script src="{% static 'frontend/js/searchable-multiselect.js' %}"></script>
 <script>
+	window.addEventListener("load", function(){
+	    var activeTabs = localStorage.getItem('ourchive-active-tabs');
+	  	if (activeTabs !== null) {
+	  		activeTabs = activeTabs.split(",");
+	  		activeTabs.forEach(function(tab) {
+	  			var accordionItem = document.getElementById('accordion-item-'+tab);
+    			if (accordionItem !== null && !accordionItem.classList.contains('uk-open')) {
+    				UIkit.accordion(document.getElementById('search-accordion')).toggle(tab, false);
+    				UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(tab, false);
+    			}
+	  		});
+	  	}
+	  	else {
+	  		UIkit.accordion(document.getElementById('search-accordion')).toggle(0, false);
+	  		UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(0, false);
+	  	}
+
+	  	if (localStorage.getItem('ourchive-show-filters') == null) {
+	  		localStorage.setItem('ourchive-show-filters', '1');
+		}
+		if (localStorage.getItem('ourchive-show-filters') === '0') {
+			UIkit.toggle(document.getElementById('search-results-toggle-button')).toggle();
+		}
+
+		const checkboxes = document.querySelectorAll("input[type='checkbox']:checked");
+		checkboxes.forEach(function(checkbox) {
+			let checkbox_id = checkbox.getAttribute("id").replace(',mobile', '');
+			if (document.getElementById(checkbox_id+"_badge") !== null) {
+	            return;
+	        }
+			createToken(document.getElementById("selected-filters-list"), checkbox.parentNode.innerText, checkbox.parentNode.innerText, checkbox_id+"_badge");
+		});
+
+		const inputboxes = document.querySelectorAll(".facet-val-input");
+		inputboxes.forEach(function(inputbox) {
+			let input_id = inputbox.getAttribute("id").replace(',mobile', '');
+			if (document.getElementById(input_id+"_badge") !== null) {
+	            return;
+	        }
+			if (inputbox.value.trim() !== "") {
+				let labelParts = inputbox.id.split(',');
+			    let label = labelParts[1] + ": " + inputbox.value; 
+			    createToken(document.getElementById("selected-filters-list"), label, label, input_id+"_badge");
+			}
+		});
+	});
+	function updateFilterToggle() {
+		var showFilters = localStorage.getItem('ourchive-show-filters');
+		showFilters = showFilters === '1' ? '0' : '1';
+		localStorage.setItem('ourchive-show-filters', showFilters);
+	}
 	function getFormVals(event) {
 		event.preventDefault();
 		link = event.target.href;
@@ -31,180 +85,98 @@
 			document.getElementById(all_toggle_label).style.visibility = "visible";
 		}
 	}
+
+	function updateSortOrder(selected, mobile) {
+		if (mobile === true) {
+			document.getElementById("search-results-sort-select-hidden-mobile").value = selected;
+			document.forms["searchResultsForm_work_mobile"].submit();
+		}
+		else {
+			document.getElementById("search-results-sort-select-hidden").value = selected;
+			document.forms["searchResultsForm_work"].submit();
+		}
+	}
+
+	function clearAll() {
+		const options = document.querySelectorAll("option");
+		options.forEach(function(option) {
+			option.removeAttribute("selected");
+		});
+		const checkboxes = document.querySelectorAll("input[type='checkbox']");
+		checkboxes.forEach(function(checkbox) {
+			checkbox.checked = false;
+		});
+		const inputboxes = document.querySelectorAll(".facet-val-input");
+		inputboxes.forEach(function(inputbox) {
+			inputbox.value = "";
+		});
+		const filterList = document.querySelectorAll("div.selected-wrapper");
+		filterList.forEach(function(element) {
+			element.remove();
+		});
+	}
 </script>
-<div id="flyover-results" uk-offcanvas="flip: true" class="uk-offcanvas">
-	<div class="uk-offcanvas-bar" id="flyover-results-child">
-		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form-flyover">	
-		<ul uk-tab="animation: uk-animation-fade;" class="uk-inline" id="search-filter-switcher-controls-flyover">
-            <li id="filter-switcher-li-include" class="uk-inline"><a href="#" id="include_tab_flyover">Include</a></li>
-            <li id="filter-switcher-li-exclude" class="uk-inline"><a href="#" id="exclude_tab_flyover">Exclude</a></li>
-		</ul>
-		{% csrf_token %}
-		<ul class="uk-switcher uk-margin-remove filter-switcher" id="search-results-filter-switcher-flyover">
-			<li id="search-results-include-switcher-li-flyover" class="uk-width-expand ourchive-li-flyover"> 
-	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl-flyover">	
-			        {% for facet in include_facets %} 
-						{% include "facet_tile.html" with include='include' keys=keys_include %}     
-				    {% endfor %}	        
-				</dl>
-				<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl-flyover">	
-					<dt><span class="uk-text-bold">Include all/any</span></dt>
-					<dr>
-						<label id="all-toggle-label-flyover" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
-		                <div id="any-all-toggle-inline-flyover" class="uk-inline">
-		                    <label id="include-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="any-all-toggle-flyover" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="include_any_all" onclick="toggleAnyAll('include', 'flyover')"> <span id="any-all-slider-flyover" class="slider round"></span></label>
-		                </div>
-		                <label id="include-any-toggle-label-flyover" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
-		            </dr>
-		        </dl>
-		    </li>
-		    <li id="search-results-exclude-switcher-li-flyover" class="uk-width-expand ourchive-li-flyover"> 
-	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-facet-dl-flyover">	
-			        {% for facet in exclude_facets %} 
-						{% include "facet_tile.html" with include='exclude' keys=keys_exclude %}     
-				    {% endfor %}	
-
-				</dl>
-				<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-type-dl-flyover">	
-					<dt><span class="uk-text-bold">Exclude all/any</span></dt>
-					<dr>
-						<label id="exclude-all-toggle-label-flyover" {% if 'any_all' in keys_exclude %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
-		                <div id="exclude-any-all-toggle-inline-flyover" class="uk-inline">
-		                    <label id="exclude-any-all-toggle-switch-flyover" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll('exclude', 'flyover')"> <span id="exclude-any-all-slider-flyover" class="slider round"></span></label>
-		                </div>
-		                <label id="exclude-any-toggle-label-flyover" {% if 'any_all' not in keys_exclude %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
-		            </dr>
-		        </dl>
-		    </li>
-	    </ul>
-	    <dl class="uk-description-list uk-description-list-divider" id="order-by-dl">
-	    	<dt><span class="uk-text-bold">Sort by...</span></dt>
-            <dr>
-	            <select id="search-results-sort-select" name="order_by" class="uk-select">
-	                <option id="search-results-sort-newest" value="-updated_on">Newest</option>
-	                <option id="search-results-sort-oldest" value="created_on">Oldest</option>
-	            </select>
-	        </dr>
-	    </dl>
-		<input type="hidden" id="term" name="term" value="{{ term }}">
-		{% if tag_id %}
-		<input type="hidden" id="tag_id" name="tag_id" value="{{ tag_id }}">
-		{% endif %}
-		<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default uk-margin-top" type="submit" value="Submit"/>
-	</form>
-	</div>
-</div>
-<div class="uk-width-1-1 uk-text-right uk-align-right uk-hidden@s"><a class="uk-button uk-button-default uk-button-small uk-hidden@s" uk-toggle="target: #flyover-results" id="show-filters-link">Toggle Filters</a></div> 
-<div class="uk-width-1-4@s uk-visible@s" id="search-results-work-facet-child"> 
-	<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">	
-		<ul uk-tab="animation: uk-animation-fade;" class="uk-inline" id="search-filter-switcher-controls">
-            <li id="filter-switcher-li-include" class="uk-inline"><a href="#" id="include_tab" data-testid="include-tab">Include</a></li>
-            <li id="filter-switcher-li-exclude" class="uk-inline"><a href="#" id="exclude_tab">Exclude</a></li>
-		</ul>
-		{% csrf_token %}
-		<ul class="uk-switcher uk-margin-remove filter-switcher" id="search-results-filter-switcher">
-			<li id="search-results-include-switcher-li" class="uk-width-expand"> 
-	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-work-facet-dl">	
-			        {% for facet in include_facets %} 
-						{% include "facet_tile.html" with include='include' keys=keys_include %}     
-				    {% endfor %}		        
-				</dl>
-				<dl class="uk-description-list uk-description-list-divider" id="search-results-search-type-dl">	
-					<dt><span class="uk-text-bold">Include all/any</span></dt>
-					<dr>
-						<label id="include-all-toggle-label" {% if 'any_all' in keys_include %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
-		                <div id="any-all-toggle-inline" class="uk-inline">
-		                    <label id="any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="any-all-toggle" type="checkbox" {% if 'any_all' in keys_include %}checked{%endif%} name="include_any_all" onclick="toggleAnyAll('include', null)"> <span id="any-all-slider" class="slider round"></span></label>
-		                </div>
-		                <label id="include-any-toggle-label" {% if 'any_all' not in keys_include %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
-		            </dr>
-		        </dl>
-		    </li>
-		    <li id="search-results-exclude-switcher-li" class="uk-width-expand"> 
-	        	<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-facet-dl">	
-			        {% for facet in exclude_facets %} 
-						{% include "facet_tile.html" with include='exclude' keys=keys_exclude %}     
-				    {% endfor %}		        
-				</dl>
-				<dl class="uk-description-list uk-description-list-divider" id="search-results-exclude-type-dl">	
-					<dt><span class="uk-text-bold">Exclude all/any</span></dt>
-					<dr>
-						<label id="exclude-all-toggle-label" {% if 'any_all' in keys_exclude %}style="visibility: hidden;"{%endif%}class="uk-margin-right">All</label>
-		                <div id="exclude-any-all-toggle-inline" class="uk-inline">
-		                    <label id="exclude-any-all-toggle-switch" class="switch"><input class="uk-checkbox" id="exclude-any-all-toggle" type="checkbox" {% if 'any_all' in keys_exclude %}checked{%endif%} name="exclude_any_all" onclick="toggleAnyAll('exclude', null)"> <span id="exclude-any-all-slider" class="slider round"></span></label>
-		                </div>
-		                <label id="exclude-any-toggle-label" {% if 'any_all' not in keys_exclude %}style="visibility: hidden;"{% endif %} class="uk-margin-left">Any</label>
-		            </dr>
-		        </dl>
-		    </li>
-	    </ul>
-	    <dl class="uk-description-list uk-description-list-divider" id="order-by-dl">
-	    	<dt><span class="uk-text-bold">Sort by...</span></dt>
-            <dr>
-	            <select id="search-results-sort-select" name="order_by" class="uk-select">
-	                <option id="search-results-sort-newest" value="-updated_on">Newest</option>
-	                <option id="search-results-sort-oldest" value="created_on">Oldest</option>
-	            </select>
-	        </dr>
-	    </dl>
-		<input type="hidden" id="term" name="term" value="{{ term }}">
-		{% if tag_id %}
-		<input type="hidden" id="tag_id" name="tag_id" value="{{ tag_id }}">
-		{% endif %}
-		<input type="hidden" id="active_tab" name="active_tab" value="{{ default_tab }}">
-		<input id="search-results-work-facet-form-submit" class="uk-button uk-button-default uk-margin-top" type="submit" value="Submit"/>
-	</form>
-</div>
-<div class="uk-width-3-4@s uk-width-1-1@xs ourchive-padding-remove-horizontal" id="search-results-tab-parent">
-	<ul class="uk-subnav uk-subnav-pill uk-subnav-divider uk-flex uk-flex-right" uk-switcher="animation: uk-animation-fade;connect: .search-switcher;active: {{default_tab}}" id="search-results-switcher-controls">
-        <li id="results-switcher-li-works"><a href="#" id="works_tab" data-testid="works-tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
-        <li id="results-switcher-li-bookmarks"><a href="#" id="bookmarks_tab" onclick="updateActiveTab(1)">Bookmarks ({{ bookmarks.page.count }})</a></li>
-        <li id="results-switcher-li-users"><a href="#" id="users_tab" onclick="updateActiveTab(2)">Collections ({{ collections.page.count }})</a></li>
-        {% if not tag_id %}<li id="results-switcher-li-tags"><a href="#" id="tags_tab" onclick="updateActiveTab(3)">Tags ({{ tags.page.count }})</a></li>
-        <li id="results-switcher-li-users"><a href="#" id="users_tab" onclick="updateActiveTab(4)">Users ({{ users.data|length }})</a></li>{% endif %}
+<div class="uk-width-1-1">
+	<ul uk-tab="animation: uk-animation-fade; active: {{default_tab}}; connect: .search-switcher" id="search-results-switcher-controls" class="uk-flex-center uk-width-1-1 ourchive-padding-remove-horizontal">
+	    <li id="results-switcher-li-works" class="ourchive-search-tab"><a href="#" id="works_tab" data-testid="works-tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
+	    <li id="results-switcher-li-bookmarks" class="ourchive-search-tab"><a href="#" id="bookmarks_tab" onclick="updateActiveTab(1)">Bookmarks ({{ bookmarks.page.count }})</a></li>
+	    <li id="results-switcher-li-users" class="ourchive-search-tab"><a href="#" id="users_tab" onclick="updateActiveTab(2)">Collections ({{ collections.page.count }})</a></li>
+	    {% if not tag_id %}<li id="results-switcher-li-tags" class="ourchive-search-tab"><a href="#" id="tags_tab" onclick="updateActiveTab(3)">Tags ({{ tags.page.count }})</a></li>
+	    <li id="results-switcher-li-users" class="ourchive-search-tab"><a href="#" id="users_tab" onclick="updateActiveTab(4)">Users ({{ users.data|length }})</a></li>{% endif %}
 	</ul>
-
-	<ul class="uk-switcher uk-margin-remove search-switcher" id="search-results-work-facet-switcher">
-		<li id="search-results-work-facet-switcher-li" class="uk-width-expand"> 
-			<div class="uk-width-expand" id="search-results-works-parent">		
-				{% for work in works.data %} 
-					<div class="uk-margin-bottom">{% include "work_tile.html" %} </div>    
-			    {% endfor %}
-			    {% if works.data %}{% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}{% endif %}
-			</div>
-		</li>
-		<li id="search-results-bookmarks-li" class="uk-width-expand"> 
-			<div class="uk-width-expand" id="search-results-bookmarks-content">
+</div>
+{% include 'search_results_filters.html' %}
+<div class="uk-width-expand">
+	<div id="selected-filters-list" class="uk-width-expand uk-margin-small-bottom">
+		<!-- Selected filters go here -->
+	</div>
+	<div class="uk-width-expand uk-margin-bottom">
+		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden id="search-results-toggle-button" onClick="updateFilterToggle()">Filter</button>
+		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
+		<select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-width-medium uk-hidden@s" onchange="updateSortOrder(value, true)">
+            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
+            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
+            <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
+        </select>
+        <select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium uk-visible@s" onchange="updateSortOrder(value, false)">
+            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
+            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
+            <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
+        </select>
+	</div>
+	<div class="uk-switcher uk-margin-remove-left search-switcher uk-width-expand ourchive-padding-remove-horizontal uk-inline uk-height-viewport">
+		<div class="uk-width-expand" id="search-results-works-parent">		
+			{% for work in works.data %} 
+				<div class="uk-margin-bottom">{% include "work_tile.html" %} </div>    
+		    {% endfor %}
+		    {% if works.data %}{% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}{% endif %}
+		</div>
+				<div class="uk-width-expand" id="search-results-bookmarks-content">
 		        {% for bookmark in bookmarks.data %} 
 					<div class="uk-margin-bottom">{% include "bookmark_tile.html" %} </div>   
 			    {% endfor %}
 			    {% include 'pagination.html' with previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
-			</div>     
-		</li>
-		<li id="search-results-collections-li" class="uk-width-expand"> 
+			</div>   
 			<div class="uk-width-expand" id="search-results-collections-content">
 		        {% for bookmark_collection in collections.data %} 
 					<div class="uk-margin-bottom">{% include "bookmark_collection_tile.html" %}</div>  
 			    {% endfor %}
 			    {% include 'pagination.html' with previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
-			</div>     
-		</li>
-		<li id="search-results-tags-li" class="uk-width-expand"> 
+			</div> 
 			<div class="uk-width-expand" id="search-results-tags-content">
 		        <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
 		        {% include "tag_partial.html" with obj_name='tag' tags=tags.data.items %}
 		        {% include 'pagination.html' with previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
 				</dl>
-			</div>     
-		</li>
-		<li id="search-results-users-parent" class="uk-width-expand"> 
+			</div> 
 			<div uk-grid id="search-results-users-grid">
 			<div class="uk-width-expand" id="search-results-users-content-parent">
 		        {% for user in users.data %} 
 					<p id="search-results-user-{{user.id}}"> <a id="search-results-user-{{user.id}}-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a> </p>
 			    {% endfor %}
-			</div>     
-		</li>
-	</ul>
+			</div>  
+		</div>
+	</div>
 </div>
+
 {% endblock %}

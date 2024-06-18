@@ -4,6 +4,8 @@
 {% block content %}	
 {% load static %}
 <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
+<script src="{% static 'frontend/js/searchable-multiselect-generic.js' %}"></script>
 <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="bookmark-form-parent-grid">  
 <form class="uk-form-horizontal" method="post" id="bookmarkForm" onsubmit="return getRichText(['description'])">
     <script>
@@ -80,9 +82,9 @@
         <label id="bookmark-form-languages-label" class="uk-form-label" for="bookmark-form-languages">{% translate 'Languages' %}</label>
         <div id="bookmark-form-languages-controls" class="uk-form-controls">
             <div id="bookmark-form-languages-inline" class="uk-inline">
-                <select name="languages[]" id="bookmark-form-languages" class="uk-select" multiple="">
+                <select multiple data-multi-select-plugin name="languages[]" id="bookmark-form-languages">
                     {% for language in languages %}
-                        <option value="{{language.id}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                        <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -92,7 +94,7 @@
         <label id="bookmark-form-created-label" class="uk-form-label" for="bookmark-form-complete-checkbox">Post Date</label>
         <div id="bookmark-form-created-controls" class="uk-form-controls">
             <div id="bookmark-form-created-inline" class="uk-inline">
-                <input title="{% translate 'Bookmark created on' %}" id="bookmark-form-complete-checkbox" type="date" name="created_on" value="{{ bookmark.created_on }}"> 
+                <input title="{% translate 'Bookmark created on' %}" id="bookmark-form-complete-checkbox" type="date" class="uk-input" name="created_on" value="{{ bookmark.created_on }}">
             </div>
         </div>
     </div>
@@ -101,7 +103,7 @@
         <div id="bookmark-form-updated-controls" class="uk-form-controls">
             <div id="bookmark-form-updated-inline" class="uk-inline">
                 <input title="{% translate 'Bookmark updated on original' %}" id="bookmark-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ bookmark.updated_on }}"> 
-                <input title="{% translate 'Bookmark updated on' %}" id="bookmark-form-complete-checkbox" type="date" name="updated_on" value="{{ bookmark.updated_on }}"> 
+                <input title="{% translate 'Bookmark updated on' %}" id="bookmark-form-complete-checkbox" type="date" class="uk-input" name="updated_on" value="{{ bookmark.updated_on }}">
             </div>
         </div>
     </div>

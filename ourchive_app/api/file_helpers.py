@@ -6,7 +6,7 @@ import uuid
 import os
 import pathlib
 import audioread
-from api.models import OurchiveSetting
+from core.models import OurchiveSetting
 
 
 logger = logging.getLogger(__name__)

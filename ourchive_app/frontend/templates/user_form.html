@@ -2,6 +2,8 @@
 {% load i18n %} 
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}	
+<link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
+<script src="{% static 'frontend/js/searchable-multiselect-generic.js' %}"></script>
 <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="user-form-parent-div"> 
 	<form class="uk-form-horizontal"  method="post" id="userForm" onsubmit="return getRichText(['profile'])">
 		{% csrf_token %}
@@ -81,9 +83,9 @@
             <label id="user-form-languages-label" class="uk-form-label" for="user-form-languages">{% translate 'Default Languages' %}</label>
             <div id="user-form-languages-controls" class="uk-form-controls">
                 <div id="user-form-languages-inline" class="uk-inline">
-                    <select name="default_languages[]" id="user-form-languages" class="uk-select" multiple="">
+                    <select multiple data-multi-select-plugin name="default_languages[]" id="user-form-languages">
                         {% for language in default_languages %}
-                            <option value="{{language.id}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                            <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
                         {% endfor %}
                     </select>
                 </div>
