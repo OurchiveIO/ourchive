@@ -40,6 +40,8 @@ function setSearchToggles(groupName, mobile=false) {
     }
     var accordionItem = document.getElementById(itemId);
     var open = !accordionItem.classList.contains('uk-open');
+    console.log(groupName);
+    console.log(open);
     if (open === true) {
         if (activeTabs !== null) {
             var activeTabs = activeTabs.split(',');

@@ -4,8 +4,8 @@
 		{% csrf_token %}
 		<ul uk-accordion="multiple: true;" id="search-accordion-mobile">
 	    	{% for facet_group in facets %} 
-	    	<li id="accordion-item-{{forloop.counter0}}-mobile" onclick="setSearchToggles({{ forloop.counter0 }}, true)">
-	    		<a class="uk-accordion-title" href>{{ facet_group.label }}</a>
+	    	<li id="accordion-item-{{forloop.counter0}}-mobile">
+	    		<a class="uk-accordion-title" href onclick="setSearchToggles({{ forloop.counter0 }}, true)">{{ facet_group.label }}</a>
 	    		<div class="uk-accordion-content">
 		    		{% for facet in facet_group.facets %}
 						{% include "facet_tile.html" with include='include' mobile='true' %}
@@ -36,8 +36,8 @@
 		{% csrf_token %}
 		<ul uk-accordion="multiple: true;" id="search-accordion">
 	    	{% for facet_group in facets %} 
-	    	<li id="accordion-item-{{forloop.counter0}}" onclick="setSearchToggles({{ forloop.counter0 }})">
-	    		<a class="uk-accordion-title" href>{{ facet_group.label }}</a>
+	    	<li id="accordion-item-{{forloop.counter0}}">
+	    		<a class="uk-accordion-title" href onclick="setSearchToggles({{ forloop.counter0 }})">{{ facet_group.label }}</a>
 	    		<div class="uk-accordion-content">
 		    		{% for facet in facet_group.facets %}
 						{% include "facet_tile.html" with include='include'%}

@@ -56,11 +56,11 @@ select[data-multi-select-plugin] {
     display: inline-block;
     background-color: #fdecce;
     color: #333;
-    white-space: nowrap;
+    white-space: normal;
     margin: 1px 5px 5px 0;
-    height: 1.55em;
     vertical-align: top;
     cursor: default;
+    max-width: 80%;
 }
 
 .selected-wrapper .selected-label {
