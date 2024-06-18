@@ -245,7 +245,7 @@ class PostgresProvider:
                 if hasattr(obj, order_by.replace('-', '')):
                     resultset = resultset.order_by('zero_distance', order_by) 
                 else:
-                    resultset = resultset.order_by('zero_distance', 'one_distance', '-updated_on')
+                    resultset = resultset.order_by('zero_distance', '-updated_on')
             require_distinct = False
         if resultset and has_filterable:
             resultset = resultset.filter(filterable=True)
@@ -254,7 +254,7 @@ class PostgresProvider:
             if hasattr(obj, order_by.replace('-', '')):
                 resultset = resultset.order_by(order_by)
             else:
-                resultset = resultset.order_by('zero_distance', 'one_distance', '-updated_on')
+                resultset = resultset.order_by('-updated_on')
             resultset = resultset.distinct()
         tags = self.process_result_tags(resultset) if hasattr(obj, 'tags') else []
         return self.process_results(resultset, page, obj), tags

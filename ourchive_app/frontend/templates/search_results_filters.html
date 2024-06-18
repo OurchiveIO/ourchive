@@ -29,7 +29,7 @@
 	</form>
 	</div>
 </div>
-<div class="uk-width-1-4 uk-visible@s search-results-toggle" id="search-results-work-facet-child"> 
+<div class="uk-width-1-4 uk-visible@s search-results-toggle" data-testid="result-filter-pane" id="search-results-desktop-filter-pane"> 
 	<div class="uk-inline uk-align-left"><span class="uk-text-bold uk-inline uk-text-large">Filters</span></div><div class="uk-inline uk-align-right"><a href="#" class="uk-link-reset" onClick="updateFilterToggle()"><span uk-icon="icon: close; ratio: 1.5" title="Close filters" id="search-results-close-desktop-filter" class="search-results-toggle" uk-toggle="target: .search-results-toggle"></span></a></div>
 	<div class="uk-align-left uk-width-expand">
 		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">	
@@ -56,7 +56,7 @@
 			{% endif %}
 			<input type="hidden" id="active_tab" name="active_tab" value="{{ default_tab }}">
 		<input id="search-results-work-facet-form-submit" class="uk-button uk-button-primary uk-margin-top uk-align-center uk-width-medium uk-margin-small-bottom" type="submit" value="Filter"/>
-		<button class="uk-button uk-button-danger uk-margin-small-top uk-align-center uk-width-medium" type="button" onClick="clearAll()">Clear All</button>
+		<button data-testid="search-facet-form-submit" class="uk-button uk-button-danger uk-margin-small-top uk-align-center uk-width-medium" type="button" onClick="clearAll()">Clear All</button>
 	</ul>
 	</form>
 	</div>
