@@ -66,25 +66,24 @@ function doSeriesAutocomplete(term) {
 }
 
 function removeSeries(series_id) {
-    var parent = document.getElementById("work-form-series-parent");
-    parent.remove();
+    var parent = document.getElementById("work-form-series-existing-container");
+    if (parent !== null) {
+        parent.remove();
+    }
 }
 
 function populateSeriesInput(title, series_id) {
     if (series_id === null) {
         series_id = title;
     }
-    var existing_value = document.getElementById("work-form-series-parent");
-    if (existing_value) {
-        existing_value.remove();
-    }
+    removeSeries(null);
     // parent div
     var parent = document.getElementById("work-form-series-parent-parent");
     var wrapper= document.createElement('div');
     wrapper.classList.add('uk-margin-small');
     wrapper.classList.add('uk-margin-remove-top');
-    wrapper.setAttribute('id', 'work-form-series-parent');
-    wrapper.innerHTML= '<input id="work-form-series-hidden" type="hidden" name="series_id" value="'+series_id+'"> <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="work_series_display">'+title+' <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeSeries('+series_id+')" id="work_series_delete"></span></span>';
+    wrapper.setAttribute('id', 'work-form-series-existing-container');
+    wrapper.innerHTML= '<input id="work-form-series-hidden" type="hidden" name="series_id" value="'+series_id+'"> <span class="uk-badge uk-text-default uk-padding-small uk-margin-small-right" id="work_series_display">'+title+' <span class="uk-text-default uk-padding-small uk-padding-remove-right" uk-icon="icon:close" onclick="removeSeries('+series_id+')" id="work_series_delete"></span></span>';
     parent.appendChild(wrapper);
     document.getElementById("work-form-series").value = '';
     document.getElementById("work-form-series").focus();
@@ -240,9 +239,9 @@ function seriesCheck (e) {
             <div id="work-form-work-series" class="uk-form-controls">
                 <div class="uk-margin-remove" id="work-form-series-parent-parent">
                 {% if work.series %}
-                    <div class="uk-margin-small uk-margin-remove-top" id="work-form-series-parent">
+                    <div class="uk-margin-small uk-margin-remove-top" id="work-form-series-existing-container">
                         <input type="hidden" id="work-form-series-hidden" name="series_id" value="{{work.series.id}}">
-                        <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="work_series__display">{{ work.series.title }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeSeries({{series.id}})" id="work_series_{{work.series.id}}_delete"></span></span>
+                        <span class="uk-badge uk-text-default uk-padding-small uk-margin-small-right" id="work_series_display">{{ work.series.title }} <span class="uk-text-default uk-padding-small uk-padding-remove-right" uk-icon="icon:close" onclick="removeSeries({{series.id}})" id="work_series_{{work.series.id}}_delete"></span></span>
                     </div>
                 {% endif %}
                 </div>
