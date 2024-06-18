@@ -47,7 +47,7 @@ We welcome technical contributions as well:
 
 - Submit a code fix for a bug. Grab a bug out of the [issue tracker][github issues] and fix that sucker! Then make a pull request to the repo.
 - Submit a new feature request [as a GitHub issue][github issues].
-- Work on a feature that's on the roadmap, or unassigned in [the release version](https://tree.taiga.io/project/c-e-p-v06/kanban).
+- Work on a feature that's on the roadmap, or unassigned in [the release version](https://planning.ourchive.io/project/ourchive-beta/kanban).
 - Submit a unit test.
 - Submit another unit test. Maybe even a ui test if you're feeling frisky!
 
