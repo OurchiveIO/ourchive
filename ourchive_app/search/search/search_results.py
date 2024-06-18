@@ -37,12 +37,6 @@ class SearchResults(object):
                 tags_dict[result['tag_type']]['tags'].append(result['display_text'])
         return tags_dict
 
-    def process_chive_tags(self, tags, tags_dict):
-        for result in tags:
-            if len(result['tags']) > 0:
-                tags_dict = self.process_tag_tags(result['tags'], tags_dict)
-        return tags_dict
-
     def get_inverse_context(self, context):
         return 'exclude' if context == 'include' else ('include' if context == 'exclude' else None)
 
@@ -62,7 +56,7 @@ class SearchResults(object):
                 result_facet = ResultFacet(tags_dict[tag_type]['type_id'], tag_type, tag_filter_vals, 'tag').to_dict()
                 getattr(self, f'{context}_search_groups')[tags_dict[tag_type]['group']].append(result_facet)
 
-    def get_tag_facets(self, results, result_json, context):
+    def get_tag_facets(self, results, result_json, context, tags):
         tag_filter_name = None
         if self.tag_id:
             tag_filter = Tag.objects.filter(id=self.tag_id).first()
@@ -83,9 +77,7 @@ class SearchResults(object):
                 for db_tag in db_tag_list:
                     if db_tag.display_text not in tags_dict[db_tag.tag_type.label]['tags']:
                         tags_dict[db_tag.tag_type.label]['tags'].append(db_tag.display_text)
-        tags_dict = self.process_chive_tags(results['work']['data'], tags_dict)
-        tags_dict = self.process_chive_tags(results['bookmark']['data'], tags_dict)
-        tags_dict = self.process_chive_tags(results['collection']['data'], tags_dict)
+        tags_dict = self.process_tag_tags(tags, tags_dict)
         tags_dict = self.process_tag_tags(results['tag']['data'], tags_dict)
         self.build_final_tag_facets(tag_filter_name, result_json, tags_dict, context)
         return result_json
@@ -192,19 +184,22 @@ class SearchResults(object):
         options["order_by"] = self.order_by
         return options
 
-    def get_contextual_result_facets(self, results, context):
+    def get_contextual_result_facets(self, results, context, tags):
         result_json = []
         chive_info = self.get_chive_info_facets(context)
         result_json.append(chive_info)
-        self.get_tag_facets(results, result_json, context)
+        self.get_tag_facets(results, result_json, context, tags)
         self.get_attribute_facets(results, result_json, context)
         result_json = result_json + self.flatten_search_groups(context)
         return result_json
 
-    def get_result_facets(self, results, kwargs):
+    def get_result_facets(self, results, kwargs, tags):
         # TODO: use translation on labels, move ranges to a dynamic number
         self.set_shared_vals(kwargs)
-        result_json_include = self.get_contextual_result_facets(results, 'include')
-        result_json_exclude = self.get_contextual_result_facets(results, 'exclude')
+        result_json_include = self.get_contextual_result_facets(results, 'include', tags)
         options = self.get_options_facets()
-        return [result_json_include, result_json_exclude, options] if self.split_include_exclude else [result_json_include, options]
+        if self.split_include_exclude:
+            result_json_exclude = self.get_contextual_result_facets(results, 'exclude', tags)
+            return [result_json_include, result_json_exclude, options]
+        else:
+            return [result_json_include, options]

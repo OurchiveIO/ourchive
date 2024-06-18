@@ -12,6 +12,7 @@ class OurchiveSearch:
 
 	def do_search(self, **kwargs):
 		results = {}
+		tags = []
 		if 'tag_id' in kwargs and kwargs['tag_id']:
 			return self.filter_by_tag(**kwargs)
 		if 'attr_id' in kwargs and kwargs['attr_id']:
@@ -20,15 +21,20 @@ class OurchiveSearch:
 			return self.filter_by_work_type(**kwargs)
 		if ('work_search') in kwargs:
 			results['work'] = self.searcher.search_works(kwargs['options'], **kwargs['work_search'])
+			tags = tags + results['work'].pop('tags')
 		if ('bookmark_search') in kwargs:
 			results['bookmark'] = self.searcher.search_bookmarks(kwargs['options'], **kwargs['bookmark_search'])
+			tags = tags + results['bookmark'].pop('tags')
 		if ('tag_search') in kwargs:
 			results['tag'] = self.searcher.search_tags(kwargs['options'], **kwargs['tag_search'])
+			tags = tags + results['tag'].pop('tags')
 		if ('user_search') in kwargs:
 			results['user'] = self.searcher.search_users(kwargs['options'], **kwargs['user_search'])
+			tags = tags + results['user'].pop('tags')
 		if ('collection_search') in kwargs:
 			results['collection'] = self.searcher.search_collections(kwargs['options'], **kwargs['collection_search'])
-		facets = self.result_builder.get_result_facets(results, kwargs)
+			tags = tags + results['collection'].pop('tags')
+		facets = self.result_builder.get_result_facets(results, kwargs, tags)
 		results['facets'] = facets[0]
 		results['options'] = facets[1]
 		return results

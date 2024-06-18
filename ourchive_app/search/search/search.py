@@ -1,21 +1,22 @@
 from core.models import *
 from api import object_factory
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-import json
 import re
 from django.db.models import Q
 from .search_obj import WorkSearch, BookmarkSearch, TagSearch, UserSearch, CollectionSearch
-from django.contrib.postgres.search import TrigramDistance, TrigramWordDistance
+from django.contrib.postgres.search import TrigramWordDistance
 from django.core.paginator import Paginator
 from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ElasticSearchProvider:
     from elasticsearch import Elasticsearch
     from elasticsearch_dsl import Search, Q
 
-    def init_provider():
-        print('init provider')
+    def init_provider(self):
+        logger.debug("Elasticsearch provider initialized.")
 
     def search_works(self, **kwargs):
         q = Q("multi_match", query=kwargs['filter']['term'], fields=[
@@ -61,8 +62,8 @@ class ElasticSearchServiceBuilder:
 
 class PostgresProvider:
 
-    def init_provider():
-        print('init provider')
+    def init_provider(self):
+        logger.debug("Postgres provider initialized.")
 
     # ref: https://www.julienphalip.com/blog/adding-search-to-a-django-site-in-a-snap/
     def normalize_query(self, query_string,
@@ -71,8 +72,7 @@ class PostgresProvider:
         ''' Splits the query string in invidual keywords, getting rid of unecessary spaces
             and grouping quoted words together.
             Example:
-
-            >>> normalize_query('  some random  words "with   quotes  " and   spaces')
+                normalize_query('  some random  words "with   quotes  " and   spaces')
             ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
 
         '''
@@ -156,6 +156,14 @@ class PostgresProvider:
                         full_filters = Q(full_filters & join_filters)
         return full_filters
 
+    def process_result_tags(self, resultset):
+        tags = []
+        for result in resultset:
+            if result and result.tags:
+                for tag in result.tags.all():
+                    tags.append(self.get_tags_dict(tag))
+        return tags
+
     def process_results(self, resultset, page, obj, base_string='/search/?'):
         page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
         paginator = Paginator(resultset, page_size)
@@ -167,7 +175,7 @@ class PostgresProvider:
         ) else f"{base_string}limit={page_size}&page={page-1}&object_type={obj.__name__}"
         return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
 
-    # todo: move to kwargs or obj. my god.
+    # TODO: move to kwargs or obj. my god.
     def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True, has_private=False, has_filterable=False):
         resultset = None
         page = int(page)
@@ -248,7 +256,8 @@ class PostgresProvider:
             else:
                 resultset = resultset.order_by('zero_distance', 'one_distance', '-updated_on')
             resultset = resultset.distinct()
-        return self.process_results(resultset, page, obj)
+        tags = self.process_result_tags(resultset) if hasattr(obj, 'tags') else []
+        return self.process_results(resultset, page, obj), tags
 
     def get_filters(self, search_object):
         include_filters = self.build_filters(
@@ -267,6 +276,10 @@ class PostgresProvider:
             users_dict.append(user)
         return users_dict
 
+    def get_tags_dict(self, tag):
+        return {"tag_type": tag.tag_type.label, "text": tag.text, "display_text": tag.display_text,
+         "id": tag.id}
+
     def build_work_resultset(self, resultset, reserved_fields):
         # build final resultset
         result_json = []
@@ -275,20 +288,12 @@ class PostgresProvider:
             username = result.user.username
             tags = []
             for tag in result.tags.all():
-                tag_dict = {}
-                tag_dict["tag_type"] = tag.tag_type.label
-                tag_dict["text"] = tag.text
-                tag_dict["display_text"] = tag.display_text
-                tag_dict["id"] = tag.id
+                tag_dict = self.get_tags_dict(tag)
                 tags.append(tag_dict)
             attributes = []
             for attribute in result.attributes.all():
-                attribute_dict = {}
-                attribute_dict["attribute_type"] = attribute.attribute_type.display_name
-                attribute_dict["name"] = attribute.name
-                attribute_dict["display_name"] = attribute.display_name
-                attribute_dict["id"] = attribute.id
-                attribute_dict["order"] = attribute.order
+                attribute_dict = {"attribute_type": attribute.attribute_type.display_name, "name": attribute.name,
+                                  "display_name": attribute.display_name, "id": attribute.id, "order": attribute.order}
                 attributes.append(attribute_dict)
             languages = []
             for language in result.languages.all():
@@ -317,20 +322,13 @@ class PostgresProvider:
             username = result.user.username
             tags = []
             for tag in result.tags.all():
-                tag_dict = {}
-                tag_dict["tag_type"] = tag.tag_type.label
-                tag_dict["text"] = tag.text
-                tag_dict["display_text"] = tag.display_text
-                tag_dict["id"] = tag.id
+                tag_dict = {"tag_type": tag.tag_type.label, "text": tag.text, "display_text": tag.display_text,
+                            "id": tag.id}
                 tags.append(tag_dict)
             attributes = []
             for attribute in result.attributes.all():
-                attribute_dict = {}
-                attribute_dict["attribute_type"] = attribute.attribute_type.display_name
-                attribute_dict["name"] = attribute.name
-                attribute_dict["display_name"] = attribute.display_name
-                attribute_dict["id"] = attribute.id
-                attribute_dict["order"] = attribute.order
+                attribute_dict = {"attribute_type": attribute.attribute_type.display_name, "name": attribute.name,
+                                  "display_name": attribute.display_name, "id": attribute.id, "order": attribute.order}
                 attributes.append(attribute_dict)
             result_dict = result.__dict__
             result_dict["tags"] = tags
@@ -351,20 +349,13 @@ class PostgresProvider:
             username = result.user.username
             tags = []
             for tag in result.tags.all():
-                tag_dict = {}
-                tag_dict["tag_type"] = tag.tag_type.label
-                tag_dict["text"] = tag.text
-                tag_dict["display_text"] = tag.display_text
-                tag_dict["id"] = tag.id
+                tag_dict = {"tag_type": tag.tag_type.label, "text": tag.text, "display_text": tag.display_text,
+                            "id": tag.id}
                 tags.append(tag_dict)
             attributes = []
             for attribute in result.attributes.all():
-                attribute_dict = {}
-                attribute_dict["attribute_type"] = attribute.attribute_type.display_name
-                attribute_dict["name"] = attribute.name
-                attribute_dict["display_name"] = attribute.display_name
-                attribute_dict["id"] = attribute.id
-                attribute_dict["order"] = attribute.order
+                attribute_dict = {"attribute_type": attribute.attribute_type.display_name, "name": attribute.name,
+                                  "display_name": attribute.display_name, "id": attribute.id, "order": attribute.order}
                 attributes.append(attribute_dict)
             users = self.get_user_dict(result.users.all())
             result_dict = result.__dict__
@@ -390,8 +381,8 @@ class PostgresProvider:
             return {'data': []}
         resultset = self.run_queries(work_filters, query, Work, [
                                      'title', 'summary'], work_search.term, kwargs['page'], options.get('order_by', '-updated_on'), True)
-        result_json = self.build_work_resultset(resultset[0], work_search.reserved_fields)
-        return {'data': result_json, 'page': resultset[1]}
+        result_json = self.build_work_resultset(resultset[0][0], work_search.reserved_fields)
+        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def search_bookmarks(self, options, **kwargs):
         bookmark_search = BookmarkSearch()
@@ -402,8 +393,8 @@ class PostgresProvider:
             return {'data': []}
         resultset = self.run_queries(bookmark_filters, query, Bookmark, [
                                      'title', 'description'], bookmark_search.term, kwargs.get('page', 1), options.get('order_by', '-updated_on'), True, .85, True, True)
-        result_json = self.build_bookmark_resultset(resultset[0], bookmark_search.reserved_fields)
-        return {'data': result_json, 'page': resultset[1]}
+        result_json = self.build_bookmark_resultset(resultset[0][0], bookmark_search.reserved_fields)
+        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def search_collections(self, options, **kwargs):
         collection_search = CollectionSearch()
@@ -415,8 +406,8 @@ class PostgresProvider:
             return {'data': []}
         resultset = self.run_queries(collection_filters, query, BookmarkCollection, [
                                      'title', 'short_description'], collection_search.term, kwargs.get('page', 1), options.get('order_by', '-updated_on'), True)
-        result_json = self.build_collection_resultset(resultset[0], collection_search.reserved_fields)
-        return {'data': result_json, 'page': resultset[1]}
+        result_json = self.build_collection_resultset(resultset[0][0], collection_search.reserved_fields)
+        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def search_users(self, options, **kwargs):
         user_search = UserSearch()
@@ -434,7 +425,7 @@ class PostgresProvider:
             for field in user_search.reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
-        return {'data': result_json, 'page': {}}
+        return {'data': result_json, 'page': {}, 'tags': []}
 
     def autocomplete_tags(self, term, tag_type, fetch_all=False):
         results = []
@@ -520,14 +511,14 @@ class PostgresProvider:
         result_json = []
         if resultset is None:
             return result_json
-        for result in resultset[0]:
+        for result in resultset[0][0]:
             tag_type = result.tag_type.label
             result_dict = result.__dict__
             for field in tag_search.reserved_fields:
                 result_dict.pop(field, None)
             result_dict['tag_type'] = tag_type
             result_json.append(result_dict)
-        return {'data': result_json, 'page': resultset[1]}
+        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def filter_by_tag(self, **kwargs):
         tag_search = TagSearch()
@@ -590,12 +581,8 @@ class PostgresProvider:
         work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
         bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
         collection_results = {'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
-        results = {}
-        results['work'] = work_results
-        results['bookmark'] = bookmark_results
-        results['collection'] = collection_results
-        results['tag'] = tag_results
-        results['user'] = {'data': [], 'page': {}}
+        results = {'work': work_results, 'bookmark': bookmark_results, 'collection': collection_results,
+                   'tag': tag_results, 'user': {'data': [], 'page': {}}}
         return results
 
     def filter_by_attribute(self, **kwargs):
@@ -650,12 +637,8 @@ class PostgresProvider:
         work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
         bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
         collection_results = {'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
-        results = {}
-        results['work'] = work_results
-        results['bookmark'] = bookmark_results
-        results['collection'] = collection_results
-        results['tag'] = tag_results
-        results['user'] = {'data': [], 'page': {}}
+        results = {'work': work_results, 'bookmark': bookmark_results, 'collection': collection_results,
+                   'tag': tag_results, 'user': {'data': [], 'page': {}}}
         return results
 
     def filter_by_work_type(self, **kwargs):
@@ -679,12 +662,9 @@ class PostgresProvider:
         works_processed = self.process_results(works, work_search.page, Work, base_string)
 
         work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
-        results = {}
-        results['work'] = work_results
-        results['bookmark'] = {'data': [], 'page': {'count': 0}}
-        results['collection'] = {'data': [], 'page': {'count': 0}}
-        results['tag'] = {'data': [], 'page': {'count': 0}}
-        results['user'] = {'data': [], 'page': {'count': 0}}
+        results = {'work': work_results, 'bookmark': {'data': [], 'page': {'count': 0}},
+                   'collection': {'data': [], 'page': {'count': 0}}, 'tag': {'data': [], 'page': {'count': 0}},
+                   'user': {'data': [], 'page': {'count': 0}}}
         return results
 
 
