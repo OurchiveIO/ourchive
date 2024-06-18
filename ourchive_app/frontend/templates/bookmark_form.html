@@ -92,7 +92,7 @@
         <label id="bookmark-form-created-label" class="uk-form-label" for="bookmark-form-complete-checkbox">Post Date</label>
         <div id="bookmark-form-created-controls" class="uk-form-controls">
             <div id="bookmark-form-created-inline" class="uk-inline">
-                <input title="{% translate 'Bookmark created on' %}" id="bookmark-form-complete-checkbox" type="date" name="created_on" value="{{ bookmark.created_on }}"> 
+                <input title="{% translate 'Bookmark created on' %}" id="bookmark-form-complete-checkbox" type="date" class="uk-input" name="created_on" value="{{ bookmark.created_on }}"> 
             </div>
         </div>
     </div>
@@ -101,7 +101,7 @@
         <div id="bookmark-form-updated-controls" class="uk-form-controls">
             <div id="bookmark-form-updated-inline" class="uk-inline">
                 <input title="{% translate 'Bookmark updated on original' %}" id="bookmark-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ bookmark.updated_on }}"> 
-                <input title="{% translate 'Bookmark updated on' %}" id="bookmark-form-complete-checkbox" type="date" name="updated_on" value="{{ bookmark.updated_on }}"> 
+                <input title="{% translate 'Bookmark updated on' %}" id="bookmark-form-complete-checkbox" type="date" class="uk-input" name="updated_on" value="{{ bookmark.updated_on }}"> 
             </div>
         </div>
     </div>

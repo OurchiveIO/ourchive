@@ -168,7 +168,7 @@ function handleModalDelete(url) {
         <div id="anthology-form-updated-controls" class="uk-form-controls">
             <div id="anthology-form-updated-inline" class="uk-inline">
                 <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ anthology.updated_on }}"> 
-                <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on" type="date" name="updated_on" value="{{ anthology.updated_on }}"> 
+                <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on" type="date" class="uk-input" name="updated_on" value="{{ anthology.updated_on }}"> 
             </div>
         </div>
     </div>

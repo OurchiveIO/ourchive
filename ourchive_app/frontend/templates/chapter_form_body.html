@@ -24,7 +24,7 @@
     <label id="chapter-form-created-label" class="uk-form-label" for="chapter-form-created-on">Post Date</label>
     <div id="chapter-form-created-controls" class="uk-form-controls">
         <div id="chapter-form-created-inline" class="uk-inline">
-            <input title="{% translate 'Chapter created on' %}" id="chapter-form-created-on" type="date" name="created_on" value="{{ chapter.created_on }}"> 
+            <input title="{% translate 'Chapter created on' %}" id="chapter-form-created-on" type="date" class="uk-input" name="created_on" value="{{ chapter.created_on }}"> 
         </div>
     </div>
 </div>
@@ -33,7 +33,7 @@
     <div id="chapter-form-updated-controls" class="uk-form-controls">
         <div id="chapter-form-updated-inline" class="uk-inline">
             <input title="{% translate 'Chapter updated on' %}" id="chapter-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ chapter.updated_on }}"> 
-            <input title="{% translate 'Chapter updated on' %}" id="chapter-form-updated-on" type="date" name="updated_on" value="{{ chapter.updated_on }}"> 
+            <input title="{% translate 'Chapter updated on' %}" id="chapter-form-updated-on" type="date" class="uk-input" name="updated_on" value="{{ chapter.updated_on }}"> 
         </div>
     </div>
 </div>
