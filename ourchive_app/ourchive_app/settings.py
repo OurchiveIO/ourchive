@@ -150,11 +150,11 @@ WSGI_APPLICATION = 'ourchive_app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ourchive_db',
-        'USER': 'ourchive',
+        'NAME': os.getenv('OURCHIVE_DB_NAME', 'ourchive_db'),
+        'USER': os.getenv('OURCHIVE_DB_USER', 'ourchive'),
         'PASSWORD': os.getenv('OURCHIVE_DB_PW'),
         'HOST': os.getenv('OURCHIVE_DB_HOST'),
-        'PORT': '5432',
+        'PORT': os.getenv('OURCHIVE_DB_PORT', '5432'),
     }
 }
 

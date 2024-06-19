@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.forms import ModelForm, ChoiceField
 import datetime
+from core.constants import SETTING_VALUE_CHOICES
 
 
 class RichTextEditorWidget(Input):
@@ -88,20 +89,6 @@ class NewsAdmin(admin.ModelAdmin):
     list_display = ('title', 'id')
 
 
-SETTING_VALUE_CHOICES = [
-    [('true', 'True'),('false', 'False')],
-    {
-        'Search Provider': [('POSTGRES', 'Database')],
-        'Invite Queue Limit': [('10', '10'), ('20', '20'), ('50', '50'), ('100', '100')],
-        'Rating Star Count': [
-            ('1', '1'), ('2', '2'),('3', '3'),('4', '4'),('5', '5'),
-            ('6', '6'),('7', '7'),('8', '8'),('9', '9'),('10', '10')
-        ]
-    }
-
-]
-
-
 class SettingsForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(SettingsForm, self).__init__(*args, **kwargs)
@@ -117,10 +104,8 @@ class SettingsForm(ModelForm):
 
 class OurchiveSettingAdmin(admin.ModelAdmin):
     form = SettingsForm
-    exclude = ('valtype',)
-    readonly_fields = ('name', )
-    fields = ('name', 'value')
-    list_display = ('id', 'name', 'value', 'uid')
+    fields = ('name', 'value', 'valtype')
+    list_display = ('name', 'value', 'uid')
 
 
 @admin.action(description="Allow selected users to upload images")

@@ -16,9 +16,9 @@ class User(AbstractUser):
     id = models.AutoField(primary_key=True)
     username = models.CharField(
         "Username",
-        max_length = 150,
-        unique = True,
-        validators = [username_validator]
+        max_length=150,
+        unique=True,
+        validators=[username_validator]
     )
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -43,7 +43,7 @@ class User(AbstractUser):
     collapse_chapter_audio = models.BooleanField(default=False)
     collapse_chapter_image = models.BooleanField(default=False)
     collapse_chapter_video = models.BooleanField(default=False)
-    default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE,null=True, blank=True)
+    default_work_type = models.ForeignKey('WorkType', on_delete=models.CASCADE, null=True, blank=True)
     copy_work_metadata = models.BooleanField(default=False)
     chive_export_url = models.CharField(max_length=200, blank=True, null=True)
     works = models.ManyToManyField('Work', related_name='users', through='UserWork')
@@ -74,7 +74,7 @@ class UserReportReason(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['reason'],name='unique reportreason')]
+            models.UniqueConstraint(fields=['reason'], name='unique reportreason')]
         ordering = ['reason']
         db_table = 'core_userreportreason'
 
@@ -113,7 +113,6 @@ class UserReport(models.Model):
 
 
 class UserSubscription(models.Model):
-
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -158,7 +157,6 @@ class Language(models.Model):
 
 
 class Work(models.Model):
-
     DOWNLOAD_CHOICES = [
         ('EPUB', 'EPUB'), ('M4B', 'M4B'), ('ZIP', 'ZIP'), ('M4A', 'M4A'),
         ('MOBI', 'MOBI')
@@ -559,7 +557,7 @@ class ChapterComment(Comment):
         return '<ChapterComment: {}>'.format(self.id)
 
     class Meta:
-        db_table = 'core_chaptercomment'    
+        db_table = 'core_chaptercomment'
 
 
 class CollectionComment(Comment):
@@ -722,7 +720,7 @@ class Bookmark(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    work = models.ForeignKey('Work',on_delete=models.SET_NULL, null=True)
+    work = models.ForeignKey('Work', on_delete=models.SET_NULL, null=True)
 
     tags = models.ManyToManyField('Tag')
     attributes = models.ManyToManyField('AttributeValue')
@@ -863,12 +861,32 @@ class NotificationType(models.Model):
         db_table = 'core_notificationtype'
 
 
+class Settings(models.TextChoices):
+    SEARCH_PROVIDER = 'Search Provider', 'Search Provider'
+    UPLOAD_ENDPOINT = 'Upload Endpoint', 'Upload Endpoint'
+    REGISTRATION_PERMITTED = 'Registration Permitted', 'Registration Permitted'
+    INVITE_ONLY = 'Invite Only', 'Invite Only'
+    USE_INVITE_QUEUE = 'Use Invite Queue', 'Use Invite Queue'
+    INVITE_QUEUE_LIMIT = 'Invite Queue Limit', 'Invite Queue Limit'
+    DEFAULT_ICON_URL = 'Default Icon URL', 'Default Icon URL'
+    AUDIO_PROCESSING = 'Audio Processing', 'Audio Processing'
+    RATING_STAR_COUNT = 'Rating Star Count', 'Rating Star Count'
+    ALLOW_COMMENTS = 'Allow Comments', 'Allow Comments'
+    RATINGS_ENABLED = 'Ratings Enabled', 'Ratings Enabled'
+    AUTO_ALLOW_UPLOAD = 'Auto-Allow Upload', 'Auto-Allow Upload'
+
+
+class SettingsValTypes(models.TextChoices):
+    TRUE_FALSE = 'truefalse', 'truefalse'
+    CHOICE = 'choice', 'choice'
+
+
 class OurchiveSetting(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, choices=Settings.choices)
     value = models.CharField(max_length=200)
-    valtype = models.CharField(max_length=200, null=True, blank=True)
+    valtype = models.CharField(max_length=200, null=True, blank=True, choices=SettingsValTypes)
 
     def __repr__(self):
         return '<OurchiveSettings: {}>'.format(self.id)
@@ -982,7 +1000,7 @@ class AttributeValue(models.Model):
         indexes = [
             models.Index(fields=['name']),
         ]
-        ordering = ('attribute_type__name','order', 'name')
+        ordering = ('attribute_type__name', 'order', 'name')
         constraints = [
             models.UniqueConstraint(Lower('name').desc(), name='unique_attributevalue_name')
         ]
@@ -1102,5 +1120,5 @@ class SearchGroup(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['label'],name='unique label')]
+            models.UniqueConstraint(fields=['label'], name='unique label')]
         ordering = ['display_order', 'label']
