@@ -1,6 +1,6 @@
 [
 {
-    "model": "api.bookmarkcomment",
+    "model": "core.bookmarkcomment",
     "pk": 1,
     "fields": {
         "uid": "fbdcb22e-aead-40ed-9b14-0be6ff3ddd44",
@@ -13,7 +13,7 @@
     }
 },
 {
-    "model": "api.bookmarkcomment",
+    "model": "core.bookmarkcomment",
     "pk": 2,
     "fields": {
         "uid": "496a02bc-90a3-4570-a179-db56f7fdaf14",
@@ -26,7 +26,7 @@
     }
 },
 {
-    "model": "api.bookmarkcomment",
+    "model": "core.bookmarkcomment",
     "pk": 3,
     "fields": {
         "uid": "9294955d-6785-4727-8194-6aa575616c8c",
@@ -39,7 +39,7 @@
     }
 },
 {
-    "model": "api.bookmarkcomment",
+    "model": "core.bookmarkcomment",
     "pk": 4,
     "fields": {
         "uid": "42e1c913-1b98-4d3e-9657-27013b291f13",
@@ -52,7 +52,7 @@
     }
 },
 {
-    "model": "api.bookmarkcomment",
+    "model": "core.bookmarkcomment",
     "pk": 5,
     "fields": {
         "uid": "94c7eacb-e18b-407d-870f-a0d7f09433e5",
@@ -65,7 +65,7 @@
     }
 },
 {
-    "model": "api.bookmarkcomment",
+    "model": "core.bookmarkcomment",
     "pk": 6,
     "fields": {
         "uid": "0479563c-021d-42d9-a5df-9549bdb616eb",
@@ -78,7 +78,7 @@
     }
 },
 {
-    "model": "api.bookmarkcomment",
+    "model": "core.bookmarkcomment",
     "pk": 7,
     "fields": {
         "uid": "67187668-7a34-4afc-8f6e-3bcc796d17e8",
@@ -91,7 +91,7 @@
     }
 },
 {
-    "model": "api.bookmarkcomment",
+    "model": "core.bookmarkcomment",
     "pk": 8,
     "fields": {
         "uid": "eea6f111-6f66-4d23-b955-76158ff32ee4",

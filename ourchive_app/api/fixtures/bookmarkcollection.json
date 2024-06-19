@@ -1,6 +1,6 @@
 [
     {
-        "model": "api.bookmarkcollection",
+        "model": "core.bookmarkcollection",
         "pk": 1,
         "fields":
         {
@@ -28,7 +28,7 @@
         }
     },
     {
-        "model": "api.bookmarkcollection",
+        "model": "core.bookmarkcollection",
         "pk": 2,
         "fields":
         {
@@ -55,7 +55,7 @@
         }
     },
     {
-        "model": "api.bookmarkcollection",
+        "model": "core.bookmarkcollection",
         "pk": 3,
         "fields":
         {

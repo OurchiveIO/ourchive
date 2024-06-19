@@ -1,6 +1,6 @@
 [
     {
-        "model": "api.work",
+        "model": "core.work",
         "pk": 1,
         "fields":
         {
@@ -45,7 +45,7 @@
         }
     },
     {
-        "model": "api.work",
+        "model": "core.work",
         "pk": 2,
         "fields":
         {
@@ -90,7 +90,7 @@
         }
     },
     {
-        "model": "api.work",
+        "model": "core.work",
         "pk": 3,
         "fields":
         {

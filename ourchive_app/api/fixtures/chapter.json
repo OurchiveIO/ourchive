@@ -1,6 +1,6 @@
 [
     {
-        "model": "api.chapter",
+        "model": "core.chapter",
         "pk": 1,
         "fields":
         {
@@ -32,7 +32,7 @@
         }
     },
     {
-        "model": "api.chapter",
+        "model": "core.chapter",
         "pk": 2,
         "fields":
         {
@@ -64,7 +64,7 @@
         }
     },
     {
-        "model": "api.chapter",
+        "model": "core.chapter",
         "pk": 3,
         "fields":
         {
