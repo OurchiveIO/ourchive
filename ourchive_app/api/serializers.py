@@ -466,8 +466,6 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
         comment_count = validated_data.pop('comment_count') if 'comment_count' in validated_data else None
         validated_data['text'] = clean_text(validated_data['text'], self.context['request'].user) if validated_data['text'] is not None else ''
         comment = ChapterComment.objects.create(**validated_data)
-        comment.chapter.comment_count = ChapterComment.objects.filter(chapter__id=comment.chapter.id).count()
-        comment.chapter.work.comment_count = ChapterComment.objects.filter(chapter__work__id=comment.chapter.work.id).count()
         comment.chapter.save()
         comment.chapter.work.save()
         comment_link = self.get_comment_link(comment, chapter_offset, comment_thread, comment_count)
@@ -527,7 +525,6 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification.save()
         user.has_notifications = True
         user.save()
-        comment.bookmark.comment_count = BookmarkComment.objects.filter(bookmark__id=comment.bookmark.id).count()
         comment.bookmark.save()
         if comment.parent_comment is not None and comment.parent_comment.user.id != comment.bookmark.user.id:
             user = User.objects.filter(id=comment.parent_comment.user.id).first()
@@ -577,8 +574,6 @@ class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
         notification.save()
         user.has_notifications = True
         user.save()
-        comment.collection.comment_count = CollectionComment.objects.filter(collection__id=comment.collection.id).count()
-        comment.collection.save()
         if comment.parent_comment is not None and comment.parent_comment.user.id != comment.collection.user.id:
             user = User.objects.filter(id=comment.parent_comment.user.id).first()
             notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()

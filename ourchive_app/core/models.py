@@ -545,6 +545,11 @@ class BookmarkComment(Comment):
     def __repr__(self):
         return '<BookmarkComment: {}>'.format(self.id)
 
+    def save(self, *args, **kwargs):
+        super(BookmarkComment, self).save(*args, **kwargs)
+        self.bookmark.comment_count = BookmarkComment.objects.filter(bookmark__id=self.bookmark.id).count()
+        self.bookmark.save()
+
     class Meta:
         db_table = 'core_bookmarkcomment'
 
@@ -559,6 +564,14 @@ class ChapterComment(Comment):
     def __repr__(self):
         return '<ChapterComment: {}>'.format(self.id)
 
+    def save(self, *args, **kwargs):
+        super(ChapterComment, self).save(*args, **kwargs)
+        self.chapter.comment_count = ChapterComment.objects.filter(chapter__id=self.chapter.id).count()
+        self.chapter.work.comment_count = ChapterComment.objects.filter(
+            chapter__work__id=self.chapter.work_id).count()
+        self.chapter.save()
+        self.chapter.work.save()
+
     class Meta:
         db_table = 'core_chaptercomment'
 
@@ -572,6 +585,11 @@ class CollectionComment(Comment):
 
     def __repr__(self):
         return '<CollectionComment: {}>'.format(self.id)
+
+    def save(self, *args, **kwargs):
+        self.collection.comment_count = CollectionComment.objects.filter(collection__id=self.collection.id).count()
+        self.collection.save()
+        super(CollectionComment, self).save(*args, **kwargs)
 
     class Meta:
         db_table = 'core_collectioncomment'

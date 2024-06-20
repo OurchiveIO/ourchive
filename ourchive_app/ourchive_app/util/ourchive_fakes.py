@@ -49,7 +49,7 @@ class OurchiveFakes:
         works, chapters = self.generate_works_with_varying_users(users, obj_count,
                                                                  **{'obj_count': obj_count,
                                                                     'persist_db': True,
-                                                                    'chapter_count': randint(0, chapter_count),
+                                                                    'chapter_count': randint(1, chapter_count),
                                                                     'token': token,
                                                                     'assign_tags': True,
                                                                     'tags_count': 20,
@@ -80,6 +80,13 @@ class OurchiveFakes:
             'obj_count': obj_count
         }
         collections = self.generate_collections_with_varying_users(users, len(users), **collections_opts)
+        for collection in collections:
+            self.generate_collection_comments(collection.user_id, randint(0, comment_count), True,
+                                              collection,
+                                              **{'reply_max': randint(0, reply_count), 'user_count': 3,
+                                                 'create_users': False,
+                                                 'comment_depth': comment_depth}
+                                              )
         logger.info(f'Collections created. Count: {len(collections)}')
         series = self.generate_series(users[randint(0, len(users) - 1)].id, obj_count, True, **{'token': token})
         logger.info(f'Series created. Count: {len(series)}')
@@ -198,7 +205,7 @@ class OurchiveFakes:
             if self.fake.pybool():
                 title = f'{title} {kwargs.get("token", "")}'.strip()
             if self.fake.pybool() and settings.CHIVE_COVER_URLS:
-                cover_image = settings.CHIVE_COVER_URLS[randint(0, len(settings.CHIVE_COVER_URLS)-1)]
+                cover_image = settings.CHIVE_COVER_URLS[randint(0, len(settings.CHIVE_COVER_URLS) - 1)]
                 cover_url = cover_image['cover_url']
                 cover_alt_text = cover_image['cover_alt_text']
             work = models.Work(title=title,
@@ -252,19 +259,21 @@ class OurchiveFakes:
                 paragraph = self.fake.paragraph(nb_sentences=randint(5, 50))
                 chapter_text = chapter_text + f' <p>{paragraph}</p>'
             if self.fake.pybool() and settings.CHAPTER_IMAGE_URLS:
-                image_record = settings.CHAPTER_IMAGE_URLS[randint(0, len(settings.CHAPTER_IMAGE_URLS)-1)]
+                image_record = settings.CHAPTER_IMAGE_URLS[randint(0, len(settings.CHAPTER_IMAGE_URLS) - 1)]
                 image_url = image_record['image_url']
                 image_alt_text = image_record['image_alt_text']
             if self.fake.pybool() and settings.CHAPTER_AUDIO_URLS:
-                audio_record = settings.CHAPTER_AUDIO_URLS[randint(0, len(settings.CHAPTER_AUDIO_URLS)-1)]
+                audio_record = settings.CHAPTER_AUDIO_URLS[randint(0, len(settings.CHAPTER_AUDIO_URLS) - 1)]
                 audio_url = audio_record['audio_url']
                 audio_description = audio_record['audio_description']
                 audio_length = audio_record['audio_length']
             if self.fake.pybool() and settings.CHAPTER_VIDEO_URLS:
-                video_record = settings.CHAPTER_VIDEO_URLS[randint(0, len(settings.CHAPTER_VIDEO_URLS)-1)]
+                video_record = settings.CHAPTER_VIDEO_URLS[randint(0, len(settings.CHAPTER_VIDEO_URLS) - 1)]
                 video_url = video_record['video_url']
                 video_description = video_record['video_description']
                 video_length = video_record['video_length']
+            # this is done to prevent confusing & buggy looking pagination
+            draft = self.fake.pybool() if ((y == 0 or y == chapter_count) and chapter_count > 2) else False
             chapter = models.Chapter(user_id=user_id,
                                      work=work,
                                      title=self.fake.sentence().replace('.', ''),
@@ -283,7 +292,7 @@ class OurchiveFakes:
                                      image_format=self.fake.mime_type(),
                                      image_size=str(self.fake.pyint()),
                                      summary=self.fake.paragraph(),
-                                     draft=self.fake.pybool(),
+                                     draft=draft,
                                      created_on=self.fake.date(), updated_on=self.fake.date())
             if persist_db:
                 chapter.save()
@@ -400,7 +409,7 @@ class OurchiveFakes:
             if self.fake.pybool():
                 title = f'{title} {kwargs.get("token", "")}'.strip()
             if self.fake.pybool() and settings.CHIVE_HEADER_URLS:
-                header_image = settings.CHIVE_HEADER_URLS[randint(0, len(settings.CHIVE_HEADER_URLS)-1)]
+                header_image = settings.CHIVE_HEADER_URLS[randint(0, len(settings.CHIVE_HEADER_URLS) - 1)]
                 header_url = header_image['header_url']
                 header_alt_text = header_image['header_alt_text']
             collection = models.BookmarkCollection(title=title,
@@ -496,7 +505,10 @@ class OurchiveFakes:
         comment.parent_comment = parent
         kwargs['create_users'] = False
         for x in range(0, obj_count):
-            text = self.fake.paragraph(nb_sentences=randint(1, 20))
+            text = ''
+            for z in range(1, 5):
+                paragraph = self.fake.paragraph(nb_sentences=randint(1, 30))
+                text = text + f' <p>{paragraph}</p>'
             comment.text = text
             comment.user = users[randint(0, len(users) - 1)] if create_users else self.get_random_obj(models.User)
             if persist_db:
@@ -560,7 +572,7 @@ class OurchiveFakes:
                 persist_db
             )
         for x in range(0, obj_count):
-            display_text = self.fake.sentence()
+            display_text = self.fake.sentence().replace('.', '')
             anthology = models.Anthology(title=display_text,
                                          description=self.fake.paragraph(nb_sentences=randint(1, 12)),
                                          is_complete=self.fake.pybool(),
