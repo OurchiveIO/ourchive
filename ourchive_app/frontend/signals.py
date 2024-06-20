@@ -48,7 +48,7 @@ def spoil_collection_cache(instance):
 @receiver(post_save, sender=core.Work)
 def spoil_cache_create(sender, instance, created, **kwargs):
     if created:
-        print('created')
+        return True
 
 @receiver(post_save, sender=core.Work)
 def spoil_work_cache_update(sender, instance, **kwargs):

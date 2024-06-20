@@ -39,13 +39,18 @@
     <a id="jump-to-comments" href="#chapter-{{ chapter.id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: .75" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
     {% endif %}
 </div>
-{% if work.chapter_count > 1 or chapter.title %}<div class="uk-width-1-1 uk-margin-small-top" id="chapter-header-parent">
-	<h2 id="chapter-header-h2"><a id="chapter-header-link" class="uk-link-reset" href="">{% if work.chapter_count > 1 %}Chapter {{ chapter.number }}{% if chapter.title %}: {% endif %}{{ chapter.title|default:'' }}{% endif %}{% endif %}</a></h2>
+{% if work.chapter_count > 1 or chapter.title %}
+    <div class="uk-width-1-1 uk-margin-small-top" id="chapter-header-parent">
+	    <h2 id="chapter-header-h2"><a id="chapter-header-link" class="uk-link-reset" href="">
+            {% if work.chapter_count > 1 %}Chapter {{ chapter.number }}{% if chapter.title %}: {% endif %}{{ chapter.title|default:'' }}{% endif %}
+    </a></h2>
 	{% if chapter.draft %}
             <div class="uk-width-auto" id="chapter-draft-div">
                 <span id="chapter-draft-badge" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
             </div>
-</div>{% endif %}
+    {% endif %}
+</div>
+{% endif %}
 {% if chapter.summary or chapter.notes or chapter.attributes %}<div id="chapter-context-parent" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s" uk-grid>
 	{% if chapter.summary %}<div id="chapter-summary-header"><span id="chapter-summary-label" class="uk-text-large">Summary</span></div>
     <div id="chapter-summary-div"><span id="chapter-summary-text" class="uk-text-medium">{% autoescape off %}{{ chapter.summary }}{% endautoescape %}</span></div>{% endif %}
@@ -57,16 +62,13 @@
     {% endif %}
 </div>{% endif %}
 {% if work.chapter_count > 1 %}
-	<div class="uk-align-right uk-text-right uk-width-1-1 uk-margin-small-top" id="chapter-metadata-div"><p id="chapter-metadata-p" class="uk-article-meta">{% if chapter.updated_on %}<span id="chapter-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{chapter.updated_on|date:'d M Y'}}</span> - {% endif %}{% if chapter.word_count %}<span id="chapter-metadata-length" class="uk-inline uk-text-bold">{% blocktranslate with wc=chapter.word_count %}{{ wc }} Words{% endblocktranslate %}</span>{% endif %} {% if chapter.audio_length %}- <span class="uk-inline uk-text-bold" id="chapter-metadata-audio-length">{% blocktranslate with al=chapter.audio_length %}Audio Length: {{ al }}{% endblocktranslate %}</span>{% endif %} {% if chapter.image_size %}- <span class="uk-inline uk-text-bold" id="chapter-metadata-image-size">{% blocktranslate with imgs=chapter.image_size|default:0 %}Image Size: {{ imgs }}{% endblocktranslate %}</span>{% endif %} {% if settings.AllowComments %}- <span id="chapter-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=chapter.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span></p></div>
-	{% if chapter.image_url or chapter.audio_url or chapter.text %}<div id="chapter-notes-summary-hr" class="uk-width-1-1"><hr class="ourchive-hr" id="chapter-content-hr"/></div>
-	{% else %}
-	<div id="chapter-notes-summary-hr" class="uk-width-1-1">
-		<hr class="ourchive-hr" id="chapter-content-hr"/>
-		<p>{% translate 'Nothing to see here...' %}</p>
-	</div>
-	{% endif %}
+	<div class="uk-align-right uk-text-right uk-width-1-1 uk-margin-small" id="chapter-metadata-div">
+        <p id="chapter-metadata-p" class="uk-article-meta">{% if chapter.updated_on %}<span id="chapter-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{chapter.updated_on|date:'d M Y'}}</span> - {% endif %}{% if chapter.word_count %}<span id="chapter-metadata-length" class="uk-inline uk-text-bold">{% blocktranslate with wc=chapter.word_count %}{{ wc }} Words{% endblocktranslate %}</span>{% endif %} {% if chapter.audio_length %}- <span class="uk-inline uk-text-bold" id="chapter-metadata-audio-length">{% blocktranslate with al=chapter.audio_length %}Audio Length: {{ al }}{% endblocktranslate %}</span>{% endif %} {% if chapter.image_size %}- <span class="uk-inline uk-text-bold" id="chapter-metadata-image-size">{% blocktranslate with imgs=chapter.image_size|default:0 %}Image Size: {{ imgs }}{% endblocktranslate %}</span>{% endif %} {% if settings.AllowComments %}- <span id="chapter-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=chapter.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span>
+        </p>
+    </div>
 {% endif %}
-<div class="uk-width-1-1 uk-overflow-auto ourchive-read-div" id="chapter-{{ chapter.id }}-content-container">
+<div class="uk-width-1-1 uk-margin-small-top"><hr class="ourchive-hr" id="chapter-content-hr"/></div>
+<div class="uk-width-1-1 uk-margin-top uk-overflow-auto ourchive-read-div" id="chapter-{{ chapter.id }}-content-container">
 {% if chapter.image_url and chapter.image_url != "None" %}
 	<p id="chapter-image-graf">
 		<img id="chapter-image" src="{{ chapter.image_url }}" alt="{{ chapter.image_alt_text }}"/>
@@ -75,7 +77,12 @@
 {% endif %}
 {% if chapter.audio_url and chapter.audio_url != "None" %}<p id="chapter-audio-graf"><audio id="chapter-audio" src="{{ chapter.audio_url }}" controls></audio></p><hr class="ourchive-hr" id="chapter-audio-hr"/>{% endif %}
 {% if chapter.video_url and chapter.video_url != "None" %}<p id="chapter-{{chapter.id}}-video-graf"><video id="chapter-{{chapter.id}}-video" src="{{chapter.video_url}}" controls>{% translate 'Your browser does not support the HTML5 video tag.' %}</video></p><hr class="ourchive-hr" id="chapter-{{chapter.id}}video-hr"/>{% endif %}
-{% if chapter.text %}<span id="chapter-text" class="uk-text-medium">{% autoescape off %}{{ chapter.text }}{% endautoescape %}</span><div id="chapter-content-divider"><hr class="ourchive-hr"/></div>{% endif %}
+{% if chapter.text %}
+    <div id="chapter-text" class="uk-text-medium uk-margin-large-top">
+        {% autoescape off %}{{ chapter.text }}{% endautoescape %}
+    </div>
+    <div id="chapter-content-divider" class="uk-margin-medium-top"><hr class="ourchive-hr"/></div>
+{% endif %}
 {% if chapter.end_notes %}
 	<div id="chapter-notes-header"><span id="chapter-notes-label" class="uk-text-large">Notes</span></div>
     <div id="chapter-notes-div"><span id="chapter-notes-text" class="uk-text-medium">{% autoescape off %}{{ chapter.end_notes }}{% endautoescape %}</span></div>

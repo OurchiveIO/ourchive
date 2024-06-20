@@ -7,6 +7,10 @@ import unidecode
 from .utils import clean_tag_text, count_words
 from django_registration.validators import ReservedNameValidator
 from django.core.validators import validate_slug
+from django.conf import settings
+
+# TODO: this feels illegal
+DEFAULT_ICON_URL = f'{settings.STATIC_URL}icon-default.png'
 
 
 class User(AbstractUser):
@@ -24,11 +28,10 @@ class User(AbstractUser):
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     profile = models.TextField(null=True, blank=True)
-    icon = models.CharField(max_length=600, null=True, blank=True)
+    icon = models.CharField(max_length=600, null=True, blank=True, default=DEFAULT_ICON_URL)
     icon_alt_text = models.CharField(max_length=600, null=True, blank=True)
     has_notifications = models.BooleanField(default=False)
     default_content = models.TextField(null=True, blank=True)
-    attributes = models.ManyToManyField('AttributeValue')
     can_upload_audio = models.BooleanField(default=False)
     can_upload_images = models.BooleanField(default=False)
     can_upload_export_files = models.BooleanField(default=False)

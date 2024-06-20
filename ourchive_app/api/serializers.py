@@ -748,10 +748,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     pending_users = serializers.SerializerMethodField()
     users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
-    chapter_count = serializers.IntegerField(
-        source='chapters.count',
-        read_only=True
-    )
+    chapter_count = serializers.SerializerMethodField()
     work_type_name = serializers.CharField(
         source='work_type.type_name',
         read_only=True
@@ -763,6 +760,9 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Work
         fields = '__all__'
+
+    def get_chapter_count(self, obj):
+        return obj.chapters.filter(draft=False).count()
 
     def get_has_drafts(self, obj):
         has_drafts = obj.draft or obj.chapters.all().filter(draft=True).exists()

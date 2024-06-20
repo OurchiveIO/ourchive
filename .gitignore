@@ -3,6 +3,7 @@
 uploads/*
 audio/*
 tmp/*
+!**ourchive_app/files/test_data/**
 ourchive_app/files/*
 ourchive_app/django_cache/*
 venv/*
@@ -26,8 +27,8 @@ output
 .idea
 # ignore my vim temp files
 *.swp
-# ignore any .env folder
-**/.env
+# ignore any .env file or folder
+**/.env*
 
 # ignore the venv
 **/venv
