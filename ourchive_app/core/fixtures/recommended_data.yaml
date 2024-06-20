@@ -10,6 +10,9 @@
   fields:
     uid: 44d0bf3a-480f-466b-8e48-3b9be4e297c1
     type_name: Art
+- model: core.worktype
+  fields:
+    type_name: Vid
 - model: core.tagtype
   fields:
     label: Fandom
@@ -21,16 +24,8 @@
   fields:
     label: Trope
     type_name: trope
-    admin_administrated: true
     required: false
     sort_order: 4
-- model: core.tagtype
-  fields:
-    label: Language
-    type_name: language
-    admin_administrated: false
-    required: false
-    sort_order: 5
 - model: core.tagtype
   fields:
     label: Pairing
@@ -66,6 +61,7 @@
     display_name: Rating
     allow_on_work: true
     allow_on_bookmark: true
+    allow_on_anthology: true
     allow_on_chapter: true
     allow_on_user: false
     allow_multiselect: true
@@ -75,6 +71,7 @@
     name: genre
     display_name: Genre
     allow_on_work: true
+    allow_on_anthology: true
     allow_on_bookmark: true
     allow_on_chapter: true
     allow_on_user: false
