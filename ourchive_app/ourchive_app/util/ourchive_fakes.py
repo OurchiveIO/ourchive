@@ -14,7 +14,6 @@ class OurchiveFakes:
 
     def __init__(self):
         self.fake = Faker()
-        self.fake.random.seed(6875309)
 
     def generate_everything(self, obj_count, token='', create_dependency_objs=True):
         tag_and_attribute_count = 5
@@ -66,7 +65,12 @@ class OurchiveFakes:
                                            )
         logger.info(f'Chapter comments created.')
         logger.info(f'Works and chapters created. Works count: {len(works)} Chapters count: {len(chapters)}')
-        bookmarks = self.generate_bookmarks(users[randint(0, len(users) - 1)].id, obj_count, True, **{'token': token})
+        bookmarks = self.generate_bookmarks(users[randint(0, len(users) - 1)].id, obj_count,
+                                            True, **{'token': token,
+                                                     'assign_tags': True,
+                                                     'tags_count': 20,
+                                                     'assign_attributes': True,
+                                                     'attributes_count': 10})
         logger.info(f'Bookmarks created. Count: {len(bookmarks)}')
         collections_opts = {
             'assign_works': True,
@@ -316,9 +320,15 @@ class OurchiveFakes:
                                        user_id=user_id,
                                        rating=0,
                                        created_on=self.fake.date(), updated_on=self.fake.date())
+            if models.Work.objects.count() > 0:
+                bookmark.work = self.get_random_obj(models.Work)
             bookmarks.append(bookmark)
             if persist_db:
                 bookmark.save()
+            else:
+                bookmark.id = randint(0, 5000)
+            kwargs['obj_count'] = obj_count
+            self.assign_fk_items(bookmark, user_id, persist_db, None, **kwargs)
         return bookmarks
 
     def generate_tags(self, obj_count=1, persist_db=False, **kwargs):

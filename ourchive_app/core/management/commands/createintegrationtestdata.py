@@ -17,8 +17,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "-n", "--num_instances",
             help="The max number of instances to create for chives, news items, "
-                 "announcements, or notifications. Default: 10.",
-            default=10,
+                 "announcements, or notifications. Default: 15.",
+            default=15,
         )
         parser.add_argument(
             "-t", "--token",

@@ -177,12 +177,10 @@ class CoreTests(TestCase):
         news = self.ourchive_fakes.generate_news(15, True)
         self.assertEquals(15, len(news))
 
-    @skip
     def test_generate_everything(self):
         self.ourchive_fakes.generate_everything(5, '', False)
         self.assertEquals(25, models.Work.objects.count())
 
-    @skip
     def test_get_settings(self):
         objects_added = ourchive_fixtures.load_data("ourchive_app/core/fixtures/", "required_data.yaml")
         self.assertEquals(14, objects_added)
