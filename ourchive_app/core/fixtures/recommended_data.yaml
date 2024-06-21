@@ -20,12 +20,14 @@
     admin_administrated: false
     required: false
     sort_order: 1
+    search_group_id: 1
 - model: core.tagtype
   fields:
     label: Trope
     type_name: trope
     required: false
     sort_order: 4
+    search_group_id: 1
 - model: core.tagtype
   fields:
     label: Pairing
@@ -33,6 +35,7 @@
     admin_administrated: false
     required: false
     sort_order: 2
+    search_group_id: 2
 - model: core.tagtype
   fields:
     label: Warnings
@@ -40,6 +43,7 @@
     admin_administrated: false
     required: false
     sort_order: 6
+    search_group_id: 3
 - model: core.tagtype
   fields:
     label: Additional Tags
@@ -47,6 +51,7 @@
     admin_administrated: false
     required: false
     sort_order: 7
+    search_group_id: 3
 - model: core.tagtype
   fields:
     label: Characters
@@ -54,6 +59,7 @@
     admin_administrated: false
     required: false
     sort_order: 3
+    search_group_id: 2
 - model: core.attributetype
   fields:
     uid: dac213b3-6ea0-4764-b136-b9ba514bc6c5
@@ -65,6 +71,7 @@
     allow_on_chapter: true
     allow_on_user: false
     allow_multiselect: true
+    search_group_id: 3
 - model: core.attributetype
   fields:
     uid: 7d09374c-bbdd-4f02-a3e5-019e10138cf1
@@ -76,6 +83,7 @@
     allow_on_chapter: true
     allow_on_user: false
     allow_multiselect: false
+    search_group_id: 3
 - model: core.attributetype
   fields:
     uid: 0f96d320-b0ce-4353-b95a-29f831107482
@@ -86,6 +94,7 @@
     allow_on_chapter: false
     allow_on_user: false
     allow_multiselect: true
+    search_group_id: 3
 - model: core.attributetype
   fields:
     uid: 01149db5-347d-4612-96a5-9359a09b8c95
@@ -156,5 +165,15 @@
     name: trouble
     display_name: Trouble
     attribute_type: 4
-
-  ADD SEARCH GROUPS!!!
+- model: core.searchgroup
+  id: 1
+  fields:
+    label: Tags
+- model: core.searchgroup
+  id: 2
+  fields:
+    label: Characters
+- model: core.searchgroup
+  id: 3
+  fields:
+    label: Additional Information
