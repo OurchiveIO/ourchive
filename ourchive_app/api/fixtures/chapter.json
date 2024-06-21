@@ -5,8 +5,8 @@
         "fields":
         {
             "uid": "4b0e5801-1039-462e-abbb-17707570cd07",
-            "created_on": "2023-08-17T18:07:12.978Z",
-            "updated_on": "2023-08-17T18:07:12.978Z",
+            "created_on": "2023-08-17",
+            "updated_on": "2023-08-17",
             "system_created_on": "2023-08-14T02:01:51.875Z",
             "system_updated_on": "2023-08-17T17:51:11.487Z",
             "title": "Hello World - Chapter",
@@ -37,8 +37,8 @@
         "fields":
         {
             "uid": "4b0e5801-1039-462e-abbb-17707570cd07",
-            "created_on": "2023-08-17T18:07:12.978Z",
-            "updated_on": "2023-08-17T18:07:12.978Z",
+            "created_on": "2023-08-17",
+            "updated_on": "2023-08-17",
             "system_created_on": "2023-08-14T02:01:51.875Z",
             "system_updated_on": "2023-08-17T17:51:11.487Z",
             "title": "Hello World - Chapter",
@@ -69,8 +69,8 @@
         "fields":
         {
             "uid": "4b0e5801-1039-462e-abbb-17707570cd07",
-            "created_on": "2023-08-17T18:07:12.978Z",
-            "updated_on": "2023-08-17T18:07:12.978Z",
+            "created_on": "2023-08-17",
+            "updated_on": "2023-08-17",
             "system_created_on": "2023-08-14T02:01:51.875Z",
             "system_updated_on": "2023-08-17T17:51:11.487Z",
             "title": "Hello World - Chapter",

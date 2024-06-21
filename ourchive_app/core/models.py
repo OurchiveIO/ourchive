@@ -4,6 +4,8 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 import nh3
 import unidecode
+from django.utils import timezone
+
 from .utils import clean_tag_text, count_words
 from django_registration.validators import ReservedNameValidator
 from django.core.validators import validate_slug
@@ -25,8 +27,8 @@ class User(AbstractUser):
         validators=[username_validator]
     )
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
     profile = models.TextField(null=True, blank=True)
     icon = models.CharField(max_length=600, null=True, blank=True, default=DEFAULT_ICON_URL)
     icon_alt_text = models.CharField(max_length=600, null=True, blank=True)
@@ -65,8 +67,8 @@ class User(AbstractUser):
 class UserReportReason(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
     reason = models.CharField(max_length=200, blank=False, null=False)
 
     def __repr__(self):
@@ -85,8 +87,8 @@ class UserReportReason(models.Model):
 class UserReport(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
     reason = models.ForeignKey(
         UserReportReason,
         on_delete=models.PROTECT
@@ -118,8 +120,8 @@ class UserReport(models.Model):
 class UserSubscription(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
     subscribed_to_bookmark = models.BooleanField(default=False)
     subscribed_to_collection = models.BooleanField(default=False)
     subscribed_to_work = models.BooleanField(default=False)
@@ -175,10 +177,10 @@ class Work(models.Model):
     cover_url = models.CharField(max_length=600, null=True, blank=True)
     cover_alt_text = models.CharField(max_length=600, null=True, blank=True)
     preferred_download_url = models.CharField(max_length=600, null=True, blank=True)
-    created_on = models.DateTimeField(null=True, blank=True)
-    updated_on = models.DateTimeField(null=True, blank=True)
-    system_created_on = models.DateTimeField(auto_now_add=True)
-    system_updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateField(null=True, blank=True)
+    updated_on = models.DateField(null=True, blank=True)
+    system_created_on = models.DateTimeField(default=timezone.now)
+    system_updated_on = models.DateTimeField(default=timezone.now)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
     word_count = models.IntegerField(default=0)
@@ -246,10 +248,10 @@ class WorkSeries(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
     is_complete = models.BooleanField(default=False)
-    created_on = models.DateTimeField(null=True, blank=True)
-    updated_on = models.DateTimeField(null=True, blank=True)
-    system_created_on = models.DateTimeField(auto_now_add=True)
-    system_updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateField(null=True, blank=True)
+    updated_on = models.DateField(null=True, blank=True)
+    system_created_on = models.DateTimeField(default=timezone.now)
+    system_updated_on = models.DateTimeField(default=timezone.now)
 
     user = models.ForeignKey(
         User,
@@ -270,10 +272,10 @@ class Anthology(models.Model):
     cover_url = models.CharField(max_length=600, null=True, blank=True)
     cover_alt_text = models.CharField(max_length=600, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    created_on = models.DateTimeField(null=True, blank=True)
-    updated_on = models.DateTimeField(null=True, blank=True)
-    system_created_on = models.DateTimeField(auto_now_add=True)
-    system_updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateField(null=True, blank=True)
+    updated_on = models.DateField(null=True, blank=True)
+    system_created_on = models.DateTimeField(default=timezone.now)
+    system_updated_on = models.DateTimeField(default=timezone.now)
     creating_user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -374,8 +376,8 @@ class UserAnthology(models.Model):
 class UserBlocks(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
 
     user = models.ForeignKey(
         User,
@@ -444,10 +446,10 @@ class WorkType(models.Model):
 class Chapter(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(null=True, blank=True)
-    updated_on = models.DateTimeField(null=True, blank=True)
-    system_created_on = models.DateTimeField(auto_now_add=True)
-    system_updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateField(null=True, blank=True)
+    updated_on = models.DateField(null=True, blank=True)
+    system_created_on = models.DateTimeField(default=timezone.now)
+    system_updated_on = models.DateTimeField(default=timezone.now)
     title = models.CharField(max_length=200, null=True, blank=True)
     number = models.IntegerField(default=1)
     text = models.TextField(null=True, blank=True)
@@ -514,8 +516,8 @@ class Comment(models.Model):
         null=True, blank=True
     )
 
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
 
     parent_comment = models.ForeignKey(
         'Comment',
@@ -600,8 +602,8 @@ class Tag(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     text = models.CharField(max_length=120, db_index=True)
     display_text = models.CharField(max_length=120, default='')
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
     filterable = models.BooleanField(default=True)
 
     class Meta:
@@ -684,10 +686,10 @@ class BookmarkCollection(models.Model):
     header_alt_text = models.CharField(max_length=600, null=True, blank=True)
     short_description = models.CharField(max_length=300, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    created_on = models.DateTimeField(null=True, blank=True)
-    updated_on = models.DateTimeField(null=True, blank=True)
-    system_created_on = models.DateTimeField(auto_now_add=True)
-    system_updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateField(null=True, blank=True)
+    updated_on = models.DateField(null=True, blank=True)
+    system_created_on = models.DateTimeField(default=timezone.now)
+    system_updated_on = models.DateTimeField(default=timezone.now)
     draft = models.BooleanField(default=False)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
@@ -721,10 +723,10 @@ class Bookmark(models.Model):
     title = models.CharField(max_length=200, default='', blank=True)
     rating = models.IntegerField()
     description = models.TextField(null=True, blank=True)
-    created_on = models.DateTimeField(null=True, blank=True)
-    updated_on = models.DateTimeField(null=True, blank=True)
-    system_created_on = models.DateTimeField(auto_now_add=True)
-    system_updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateField(null=True, blank=True)
+    updated_on = models.DateField(null=True, blank=True)
+    system_created_on = models.DateTimeField(default=timezone.now)
+    system_updated_on = models.DateTimeField(default=timezone.now)
     draft = models.BooleanField(default=False)
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
@@ -810,7 +812,7 @@ class Message(models.Model):
 class Notification(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
+    created_on = models.DateTimeField(default=timezone.now)
     title = models.CharField(max_length=200, default='')
     content = models.TextField(blank=True, default='')
     read = models.BooleanField(default=False)
@@ -832,10 +834,10 @@ class Notification(models.Model):
 class AdminAnnouncement(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
+    created_on = models.DateTimeField(default=timezone.now)
     title = models.CharField(max_length=200, default='')
     content = models.TextField(blank=True, default='')
-    expires_on = models.DateTimeField(null=True, blank=True)
+    expires_on = models.DateTimeField(default=timezone.now)
     active = models.BooleanField(default=False)
 
     class Meta:
@@ -849,8 +851,8 @@ class AdminAnnouncement(models.Model):
 class News(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
     title = models.CharField(max_length=200, default='')
     content = models.TextField(blank=True, default='')
 
@@ -1128,8 +1130,8 @@ class UserAttribute(models.Model):
 class SearchGroup(models.Model):
     id = models.AutoField(primary_key=True)
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_on = models.DateTimeField(auto_now_add=True)
-    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
     label = models.CharField(max_length=200, blank=False, null=False, validators=[validate_slug])
     display_order = models.IntegerField(default=1)
 

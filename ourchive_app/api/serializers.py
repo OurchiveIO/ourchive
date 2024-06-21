@@ -610,8 +610,8 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.IntegerField(read_only=True)
     word_count = serializers.IntegerField(read_only=True)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
-    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
 
     class Meta:
         model = Chapter
@@ -682,7 +682,7 @@ class ChapterAllSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     number = serializers.IntegerField()
     title = serializers.ReadOnlyField()
-    updated_on = serializers.DateTimeField(read_only=True)
+    updated_on = serializers.DateField(read_only=True)
 
     class Meta:
         model = Chapter
@@ -749,8 +749,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         read_only=True
     )
     has_drafts = serializers.SerializerMethodField()
-    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
-    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
 
     class Meta:
         model = Work
@@ -928,8 +928,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
-    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
 
     # TODO: gotta be a better way to do this
     class Meta:
@@ -1068,8 +1068,8 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     works = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all(), required=False, many=True)
     bookmarks_readonly = BookmarkSerializer(many=True, required=False, source='bookmarks')
     bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), required=False, many=True)
-    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
-    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
 
     def get_users(self, obj):
         users = obj.users.filter((Q(user_collections__collection_id=obj.id) & Q(user_collections__approved=True)) | Q(id=obj.user.id)).all()
@@ -1288,8 +1288,8 @@ class SeriesSerializer(serializers.HyperlinkedModelSerializer):
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     works_readonly = serializers.SerializerMethodField()
     works = serializers.PrimaryKeyRelatedField(many=True, queryset=Work.objects.all())
-    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
-    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
 
     def get_works_readonly(self, instance):
         works = instance.works.all().order_by('series_num')
@@ -1307,8 +1307,8 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
     users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     creating_user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     works = serializers.SerializerMethodField()
-    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
-    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
     languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
     languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
     tags = TagSerializer(many=True, required=False)

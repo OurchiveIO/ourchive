@@ -1,24 +1,26 @@
 from django.test import TestCase
-from rest_framework.test import APIClient
+from ourchive_app.util import ourchive_fakes
 from etl.ao3.work_import import EtlWorkImport
 from etl.export.chive_export import ChiveExportOrchestrator
 import json
-import api.models as models
+import core.models as models
 from django.core.management import call_command
 
 class Ao3ImportTests(TestCase):
 	@classmethod
 	def setUpTestData(cls):
 		fixtures = [
-			'tagtype', 'tags', 'worktype', 'work', 'bookmark', 'bookmarkcollection', 'chapter', 'ourchivesettings', 'objectmapping'
+			'worktype',
+			'objectmapping'
 		]
 		cls.test_user = models.User.objects.create(username="test_user", email="test_user@test.com")
 		cls.test_admin_user = models.User.objects.create(username="test_admin_user", email="test_admin@test.com")
+		cls.fake_generator = ourchive_fakes.OurchiveFakes()
 		for db_name in cls._databases_names(include_mirrors=False):
 			call_command("loaddata", *fixtures, verbosity=0, database=db_name)
 
 	def test_process_work_data(self):
-		import_cls = EtlWorkImport(1, True, True, False)
+		import_cls = EtlWorkImport(self.test_user.id, True, True, False)
 		work_id = import_cls.process_work_data(json.loads(self.test_work_data))
 		created_work = models.Work.objects.get(pk=work_id)
 		self.assertEqual(created_work.summary, "<p>An incident leads Prunella to acquire a somewhat inconvenient student.</p>")
@@ -30,7 +32,7 @@ class Ao3ImportTests(TestCase):
 		self.assertEquals(created_work.word_count, 1119)
 
 	def test_process_chapter_data(self):
-		import_cls = EtlWorkImport(1, True, True, False)
+		import_cls = EtlWorkImport(self.test_user.id, True, True, False)
 		work_id = import_cls.process_work_data(json.loads(self.test_work_data))
 		chapter_ids = import_cls.process_chapter_data(json.loads(self.test_chapter_data), work_id)
 		self.assertEquals(len(chapter_ids), 1)
@@ -39,6 +41,8 @@ class Ao3ImportTests(TestCase):
 
 	def test_create_work_export(self):
 		works = models.Work.objects.all()
+		if works.count() < 1:
+			self.fake_generator.generate_works_and_chapters(self.test_user.id, 5, True, 2)
 		exporter = ChiveExportOrchestrator()
 		file_info = ('works.csv', f'/tmp/works.csv')
 		exporter.write_csv(works, file_info)
@@ -47,12 +51,16 @@ class Ao3ImportTests(TestCase):
 
 	def test_create_bookmark_export(self):
 		bookmarks = models.Bookmark.objects.all()
+		if bookmarks.count() < 1:
+			self.fake_generator.generate_bookmarks(self.test_user.id, 5, True)
 		exporter = ChiveExportOrchestrator()
 		file_info = ('bookmarks.csv', f'/tmp/bookmarks.csv')
 		exporter.write_csv(bookmarks, file_info)
 
 	def test_create_collection_export(self):
 		collections = models.BookmarkCollection.objects.all()
+		if collections.count() < 1:
+			self.fake_generator.generate_collections(self.test_user.id, 5, True)
 		exporter = ChiveExportOrchestrator()
 		file_info = ('collections.csv', f'/tmp/collections.csv')
 		exporter.write_csv(collections, file_info)

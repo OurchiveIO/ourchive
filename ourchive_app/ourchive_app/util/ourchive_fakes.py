@@ -327,7 +327,9 @@ class OurchiveFakes:
         tags = []
         for x in range(0, obj_count):
             tag_type = self.get_random_obj(models.TagType)
-            display_text = self.generate_unique_word(kwargs.get("token", ""))
+            display_text = ''
+            for y in range(0, 4):
+                display_text = f'{display_text} {self.generate_unique_word(kwargs.get("token", ""))}'
             tag = models.Tag(display_text=display_text,
                              text=display_text.lower(),
                              tag_type=tag_type)

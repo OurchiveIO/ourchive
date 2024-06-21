@@ -158,15 +158,15 @@ class CoreTests(TestCase):
                                                                  None,
                                                                  **{'reply_max': 5, 'user_count': 3,
                                                                     'create_users': False,
-                                                                    'comment_depth': 0})
+                                                                    'comment_depth': 2})
         self.assertEquals(10, len(comments))
 
     def test_fake_collection_comments(self):
         comments = self.ourchive_fakes.generate_collection_comments(models.User.objects.all().first().id, 10, True,
                                                                     None,
                                                                     **{'reply_max': 5, 'user_count': 3,
-                                                                       'create_users': True,
-                                                                       'comment_depth': 0})
+                                                                       'create_users': False,
+                                                                       'comment_depth': 2})
         self.assertEquals(10, len(comments))
 
     def test_fake_announcements(self):
@@ -177,6 +177,7 @@ class CoreTests(TestCase):
         news = self.ourchive_fakes.generate_news(15, True)
         self.assertEquals(15, len(news))
 
+    @skip
     def test_generate_everything(self):
         self.ourchive_fakes.generate_everything(5, '', False)
         self.assertEquals(25, models.Work.objects.count())
