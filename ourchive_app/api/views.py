@@ -1550,7 +1550,7 @@ class UserSeriesList(generics.ListCreateAPIView):
     permission_classes = [IsWorksMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return WorkSeries.objects.filter(works__work_users__user__username=self.kwargs['username']).order_by('-updated_on')
+        return WorkSeries.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
 
 
 class UserAnthologyList(generics.ListCreateAPIView):

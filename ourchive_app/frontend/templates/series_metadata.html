@@ -2,10 +2,10 @@
 <div class="uk-inline ourchive-metadata-list">
 	<span id="series-metadata-complete" class="uk-inline uk-text-bold">{% translate 'Status' %}: {% if series.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
 </div>
+{% if series.updated_on %}
 <div class="uk-inline ourchive-metadata-list">
 	<span id="work-metadata-complete-divider" class="uk-inline uk-text-bold">-</span>
 </div>
-{% if series.updated_on %}
 <div class="uk-inline ourchive-metadata-list">
 	<span id="series-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{series.updated_on|date:'d M Y'}}</span>
 </div>

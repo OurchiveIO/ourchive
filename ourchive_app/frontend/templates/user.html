@@ -65,9 +65,13 @@
             <li id="bookmark_collection_tab">
                 {% include "bookmark_collections_list.html" with bookmark_collections=bookmark_collections next=bookmark_collections_next previous=bookmark_collections_previous include_header=False %}
             </li>
+            {%  endif %}
+            {%  if series %}
             <li id="series_tab">
                 {% include "series_list_body.html" with series=series next=series_next previous=series_previous include_header=False %}
             </li>
+            {% endif %}
+            {%  if anthologies %}
             <li id="anthology_tab">
                 {% include "anthologies_list_body.html" with anthologies=anthologies next=anthologies_next previous=anthologies_previous include_header=False %}
             </li>

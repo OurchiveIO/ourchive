@@ -205,6 +205,7 @@ class OurchiveFakes:
         for x in range(0, obj_count):
             cover_url = ''
             cover_alt_text = ''
+            work_type = None
             title = f'{self.fake.sentence()}'.replace('.', '')
             if self.fake.pybool():
                 title = f'{title} {kwargs.get("token", "")}'.strip()
@@ -212,6 +213,8 @@ class OurchiveFakes:
                 cover_image = settings.CHIVE_COVER_URLS[randint(0, len(settings.CHIVE_COVER_URLS) - 1)]
                 cover_url = cover_image['cover_url']
                 cover_alt_text = cover_image['cover_alt_text']
+            if models.WorkType.objects.count() > 0:
+                work_type = self.get_random_obj(models.WorkType)
             work = models.Work(title=title,
                                summary=self.fake.paragraph(),
                                notes=self.fake.paragraph(),
@@ -226,7 +229,8 @@ class OurchiveFakes:
                                    self.fake.pyint(max_value=len(models.Work.DOWNLOAD_CHOICES) - 1)],
                                external_id=self.fake.pyint() if x % 2 == 0 else None,
                                user_id=user_id,
-                               created_on=self.fake.date(), updated_on=self.fake.date())
+                               created_on=self.fake.date(), updated_on=self.fake.date(),
+                               work_type=work_type)
             if persist_db:
                 work.save()
             else:

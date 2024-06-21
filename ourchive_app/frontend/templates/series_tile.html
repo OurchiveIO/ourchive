@@ -13,6 +13,11 @@
 		        {% endif %}
 		    </div>
 		</div>
+        {% if series.description %}
+            <div class="uk-card-body ourchive-card-body uk-padding-small" id="series-{{series.id}}-tile-card-body">
+	    	{% if series.description %}<p id="series-{{series.id}}-tile-description-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ series.description }}{% endautoescape %}</p>{% endif %}
+	        </div>
+        {% endif %}
 	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="series-tile-footer-parent">
 	        <div class="uk-width-1-1 uk-padding-small uk-margin-small">
 	        	{% include 'series_metadata.html' %}
