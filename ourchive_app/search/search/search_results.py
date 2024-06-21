@@ -11,9 +11,10 @@ class SearchResults(object):
         if not SearchGroup.objects.all():
             self.include_search_groups['Facets'] = []
             self.exclude_search_groups['Facets'] = []
-        for group in SearchGroup.objects.all():
-            self.include_search_groups[group.label] = []
-            self.exclude_search_groups[group.label] = []
+        else:
+            for group in SearchGroup.objects.all():
+                self.include_search_groups[group.label] = []
+                self.exclude_search_groups[group.label] = []
 
     def set_shared_vals(self, kwargs):
         self.tag_id = kwargs.get('tag_id', None)

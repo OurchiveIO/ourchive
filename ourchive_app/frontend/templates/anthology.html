@@ -33,15 +33,15 @@
 	   	</div>
 	   	{% endif %}
 	   	<div class="uk-width-1-1 uk-margin-bottom uk-padding-remove ourchive-read-div" id="anthology-slideshow-parent">
-	   		{% if anthology.works_readonly %}
+	   		{% if anthology.works %}
 	   		<div id="anthology-works-parent-sm">
 	   			<span class="uk-text-lead">{% translate 'Works' %}</span>
 	   			<ul class="uk-list uk-list-sriped">
-	   			{% for work in anthology.works_readonly %} 
+	   			{% for work in anthology.works %} 
 					<li class="ourchive-mobile-list uk-padding-small uk-margin-small-top uk-margin-small-bottom">
 	                	<span class="uk-inline uk-text-uppercase uk-text-medium"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
 	                	{% if work.summary %}
-	            			<div class="uk-margin-left uk-margin-small-top uk-width-medium ourchive-collection-sm-desc">{{work.summary|safe}}</div>
+	            			<div class="uk-margin-left uk-margin-small-top uk-width-expand ourchive-collection-sm-desc">{{work.summary|safe}}</div>
 	            		{% endif %}
             		</li>       
 				{% endfor %}

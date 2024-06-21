@@ -2022,7 +2022,6 @@ def edit_anthology(request, pk):
 	else:
 		anthology_dict = get_anthology_obj(request)
 		work_ids = get_work_order_nums(anthology_dict, 'sort_order')
-		print(anthology_dict)
 		response = do_patch(f'api/anthologies/{pk}/', request, data=anthology_dict, object_name='Anthology')
 		if response.response_info.status_code < 400:
 			work_response = do_patch(f'api/anthologies/{pk}/works', request, data=work_ids, object_name='Anthology works')

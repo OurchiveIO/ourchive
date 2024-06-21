@@ -63,7 +63,7 @@
 					<li class="ourchive-mobile-list uk-padding-small uk-margin-small-top uk-margin-small-bottom">
 	                	<span class="uk-inline uk-text-uppercase uk-text-medium"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
 	                	{% if work.summary %}
-	            			<div class="uk-margin-left uk-margin-small-top uk-width-medium ourchive-collection-sm-desc">{{work.summary|safe}}</div>
+	            			<div class="uk-margin-left uk-margin-small-top uk-width-expand ourchive-collection-sm-desc">{{work.summary|safe}}</div>
 	            		{% endif %}
             		</li>       
 				{% endfor %}

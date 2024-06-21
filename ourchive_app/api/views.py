@@ -1601,7 +1601,7 @@ class WorkAnthologyList(APIView):
         works = request.data
         tracking = 1
         for work_obj in works:
-            anthology_work = AnthologyWork.objects.get(work__id=work_obj['work'], anthology__id=work_obj['anthology'])
+            anthology_work = AnthologyWork.objects.get(work__id=work_obj['work'], anthology__id=pk)
             anthology_work.sort_order = int(work_obj['sort_order']) if str(work_obj['sort_order']).isdigit() else tracking
             anthology_work.save()
             tracking = tracking + 1
