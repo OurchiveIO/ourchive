@@ -130,8 +130,10 @@ class OurchiveFakes:
     def get_random_obj(obj):
         # random record approach from https://stackoverflow.com/a/74855703
         count = obj.objects.all().count()
-        random_offset = randint(0, count - 1)
-        return obj.objects.all()[random_offset]
+        if count > 0:
+            random_offset = randint(0, count - 1)
+            return obj.objects.all()[random_offset]
+        return None
 
     @staticmethod
     def generate_languages(locales=None, persist_db=False):
@@ -163,7 +165,9 @@ class OurchiveFakes:
         works_count = kwargs.get('works_count', 0)
         if kwargs.get('assign_works', False):
             for y in range(0, works_count):
-                obj.works.add(self.get_random_obj(models.Work))
+                work = self.get_random_obj(models.Work)
+                if work:
+                    obj.works.add(work)
         if kwargs.get('create_works', False):
             works = self.generate_works_and_chapters(user_id, works_count, persist_db)
             for work in works[0]:
@@ -171,7 +175,9 @@ class OurchiveFakes:
         tags_count = kwargs.get('tags_count', 0)
         if kwargs.get('assign_tags', False):
             for y in range(0, tags_count):
-                obj.tags.add(self.get_random_obj(models.Tag))
+                tag = self.get_random_obj(models.Tag)
+                if tag:
+                    obj.tags.add(tag)
         if kwargs.get('create_tags', False):
             tags = self.generate_tags(tags_count, persist_db, **{'create_tag_types': True})
             for tag in tags:
@@ -181,7 +187,9 @@ class OurchiveFakes:
         attributes_count = kwargs.get('attributes_count', 0)
         if kwargs.get('assign_attributes', False):
             for y in range(0, attributes_count):
-                obj.attributes.add(self.get_random_obj(models.AttributeValue))
+                attribute = self.get_random_obj(models.AttributeValue)
+                if attribute:
+                    obj.attributes.add(attribute)
         if kwargs.get('create_attributes', False):
             attributes = self.generate_attributes(
                 attributes_count,
@@ -193,7 +201,9 @@ class OurchiveFakes:
         if kwargs.get('assign_languages', False):
             languages_count = models.Language.objects.all().count()
             for y in range(0, languages_count):
-                obj.languages.add(self.get_random_obj(models.Language))
+                language = self.get_random_obj(models.Language)
+                if language:
+                    obj.languages.add(language)
         elif kwargs.get('create_languages', False):
             for language in languages:
                 obj.languages.add(language)

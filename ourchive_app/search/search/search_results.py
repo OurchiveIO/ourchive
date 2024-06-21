@@ -1,14 +1,15 @@
 from search.search.search_obj import FilterFacet, ResultFacet, GroupFacet, ContextualFilterFacet
 from core.models import WorkType, OurchiveSetting, Tag, AttributeType, TagType, Language, SearchGroup, AttributeValue
-from core.utils import get_star_count
-from copy import deepcopy
+import logging
+
+logger = logging.getLogger(__name__)
 
 class SearchResults(object):
 
     def __init__(self):
         self.include_search_groups = {}
         self.exclude_search_groups = {}
-        if not SearchGroup.objects.all():
+        if not SearchGroup.objects.count() > 0:
             self.include_search_groups['Facets'] = []
             self.exclude_search_groups['Facets'] = []
         else:
@@ -114,7 +115,13 @@ class SearchResults(object):
                     checked_attr = val.lower() in getattr(self, f'work_search_{context}').get('attributes', [])
                     attribute_filter_vals.append(FilterFacet(val, checked_attr))
                 result_facet = ResultFacet(attributes_dict[key]['type_id'], key, attribute_filter_vals, 'attribute').to_dict()
-                getattr(self, f'{context}_search_groups')[attributes_dict[key]['group']].append(result_facet)
+                try:
+                    getattr(self, f'{context}_search_groups')[attributes_dict[key]['group']].append(result_facet)
+                except Exception as e:
+                    logger.error(f'Attribute has search group which is not in search groups. '
+                                 f'This likely means you should assign a search group to this attribute '
+                                 f'in the admin console. Error: {e}')
+                    continue
 
     def get_chive_info_facets(self, context):
         chive_info = {"label": "Chive Info", "facets": []}

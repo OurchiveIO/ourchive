@@ -1,5 +1,5 @@
 import yaml
-from core.models import OurchiveSetting, NotificationType, WorkType, TagType, AttributeType, AttributeValue
+from core.models import OurchiveSetting, NotificationType, WorkType, TagType, AttributeType, AttributeValue, SearchGroup
 from etl.models import ObjectMapping
 
 data_keys = {'core.ourchivesetting': OurchiveSetting,
@@ -8,7 +8,8 @@ data_keys = {'core.ourchivesetting': OurchiveSetting,
              'core.worktype': WorkType,
              'core.attributetype': AttributeType,
              'core.attributevalue': AttributeValue,
-             'core.tagtype': TagType, }
+             'core.tagtype': TagType,
+             'core.searchgroup': SearchGroup,}
 
 
 def load_data(path, filename):
@@ -19,6 +20,8 @@ def load_data(path, filename):
             for setting in settings:
                 model_obj = data_keys[setting['model']]
                 obj = model_obj(**setting['fields'])
+                if setting.get('pk', None):
+                    obj.id = setting.get('pk')
                 obj.save()
                 objs_added += 1
             return objs_added
