@@ -29,9 +29,9 @@ Ourchive is a configurable, multi-media archive application. We aim to meet the 
 
 Ourchive runs on Django.
 
-To set up as an admin, see [Getting Started](https://docs.getourchive.io/admin-getting-started/) for futher instructions.
+To set up as an admin, check out our documentation's [Getting Started](https://docs.getourchive.io/admin-getting-started/) page.
 
-For local development, check out our [developer docs](https://developer.getourchive.io).
+For local development: [developer docs](https://developer.getourchive.io).
 
 
 <a name="contributor-guidelines"></a>
@@ -49,9 +49,9 @@ We welcome technical contributions as well:
 - Submit a new feature request [as a GitHub issue][github issues].
 - Work on a feature that's on the roadmap, or unassigned in [the release version](https://planning.ourchive.io/project/ourchive-beta/kanban).
 - Submit a unit test.
-- Submit another unit test. Maybe even a ui test if you're feeling frisky!
+- Submit another unit test. Maybe even a UI test if you're feeling frisky!
 
-Please see the [wiki](https://github.com/c-e-p/ourchive/wiki) for more on technical contributions, PR guidelines, and so on.
+Please see the our [developer docs](https://developer.getourchive.io/docs/contributing/drive-by-contributions/) for more on technical contributions, PR guidelines, and so on.
 
 (ganked with love from [azure](https://azure.github.io/guidelines/))
 
@@ -64,7 +64,12 @@ Please see [the code of conduct and diversity statement](codeofconduct.md).
 <a name="thanks"></a>
 ## Thanks
 
-We have used Unsplash free images for icon defaults.
+We use Unsplash free images for icon defaults.
+
+For test data, we use:
+* audio from [Freesound](https://freesound.org/)
+* images from [Unsplash](https://unsplash.com/)
+* Videos from the [ESO](https://www.eso.org/public/videos/list/4/)
 
 All frameworks and tools we are using are open source, including:
 
@@ -76,4 +81,4 @@ All frameworks and tools we are using are open source, including:
 - UIKit (CSS + JS)
 
 [github issues]: https://github.com/c-e-p/ourchive/issues
-[pull request guidelines]: .github/PULL_REQUEST_TEMPLATE/pr_feature_template.md
+[pull request template]: .github/PULL_REQUEST_TEMPLATE/pr_feature_template.md
