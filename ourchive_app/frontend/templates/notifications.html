@@ -2,27 +2,33 @@
 {% load i18n %}
 {% block title %}{{ page_title }}{% endblock %}
 {% block content %}		
-<div class="uk-width-1-1 uk-margin-small-bottom uk-padding-remove-horizontal uk-height-max-small">
-    <h1 class="uk-text-lead uk-inline">{{ page_title }}</h1>
-    {% if notifications %}
-    <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-notifications-mark-all-read' request.user %}">{% translate 'Mark all read' %}</a>
-    <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-notifications-delete-all' request.user %}">{% translate 'Delete all' %}</a>
-    {% endif %}
-    <hr class="ourchive-hr"/>
-    {% if not notifications %}
-    <p id="notifications-empty-message">{% translate "You don't have any notifications. When you do, they'll appear here." %}</p>
-    {% endif %}
-</div>
-{% for notification in notifications %} 
-{% if forloop.first and forloop.last %}<div class="uk-margin-bottom uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal" uk-height-viewport="expand: true">{% else %}<div class="uk-margin-bottom uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">{% endif %}
-	{% include "notification_tile.html" %}</div>
-{% endfor %}
-<div class="uk-width-1-1 uk-text-center" id="notifications-pagination-parent">
-    <div id="notifications-pagination-child">
-        <ul class="uk-pagination" id="notifications-pagination-ul">
-        {% if previous is not None %}<li id="notifications-pagination-prev-li"><a id="notifications-pagination-prev-link" href="{{ previous }}"><span class="uk-margin-small-right" uk-pagination-previous id="notifications-pagination-prev-span"></span> Previous</a></li>{% endif %}
-        {% if next is not None %}<li id="notifications-pagination-next-li" class="uk-margin-auto-left"><a href="{{ next }}" id="notifications-pagination-next-link">Next <span class="uk-margin-small-left" uk-pagination-next id="notifications-pagination-next-span"></span></a></li>{% endif %}
-    </ul>
-    </div>        
-</div>  
+    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="anthology-form-uk-grid" uk-grid>
+        <div class="uk-width-1-1 uk-margin-small-bottom uk-padding-remove-horizontal uk-height-max-small">
+            <h1 class="uk-text-lead uk-inline">{{ page_title }}</h1>
+            {% if notifications %}
+            <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-notifications-mark-all-read' request.user %}">{% translate 'Mark all read' %}</a>
+            <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-notifications-delete-all' request.user %}">{% translate 'Delete all' %}</a>
+            {% endif %}
+            <hr class="ourchive-hr"/>
+            {% if not notifications %}
+            <p id="notifications-empty-message">{% translate "You don't have any notifications. When you do, they'll appear here." %}</p>
+            {% endif %}
+        </div>
+        {% for notification in notifications %} 
+            {% if forloop.first and forloop.last %}
+                <div class="uk-margin-bottom uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal" uk-height-viewport="expand: true">
+            {% else %}
+                <div class="uk-margin-bottom uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">{% endif %}
+                    {% include "notification_tile.html" %}
+                </div>
+        {% endfor %}
+        <div class="uk-width-1-1 uk-text-center" id="notifications-pagination-parent">
+            <div id="notifications-pagination-child">
+                <ul class="uk-pagination" id="notifications-pagination-ul">
+                    {% if previous is not None %}<li id="notifications-pagination-prev-li"><a id="notifications-pagination-prev-link" href="{{ previous }}"><span class="uk-margin-small-right" uk-pagination-previous id="notifications-pagination-prev-span"></span> Previous</a></li>{% endif %}
+                    {% if next is not None %}<li id="notifications-pagination-next-li" class="uk-margin-auto-left"><a href="{{ next }}" id="notifications-pagination-next-link">Next <span class="uk-margin-small-left" uk-pagination-next id="notifications-pagination-next-span"></span></a></li>{% endif %}
+                </ul>
+            </div>        
+        </div>
+    </div>
 {% endblock %}

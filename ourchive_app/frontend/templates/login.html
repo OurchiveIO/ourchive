@@ -1,49 +1,48 @@
 {% extends 'index.html' %}
 {% block title %}Log In{% endblock %}
-{% block content %}	
 {% load i18n %}
-<div id="login-page-grid" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
-<form class="uk-form-horizontal" id="login-form" method="post">
-	{% csrf_token %}
-    <div class="uk-margin" id="login-username-parent">
-    	<label id="login-username-label" class="uk-form-label" for="login-username-input">Username</label>
-        <div class="uk-form-controls" id="login-username-form-controls">
-            <div class="uk-inline" id="login-username-inline">
-	            <span id="login-username-icon" class="uk-form-icon" uk-icon="icon: ourchive-user;ratio:.75"></span>
-	            <input id="login-username-input" class="uk-input" type="text" name="username">
-	        </div>
-        </div>
-        
+{% block content %}
+    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="login-uk-grid" uk-grid>
+        <form class="uk-form-horizontal" id="login-form" method="post">
+            {% csrf_token %}
+            <div class="uk-margin" id="login-username-parent">
+                <label id="login-username-label" class="uk-form-label" for="login-username-input">Username</label>
+                <div class="uk-form-controls" id="login-username-form-controls">
+                    <div class="uk-inline" id="login-username-inline">
+                        <span id="login-username-icon" class="uk-form-icon" uk-icon="icon: ourchive-user;ratio:.75"></span>
+                        <input id="login-username-input" class="uk-input" type="text" name="username">
+                    </div>
+                </div>
+            </div>
+            <input id="login-referrer" type="hidden" name="referrer" value="{{ referrer }}">
+            <div id="login-password-parent" class="uk-margin">
+                <label id="login-password-label" class="uk-form-label" for="login-password-input">Password</label>
+                <div id="login-password-form-controls" class="uk-form-controls">
+                    <div id="login-password-inline" class="uk-inline">
+                        <span id="login-password-icon" class="uk-form-icon uk-form-icon" uk-icon="icon: ourchive-lock;ratio:.75"></span>
+                        <input id="login-password-input" class="uk-input" type="password" name="password">
+                    </div>
+                </div>
+            </div>
+            <div class="uk-margin" id="login-submit-parent">
+                <label id="login-submit-label" class="uk-form-label" for="login-submit-button"></label>
+                <div id="login-submit-form-controls" class="uk-form-controls">
+                    <div id="login-submit-inline" class="uk-inline uk-align-right">
+                        <input id="login-submit-button" class="uk-button uk-button-default" type="submit" value="Log In"/>	
+                    </div>
+                    
+                </div>
+            </div>
+            <br/>
+            <div class="uk-margin" id="login-actions-parent">
+                <div id="login-pw-reset-inline" class="uk-inline">
+                        <span class="uk-text" id="login-pw-reset-span"><a id="login-pw-reset-link" href="/reset-password">Forgot password?</a></span>
+                </div>
+                <div id="login-register-inline" class="uk-inline uk-align-right">
+                        <span class="uk-text" id="login-register-span"><a id="login-register-link" href="{% url 'fe-register-account' %}">{% translate 'Create an account' %}</a></span>
+                </div>
+            </div>
+        </form>
     </div>
-    <input id="login-referrer" type="hidden" name="referrer" value="{{ referrer }}">
-    <div id="login-password-parent" class="uk-margin">
-    	<label id="login-password-label" class="uk-form-label" for="login-password-input">Password</label>
-        <div id="login-password-form-controls" class="uk-form-controls">
-	        <div id="login-password-inline" class="uk-inline">
-	            <span id="login-password-icon" class="uk-form-icon uk-form-icon" uk-icon="icon: ourchive-lock;ratio:.75"></span>
-	            <input id="login-password-input" class="uk-input" type="password" name="password">
-	        </div>
-	    </div>
-    </div>
-    <div class="uk-margin" id="login-submit-parent">
-    	<label id="login-submit-label" class="uk-form-label" for="login-submit-button"></label>
-        <div id="login-submit-form-controls" class="uk-form-controls">
-        	<div id="login-submit-inline" class="uk-inline uk-align-right">
-	    		<input id="login-submit-button" class="uk-button uk-button-default" type="submit" value="Log In"/>	
-	    	</div>
-	    	
-        </div>
-    </div>
-    <br/>
-    <div class="uk-margin" id="login-actions-parent">
-    	<div id="login-pw-reset-inline" class="uk-inline">
-	    		<span class="uk-text" id="login-pw-reset-span"><a id="login-pw-reset-link" href="/reset-password">Forgot password?</a></span>
-	    </div>
-	    <div id="login-register-inline" class="uk-inline uk-align-right">
-	    		<span class="uk-text" id="login-register-span"><a id="login-register-link" href="{% url 'fe-register-account' %}">{% translate 'Create an account' %}</a></span>
-	    </div>
-    </div>
-</div>
-</form>
 
 {% endblock %}
