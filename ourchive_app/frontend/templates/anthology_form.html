@@ -1,8 +1,8 @@
 {% extends 'index.html' %}
 {% load i18n %}
-{% block title %}{{ form_title }}{% endblock %}
-{% block content %}	
 {% load static %}
+{% block title %}{{ form_title }}{% endblock %}
+{% block content %}
 <link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
 <script src="{% static 'frontend/js/searchable-multiselect-generic.js' %}"></script>
 <script>
@@ -106,193 +106,195 @@ function handleModalDelete(url) {
     });
 }
 </script>
-<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="anthology-form-parent-grid">  
-<form class="uk-form-horizontal" method="post" id="anthologyForm" onsubmit="return getRichText(['description'])">
-    {% csrf_token %}
-    <input id="anthology-form-hidden-id" type="hidden" name="anthology_id" {% if anthology.id != 0 %}value="{{ anthology.id }}"{% else %} value=""{% endif %}/>
-    <div id="anthology-form-actions-parent" class="uk-grid" uk-grid>
-        <div id="anthology-form-header-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
-            <span id="anthology-form-header-span" class="uk-text-large">{{ form_title }}</span>
-        </div>
-        <div id="anthology-form-actions-group" class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right">
-            <input id="anthology-form-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
-            <button id="anthology-form-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
-            <input id="anthology-form-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
-        </div>
-    </div>
-    <hr id="anthology-form-hr" class="ourchive-hr"/>
-    <div id="anthology-form-title-parent" class="uk-margin">
-        <label id="anthology-form-title-label" class="uk-form-label" for="anthology-form-title-input">{% translate 'Title' %}</label>
-        <div id="anthology-form-title-form-control" class="uk-form-controls">
-            <div id="anthology-form-title-inline-div" class="uk-inline">
-                <input id="anthology-form-title-input" title="{% translate 'Anthology Title' %}" class="uk-input uk-form-width-large" type="text" name="title" value="{{ anthology.title|default_if_none:'' }}">
+    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="anthology-form-uk-grid" uk-grid>
+        <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="anthology-form-parent-grid">
+        <form class="uk-form-horizontal" method="post" id="anthologyForm" onsubmit="return getRichText(['description'])">
+            {% csrf_token %}
+            <input id="anthology-form-hidden-id" type="hidden" name="anthology_id" {% if anthology.id != 0 %}value="{{ anthology.id }}"{% else %} value=""{% endif %}/>
+            <div id="anthology-form-actions-parent" class="uk-grid" uk-grid>
+                <div id="anthology-form-header-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
+                    <span id="anthology-form-header-span" class="uk-text-large">{{ form_title }}</span>
+                </div>
+                <div id="anthology-form-actions-group" class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right">
+                    <input id="anthology-form-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
+                    <button id="anthology-form-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                    <input id="anthology-form-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="anthology-form-cocreator-form-parent">
-            <label id="anthology-form-cocreator-form-label" class="uk-form-label" for="anthology-form-new-user">{% translate 'Co-creators' %}</label>
-            <div id="anthology-form-cocreator-controls" class="uk-form-controls">   
-                {% if anthology.pending_owners %}<div id="pending-cocreators" class="uk-margin-small-bottom"><span class="uk-text-small">{% translate 'Pending cocreators' %}: </span>{% for user in anthology.pending_owners %}{{user.username}}{% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}               
-                <div id="anthology-form-cocreator-inline" class="uk-inline">
-                    <div id="anthology-form-users">
-                        {% for user in anthology.owners %}
-                        {% if user.username != request.user.username %}
-                            <div class="uk-margin-small uk-inline uk-margin-remove-top" id="anthology-form-user-{{user.id}}-parent">
-                                <input title="{% translate 'Anthology user' %}" id="anthology-form-cocreator-{{user.id}}-hidden" type="hidden" name="anthology_cocreators_{{user.id}}" value="{{ user.id }}"> 
-                                <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="anthology-user-{{user.id}}-display">{{ user.username }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser({{user.id}})" id="anthology-user-{{user.id}}-delete"></span></span>
-                            </div>
-                        {% endif %}
-                        {% endfor %}
-                        <div class="uk-margin-small uk-inline" id="anthology-form-user-search"><input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry uk-margin-small-bottom" type="text" placeholder="Find user..." id="anthology-form-new-user" oninput="doUserAutocomplete(this.value)">
-                        <div id="anthology-find-user-dropdown" uk-drop></div></div>
+            <hr id="anthology-form-hr" class="ourchive-hr"/>
+            <div id="anthology-form-title-parent" class="uk-margin">
+                <label id="anthology-form-title-label" class="uk-form-label" for="anthology-form-title-input">{% translate 'Title' %}</label>
+                <div id="anthology-form-title-form-control" class="uk-form-controls">
+                    <div id="anthology-form-title-inline-div" class="uk-inline">
+                        <input id="anthology-form-title-input" title="{% translate 'Anthology Title' %}" class="uk-input uk-form-width-large" type="text" name="title" value="{{ anthology.title|default_if_none:'' }}">
                     </div>
                 </div>
             </div>
-        </div>
-    <div class="uk-margin" id="anthology-form-complete-parent">
-        <label id="anthology-form-complete-label" class="uk-form-label" for="anthology-form-complete-checkbox">{% translate 'Complete?' %}</label>
-        <div id="anthology-form-complete-controls" class="uk-form-controls">
-            <div id="anthology-form-complete-inline" class="uk-inline">
-                <label id="anthology-form-complete-switch-label" class="switch"><input title="{% translate 'Anthology complete toggle' %}" class="uk-checkbox" id="anthology-form-complete-checkbox" type="checkbox" name="is_complete" {% if anthology.is_complete %} checked {% endif %}> <span id="anthology-form-complete-slider" class="slider round"></span> </label>
-            </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="anthology-form-created-parent">
-        <label id="anthology-form-created-label" class="uk-form-label" for="anthology-form-created-on">{% translate 'Post Date' %}</label>
-        <div id="anthology-form-created-controls" class="uk-form-controls">
-            <div id="anthology-form-created-inline" class="uk-inline">
-                <input title="{% translate 'Anthology created on' %}" id="anthology-form-created-on" type="date" class="uk-input" name="created_on" value="{{ anthology.created_on }}"> 
-            </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="anthology-form-updated-parent">
-        <label id="anthology-form-updated-label" class="uk-form-label" for="anthology-form-updated-on">{% translate 'Update Date' %}</label>
-        <div id="anthology-form-updated-controls" class="uk-form-controls">
-            <div id="anthology-form-updated-inline" class="uk-inline">
-                <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ anthology.updated_on }}"> 
-                <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on" type="date" class="uk-input" name="updated_on" value="{{ anthology.updated_on }}"> 
-            </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="anthology-form-languages-parent">
-        <label id="anthology-form-languages-label" class="uk-form-label" for="anthology-form-languages">{% translate 'Languages' %}</label>
-        <div id="anthology-form-languages-controls" class="uk-form-controls">
-            <div id="anthology-form-languages-inline" class="uk-inline">
-                <select multiple data-multi-select-plugin name="languages[]" id="anthology-form-languages">
-                    {% for language in languages %}
-                        <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-    </div>
-    {% if request.user.can_upload_images %}
-    <div class="uk-margin" id="anthology-form-cover-parent">
-        <label id="anthology-form-cover-label" class="uk-form-label" for="anthology-form-cover-inline">{% translate 'Cover' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Anthology cover help' %}"></sup>    
-            <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This image will show on your anthology and on the list view.{% endblocktranslate %}</div>
-        </label>
-        <div id="anthology-form-cover-controls" class="uk-form-controls">
-            {% if anthology.cover_url %}
-                <div id="anthology-cover-image-toggle" class="uk-width-1-1"><a uk-toggle="target: #anthology-form-image-inline" class="uk-button uk-button-primary">{% translate 'Toggle cover' %}</a></div>
-                <div id="anthology-form-image-inline" class="uk-width-1-1 uk-margin" hidden><img id="anthology-form-cover-img" src="{{ anthology.cover_url }}"/></div>
-            {% endif %}
-            <div id="anthology-form-cover-inline" class="uk-inline uk-margin">
-                {% include 'file_upload.html' with object='cover_url' replace_selector='anthology-form-cover-img' object_type='img' upload_placeholder='Upload cover image' original_value=anthology.cover_url %}
-            </div>
-            
-        </div>
-    </div>
-    <div class="uk-margin" id="anthology-form-cover-alt-text-parent">
-        <label id="anthology-form-cover-alt-text-label" class="uk-form-label" for="anthology-cover-alt-text">{% translate 'Cover Alt Text' %}</label>
-        <div id="anthology-form-cover-alt-text-controls" class="uk-form-controls">
-            <div class="uk-inline" id="anthology-cover-alt-text-inline">
-                <textarea id="anthology-cover-alt-text" class="uk-textarea uk-form-width-large" rows="2" placeholder="{% translate 'Cover alt text' %}" name="cover_alt_text" maxlength="600">{{ anthology.cover_alt_text|default_if_none:'' }}</textarea>
-            </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="anthology-form-header-parent">
-        <label id="anthology-form-header-label" class="uk-form-label" for="anthology-form-header-inline">{% translate 'Header' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Anthology header help' %}"></sup>    
-            <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This image will show on your anthology and on the list view.{% endblocktranslate %}</div>
-        </label>
-        <div id="anthology-form-header-controls" class="uk-form-controls">
-            {% if anthology.header_url %}
-                <div id="anthology-header-image-toggle" class="uk-width-1-1"><a uk-toggle="target: #anthology-form-image-inline" class="uk-button uk-button-primary">{% translate 'Toggle header' %}</a></div>
-                <div id="anthology-form-image-inline" class="uk-width-1-1 uk-margin" hidden><img id="anthology-form-header-img" src="{{ anthology.header_url }}"/></div>
-            {% endif %}
-            <div id="anthology-form-header-inline" class="uk-inline uk-margin">
-                {% include 'file_upload.html' with object='header_url' replace_selector='anthology-form-header-img' object_type='img' upload_placeholder='Upload header image' original_value=anthology.header_url %}
-            </div>
-            
-        </div>
-    </div>
-    <div class="uk-margin" id="anthology-form-header-alt-text-parent">
-        <label id="anthology-form-header-alt-text-label" class="uk-form-label" for="anthology-header-alt-text">{% translate 'Header Alt Text' %}</label>
-        <div id="anthology-form-header-alt-text-controls" class="uk-form-controls">
-            <div class="uk-inline" id="anthology-header-alt-text-inline">
-                <textarea id="anthology-header-alt-text" class="uk-textarea uk-form-width-large" rows="2" placeholder="{% translate 'Header alt text' %}" name="header_alt_text" maxlength="600">{{ anthology.header_alt_text|default_if_none:'' }}</textarea>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    <hr id="anthology-form-details-hr" class="ourchive-hr"/>
-    <h3 id="anthology-form-header">{% translate 'Details' %}</h3>
-    <div class="uk-margin" id="anthology-works-list">
-            <label id="anthology-works-form-label" class="uk-form-label" for="anthology-list">{% translate 'Works' %}</label>
-            <script>
-                var util = UIkit.util;
-
-                util.ready(function () {
-
-                    util.on(document.body, 'stop', function (e, sortable, el) {
-                        var list = document.getElementById("anthology-list").getElementsByTagName("li");
-                        var tracking = 1;
-                        for (let item of list) {
-                            var child = item.querySelector('.anthology-tracker')
-                            child.value = tracking;
-                            tracking += 1;
-                        }
-                    });
-                });
-            </script>
-            <div class="uk-form-controls" id="anthology-form-controls">
-            <ul class="uk-grid-small uk-child-width-1 uk-text-left" uk-sortable="handle: .uk-sortable-handle" uk-grid id="anthology-list">
-                {% for work in anthology.works_readonly %}
-                <li id="work-list-{{work.id}}">
-                    {% include "anthology_form_work.html" with work=work anthology=anthology %}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-        <div id="anthology-form-works-parent" class="uk-margin uk-margin-medium-top">
-            <label id="anthology-form-works-label" class="uk-form-label" for="anthology-entry">{% translate 'Add Work' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work help' %}"></sup>    
-                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for works by title.{% endblocktranslate %}</div>
-            </label>
-            <div id="anthology-form-works-form-control" class="uk-form-controls">
-                <div id="anthology-form-works-inline-div" class="uk-inline">
-                    <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="Search for work..." id="anthology-entry" oninput="doWorkAutocomplete(this.value)">
-                    <div id="anthology-autocomplete-dropdown" uk-drop></div>
+            <div class="uk-margin" id="anthology-form-cocreator-form-parent">
+                    <label id="anthology-form-cocreator-form-label" class="uk-form-label" for="anthology-form-new-user">{% translate 'Co-creators' %}</label>
+                    <div id="anthology-form-cocreator-controls" class="uk-form-controls">
+                        {% if anthology.pending_owners %}<div id="pending-cocreators" class="uk-margin-small-bottom"><span class="uk-text-small">{% translate 'Pending cocreators' %}: </span>{% for user in anthology.pending_owners %}{{user.username}}{% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+                        <div id="anthology-form-cocreator-inline" class="uk-inline">
+                            <div id="anthology-form-users">
+                                {% for user in anthology.owners %}
+                                {% if user.username != request.user.username %}
+                                    <div class="uk-margin-small uk-inline uk-margin-remove-top" id="anthology-form-user-{{user.id}}-parent">
+                                        <input title="{% translate 'Anthology user' %}" id="anthology-form-cocreator-{{user.id}}-hidden" type="hidden" name="anthology_cocreators_{{user.id}}" value="{{ user.id }}">
+                                        <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="anthology-user-{{user.id}}-display">{{ user.username }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser({{user.id}})" id="anthology-user-{{user.id}}-delete"></span></span>
+                                    </div>
+                                {% endif %}
+                                {% endfor %}
+                                <div class="uk-margin-small uk-inline" id="anthology-form-user-search"><input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry uk-margin-small-bottom" type="text" placeholder="Find user..." id="anthology-form-new-user" oninput="doUserAutocomplete(this.value)">
+                                <div id="anthology-find-user-dropdown" uk-drop></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <div class="uk-margin" id="anthology-form-complete-parent">
+                <label id="anthology-form-complete-label" class="uk-form-label" for="anthology-form-complete-checkbox">{% translate 'Complete?' %}</label>
+                <div id="anthology-form-complete-controls" class="uk-form-controls">
+                    <div id="anthology-form-complete-inline" class="uk-inline">
+                        <label id="anthology-form-complete-switch-label" class="switch"><input title="{% translate 'Anthology complete toggle' %}" class="uk-checkbox" id="anthology-form-complete-checkbox" type="checkbox" name="is_complete" {% if anthology.is_complete %} checked {% endif %}> <span id="anthology-form-complete-slider" class="slider round"></span> </label>
+                    </div>
                 </div>
             </div>
+            <div class="uk-margin" id="anthology-form-created-parent">
+                <label id="anthology-form-created-label" class="uk-form-label" for="anthology-form-created-on">{% translate 'Post Date' %}</label>
+                <div id="anthology-form-created-controls" class="uk-form-controls">
+                    <div id="anthology-form-created-inline" class="uk-inline">
+                        <input title="{% translate 'Anthology created on' %}" id="anthology-form-created-on" type="date" class="uk-input" name="created_on" value="{{ anthology.created_on }}">
+                    </div>
+                </div>
+            </div>
+            <div class="uk-margin" id="anthology-form-updated-parent">
+                <label id="anthology-form-updated-label" class="uk-form-label" for="anthology-form-updated-on">{% translate 'Update Date' %}</label>
+                <div id="anthology-form-updated-controls" class="uk-form-controls">
+                    <div id="anthology-form-updated-inline" class="uk-inline">
+                        <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ anthology.updated_on }}">
+                        <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on" type="date" class="uk-input" name="updated_on" value="{{ anthology.updated_on }}">
+                    </div>
+                </div>
+            </div>
+            <div class="uk-margin" id="anthology-form-languages-parent">
+                <label id="anthology-form-languages-label" class="uk-form-label" for="anthology-form-languages">{% translate 'Languages' %}</label>
+                <div id="anthology-form-languages-controls" class="uk-form-controls">
+                    <div id="anthology-form-languages-inline" class="uk-inline">
+                        <select multiple data-multi-select-plugin name="languages[]" id="anthology-form-languages">
+                            {% for language in languages %}
+                                <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            {% if request.user.can_upload_images %}
+            <div class="uk-margin" id="anthology-form-cover-parent">
+                <label id="anthology-form-cover-label" class="uk-form-label" for="anthology-form-cover-inline">{% translate 'Cover' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Anthology cover help' %}"></sup>
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This image will show on your anthology and on the list view.{% endblocktranslate %}</div>
+                </label>
+                <div id="anthology-form-cover-controls" class="uk-form-controls">
+                    {% if anthology.cover_url %}
+                        <div id="anthology-cover-image-toggle" class="uk-width-1-1"><a uk-toggle="target: #anthology-form-image-inline" class="uk-button uk-button-primary">{% translate 'Toggle cover' %}</a></div>
+                        <div id="anthology-form-image-inline" class="uk-width-1-1 uk-margin" hidden><img id="anthology-form-cover-img" src="{{ anthology.cover_url }}"/></div>
+                    {% endif %}
+                    <div id="anthology-form-cover-inline" class="uk-inline uk-margin">
+                        {% include 'file_upload.html' with object='cover_url' replace_selector='anthology-form-cover-img' object_type='img' upload_placeholder='Upload cover image' original_value=anthology.cover_url %}
+                    </div>
+
+                </div>
+            </div>
+            <div class="uk-margin" id="anthology-form-cover-alt-text-parent">
+                <label id="anthology-form-cover-alt-text-label" class="uk-form-label" for="anthology-cover-alt-text">{% translate 'Cover Alt Text' %}</label>
+                <div id="anthology-form-cover-alt-text-controls" class="uk-form-controls">
+                    <div class="uk-inline" id="anthology-cover-alt-text-inline">
+                        <textarea id="anthology-cover-alt-text" class="uk-textarea uk-form-width-large" rows="2" placeholder="{% translate 'Cover alt text' %}" name="cover_alt_text" maxlength="600">{{ anthology.cover_alt_text|default_if_none:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="uk-margin" id="anthology-form-header-parent">
+                <label id="anthology-form-header-label" class="uk-form-label" for="anthology-form-header-inline">{% translate 'Header' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Anthology header help' %}"></sup>
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This image will show on your anthology and on the list view.{% endblocktranslate %}</div>
+                </label>
+                <div id="anthology-form-header-controls" class="uk-form-controls">
+                    {% if anthology.header_url %}
+                        <div id="anthology-header-image-toggle" class="uk-width-1-1"><a uk-toggle="target: #anthology-form-image-inline" class="uk-button uk-button-primary">{% translate 'Toggle header' %}</a></div>
+                        <div id="anthology-form-image-inline" class="uk-width-1-1 uk-margin" hidden><img id="anthology-form-header-img" src="{{ anthology.header_url }}"/></div>
+                    {% endif %}
+                    <div id="anthology-form-header-inline" class="uk-inline uk-margin">
+                        {% include 'file_upload.html' with object='header_url' replace_selector='anthology-form-header-img' object_type='img' upload_placeholder='Upload header image' original_value=anthology.header_url %}
+                    </div>
+
+                </div>
+            </div>
+            <div class="uk-margin" id="anthology-form-header-alt-text-parent">
+                <label id="anthology-form-header-alt-text-label" class="uk-form-label" for="anthology-header-alt-text">{% translate 'Header Alt Text' %}</label>
+                <div id="anthology-form-header-alt-text-controls" class="uk-form-controls">
+                    <div class="uk-inline" id="anthology-header-alt-text-inline">
+                        <textarea id="anthology-header-alt-text" class="uk-textarea uk-form-width-large" rows="2" placeholder="{% translate 'Header alt text' %}" name="header_alt_text" maxlength="600">{{ anthology.header_alt_text|default_if_none:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <hr id="anthology-form-details-hr" class="ourchive-hr"/>
+            <h3 id="anthology-form-header">{% translate 'Details' %}</h3>
+            <div class="uk-margin" id="anthology-works-list">
+                    <label id="anthology-works-form-label" class="uk-form-label" for="anthology-list">{% translate 'Works' %}</label>
+                    <script>
+                        var util = UIkit.util;
+
+                        util.ready(function () {
+
+                            util.on(document.body, 'stop', function (e, sortable, el) {
+                                var list = document.getElementById("anthology-list").getElementsByTagName("li");
+                                var tracking = 1;
+                                for (let item of list) {
+                                    var child = item.querySelector('.anthology-tracker')
+                                    child.value = tracking;
+                                    tracking += 1;
+                                }
+                            });
+                        });
+                    </script>
+                    <div class="uk-form-controls" id="anthology-form-controls">
+                    <ul class="uk-grid-small uk-child-width-1 uk-text-left" uk-sortable="handle: .uk-sortable-handle" uk-grid id="anthology-list">
+                        {% for work in anthology.works_readonly %}
+                        <li id="work-list-{{work.id}}">
+                            {% include "anthology_form_work.html" with work=work anthology=anthology %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+                <div id="anthology-form-works-parent" class="uk-margin uk-margin-medium-top">
+                    <label id="anthology-form-works-label" class="uk-form-label" for="anthology-entry">{% translate 'Add Work' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work help' %}"></sup>
+                            <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for works by title.{% endblocktranslate %}</div>
+                    </label>
+                    <div id="anthology-form-works-form-control" class="uk-form-controls">
+                        <div id="anthology-form-works-inline-div" class="uk-inline">
+                            <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="Search for work..." id="anthology-entry" oninput="doWorkAutocomplete(this.value)">
+                            <div id="anthology-autocomplete-dropdown" uk-drop></div>
+                        </div>
+                    </div>
+                </div>
+            <div id="anthology-form-description-parent" class="uk-margin">
+                <label id="anthology-form-description-label" class="uk-form-label" for="descriptionEditor">Description</label>
+                {% include 'ourchive_tinymce_template.html' with form_field_value=anthology.description form_field='description' obj_name='anthology' %}
+            </div>
+            <hr id="anthology-attributes-hr" class="ourchive-hr"/>
+            <div id="anthology-form-tags-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left">
+                <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">{% translate 'Anthology Tags' %}</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Anthology tags help' %}"></sup>
+                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your anthology, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div></span>
+                {% include "object_attributes_form.html" with object='Anthology' attribute_types=anthology.attribute_types show_header=False %}
+                {% include "edit_tags.html" with object='anthology' object_friendly='Anthology' show_header=False %}
+            </div>
+            <hr id="anthology-actions-footer-hr" class="ourchive-hr"/>
+            <div class="uk-child-width-1-1@m uk-child-width-1@s uk-text-left" id="anthology-form-actions-footer-parent" uk-grid>
+                <div class="uk-text-right uk-width-1-1" id="anthology-form-actions-footer-child">
+                    <input id="anthology-form-actions-footer-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
+                    <input id="anthology-form-actions-footer-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+                </div>
+            </div>
+        </form>
         </div>
-    <div id="anthology-form-description-parent" class="uk-margin">
-        <label id="anthology-form-description-label" class="uk-form-label" for="descriptionEditor">Description</label>
-        {% include 'ourchive_tinymce_template.html' with form_field_value=anthology.description form_field='description' obj_name='anthology' %}
     </div>
-    <hr id="anthology-attributes-hr" class="ourchive-hr"/>
-    <div id="anthology-form-tags-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left">
-        <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">{% translate 'Anthology Tags' %}</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Anthology tags help' %}"></sup>
-                <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your anthology, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div></span>
-        {% include "object_attributes_form.html" with object='Anthology' attribute_types=anthology.attribute_types show_header=False %}
-        {% include "edit_tags.html" with object='anthology' object_friendly='Anthology' show_header=False %}
-    </div>
-    <hr id="anthology-actions-footer-hr" class="ourchive-hr"/>
-    <div class="uk-child-width-1-1@m uk-child-width-1@s uk-text-left" id="anthology-form-actions-footer-parent" uk-grid>
-        <div class="uk-text-right uk-width-1-1" id="anthology-form-actions-footer-child">
-            <input id="anthology-form-actions-footer-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
-            <input id="anthology-form-actions-footer-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
-        </div>
-    </div>    
-</form>
-</div>
 {% endblock %}

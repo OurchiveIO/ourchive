@@ -116,67 +116,68 @@
 		});
 	}
 </script>
-<div class="uk-width-1-1">
-	<ul uk-tab="animation: uk-animation-fade; active: {{default_tab}}; connect: .search-switcher" id="search-results-switcher-controls" class="uk-flex-center uk-width-1-1 ourchive-padding-remove-horizontal">
-	    <li id="results-switcher-li-works" class="ourchive-search-tab"><a href="#" id="works_tab" data-testid="works-tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
-	    <li id="results-switcher-li-bookmarks" class="ourchive-search-tab"><a href="#" id="bookmarks_tab" onclick="updateActiveTab(1)">Bookmarks ({{ bookmarks.page.count }})</a></li>
-	    <li id="results-switcher-li-users" class="ourchive-search-tab"><a href="#" id="users_tab" onclick="updateActiveTab(2)">Collections ({{ collections.page.count }})</a></li>
-	    {% if not tag_id %}<li id="results-switcher-li-tags" class="ourchive-search-tab"><a href="#" id="tags_tab" onclick="updateActiveTab(3)">Tags ({{ tags.page.count }})</a></li>
-	    <li id="results-switcher-li-users" class="ourchive-search-tab"><a href="#" id="users_tab" onclick="updateActiveTab(4)">Users ({{ users.data|length }})</a></li>{% endif %}
-	</ul>
-</div>
-{% include 'search_results_filters.html' %}
-<div class="uk-width-expand">
-	<div id="selected-filters-list" class="uk-width-expand uk-margin-small-bottom">
-		<!-- Selected filters go here -->
-	</div>
-	<div class="uk-width-expand uk-margin-bottom">
-		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden id="search-results-toggle-button" onClick="updateFilterToggle()">Filter</button>
-		<button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
-		<select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-width-medium uk-hidden@s" onchange="updateSortOrder(value, true)">
-            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
-            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
-            <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
-        </select>
-        <select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium uk-visible@s" onchange="updateSortOrder(value, false)">
-            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
-            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
-            <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
-        </select>
-	</div>
-	<div class="uk-switcher uk-margin-remove-left search-switcher uk-width-expand ourchive-padding-remove-horizontal uk-inline uk-height-viewport">
-		<div class="uk-width-expand" id="search-results-works-parent">		
-			{% for work in works.data %} 
-				<div class="uk-margin-bottom">{% include "work_tile.html" %} </div>    
-		    {% endfor %}
-		    {% if works.data %}{% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}{% endif %}
-		</div>
-				<div class="uk-width-expand" id="search-results-bookmarks-content">
-		        {% for bookmark in bookmarks.data %} 
-					<div class="uk-margin-bottom">{% include "bookmark_tile.html" %} </div>   
-			    {% endfor %}
-			    {% include 'pagination.html' with previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
-			</div>   
-			<div class="uk-width-expand" id="search-results-collections-content">
-		        {% for bookmark_collection in collections.data %} 
-					<div class="uk-margin-bottom">{% include "bookmark_collection_tile.html" %}</div>  
-			    {% endfor %}
-			    {% include 'pagination.html' with previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
-			</div> 
-			<div class="uk-width-expand" id="search-results-tags-content">
-		        <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
-		        {% include "tag_partial.html" with obj_name='tag' tags=tags.data.items %}
-		        {% include 'pagination.html' with previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
-				</dl>
-			</div> 
-			<div uk-grid id="search-results-users-grid">
-			<div class="uk-width-expand" id="search-results-users-content-parent">
-		        {% for user in users.data %} 
-					<p id="search-results-user-{{user.id}}"> <a id="search-results-user-{{user.id}}-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a> </p>
-			    {% endfor %}
-			</div>  
-		</div>
-	</div>
-</div>
-
+    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="search-uk-grid" uk-grid>
+        <div class="uk-width-1-1">
+            <ul uk-tab="animation: uk-animation-fade; active: {{default_tab}}; connect: .search-switcher" id="search-results-switcher-controls" class="uk-flex-center uk-width-1-1 ourchive-padding-remove-horizontal">
+                <li id="results-switcher-li-works" class="ourchive-search-tab"><a href="#" id="works_tab" data-testid="works-tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
+                <li id="results-switcher-li-bookmarks" class="ourchive-search-tab"><a href="#" id="bookmarks_tab" onclick="updateActiveTab(1)">Bookmarks ({{ bookmarks.page.count }})</a></li>
+                <li id="results-switcher-li-users" class="ourchive-search-tab"><a href="#" id="users_tab" onclick="updateActiveTab(2)">Collections ({{ collections.page.count }})</a></li>
+                {% if not tag_id %}<li id="results-switcher-li-tags" class="ourchive-search-tab"><a href="#" id="tags_tab" onclick="updateActiveTab(3)">Tags ({{ tags.page.count }})</a></li>
+                <li id="results-switcher-li-users" class="ourchive-search-tab"><a href="#" id="users_tab" onclick="updateActiveTab(4)">Users ({{ users.data|length }})</a></li>{% endif %}
+            </ul>
+        </div>
+        {% include 'search_results_filters.html' %}
+        <div class="uk-width-expand">
+            <div id="selected-filters-list" class="uk-width-expand uk-margin-small-bottom">
+                <!-- Selected filters go here -->
+            </div>
+            <div class="uk-width-expand uk-margin-bottom">
+                <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden id="search-results-toggle-button" onClick="updateFilterToggle()">Filter</button>
+                <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
+                <select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-width-medium uk-hidden@s" onchange="updateSortOrder(value, true)">
+                    <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
+                    <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
+                    <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
+                </select>
+                <select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium uk-visible@s" onchange="updateSortOrder(value, false)">
+                    <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
+                    <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
+                    <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
+                </select>
+            </div>
+            <div class="uk-switcher uk-margin-remove-left search-switcher uk-width-expand ourchive-padding-remove-horizontal uk-inline uk-height-viewport">
+                <div class="uk-width-expand" id="search-results-works-parent">
+                    {% for work in works.data %}
+                        <div class="uk-margin-bottom">{% include "work_tile.html" %} </div>
+                    {% endfor %}
+                    {% if works.data %}{% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}{% endif %}
+                </div>
+                        <div class="uk-width-expand" id="search-results-bookmarks-content">
+                        {% for bookmark in bookmarks.data %}
+                            <div class="uk-margin-bottom">{% include "bookmark_tile.html" %} </div>
+                        {% endfor %}
+                        {% include 'pagination.html' with previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
+                    </div>
+                    <div class="uk-width-expand" id="search-results-collections-content">
+                        {% for bookmark_collection in collections.data %}
+                            <div class="uk-margin-bottom">{% include "bookmark_collection_tile.html" %}</div>
+                        {% endfor %}
+                        {% include 'pagination.html' with previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
+                    </div>
+                    <div class="uk-width-expand" id="search-results-tags-content">
+                        <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
+                        {% include "tag_partial.html" with obj_name='tag' tags=tags.data.items %}
+                        {% include 'pagination.html' with previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
+                        </dl>
+                    </div>
+                    <div uk-grid id="search-results-users-grid">
+                    <div class="uk-width-expand" id="search-results-users-content-parent">
+                        {% for user in users.data %}
+                            <p id="search-results-user-{{user.id}}"> <a id="search-results-user-{{user.id}}-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a> </p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

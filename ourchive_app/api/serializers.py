@@ -78,7 +78,7 @@ class ContentPageSerializer(serializers.Serializer):
 class ContentPageDetailSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     name = serializers.ReadOnlyField()
-    value = serializers.ReadOnlyField()
+    content = serializers.ReadOnlyField()
 
     class Meta:
         model = ContentPage

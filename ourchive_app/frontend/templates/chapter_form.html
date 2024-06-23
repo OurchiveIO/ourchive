@@ -1,34 +1,36 @@
 {% extends 'index.html' %}
 {% load i18n %}
-{% block title %}{{ form_title }}{% endblock %}
-{% block content %}	
 {% load static %}
-    <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
-    <script src="{% static 'frontend/js/ourchive-chapter.js' %}"></script>
-    <div id="chapter-form-parent" class="uk-width-1-1 uk-text-left"> 
-    	<form class="uk-form-horizontal"  method="post" id="chapterForm" onsubmit="return getChapterRichTextValues()">
-            <input type="hidden" id="work" name="work" value="{{ chapter.work }}">
-            <input type="hidden" id="work" name="chapter_id" value="{{ chapter.id }}">
-    <div id="chapter-form-title-grid" class="uk-grid" uk-grid>
-        <div class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom" id="chapter-form-title-div">
-            <span id="chapter-form-title-span" class="uk-text-large">{{ chapter.title|default_if_none:'' }}</span>
-        </div>
-        <div class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="chapter-form-top-buttons-group">
-            <button id="chapter-form-top-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-            <input id="chapter-form-cancel-button" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
-            <input id="chapter-form-submit-button" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+{% block title %}{{ form_title }}{% endblock %}
+{% block content %}
+<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
+<script src="{% static 'frontend/js/ourchive-chapter.js' %}"></script>
+    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="chapter-form-uk-grid" uk-grid>
+        <div id="chapter-form-parent" class="uk-width-1-1 uk-text-left"> 
+            <form class="uk-form-horizontal"  method="post" id="chapterForm" onsubmit="return getChapterRichTextValues()">
+                <input type="hidden" id="work" name="work" value="{{ chapter.work }}">
+                <input type="hidden" id="work" name="chapter_id" value="{{ chapter.id }}">
+                <div id="chapter-form-title-grid" class="uk-grid" uk-grid>
+                    <div class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom" id="chapter-form-title-div">
+                        <span id="chapter-form-title-span" class="uk-text-large">{{ chapter.title|default_if_none:'' }}</span>
+                    </div>
+                    <div class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="chapter-form-top-buttons-group">
+                        <button id="chapter-form-top-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                        <input id="chapter-form-cancel-button" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
+                        <input id="chapter-form-submit-button" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+                    </div>
+                </div>
+                <hr id="chapter-form-hr"/>
+                {% include 'chapter_form_body.html' %}
+                <hr/>
+                <div id="chapter-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
+                    <div class="uk-align-right uk-width-1-1@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="chapter-form-bottom-buttons-group">
+                        <button id="chapter-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                        <input id="chapter-form-cancel-button-bottom" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
+                        <input id="chapter-form-submit-button-bottom" class="uk-button uk-button-primary" type="submit" value="Submit"/>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
-    <hr id="chapter-form-hr"/>
-	{% include 'chapter_form_body.html' %}
-    <hr/>
-    <div id="chapter-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
-        <div class="uk-align-right uk-width-1-1@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="chapter-form-bottom-buttons-group">
-            <button id="chapter-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-            <input id="chapter-form-cancel-button-bottom" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
-            <input id="chapter-form-submit-button-bottom" class="uk-button uk-button-primary" type="submit" value="Submit"/>
-        </div>
-    </div>
-	</form>
-</div>
 {% endblock %}

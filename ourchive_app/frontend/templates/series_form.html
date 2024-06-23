@@ -1,8 +1,8 @@
 {% extends 'index.html' %}
 {% load i18n %}
-{% block title %}{{ form_title }}{% endblock %}
-{% block content %}	
 {% load static %}
+{% block title %}{{ form_title }}{% endblock %}
+{% block content %}
 <script>
 function doWorkAutocomplete(term) {
   if (term.length < 2)
@@ -63,106 +63,108 @@ function handleModalDelete(url) {
     });
 }
 </script>
-<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="series-form-parent-grid">  
-<form class="uk-form-horizontal" method="post" id="seriesForm" onsubmit="return getRichText(['description'])">
-    {% csrf_token %}
-    <input id="series-form-hidden-id" type="hidden" name="series_id" {% if series.id != 0 %}value="{{ series.id }}"{% else %} value=""{% endif %}/>
-    <div id="series-form-actions-parent" class="uk-grid" uk-grid>
-        <div id="series-form-header-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
-            <span id="series-form-header-span" class="uk-text-large">{{ form_title }}</span>
-        </div>
-        <div id="series-form-actions-group" class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right">
-            <input id="series-form-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="{% translate 'Cancel' %}"/>
-            <button id="series-form-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
-            <input id="series-form-submit" class="uk-button uk-button-primary" type="submit" value="{% translate 'Submit' %}"/>
-        </div>
-    </div>
-    <hr id="series-form-hr" class="ourchive-hr"/>
-    <div id="series-form-title-parent" class="uk-margin">
-        <label id="series-form-title-label" class="uk-form-label" for="series-form-title-input">{% translate 'Title' %}</label>
-        <div id="series-form-title-form-control" class="uk-form-controls">
-            <div id="series-form-title-inline-div" class="uk-inline">
-                <input id="series-form-title-input" title="{% translate 'Series Title' %}" class="uk-input uk-form-width-large" type="text" name="title" value="{{ series.title|default_if_none:'' }}">
-            </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="series-form-created-parent">
-        <label id="series-form-created-label" class="uk-form-label" for="series-form-created-on">{% translate 'Post Date' %}</label>
-        <div id="series-form-created-controls" class="uk-form-controls">
-            <div id="series-form-created-inline" class="uk-inline">
-                <input title="{% translate 'Series created on' %}" id="series-form-created-on" type="date" class="uk-input" name="created_on" value="{{ series.created_on }}"> 
-            </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="series-form-updated-parent">
-        <label id="series-form-updated-label" class="uk-form-label" for="series-form-updated-on">{% translate 'Update Date' %}</label>
-        <div id="series-form-updated-controls" class="uk-form-controls">
-            <div id="series-form-updated-inline" class="uk-inline">
-                <input title="{% translate 'Series updated on' %}" id="series-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ series.updated_on }}"> 
-                <input title="{% translate 'Series updated on' %}" id="series-form-updated-on" type="date" class="uk-input" name="updated_on" value="{{ series.updated_on }}"> 
-            </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="series-form-complete-parent">
-        <label id="series-form-complete-label" class="uk-form-label" for="series-form-complete-checkbox">{% translate 'Complete?' %}</label>
-        <div id="series-form-complete-controls" class="uk-form-controls">
-            <div id="series-form-complete-inline" class="uk-inline">
-                <label id="series-form-complete-switch-label" class="switch"><input title="{% translate 'Series complete toggle' %}" class="uk-checkbox" id="series-form-complete-checkbox" type="checkbox" name="is_complete" {% if series.is_complete %} checked {% endif %}> <span id="series-form-complete-slider" class="slider round"></span> </label>
-            </div>
-        </div>
-    </div>
-    <hr id="series-form-details-hr" class="ourchive-hr"/>
-    <h3 id="series-form-header">{% translate 'Details' %}</h3>
-    <div class="uk-margin" id="series-works-list">
-            <label id="series-works-form-label" class="uk-form-label" for="series-list">{% translate 'Works' %}</label>
-            <script>
-                var util = UIkit.util;
-
-                util.ready(function () {
-
-                    util.on(document.body, 'stop', function (e, sortable, el) {
-                        var list = document.getElementById("series-list").getElementsByTagName("li");
-                        var tracking = 1;
-                        for (let item of list) {
-                            var child = item.querySelector('.series-tracker')
-                            child.value = tracking;
-                            tracking += 1;
-                        }
-                    });
-                });
-            </script>
-            <div class="uk-form-controls" id="series-form-controls">
-            <ul class="uk-grid-small uk-child-width-1 uk-text-left" uk-sortable="handle: .uk-sortable-handle" uk-grid id="series-list">
-                {% for work in series.works_readonly %}
-                <li id="work-list-{{work.id}}">
-                    {% include "series_form_work.html" with work=work series=series %}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-        <div id="series-form-works-parent" class="uk-margin uk-margin-medium-top">
-            <label id="series-form-works-label" class="uk-form-label" for="series_entry">{% translate 'Add Work' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work help' %}"></sup>    
-                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for works by title.{% endblocktranslate %}</div>
-            </label>
-            <div id="series-form-works-form-control" class="uk-form-controls">
-                <div id="series-form-works-inline-div" class="uk-inline">
-                    <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="{% translate 'Search for work...' %}" id="series_entry" oninput="doWorkAutocomplete(this.value)">
-                    <div id="series-autocomplete-dropdown" uk-drop></div>
+    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="series-form-uk-grid" uk-grid>
+        <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="series-form-parent-grid">  
+        <form class="uk-form-horizontal" method="post" id="seriesForm" onsubmit="return getRichText(['description'])">
+            {% csrf_token %}
+            <input id="series-form-hidden-id" type="hidden" name="series_id" {% if series.id != 0 %}value="{{ series.id }}"{% else %} value=""{% endif %}/>
+            <div id="series-form-actions-parent" class="uk-grid" uk-grid>
+                <div id="series-form-header-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
+                    <span id="series-form-header-span" class="uk-text-large">{{ form_title }}</span>
+                </div>
+                <div id="series-form-actions-group" class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right">
+                    <input id="series-form-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="{% translate 'Cancel' %}"/>
+                    <button id="series-form-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                    <input id="series-form-submit" class="uk-button uk-button-primary" type="submit" value="{% translate 'Submit' %}"/>
                 </div>
             </div>
+            <hr id="series-form-hr" class="ourchive-hr"/>
+            <div id="series-form-title-parent" class="uk-margin">
+                <label id="series-form-title-label" class="uk-form-label" for="series-form-title-input">{% translate 'Title' %}</label>
+                <div id="series-form-title-form-control" class="uk-form-controls">
+                    <div id="series-form-title-inline-div" class="uk-inline">
+                        <input id="series-form-title-input" title="{% translate 'Series Title' %}" class="uk-input uk-form-width-large" type="text" name="title" value="{{ series.title|default_if_none:'' }}">
+                    </div>
+                </div>
+            </div>
+            <div class="uk-margin" id="series-form-created-parent">
+                <label id="series-form-created-label" class="uk-form-label" for="series-form-created-on">{% translate 'Post Date' %}</label>
+                <div id="series-form-created-controls" class="uk-form-controls">
+                    <div id="series-form-created-inline" class="uk-inline">
+                        <input title="{% translate 'Series created on' %}" id="series-form-created-on" type="date" class="uk-input" name="created_on" value="{{ series.created_on }}"> 
+                    </div>
+                </div>
+            </div>
+            <div class="uk-margin" id="series-form-updated-parent">
+                <label id="series-form-updated-label" class="uk-form-label" for="series-form-updated-on">{% translate 'Update Date' %}</label>
+                <div id="series-form-updated-controls" class="uk-form-controls">
+                    <div id="series-form-updated-inline" class="uk-inline">
+                        <input title="{% translate 'Series updated on' %}" id="series-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ series.updated_on }}"> 
+                        <input title="{% translate 'Series updated on' %}" id="series-form-updated-on" type="date" class="uk-input" name="updated_on" value="{{ series.updated_on }}"> 
+                    </div>
+                </div>
+            </div>
+            <div class="uk-margin" id="series-form-complete-parent">
+                <label id="series-form-complete-label" class="uk-form-label" for="series-form-complete-checkbox">{% translate 'Complete?' %}</label>
+                <div id="series-form-complete-controls" class="uk-form-controls">
+                    <div id="series-form-complete-inline" class="uk-inline">
+                        <label id="series-form-complete-switch-label" class="switch"><input title="{% translate 'Series complete toggle' %}" class="uk-checkbox" id="series-form-complete-checkbox" type="checkbox" name="is_complete" {% if series.is_complete %} checked {% endif %}> <span id="series-form-complete-slider" class="slider round"></span> </label>
+                    </div>
+                </div>
+            </div>
+            <hr id="series-form-details-hr" class="ourchive-hr"/>
+            <h3 id="series-form-header">{% translate 'Details' %}</h3>
+            <div class="uk-margin" id="series-works-list">
+                    <label id="series-works-form-label" class="uk-form-label" for="series-list">{% translate 'Works' %}</label>
+                    <script>
+                        var util = UIkit.util;
+        
+                        util.ready(function () {
+        
+                            util.on(document.body, 'stop', function (e, sortable, el) {
+                                var list = document.getElementById("series-list").getElementsByTagName("li");
+                                var tracking = 1;
+                                for (let item of list) {
+                                    var child = item.querySelector('.series-tracker')
+                                    child.value = tracking;
+                                    tracking += 1;
+                                }
+                            });
+                        });
+                    </script>
+                    <div class="uk-form-controls" id="series-form-controls">
+                    <ul class="uk-grid-small uk-child-width-1 uk-text-left" uk-sortable="handle: .uk-sortable-handle" uk-grid id="series-list">
+                        {% for work in series.works_readonly %}
+                        <li id="work-list-{{work.id}}">
+                            {% include "series_form_work.html" with work=work series=series %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+                <div id="series-form-works-parent" class="uk-margin uk-margin-medium-top">
+                    <label id="series-form-works-label" class="uk-form-label" for="series_entry">{% translate 'Add Work' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work help' %}"></sup>    
+                            <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for works by title.{% endblocktranslate %}</div>
+                    </label>
+                    <div id="series-form-works-form-control" class="uk-form-controls">
+                        <div id="series-form-works-inline-div" class="uk-inline">
+                            <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="{% translate 'Search for work...' %}" id="series_entry" oninput="doWorkAutocomplete(this.value)">
+                            <div id="series-autocomplete-dropdown" uk-drop></div>
+                        </div>
+                    </div>
+                </div>
+            <div id="series-form-description-parent" class="uk-margin">
+                <label id="series-form-description-label" class="uk-form-label" for="descriptionEditor">{% translate 'Description' %}</label>
+                {% include 'ourchive_tinymce_template.html' with form_field_value=series.description form_field='description' obj_name='series' %}
+            </div>
+            <hr id="series-actions-footer-hr" class="ourchive-hr"/>
+            <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="series-form-actions-footer-parent" uk-grid>
+                <div class="uk-text-right uk-width-1-1" id="series-form-actions-footer-child">
+                    <input id="series-form-actions-footer-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="{% translate 'Cancel' %}"/>
+                    <input id="series-form-actions-footer-submit" class="uk-button uk-button-primary" type="submit" value="{% translate 'Submit' %}"/>
+                </div>
+            </div>    
+        </form>
         </div>
-    <div id="series-form-description-parent" class="uk-margin">
-        <label id="series-form-description-label" class="uk-form-label" for="descriptionEditor">{% translate 'Description' %}</label>
-        {% include 'ourchive_tinymce_template.html' with form_field_value=series.description form_field='description' obj_name='series' %}
     </div>
-    <hr id="series-actions-footer-hr" class="ourchive-hr"/>
-    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="series-form-actions-footer-parent" uk-grid>
-        <div class="uk-text-right uk-width-1-1" id="series-form-actions-footer-child">
-            <input id="series-form-actions-footer-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="{% translate 'Cancel' %}"/>
-            <input id="series-form-actions-footer-submit" class="uk-button uk-button-primary" type="submit" value="{% translate 'Submit' %}"/>
-        </div>
-    </div>    
-</form>
-</div>
 {% endblock %}
