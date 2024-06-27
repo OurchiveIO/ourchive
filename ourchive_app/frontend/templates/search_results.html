@@ -1,8 +1,7 @@
 {% extends 'index.html' %}
 {% load static %}
 {% block title %}Search Results{% endblock %}
-{% block content %}	
-<link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
+{% block content %}
 <script src="{% static 'frontend/js/searchable-multiselect.js' %}"></script>
 <script>
 	window.addEventListener("load", function(){
@@ -170,7 +169,7 @@
                     </div>
                     <div class="uk-width-expand" id="search-results-tags-content">
                         <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
-                        {% include "tag_partial.html" with obj_name='tag' tags=tags.data.items %}
+                        {% include "tag_partial.html" with obj_name='tag' tags=tags.data %}
                         {% include 'pagination.html' with previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
                         </dl>
                     </div>

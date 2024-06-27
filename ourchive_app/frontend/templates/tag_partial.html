@@ -1,10 +1,15 @@
-{% for type, tag in tags %}
-<div class="uk-margin-small-top uk-width-medium" id="{{obj_name}}-tags-dl-mb">
-    <span class="uk-text-bold uk-margin-small">{{ type }}: </span>
-    {% for single_tag in tag %}
-        <a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link-mb" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}"
-           class="uk-inline">{{ single_tag.display_text|default:single_tag.text }}{% if not forloop.last %},{% endif %}
-        </a>
+{% for group, group_tags in tags.items %}
+    {% if not forloop.first %}<hr class="ourchive-hr"/>{% endif %}
+    {% for type, tag in group_tags.items %}
+        <div class="{% if forloop.first %}uk-margin-small-top{% else %}ourchive-badge-margins{% endif %} uk-width-expand" id="{{obj_name}}-tags-dl-mb">
+            <div class="uk-inline selected-wrapper-margins"><span class="uk-text-muted">{{ type }} </span></div>
+            {% for single_tag in tag %}
+                <div class="selected-wrapper" id="tag-container-{{ single_tag.id }}">
+                    <a class="ourchive-badge-link" id="{{obj_name}}-tile-tag-{{single_tag.id}}-link-mb" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}">
+                        <span class="selected-label ourchive-badge-label">{{ single_tag.display_text|default:single_tag.text }}</span>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
     {% endfor %}
-</div>
 {% endfor %}

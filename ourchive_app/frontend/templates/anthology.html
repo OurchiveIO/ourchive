@@ -21,7 +21,7 @@
     <div id="anthology-content" class="uk-width-1-1 uk-padding-remove">
         <hr class="ourchive-hr" id="anthology-tags-hr"/>
         <p class="uk-width-1-1" id="anthology-{{anthology.id}}-tile-attributes-p">{% include "object_attributes.html" with object='anthology' object_id=anthology.id attributes=anthology.attributes %}</p>
-        {% include "tag_partial.html" with obj_name='anthology' tags=anthology.tags.items %}
+        {% include "tag_partial.html" with obj_name='anthology' tags=anthology.tags %}
         <div class="uk-align-right">{% include 'anthology_metadata.html' %}</div>
     </div>
     <div class="uk-margin-remove-bottom uk-margin-remove-top uk-width-1-1 uk-padding-remove"><hr id="anthology-title-hr" class="ourchive-hr"/></div>

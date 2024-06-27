@@ -15,6 +15,7 @@
 		  });
 	}
 </script>
+    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="bookmark-uk-grid" uk-grid>
 <article class="uk-article uk-width-expand uk-padding-remove" id="bookmark-uk-article">
     <div class="uk-child-width-2-1 ourchive-parent-grid" id="bookmark-uk-child-grid" uk-grid>
         <div class="uk-width-2-3" id="bookmark-title-parent">
@@ -63,7 +64,7 @@
         {% endif %}
     </div>
     {% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}
-    {% include "tag_partial.html" with obj_name='bookmark-tag' tags=tags.items %}
+    {% include "tag_partial.html" with obj_name='bookmark-tag' tags=tags %}
     <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" id="bookmark-comments-grid-parent" uk-grid>
         <div class="uk-text-right" id="bookmark-metadata-parent">
         {% include 'bookmark_metadata.html' %}
@@ -72,6 +73,7 @@
         <div class="uk-width-1" id="bookmark-parent-comments-include-container">{% include 'comments_parent.html' with object_name='bookmark' comments=comments object=bookmark edit_action_url=bookmark.edit_action_url post_action_url=bookmark.post_action_url comment_offset=comment_offset delete_obj='bookmark-comment' load_more_base=load_more_base view_thread_base=view_thread_base comment_count=bookmark.comment_count %}</div>  
     </div>
 </article>
+
 {% if scroll_comment_id %}
     <script>
         window.onload = function(){
@@ -79,4 +81,5 @@
         }
     </script>
 {% endif %}
+    </div>
 {% endblock %}

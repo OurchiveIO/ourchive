@@ -290,6 +290,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             attributes = validated_data.pop('attributes')
             user = AttributeValueSerializer.process_attributes(user, validated_data, attributes)
         User.objects.filter(id=user.id).update(**validated_data)
+        user = User.objects.get(id=user.id)
         user = self.process_languages(user, languages)
         return user
 

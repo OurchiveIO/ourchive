@@ -278,7 +278,7 @@ class PostgresProvider:
 
     def get_tags_dict(self, tag):
         return {"tag_type": tag.tag_type.label, "text": tag.text, "display_text": tag.display_text,
-         "id": tag.id}
+         "id": tag.id, "search_group": tag.tag_type.search_group.label if tag.tag_type.search_group else TagType.DEFAULT_SEARCH_GROUP_LABEL}
 
     def build_work_resultset(self, resultset, reserved_fields):
         # build final resultset

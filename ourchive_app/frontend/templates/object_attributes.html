@@ -1,20 +1,14 @@
-<div class="uk-margin-small-top uk-visible@s uk-grid ourchive-parent-grid" id="attribute-tags-dl" uk-grid>
 {% if attributes.items %}
 {% for attribute, attribute_values in attributes.items %}
-    <div id="{{attribute}}-tile-attribute-type-{{type}}" class="uk-margin-small uk-visible@s {% if not forloop.last %}uk-width-1-2{% else %} uk-width-1-1 {% endif %}">
-        <div class="uk-margin-remove"><span class="uk-text-bold uk-margin-right">{{ attribute }}</span></div>
+    <div id="{{attribute}}-tile-attribute-type-{{type}}" class="{% if forloop.first %}uk-margin-small-top{% else %}ourchive-badge-margins{% endif %} uk-width-expand">
+        <div class="uk-inline selected-wrapper-margins"><span class="uk-text-muted">{{ attribute }}</span></div>
         {% for single_attr in attribute_values %}
-            <div class="uk-inline uk-button-tag"><a id="{{single_attr.display_name}}-tile-attr-{{single_attr.display_name}}-link" class="uk-link-muted uk-inline uk-text-break" href="/attributes/{{single_attr.id}}?attr_id={{single_attr.id}}">{{ single_attr.display_name }}</a></div>
+            <div class="selected-wrapper" id="attr-container-{{ single_attr.id }}">
+                <a class="ourchive-badge-link" id="{{single_attr.display_name}}-tile-attr-{{single_attr.display_name}}-link" href="/attributes/{{single_attr.id}}?attr_id={{single_attr.id}}">
+                    <span class="selected-label ourchive-badge-label">{{ single_attr.display_name }}</span>
+                </a>
+            </div>
         {% endfor %}
     </div>
 {% endfor %}
 {% endif %}
-</div>
-{% for attribute, attribute_values in attributes.items %}
-<div class="uk-margin-small-top uk-hidden@s uk-width-medium" id="{{object}}-attributes-dl-mb">
-    <span class="uk-text-bold uk-margin-small uk-hidden@s">{{ attribute }}: </span>
-    {% for single_attr in attribute_values %}
-        <a id="{{object}}-attribute-{{single_attr.display_name}}-link-mb" href="/attributes/{{single_attr.id}}?attr_id={{single_attr.id}}" class="uk-hidden@s ourchive-mobile-tag-list uk-inline uk-text-break">{{ single_attr.display_name }}{% if not forloop.last %},{% endif %}</a>
-    {% endfor %}
-</div>
-{% endfor %}

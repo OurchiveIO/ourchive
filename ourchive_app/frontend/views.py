@@ -413,10 +413,7 @@ def edit_user(request, pk):
 				user['profile'] = sanitize_rich_text(user['profile'])
 			user_attributes = do_get(f'api/attributetypes', request, params={'allow_on_user': True}, object_name='Attribute')
 			user['attribute_types'] = process_attributes(user['attributes'], user_attributes.response_data['results'])
-			for language in languages:
-				for user_language in user['default_languages']:
-					if user_language == language['id']:
-						language['selected'] = True
+			languages = process_languages(languages, user.get('default_languages_readonly', []))
 			return render(request, 'user_form.html', {
 				'user': user, 'form_title': 'Edit User',
 				'work_types': work_types,

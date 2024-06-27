@@ -35,6 +35,8 @@ class OurchiveFakes:
             logger.info(f'Work types created using default type names. Count: {len(work_types)}.')
             languages = self.generate_languages([], True)
             logger.info(f'Work types created using defaults. Count: {len(languages)}.')
+            search_groups = self.generate_search_groups(3, True)
+            logger.info(f'Search groups created using defaults. Count: {len(search_groups)}')
             tag_types = self.generate_tag_types(5, True)
             logger.info(f'Tag types created. Count: {len(tag_types)}')
             attribute_types = self.generate_attribute_types(5, True)
@@ -479,8 +481,9 @@ class OurchiveFakes:
         tag_types = []
         for x in range(0, obj_count):
             display_text = self.generate_unique_word(kwargs.get('token', ''))
+            search_group = self.get_random_obj(models.SearchGroup)
             tag_type = models.TagType(label=display_text,
-                                      type_name=display_text.lower())
+                                      type_name=display_text.lower(), search_group=search_group)
             tag_types.append(tag_type)
             if persist_db:
                 tag_type.save()
@@ -490,6 +493,7 @@ class OurchiveFakes:
         attribute_types = []
         for x in range(0, obj_count):
             display_name = self.generate_unique_word(kwargs.get('token', ""))
+            search_group = self.get_random_obj(models.SearchGroup)
             attribute_type = models.AttributeType(display_name=display_name,
                                                   name=display_name.lower(),
                                                   allow_multiselect=self.fake.pybool(),
@@ -497,11 +501,22 @@ class OurchiveFakes:
                                                   allow_on_bookmark=self.fake.pybool(),
                                                   allow_on_work=self.fake.pybool(),
                                                   allow_on_chapter=self.fake.pybool(),
-                                                  allow_on_anthology=self.fake.pybool())
+                                                  allow_on_anthology=self.fake.pybool(),
+                                                  search_group=search_group)
             attribute_types.append(attribute_type)
             if persist_db:
                 attribute_type.save()
         return attribute_types
+
+    def generate_search_groups(self, obj_count=1, persist_db=False, **kwargs):
+        search_groups = []
+        for x in range(0, obj_count):
+            label = self.generate_unique_word(kwargs.get('token', ""))
+            search_group = models.SearchGroup(label=label, display_order=x)
+            search_groups.append(search_group)
+            if persist_db:
+                search_group.save()
+        return search_groups
 
     def generate_chapter_comments(self, user_id, obj_count=1, persist_db=False, chapter=None, **kwargs):
         if not chapter:

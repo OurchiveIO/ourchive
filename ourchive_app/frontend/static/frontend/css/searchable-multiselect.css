@@ -46,19 +46,24 @@ select[data-multi-select-plugin] {
     width: 100%;
 }
 
+.selected-wrapper-margins {
+    margin: 6px 5px 5px 0;
+    vertical-align: top;
+}
+
 .selected-wrapper {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    border-radius: 3px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    margin: 1px 5px 5px 0;
+    vertical-align: top;
+    border-radius: 10px;
     display: inline-block;
     background-color: #fdecce;
     color: #333;
     white-space: normal;
-    margin: 1px 5px 5px 0;
-    vertical-align: top;
     cursor: default;
     max-width: 80%;
 }
@@ -68,8 +73,26 @@ select[data-multi-select-plugin] {
     display: inline-block;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-left: 4px;
+    padding-left: 5px;
     vertical-align: top;
+}
+
+.ourchive-badge-link {
+    color: #333;
+}
+
+.ourchive-badge-link:hover {
+    color: #fff;
+}
+
+.ourchive-badge-label {
+    padding-right: 5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.ourchive-badge-margins {
+    margin: 0;
 }
 
 .selected-wrapper .selected-close {

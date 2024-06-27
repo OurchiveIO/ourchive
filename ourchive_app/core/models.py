@@ -643,6 +643,8 @@ class Tag(models.Model):
 
 
 class TagType(models.Model):
+    DEFAULT_SEARCH_GROUP_LABEL = 'Default'
+
     id = models.AutoField(primary_key=True)
     label = models.CharField(max_length=200)
     type_name = models.CharField(max_length=200, db_index=True, null=True, blank=True)

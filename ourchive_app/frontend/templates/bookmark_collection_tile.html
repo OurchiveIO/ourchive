@@ -18,7 +18,7 @@
 			{% if bookmark_collection.short_description %}
 				<p class="uk-text-medium">{{ bookmark_collection.short_description }}</p>
 			{% endif %}
-			{% if bookmark_collection.tags.items %}{% include "tag_partial.html" with obj_name='bk' tags=bookmark_collection.tags.items %}{% endif %}
+			{% if bookmark_collection.tags %}{% include "tag_partial.html" with obj_name='bk' tags=bookmark_collection.tags %}{% endif %}
 			{% if bookmark_collection.attributes %}{% include "object_attributes.html" with object='bkcol' object_id=bookmark_collection.id attributes=bookmark_collection.attributes %}{% endif %}
 		</div>
 	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="bkcol-tile-footer-parent">

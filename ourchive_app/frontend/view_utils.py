@@ -10,6 +10,7 @@ import logging
 from frontend.api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from django.utils.translation import gettext as _
 from core import utils
+from core.models import TagType
 from django.views.decorators.cache import never_cache
 from dateutil.parser import *
 from dateutil import tz
@@ -22,14 +23,26 @@ from datetime import *
 
 logger = logging.getLogger(__name__)
 
+
 def group_tags(tags):
+	search_groups = {}
+	# tag_parent format: {'type_name': [tags]}
 	tag_parent = {}
 	for tag in tags:
 		if tag['tag_type'] not in tag_parent:
 			tag_parent[tag['tag_type']] = [tag]
 		else:
 			tag_parent[tag['tag_type']].append(tag)
-	return tag_parent
+	for tag_type in tag_parent.keys():
+		search_group = tag_parent[tag_type][0].get('search_group', TagType.DEFAULT_SEARCH_GROUP_LABEL)
+		if search_group not in search_groups:
+			search_groups[search_group] = {tag_type: tag_parent[tag_type]}
+		else:
+			if tag_type not in search_groups[search_group]:
+				search_groups[search_group][tag_type] = tag_parent[tag_type]
+			else:
+				search_groups[search_group][tag_type].append(tag_parent[tag_type])
+	return search_groups
 
 
 def group_tags_for_edit(tags, tag_types=None):

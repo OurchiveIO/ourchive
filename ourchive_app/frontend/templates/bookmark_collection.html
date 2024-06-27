@@ -45,7 +45,7 @@
                     <hr class="ourchive-hr" id="bkcol-short-desc-hr"/>
                     <p class="uk-article-meta uk-width-1-1">{{ bkcol.short_description }}</p>
                     <p class="uk-width-1-1" id="bkcol-{{bkcol.id}}-tile-attributes-p">{% include "object_attributes.html" with object='bkcol' object_id=bkcol.id attributes=bkcol.attributes %}</p>
-                    {% include "tag_partial.html" with obj_name='bkcol' tags=bkcol.tags.items %}
+                    {% include "tag_partial.html" with obj_name='bkcol' tags=bkcol.tags %}
                     <div class="uk-align-right">{% include 'bookmark_collection_metadata.html' with bookmark_collection=bkcol %}</div>
                 </div>
                 <div class="uk-margin-remove-bottom uk-margin-remove-top uk-width-1-1 uk-padding-remove"><hr id="bkcol-title-hr" class="ourchive-hr"/></div>

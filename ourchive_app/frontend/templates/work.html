@@ -78,7 +78,7 @@
                 {% endif %} 
             </div>
             {% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}
-            {% include "tag_partial.html" with obj_name='work-tag' tags=tags.items %}
+            {% include "tag_partial.html" with obj_name='work-tag' tags=tags %}
             <div id="work-chapter-hr-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" uk-grid><div><hr class="ourchive-hr" id="work-chapter-hr"/></div></div>
             <div id="chapter-grid-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left ourchive-parent-grid" uk-grid>
                 {% if chapter %} 
