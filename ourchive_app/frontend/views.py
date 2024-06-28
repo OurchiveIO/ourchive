@@ -1368,7 +1368,7 @@ def log_out(request):
 @require_http_methods(["GET"])
 def work(request, pk, chapter_offset=0):
 	view_full = request.GET.get('view_full', False)
-	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
+	expand_comments = request.GET.get('expandComments', 'True').lower() == 'true'
 	comment_offset = request.GET.get('comment_offset', 0)
 	comment_id = request.GET.get('comment_thread', None)
 	comment_count = request.GET.get('comment_count')
@@ -1382,7 +1382,7 @@ def work(request, pk, chapter_offset=0):
 		messages.add_message(request, messages.ERROR, work_response.response_info.message, work_response.response_info.type_label)
 		return redirect('/')
 	work = work_response.response_data
-	tags = group_tags(work['tags']) if 'tags' in work else {}
+	work['tags'] = group_tags(work['tags']) if 'tags' in work else {}
 	work['attributes'] = get_attributes_for_display(work['attributes'])
 	work = format_date_for_template(work, 'updated_on')
 	work['owner'] = get_owns_object(work, request)
@@ -1440,7 +1440,6 @@ def work(request, pk, chapter_offset=0):
 		'expand_comments': expand_comments,
 		'scroll_comment_id': request.GET.get("scrollCommentId") if request.GET.get("scrollCommentId") is not None else None,
 		'id': pk,
-		'tags': tags,
 		'view_full': view_full,
 		'root': settings.ROOT_URL,
 		'chapters': chapters,

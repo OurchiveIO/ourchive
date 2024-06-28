@@ -1,14 +1,4 @@
 {% load i18n %}
-{% if work.series %}
-<div class="uk-align-left ourchive-metadata-list">
-	<span class="uk-inline ourchive-muted" id="work-metadata-series">{% blocktranslate with series_num=work.series_num %}Part {{ series_num }} of {% endblocktranslate %}<a href="{% url 'fe-series' work.series.id%}">{{work.series.title}}</a></span>
-</div>
-{% endif %}
-{% if work.anthology_work %}
-<div class="uk-align-left ourchive-metadata-list">
-	<span class="uk-inline ourchive-muted" id="work-metadata-series">Anthologies: {% for anthology in work.anthology_work %}<a href="{% url 'fe-anthology' anthology.id%}">{{anthology.anthology}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
-</div>
-{% endif %}
 <div class="uk-inline ourchive-metadata-list">
 	<span id="work-metadata-complete" class="uk-inline ourchive-muted">{% if work.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
 </div>

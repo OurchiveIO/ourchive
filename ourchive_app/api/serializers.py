@@ -723,6 +723,14 @@ class WorkAnthologySerializer(serializers.HyperlinkedModelSerializer):
         model = AnthologyWork
         fields = ['anthology', 'id']
 
+class MiniChapterSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    title = serializers.CharField()
+    number = serializers.IntegerField()
+
+    class Meta:
+        model = Chapter
+        fields = ['id', 'title', 'number']
 
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
@@ -738,6 +746,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     word_count = serializers.IntegerField(read_only=True)
     audio_length = serializers.IntegerField(read_only=True, required=False)
+    chapters = MiniChapterSerializer(many=True)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     anthology_work = WorkAnthologySerializer(many=True, required=False, read_only=True)
     users = serializers.SerializerMethodField()

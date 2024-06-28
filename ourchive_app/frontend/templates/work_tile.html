@@ -37,7 +37,7 @@
             document.getElementById(element_id).style.maxHeight = '150px';
             document.getElementById(element_id).style.height = '150px';
             document.getElementById(button_id).innerText = '{% translate "Show more..." %}';
-            document.getElementById(element_id).scrollIntoView();
+            document.getElementById(`work-${work_id}-tile-card`).scrollIntoView();
         }
     }
 </script>
@@ -57,6 +57,7 @@
             <p class="uk-margin-remove-bottom uk-margin-small-top"><span id="work-{{ work.id }}-type" class="ourchive-muted">{{ work.work_type_name }}</span></p>
             <p class="uk-margin-remove-bottom uk-margin-small-top"><span class="uk-inline ourchive-muted uk-text-italic" id="work-metadata-language">{% for language in work.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}
         {% endfor %}</span></p>
+            <!-- TODO: ADD CLICK TO EXPAND -->
             {% if work.cover_url != "None" and work.cover_url is not None and work.cover_url != "" %}
             <div class="uk-width-auto" id="work-{{work.id}}-tile-img-parent">
                 <img class="work-tile-cover" alt="{{work.cover_alt_text}}" src="{{work.cover_url}}" id="work-{{work.id}}-tile-image">
@@ -64,29 +65,39 @@
             {% endif %}
         </div>
         <div class="uk-width-2-3@m uk-width-1-1@s card-info" id="work-{{work.id}}-info-card">
-            <!-- series/anthology, summary, tag/attribute group 1, 2, and 3 -->
-            {% if work.series %}
-            <div class="uk-align-left uk-max-height-small">
-                <span class="uk-inline uk-text-bold" id="work-metadata-series">{% blocktranslate with series_num=work.series_num %}Part {{ series_num }} of {% endblocktranslate %}<a href="{% url 'fe-series' work.series.id%}">{{work.series.title}}</a></span>
-            </div>
-            {% endif %}
-            {% if work.anthology_work %}
-            <div class="uk-align-left uk-max-height-small">
-                <span class="uk-inline uk-text-bold" id="work-metadata-series">Anthologies: {% for anthology in work.anthology_work %}<a href="{% url 'fe-anthology' anthology.id%}">{{anthology.anthology}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
-            </div>
-            {% endif %}
-            {% if work.summary %}
-                <div class="uk-height-max-small summary-container" id="show-summary-{{ work.id }}">
-                    <p id="work-{{work.id}}-tile-summary-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>
+            <div class="uk-grid uk-grid-small uk-child-width-1-1">
+                <!-- series/anthology, summary, tag/attribute group 1, 2, and 3 -->
+                {% if work.summary %}
+                    <div class="uk-height-max-small summary-container" id="show-summary-{{ work.id }}">
+                        <p id="work-{{work.id}}-tile-summary-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>
+                    </div>
+                    <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleData('{{ work.id }}', 'summary')" id="more-btn-summary-{{ work.id }}">{% translate 'Show more...' %}</a>
+                {% endif %}
+                {% if work.series %}
+                    <div class="uk-align-left uk-max-height-small uk-margin-small-top uk-margin-small-bottom">
+                        <hr class="ourchive-hr"/>
+                        <span id="work-metadata-series">{% blocktranslate with series_num=work.series_num %}Part {{ series_num }} of {% endblocktranslate %}<a href="{% url 'fe-series' work.series.id%}">{{work.series.title}}</a></span>
+                        <hr class="ourchive-hr"/>
+                    </div>
+                {% endif %}
+                {% if work.anthologies %}
+                    <div class="uk-align-left uk-max-height-small uk-margin-small-top uk-margin-small-bottom">
+                        {% if not work.series %}
+                            <hr class="ourchive-hr"/>
+                        {% endif %}
+                        <span id="work-metadata-series">{% translate 'Anthologies' %}: {% for anthology in work.anthologies %}<a href="{% url 'fe-anthology' anthology.id%}">{{anthology.anthology}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+                        <hr class="ourchive-hr"/>
+                    </div>
+                {% endif %}
+                <div class="uk-height-max-small tag-container {% if not work.anthologies and not work.series %}uk-margin-small-top{% endif %}" id="show-tags-{{ work.id }}">
+                    {% if not work.anthologies and not work.series %}
+                        <hr class="ourchive-hr"/>
+                    {% endif %}
+                    {% if work.attributes %}{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}{% endif %}
+                    {% if work.tags %}{% include "tag_partial.html" with obj_name='work' tags=work.tags %}{% endif %}
                 </div>
-                <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleData('{{ work.id }}', 'summary')" id="more-btn-summary-{{ work.id }}">{% translate 'Show more...' %}</a>
-            {% endif %}
-            <div class="uk-height-max-small tag-container" id="show-tags-{{ work.id }}">
-                {% if work.attributes %}{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}{% endif %}
-            <hr class="ourchive-hr"/>
-                {% if work.tags %}{% include "tag_partial.html" with obj_name='work' tags=work.tags %}{% endif %}
+                <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleData('{{ work.id }}', 'tags')" id="more-btn-tags-{{ work.id }}">{% translate 'Show more...' %}</a>
             </div>
-            <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleData('{{ work.id }}', 'tags')" id="more-btn-tags-{{ work.id }}">{% translate 'Show more...' %}</a>
         </div>
         <div class="uk-width-1-1 card-metadata" id="work-{{ work.id }}-list-meta">
             <!-- language, complete status, updated, chapters, word count, comments, fingerguns -->

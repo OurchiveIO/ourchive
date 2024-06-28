@@ -313,6 +313,18 @@ class PostgresProvider:
             result_dict["attributes"] = attributes
             result_dict["languages_readonly"] = languages
             result_dict["chapter_count"] = len(chapters)
+            if result.series_id:
+                series = WorkSeries.objects.get(id=result.series_id).__dict__
+                series.pop("_state")
+                result_dict["series"] = series
+            anthologies = AnthologyWork.objects.filter(work_id=result.id).all()
+            if anthologies:
+                result_dict["anthologies"] = []
+                for anthology in anthologies:
+                    result_dict["anthologies"].append({
+                        "id": anthology.anthology.id,
+                        "anthology": anthology.anthology.title
+                    })
             result_json.append(result_dict)
         return result_json
 

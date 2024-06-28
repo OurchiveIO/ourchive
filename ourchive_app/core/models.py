@@ -201,7 +201,7 @@ class Work(models.Model):
 
     work_type = models.ForeignKey('WorkType', on_delete=models.SET_NULL, null=True)
     series = models.ForeignKey('WorkSeries', on_delete=models.SET_NULL, null=True, related_name='works')
-    series_num = models.IntegerField(null=True, blank=True)
+    series_num = models.IntegerField(default=1)
     languages = models.ManyToManyField('Language')
 
     tags = models.ManyToManyField('Tag')
