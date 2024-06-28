@@ -91,7 +91,17 @@
             {% endif %}
         </div>
         <div class="uk-width-2-3@m uk-width-1-1@s card-info" id="work-{{work.id}}-info-card">
-            <!-- summary, tag/attribute group 1, 2, and 3 -->
+            <!-- series/anthology, summary, tag/attribute group 1, 2, and 3 -->
+            {% if work.series %}
+            <div class="uk-align-left uk-max-height-small">
+                <span class="uk-inline uk-text-bold" id="work-metadata-series">{% blocktranslate with series_num=work.series_num %}Part {{ series_num }} of {% endblocktranslate %}<a href="{% url 'fe-series' work.series.id%}">{{work.series.title}}</a></span>
+            </div>
+            {% endif %}
+            {% if work.anthology_work %}
+            <div class="uk-align-left uk-max-height-small">
+                <span class="uk-inline uk-text-bold" id="work-metadata-series">Anthologies: {% for anthology in work.anthology_work %}<a href="{% url 'fe-anthology' anthology.id%}">{{anthology.anthology}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+            </div>
+            {% endif %}
             {% if work.summary %}
                 <div class="uk-height-max-small summary-container" id="show-summary-{{ work.id }}">
                     <p id="work-{{work.id}}-tile-summary-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>
