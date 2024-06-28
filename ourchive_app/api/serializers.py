@@ -873,7 +873,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         work = Work.objects.get(id=work.id)
         self.process_users(work, users)
         work = self.process_languages(work, languages)
-        work.draft = validated_data['draft']
+        work.draft = validated_data.get('draft', False)
         work.save()
         return Work.objects.filter(id=work.id).first()
 
