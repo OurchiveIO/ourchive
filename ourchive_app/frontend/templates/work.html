@@ -84,7 +84,7 @@
             </div>
             <div id="work-intro-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid uk-padding-remove-horizontal" uk-grid>
                 {% if work.notes %}
-                    <div id="work-notes-div" style="border-left: 1px solid;" class="uk-margin-large-left">
+                    <div id="work-notes-div" class="uk-margin-large-left ourchive-blockquote">
                         <p><span id="work-notes-span" class="uk-text-bold">Notes</span></p>
                         <p><span id="work-notes-text-span" class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></p>
                     </div>

@@ -25,7 +25,7 @@
 {% if chapter.summary or chapter.notes or chapter.attributes %}
     <div id="chapter-context-parent" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid uk-padding-remove-horizontal" uk-grid>
         {% if chapter.notes or chapter.summary %}
-            <div id="chapter-notes-and-summary-div" style="border-left: 1px solid;" class="uk-margin-large-left">
+            <div id="chapter-notes-and-summary-div" class="uk-margin-large-left ourchive-blockquote">
                 {% if chapter.summary %}
                     <p><span id="chapter-summary-label" class="uk-text-bold">Summary</span></p>
                     <p><span id="chapter-summary-text" class="uk-text-medium">{% autoescape off %}{{ chapter.summary }}{% endautoescape %}</span></p>
@@ -71,7 +71,7 @@
     <div id="chapter-content-divider" class="uk-margin-medium-top"><hr class="ourchive-hr"/></div>
 {% endif %}
 {% if chapter.end_notes %}
-    <div id="chapter-{{ chapter.id }}-end-notes" style="border-left: 1px solid;" class="uk-margin-large-left uk-margin-bottom">
+    <div id="chapter-{{ chapter.id }}-end-notes" class="uk-margin-large-left uk-margin-bottom ourchive-blockquote">
         <p class="uk-padding-small uk-padding-remove-vertical"><span id="chapter-{{ chapter.id }}-end-notes-span" class="uk-text-bold">Notes</span></p>
         <p class="uk-padding-small uk-padding-remove-vertical"><span id="chapter-{{ chapter.id }}-end-notes-text-span" class="uk-text-medium">{% autoescape off %}{{ chapter.end_notes }}{% endautoescape %}</span></p>
     </div>
