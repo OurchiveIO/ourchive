@@ -54,8 +54,8 @@
                         <a id="work-{{work.id}}-user-link" data-testid="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>
                     {% endfor %}
             </span></p>
-            <p class="uk-margin-remove-bottom uk-margin-small-top"><span id="work-{{ work.id }}-type" class="uk-text-muted">{{ work.work_type_name }}</span></p>
-            <p class="uk-margin-remove-bottom uk-margin-small-top"><span class="uk-inline uk-text-muted uk-text-italic" id="work-metadata-language">{% for language in work.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}
+            <p class="uk-margin-remove-bottom uk-margin-small-top"><span id="work-{{ work.id }}-type" class="ourchive-muted">{{ work.work_type_name }}</span></p>
+            <p class="uk-margin-remove-bottom uk-margin-small-top"><span class="uk-inline ourchive-muted uk-text-italic" id="work-metadata-language">{% for language in work.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}
         {% endfor %}</span></p>
             {% if work.cover_url != "None" and work.cover_url is not None and work.cover_url != "" %}
             <div class="uk-width-auto" id="work-{{work.id}}-tile-img-parent">
