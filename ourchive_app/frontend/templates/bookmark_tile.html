@@ -4,7 +4,7 @@
 	    <div id="bk-tile-header-parent" class="uk-card-header uk-padding-small ourchive-card-head">
 	        <div id="bk-tile-header-grid" class="uk-grid-small uk-flex-middle" uk-grid>
 		        <div id="bk-tile-header-content" class="uk-width-expand">
-	                <span id="bookmark-{{bookmark.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title">{% if bookmark.title %}{{ bookmark.title }}{% else %}{% translate 'Bookmark' %}: {{ bookmark.work.title }}{% endif %}</a> by <a href="{% url 'user-profile-parent' bookmark.user_id %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark.user }}</span>
+                    <span id="bookmark-{{bookmark.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title">{% if bookmark.title %}{{ bookmark.title }}{% else %}{% translate 'Bookmark' %}: {{ bookmark.work.title }}{% endif %} by <a href="{% url 'user-profile-parent' bookmark.user_id %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark.user }}</a></span>
 	                {% if bookmark.user == request.user.username %}
 			        <div id="bk-tile-actions-parent" class="uk-align-right uk-margin-remove-bottom">
 			            <a class="ourchive-icon-wrapper" id="bk-tile-edit-{{ bookmark.id }}-link" href="/bookmarks/{{ bookmark.id }}/edit"><span id="bk-tile-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="Edit Bookmark {{ bookmark.id }}"></span> </a>
