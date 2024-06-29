@@ -59,7 +59,7 @@
         {% endfor %}</span></p>
             <!-- TODO: ADD CLICK TO EXPAND -->
             {% if work.cover_url != "None" and work.cover_url is not None and work.cover_url != "" %}
-            <div class="uk-width-auto" id="work-{{work.id}}-tile-img-parent">
+            <div class="uk-width-auto uk-margin-small-top" id="work-{{work.id}}-tile-img-parent">
                 <img class="work-tile-cover" alt="{{work.cover_alt_text}}" src="{{work.cover_url}}" id="work-{{work.id}}-tile-image">
             </div>
             {% endif %}

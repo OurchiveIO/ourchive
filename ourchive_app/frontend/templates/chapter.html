@@ -42,14 +42,14 @@
     </div>
 {% endif %}
 {% if work.chapter_count > 1 %}
-    <div id="chapter-metadata-parent" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid uk-padding-remove-horizontal" uk-grid>
-        <div class="uk-align-right@m uk-align-center@s uk-text-right@m uk-text-center@s uk-width-1-1 uk-margin-small-bottom uk-margin-medium-top ourchive-metadata-list" id="chapter-metadata-div">
-            {% if chapter.updated_on %}<span id="chapter-metadata-updated" class="uk-inline ourchive-muted">{% translate 'Updated' %} {{chapter.updated_on|date:'d M Y'}}</span> - {% endif %}
-            {% if chapter.word_count %}<span id="chapter-metadata-length" class="uk-inline ourchive-muted">{% blocktranslate with wc=chapter.word_count %}{{ wc }} Words{% endblocktranslate %}</span>{% endif %}
-            {% if chapter.audio_length %}- <span class="uk-inline ourchive-muted" id="chapter-metadata-audio-length">{% blocktranslate with al=chapter.audio_length %}Audio Length: {{ al }}{% endblocktranslate %}</span>{% endif %}
-            {% if chapter.image_size %}- <span class="uk-inline ourchive-muted" id="chapter-metadata-image-size">{% blocktranslate with imgs=chapter.image_size|default:0 %}Image Size: {{ imgs }}{% endblocktranslate %}</span>{% endif %}
-            {% if settings.AllowComments %}- <span id="chapter-metadata-comment-count" class="uk-inline ourchive-muted">{% blocktranslate with cc=chapter.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span>
-        </div>
+    <div class="uk-grid-small uk-child-width-1-2@s uk-flex-right@m uk-flex-center@s uk-text-center uk-text-right@m uk-text-center@s uk-margin-small-bottom uk-margin-medium-top" uk-grid>
+    <div class="ourchive-metadata-list" id="chapter-metadata-div">
+        {% if chapter.updated_on %}<span id="chapter-metadata-updated" class="uk-inline ourchive-muted">{% translate 'Updated' %} {{chapter.updated_on|date:'d M Y'}}</span> {% endif %}
+        {% if chapter.word_count %}<span id="chapter-metadata-length" class="uk-inline ourchive-muted">{% blocktranslate with wc=chapter.word_count %}{{ wc }} Words{% endblocktranslate %}</span>{% endif %}
+        {% if chapter.audio_length %}<span class="uk-inline ourchive-muted" id="chapter-metadata-audio-length">{% blocktranslate with al=chapter.audio_length %}Audio Length: {{ al }}{% endblocktranslate %}</span>{% endif %}
+        {% if chapter.image_size %}<span class="uk-inline ourchive-muted" id="chapter-metadata-image-size">{% blocktranslate with imgs=chapter.image_size|default:0 %}Image Size: {{ imgs }}{% endblocktranslate %}</span>{% endif %}
+        {% if settings.AllowComments %}<span id="chapter-metadata-comment-count" class="uk-inline ourchive-muted">{% blocktranslate with cc=chapter.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span>
+    </div>
     </div>
 {% endif %}
 <div id="chapter-{{ chapter.id }}-content-container" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid uk-padding-remove-horizontal" uk-grid>
