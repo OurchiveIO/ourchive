@@ -77,7 +77,7 @@ All frameworks and tools we are using are open source, including:
 - Postgres
 - Docker
 - pytest
-- The Noun Project (icons)
+- Tabler (icons)
 - UIKit (CSS + JS)
 
 [github issues]: https://github.com/c-e-p/ourchive/issues

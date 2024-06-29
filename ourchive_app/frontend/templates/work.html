@@ -47,17 +47,17 @@
                     </select>
                 </div>
             {% endif %}
-            <div id="work-controls-parent" class="uk-text-right uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right">
+            <div id="work-controls-parent" class="uk-text-right uk-align-right {% if work.chapter_count > 1 %}uk-width-1-2@m{% else %}uk-width-1-1@m{% endif %} uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right">
                 {% if work.owner %}
-                    {% if work.has_drafts %}<a id="work-publish-all-link" href="/works/{{ id }}/publish-full" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-publish; ratio: .75" title="{% translate 'Publish All' %}"></span> </a>{% endif %}
-                    <a class="ourchive-icon-wrapper" id="work-edit-link" href="/works/{{ id }}/edit"><span uk-icon="icon: ourchive-edit; ratio: .75" title="{% translate 'Edit' %}"></span></a>
-                    <a class="ourchive-icon-wrapper" id="work-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span uk-icon="icon: ourchive-delete; ratio: .75" title="{% translate 'Delete' %}"></span></a>
+                    {% if work.has_drafts %}<a id="work-publish-all-link" href="/works/{{ id }}/publish-full" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-publish; ratio: 1" title="{% translate 'Publish All' %}"></span> </a>{% endif %}
+                    <a class="ourchive-icon-wrapper" id="work-edit-link" href="/works/{{ id }}/edit"><span uk-icon="icon: ourchive-edit; ratio: 1" title="{% translate 'Edit' %}"></span></a>
+                    <a class="ourchive-icon-wrapper" id="work-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span uk-icon="icon: ourchive-delete; ratio: 1" title="{% translate 'Delete' %}"></span></a>
                     {% include "delete_modal.html" with object='work' object_id=work.id %}
                 {% endif %}
                 {% if not work.draft %}<a class="ourchive-icon-wrapper" title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: ourchive-add;ratio:.75"></span> </a>{% endif %}
                 {% include "bookmark_collection_modal.html" %}
-                {% if not work.draft %}<a id="work-bookmark-link" class="ourchive-icon-wrapper" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span" uk-icon="icon: ourchive-bookmark;ratio: .75" title="{% translate 'Bookmark' %}"></span> </a>{% endif %}
-                <a id="work-fingerguns-link" href="/fingerguns/{{ id }}" class="ourchive-icon-wrapper"><span id="work-fingerguns-span" uk-icon="icon: ourchive-like; ratio: .75" title="{% translate 'Fingerguns' %}"></span> </a>
+                {% if not work.draft %}<a id="work-bookmark-link" class="ourchive-icon-wrapper" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span" uk-icon="icon: ourchive-bookmark;ratio: 1" title="{% translate 'Bookmark' %}"></span> </a>{% endif %}
+                <a id="work-fingerguns-link" href="/fingerguns/{{ id }}" class="ourchive-icon-wrapper"><span id="work-fingerguns-span" uk-icon="icon: ourchive-like; ratio: 1" title="{% translate 'Fingerguns' %}"></span> </a>
                 <div class="uk-inline">
                     <a id="work-download-drop" class="ourchive-icon-wrapper" href="#"><span uk-icon="icon: ourchive-download;ratio:.75" title="{% translate 'Download' %}" id="work-download-span"></span> </a>
                     <div class="uk-card uk-card-body uk-card-default uk-text-left" uk-drop>
@@ -68,9 +68,9 @@
                         </ul>
                     </div>
                     {% if view_full %}
-                    <a id="jump-to-comments" href="#chapter-{{ work.last_chapter_id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: .75" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
+                    <a id="jump-to-comments" href="#chapter-{{ work.last_chapter_id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: 1" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
                     {% else %}
-                    <a id="jump-to-comments" href="#chapter-{{ chapters.0.id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: .75" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
+                    <a id="jump-to-comments" href="#chapter-{{ chapters.0.id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: 1" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
                     {% endif %}
                 </div>
             </div>

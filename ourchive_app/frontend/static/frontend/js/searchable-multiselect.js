@@ -63,7 +63,7 @@ function createInitialTokens(select) {
         let optionId = option.getAttribute("id");
         let value = options_selected[i];
         if (optionId.includes(',exclude')) {
-             value = '<span><span class="uk-icon ourchive-search-badge-exclude" uk-icon="icon: ban; ratio: .8"></span> ' 
+             value = '<span><span class="uk-icon ourchive-search-badge-exclude" uk-icon="icon: ban; ratio: 1"></span> '
                 + " " + value + "</span>";
         }
         createToken(wrapper, value, options_selected[i], optionId+"_dropdown");
@@ -140,7 +140,7 @@ function createToken(wrapper, value, text_value, id="") {
     close.setAttribute("data-option", text_value);
     close.setAttribute("data-hits", 0);
     close.setAttribute("href", "#");
-    close.setAttribute("uk-icon", "icon: close; ratio: .8");
+    close.setAttribute("uk-icon", "icon: close; ratio: 1");
     close.addEventListener("click", removeToken)
     token.appendChild(token_span);
     token.appendChild(close);
@@ -264,7 +264,7 @@ function selectOption(e) {
     let optionId = option.getAttribute("id");
     let value = e.target.dataset.value;
     if (optionId.includes(',exclude')) {
-         value = '<span><span class="uk-icon ourchive-search-badge-exclude" uk-icon="icon: ban; ratio: .8"></span> ' 
+         value = '<span><span class="uk-icon ourchive-search-badge-exclude" uk-icon="icon: ban; ratio: 1"></span> '
             + " " + value + "</span>";
     }
     createToken(wrapper, value, e.target.dataset.value, optionId+"_dropdown");

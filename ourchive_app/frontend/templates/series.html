@@ -11,8 +11,8 @@
             </div>
             <div class="uk-text-right uk-width-1-3 uk-padding-remove" id="series-user-controls-parent">
             {% if series.owner %}
-                <a id="series-edit-link" class="ourchive-icon-wrapper" href="{% url 'fe-edit-series' series.id %}"><span uk-icon="icon: ourchive-edit; ratio: .75" title="Edit"></span> </a>
-                <a id="series-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #series-{{series.id}}-modal-delete"><span title="Delete" uk-icon="icon: ourchive-delete; ratio: .75"></span> </a> 
+                <a id="series-edit-link" class="ourchive-icon-wrapper" href="{% url 'fe-edit-series' series.id %}"><span uk-icon="icon: ourchive-edit; ratio: 1" title="Edit"></span> </a>
+                <a id="series-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #series-{{series.id}}-modal-delete"><span title="Delete" uk-icon="icon: ourchive-delete; ratio: 1"></span> </a> 
             {% endif %}
             </div>
             {% if series.description %}

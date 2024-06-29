@@ -77,10 +77,10 @@
     </div>
 {% endif %}
 <div id="chapter-controls-parent-bottom" class="uk-align-center uk-text-center">
-    <a class="ourchive-icon-wrapper" id="work-bookmark-link-bottom" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span-bottom" uk-icon="icon: ourchive-bookmark;ratio: .75" title="{% translate 'Bookmark' %}"></span> </a>
-    <a class="ourchive-icon-wrapper" id="work-fingerguns-link-bottom" href="/fingerguns/{{ id }}"><span id="work-fingerguns-span-bottom" uk-icon="icon: ourchive-like;ratio: .75" title="{% translate 'Fingerguns' %}"></span> </a>
+    <a class="ourchive-icon-wrapper" id="work-bookmark-link-bottom" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span-bottom" uk-icon="icon: ourchive-bookmark;ratio: 1" title="{% translate 'Bookmark' %}"></span> </a>
+    <a class="ourchive-icon-wrapper" id="work-fingerguns-link-bottom" href="/fingerguns/{{ id }}"><span id="work-fingerguns-span-bottom" uk-icon="icon: ourchive-like;ratio: 1" title="{% translate 'Fingerguns' %}"></span> </a>
     <div class="uk-inline">
-        <a class="ourchive-icon-wrapper" id="work-download-drop-bottom" href="#"><span uk-icon="icon: ourchive-download;ratio: .75" title="{% translate 'Download' %}" id="work-download-span"></span> </a>
+        <a class="ourchive-icon-wrapper" id="work-download-drop-bottom" href="#"><span uk-icon="icon: ourchive-download;ratio: 1" title="{% translate 'Download' %}" id="work-download-span"></span> </a>
         <div class="uk-card uk-card-body uk-card-default uk-text-left" uk-drop><ul class="uk-list uk-list-divider">
             {% if work.preferred_download_url %}<li><a href="{{ work.preferred_download_url }}">{{ work.preferred_download }} - Creator's Preferred</a></li>{% endif %}
             <li><a href="{% if work.epub_url %}{{work.epub_url}}{% else %}{% url 'export-work' work.id 'epub' %}{% endif %}">EPUB</a></li>
@@ -88,9 +88,9 @@
         </ul></div>
     </div>
     {% if view_full %}
-    <a id="jump-to-comments" href="#chapter-{{ work.last_chapter_id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: .75" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
+    <a id="jump-to-comments" href="#chapter-{{ work.last_chapter_id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: 1" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
     {% else %} 
-    <a id="jump-to-comments" href="#chapter-{{ chapter.id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: .75" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
+    <a id="jump-to-comments" href="#chapter-{{ chapter.id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: 1" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
     {% endif %}
 </div>
 <div>

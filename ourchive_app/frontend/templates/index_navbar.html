@@ -38,9 +38,9 @@
 	        		<div class="uk-navbar-item">
 		    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper uk-margin-small-top" title="Switch Modes">
 		    	 			{% if request.session.css_mode == "dark" %}
-		    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1" title="Light Mode" id="theme-switcher-light"></span>
+		    	 			<span uk-icon="icon: ourchive-sun; ratio: 1" title="Light Mode" id="theme-switcher-light"></span>
 		    	 			{% else %}
-		    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1" title="Dark Mode" id="theme-switcher-dark"></span>
+		    	 			<span uk-icon="icon: ourchive-sun-off; ratio: 1" title="Dark Mode" id="theme-switcher-dark"></span>
 		    	 			{% endif %}
 		    	 		</a>
 		    	 	</div>
@@ -52,9 +52,9 @@
 	    	 	<li id="theme-switcher-li">
 	    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper" title="Switch Modes">
 	    	 			{% if request.session.css_mode == "dark" %}
-	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Light Mode" id="theme-switcher-light"></span>
+	    	 			<span uk-icon="icon: ourchive-sun; ratio: 1" title="Light Mode" id="theme-switcher-light"></span>
 	    	 			{% else %}
-	    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Dark Mode" id="theme-switcher-dark"></span>
+	    	 			<span uk-icon="icon: ourchive-sun-off; ratio: 1" title="Dark Mode" id="theme-switcher-dark"></span>
 	    	 			{% endif %}
 	    	 		</a>
 	    	 	</li>
