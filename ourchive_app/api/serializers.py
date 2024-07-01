@@ -1,7 +1,11 @@
+import json
+
 from django.contrib.auth.models import Group, AnonymousUser
 from rest_framework import serializers
 from django.db import IntegrityError
 from rest_framework_recursive.fields import RecursiveField
+
+from search.models import SavedSearch
 from .custom_fields import UserPrivateField
 from core.models import *
 import datetime
@@ -293,6 +297,28 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         user = User.objects.get(id=user.id)
         user = self.process_languages(user, languages)
         return user
+
+
+class SavedSearchSerializer(serializers.HyperlinkedModelSerializer):
+    languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
+    languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True,
+                                             slug_field='display_name')
+    info_facets_json = serializers.SerializerMethodField()
+    include_facets_json = serializers.SerializerMethodField()
+    exclude_facets_json = serializers.SerializerMethodField()
+
+    def get_info_facets_json(self, obj):
+        return json.loads(obj.info_facets.replace('\'', '\"')) if obj.info_facets else {}
+
+    def get_include_facets_json(self, obj):
+        return json.loads(obj.include_facets.replace('\'', '\"')) if obj.include_facets else []
+
+    def get_exclude_facets_json(self, obj):
+        return json.loads(obj.exclude_facets.replace('\'', '\"')) if obj.exclude_facets else []
+
+    class Meta:
+        model = SavedSearch
+        fields = '__all__'
 
 
 class SearchResultsSerializer(serializers.Serializer):

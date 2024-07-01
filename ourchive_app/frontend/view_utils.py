@@ -20,6 +20,9 @@ from django.core.cache import cache
 from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
 from datetime import *
+from search.search import constants as search_constants
+
+from search.search.constants import WORK_TYPE_FILTER_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -610,3 +613,15 @@ def get_anthology_users(request, anthology):
 				anthology['owner'] = True
 				break
 	return anthology
+
+def get_saved_search_chive_info(saved_search, work_types):
+	search_work_types = saved_search.get('info_facets_json', {}).get(search_constants.WORK_TYPE_FILTER_KEY, [])
+	for work_type in work_types:
+		if work_type.get('type_name') in search_work_types:
+			work_type['checked'] = True
+	saved_search['work_types'] = work_types
+	saved_search['word_count_gte'] = saved_search.get('info_facets_json', {}).get(search_constants.WORD_COUNT_FILTER_KEY_GTE)
+	saved_search['word_count_lte'] = saved_search.get('info_facets_json', {}).get(search_constants.WORD_COUNT_FILTER_KEY_LTE)
+	saved_search['work_statuses'] = saved_search.get('info_facets_json', {}).get(search_constants.COMPLETE_FILTER_KEY, [])
+	return saved_search
+

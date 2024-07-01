@@ -1,0 +1,80 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}{% translate 'Saved Searches' %}{% endblock %}
+{% block content %}
+    <link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
+    <script src="{% static 'frontend/js/searchable-multiselect-generic.js' %}"></script>
+    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="user-saved-searches-uk-grid" uk-grid>
+        <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="user-saved-searches-grid">
+            <h1>{% translate 'Saved Searches' %}</h1>
+            <hr/>
+            {% if not saved_searches %}
+            <p id="user-saved-searches-none-message" class="uk-text-default">{% translate 'No users have been blocked. To block a user, navigate to their profile and click the "block" icon.' %}</p>
+            {% endif %}
+        </div>
+        {% for search in saved_searches.results %}
+            <div id="saved-search-{{ search.id }}" class="uk-width-1-3 uk-box-shadow-small uk-padding ourchive-work-card">
+                <h3>{{ search.name }}</h3>
+                <hr class="ourchive-hr"/>
+                <form class="uk-form-stacked">
+                    <div class="uk-margin">
+                        <label for="saved-search-{{ search.id }}-languages" class="uk-text-bold uk-form-label">{% translate 'Language' %}</label>
+                        <div id="saved-search-{{ search.id }}-languages" class="uk-form-controls">
+                            <select multiple data-multi-select-plugin name="languages[]" id="saved-search-{{ search.id }}-languages">
+                                {% for language in search.languages %}
+                                    <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <label for="saved-search-{{ search.id }}-status" class="uk-text-bold uk-form-label">{% translate 'Status' %}</label>
+                        <div id="saved-search-{{ search.id }}-status" class="uk-form-controls">
+                            <label><input class="uk-radio" type="radio" name="incomplete" {% if '0' in search.work_statuses and '1' not in search.work_statuses %}checked{% endif %}> {% translate 'Incomplete' %}</label><br>
+                            <label><input class="uk-radio" type="radio" name="complete" {% if '1' in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}> {% translate 'Complete' %}</label><br>
+                            <label><input class="uk-radio" type="radio" name="any" {% if '1' in search.work_statuses and '0' in search.work_statuses %}checked{% elif '1' not in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}> {% translate 'Any' %}</label><br>
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <label for="saved-search-{{ search.id }}-work-types" class="uk-text-bold uk-form-label">{% translate 'Work Type' %}</label>
+                        <div id="saved-search-{{ search.id }}-work-types" class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                            {% for work_type in search.work_types %}
+                                <label><input class="uk-checkbox" type="checkbox" {% if work_type.checked %}checked{% endif %}> {{ work_type.type_name }}</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <label for="word-count-{{ search.id }}" id="saved-search-{{ search.id }}-wordcount" class="uk-text-bold uk-form-label">{% translate 'Word Count' %}</label>
+                        <div class="uk-form-controls uk-inline" id="word-count-{{ search.id }}">
+                            <p class="uk-text-medium">{% translate 'Between' %}
+                                <input class="uk-input uk-inline uk-width-small" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.word_count_gte }}"/> {% translate 'and' %} <input class="uk-input uk-inline uk-width-small" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.word_count_lte }}"/></p>
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <label for="saved-search-{{ search.id }}-tags" class="uk-text-bold uk-form-label">{% translate 'Tags' %}</label>
+                        <div id="saved-search-{{ search.id }}-tags" class="uk-form-controls">
+                            <span class="ourchive-muted">Include</span>
+                            <select multiple data-multi-select-plugin name="include_facets_json[]" id="saved-search-{{ search.id }}-include-facets">
+                                {% for tag in search.include_facets_json %}
+                                    <option value="{{tag}}" selected>{{tag}}</option>
+                                {% endfor %}
+                            </select>
+
+                            <span class="ourchive-muted">Exclude</span>
+                            <select multiple data-multi-select-plugin name="exclude_facets_json[]" id="saved-search-{{ search.id }}-exclude-facets">
+                                {% for tag in search.exclude_facets_json %}
+                                    <option value="{{tag}}" selected>{{tag}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

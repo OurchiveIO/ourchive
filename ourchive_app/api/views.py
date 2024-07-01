@@ -30,6 +30,7 @@ from api.custom_pagination import NonPaginatedResultSetPagination
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
 from search.search.search_service import OurchiveSearch
 from search.search.search_obj import GlobalSearch
+from search.models import SavedSearch
 
 
 @api_view(['GET'])
@@ -485,6 +486,26 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     def retrieve(self, request, *args, **kwargs):
         response = super(UserDetail, self).retrieve(request, args, kwargs)
         return response
+
+
+class UserSavedSearchesList(generics.ListCreateAPIView):
+    serializer_class = SavedSearchSerializer
+    permission_classes = [IsOwner]
+
+    def get_queryset(self):
+        return SavedSearch.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
+
+
+class SavedSearchesList(generics.ListCreateAPIView):
+    queryset = SavedSearch.objects.get_queryset().order_by('updated_on')
+    serializer_class = SavedSearchSerializer
+    permission_classes = [IsOwner]
+
+
+class SavedSearchDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = SavedSearchSerializer
+    permission_classes = [IsOwner]
+    queryset = SavedSearch.objects.get_queryset().order_by('updated_on')
 
 
 class GroupList(generics.ListAPIView):

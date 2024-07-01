@@ -2077,6 +2077,19 @@ def delete_work_anthology(request, pk, work_id):
 	else:
 		return redirect(f'/anthologies/create')
 
+def user_saved_searches(request, username):
+	response = do_get(f'api/users/{username}/savedsearches', request, None, 'saved searches')
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	saved_searches = response.response_data
+	languages = get_languages(request)
+	work_types = get_work_types(request)
+	for saved_search in saved_searches.get('results', []):
+		saved_search['languages'] = process_languages(languages, saved_search.get('languages_readonly', []))
+		get_saved_search_chive_info(saved_search, work_types)
+	return render(request, 'user_saved_searches.html', {
+		'saved_searches': saved_searches})
 
 @never_cache
 def switch_css_mode(request):
