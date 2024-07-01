@@ -7,7 +7,7 @@ from copy import deepcopy
 logger = logging.getLogger(__name__)
 
 # values we don't want to send to the API
-NONFILTER_VALS = ['csrfmiddlewaretoken', 'term', 'order_by']
+NONFILTER_VALS = ['csrfmiddlewaretoken', 'term', 'order_by', 'search-name']
 # values we don't want to add to the frontend facets
 NONRETAIN_VALS = ['order_by', 'active_tab', 'work_type']
 
@@ -201,6 +201,7 @@ def build_and_execute_search(request):
 	attr_id = None
 	work_type_id = None
 	valid_search = False
+	search_name = request.POST.get('search-name', None)
 	if 'term' in request.GET:
 		term = request.GET['term']
 		valid_search = True
@@ -228,7 +229,7 @@ def build_and_execute_search(request):
 	order_by = request.POST['order_by'] if 'order_by' in request.POST else '-updated_on'
 	request_builder = SearchObject()
 	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
-	request_object = request_builder.with_term(term, pagination, (include_filter_any, exclude_filter_any), order_by)
+	request_object = request_builder.with_term(term, pagination, (include_filter_any, exclude_filter_any), order_by, search_name)
 	if tag_id:
 		request_object.tag_id = tag_id
 	if attr_id:
@@ -252,6 +253,7 @@ def build_and_execute_search(request):
 	bookmarks_count = bookmarks['page']['count'] if 'page' in bookmarks else 0
 	collections_count = collections['page']['count'] if 'page' in collections else 0
 	tag_count = tags['page']['count'] if 'page' in tags else 0
+	search_name = response_json.get('results', {}).get('options', {}).get('search_name', '')
 	default_tab = get_default_search_result_tab(
 		[
 			[works_count, 0],
@@ -273,7 +275,8 @@ def build_and_execute_search(request):
 		'click_func': 'getFormVals(event)',
 		'root': settings.ROOT_URL, 
 		'term': term,
-		'order_by': order_by
+		'order_by': order_by,
+		'search_name': search_name
 	}
 	if tag_id:
 		template_data['tag_id'] = tag_id

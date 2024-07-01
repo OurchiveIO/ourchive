@@ -196,7 +196,7 @@ select[data-multi-select-plugin] {
     cursor: pointer;
 }
 
-/* Adding scrool to select options */
+/* Adding scroll to select options */
 .autocomplete-list {
     max-height: 130px;
     overflow-y: auto;

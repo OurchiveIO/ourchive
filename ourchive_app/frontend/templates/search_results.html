@@ -1,5 +1,6 @@
 {% extends 'index.html' %}
 {% load static %}
+{% load i18n %}
 {% block title %}Search Results{% endblock %}
 {% block content %}
 <script src="{% static 'frontend/js/searchable-multiselect.js' %}"></script>
@@ -132,7 +133,7 @@
             </div>
             <div class="uk-width-expand uk-margin-bottom">
                 <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden id="search-results-toggle-button" onClick="updateFilterToggle()">Filter</button>
-                <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
+                <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s uk-margin-small-bottom" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
                 <select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-width-medium uk-hidden@s" onchange="updateSortOrder(value, true)">
                     <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
                     <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>

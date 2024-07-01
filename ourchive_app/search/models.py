@@ -15,6 +15,7 @@ class SavedSearch(models.Model):
     type_id = models.IntegerField(null=True, blank=True)
     attr_id = models.IntegerField(null=True, blank=True)
     languages = models.ManyToManyField('core.Language')
+    order_by = models.CharField(max_length=100, blank=True, null=True)
     info_facets = models.CharField(null=True, blank=True)
     include_facets = models.CharField(null=True, blank=True)
     exclude_facets = models.CharField(null=True, blank=True)

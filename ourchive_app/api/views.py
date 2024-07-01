@@ -64,7 +64,7 @@ class SearchList(APIView):
 
     def post(self, request, format=None):
         searcher = OurchiveSearch()
-        results = searcher.do_search(**request.data)
+        results = searcher.do_search(request.user.id, **request.data)
         return Response({'results': results})
 
     def get(self, request, format=None):

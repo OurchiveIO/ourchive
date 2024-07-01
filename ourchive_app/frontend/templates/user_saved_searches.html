@@ -5,6 +5,39 @@
 {% block content %}
     <link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
     <script src="{% static 'frontend/js/searchable-multiselect-generic.js' %}"></script>
+    <script>
+        function populateSavedSearchExclude(element) {
+            let tag = element.querySelectorAll('span')[0].innerHTML;
+            let search = document.getElementById("exclude-wrapper").querySelector(".exclude-search-wrapper");
+            const tagWrapper = document.createElement("div");
+            tagWrapper.classList.add("selected-wrapper");
+            tagWrapper.setAttribute("id", `exclude-wrapper-${tag}`);
+            const tagWrapperSpan = document.createElement("span");
+            tagWrapperSpan.classList.add("selected-label");
+            tagWrapperSpan.innerText = tag;
+            const close = document.createElement("a");
+            close.classList.add("selected-close");
+            close.setAttribute("tabindex", "-1");
+            close.setAttribute("data-option", tag);
+            close.setAttribute("data-hits", 0);
+            close.setAttribute("uk-icon", "icon: ourchive-close");
+            close.addEventListener("click", function() {
+                document.getElementById(`exclude-wrapper-${tag}`).remove()
+            });
+            tagWrapper.appendChild(tagWrapperSpan);
+            tagWrapper.appendChild(close);
+            const hidden = document.createElement("input");
+            hidden.setAttribute("type", "hidden");
+            hidden.setAttribute("id", `exclude-${tag}`);
+            hidden.setAttribute("name", `exclude-${tag}`);
+            hidden.setAttribute("value", tag);
+            document.getElementById("exclude-wrapper").insertBefore(tagWrapper, search);
+            document.getElementById("exclude-wrapper").appendChild(hidden);
+            document.getElementById("exclude-tag-search").value = "";
+            UIkit.drop(document.getElementById("tag-autocomplete-dropdown-savedsearch")).hide();
+            document.getElementById("tag-autocomplete-dropdown-savedsearch").innerHTML = "";
+        }
+    </script>
     <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="user-saved-searches-uk-grid" uk-grid>
         <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="user-saved-searches-grid">
             <h1>{% translate 'Saved Searches' %}</h1>
@@ -17,7 +50,8 @@
             <div id="saved-search-{{ search.id }}" class="uk-width-1-3 uk-box-shadow-small uk-padding ourchive-work-card">
                 <h3>{{ search.name }}</h3>
                 <hr class="ourchive-hr"/>
-                <form class="uk-form-stacked">
+                <form class="uk-form-stacked" action="save-search" method="post">
+                    {% csrf_token %}
                     <div class="uk-margin">
                         <label for="saved-search-{{ search.id }}-languages" class="uk-text-bold uk-form-label">{% translate 'Language' %}</label>
                         <div id="saved-search-{{ search.id }}-languages" class="uk-form-controls">
@@ -66,13 +100,20 @@
                             </select>
 
                             <span class="ourchive-muted">Exclude</span>
-                            <select multiple data-multi-select-plugin name="exclude_facets_json[]" id="saved-search-{{ search.id }}-exclude-facets">
+                            <div class="multi-select-component" id="exclude-wrapper">
                                 {% for tag in search.exclude_facets_json %}
-                                    <option value="{{tag}}" selected>{{tag}}</option>
+                                    <input type="hidden" id="exclude-{{ tag }}" name="exclude-{{ tag }}" value="{{ tag }}"/>
+                                    <div class="selected-wrapper" id="exclude-wrapper-{{ tag }}"><span class="selected-label">{{tag}}</span><a class="selected-close" tabindex="-1" data-option="{{tag}}" data-hits="0" uk-icon="icon: ourchive-close"></a></div>
                                 {% endfor %}
-                            </select>
+                                <div class="uk-width-expand exclude-search-wrapper">
+                                    <input id="exclude-tag-search" class="uk-form-blank" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for tags...' %}" oninput="doAutocomplete(this.value, 'search', 'savedsearch', '', ',', 'populateSavedSearchExclude(this)')">
+                                </div>
+                                <a href="" uk-icon="icon: chevron-down" class="uk-icon uk-margin-remove uk-flex-right"></a>
+                            </div>
+                            <div id="tag-autocomplete-dropdown-savedsearch" uk-drop></div>
                         </div>
                     </div>
+                    <input id="saved-search-{{ search.id }}-submit" class="uk-button uk-button-primary uk-margin-top uk-align-center uk-width-medium uk-margin-small-bottom" type="submit" value="{% translate 'Update Search' %}"/>
                 </form>
             </div>
         {% endfor %}

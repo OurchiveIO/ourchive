@@ -686,6 +686,14 @@ def search_filter(request):
 	return render(request, 'search_results.html', template_data)
 
 
+def search_save(request, username):
+	template_data = request.POST
+	print(template_data)
+	if not template_data:
+		return redirect('/')
+	return redirect(f'/users/{username}/savedsearches')
+
+
 def tag_autocomplete(request):
 	term = request.GET.get('text')
 	params = {'term': term}
@@ -699,7 +707,8 @@ def tag_autocomplete(request):
 	return render(request, template, {
 		'tags': tags,
 		'divider': settings.TAG_DIVIDER,
-		'fetch_all': params['fetch_all']})
+		'fetch_all': params['fetch_all'],
+		'click_action': request.GET.get('click_action', None)})
 
 
 def bookmark_autocomplete(request):

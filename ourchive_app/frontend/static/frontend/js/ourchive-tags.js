@@ -37,13 +37,13 @@ function tagCheck (e, type, bypass_check=false, divider='$!$') {
     }
 }
 
-function doAutocomplete(term, source, selector, tag_type='', divider='$!$') {
+function doAutocomplete(term, source, selector, tag_type='', divider='$!$', clickAction='') {
   if (term.length < 2)
   {
     return;
   }
   var complete_select = 'tag-autocomplete-dropdown-'+selector;
-  fetch('/tag-autocomplete?text='+term+"&source="+source+"&type="+tag_type)
+  fetch('/tag-autocomplete?text='+term+"&source="+source+"&type="+tag_type+"&click_action="+clickAction)
     .then((response) => {
       return response.text();
     })

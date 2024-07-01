@@ -179,9 +179,15 @@ class PostgresProvider:
     def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True, has_private=False, has_filterable=False):
         resultset = None
         page = int(page)
+        import time
+        start = time.time()
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
             resultset = obj.objects.filter(query)
+            end = time.time()
+            length = end - start
+            print(f'text execution: {length}')
+            start = time.time()
         if filters is not None:
             if self.include_mode == "all" and filters[0]:
                 for q_item in filters[0].children:
@@ -199,6 +205,10 @@ class PostgresProvider:
                     resultset = obj.objects.filter(filters[1])
                 elif filters[1]:
                     resultset = resultset.filter(filters[1])
+        end = time.time()
+        length = end - start
+        print(f'filter execution: {length}')
+        start = time.time()
         if resultset is not None and has_drafts:
             resultset = resultset.filter(draft=False)
         if resultset is not None and has_private:
@@ -247,6 +257,10 @@ class PostgresProvider:
                 else:
                     resultset = resultset.order_by('zero_distance', '-updated_on')
             require_distinct = False
+        end = time.time()
+        length = end - start
+        print(f'trigram: {length}')
+        start = time.time()
         if resultset and has_filterable:
             resultset = resultset.filter(filterable=True)
         if require_distinct and resultset:
@@ -256,8 +270,20 @@ class PostgresProvider:
             else:
                 resultset = resultset.order_by('-updated_on')
             resultset = resultset.distinct()
+        end = time.time()
+        length = end - start
+        print(f'result processing: {length}')
+        start = time.time()
         tags = self.process_result_tags(resultset) if hasattr(obj, 'tags') else []
-        return self.process_results(resultset, page, obj), tags
+        end = time.time()
+        length = end - start
+        print(f'tags: {length}')
+        start = time.time()
+        final = self.process_results(resultset, page, obj), tags
+        end = time.time()
+        length = end - start
+        print(f'final: {length}')
+        return final
 
     def get_filters(self, search_object):
         include_filters = self.build_filters(

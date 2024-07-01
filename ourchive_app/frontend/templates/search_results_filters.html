@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="flyover-results" uk-offcanvas="flip: true" class="uk-offcanvas">
 	<div class="uk-offcanvas-bar" id="flyover-results-child">
 		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work_mobile" action="/search/filter" id="search-results-work-facet-form-flyover">	
@@ -45,6 +46,10 @@
 		    	</div>
 	    	</li>
 			{% endfor %}
+            <div class="uk-child-width-1 uk-grid uk-grid-small uk-margin" id="search-save-name-parent">
+                <label id="save-search-label" for="search-name" class="uk-text-bold">{% translate 'Save search with name' %}</label>
+                <span><input id=search-name" class="uk-input uk-width-small facet-val-input" type="text" name="search-name" value="{{ search_name }}"></span>
+            </div>
 			<select id="search-results-sort-select-hidden" name="order_by" class="uk-select" hidden>
 	            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
 	            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
