@@ -686,11 +686,36 @@ def search_filter(request):
 	return render(request, 'search_results.html', template_data)
 
 
+def search_save(request, pk):
+	response = do_delete(f'api/savedsearches/{pk}/delete', request, object_name='saved search')
+	process_message(request, response)
+	return referrer_redirect(request)
+
 def search_save(request, username):
-	template_data = request.POST
-	print(template_data)
-	if not template_data:
-		return redirect('/')
+	template_data = request.POST.copy()
+	template_data = get_list_from_form('include_facets', template_data, request)
+	template_data = get_list_from_form('exclude_facets', template_data, request)
+	search_data = {
+		'include_facets': str(template_data.get('include_facets')),
+		'exclude_facets': str(template_data.get('exclude_facets'))
+	}
+	info_facets = {}
+	if template_data.get('word_count_lte', None):
+		info_facets['word_count_lte'] = template_data.get('word_count_lte')
+	if template_data.get('word_count_gte', None):
+		info_facets['word_count_gte'] = template_data.get('word_count_gte')
+	template_data = get_list_from_form('languages', template_data, request)
+	info_facets['languages'] = template_data.get('languages', [])
+	completes = []
+	if template_data.get('complete', None) and int(template_data.get('complete')) > -1:
+		completes.append(template_data.get('complete'))
+	info_facets[search_constants.COMPLETE_FILTER_KEY] = completes
+	template_data = get_list_from_form('work_types', template_data, request)
+	info_facets[search_constants.WORK_TYPE_FILTER_KEY] = template_data.get('work_types', [])
+	search_data['info_facets'] = str(info_facets)
+	search_id = template_data.get('search_id')
+	print(search_data)
+	do_patch(f'api/savedsearches/{search_id}/', request, data=search_data, object_name='saved search')
 	return redirect(f'/users/{username}/savedsearches')
 
 
