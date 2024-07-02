@@ -78,6 +78,14 @@
                 <form class="uk-form-stacked" action="save-search" method="post">
                     {% csrf_token %}
                     <input type="hidden" id="search_id" name="search_id" value="{{ search.id }}"/>
+
+                    <div class="uk-margin">
+                        <label for="saved-search-{{ search.id }}-name" class="uk-text-bold uk-form-label">{% translate 'Name' %}</label>
+                        <div id="saved-search-{{ search.id }}-sname" class="uk-form-controls">
+                            <input type="text" id="saved-search-{{ search.id }}-name" class="uk-input" value="{{ search.name }}"/>
+                        </div>
+                    </div>
+
                     <div class="uk-margin">
                         <label for="saved-search-{{ search.id }}-languages" class="uk-text-bold uk-form-label">{% translate 'Language' %}</label>
                         <div id="saved-search-{{ search.id }}-languages" class="uk-form-controls">

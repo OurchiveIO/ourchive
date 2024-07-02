@@ -18,18 +18,33 @@
                                     background-color: grey;
                                     border: grey;
                                 }
+                                #filter-toggle-dsk {
+                                    width: 93%;
+                                    background-color: #3b3b3b;
+                                }
                             </style>
                             <div>
-                                <a class="uk-button uk-button-default ourchive-filter-button" uk-toggle="target: #filter-toggle-dsk">{% translate 'Filters' %}</a>
-                                <div id="filter-toggle-dsk" class="uk-width-expand uk-padding ourchive-work-card" style="position: absolute;">
-                                    <form class="uk-form-stacked" action="save-search" method="post">
+                                <a class="uk-button uk-button-default ourchive-filter-button" uk-toggle="target: #filter-toggle-dsk">{% translate 'Filters' %} <span uk-icon="icon: chevron-down"></span></a>
+                                <div id="filter-toggle-dsk" class="uk-padding ourchive-work-card" style="position: absolute;">
+                                    <form class="uk-form-stacked" action="do-search" method="post">
                                         {% csrf_token %}
                                         <input type="hidden" id="search_id" name="search_id" value="{{ search.id }}"/>
+
                                         <div class="uk-margin">
-                                            <label for="saved-search-{{ search.id }}-languages" class="uk-text-bold uk-form-label">{% translate 'Language' %}</label>
-                                            <div id="saved-search-{{ search.id }}-languages" class="uk-form-controls">
-                                                <select multiple data-multi-select-plugin name="languages[]" id="saved-search-{{ search.id }}-languages">
-                                                    {% for language in search.languages %}
+                                            <label for="search-saved-searches" class="uk-text-bold uk-form-label">{% translate 'Saved Searches' %}</label>
+                                            <div id="search-searches-parent" class="uk-form-controls">
+                                                <select name="saved-search" id="search-saved-searches" class="uk-select" onselect="updateSelectedSearch()">
+                                                    {% for search in idx_saved_searches %}
+                                                        <option value="{{search.name}}">{{search.name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="uk-margin">
+                                            <label for="search-languages-parent" class="uk-text-bold uk-form-label">{% translate 'Language' %}</label>
+                                            <div id="search-languages" class="uk-form-controls">
+                                                <select multiple data-multi-select-plugin name="languages[]" id="search-languages-select" class="uk-select">
+                                                    {% for language in idx_languages %}
                                                         <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
                                                     {% endfor %}
                                                 </select>
@@ -37,49 +52,43 @@
                                         </div>
 
                                         <div class="uk-margin">
-                                            <label for="saved-search-{{ search.id }}-status" class="uk-text-bold uk-form-label">{% translate 'Status' %}</label>
-                                            <div id="saved-search-{{ search.id }}-status" class="uk-form-controls">
-                                                <label><input class="uk-radio" type="radio" name="complete" value="0" {% if '0' in search.work_statuses and '1' not in search.work_statuses %}checked{% endif %}> {% translate 'Incomplete' %}</label><br>
-                                                <label><input class="uk-radio" type="radio" name="complete" value="1" {% if '1' in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}> {% translate 'Complete' %}</label><br>
-                                                <label><input class="uk-radio" type="radio" name="complete" value="-1" {% if '1' in search.work_statuses and '0' in search.work_statuses %}checked{% elif '1' not in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}> {% translate 'Any' %}</label><br>
+                                            <label for="search-status-parent" class="uk-text-bold uk-form-label">{% translate 'Status' %}</label>
+                                            <div id="search-status-parent" class="uk-form-controls">
+                                                <label><input class="uk-radio" type="radio" name="complete" value="0"> {% translate 'Incomplete' %}</label><br>
+                                                <label><input class="uk-radio" type="radio" name="complete" value="1"> {% translate 'Complete' %}</label><br>
+                                                <label><input class="uk-radio" type="radio" name="complete" value="-1"> {% translate 'Any' %}</label><br>
                                             </div>
                                         </div>
 
                                         <div class="uk-margin">
-                                            <label for="saved-search-{{ search.id }}-work-types" class="uk-text-bold uk-form-label">{% translate 'Work Type' %}</label>
-                                            <div id="saved-search-{{ search.id }}-work-types" class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
-                                                <select multiple id="work_types[]" name="work_types[]" hidden>
-                                                    {% for work_type in search.work_types %}
-                                                        <option id="work-type-{{ work_type.id }}" value="{{ work_type.type_name }}" {% if work_type.checked %}selected{% endif %}>{{ work_type.type_name }}</option>
+                                            <label for="search-work-types" class="uk-text-bold uk-form-label">{% translate 'Work Type' %}</label>
+                                            <div id="search-work-types-parent" class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                                                <select id="search-work-types" multiple id="work_types[]" name="work_types[]" hidden>
+                                                    {% for work_type in idx_work_types %}
+                                                        <option id="work-type-{{ work_type.id }}" value="{{ work_type.type_name }}">{{ work_type.type_name }}</option>
                                                     {% endfor %}
                                                 </select>
-                                                {% for work_type in search.work_types %}
-                                                    <label><input class="uk-checkbox" type="checkbox" {% if work_type.checked %}checked{% endif %} onchange="addWorkType(this, '{{ work_type.id }}', '{{ work_type.type_name }}')"> {{ work_type.type_name }}</label>
+                                                {% for work_type in idx_work_types %}
+                                                    <label><input class="uk-checkbox" type="checkbox" onchange="addWorkType(this, '{{ work_type.id }}', '{{ work_type.type_name }}')"> {{ work_type.type_name }}</label>
                                                 {% endfor %}
                                             </div>
                                         </div>
 
                                         <div class="uk-margin">
-                                            <label for="word-count-{{ search.id }}" id="saved-search-{{ search.id }}-wordcount" class="uk-text-bold uk-form-label">{% translate 'Word Count' %}</label>
-                                            <div class="uk-form-controls uk-inline" id="word-count-{{ search.id }}">
+                                            <label for="word-count-parent" id="search-wordcount-label" class="uk-text-bold uk-form-label">{% translate 'Word Count' %}</label>
+                                            <div class="uk-form-controls uk-inline" id="word-count-parent">
                                                 <p class="uk-text-medium">{% translate 'Between' %}
-                                                    <input class="uk-input uk-inline uk-width-small" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.word_count_gte }}"/> {% translate 'and' %} <input class="uk-input uk-inline uk-width-small" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.word_count_lte }}"/></p>
+                                                    <input class="uk-input uk-inline uk-width-small" id="word_count_gte" name="word_count_gte" type="text"/> {% translate 'and' %} <input class="uk-input uk-inline uk-width-small" id="word_count_lte" name="word_count_lte" type="text"/></p>
                                             </div>
                                         </div>
 
                                         <div class="uk-margin">
-                                            <label for="saved-search-{{ search.id }}-tags" class="uk-text-bold uk-form-label">{% translate 'Tags' %}</label>
-                                            <div id="saved-search-{{ search.id }}-tags" class="uk-form-controls">
+                                            <label for="saved-search-0-tags" class="uk-text-bold uk-form-label">{% translate 'Tags' %}</label>
+                                            <div id="saved-search-0-tags" class="uk-form-controls">
                                                 <span class="ourchive-muted">Include</span>
                                                 <div class="multi-select-component" id="include-wrapper">
                                                     <select multiple id="include_facets[]" name="include_facets[]" hidden>
-                                                        {% for tag in search.include_facets_json %}
-                                                            <option id="include-{{ tag }}-option" value="{{ tag }}" selected>{{ tag }}</option>
-                                                        {% endfor %}
                                                     </select>
-                                                    {% for tag in search.include_facets_json %}
-                                                        <div class="selected-wrapper" id="include-wrapper-{{ tag }}"><span class="selected-label">{{tag}}</span><a class="selected-close" tabindex="-1" data-option="{{tag}}" data-hits="0" uk-icon="icon: ourchive-close" onclick="removeElement('include', '{{ tag }}')"></a></div>
-                                                    {% endfor %}
                                                     <div class="uk-width-expand include-search-wrapper">
                                                         <input id="include-tag-search" class="uk-form-blank" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for tags...' %}" oninput="doAutocomplete(this.value, 'search', 'savedsearchinclude', '', ',', 'populateSavedSearchInclude(this)')">
                                                     </div>
@@ -90,13 +99,7 @@
                                                 <span class="ourchive-muted">Exclude</span>
                                                 <div class="multi-select-component" id="exclude-wrapper">
                                                     <select multiple id="exclude_facets[]" name="exclude_facets[]" hidden>
-                                                        {% for tag in search.exclude_facets_json %}
-                                                            <option id="exclude-{{ tag }}-option" value="{{ tag }}" selected>{{ tag }}</option>
-                                                        {% endfor %}
                                                     </select>
-                                                    {% for tag in search.exclude_facets_json %}
-                                                        <div class="selected-wrapper" id="exclude-wrapper-{{ tag }}"><span class="selected-label">{{tag}}</span><a class="selected-close" tabindex="-1" data-option="{{tag}}" data-hits="0" uk-icon="icon: ourchive-close" onclick="removeElement('exclude', '{{ tag }}')"></a></div>
-                                                    {% endfor %}
                                                     <div class="uk-width-expand exclude-search-wrapper">
                                                         <input id="exclude-tag-search" class="uk-form-blank" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for tags...' %}" oninput="doAutocomplete(this.value, 'search', 'savedsearchexclude', '', ',', 'populateSavedSearchExclude(this)')">
                                                     </div>
@@ -106,8 +109,8 @@
                                             </div>
                                         </div>
                                         <div class="uk-button-group uk-width-expand uk-flex-left">
-                                            <input id="saved-search-{{ search.id }}-submit" class="uk-button uk-button-primary uk-margin-top uk-align-left uk-margin-small-bottom" type="submit" value="{% translate 'Update' %}"/>
-                                            {% if show_delete %}<a id="saved-search-{{ search.id }}-delete" class="uk-button uk-button-danger uk-margin-top uk-align-left uk-margin-small-bottom" href="/searches/{{ search.id }}/delete">{% translate 'Delete' %}</a>{% endif %}
+                                            <input id="saved-search-0-submit" class="uk-button uk-button-primary uk-margin-top uk-align-left uk-margin-small-bottom" type="submit" value="{% translate 'Apply Filters' %}"/>
+                                            <a id="saved-search-0-delete" class="uk-button uk-button-secondary uk-margin-top uk-align-left uk-margin-small-bottom" href="/searches/save-custom">{% translate 'Save Search' %}</a>
                                         </div>
                                     </form>
                                 </div>
