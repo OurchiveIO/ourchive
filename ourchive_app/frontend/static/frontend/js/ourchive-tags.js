@@ -54,6 +54,17 @@ function doAutocomplete(term, source, selector, tag_type='', divider='$!$', clic
     });
 }
 
+function doIndexAutocomplete(term, source, selector, tag_type='', divider='$!$', clickAction='') {
+    document.getElementById("filter-search-text").value = term;
+    doAutocomplete(term, source, selector, tag_type, divider, clickAction);
+}
+
+function updateIndexSearchText(term) {
+    document.querySelectorAll('#nav-search-input').forEach(el => {
+        el.value = term;
+    });
+}
+
 function doAdminAutocomplete(term, source, selector, tag_type='', divider='$!$') {
   var complete_select = 'tag-autocomplete-dropdown-'+selector
   fetch('/tag-autocomplete?text='+term+"&source="+source+"&type="+tag_type+"&fetch_all=true")

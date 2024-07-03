@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if items %}
+<div class="uk-background-default uk-margin-small-top uk-padding-small uk-width-auto uk-height-max-medium ourchive-autocomplete-parent" id="search-generic-autocomplete-parent">
+	{% for item in items %}
+		<div class="ourchive-autocomplete-child">
+            <p id="search-generic-autocomplete-graf-{{item.display}}" class="uk-text-left uk-margin-large-left">
+                <a id="populate-search-generic-href-{{item.id}}" onclick="{{ click_action }}"><span class="ourchive-autocomplete uk-text-small" id="search-generic-autocorrect-span-{{ item.id }}">{{item.display}}</span></a></p></div>
+	{% endfor %}
+</div>
+{% endif %}

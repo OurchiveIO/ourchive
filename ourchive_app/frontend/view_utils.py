@@ -107,6 +107,31 @@ def sanitize_rich_text(rich_text):
 	return rich_text
 
 
+def get_save_search_data(request):
+	template_data = request.POST.copy()
+	template_data = get_list_from_form('include_facets', template_data, request)
+	template_data = get_list_from_form('exclude_facets', template_data, request)
+	search_data = {
+		'include_facets': str(template_data.get('include_facets', [])),
+		'exclude_facets': str(template_data.get('exclude_facets', []))
+	}
+	info_facets = {}
+	if template_data.get('word_count_lte', ''):
+		info_facets['word_count_lte'] = template_data.get('word_count_lte')
+	if template_data.get('word_count_gte', ''):
+		info_facets['word_count_gte'] = template_data.get('word_count_gte')
+	template_data = get_list_from_form('languages', template_data, request)
+	info_facets['languages'] = template_data.get('languages', [])
+	completes = []
+	if template_data.get('complete', None) and int(template_data.get('complete')) > -1:
+		completes.append(template_data.get('complete'))
+	info_facets[search_constants.COMPLETE_FILTER_KEY] = completes
+	template_data = get_list_from_form('work_types', template_data, request)
+	info_facets[search_constants.WORK_TYPE_FILTER_KEY] = template_data.get('work_types', [])
+	search_data['info_facets'] = str(info_facets)
+	search_data['term'] = template_data.get('term', '')
+	return search_data
+
 def get_list_from_form(form_key, obj_dict, request):
 	if f'{form_key}[]' in obj_dict:
 		obj_dict[form_key] = [x for x in request.POST.getlist(f"{form_key}[]")]
@@ -279,7 +304,6 @@ def get_bookmark_obj(request):
 
 def get_bookmark_collection_obj(request):
 	collection_dict = request.POST.copy()
-	print(collection_dict)
 	tags = []
 	bookmarks = []
 	tag_types = {}

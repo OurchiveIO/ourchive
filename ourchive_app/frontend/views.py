@@ -3,6 +3,8 @@ from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
+
+from core.models import Language
 from .search_models import SearchObject
 from html import escape, unescape
 from django.http import HttpResponse, FileResponse
@@ -18,7 +20,7 @@ import random
 from django.core.cache import cache
 from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
-from frontend.searcher import build_and_execute_search
+from frontend.searcher import build_and_execute_search, execute_search
 from frontend.view_utils import *
 from datetime import *
 from django.urls import reverse
@@ -686,37 +688,138 @@ def search_filter(request):
 	return render(request, 'search_results.html', template_data)
 
 
-def search_save(request, pk):
+def saved_search_filter(request):
+	if request.GET.get('save_new', False):
+		search_data = get_save_search_data(request)
+		search_data['name'] = request.POST.get('search-name')
+		search_data['user'] = str(request.user)
+		response = do_post(f'api/savedsearches/', request, data=search_data, object_name='saved search')
+		if response.response_info.status_code >= 400:
+			messages.add_message(request, messages.ERROR, _("Something went wrong saving this search."))
+	data_dict = request.POST.copy()
+	data_dict = get_list_from_form('include_facets', data_dict, request)
+	data_dict = get_list_from_form('exclude_facets', data_dict, request)
+	data_dict = get_list_from_form('work_types', data_dict, request)
+	data_dict = get_list_from_form('languages', data_dict, request)
+	completes = data_dict.get('complete', None)
+	include_filter = {
+		'Work Type': data_dict.get('work_types', []),
+		'Language': data_dict.get('languages', []),
+		'Completion Status': completes if completes and completes != '-1' else ['0', '1'],
+		'tags': data_dict.get('include_facets', []),
+		"attributes": [],
+	}
+	if data_dict.get('word_count_gte'):
+		include_filter['word_count_gte'] = [data_dict.get('word_count_gte')]
+	if data_dict.get('word_count_lte'):
+		include_filter['word_count_lte'] = [data_dict.get('word_count_lte')]
+	# TODO: clean this up
+	search_request = {
+		'work_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': include_filter,
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'bookmark_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+				'tags': data_dict.get('include_facets', []),
+				"attributes": [],
+			},
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'collection_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+				'tags': data_dict.get('include_facets', []),
+				"attributes": [],
+			},
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'user_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+				'tags': data_dict.get('include_facets', []),
+				"attributes": [],
+			},
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'tag_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+			},
+			"exclude_filter": {
+			},
+		},
+		'options': {'order_by': '-updated_on', 'split_include_exclude': False},
+		'tag_id': '',
+		'attr_id': '',
+		'work_type_id': ''
+	}
+	template_data = execute_search(request, search_request)
+	if not template_data:
+		return redirect('/')
+	return render(request, 'search_results.html', template_data)
+
+
+def search_delete(request, pk):
 	response = do_delete(f'api/savedsearches/{pk}/delete', request, object_name='saved search')
 	process_message(request, response)
 	return referrer_redirect(request)
 
+
 def search_save(request, username):
-	template_data = request.POST.copy()
-	template_data = get_list_from_form('include_facets', template_data, request)
-	template_data = get_list_from_form('exclude_facets', template_data, request)
-	search_data = {
-		'include_facets': str(template_data.get('include_facets')),
-		'exclude_facets': str(template_data.get('exclude_facets'))
-	}
-	info_facets = {}
-	if template_data.get('word_count_lte', None):
-		info_facets['word_count_lte'] = template_data.get('word_count_lte')
-	if template_data.get('word_count_gte', None):
-		info_facets['word_count_gte'] = template_data.get('word_count_gte')
-	template_data = get_list_from_form('languages', template_data, request)
-	info_facets['languages'] = template_data.get('languages', [])
-	completes = []
-	if template_data.get('complete', None) and int(template_data.get('complete')) > -1:
-		completes.append(template_data.get('complete'))
-	info_facets[search_constants.COMPLETE_FILTER_KEY] = completes
-	template_data = get_list_from_form('work_types', template_data, request)
-	info_facets[search_constants.WORK_TYPE_FILTER_KEY] = template_data.get('work_types', [])
-	search_data['info_facets'] = str(info_facets)
-	search_id = template_data.get('search_id')
-	print(search_data)
+	search_data = get_save_search_data(request)
+	search_id = request.POST.get('search_id')
 	do_patch(f'api/savedsearches/{search_id}/', request, data=search_data, object_name='saved search')
 	return redirect(f'/users/{username}/savedsearches')
+
+
+def saved_search(request, pk):
+	if pk == 0:
+		return render(request, 'index_search_filter.html', {
+			'search': {}
+		})
+	search_response = do_get(f'api/savedsearches/{pk}', request, object_name='saved search')
+	if search_response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view this saved search.'),
+							 'search-not-authed')
+		return referrer_redirect(request)
+	search_data = search_response.response_data
+	languages = get_languages(request)
+	work_types = get_work_types(request)
+	search_data['languages'] = process_languages(languages, search_data.get('languages_readonly', []))
+	get_saved_search_chive_info(search_data, work_types)
+	return render(request, 'index_search_filter.html', {
+		'search': search_data
+	})
 
 
 def tag_autocomplete(request):
@@ -733,6 +836,15 @@ def tag_autocomplete(request):
 		'tags': tags,
 		'divider': settings.TAG_DIVIDER,
 		'fetch_all': params['fetch_all'],
+		'click_action': request.GET.get('click_action', None)})
+
+
+def language_autocomplete(request):
+	term = request.GET.get('text')
+	languages = Language.objects.filter(display_name__icontains=term).all()
+	languages = [{'display': language.display_name, 'id': language.id} for language in languages]
+	return render(request, 'generic_autocomplete.html', {
+		'items': languages,
 		'click_action': request.GET.get('click_action', None)})
 
 
@@ -2111,6 +2223,7 @@ def delete_work_anthology(request, pk, work_id):
 	else:
 		return redirect(f'/anthologies/create')
 
+
 def user_saved_searches(request, username):
 	response = do_get(f'api/users/{username}/savedsearches', request, None, 'saved searches')
 	if response.response_info.status_code >= 400:
@@ -2124,6 +2237,7 @@ def user_saved_searches(request, username):
 		get_saved_search_chive_info(saved_search, work_types)
 	return render(request, 'user_saved_searches.html', {
 		'saved_searches': saved_searches})
+
 
 @never_cache
 def switch_css_mode(request):

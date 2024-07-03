@@ -307,6 +307,9 @@ class SavedSearchSerializer(serializers.HyperlinkedModelSerializer):
     include_facets_json = serializers.SerializerMethodField()
     exclude_facets_json = serializers.SerializerMethodField()
     id = serializers.IntegerField(read_only=True)
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
 
     def get_info_facets_json(self, obj):
         return json.loads(obj.info_facets.replace('\'', '\"')) if obj.info_facets else {}

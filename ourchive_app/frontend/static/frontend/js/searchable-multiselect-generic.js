@@ -374,7 +374,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const dropdown = wrapper.querySelector(".dropdown-icon");
                     const autocomplete_list = wrapper.querySelector(".autocomplete-list");
                     //the click was outside the specifiedElement, do something
-                    dropdown.classList.remove("active");
+                    if (dropdown.classList.contains("active")) {
+                        dropdown.classList.remove("active");
+                    }
                     autocomplete_list.innerHTML = "";
                     addPlaceholder(wrapper);
                 }

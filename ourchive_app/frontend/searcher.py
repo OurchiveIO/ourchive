@@ -7,7 +7,7 @@ from copy import deepcopy
 logger = logging.getLogger(__name__)
 
 # values we don't want to send to the API
-NONFILTER_VALS = ['csrfmiddlewaretoken', 'term', 'order_by', 'search-name']
+NONFILTER_VALS = ['csrfmiddlewaretoken', 'term', 'order_by', 'search-name', 'search_id']
 # values we don't want to add to the frontend facets
 NONRETAIN_VALS = ['order_by', 'active_tab', 'work_type']
 
@@ -195,7 +195,7 @@ def get_tag_results(response_obj):
 	return response_obj
 
 
-def build_and_execute_search(request):
+def build_search(request):
 	# prepare search & preserve request data
 	tag_id = None
 	attr_id = None
@@ -223,13 +223,13 @@ def build_and_execute_search(request):
 	if not valid_search:
 		logger.info(f'Not a valid search. Returning. Request get: {request.GET} Request post: {request.POST}')
 		return None
-	active_tab = request.POST.get('active_tab', None)
 	include_filter_any = 'any' if request.POST.get('include_any_all') == 'on' else 'all'
 	exclude_filter_any = 'any' if request.POST.get('exclude_any_all') == 'on' else 'all'
 	order_by = request.POST['order_by'] if 'order_by' in request.POST else '-updated_on'
 	request_builder = SearchObject()
 	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
-	request_object = request_builder.with_term(term, pagination, (include_filter_any, exclude_filter_any), order_by, search_name)
+	request_object = request_builder.with_term(term, pagination, (include_filter_any, exclude_filter_any), order_by,
+											   search_name)
 	if tag_id:
 		request_object.tag_id = tag_id
 	if attr_id:
@@ -238,22 +238,40 @@ def build_and_execute_search(request):
 		request_object.work_type_id = work_type_id
 	request_object = get_search_request(request, request_object, request_builder)
 	post_request = request_object.post_data.get_dict()
+	return post_request
+
+
+def execute_search(request, post_request):
+	active_tab = request.POST.get('active_tab', None)
+	term = request.POST.get('term')
+	tag_id = request.GET.get('tag_id', None)
 	# make request
 	logger.debug(f'Search request data: {post_request}')
 	response_json = do_post(f'api/search/', request, data=post_request).response_data
 	logger.debug(f'Search response data: {response_json}')
 	# process results
-	works = get_chive_results(response_json['results']['work']) if 'results' in response_json and 'work' in response_json['results'] else get_empty_response_obj()
-	bookmarks = get_chive_results(response_json['results']['bookmark']) if 'results' in response_json and 'bookmark' in response_json['results'] else get_empty_response_obj()
-	tags = get_tag_results(response_json['results']['tag']) if 'results' in response_json and 'tag' in response_json['results'] else get_empty_response_obj()
-	users = response_json['results']['user'] if 'results' in response_json and 'user' in response_json['results'] else get_empty_response_obj()
-	collections = get_chive_results(response_json['results']['collection']) if 'results' in response_json and 'collection' in response_json['results'] else get_empty_response_obj()
-	facets = response_json['results']['facets'] if 'results' in response_json and 'facets' in response_json['results'] else [{}, {}]
+	works = get_chive_results(response_json['results']['work']) if 'results' in response_json and 'work' in \
+																   response_json[
+																	   'results'] else get_empty_response_obj()
+	bookmarks = get_chive_results(response_json['results']['bookmark']) if 'results' in response_json and 'bookmark' in \
+																		   response_json[
+																			   'results'] else get_empty_response_obj()
+	tags = get_tag_results(response_json['results']['tag']) if 'results' in response_json and 'tag' in response_json[
+		'results'] else get_empty_response_obj()
+	users = response_json['results']['user'] if 'results' in response_json and 'user' in response_json[
+		'results'] else get_empty_response_obj()
+	collections = get_chive_results(
+		response_json['results']['collection']) if 'results' in response_json and 'collection' in response_json[
+		'results'] else get_empty_response_obj()
+	facets = response_json['results']['facets'] if 'results' in response_json and 'facets' in response_json[
+		'results'] else [{}, {}]
 	works_count = works['page']['count'] if 'page' in works else 0
 	bookmarks_count = bookmarks['page']['count'] if 'page' in bookmarks else 0
 	collections_count = collections['page']['count'] if 'page' in collections else 0
 	tag_count = tags['page']['count'] if 'page' in tags else 0
 	search_name = response_json.get('results', {}).get('options', {}).get('search_name', '')
+	if not search_name:
+		search_name = request.POST.get('search-name', '')
 	default_tab = get_default_search_result_tab(
 		[
 			[works_count, 0],
@@ -273,7 +291,7 @@ def build_and_execute_search(request):
 		'facets': facets,
 		'default_tab': default_tab,
 		'click_func': 'getFormVals(event)',
-		'root': settings.ROOT_URL, 
+		'root': settings.ROOT_URL,
 		'term': term,
 		'order_by': order_by,
 		'search_name': search_name
@@ -281,3 +299,10 @@ def build_and_execute_search(request):
 	if tag_id:
 		template_data['tag_id'] = tag_id
 	return template_data
+
+
+def build_and_execute_search(request):
+	post_request = build_search(request)
+	if not post_request:
+		return None
+	return execute_search(request, post_request)

@@ -5,64 +5,6 @@
 {% block content %}
     <link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
     <script src="{% static 'frontend/js/searchable-multiselect-generic.js' %}"></script>
-    <script>
-        function addWorkType(element, id, typeName) {
-            if (element.checked === true) {
-                const hidden = document.createElement("option");
-                hidden.setAttribute("id", `work-type-${id}`);
-                hidden.setAttribute("name", `work-type-${id}`);
-                hidden.setAttribute("value", typeName);
-                hidden.selected = true;
-                hidden.innerText = typeName;
-                document.getElementById(`work_types[]`).append(hidden);
-            }
-            else {
-                document.getElementById(`work-type-${id}`).remove();
-            }
-        }
-        function removeElement(include_exclude, tag) {
-            document.getElementById(`${include_exclude}-wrapper-${tag}`).remove();
-            document.getElementById(`${include_exclude}-${tag}-option`).selected = false;
-        }
-        function populateSavedSearch(element, includeLabel) {
-            let tag = element.querySelectorAll('span')[0].innerHTML;
-            let search = document.getElementById(`${includeLabel}-wrapper`).querySelector(`.${includeLabel}-search-wrapper`);
-            const tagWrapper = document.createElement("div");
-            tagWrapper.classList.add("selected-wrapper");
-            tagWrapper.setAttribute("id", `${includeLabel}-wrapper-${tag}`);
-            const tagWrapperSpan = document.createElement("span");
-            tagWrapperSpan.classList.add("selected-label");
-            tagWrapperSpan.innerText = tag;
-            const close = document.createElement("a");
-            close.classList.add("selected-close");
-            close.setAttribute("tabindex", "-1");
-            close.setAttribute("data-option", tag);
-            close.setAttribute("data-hits", 0);
-            close.setAttribute("uk-icon", "icon: ourchive-close; ratio: .75");
-            close.addEventListener("click", function() {
-                document.getElementById(`${includeLabel}-wrapper-${tag}`).remove()
-            });
-            tagWrapper.appendChild(tagWrapperSpan);
-            tagWrapper.appendChild(close);
-            const hidden = document.createElement("option");
-            hidden.setAttribute("id", `${includeLabel}-${tag}`);
-            hidden.setAttribute("name", `${includeLabel}-${tag}`);
-            hidden.setAttribute("value", tag);
-            hidden.selected = true;
-            hidden.innerText = tag;
-            document.getElementById(`${includeLabel}-wrapper`).insertBefore(tagWrapper, search);
-            document.getElementById(`${includeLabel}_facets[]`).appendChild(hidden);
-            document.getElementById(`${includeLabel}-tag-search`).value = "";
-            UIkit.drop(document.getElementById(`tag-autocomplete-dropdown-savedsearch${includeLabel}`)).hide();
-            document.getElementById(`tag-autocomplete-dropdown-savedsearch${includeLabel}`).innerHTML = "";
-        }
-        function populateSavedSearchExclude(element) {
-            populateSavedSearch(element, 'exclude');
-        }
-        function populateSavedSearchInclude(element) {
-            populateSavedSearch(element, 'include');
-        }
-    </script>
     <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="user-saved-searches-uk-grid" uk-grid>
         <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="user-saved-searches-grid">
             <h1>{% translate 'Saved Searches' %}</h1>
@@ -163,7 +105,7 @@
                                 </div>
                                 <a uk-icon="icon: chevron-down" class="uk-icon uk-margin-remove uk-flex-right"></a>
                             </div>
-                            <div id="tag-autocomplete-dropdown-savedsearchexclude" uk-drop></div>
+                            <div id="tag-autocomplete-dropdown-savedsearchexclude" uk-drop="toggle: #exclude-wrapper; delay=hide: 1500"></div>
                         </div>
                     </div>
                     <div class="uk-button-group uk-width-expand uk-flex-left">

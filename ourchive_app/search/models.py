@@ -10,6 +10,7 @@ class SavedSearch(models.Model):
     created_on = models.DateTimeField(default=timezone.now)
     updated_on = models.DateTimeField(default=timezone.now)
     name = models.CharField(max_length=100, blank=False, null=False)
+    term = models.CharField(max_length=300, blank=True, null=True)
     user = models.ForeignKey(core.models.User, on_delete=models.CASCADE)
     tag_id = models.IntegerField(null=True, blank=True)
     type_id = models.IntegerField(null=True, blank=True)
