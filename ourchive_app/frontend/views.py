@@ -49,6 +49,7 @@ def index(request):
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
 		recent_works = response.response_data['results']
 	news = get_news(request).response_data.get('results', [])
+	homepage_news = do_get(f'api/news/homepage/', request, params=request.GET, object_name='news').response_data
 	browse_cards = create_browse_cards(request)
 	return render(request, 'index.html', {
 		'heading_message': _('ourchive_welcome'),
@@ -59,7 +60,8 @@ def index(request):
 		'stylesheet_name': 'ourchive-light.css',
 		'has_notifications': request.session.get('has_notifications'),
 		'news': news,
-		'browse_cards': browse_cards
+		'browse_cards': browse_cards,
+		'homepage_news': homepage_news
 	})
 
 

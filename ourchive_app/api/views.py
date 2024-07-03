@@ -1507,6 +1507,14 @@ class NewsList(generics.ListAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
 
+class HomepageNewsList(generics.ListAPIView):
+    serializer_class = NewsSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return News.objects.filter(embed_in_homepage=True).order_by('-updated_on')
+
+
 class NewsDetail(generics.RetrieveAPIView):
     queryset = News.objects.get_queryset()
     serializer_class = NewsSerializer

@@ -163,6 +163,7 @@ function handleFacetInput(event) {
     let labelParts = event.target.id.split(',');
     let label = labelParts[1] + ": " + event.target.value; 
     if ((event.target.value) && (event.target.value.trim() != '')) {
+        console.log(event.target.value);
         input_id = event.target.getAttribute("id").replace(',mobile', '');
         createToken(document.getElementById("selected-filters-list"), label, label, input_id+"_badge");
     }

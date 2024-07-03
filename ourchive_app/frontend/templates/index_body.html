@@ -4,10 +4,15 @@
     <div class="uk-width-3-4@l uk-width-1-1">
         {% cache 43200 homepage-intro %}
         <div id="index-content-intro-div" class="ourchive-content-padding">
-            <h1 id="index-content-heading" class="uk-heading-medium">{{ heading_message }}</h1>
+            <h2 id="index-content-heading" class="uk-heading-small">{{ heading_message }}</h2>
             <span id="index-content-message">{{ long_message }}</span>
         </div>
         {% endcache %}
+        {%  if homepage_news.results %}
+            <div id="index-content-news-div" class="ourchive-content-padding">
+                {% for news in homepage_news.results %}<span id="index-content-message">{{ news.content|safe }}</span>{% endfor %}
+            </div>
+        {%  endif %}
         <div class="uk-grid uk-grid-small uk-child-width-1-1">
                 <ul uk-tab class="ourchive-content-padding uk-margin-auto-left">
                     {% for item in browse_cards %}

@@ -164,6 +164,7 @@ urlpatterns = [
     path('languages/', views.LanguageList.as_view(), name='language-list'),
     path('news/', views.NewsList.as_view(), name='news-list'),
     path('news/<int:pk>', views.NewsDetail.as_view(), name='news-detail'),
+    path('news/homepage/', views.HomepageNewsList.as_view(), name='homepage-news-list'),
     path('series/', views.SeriesList.as_view(), name='series-list'),
     path('series/<int:pk>/', views.SeriesDetail.as_view(), name='workseries-detail'),
     path('series-autocomplete', views.SeriesAutocomplete.as_view(), name='be-user-autocomplete'),
