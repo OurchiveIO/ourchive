@@ -1989,8 +1989,8 @@ def news_list(request):
 	prev_params = news_response.get('prev_params', None)
 	return render(request, 'news.html', {
 		'news': news,
-		'next': f"/news/{next_params}" if next_params is not None else None,
-		'previous': f"/news/{prev_params}" if prev_params is not None else None,
+		'next': f"/news{next_params}" if next_params is not None else None,
+		'previous': f"/news{prev_params}" if prev_params is not None else None,
 		'root': settings.ROOT_URL})
 
 

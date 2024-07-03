@@ -15,7 +15,7 @@
     <div class="uk-margin">
         <label for="search-saved-searches" class="uk-text-bold uk-form-label">{% translate 'Saved Searches' %}</label>
         <div id="search-searches-parent" class="uk-form-controls">
-            <select id="search-saved-searches" class="uk-select" onchange="fetchSavedSearch(this)">
+            <select id="search-saved-searches" class="uk-select" onchange="fetchSavedSearch(this, '{{ dropdown_selector }}')">
                 <option value="0"> </option>
                 {% for idx_search in idx_saved_searches %}
                     <option value="{{idx_search.id}}" {% if idx_search.id == search.id %}selected{% endif %}>{{idx_search.name}}</option>
@@ -103,9 +103,9 @@
 
     <div class="uk-margin">
         <label for="word-count-{{ search.id }}" id="saved-search-{{ search.id }}-wordcount" class="uk-text-bold uk-form-label">{% translate 'Word Count' %}</label>
-        <div class="uk-form-controls uk-inline" id="word-count-{{ search.id }}">
-            <p class="uk-text-medium">{% translate 'Between' %}
-                <input class="uk-input uk-inline uk-width-small" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.word_count_gte }}"/> {% translate 'and' %} <input class="uk-input uk-inline uk-width-small" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.word_count_lte }}"/></p>
+        <div class="uk-form-controls" id="word-count-{{ search.id }}">
+            <span class="uk-text-medium uk-hidden@m">{% translate 'From' %}</span><span class="uk-text-medium uk-visible@m">{% translate 'Between' %}</span>
+            <input class="uk-input uk-width-expand@s uk-width-small@m" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.word_count_gte }}"/> <span class="uk-text-medium uk-visible@m">{% translate 'and' %}</span><span class="uk-text-medium uk-hidden@m">{% translate 'To' %}</span> <input class="uk-input uk-width-expand@s uk-width-small@m" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.word_count_lte }}"/>
         </div>
     </div>
 
@@ -147,9 +147,17 @@
             <div id="tag-autocomplete-dropdown-savedsearchexclude" uk-drop="toggle: #exclude-wrapper; delay=hide: 1500"></div>
         </div>
     </div>
-    <div class="uk-button-group uk-width-expand uk-flex-left">
-        <input id="saved-search-0-submit" class="uk-button uk-button-primary uk-margin-top uk-align-left uk-margin-small-bottom" type="submit" value="{% translate 'Apply Filters' %}"/>
-        <a id="saved-search-0-delete" class="uk-button uk-button-secondary uk-margin-top uk-align-left uk-margin-small-bottom" href="#" uk-toggle="target: #save-search-modal">{% translate 'Save Search' %}</a>
+    <div class="uk-grid uk-grid-small" uk-grid>
+        <div class="uk-button-group uk-width-expand uk-flex-left uk-visible@s">
+            <input id="saved-search-0-submit" class="uk-button uk-button-primary uk-margin-top uk-align-left uk-margin-small-bottom" type="submit" value="{% translate 'Apply Filters' %}"/>
+            <a id="saved-search-0-delete" class="uk-button uk-button-secondary uk-margin-top uk-align-left uk-margin-small-bottom" href="#" uk-toggle="target: #save-search-modal">{% translate 'Save Search' %}</a>
+        </div>
+        <div class="uk-width-1-1 uk-hidden@s">
+            <input id="saved-search-0-submit" class="uk-button uk-button-primary uk-margin-small uk-align-center" type="submit" value="{% translate 'Apply Filters' %}"/>
+        </div>
+        <div class="uk-width-1-1 uk-hidden@s">
+            <a id="saved-search-0-delete" class="uk-button uk-button-secondary uk-margin-small uk-align-center uk-width-small uk-padding-remove-horizontal" href="#" uk-toggle="target: #save-search-modal">{% translate 'Save Search' %}</a>
+        </div>
     </div>
 </form>
 <div id="save-search-modal" uk-modal>

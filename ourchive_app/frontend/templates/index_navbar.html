@@ -12,35 +12,23 @@
 	    	 <ul class="uk-navbar-nav" id="uk-nav-center-ul">
 	    	 	<li id="nav-search-li">
     					<div class="uk-navbar-item uk-margin-small-left">
-                            <style>
-                                .ourchive-filter-button {
-                                    margin-right: -2px;
-                                    background-color: grey;
-                                    border: grey;
-                                }
-                                #filter-toggle-dsk {
-                                    width: 93.66%;
-                                    background-color: #3b3b3b;
-                                }
-                            </style>
                         <script>
-                            function fetchSavedSearch(element) {
+                            function fetchSavedSearch(element, selector) {
                                 let id = element.value;
-                                let search_form = "filter-toggle-dsk";
                                   fetch(`/savedsearch/${id}`)
                                     .then((response) => {
                                       return response.text();
                                     })
                                     .then((templateText) => {
-                                        document.getElementById(search_form).innerHTML = "";
-                                        document.getElementById(search_form).innerHTML = templateText;
+                                        document.getElementById(selector).innerHTML = "";
+                                        document.getElementById(selector).innerHTML = templateText;
                                     });
                                 }
                         </script>
                             <div>
                                 <a class="uk-button uk-button-default ourchive-filter-button" uk-toggle="target: #filter-toggle-dsk">{% translate 'Filters' %} <span uk-icon="icon: chevron-down"></span></a>
                                 <div id="filter-toggle-dsk" class="uk-padding ourchive-work-card" style="position: absolute;" hidden>
-                                    {% include 'index_search_filter.html' %}
+                                    {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk' %}
                                 </div>
                             </div>
 
@@ -58,6 +46,12 @@
 	    	 <ul class="uk-navbar-nav" id="uk-nav-mobile-ul">
 	    	 	<li id="nav-search-li">
 					<div class="uk-navbar-item">
+                            <div class="navbar-mobile-search">
+                                <a uk-icon="ourchive-filter" class="mobile-filter" uk-toggle="target: #filter-toggle-dsk-mobile"></a>
+                                <div id="filter-toggle-dsk-mobile" class="uk-padding ourchive-work-card" hidden>
+                                    {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk-mobile' %}
+                                </div>
+                            </div>
         				<form class="uk-search uk-search-default" action="/search/" method="post" id="nav-search-form">
 		                	{% csrf_token %}
 		                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>

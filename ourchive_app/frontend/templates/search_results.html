@@ -116,7 +116,7 @@
 		});
 	}
 </script>
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="search-uk-grid" uk-grid>
+    <div class="uk-grid uk-grid-small ourchive-content-padding" id="search-uk-grid" uk-grid>
         <div class="uk-width-1-1">
             <ul uk-tab="animation: uk-animation-fade; active: {{default_tab}}; connect: .search-switcher" id="search-results-switcher-controls" class="uk-flex-center uk-width-1-1 ourchive-padding-remove-horizontal">
                 <li id="results-switcher-li-works" class="ourchive-search-tab"><a href="#" id="works_tab" data-testid="works-tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
@@ -134,7 +134,7 @@
             <div class="uk-width-expand uk-margin-bottom">
                 <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden id="search-results-toggle-button" onClick="updateFilterToggle()">Filter</button>
                 <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s uk-margin-small-bottom" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
-                <select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-width-medium uk-hidden@s" onchange="updateSortOrder(value, true)">
+                <select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-width-medium uk-margin-small-top uk-hidden@s" onchange="updateSortOrder(value, true)">
                     <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
                     <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
                     <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>

@@ -140,7 +140,7 @@ function createToken(wrapper, value, text_value, id="") {
     close.setAttribute("data-option", text_value);
     close.setAttribute("data-hits", 0);
     close.setAttribute("href", "#");
-    close.setAttribute("uk-icon", "icon: close; ratio: 1");
+    close.setAttribute("uk-icon", "icon: ourchive-close");
     close.addEventListener("click", removeToken)
     token.appendChild(token_span);
     token.appendChild(close);
