@@ -482,7 +482,8 @@ class PostgresProvider:
             resultset = Tag.objects.filter(
                 tag_type__type_name=tag_type).filter(tag_type__filterable=True).filter(filterable=True) if fetch_all else []
         for result in resultset:
-            results.append({"tag": result.text, "display_text": result.display_text,
+            usages = Work.objects.filter(tags__id=result.id, draft=False).count() + BookmarkCollection.objects.filter(tags__id=result.id, draft=False).count()
+            results.append({"tag": result.text, "display_text": result.display_text, "count": usages,
                             "id": result.id, "type": result.tag_type.label, "type_name": result.tag_type.type_name})
         return results
 

@@ -182,3 +182,7 @@ function populateSavedSearchLanguage(element) {
     UIkit.drop(document.getElementById(`language-autocomplete-dropdown`)).hide();
     document.getElementById(`language-autocomplete-dropdown`).innerHTML = "";
 }
+
+function goToUrl(url) {
+    window.location.href = url;
+}
