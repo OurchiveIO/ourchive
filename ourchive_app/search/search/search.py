@@ -112,7 +112,7 @@ class PostgresProvider:
             if existing_query is None:
                 existing_query = or_query
             else:
-                existing_query = existing_query | or_query
+                existing_query = existing_query | or_query if 'count' not in filter_text else existing_query & or_query
         return existing_query
 
     def build_range_query(self, filter_obj, existing_query):
@@ -189,7 +189,7 @@ class PostgresProvider:
             length = end - start
             print(f'text execution: {length}')
             start = time.time()
-        if filters is not None:
+        if filters is not None and (not not term and resultset and len(resultset) > 0):
             if self.include_mode == "all" and filters[0]:
                 for q_item in filters[0].children:
                     resultset = resultset.filter(q_item) if resultset else obj.objects.filter(q_item)
@@ -214,7 +214,7 @@ class PostgresProvider:
             resultset = resultset.filter(draft=False)
         if resultset is not None and has_private:
             resultset = resultset.filter(is_private=False)
-        if resultset is not None and len(resultset) == 0 and query:
+        if resultset is not None and len(resultset) == 0 and query and not filters:
             # if exact matching & filtering produced no results, let's do limited trigram searching
             if len(trigram_fields) > 1:
                 resultset = obj.objects.annotate(zero_distance=TrigramWordDistance(
