@@ -54,15 +54,21 @@ function doAutocomplete(term, source, selector, tag_type='', divider='$!$', clic
     });
 }
 
-function doIndexAutocomplete(term, source, selector, tag_type='', divider='$!$', clickAction='') {
-    document.getElementById("filter-search-text").value = term;
-    doAutocomplete(term, source, selector, tag_type, divider, clickAction);
+function updateIndexSearchText(term, inForm=false) {
+    if (inForm === true) {
+        document.querySelectorAll('#nav-search-input').forEach(el => {
+            el.value = term;
+        });
+    }
+    else {
+        document.getElementById("filter-search-text").value = term;
+    }
 }
 
-function updateIndexSearchText(term) {
-    document.querySelectorAll('#nav-search-input').forEach(el => {
-        el.value = term;
-    });
+function doIndexAutocomplete(term, source, selector, tag_type='', divider='$!$', clickAction='') {
+    updateIndexSearchText(term, true);
+    document.getElementById("filter-search-text").value = term;
+    doAutocomplete(term, source, selector, tag_type, divider, clickAction);
 }
 
 function doAdminAutocomplete(term, source, selector, tag_type='', divider='$!$') {

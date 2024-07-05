@@ -35,8 +35,8 @@
             				<form class="uk-search uk-search-default ourchive-nav-search" action="/search/" method="post" id="nav-search-form">
 			                	{% csrf_token %}
 			                	<button type="submit" data-testid="navbar-search-submit" class="uk-search-icon-flip" uk-search-icon></button>
-			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
-							<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
+			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
+							<div id="tag-autocomplete-dropdown-navbar" uk-drop="delay-hide: 1500"></div>
 			                </form>
     					</div>
 	        	</li>
@@ -55,7 +55,7 @@
         				<form class="uk-search uk-search-default" action="/search/" method="post" id="nav-search-form">
 		                	{% csrf_token %}
 		                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>
-		                    <input class="uk-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
+		                    <input class="uk-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
 						<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
 		                </form>
 					</div>

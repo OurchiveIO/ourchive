@@ -776,7 +776,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     word_count = serializers.IntegerField(read_only=True)
     audio_length = serializers.IntegerField(read_only=True, required=False)
-    chapters = MiniChapterSerializer(many=True)
+    chapters = MiniChapterSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
     anthology_work = WorkAnthologySerializer(many=True, required=False, read_only=True)
     users = serializers.SerializerMethodField()

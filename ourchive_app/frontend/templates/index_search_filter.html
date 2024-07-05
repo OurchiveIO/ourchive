@@ -2,16 +2,21 @@
 {%  load static %}
 <script>
     function saveSearch() {
-        document.getElementById("search-name").value = document.getElementById("new-search-name").value;
+        console.log(document.getElementById("search-name"));
         let search_form = document.forms["search_filter_form"];
 		search_form.action = "/savedsearch/filter?save_new=True";
         document.forms["search_filter_form"].submit();
 	}
+
+    function updateSearchName(value) {
+        document.getElementById("search-name").value  = value;
+    }
 </script>
 <form class="uk-form-stacked" name="search_filter_form" action="/savedsearch/filter" method="post">
     {% csrf_token %}
     <input type="hidden" id="search_id" name="search_id" value="{{ search.id }}"/>
     <input type="hidden" id="search-name" name="search-name" value="{{ search.name }}"/>
+    {% if idx_saved_searches %}
     <div class="uk-margin">
         <label for="search-saved-searches" class="uk-text-bold uk-form-label">{% translate 'Saved Searches' %}</label>
         <div id="search-searches-parent" class="uk-form-controls">
@@ -23,10 +28,11 @@
             </select>
         </div>
     </div>
+    {% endif %}
     <div class="uk-margin">
         <label for="search-text" class="uk-text-bold uk-form-label">{% translate 'Search Term' %}</label>
         <div id="search-text-parent" class="uk-form-controls">
-            <input id="filter-search-text" name="term" class="uk-input" value="{{ search.term }}" oninput="updateIndexSearchText(this.value)"/>
+            <input id="filter-search-text" name="term" class="uk-input" value="{{ search.term }}" oninput="updateIndexSearchText(this.value, true)"/>
         </div>
     </div>
     <div class="uk-margin">
@@ -105,7 +111,7 @@
         <label for="word-count-{{ search.id }}" id="saved-search-{{ search.id }}-wordcount" class="uk-text-bold uk-form-label">{% translate 'Word Count' %}</label>
         <div class="uk-form-controls" id="word-count-{{ search.id }}">
             <span class="uk-text-medium uk-hidden@m">{% translate 'From' %}</span><span class="uk-text-medium uk-visible@m">{% translate 'Between' %}</span>
-            <input class="uk-input uk-width-expand@s uk-width-small@m" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.word_count_gte }}"/> <span class="uk-text-medium uk-visible@m">{% translate 'and' %}</span><span class="uk-text-medium uk-hidden@m">{% translate 'To' %}</span> <input class="uk-input uk-width-expand@s uk-width-small@m" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.word_count_lte }}"/>
+            <input class="uk-input uk-width-expand@s uk-width-small@m" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.word_count_gte|default_if_none:'' }}"/> <span class="uk-text-medium uk-visible@m">{% translate 'and' %}</span><span class="uk-text-medium uk-hidden@m">{% translate 'To' %}</span> <input class="uk-input uk-width-expand@s uk-width-small@m" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.word_count_lte|default_if_none:'' }}"/>
         </div>
     </div>
 
@@ -165,11 +171,11 @@
         <h2 id="save-search-modal-header" class="uk-modal-title">Save Search</h2>
         <div class="uk-margin">
             <label class="uk-text-medium" for="new-search-name">{% blocktranslate %}Enter a name for this search:{% endblocktranslate %}</label>
-            <input class="uk-input" id="new-search-name"/>
+            <input class="uk-input" id="newsearchname" type="text" name="new-search-name" onkeyup="updateSearchName(this.value)"/>
         </div>
         <p id="save-searchmodal-button-parent" class="uk-text-right">
             <a id="save-search-modal-cancel" class="uk-button uk-button-default uk-modal-close uk-margin-right">{% translate 'Cancel' %}</a>
-            <a id="save-search-modal-add" class="uk-button uk-button-primary uk-modal-close" onclick="saveSearch()" href="#">{% translate 'Save' %}</a>
+            <a id="save-search-modal-add" class="uk-button uk-button-primary" onclick="saveSearch()">{% translate 'Save' %}</a>
         </p>
     </div>
 </div>

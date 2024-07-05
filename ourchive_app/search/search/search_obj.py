@@ -40,8 +40,8 @@ class WorkFilter(object):
                 'attributes__display_name__icontains': [],
             },
             'word_count': {
-                'word_count__gte': [],
                 'word_count__lte': [],
+                'word_count__gte': [],
             },
             'word_count_range': {
                 'ranges': [],

@@ -638,6 +638,7 @@ def get_anthology_users(request, anthology):
 				break
 	return anthology
 
+
 def get_saved_search_chive_info(saved_search, work_types):
 	search_work_types = saved_search.get('info_facets_json', {}).get(search_constants.WORK_TYPE_FILTER_KEY, [])
 	for work_type in work_types:
@@ -649,3 +650,7 @@ def get_saved_search_chive_info(saved_search, work_types):
 	saved_search['work_statuses'] = saved_search.get('info_facets_json', {}).get(search_constants.COMPLETE_FILTER_KEY, [])
 	return saved_search
 
+
+def get_pagination_array(pages):
+	pagination_array = [1, 2, 3, 4, 5, '...', pages] if pages > 5 else [x+1 for x in range(0, pages)]
+	return pagination_array

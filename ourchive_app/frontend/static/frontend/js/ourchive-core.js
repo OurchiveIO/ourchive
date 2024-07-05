@@ -208,8 +208,7 @@ function initShowMores(objType='chive', firstContainer='tag-container', secondCo
             if (!couldFit) {
                 console.log(`more-btn-${firstSelector}-${id}`);
                 document.getElementById(`more-btn-${firstSelector}-${id}`).style.display = 'inline';
-            }
-            else {
+            } else {
                 el.style.height = `${el.scrollHeight}px`;
                 el.style.maxHeight = `${el.scrollHeight}px`;
             }
@@ -218,7 +217,11 @@ function initShowMores(objType='chive', firstContainer='tag-container', secondCo
     [...document.getElementsByClassName(secondContainer)].forEach(el => {
         if (el.offsetHeight < el.scrollHeight) {
             let id = el.id.replace(`show-${secondSelector}-`, '');
-            document.getElementById(`more-btn-${secondSelector}-`+id).style.display = 'inline';
+            document.getElementById(`more-btn-${secondSelector}-` + id).style.display = 'inline';
         }
     });
+}
+
+function goToUrl(url) {
+    window.location.href = url;
 }

@@ -55,6 +55,7 @@
                     {% if work.tags %}{% include "tag_partial.html" with obj_name='work' tags=work.tags %}{% endif %}
                 </div>
                 <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleChiveData('{{ work.id }}', 'tags', 'work', '{% translate 'Show More...' %}', '{% translate 'Hide' %}')" id="more-btn-tags-{{ work.id }}">{% translate 'Show more...' %}</a>
+                {% endif %}
             </div>
         </div>
         <div class="uk-width-1-1 card-metadata" id="work-{{ work.id }}-list-meta">

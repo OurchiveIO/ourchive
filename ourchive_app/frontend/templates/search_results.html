@@ -158,7 +158,7 @@
                     {% endfor %}
                     {% if works.data %}
                     <div class="uk-width-1-1 uk-align-right">
-                        {% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}
+                        {% include 'pagination.html' with pagination_array=works.pagination_array page_params=works.page.page_params current_page=works.page.current_page previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}
                     </div>
                     {% endif %}
                 </div>
@@ -166,18 +166,18 @@
                         {% for bookmark in bookmarks.data %}
                             <div class="uk-margin-bottom">{% include "bookmark_tile.html" %} </div>
                         {% endfor %}
-                        {% include 'pagination.html' with previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
+                        {% include 'pagination.html' with pagination_array=bookmarks.pagination_array page_params=bookmarks.page.page_params current_page=bookmarks.page.current_page previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
                     </div>
                     <div class="uk-width-expand" id="search-results-collections-content">
                         {% for bookmark_collection in collections.data %}
                             <div class="uk-margin-bottom">{% include "bookmark_collection_tile.html" %}</div>
                         {% endfor %}
-                        {% include 'pagination.html' with previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
+                        {% include 'pagination.html' with pagination_array=collections.pagination_array page_params=collections.page.page_params current_page=collections.page.current_page previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
                     </div>
                     <div class="uk-width-expand" id="search-results-tags-content">
                         <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
                         {% include "tag_partial.html" with obj_name='tag' tags=tags.data %}
-                        {% include 'pagination.html' with previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
+                        {% include 'pagination.html' with pagination_array=tags.pagination_array page_params=tags.page.page_params current_page=tags.page.current_page previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
                         </dl>
                     </div>
                     <div uk-grid id="search-results-users-grid">
