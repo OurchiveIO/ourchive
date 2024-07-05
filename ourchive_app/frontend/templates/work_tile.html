@@ -89,6 +89,7 @@
                         <hr class="ourchive-hr"/>
                     </div>
                 {% endif %}
+                {% if work.attributes or work.tags %}
                 <div class="uk-height-max-small tag-container {% if not work.anthologies and not work.series %}uk-margin-small-top{% endif %}" id="show-tags-{{ work.id }}">
                     {% if not work.anthologies and not work.series %}
                         <hr class="ourchive-hr"/>
@@ -97,6 +98,7 @@
                     {% if work.tags %}{% include "tag_partial.html" with obj_name='work' tags=work.tags %}{% endif %}
                 </div>
                 <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleData('{{ work.id }}', 'tags')" id="more-btn-tags-{{ work.id }}">{% translate 'Show more...' %}</a>
+                {% endif %}
             </div>
         </div>
         <div class="uk-width-1-1 card-metadata" id="work-{{ work.id }}-list-meta">

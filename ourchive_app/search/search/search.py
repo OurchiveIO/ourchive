@@ -7,6 +7,7 @@ from django.contrib.postgres.search import TrigramWordDistance
 from django.core.paginator import Paginator
 from django.conf import settings
 import logging
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +174,7 @@ class PostgresProvider:
         ) else f"{base_string}limit={page_size}&page={page+1}&object_type={obj.__name__}"
         prev_params = None if not resultset or not resultset.has_previous(
         ) else f"{base_string}limit={page_size}&page={page-1}&object_type={obj.__name__}"
-        return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
+        return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params, "page_params": f"&object_type={obj.__name__}", "current_page": page}]
 
     # TODO: move to kwargs or obj. my god.
     def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True, has_private=False, has_filterable=False):
@@ -421,7 +422,7 @@ class PostgresProvider:
         resultset = self.run_queries(work_filters, query, Work, [
                                      'title', 'summary'], work_search.term, kwargs['page'], options.get('order_by', '-updated_on'), True)
         result_json = self.build_work_resultset(resultset[0][0], work_search.reserved_fields)
-        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
+        return {'pages': math.ceil(resultset[0][1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def search_bookmarks(self, options, **kwargs):
         bookmark_search = BookmarkSearch()
@@ -433,7 +434,7 @@ class PostgresProvider:
         resultset = self.run_queries(bookmark_filters, query, Bookmark, [
                                      'title', 'description'], bookmark_search.term, kwargs.get('page', 1), options.get('order_by', '-updated_on'), True, .85, True, True)
         result_json = self.build_bookmark_resultset(resultset[0][0], bookmark_search.reserved_fields)
-        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
+        return {'pages': math.ceil(resultset[0][1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def search_collections(self, options, **kwargs):
         collection_search = CollectionSearch()
@@ -446,7 +447,7 @@ class PostgresProvider:
         resultset = self.run_queries(collection_filters, query, BookmarkCollection, [
                                      'title', 'short_description'], collection_search.term, kwargs.get('page', 1), options.get('order_by', '-updated_on'), True)
         result_json = self.build_collection_resultset(resultset[0][0], collection_search.reserved_fields)
-        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
+        return {'pages': math.ceil(resultset[0][1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def search_users(self, options, **kwargs):
         user_search = UserSearch()
@@ -558,7 +559,7 @@ class PostgresProvider:
                 result_dict.pop(field, None)
             result_dict['tag_type'] = tag_type
             result_json.append(result_dict)
-        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
+        return {'pages': math.ceil(resultset[0][1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def filter_by_tag(self, **kwargs):
         tag_search = TagSearch()

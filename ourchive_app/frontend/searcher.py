@@ -187,11 +187,13 @@ def get_chive_results(response_obj):
 	response_obj['data'] = get_object_tags(response_obj['data'])
 	response_obj['data'] = get_array_attributes_for_display(response_obj['data'], 'attributes')
 	response_obj['data'] = format_date_for_template(response_obj['data'], 'updated_on', True)
+	response_obj['pagination_array'] = get_pagination_array(response_obj['pages'])
 	return response_obj
 
 
 def get_tag_results(response_obj):
 	response_obj['data'] = group_tags(response_obj['data'])
+	response_obj['pagination_array'] = get_pagination_array(response_obj['pages'])
 	return response_obj
 
 
@@ -244,6 +246,8 @@ def build_search(request):
 def execute_search(request, post_request):
 	active_tab = request.POST.get('active_tab', None)
 	term = request.POST.get('term')
+	if not term:
+		term = request.GET.get('term')
 	tag_id = request.GET.get('tag_id', None)
 	# make request
 	logger.debug(f'Search request data: {post_request}')

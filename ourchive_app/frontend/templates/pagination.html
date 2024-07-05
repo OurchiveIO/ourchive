@@ -1,9 +1,29 @@
 {% load i18n %}
+{% if not pagination_array %}
 <div id="{{object_name}}-pagination-grid" class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid>
     <div id="{{object_name}}-pagination-parent">
         <ul class="uk-pagination" id="{{object_name}}-pagination-ul">
-        {% if previous is not None %}<li id="{{object_name}}-pagination-prev-li"><a id="{{object_name}}-pagination-prev-link" href="{{ previous }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span id="{{object_name}}-pagination-prev-span" class="uk-margin-small-right" uk-pagination-previous></span> {% translate 'Previous' %}</a></li>{% endif %}
-        {% if next is not None %}<li id="{{object_name}}-pagination-next-li" class="uk-margin-auto-left"><a id="{{object_name}}-pagination-next-link" href="{{ next }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}>{% translate 'Next' %} <span id="{{object_name}}-pagination-next-span" class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
-    </ul>
+            {% if previous is not None %}<li id="{{object_name}}-pagination-prev-li"><a id="{{object_name}}-pagination-prev-link" href="{{ previous }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span id="{{object_name}}-pagination-prev-span" class="uk-margin-small-right" uk-pagination-previous></span> {% translate 'Previous' %}</a></li>{% endif %}
+            {% if next is not None %}<li id="{{object_name}}-pagination-next-li" class="uk-margin-auto-left"><a id="{{object_name}}-pagination-next-link" href="{{ next }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}>{% translate 'Next' %} <span id="{{object_name}}-pagination-next-span" class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
+        </ul>
     </div>        
-</div>  
+</div>
+{% else %}
+<nav aria-label="Pagination">
+    <ul class="uk-pagination uk-flex-center" uk-margin>
+        <li><a href="#"><span uk-pagination-previous></span></a></li>
+        {% for number in pagination_array %}
+        {% if number != '...' %}
+            {% if current_page == number %}
+                <li class="uk-active"><a href="?page={{ number }}{% if search_term %}&term={{search_term}}{%endif%}{% if page_params %}{{ page_params }}{% endif %}"><span aria-current="page">{{ number }}</span></a></li>
+            {% else %}
+                <li><a href="?page={{ number }}{% if search_term %}&term={{search_term}}{%endif%}{% if page_params %}{{ page_params }}{% endif %}">{{ number }}</a></li>
+            {% endif %}
+        {% else %}
+            <li class="uk-disabled"><span>…</span></li>
+        {% endif %}
+        {% endfor %}
+        <li><a href="#"><span uk-pagination-next></span></a></li>
+    </ul>
+</nav>
+{% endif %}
