@@ -3,6 +3,10 @@
 {% block title %}Work - {{ work.title }}{% endblock %}
 {% block content %}	
 <script>
+    window.addEventListener("load", function() {
+        initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
+    });
+
     function addSelectedCollection() {
         document.querySelectorAll('.add-to-bookmark-radio').forEach(function(elm)
         {

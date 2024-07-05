@@ -1,17 +1,20 @@
 {% extends 'index.html' %}
 {% load i18n %}
 {% block title %}User - {{ user.username }}{% endblock %}
-{% block content %}	
-{% if anchor %}
-<script>
-    window.onload = function(){
-        const anchor_val = '{{anchor}}';
-        window.location = '#'+anchor_val;
-        show_val = anchor_val.includes("work") ? 0 : (anchor_val.includes("collection") ? 2 : 1);
-        UIkit.switcher(document.getElementById("user_content_switcher_header")).show(show_val);
-    };
-</script>
-{% endif %}
+{% block content %}
+    <script>
+        window.addEventListener("load", function() {
+            initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
+            initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
+        });
+
+        UIkit.util.on(document, 'show', '#work_tab', function() {
+            initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
+        });
+        UIkit.util.on(document, 'show', '#anthology_tab', function() {
+            initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
+        });
+    </script>
     <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="user-uk-grid" uk-grid>
         <div class="uk-width-1 uk-padding-remove-horizontal" id="user-profile-parent">
             <div class="uk-text-right uk-width-1" id="user-profile-controls-parent">
@@ -44,39 +47,29 @@
                     {% include "object_attributes.html" with object='user' object_id=user.id attributes=user.attributes %}
                     <hr class="uk-margin-medium" id="user-attributes-lower-hr"/>
                 {% endif %}
-                <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {% if user.default_content == 'Work' %}0{% elif user.default_content == 'Bookmark' %}1{% else %}2{% endif %}" id="user_content_switcher_header">
-                    {% if works %}<li><a href="#" id="user_works_selector">{% translate 'Works' %}</a></li>{% endif %}
-                    {% if bookmarks %}<li><a href="#" id="user_bookmarks_selector">{% translate 'Bookmarks' %}</a></li>{% endif %}
-                    {% if bookmark_collections %}<li><a href="#" id="user_collections_selector">{% translate 'Collections' %}</a></li>{% endif %}
-                    {% if series %}<li><a href="#" id="user_series_selector">{% translate 'Series' %}</a></li>{% endif %}
-                    {% if anthologies %}<li><a href="#" id="user_anthologies_selector">{% translate 'Anthologies' %}</a></li>{% endif %}
+                <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {{ anchor }};" id="user_content_switcher_header">
+                    <li><a href="#work_tab" id="user_works_selector">{% translate 'Works' %} ({{ work_count }})</a></li>
+                    <li><a href="#bookmark_tab" id="user_bookmarks_selector">{% translate 'Bookmarks' %} ({{ bookmark_count }})</a></li>
+                    <li><a href="#bookmark_collection_tab" id="user_collections_selector">{% translate 'Collections' %} ({{ collection_count }})</a></li>
+                    <li><a href="#series_tab" id="user_series_selector">{% translate 'Series' %} ({{ series_count }})</a></li>
+                    <li><a href="#anthology_tab" id="user_anthologies_selector">{% translate 'Anthologies' %} ({{ anthology_count }})</a></li>
                 </ul>
                 <ul class="uk-switcher uk-margin" id="user_content_switcher">
-                    {% if works %}
                     <li id="work_tab">
                         {% include "works_list.html" with works=works root=root username=username next=works_next previous=works_previous include_header=False %} 
                     </li>
-                    {% endif %}
-                    {% if bookmarks %}
                     <li id="bookmark_tab">
                         {% include "bookmarks_list.html" with bookmarks=bookmarks next=bookmarks_next previous=bookmarks_previous include_header=False %}
                     </li>
-                    {% endif %}
-                    {% if bookmark_collections %}
                     <li id="bookmark_collection_tab">
                         {% include "bookmark_collections_list.html" with bookmark_collections=bookmark_collections next=bookmark_collections_next previous=bookmark_collections_previous include_header=False %}
                     </li>
-                    {%  endif %}
-                    {%  if series %}
                     <li id="series_tab">
                         {% include "series_list_body.html" with series=series next=series_next previous=series_previous include_header=False %}
                     </li>
-                    {% endif %}
-                    {%  if anthologies %}
                     <li id="anthology_tab">
                         {% include "anthologies_list_body.html" with anthologies=anthologies next=anthologies_next previous=anthologies_previous include_header=False %}
                     </li>
-                    {% endif %}
                 </ul>
             </div>
         </div>

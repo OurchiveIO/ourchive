@@ -6,6 +6,8 @@
 <script src="{% static 'frontend/js/searchable-multiselect.js' %}"></script>
 <script>
 	window.addEventListener("load", function(){
+        initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
+        initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
 	    var activeTabs = localStorage.getItem('ourchive-active-tabs');
 	  	if (activeTabs !== null) {
 	  		activeTabs = activeTabs.split(",");
@@ -115,6 +117,10 @@
 			element.remove();
 		});
 	}
+
+    UIkit.util.on(document, 'show', '#search-results-works-parent', function() {
+        initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
+    });
 </script>
     <div class="uk-grid uk-grid-small ourchive-content-padding" id="search-uk-grid" uk-grid>
         <div class="uk-width-1-1">
@@ -131,10 +137,10 @@
             <div id="selected-filters-list" class="uk-width-expand uk-margin-small-bottom">
                 <!-- Selected filters go here -->
             </div>
-            <div class="uk-width-expand uk-margin-bottom">
+            <div class="uk-width-expand uk-margin-bottom" id="search-filter-controls">
                 <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden id="search-results-toggle-button" onClick="updateFilterToggle()">Filter</button>
-                <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s uk-margin-small-bottom" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
-                <select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-width-medium uk-margin-small-top uk-hidden@s" onchange="updateSortOrder(value, true)">
+                <button class="uk-button uk-button-primary search-results-toggle uk-inline uk-hidden@s uk-margin-small-bottom uk-width-expand" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
+                <select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-margin-small-top uk-hidden@s uk-width-expand" onchange="updateSortOrder(value, true)">
                     <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
                     <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
                     <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>

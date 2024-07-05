@@ -35,7 +35,7 @@
     <div class="uk-width-1-4@l uk-width-1-1" id="homepage-news-and-recent-works">
         <div class="uk-grid ourchive-border-left uk-grid-small uk-child-width-1-1" uk-grid>
         {% cache 300 homepage-news %}
-            <div id="news-column" class="ourchive-content-padding">
+            <div id="news-column" class="ourchive-content-padding uk-padding-remove-horizontal">
                 <h2 id="news-header">{% translate 'News' %}</h2>
                 <ul class="uk-list" id="news-ul">
                     {% for item in news %}
@@ -45,11 +45,11 @@
                 </ul>
             </div>
         {% endcache %}
-        <div id="news-and-recent-separator">
+        <div id="news-and-recent-separator" class="uk-padding-remove-horizontal">
             <hr class="ourchive-hr"/>
         </div>
         {% cache 300 homepage-recent-works %}
-            <div id="recent-works-column">
+            <div id="recent-works-column" class="uk-padding-remove-horizontal">
                 <h2 id="recent-works-header">{% translate 'Recent Works' %}</h2>
                 <ul class="uk-list" id="recent-works-ul">
                     {% for work in recent_works %}

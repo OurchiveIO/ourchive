@@ -1,27 +1,46 @@
 {% load i18n %}
-<div id="anthology-tile-parent-{{ anthology.id }}" class="uk-width-1-1 uk-padding-remove-horizontal">
-	<div id="anthology-tile-card-{{ anthology.id }}" class="uk-card uk-card-default">
-	    <div id="anthology-tile-header-parent" class="uk-card-header uk-padding-small ourchive-card-head">
-	        <div id="anthology-tile-header-grid" class="uk-grid uk-child-width-expand" uk-grid>
-		        <span id="anthology-{{ anthology.id }}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="anthology-{{ anthology.id }}-tile-title-link" href="{% url 'fe-anthology' anthology.id %}" data-testid="anthology-card-title">{{ anthology.title }}</a> by {% for user in anthology.owners %}<a id="anthology-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="anthology-user-link" href="{% url 'user-profile-parent' anthology.creating_user_id %}">{{ anthology.user }}</a>{% endfor %}</span>
-		        {% if anthology.owner %}
-		        <div id="anthology-tile-actions-parent" class="uk-align-right uk-text-right uk-margin-remove">
-		            <a class="ourchive-icon-wrapper" id="anthology-tile-edit-{{ anthology.id }}-link" href="{% url 'fe-edit-anthology' anthology.id %}"><span id="anthology-tile-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="Edit anthology {{ anthology.id }}"></span> </a>
-		            <a class="ourchive-icon-wrapper" id="anthology-tile-delete-link" uk-toggle="target: #anthology-{{anthology.id}}-modal-delete"><span uk-icon="icon: ourchive-delete;ratio:.75" id="anthology-tile-delete-span" title="Delete"></span> </a>
-			    <p>{% include "delete_modal.html" with object='anthology' object_friendly='anthology' object_id=anthology.id %}</p>
-		        </div>
-		        {% endif %}
-		    </div>
-		</div>
-		{% if anthology.attributes or anthology.tags or anthology.description %}<div class="uk-card-body ourchive-card-body uk-padding-small" id="anthology-{{anthology.id}}-tile-card-body">
-	    	{% if anthology.description %}<p id="anthology-{{anthology.id}}-tile-description-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ anthology.description }}{% endautoescape %}</p>{% endif %}
-        {% if anthology.attributes %}{% include "object_attributes.html" with object='anthology' object_id=anthology.id attributes=anthology.attributes %}{% endif %}
-	    {% if anthology.tags %}{% include "tag_partial.html" with obj_name='anthology' tags=anthology.tags %}{% endif %}
-	    </div>{% endif %}
-	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="anthology-tile-footer-parent">
-	        <div class="uk-width-1-1 uk-padding-small uk-margin-small">
-	        	{% include 'anthology_metadata.html' %}
-	        </div>
-	    </div>
-	</div>  
+<div class="ourchive-work-card uk-box-shadow-small uk-height-large uk-width-1-1" id="anthology-{{anthology.id}}-tile-container">
+    <div class="uk-grid uk-grid-small uk-height-1-1" uk-grid>
+        <div class="uk-width-1-3@m uk-width-1-1@s card-info" id="anthology-{{anthology.id}}-tile-card">
+            <!-- title, author, 1 tag/attribute type, cover -->
+            <p class="uk-margin-small-bottom"><span id="anthology-{{anthology.id}}-tile-title" class="uk-margin-remove-bottom ourchive-tile-title">
+                <a id="anthology-{{anthology.id}}-tile-title-link" href="{% url 'fe-anthology' anthology.id %}" data-testid="anthology-tile-title">{{anthology.title}}</a>
+            </span> </p>
+            <p class="uk-margin-remove-bottom uk-margin-small-top"><span id="anthology-{{ anthology.id }}-creators>">By
+                    {% for user in anthology.owners %}<a id="anthology-{{anthology.id}}-user-link" data-testid="anthology-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>
+                        {% if not forloop.last %}, {% endif %}{% empty %}
+                        <a id="anthology-{{anthology.id}}-user-link" data-testid="anthology-user-link" href="{% url 'user-profile-parent' anthology.creating_user_id %}">{{ anthology.creating_user }}</a>
+                    {% endfor %}
+            </span></p>
+            <p class="uk-margin-remove-bottom uk-margin-small-top"><span class="uk-inline ourchive-muted uk-text-italic" id="anthology-metadata-language">{% for language in anthology.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}
+        {% endfor %}</span></p>
+            <!-- TODO: ADD CLICK TO EXPAND -->
+            {% if anthology.cover_url != "None" and anthology.cover_url is not None and work.cover_url != "" %}
+            <div class="uk-width-auto uk-margin-small-top" id="anthology-{{anthology.id}}-tile-img-parent">
+                <img class="anthology-tile-cover" alt="{{anthology.cover_alt_text}}" src="{{anthology.cover_url}}" id="anthology-{{anthology.id}}-tile-image">
+            </div>
+            {% endif %}
+        </div>
+        <div class="uk-width-2-3@m uk-width-1-1@s card-info" id="anthology-{{anthology.id}}-info-card">
+            <div class="uk-grid uk-grid-small uk-child-width-1-1">
+                <!-- series/anthology, summary, tag/attribute group 1, 2, and 3 -->
+                    <div class="uk-height-max-small anthology-description-container summary-container" id="show-description-{{ anthology.id }}">
+                        <p id="anthology-{{anthology.id}}-tile-summary-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ anthology.description }}{% endautoescape %}</p>
+                    </div>
+                    <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleChiveData('{{ anthology.id }}', 'description', 'anthology', '{% translate 'Show More...' %}', '{% translate 'Hide' %}')" id="more-btn-description-{{ anthology.id }}">{% translate 'Show more...' %}</a>
+                <div class="uk-height-max-small anthology-tag-container tag-container uk-margin-small-top" id="show-tags-{{ anthology.id }}">
+                    {% if anthology.tags or anthology.attributes %}
+                        <hr class="ourchive-hr"/>
+                    {% endif %}
+                    {% if anthology.attributes %}{% include "object_attributes.html" with object='anthology' object_id=anthology.id attributes=anthology.attributes %}{% endif %}
+                    {% if anthology.tags %}{% include "tag_partial.html" with obj_name='anthology' tags=anthology.tags %}{% endif %}
+                </div>
+                <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleChiveData('{{ anthology.id }}', 'tags', anthology)" id="more-btn-tags-{{ anthology.id }}">{% translate 'Show more...' %}</a>
+            </div>
+        </div>
+        <div class="uk-width-1-1 card-metadata" id="anthology-{{ anthology.id }}-list-meta">
+            <!-- language, complete status, updated, chapters, word count, comments, fingerguns -->
+            {% include 'anthology_metadata.html' %}
+        </div>
+    </div>
 </div>

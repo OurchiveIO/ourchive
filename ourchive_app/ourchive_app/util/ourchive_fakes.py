@@ -613,15 +613,32 @@ class OurchiveFakes:
                 persist_db
             )
         for x in range(0, obj_count):
+            header_url = ''
+            header_alt_text = ''
+            cover_url = ''
+            cover_alt_text = ''
+            if self.fake.pybool() and settings.CHIVE_HEADER_URLS:
+                header_image = settings.CHIVE_HEADER_URLS[randint(0, len(settings.CHIVE_HEADER_URLS) - 1)]
+                header_url = header_image['header_url']
+                header_alt_text = header_image['header_alt_text']
+            if self.fake.pybool() and settings.CHIVE_COVER_URLS:
+                cover_image = settings.CHIVE_COVER_URLS[randint(0, len(settings.CHIVE_COVER_URLS) - 1)]
+                cover_url = cover_image['cover_url']
+                cover_alt_text = cover_image['cover_alt_text']
             display_text = self.fake.sentence().replace('.', '')
             anthology = models.Anthology(title=display_text,
                                          description=self.fake.paragraph(nb_sentences=randint(1, 12)),
                                          is_complete=self.fake.pybool(),
-                                         creating_user_id=user_id)
+                                         creating_user_id=user_id,
+                                         header_url=header_url,
+                                         header_alt_text=header_alt_text,
+                                         cover_url=cover_url,
+                                         cover_alt_text=cover_alt_text)
             if persist_db:
                 anthology.save()
             anthology = self.assign_fk_items(anthology, user_id, persist_db, languages, **kwargs)
             anthologies.append(anthology)
+        print(f'Anthologies: {len(anthologies)}')
         return anthologies
 
     def generate_series(self, user_id, obj_count=1, persist_db=False, **kwargs):

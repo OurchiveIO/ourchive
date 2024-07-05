@@ -1587,13 +1587,15 @@ class UserAnthologyList(generics.ListCreateAPIView):
     permission_classes = [IsWorksMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Anthology.objects.filter(Q(owners__username=self.kwargs['username']) | Q(creating_user__username=self.kwargs['username'])).order_by('-updated_on')
+        return Anthology.objects.filter(Q(owners__username=self.kwargs['username']) | Q(creating_user__username=self.kwargs['username'])).order_by('-system_updated_on')
 
 
 class AnthologyList(generics.ListCreateAPIView):
-    queryset = Anthology.objects.get_queryset()
     serializer_class = AnthologySerializer
     permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return Anthology.objects.get_queryset().order_by('-system_updated_on')
 
     def perform_create(self, serializer):
         attributes = []
@@ -1619,7 +1621,7 @@ class AnthologyDetail(generics.RetrieveUpdateDestroyAPIView):
             self.request.data['created_on'] = str(datetime.datetime.now().date())
         if 'updated_on' in self.request.data and not self.request.data['updated_on']:
             self.request.data['updated_on'] = str(datetime.datetime.now().date())
-        serializer.save(creating_user=self.request.user, attributes=attributes)
+        serializer.save(attributes=attributes)
 
 
 class WorkAnthologyList(APIView):

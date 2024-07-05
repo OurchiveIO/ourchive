@@ -98,34 +98,39 @@ def user_name(request, pk):
 	series_params = {}
 	anthology_params = {}
 	anchor = None
-	if 'work_offset' in request.GET:
-		work_params['offset'] = request.GET['work_offset']
-		work_params['limit'] = request.GET['work_limit']
-		anchor = "work_tab"
-	if 'bookmark_offset' in request.GET:
-		bookmark_params['offset'] = request.GET['bookmark_offset']
-		bookmark_params['limit'] = request.GET['bookmark_limit']
-		anchor = "bookmark_tab"
-	if 'bookmark_collection_offset' in request.GET:
-		bookmark_collection_params['offset'] = request.GET['bookmark_collection_offset']
-		bookmark_collection_params['limit'] = request.GET['bookmark_collection_limit']
-		anchor = "bookmark_collection_tab"
-	if 'series_offset' in request.GET:
-		series_params['offset'] = request.GET['series_offset']
-		series_params['limit'] = request.GET['series_limit']
-		anchor = "series_tab"
-	if 'anthology_offset' in request.GET:
-		anthology_params['offset'] = request.GET['anthology_offset']
-		anthology_params['limit'] = request.GET['anthology_limit']
-		anchor = "anthology_tab"
+	if request.GET.get('work_offset', '') or request.GET.get('work_limit', ''):
+		work_params['offset'] = request.GET.get('work_offset', '')
+		work_params['limit'] = request.GET.get('work_limit', '')
+		anchor = 0
+	if request.GET.get('bookmark_offset', '') or request.GET.get('bookmark_limit', ''):
+		bookmark_params['offset'] = request.GET.get('bookmark_offset', '')
+		bookmark_params['limit'] = request.GET.get('bookmark_limit', '')
+		anchor = 1
+	if request.GET.get('bookmark_collection_offset', '') or request.GET.get('bookmark_collection_limit', ''):
+		bookmark_collection_params['offset'] = request.GET.get('bookmark_collection_offset', '')
+		bookmark_collection_params['limit'] = request.GET.get('bookmark_collection_limit', '')
+		anchor = 2
+	if request.GET.get('series_offset', '') or request.GET.get('series_limit', ''):
+		series_params['offset'] = request.GET.get('series_offset', '')
+		series_params['limit'] = request.GET.get('series_limit', '')
+		anchor = 3
+	if request.GET.get('anthology_offset', '') or request.GET.get('anthology_limit', ''):
+		anthology_params['offset'] = request.GET.get('anthology_offset', '')
+		anthology_params['limit'] = request.GET.get('anthology_limit', '')
+		anchor = 4
+	if anchor is None:
+		anchor = 0 if user.response_data['results'][0]["default_content"] == 'Work' else (1 if user.response_data['results'][0]["default_content"] == 'Bookmark' else 2)
+	# TODO: this violates DRY. all of this can be simplified, it's doing the exact same thing with multiple chives. also, we should just work with the results object instead of pulling out individual variables.
 	works_list = get_works_list(request, username)
 	works = works_list['works']
 	work_next = works_list['next_params'].replace("limit=", "work_limit=").replace("offset=", "work_offset=") if works_list['next_params'] else None
 	work_previous = works_list["prev_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=") if works_list["prev_params"] else None
+	work_count = works_list.get('count', 0)
 	bookmarks_response = do_get(f'api/users/{username}/bookmarks', request, params=bookmark_params).response_data
 	bookmarks = bookmarks_response['results']
 	bookmark_next = f'/username/{pk}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
 	bookmark_previous = f'/username/{pk}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
+	bookmark_count = bookmarks_response.get('count', 0)
 	bookmarks = get_object_tags(bookmarks)
 	bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
 	bookmark_collection_response = do_get(f'api/users/{username}/bookmarkcollections', request, params=bookmark_collection_params).response_data
@@ -134,17 +139,20 @@ def user_name(request, pk):
 	bookmark_collection_previous = f'/username/{pk}/{bookmark_collection_response["prev_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["prev_params"] is not None else None
 	bookmark_collection = get_object_tags(bookmark_collection)
 	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on', True)
+	collection_count = bookmark_collection_response.get('count', 0)
 	series_response = do_get(f'api/users/{username}/series', request, params=series_params).response_data
 	series = series_response['results']
 	series_next = f'/username/{pk}/{series_response["next_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["next_params"] is not None else None
 	series_previous = f'/username/{pk}/{series_response["prev_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["prev_params"] is not None else None
+	series_count = series_response.get('count', 0)
 	series = format_date_for_template(series, 'updated_on', True)
 	anthologies_response = do_get(f'api/users/{username}/anthologies', request, params=anthology_params).response_data
 	anthologies = anthologies_response['results']
 	anthology_next = f'/username/{pk}/{anthologies_response["next_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["next_params"] is not None else None
-	anthology_previous = f'/username/{pk}/{anthologies_response["prev_params"].replace("limit=", "series_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["prev_params"] is not None else None
+	anthology_previous = f'/username/{pk}/{anthologies_response["prev_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["prev_params"] is not None else None
 	anthologies = format_date_for_template(anthologies, 'updated_on', True)
 	anthologies = get_object_tags(anthologies)
+	anthology_count = anthologies_response.get('count', 0)
 	for anthology in anthologies:
 		anthology['attributes'] = get_attributes_for_display(anthology.get('attributes', []))
 	user = user.response_data['results'][0]
@@ -175,7 +183,12 @@ def user_name(request, pk):
 		'anthologies_next': anthology_next,
 		'anthologies_previous': anthology_previous,
 		'user': user,
-		'subscription' : subscription
+		'subscription': subscription,
+		'work_count': work_count,
+		'bookmark_count': bookmark_count,
+		'collection_count': collection_count,
+		'series_count': series_count,
+		'anthology_count': anthology_count
 	})
 
 

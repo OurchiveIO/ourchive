@@ -40,8 +40,6 @@ function setSearchToggles(groupName, mobile=false) {
     }
     var accordionItem = document.getElementById(itemId);
     var open = !accordionItem.classList.contains('uk-open');
-    console.log(groupName);
-    console.log(open);
     if (open === true) {
         if (activeTabs !== null) {
             var activeTabs = activeTabs.split(',');
@@ -181,4 +179,46 @@ function populateSavedSearchLanguage(element) {
     document.getElementById(`language-search`).value = "";
     UIkit.drop(document.getElementById(`language-autocomplete-dropdown`)).hide();
     document.getElementById(`language-autocomplete-dropdown`).innerHTML = "";
+}
+
+function toggleChiveData(chive_id, selector, objType='chive', showMoreText='Show more...', hideText='Hide') {
+    let overflow = document.getElementById(`show-${selector}-`+chive_id).style.overflow;
+    let element_id = `show-${selector}-` + chive_id;
+    let button_id = `more-btn-${selector}-` + chive_id;
+    if (overflow === 'hidden' || overflow.length < 1) {
+        document.getElementById(element_id).style.overflow = 'clip';
+        document.getElementById(element_id).style.maxHeight = '2000px';
+        document.getElementById(element_id).style.height = 'auto';
+        document.getElementById(button_id).innerText = hideText;
+    }
+    else {
+        document.getElementById(element_id).style.overflow = 'hidden';
+        document.getElementById(element_id).style.maxHeight = '150px';
+        document.getElementById(element_id).style.height = '150px';
+        document.getElementById(button_id).innerText = showMoreText;
+        document.getElementById(`${objType}-${chive_id}-tile-card`).scrollIntoView();
+    }
+}
+
+function initShowMores(objType='chive', firstContainer='tag-container', secondContainer='summary-container', firstSelector='tags', secondSelector='summary') {
+    [...document.getElementsByClassName(firstContainer)].forEach(el => {
+        let id = el.id.replace(`show-${firstSelector}-`, '');
+        let couldFit = (el.scrollHeight + document.getElementById(`show-${secondSelector}-${id}`).scrollHeight) < document.getElementById(`${objType}-${id}-tile-container`).scrollHeight;
+        if (el.offsetHeight < el.scrollHeight) {
+            if (!couldFit) {
+                console.log(`more-btn-${firstSelector}-${id}`);
+                document.getElementById(`more-btn-${firstSelector}-${id}`).style.display = 'inline';
+            }
+            else {
+                el.style.height = `${el.scrollHeight}px`;
+                el.style.maxHeight = `${el.scrollHeight}px`;
+            }
+        }
+    });
+    [...document.getElementsByClassName(secondContainer)].forEach(el => {
+        if (el.offsetHeight < el.scrollHeight) {
+            let id = el.id.replace(`show-${secondSelector}-`, '');
+            document.getElementById(`more-btn-${secondSelector}-`+id).style.display = 'inline';
+        }
+    });
 }
