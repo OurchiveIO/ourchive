@@ -3,88 +3,72 @@
 {% load i18n %}
 {% block title %}{% translate 'Bookmark Collection' %} - {{ bkcol.title }}{% endblock %}
 {% block content %}
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="collection-uk-grid" uk-grid>
-        <div class="uk-text-left uk-width-1-1 ourchive-article-parent" id="bk-collection-uk-grid">
-            <script>
-                function loadMoreComments(next, chapterId) {
-                    fetch(next)
-                      .then((response) => {
-                        return response.text();
-                      })
-                      .then((myText) => {			 
-                        document.getElementById('collection-{{bkcol.id}}-comments-child-container').innerHTML = "";
-                        document.getElementById('collection-{{bkcol.id}}-comments-child-container').innerHTML = myText;
-                        document.getElementById('collection-{{bokcol.id}}-comments-child-container').scrollIntoView();
-                      });
-                }
-            </script>
-            <article class="uk-article uk-padding" id="bookmark-uk-article" uk-grid>
-                {% if bkcol.header_url %}
-                <div id="bkcol-header-image" class="uk-width-1-1 uk-padding-remove">
-                    <img src="{{bkcol.header_url}}" title="{{bkcol.header_alt_text}}" alt="{{bkcol.header_alt_text}}" class="uk-align-center"/>
-                </div>
-                {% endif %}
-                <div id="bkcol-header-title" class="uk-width-2-3 uk-padding-remove">
-                    <h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link" id="bookmark-title-link" href="{% url 'fe-view-collection' bkcol.id %}">{{ bkcol.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large" style="padding-left: 10px;"> {% translate 'by' %} {% for user in bkcol.users %}<a id="bkcol-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="bkcol-user-link" href="{% url 'user-profile-parent' bkcol.user_id %}">{{ bkcol.user }}</a>{% endfor %}</span>
-                    {% if bkcol.draft %}
-                        <div id="bkcol-draft-badge" class="uk-width-auto uk-margin-bottom">
-                            <span id="bkcol-draft-span" class="uk-label uk-label-warning"><strong id="bkcol-draft-text">DRAFT</strong></span>
-                        </div>
-                    {% endif %}
-                </div>
-                <div class="uk-text-right uk-width-1-3 uk-padding-remove" id="bkcol-user-controls-parent">
-                {% if bkcol.owner %}
-                    {% if bkcol.draft %}
-                    <a class="ourchive-icon-wrapper" id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: ourchive-publish; ratio: 1" title="Publish"></span> </a>
-                    {% endif %}
-                    <a id="bkcol-edit-link" class="ourchive-icon-wrapper" href="/bookmark-collections/{{ bkcol.id }}/edit"><span uk-icon="icon: ourchive-edit; ratio: 1" title="Edit"></span> </a>
-                    <a id="bookmark-collection-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span title="Delete" uk-icon="icon: ourchive-delete; ratio: 1"></span> </a>
-                {% endif %}
-                </div>
-                <div id="bkcol-content" class="uk-width-1-1 uk-padding-remove">
-                    <hr class="ourchive-hr" id="bkcol-short-desc-hr"/>
-                    <p class="uk-article-meta uk-width-1-1">{{ bkcol.short_description }}</p>
-                    <p class="uk-width-1-1" id="bkcol-{{bkcol.id}}-tile-attributes-p">{% include "object_attributes.html" with object='bkcol' object_id=bkcol.id attributes=bkcol.attributes %}</p>
-                    {% include "tag_partial.html" with obj_name='bkcol' tags=bkcol.tags %}
-                    <div class="uk-align-right">{% include 'bookmark_collection_metadata.html' with bookmark_collection=bkcol %}</div>
-                </div>
-                <div class="uk-margin-remove-bottom uk-margin-remove-top uk-width-1-1 uk-padding-remove"><hr id="bkcol-title-hr" class="ourchive-hr"/></div>
-                {% if bkcol.description %}
-                <div id="bkcol-description-parent" class="uk-width-1-1 uk-padding-remove">
-                    <span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description|safe}}</span>
-                    <hr class="ourchive-hr" id="bkcol-desc-hr"/>
-                </div>
-                {% endif %}
-                <div class="uk-width-1-1 uk-margin-bottom uk-padding-remove ourchive-read-div" id="bkcol-slideshow-parent">
-                    {% if bkcol.works_readonly %}
-                    <div id="bkcol-bookmarks-parent-sm">
-                        <span class="uk-text-lead">{% translate 'Works' %}</span>
-                        <ul class="uk-list uk-list-sriped">
-                        {% for work in bkcol.works_readonly %} 
-                            <li class="ourchive-mobile-list uk-padding-small uk-margin-small-top uk-margin-small-bottom">
-                                <span class="uk-inline uk-text-uppercase uk-text-medium"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
-                                {% if work.summary %}
-                                    <div class="uk-margin-left uk-margin-small-top uk-width-expand ourchive-collection-sm-desc">{{work.summary|safe}}</div>
-                                {% endif %}
-                            </li>       
-                        {% endfor %}
-                    </ul>
-                    </div>
-                    {% endif %}
-                </div>
-                {% if comments %}<div class="uk-width-1-1 uk-padding-remove"><hr class="ourchive-hr" id="bkcol-comment-hr"/></div>{% endif %}
-                <div class="uk-width-1-1 uk-padding-remove">
-                    {% include 'comments_parent.html' with object_name='collection' comments=comments object=bkcol edit_action_url=bkcol.edit_action_url post_action_url=bkcol.post_action_url comment_offset=comment_offset delete_obj='collection-comment' load_more_base=load_more_base view_thread_base=view_thread_base comment_count=bkcol.comment_count %}
-                </div>
-            </article>
+    <script>
+        window.addEventListener("load", function() {
+            initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
+        });
+        function loadMoreComments(next, chapterId) {
+            fetch(next)
+              .then((response) => {
+                return response.text();
+              })
+              .then((myText) => {
+                document.getElementById('collection-{{bkcol.id}}-comments-child-container').innerHTML = "";
+                document.getElementById('collection-{{bkcol.id}}-comments-child-container').innerHTML = myText;
+                document.getElementById('collection-{{bokcol.id}}-comments-child-container').scrollIntoView();
+              });
+        }
+    </script>
+<div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="work-uk-grid" uk-grid>
+    {% if bkcol.header_url %}
+        <div id="bkcol-header-image" class="uk-width-1-1 uk-padding-remove">
+            <img src="{{bkcol.header_url}}" title="{{bkcol.header_alt_text}}" alt="{{bkcol.header_alt_text}}" class="uk-align-center"/>
         </div>
-        {% if scroll_comment_id %}
-            <script>
-                window.onload = function(){
-                    document.getElementById("collection-comment-{{scroll_comment_id}}-icon-div").scrollIntoView();
-                }
-            </script>
-        {% endif %}
-        {% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
+    {% endif %}
+    <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center">{% include "bookmark_collection_tile.html" with bookmark_collection=bkcol %}</div>
+    {% if bkcol.owner %}
+        <div class="uk-width-1-1 uk-text-right uk-margin-small-top">
+            {% if bkcol.draft %}
+            <a class="ourchive-icon-wrapper" id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: ourchive-publish; ratio: 1" title="Publish"></span> </a>
+            {% endif %}
+            <a id="bkcol-edit-link" class="ourchive-icon-wrapper" href="/bookmark-collections/{{ bkcol.id }}/edit"><span uk-icon="icon: ourchive-edit; ratio: 1" title="Edit"></span> </a>
+            <a id="bookmark-collection-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span title="Delete" uk-icon="icon: ourchive-delete; ratio: 1"></span> </a>
+        </div>
+    {% endif %}
+    {% if bkcol.description %}
+    <div id="bkcol-description-parent" class="uk-width-1-1 uk-padding-remove">
+        <span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description|safe}}</span>
+        <hr class="ourchive-hr" id="bkcol-desc-hr"/>
     </div>
+    {% endif %}
+    <div class="uk-width-1-1 uk-margin-bottom uk-padding-remove ourchive-read-div" id="bkcol-slideshow-parent">
+        {% if bkcol.works_readonly %}
+        <div id="bkcol-bookmarks-parent-sm">
+            <span class="uk-text-lead">{% translate 'Works' %}</span>
+            <ul class="uk-list uk-list-sriped">
+            {% for work in bkcol.works_readonly %}
+                <li class="ourchive-mobile-list uk-padding-small uk-margin-small-top uk-margin-small-bottom">
+                    <span class="uk-inline uk-text-uppercase uk-text-medium"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
+                    {% if work.summary %}
+                        <div class="uk-margin-left uk-margin-small-top uk-width-expand ourchive-collection-sm-desc">{{work.summary|safe}}</div>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        </div>
+        {% endif %}
+    </div>
+    {% if comments %}<div class="uk-width-1-1 uk-padding-remove"><hr class="ourchive-hr" id="bkcol-comment-hr"/></div>{% endif %}
+    <div class="uk-width-1-1 uk-padding-remove">
+        {% include 'comments_parent.html' with object_name='collection' comments=comments object=bkcol edit_action_url=bkcol.edit_action_url post_action_url=bkcol.post_action_url comment_offset=comment_offset delete_obj='collection-comment' load_more_base=load_more_base view_thread_base=view_thread_base comment_count=bkcol.comment_count %}
+    </div>
+    {% if scroll_comment_id %}
+        <script>
+            window.onload = function(){
+                document.getElementById("collection-comment-{{scroll_comment_id}}-icon-div").scrollIntoView();
+            }
+        </script>
+    {% endif %}
+    {% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
+</div>
 {% endblock %}

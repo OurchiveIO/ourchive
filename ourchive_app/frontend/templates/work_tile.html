@@ -29,6 +29,14 @@
                     <p id="work-{{work.id}}-tile-summary-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>
                 </div>
                 <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleChiveData('{{ work.id }}', 'summary', 'work', '{% translate 'Show More...' %}', '{% translate 'Hide' %}')" id="more-btn-summary-{{ work.id }}">{% translate 'Show more...' %}</a>
+                <div class="uk-height-max-small works-tag-container tag-container {% if not work.anthologies and not work.series %}uk-margin-small-top{% endif %}" id="show-tags-{{ work.id }}">
+                    {% if not work.anthologies and not work.series and work.summary %}
+                        <hr class="ourchive-hr"/>
+                    {% endif %}
+                    {% if work.attributes %}{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}{% endif %}
+                    {% if work.tags %}{% include "tag_partial.html" with obj_name='work' tags=work.tags %}{% endif %}
+                </div>
+                <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleChiveData('{{ work.id }}', 'tags', 'work', '{% translate 'Show More...' %}', '{% translate 'Hide' %}')" id="more-btn-tags-{{ work.id }}">{% translate 'Show more...' %}</a>
                 {% if work.series %}
                     <div class="uk-align-left uk-max-height-small uk-margin-small-top uk-margin-small-bottom">
                         <hr class="ourchive-hr"/>
@@ -41,18 +49,10 @@
                         {% if not work.series  and work.summary %}
                             <hr class="ourchive-hr"/>
                         {% endif %}
-                        <span id="work-metadata-series">{% translate 'Anthologies' %}: {% for anthology in work.anthologies %}<a href="{% url 'fe-anthology' anthology.id%}">{{anthology.anthology}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+                        <span id="work-metadata-series">{% translate 'Part of' %} {% for anthology in work.anthologies %}<a href="{% url 'fe-anthology' anthology.id%}">{{anthology.anthology}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
                         <hr class="ourchive-hr"/>
                     </div>
                 {% endif %}
-                <div class="uk-height-max-small works-tag-container tag-container {% if not work.anthologies and not work.series %}uk-margin-small-top{% endif %}" id="show-tags-{{ work.id }}">
-                    {% if not work.anthologies and not work.series and work.summary %}
-                        <hr class="ourchive-hr"/>
-                    {% endif %}
-                    {% if work.attributes %}{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}{% endif %}
-                    {% if work.tags %}{% include "tag_partial.html" with obj_name='work' tags=work.tags %}{% endif %}
-                </div>
-                <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleChiveData('{{ work.id }}', 'tags', 'work', '{% translate 'Show More...' %}', '{% translate 'Hide' %}')" id="more-btn-tags-{{ work.id }}">{% translate 'Show more...' %}</a>
             </div>
         </div>
         <div class="uk-width-1-1 card-metadata" id="work-{{ work.id }}-list-meta">

@@ -6,6 +6,8 @@
         window.addEventListener("load", function() {
             initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
             initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
+            initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
+            initShowMores('series', 'series-tag-container', 'series-description-container', 'tags', 'description');
         });
 
         UIkit.util.on(document, 'show', '#work_tab', function() {
@@ -13,6 +15,12 @@
         });
         UIkit.util.on(document, 'show', '#anthology_tab', function() {
             initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
+        });
+        UIkit.util.on(document, 'show', '#bookmark_collection_tab', function() {
+            initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
+        });
+        UIkit.util.on(document, 'show', '#series_tab', function() {
+            initShowMores('series', 'series-tag-container', 'series-description-container', 'tags', 'description');
         });
     </script>
     <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="user-uk-grid" uk-grid>

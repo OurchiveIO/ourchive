@@ -1,19 +1,5 @@
 {% load i18n %}
-<div class="uk-inline ourchive-metadata-list">
-	<span id="bookmark-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{bookmark.updated_on|date:'d M Y'}}</span>
+<div class="uk-inline ourchive-metadata-list uk-width-medium">
+	<span id="bookmark-metadata-updated" class="uk-inline ourchive-muted">{% translate 'Updated' %} {{bookmark.updated_on|date:'d M Y'}}</span>
+    {% if settings.AllowComments %}<span id="bookmark-metadata-comment-count" class="uk-inline ourchive-muted">{% blocktranslate with cc=bookmark.comment_count %}Comments: {{ cc }}{% endblocktranslate %}</span>{% endif %}
 </div>
-{% if settings.AllowComments %}
-<div class="uk-inline ourchive-metadata-list">
-	<span id="bookmark-metadata-status-divider" class="uk-inline uk-text-bold">-</span>
-</div>
-<div class="uk-inline ourchive-metadata-list"><span id="bookmark-metadata-comment-count" class="uk-inline uk-text-bold">{% blocktranslate with cc=bookmark.comment_count %}Comments: {{ cc }}{% endblocktranslate %}</span></div>
-{% endif %}
-{% if bookmark.languages_readonly %}
-<div class="uk-inline ourchive-metadata-list">
-	<span id="bookmark-metadata-languages-divider" class="uk-inline uk-text-bold">-</span>
-</div>
-<div class="uk-inline ourchive-metadata-list">
-	<span class="uk-inline uk-text-bold" id="bookmark-metadata-language">{% translate 'Languages' %}: {% for language in bookmark.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}
-    {% endfor %}</span>
-</div>
-{% endif %}

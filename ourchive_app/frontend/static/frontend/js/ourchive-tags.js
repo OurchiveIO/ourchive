@@ -38,7 +38,7 @@ function tagCheck (e, type, bypass_check=false, divider='$!$') {
 }
 
 function doAutocomplete(term, source, selector, tag_type='', divider='$!$', clickAction='') {
-  if (term.length < 2)
+  if (term.length < 4)
   {
     return;
   }
