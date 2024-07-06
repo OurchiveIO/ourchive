@@ -1,10 +1,14 @@
 {% extends 'index.html' %}
 {% load static %}
+{% load i18n %}
 {% block title %}Search Results{% endblock %}
 {% block content %}
 <script src="{% static 'frontend/js/searchable-multiselect.js' %}"></script>
 <script>
 	window.addEventListener("load", function(){
+        initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
+        initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
+        initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
 	    var activeTabs = localStorage.getItem('ourchive-active-tabs');
 	  	if (activeTabs !== null) {
 	  		activeTabs = activeTabs.split(",");
@@ -114,8 +118,15 @@
 			element.remove();
 		});
 	}
+
+    UIkit.util.on(document, 'show', '#search-results-works-parent', function() {
+        initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
+    });
+    UIkit.util.on(document, 'show', '#search-results-collections-content', function() {
+        initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
+    });
 </script>
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="search-uk-grid" uk-grid>
+    <div class="uk-grid uk-grid-small ourchive-content-padding" id="search-uk-grid" uk-grid>
         <div class="uk-width-1-1">
             <ul uk-tab="animation: uk-animation-fade; active: {{default_tab}}; connect: .search-switcher" id="search-results-switcher-controls" class="uk-flex-center uk-width-1-1 ourchive-padding-remove-horizontal">
                 <li id="results-switcher-li-works" class="ourchive-search-tab"><a href="#" id="works_tab" data-testid="works-tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
@@ -130,10 +141,10 @@
             <div id="selected-filters-list" class="uk-width-expand uk-margin-small-bottom">
                 <!-- Selected filters go here -->
             </div>
-            <div class="uk-width-expand uk-margin-bottom">
+            <div class="uk-width-expand uk-margin-bottom" id="search-filter-controls">
                 <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden id="search-results-toggle-button" onClick="updateFilterToggle()">Filter</button>
-                <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline uk-hidden@s" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
-                <select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-width-medium uk-hidden@s" onchange="updateSortOrder(value, true)">
+                <button class="uk-button uk-button-primary search-results-toggle uk-inline uk-hidden@s uk-margin-small-bottom uk-width-expand" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
+                <select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-margin-small-top uk-hidden@s uk-width-expand" onchange="updateSortOrder(value, true)">
                     <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
                     <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
                     <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
@@ -151,7 +162,7 @@
                     {% endfor %}
                     {% if works.data %}
                     <div class="uk-width-1-1 uk-align-right">
-                        {% include 'pagination.html' with previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}
+                        {% include 'pagination.html' with pagination_array=works.pagination_array page_params=works.page.page_params current_page=works.page.current_page previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}
                     </div>
                     {% endif %}
                 </div>
@@ -159,18 +170,18 @@
                         {% for bookmark in bookmarks.data %}
                             <div class="uk-margin-bottom">{% include "bookmark_tile.html" %} </div>
                         {% endfor %}
-                        {% include 'pagination.html' with previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
+                        {% include 'pagination.html' with pagination_array=bookmarks.pagination_array page_params=bookmarks.page.page_params current_page=bookmarks.page.current_page previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
                     </div>
                     <div class="uk-width-expand" id="search-results-collections-content">
                         {% for bookmark_collection in collections.data %}
                             <div class="uk-margin-bottom">{% include "bookmark_collection_tile.html" %}</div>
                         {% endfor %}
-                        {% include 'pagination.html' with previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
+                        {% include 'pagination.html' with pagination_array=collections.pagination_array page_params=collections.page.page_params current_page=collections.page.current_page previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
                     </div>
                     <div class="uk-width-expand" id="search-results-tags-content">
                         <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
                         {% include "tag_partial.html" with obj_name='tag' tags=tags.data %}
-                        {% include 'pagination.html' with previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
+                        {% include 'pagination.html' with pagination_array=tags.pagination_array page_params=tags.page.page_params current_page=tags.page.current_page previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
                         </dl>
                     </div>
                     <div uk-grid id="search-results-users-grid">

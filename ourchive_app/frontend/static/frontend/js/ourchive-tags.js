@@ -37,13 +37,13 @@ function tagCheck (e, type, bypass_check=false, divider='$!$') {
     }
 }
 
-function doAutocomplete(term, source, selector, tag_type='', divider='$!$') {
-  if (term.length < 2)
+function doAutocomplete(term, source, selector, tag_type='', divider='$!$', clickAction='') {
+  if (term.length < 4)
   {
     return;
   }
   var complete_select = 'tag-autocomplete-dropdown-'+selector;
-  fetch('/tag-autocomplete?text='+term+"&source="+source+"&type="+tag_type)
+  fetch('/tag-autocomplete?text='+term+"&source="+source+"&type="+tag_type+"&click_action="+clickAction)
     .then((response) => {
       return response.text();
     })
@@ -52,6 +52,23 @@ function doAutocomplete(term, source, selector, tag_type='', divider='$!$') {
     document.getElementById(complete_select).innerHTML = templateText;
     UIkit.drop(document.getElementById(complete_select)).show();
     });
+}
+
+function updateIndexSearchText(term, inForm=false) {
+    if (inForm === true) {
+        document.querySelectorAll('#nav-search-input').forEach(el => {
+            el.value = term;
+        });
+    }
+    else {
+        document.getElementById("filter-search-text").value = term;
+    }
+}
+
+function doIndexAutocomplete(term, source, selector, tag_type='', divider='$!$', clickAction='') {
+    updateIndexSearchText(term, true);
+    document.getElementById("filter-search-text").value = term;
+    doAutocomplete(term, source, selector, tag_type, divider, clickAction);
 }
 
 function doAdminAutocomplete(term, source, selector, tag_type='', divider='$!$') {

@@ -7,6 +7,7 @@ from django.contrib.postgres.search import TrigramWordDistance
 from django.core.paginator import Paginator
 from django.conf import settings
 import logging
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +112,7 @@ class PostgresProvider:
             if existing_query is None:
                 existing_query = or_query
             else:
-                existing_query = existing_query | or_query
+                existing_query = existing_query | or_query if 'count' not in filter_text else existing_query & or_query
         return existing_query
 
     def build_range_query(self, filter_obj, existing_query):
@@ -173,16 +174,22 @@ class PostgresProvider:
         ) else f"{base_string}limit={page_size}&page={page+1}&object_type={obj.__name__}"
         prev_params = None if not resultset or not resultset.has_previous(
         ) else f"{base_string}limit={page_size}&page={page-1}&object_type={obj.__name__}"
-        return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params}]
+        return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params, "page_params": f"&object_type={obj.__name__}", "current_page": page}]
 
     # TODO: move to kwargs or obj. my god.
     def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True, has_private=False, has_filterable=False):
         resultset = None
         page = int(page)
+        import time
+        start = time.time()
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
             resultset = obj.objects.filter(query)
-        if filters is not None:
+            end = time.time()
+            length = end - start
+            print(f'text execution: {length}')
+            start = time.time()
+        if filters is not None and (not not term and resultset and len(resultset) > 0):
             if self.include_mode == "all" and filters[0]:
                 for q_item in filters[0].children:
                     resultset = resultset.filter(q_item) if resultset else obj.objects.filter(q_item)
@@ -199,11 +206,15 @@ class PostgresProvider:
                     resultset = obj.objects.filter(filters[1])
                 elif filters[1]:
                     resultset = resultset.filter(filters[1])
+        end = time.time()
+        length = end - start
+        print(f'filter execution: {length}')
+        start = time.time()
         if resultset is not None and has_drafts:
             resultset = resultset.filter(draft=False)
         if resultset is not None and has_private:
             resultset = resultset.filter(is_private=False)
-        if resultset is not None and len(resultset) == 0 and query:
+        if resultset is not None and len(resultset) == 0 and query and not filters:
             # if exact matching & filtering produced no results, let's do limited trigram searching
             if len(trigram_fields) > 1:
                 resultset = obj.objects.annotate(zero_distance=TrigramWordDistance(
@@ -247,6 +258,10 @@ class PostgresProvider:
                 else:
                     resultset = resultset.order_by('zero_distance', '-updated_on')
             require_distinct = False
+        end = time.time()
+        length = end - start
+        print(f'trigram: {length}')
+        start = time.time()
         if resultset and has_filterable:
             resultset = resultset.filter(filterable=True)
         if require_distinct and resultset:
@@ -256,8 +271,20 @@ class PostgresProvider:
             else:
                 resultset = resultset.order_by('-updated_on')
             resultset = resultset.distinct()
+        end = time.time()
+        length = end - start
+        print(f'result processing: {length}')
+        start = time.time()
         tags = self.process_result_tags(resultset) if hasattr(obj, 'tags') else []
-        return self.process_results(resultset, page, obj), tags
+        end = time.time()
+        length = end - start
+        print(f'tags: {length}')
+        start = time.time()
+        final = self.process_results(resultset, page, obj), tags
+        end = time.time()
+        length = end - start
+        print(f'final: {length}')
+        return final
 
     def get_filters(self, search_object):
         include_filters = self.build_filters(
@@ -395,7 +422,7 @@ class PostgresProvider:
         resultset = self.run_queries(work_filters, query, Work, [
                                      'title', 'summary'], work_search.term, kwargs['page'], options.get('order_by', '-updated_on'), True)
         result_json = self.build_work_resultset(resultset[0][0], work_search.reserved_fields)
-        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
+        return {'pages': math.ceil(resultset[0][1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def search_bookmarks(self, options, **kwargs):
         bookmark_search = BookmarkSearch()
@@ -407,7 +434,7 @@ class PostgresProvider:
         resultset = self.run_queries(bookmark_filters, query, Bookmark, [
                                      'title', 'description'], bookmark_search.term, kwargs.get('page', 1), options.get('order_by', '-updated_on'), True, .85, True, True)
         result_json = self.build_bookmark_resultset(resultset[0][0], bookmark_search.reserved_fields)
-        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
+        return {'pages': math.ceil(resultset[0][1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def search_collections(self, options, **kwargs):
         collection_search = CollectionSearch()
@@ -420,7 +447,7 @@ class PostgresProvider:
         resultset = self.run_queries(collection_filters, query, BookmarkCollection, [
                                      'title', 'short_description'], collection_search.term, kwargs.get('page', 1), options.get('order_by', '-updated_on'), True)
         result_json = self.build_collection_resultset(resultset[0][0], collection_search.reserved_fields)
-        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
+        return {'pages': math.ceil(resultset[0][1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def search_users(self, options, **kwargs):
         user_search = UserSearch()
@@ -456,7 +483,8 @@ class PostgresProvider:
             resultset = Tag.objects.filter(
                 tag_type__type_name=tag_type).filter(tag_type__filterable=True).filter(filterable=True) if fetch_all else []
         for result in resultset:
-            results.append({"tag": result.text, "display_text": result.display_text,
+            usages = Work.objects.filter(tags__id=result.id, draft=False).count() + BookmarkCollection.objects.filter(tags__id=result.id, draft=False).count()
+            results.append({"tag": result.text, "display_text": result.display_text, "count": usages,
                             "id": result.id, "type": result.tag_type.label, "type_name": result.tag_type.type_name})
         return results
 
@@ -531,7 +559,7 @@ class PostgresProvider:
                 result_dict.pop(field, None)
             result_dict['tag_type'] = tag_type
             result_json.append(result_dict)
-        return {'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
+        return {'pages': math.ceil(resultset[0][1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
     def filter_by_tag(self, **kwargs):
         tag_search = TagSearch()

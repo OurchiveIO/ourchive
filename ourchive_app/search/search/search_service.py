@@ -10,7 +10,7 @@ class OurchiveSearch:
 		self.searcher = search.factory.create(search_backend, **config)
 		self.result_builder = SearchResults()
 
-	def do_search(self, **kwargs):
+	def do_search(self, user_id, **kwargs):
 		results = {}
 		tags = []
 		if 'tag_id' in kwargs and kwargs['tag_id']:
@@ -34,9 +34,10 @@ class OurchiveSearch:
 		if ('collection_search') in kwargs:
 			results['collection'] = self.searcher.search_collections(kwargs['options'], **kwargs['collection_search'])
 			tags = tags + results['collection'].pop('tags')
+		kwargs['user_id'] = user_id
 		facets = self.result_builder.get_result_facets(results, kwargs, tags)
-		results['facets'] = facets[0]
-		results['options'] = facets[1]
+		results['facets'] = facets['include_facets']
+		results['options'] = facets['options']
 		return results
 
 	def filter_by_work_type(self, **kwargs):
@@ -44,8 +45,8 @@ class OurchiveSearch:
 			return {'results': {'errors': ['Work type id must be a number.']}}
 		results = self.searcher.filter_by_work_type(**kwargs)
 		facets = self.result_builder.get_result_facets(results, kwargs)
-		results['facets'] = facets[0]
-		results['options'] = facets[1]
+		results['facets'] = facets['include_facets']
+		results['options'] = facets['options']
 		return results
 
 	def filter_by_tag(self, **kwargs):
@@ -53,8 +54,8 @@ class OurchiveSearch:
 			return {'results': {'errors': ['Tag id must be a number.']}}
 		results = self.searcher.filter_by_tag(**kwargs)
 		facets = self.result_builder.get_result_facets(results, kwargs)
-		results['facets'] = facets[0]
-		results['options'] = facets[1]
+		results['facets'] = facets['include_facets']
+		results['options'] = facets['options']
 		return results
 
 	def filter_by_attribute(self, **kwargs):
@@ -62,8 +63,8 @@ class OurchiveSearch:
 			return {'results': {'errors': ['Attribute id must be a number.']}}
 		results = self.searcher.filter_by_attribute(**kwargs)
 		facets = self.result_builder.get_result_facets(results, kwargs)
-		results['facets'] = facets[0]
-		results['options'] = facets[1]
+		results['facets'] = facets['include_facets']
+		results['options'] = facets['options']
 		return results
 
 	def do_tag_search(self, term, tag_type, fetch_all):

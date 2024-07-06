@@ -120,12 +120,12 @@ function createToken(wrapper, value) {
     token_span.innerText = value;
     const close = document.createElement("a");
     close.classList.add("selected-close");
-    close.setAttribute("tabindex", "-1");
+     close.setAttribute("tabindex", "-1");
     close.setAttribute("data-option", value);
     close.setAttribute("data-hits", 0);
     close.setAttribute("href", "#");
-    close.innerText = "x";
-    close.addEventListener("click", removeToken)
+    close.setAttribute("uk-icon", "icon: ourchive-close; ratio: .8");
+    close.addEventListener("click", removeToken);
     token.appendChild(token_span);
     token.appendChild(close);
     wrapper.insertBefore(token, search);
@@ -367,14 +367,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const select = document.querySelectorAll("[data-multi-select-plugin]");
         for (let i = 0; i < select.length; i++) {
             if (event) {
-                var isClickInside = select[i].parentElement.parentElement.contains(event.target);
+                var isClickInside = select[i].parentElement.contains(event.target);
 
                 if (!isClickInside) {
-                    const wrapper = select[i].parentElement.parentElement;
+                    const wrapper = select[i].parentElement;
                     const dropdown = wrapper.querySelector(".dropdown-icon");
                     const autocomplete_list = wrapper.querySelector(".autocomplete-list");
                     //the click was outside the specifiedElement, do something
-                    dropdown.classList.remove("active");
+                    if (dropdown.classList.contains("active")) {
+                        dropdown.classList.remove("active");
+                    }
                     autocomplete_list.innerHTML = "";
                     addPlaceholder(wrapper);
                 }

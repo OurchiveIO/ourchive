@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="flyover-results" uk-offcanvas="flip: true" class="uk-offcanvas">
 	<div class="uk-offcanvas-bar" id="flyover-results-child">
 		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work_mobile" action="/search/filter" id="search-results-work-facet-form-flyover">	
@@ -30,7 +31,7 @@
 	</div>
 </div>
 <div class="uk-width-1-4 uk-visible@s search-results-toggle" data-testid="result-filter-pane" id="search-results-desktop-filter-pane"> 
-	<div class="uk-inline uk-align-left"><span class="uk-text-bold uk-inline uk-text-large">Filters</span></div><div class="uk-inline uk-align-right"><a href="#" class="uk-link-reset" onClick="updateFilterToggle()"><span uk-icon="icon: close; ratio: 1" title="Close filters" id="search-results-close-desktop-filter" class="search-results-toggle" uk-toggle="target: .search-results-toggle"></span></a></div>
+	<div class="uk-inline uk-align-left"><span class="uk-text-bold uk-inline uk-text-large">Filters</span></div><div class="uk-inline uk-align-right"><a href="#" class="uk-link-reset" onClick="updateFilterToggle()"><span uk-icon="icon: ourchive-close" title="Close filters" id="search-results-close-desktop-filter" class="search-results-toggle" uk-toggle="target: .search-results-toggle"></span></a></div>
 	<div class="uk-align-left uk-width-expand">
 		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">	
 		{% csrf_token %}
@@ -45,6 +46,10 @@
 		    	</div>
 	    	</li>
 			{% endfor %}
+            <div class="uk-child-width-1 uk-grid uk-grid-small uk-margin" id="search-save-name-parent">
+                <label id="save-search-label" for="search-name" class="uk-text-bold">{% translate 'Save search with name' %}</label>
+                <span><input id=search-name" class="uk-input uk-width-large" type="text" name="search-name" value="{{ search_name|default_if_none:'' }}"></span>
+            </div>
 			<select id="search-results-sort-select-hidden" name="order_by" class="uk-select" hidden>
 	            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
 	            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>

@@ -3,6 +3,8 @@ from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
+
+from core.models import Language
 from .search_models import SearchObject
 from html import escape, unescape
 from django.http import HttpResponse, FileResponse
@@ -18,7 +20,7 @@ import random
 from django.core.cache import cache
 from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
-from frontend.searcher import build_and_execute_search
+from frontend.searcher import build_and_execute_search, execute_search
 from frontend.view_utils import *
 from datetime import *
 from django.urls import reverse
@@ -47,6 +49,7 @@ def index(request):
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
 		recent_works = response.response_data['results']
 	news = get_news(request).response_data.get('results', [])
+	homepage_news = do_get(f'api/news/homepage/', request, params=request.GET, object_name='news').response_data
 	browse_cards = create_browse_cards(request)
 	return render(request, 'index.html', {
 		'heading_message': _('ourchive_welcome'),
@@ -57,7 +60,8 @@ def index(request):
 		'stylesheet_name': 'ourchive-light.css',
 		'has_notifications': request.session.get('has_notifications'),
 		'news': news,
-		'browse_cards': browse_cards
+		'browse_cards': browse_cards,
+		'homepage_news': homepage_news
 	})
 
 
@@ -94,34 +98,39 @@ def user_name(request, pk):
 	series_params = {}
 	anthology_params = {}
 	anchor = None
-	if 'work_offset' in request.GET:
-		work_params['offset'] = request.GET['work_offset']
-		work_params['limit'] = request.GET['work_limit']
-		anchor = "work_tab"
-	if 'bookmark_offset' in request.GET:
-		bookmark_params['offset'] = request.GET['bookmark_offset']
-		bookmark_params['limit'] = request.GET['bookmark_limit']
-		anchor = "bookmark_tab"
-	if 'bookmark_collection_offset' in request.GET:
-		bookmark_collection_params['offset'] = request.GET['bookmark_collection_offset']
-		bookmark_collection_params['limit'] = request.GET['bookmark_collection_limit']
-		anchor = "bookmark_collection_tab"
-	if 'series_offset' in request.GET:
-		series_params['offset'] = request.GET['series_offset']
-		series_params['limit'] = request.GET['series_limit']
-		anchor = "series_tab"
-	if 'anthology_offset' in request.GET:
-		anthology_params['offset'] = request.GET['anthology_offset']
-		anthology_params['limit'] = request.GET['anthology_limit']
-		anchor = "anthology_tab"
+	if request.GET.get('work_offset', '') or request.GET.get('work_limit', ''):
+		work_params['offset'] = request.GET.get('work_offset', '')
+		work_params['limit'] = request.GET.get('work_limit', '')
+		anchor = 0
+	if request.GET.get('bookmark_offset', '') or request.GET.get('bookmark_limit', ''):
+		bookmark_params['offset'] = request.GET.get('bookmark_offset', '')
+		bookmark_params['limit'] = request.GET.get('bookmark_limit', '')
+		anchor = 1
+	if request.GET.get('bookmark_collection_offset', '') or request.GET.get('bookmark_collection_limit', ''):
+		bookmark_collection_params['offset'] = request.GET.get('bookmark_collection_offset', '')
+		bookmark_collection_params['limit'] = request.GET.get('bookmark_collection_limit', '')
+		anchor = 2
+	if request.GET.get('series_offset', '') or request.GET.get('series_limit', ''):
+		series_params['offset'] = request.GET.get('series_offset', '')
+		series_params['limit'] = request.GET.get('series_limit', '')
+		anchor = 3
+	if request.GET.get('anthology_offset', '') or request.GET.get('anthology_limit', ''):
+		anthology_params['offset'] = request.GET.get('anthology_offset', '')
+		anthology_params['limit'] = request.GET.get('anthology_limit', '')
+		anchor = 4
+	if anchor is None:
+		anchor = 0 if user.response_data['results'][0]["default_content"] == 'Work' else (1 if user.response_data['results'][0]["default_content"] == 'Bookmark' else 2)
+	# TODO: this violates DRY. all of this can be simplified, it's doing the exact same thing with multiple chives. also, we should just work with the results object instead of pulling out individual variables.
 	works_list = get_works_list(request, username)
 	works = works_list['works']
 	work_next = works_list['next_params'].replace("limit=", "work_limit=").replace("offset=", "work_offset=") if works_list['next_params'] else None
 	work_previous = works_list["prev_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=") if works_list["prev_params"] else None
+	work_count = works_list.get('count', 0)
 	bookmarks_response = do_get(f'api/users/{username}/bookmarks', request, params=bookmark_params).response_data
 	bookmarks = bookmarks_response['results']
 	bookmark_next = f'/username/{pk}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
 	bookmark_previous = f'/username/{pk}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
+	bookmark_count = bookmarks_response.get('count', 0)
 	bookmarks = get_object_tags(bookmarks)
 	bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
 	bookmark_collection_response = do_get(f'api/users/{username}/bookmarkcollections', request, params=bookmark_collection_params).response_data
@@ -130,17 +139,20 @@ def user_name(request, pk):
 	bookmark_collection_previous = f'/username/{pk}/{bookmark_collection_response["prev_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["prev_params"] is not None else None
 	bookmark_collection = get_object_tags(bookmark_collection)
 	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on', True)
+	collection_count = bookmark_collection_response.get('count', 0)
 	series_response = do_get(f'api/users/{username}/series', request, params=series_params).response_data
 	series = series_response['results']
 	series_next = f'/username/{pk}/{series_response["next_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["next_params"] is not None else None
 	series_previous = f'/username/{pk}/{series_response["prev_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["prev_params"] is not None else None
+	series_count = series_response.get('count', 0)
 	series = format_date_for_template(series, 'updated_on', True)
 	anthologies_response = do_get(f'api/users/{username}/anthologies', request, params=anthology_params).response_data
 	anthologies = anthologies_response['results']
 	anthology_next = f'/username/{pk}/{anthologies_response["next_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["next_params"] is not None else None
-	anthology_previous = f'/username/{pk}/{anthologies_response["prev_params"].replace("limit=", "series_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["prev_params"] is not None else None
+	anthology_previous = f'/username/{pk}/{anthologies_response["prev_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["prev_params"] is not None else None
 	anthologies = format_date_for_template(anthologies, 'updated_on', True)
 	anthologies = get_object_tags(anthologies)
+	anthology_count = anthologies_response.get('count', 0)
 	for anthology in anthologies:
 		anthology['attributes'] = get_attributes_for_display(anthology.get('attributes', []))
 	user = user.response_data['results'][0]
@@ -171,7 +183,12 @@ def user_name(request, pk):
 		'anthologies_next': anthology_next,
 		'anthologies_previous': anthology_previous,
 		'user': user,
-		'subscription' : subscription
+		'subscription': subscription,
+		'work_count': work_count,
+		'bookmark_count': bookmark_count,
+		'collection_count': collection_count,
+		'series_count': series_count,
+		'anthology_count': anthology_count
 	})
 
 
@@ -686,6 +703,140 @@ def search_filter(request):
 	return render(request, 'search_results.html', template_data)
 
 
+def saved_search_filter(request):
+	if request.GET.get('save_new', False):
+		search_data = get_save_search_data(request)
+		search_data['name'] = request.POST.get('search-name')
+		search_data['user'] = str(request.user)
+		response = do_post(f'api/savedsearches/', request, data=search_data, object_name='saved search')
+		if response.response_info.status_code >= 400:
+			messages.add_message(request, messages.ERROR, _("Something went wrong saving this search."))
+	data_dict = request.POST.copy()
+	data_dict = get_list_from_form('include_facets', data_dict, request)
+	data_dict = get_list_from_form('exclude_facets', data_dict, request)
+	data_dict = get_list_from_form('work_types', data_dict, request)
+	data_dict = get_list_from_form('languages', data_dict, request)
+	completes = data_dict.get('complete', None)
+	include_filter = {
+		'Work Type': data_dict.get('work_types', []),
+		'Language': data_dict.get('languages', []),
+		'Completion Status': completes if completes and completes != '-1' else ['0', '1'],
+		'tags': data_dict.get('include_facets', []),
+		"attributes": [],
+	}
+	if data_dict.get('word_count_gte'):
+		include_filter['word_count_gte'] = [data_dict.get('word_count_gte')]
+	if data_dict.get('word_count_lte'):
+		include_filter['word_count_lte'] = [data_dict.get('word_count_lte')]
+	# TODO: clean this up
+	search_request = {
+		'work_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': include_filter,
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'bookmark_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+				'tags': data_dict.get('include_facets', []),
+				"attributes": [],
+			},
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'collection_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+				'tags': data_dict.get('include_facets', []),
+				"attributes": [],
+			},
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'user_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+				'tags': data_dict.get('include_facets', []),
+				"attributes": [],
+			},
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'tag_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+			},
+			"exclude_filter": {
+			},
+		},
+		'options': {'order_by': '-updated_on', 'split_include_exclude': False},
+		'tag_id': '',
+		'attr_id': '',
+		'work_type_id': ''
+	}
+	template_data = execute_search(request, search_request)
+	if not template_data:
+		return redirect('/')
+	return render(request, 'search_results.html', template_data)
+
+
+def search_delete(request, pk):
+	response = do_delete(f'api/savedsearches/{pk}/delete', request, object_name='saved search')
+	process_message(request, response)
+	return referrer_redirect(request)
+
+
+def search_save(request, username):
+	search_data = get_save_search_data(request)
+	search_id = request.POST.get('search_id')
+	do_patch(f'api/savedsearches/{search_id}/', request, data=search_data, object_name='saved search')
+	return redirect(f'/users/{username}/savedsearches')
+
+
+def saved_search(request, pk):
+	if pk == 0:
+		return render(request, 'index_search_filter.html', {
+			'search': {}
+		})
+	search_response = do_get(f'api/savedsearches/{pk}', request, object_name='saved search')
+	if search_response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view this saved search.'),
+							 'search-not-authed')
+		return referrer_redirect(request)
+	search_data = search_response.response_data
+	languages = get_languages(request)
+	work_types = get_work_types(request)
+	search_data['languages'] = process_languages(languages, search_data.get('languages_readonly', []))
+	get_saved_search_chive_info(search_data, work_types)
+	return render(request, 'index_search_filter.html', {
+		'search': search_data
+	})
+
+
 def tag_autocomplete(request):
 	term = request.GET.get('text')
 	params = {'term': term}
@@ -699,7 +850,17 @@ def tag_autocomplete(request):
 	return render(request, template, {
 		'tags': tags,
 		'divider': settings.TAG_DIVIDER,
-		'fetch_all': params['fetch_all']})
+		'fetch_all': params['fetch_all'],
+		'click_action': request.GET.get('click_action', None)})
+
+
+def language_autocomplete(request):
+	term = request.GET.get('text')
+	languages = Language.objects.filter(display_name__icontains=term).all()
+	languages = [{'display': language.display_name, 'id': language.id} for language in languages]
+	return render(request, 'generic_autocomplete.html', {
+		'items': languages,
+		'click_action': request.GET.get('click_action', None)})
 
 
 def bookmark_autocomplete(request):
@@ -1841,8 +2002,8 @@ def news_list(request):
 	prev_params = news_response.get('prev_params', None)
 	return render(request, 'news.html', {
 		'news': news,
-		'next': f"/news/{next_params}" if next_params is not None else None,
-		'previous': f"/news/{prev_params}" if prev_params is not None else None,
+		'next': f"/news{next_params}" if next_params is not None else None,
+		'previous': f"/news{prev_params}" if prev_params is not None else None,
 		'root': settings.ROOT_URL})
 
 
@@ -2076,6 +2237,21 @@ def delete_work_anthology(request, pk, work_id):
 		return redirect(f'/anthologies/{pk}/edit')
 	else:
 		return redirect(f'/anthologies/create')
+
+
+def user_saved_searches(request, username):
+	response = do_get(f'api/users/{username}/savedsearches', request, None, 'saved searches')
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	saved_searches = response.response_data
+	languages = get_languages(request)
+	work_types = get_work_types(request)
+	for saved_search in saved_searches.get('results', []):
+		saved_search['languages'] = process_languages(languages, saved_search.get('languages_readonly', []))
+		get_saved_search_chive_info(saved_search, work_types)
+	return render(request, 'user_saved_searches.html', {
+		'saved_searches': saved_searches})
 
 
 @never_cache

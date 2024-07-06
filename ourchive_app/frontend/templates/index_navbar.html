@@ -12,11 +12,31 @@
 	    	 <ul class="uk-navbar-nav" id="uk-nav-center-ul">
 	    	 	<li id="nav-search-li">
     					<div class="uk-navbar-item uk-margin-small-left">
+                        <script>
+                            function fetchSavedSearch(element, selector) {
+                                let id = element.value;
+                                  fetch(`/savedsearch/${id}`)
+                                    .then((response) => {
+                                      return response.text();
+                                    })
+                                    .then((templateText) => {
+                                        document.getElementById(selector).innerHTML = "";
+                                        document.getElementById(selector).innerHTML = templateText;
+                                    });
+                                }
+                        </script>
+                            <div>
+                                <a class="uk-button uk-button-default ourchive-filter-button" uk-toggle="target: #filter-toggle-dsk">{% translate 'Filters' %} <span uk-icon="icon: chevron-down"></span></a>
+                                <div id="filter-toggle-dsk" class="uk-padding ourchive-work-card" style="position: absolute;" hidden>
+                                    {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk' %}
+                                </div>
+                            </div>
+
             				<form class="uk-search uk-search-default ourchive-nav-search" action="/search/" method="post" id="nav-search-form">
 			                	{% csrf_token %}
 			                	<button type="submit" data-testid="navbar-search-submit" class="uk-search-icon-flip" uk-search-icon></button>
-			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
-							<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
+			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
+							<div id="tag-autocomplete-dropdown-navbar" uk-drop="delay-hide: 1500"></div>
 			                </form>
     					</div>
 	        	</li>
@@ -26,10 +46,16 @@
 	    	 <ul class="uk-navbar-nav" id="uk-nav-mobile-ul">
 	    	 	<li id="nav-search-li">
 					<div class="uk-navbar-item">
+                            <div class="navbar-mobile-search">
+                                <a uk-icon="ourchive-filter" class="mobile-filter" uk-toggle="target: #filter-toggle-dsk-mobile"></a>
+                                <div id="filter-toggle-dsk-mobile" class="uk-padding ourchive-work-card" hidden>
+                                    {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk-mobile' %}
+                                </div>
+                            </div>
         				<form class="uk-search uk-search-default" action="/search/" method="post" id="nav-search-form">
 		                	{% csrf_token %}
 		                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>
-		                    <input class="uk-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
+		                    <input class="uk-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
 						<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
 		                </form>
 					</div>

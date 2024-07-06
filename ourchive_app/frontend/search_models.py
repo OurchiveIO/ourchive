@@ -1,5 +1,5 @@
 class ParentSearch():
-	def __init__(self, work_search, bookmark_search, collection_search, user_search, tag_search, order_by):
+	def __init__(self, work_search, bookmark_search, collection_search, user_search, tag_search, order_by, search_name):
 		self.work_search = work_search
 		self.bookmark_search = bookmark_search
 		self.collection_search = collection_search
@@ -9,6 +9,8 @@ class ParentSearch():
 		self.tag_id = None
 		self.attr_id = None
 		self.work_type_id = None
+		if search_name:
+			self.search_name = search_name
 
 	def get_dict(self):
 		self.work_search = self.work_search.__dict__
@@ -59,13 +61,13 @@ class WorkSearch(object):
 
 
 class SearchObject(object):
-	def with_term(self, term, pagination=None, mode=('all', 'all'), order_by='-updated_on'):
+	def with_term(self, term, pagination=None, mode=('all', 'all'), order_by='-updated_on', search_name=None):
 		work_search = ObjectSearch(mode, term)
 		bookmark_search = ObjectSearch(mode, term)
 		collection_search = ObjectSearch(mode, term)
 		user_search = ObjectSearch(mode, term)
 		tag_search = TagSearch(mode, term)
-		return_obj = ParentSearch(work_search, bookmark_search, collection_search, user_search, tag_search, order_by)
+		return_obj = ParentSearch(work_search, bookmark_search, collection_search, user_search, tag_search, order_by, search_name)
 
 		if pagination:
 			obj = pagination['obj'].lower()

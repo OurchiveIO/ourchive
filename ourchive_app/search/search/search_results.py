@@ -1,18 +1,23 @@
+from search.models import SavedSearch
 from search.search.search_obj import FilterFacet, ResultFacet, GroupFacet, ContextualFilterFacet
 from core.models import WorkType, OurchiveSetting, Tag, AttributeType, TagType, Language, SearchGroup, AttributeValue
+from search.search import constants as search_constants
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class SearchResults(object):
 
     def __init__(self):
         self.include_search_groups = {}
         self.exclude_search_groups = {}
+        self.default_search_group = SearchGroup(label='Facets')
         if not SearchGroup.objects.count() > 0:
             self.include_search_groups['Facets'] = []
             self.exclude_search_groups['Facets'] = []
         else:
+            self.default_search_group = SearchGroup.objects.first()
             for group in SearchGroup.objects.all():
                 self.include_search_groups[group.label] = []
                 self.exclude_search_groups[group.label] = []
@@ -26,8 +31,11 @@ class SearchResults(object):
         self.collection_search_exclude = kwargs.get('collection_search', []).get('exclude_filter', {})
         self.tag_search_include = kwargs.get('tag_search', []).get('include_filter', {})
         self.tag_search_exclude = kwargs.get('tag_search', []).get('exclude_filter', {})
-        self.split_include_exclude = str(kwargs.get('options', {}).get('split_include_exclude', 'true')).lower() == "true"
+        self.split_include_exclude = str(
+            kwargs.get('options', {}).get('split_include_exclude', 'true')).lower() == "true"
         self.order_by = str(kwargs.get('options', {}).get('order_by', '-updated_on'))
+        self.search_name = kwargs.get('search_name', None)
+        self.user_id = kwargs.get('user_id', None)
 
     def flatten_search_groups(self, context):
         groups_array = []
@@ -54,7 +62,9 @@ class SearchResults(object):
                     if not checked_tag:
                         checked_tag = tag_text.lower() in getattr(self, f'work_search_{context}').get('tags', [])
                         if not self.split_include_exclude:
-                            inverse_checked = tag_text.lower() in getattr(self, f'work_search_{self.get_inverse_context(context)}').get('tags', [])
+                            inverse_checked = tag_text.lower() in getattr(self,
+                                                                          f'work_search_{self.get_inverse_context(context)}').get(
+                                'tags', [])
                             tag_filter_vals.append(ContextualFilterFacet(tag_text, checked_tag, inverse_checked))
                         else:
                             tag_filter_vals.append(FilterFacet(tag_text, checked_tag))
@@ -69,7 +79,8 @@ class SearchResults(object):
                 tag_filter_name = tag_filter.display_text
         tags_dict = {}
         for tag_type in TagType.objects.all():
-            tags_dict[tag_type.label] = {'tags': [], 'type_id': tag_type.id, 'type_label': tag_type.label, 'group': tag_type.search_group.label if tag_type.search_group else 'Facets'}
+            tags_dict[tag_type.label] = {'tags': [], 'type_id': tag_type.id, 'type_label': tag_type.label,
+                                         'group': tag_type.search_group.label if tag_type.search_group else self.default_search_group.label}
         for tag in getattr(self, f'work_search_{context}').get('tags', []):
             db_tag_list = Tag.objects.filter(display_text__iexact=tag).all()
             for db_tag in db_tag_list:
@@ -100,7 +111,9 @@ class SearchResults(object):
     def get_attribute_facets(self, results, result_json, context):
         attributes_dict = {}
         for attribute_type in AttributeType.objects.filter().all():
-            attributes_dict[attribute_type.display_name] = {'attrs': [], 'type_id': attribute_type.id, 'type_label': attribute_type.display_name, 'group': attribute_type.search_group.label if attribute_type.search_group else 'Facets'}
+            attributes_dict[attribute_type.display_name] = {'attrs': [], 'type_id': attribute_type.id,
+                                                            'type_label': attribute_type.display_name,
+                                                            'group': attribute_type.search_group.label if attribute_type.search_group else self.default_search_group.label}
         for attribute in getattr(self, f'work_search_{context}').get('attributes', []):
             db_attr_list = AttributeValue.objects.filter(display_name__iexact=attribute).all()
             for db_attr in db_attr_list:
@@ -114,7 +127,8 @@ class SearchResults(object):
                 for val in attributes_dict[key]['attrs']:
                     checked_attr = val.lower() in getattr(self, f'work_search_{context}').get('attributes', [])
                     attribute_filter_vals.append(FilterFacet(val, checked_attr))
-                result_facet = ResultFacet(attributes_dict[key]['type_id'], key, attribute_filter_vals, 'attribute').to_dict()
+                result_facet = ResultFacet(attributes_dict[key]['type_id'], key, attribute_filter_vals,
+                                           'attribute').to_dict()
                 try:
                     getattr(self, f'{context}_search_groups')[attributes_dict[key]['group']].append(result_facet)
                 except Exception as e:
@@ -143,7 +157,9 @@ class SearchResults(object):
         languages = Language.objects.all()
         languages_list = []
         for language in languages:
-            checked = language.display_name in getattr(self, f'work_search_{context}').get('Language', []) or language.display_name in getattr(self, f'collection_search_{context}').get('Language', [])
+            checked = language.display_name in getattr(self, f'work_search_{context}').get('Language',
+                                                                                           []) or language.display_name in getattr(
+                self, f'collection_search_{context}').get('Language', [])
             languages_list.append(
                 {"label": language.display_name, "filter_val": language.display_name, "checked": checked})
         languages_dict = {}
@@ -161,8 +177,9 @@ class SearchResults(object):
         word_count_dict["filters"] = ["word_count_gte", "word_count_lte"]
         input_value_gte = getattr(self, f'work_search_{context}').get('word_count_gte', [""])[0]
         input_value_lte = getattr(self, f'work_search_{context}').get('word_count_lte', [""])[0]
-        word_count_dict["values"] = [{"label": "From", "filter_val": "word_count_gte", "type": "text_range", "value": input_value_gte},
-                                     {"label": "To","filter_val": "word_count_lte", "type": "text_range", "value": input_value_lte}]
+        word_count_dict["values"] = [
+            {"label": "From", "filter_val": "word_count_gte", "type": "text_range", "value": input_value_gte},
+            {"label": "To", "filter_val": "word_count_lte", "type": "text_range", "value": input_value_lte}]
         chive_info["facets"].append(word_count_dict)
 
         # TODO: ADD FILTER
@@ -171,9 +188,9 @@ class SearchResults(object):
         audio_length_dict["display_type"] = 'checkbox'
         audio_length_dict["values"] = [{"label": "Under 30:00", "filter_val": "audio_length_range|ranges|0|30"},
                                        {"label": "30:00 - 1:00:00",
-                                           "filter_val": "audio_length_range|ranges|30|60"},
+                                        "filter_val": "audio_length_range|ranges|30|60"},
                                        {"label": "1:00:00 - 2:00:00",
-                                           "filter_val": "audio_length_range|ranges|60|120"},
+                                        "filter_val": "audio_length_range|ranges|60|120"},
                                        {"label": "2:00:00 - 3:00:00",
                                         "filter_val": "audio_length_range|ranges|120|180"},
                                        {"label": "3:00:00+", "filter_val": "audio_length_range|ranges|20000|180"}]
@@ -184,8 +201,12 @@ class SearchResults(object):
         complete_dict["label"] = "Completion Status"
         complete_dict["object_type"] = 'work'
         complete_dict['display_type'] = 'checkbox'
-        complete_dict["values"] = [{"label": "Complete", "filter_val": "1", "checked": "1" in getattr(self, f'work_search_{context}').get("Completion Status", [])},
-                                   {"label": "Work In Progress", "filter_val": "0", "checked": "0" in getattr(self, f'work_search_{context}').get("Completion Status", [])}]
+        complete_dict["values"] = [{"label": "Complete", "filter_val": "1",
+                                    "checked": "1" in getattr(self, f'work_search_{context}').get("Completion Status",
+                                                                                                  [])},
+                                   {"label": "Work In Progress", "filter_val": "0",
+                                    "checked": "0" in getattr(self, f'work_search_{context}').get("Completion Status",
+                                                                                                  [])}]
         chive_info["facets"].append(complete_dict)
 
         return chive_info
@@ -193,6 +214,7 @@ class SearchResults(object):
     def get_options_facets(self):
         options = {}
         options["order_by"] = self.order_by
+        options["search_name"] = self.search_name
         return options
 
     def get_contextual_result_facets(self, results, context, tags):
@@ -211,8 +233,45 @@ class SearchResults(object):
         self.set_shared_vals(kwargs)
         result_json_include = self.get_contextual_result_facets(results, 'include', tags)
         options = self.get_options_facets()
+        results = {'include_facets': result_json_include, 'options': options}
         if self.split_include_exclude:
-            result_json_exclude = self.get_contextual_result_facets(results, 'exclude', tags)
-            return [result_json_include, result_json_exclude, options]
+            results['exclude_facets'] = self.get_contextual_result_facets(results, 'exclude', tags)
+        if self.search_name:
+            results['search_name'] = self.search_name
+            self.save_search(self.order_by, self.user_id)
+        return results
+
+    def save_search(self, order_by, user_id):
+        '''tag_id = models.IntegerField(null=True, blank=True)
+        type_id = models.IntegerField(null=True, blank=True)
+        attr_id = models.IntegerField(null=True, blank=True)
+        languages = models.ManyToManyField('core.Language')
+        info_facets = models.CharField(null=True, blank=True)
+        include_facets = models.CharField(null=True, blank=True)
+        exclude_facets = models.CharField(null=True, blank=True)
+        order_by = models.CharField(max_length=100, blank=True, null=True)'''
+        info_facets = {
+            search_constants.WORK_TYPE_FILTER_KEY: getattr(self, f'work_search_include').get(
+                search_constants.WORK_TYPE_FILTER_KEY, []),
+            search_constants.LANGUAGE_FILTER_KEY: getattr(self, f'work_search_include').get(
+                search_constants.LANGUAGE_FILTER_KEY, []),
+            search_constants.COMPLETE_FILTER_KEY: getattr(self, f'work_search_include').get(
+                search_constants.COMPLETE_FILTER_KEY, []),
+            search_constants.WORD_COUNT_FILTER_KEY_LTE:
+                getattr(self, f'work_search_include').get('word_count_lte', [""])[0],
+            search_constants.WORD_COUNT_FILTER_KEY_GTE:
+                getattr(self, f'work_search_include').get('word_count_gte', [""])[0]
+        }
+        include_facets = list(set(self.work_search_include['tags'] + self.collection_search_include['tags']))
+        exclude_facets = list(set(self.work_search_exclude['tags'] + self.collection_search_exclude['tags']))
+        if SavedSearch.objects.filter(name=self.search_name).count() > 0:
+            saved_search = SavedSearch.objects.filter(name=self.search_name, user_id=user_id).first()
         else:
-            return [result_json_include, options]
+            saved_search = SavedSearch(user_id=user_id,
+                                       name=self.search_name)
+        saved_search.order_by = order_by
+        saved_search.info_facets = info_facets
+        saved_search.include_facets = include_facets
+        saved_search.exclude_facets = exclude_facets
+        saved_search.save()
+        return saved_search

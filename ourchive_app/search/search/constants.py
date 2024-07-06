@@ -1,0 +1,7 @@
+TAG_SEARCH_KEY = 'tags__text__icontains'
+WORD_COUNT_FILTER_KEY_GTE = 'word_count_gte'
+WORD_COUNT_FILTER_KEY_LTE = 'word_count_lte'
+COMPLETE_KEY = 'is_complete__exact'
+WORK_TYPE_FILTER_KEY = 'Work Type'
+COMPLETE_FILTER_KEY = 'Completion Status'
+LANGUAGE_FILTER_KEY = 'Language'

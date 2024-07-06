@@ -82,7 +82,6 @@ function inputChange(e) {
     const dropdown = wrapper.querySelector(".dropdown-icon");
 
     const input_val = e.target.value;
-
     if (input_val) {
         dropdown.classList.add("active");
         populateAutocompleteList(select, input_val.trim());
@@ -140,8 +139,8 @@ function createToken(wrapper, value, text_value, id="") {
     close.setAttribute("data-option", text_value);
     close.setAttribute("data-hits", 0);
     close.setAttribute("href", "#");
-    close.setAttribute("uk-icon", "icon: close; ratio: 1");
-    close.addEventListener("click", removeToken)
+    close.setAttribute("uk-icon", "icon: ourchive-close; ratio: .8");
+    close.addEventListener("click", removeToken);
     token.appendChild(token_span);
     token.appendChild(close);
     wrapper.insertBefore(token, search);
@@ -163,8 +162,11 @@ function handleFacetInput(event) {
     let labelParts = event.target.id.split(',');
     let label = labelParts[1] + ": " + event.target.value; 
     if ((event.target.value) && (event.target.value.trim() != '')) {
-        input_id = event.target.getAttribute("id").replace(',mobile', '');
-        createToken(document.getElementById("selected-filters-list"), label, label, input_id+"_badge");
+        input_id = `${event.target.getAttribute("id").replace(',mobile', '')}_badge`;
+        if (document.getElementById(input_id) !== null) {
+            document.getElementById(input_id).remove();
+        }
+        createToken(document.getElementById("selected-filters-list"), label, label, input_id);
     }
 }
 
@@ -215,7 +217,6 @@ function populateAutocompleteList(select, query, dropdown = false) {
         options_to_show = autocomplete_options;
     else
         options_to_show = autocomplete(query, autocomplete_options);
-
     const wrapper = select.parentNode;
     const input_search = wrapper.querySelector(".search-container");
     const autocomplete_list = wrapper.querySelector(".autocomplete-list");
@@ -264,8 +265,7 @@ function selectOption(e) {
     let optionId = option.getAttribute("id");
     let value = e.target.dataset.value;
     if (optionId.includes(',exclude')) {
-         value = '<span><span class="uk-icon ourchive-search-badge-exclude" uk-icon="icon: ban; ratio: 1"></span> '
-            + " " + value + "</span>";
+         value = '<span><span class="uk-icon ourchive-search-badge-exclude" uk-icon="icon: ban; ratio: 1"></span>' + value + "</span>";
     }
     createToken(wrapper, value, e.target.dataset.value, optionId+"_dropdown");
     createToken(document.getElementById("selected-filters-list"), value, e.target.dataset.value, optionId.replace(',mobile', '')+"_badge");
@@ -301,7 +301,7 @@ function autocomplete(query, options) {
     let options_return = [];
 
     for (let i = 0; i < options.length; i++) {
-        if (query.toLowerCase() === options[i].slice(0, query.length).toLowerCase()) {
+        if (query.toLowerCase() === options[i].trim().slice(0, query.length).toLowerCase()) {
             options_return.push(options[i]);
         }
     }
@@ -370,18 +370,26 @@ function removeToken(e) {
             wrapper = document.getElementById(otherId).closest(".multi-select-component");
         }
         else {
-            var desktop_id = token_id.replace('_badge', '');
-            var mobile_id = (token_id.replace('_badge', '')) +',mobile';
-            if (document.getElementById(desktop_id).checked || document.getElementById(mobile_id).checked) {
-                document.getElementById(desktop_id).checked = false;
-                document.getElementById(mobile_id).checked = false;
+            otherId = otherId = token_id.replace('_badge', ',mobile_dropdown')
+            if (document.getElementById(otherId) !== null) {
+                wrapper = document.getElementById(otherId).closest(".multi-select-component");
+                console.log(wrapper);
             }
             else {
-                document.getElementById(desktop_id).value = null;
-                document.getElementById(mobile_id).value = null;
+                var desktop_id = token_id.replace('_badge', '');
+                var mobile_id = (token_id.replace('_badge', '')) +',mobile';
+                if (document.getElementById(desktop_id).checked || document.getElementById(mobile_id).checked) {
+                    document.getElementById(desktop_id).checked = false;
+                    document.getElementById(mobile_id).checked = false;
+                }
+                else {
+                    document.getElementById(desktop_id).value = null;
+                    document.getElementById(mobile_id).value = null;
+                }
             }
         }
     }
+    console.log(wrapper);
     if (wrapper !== null) {
         const input_search = wrapper.querySelector(".selected-input");
         const dropdown = wrapper.querySelector(".dropdown-icon");
@@ -450,10 +458,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const select = document.querySelectorAll("[data-multi-select-plugin]");
         for (let i = 0; i < select.length; i++) {
             if (event) {
-                var isClickInside = select[i].parentElement.parentElement.contains(event.target);
-
+                var isClickInside = select[i].parentElement.contains(event.target);
                 if (!isClickInside) {
-                    const wrapper = select[i].parentElement.parentElement;
+                    const wrapper = select[i].parentElement;
                     const dropdown = wrapper.querySelector(".dropdown-icon");
                     const autocomplete_list = wrapper.querySelector(".autocomplete-list");
                     //the click was outside the specifiedElement, do something
