@@ -245,6 +245,16 @@ def build_search(request):
 
 def execute_search(request, post_request):
 	active_tab = request.POST.get('active_tab', None)
+	if not active_tab:
+		object_type = request.GET.get('object_type', '')
+		if object_type == 'BookmarkCollection':
+			active_tab = 2
+		elif object_type == 'Work':
+			active_tab = 0
+		elif object_type == 'Tag':
+			active_tab = 3
+		elif object_type == 'Bookmark':
+			active_tab = 1
 	term = request.POST.get('term')
 	if not term:
 		term = request.GET.get('term')

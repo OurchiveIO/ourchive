@@ -207,7 +207,11 @@ function initShowMores(objType='chive', firstContainer='tag-container', secondCo
         if (el.offsetHeight < el.scrollHeight) {
             if (!couldFit) {
                 console.log(`more-btn-${firstSelector}-${id}`);
-                document.getElementById(`more-btn-${firstSelector}-${id}`).style.display = 'inline';
+                var showMore = document.getElementById(`more-btn-${firstSelector}-${id}`);
+                if (showMore !== null)
+                {
+                    showMore.style.display = 'inline';
+                }
             } else {
                 el.style.height = `${el.scrollHeight}px`;
                 el.style.maxHeight = `${el.scrollHeight}px`;
