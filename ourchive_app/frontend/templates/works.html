@@ -2,6 +2,11 @@
 {% load i18n %}
 {% block title %}{% translate 'Works' %}{% endblock %}
 {% block content %}	
+    <script>
+        window.addEventListener("load", function() {
+            initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
+        });
+    </script>
     <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="works-uk-grid" uk-grid>
         {% if user_filter %}
             <div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="works-list-user-filter-parent">

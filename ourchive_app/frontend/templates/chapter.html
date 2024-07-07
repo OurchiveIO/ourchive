@@ -16,12 +16,22 @@
     <div class="uk-width-1-1 uk-margin-small-top uk-text-center uk-padding-remove-horizontal" id="chapter-header-parent">
 	    <h3 id="chapter-header-h2"><a id="chapter-header-link"  href="/works/{{ id }}/{{ chapter.number|add:"-1" }}">{% if work.chapter_count > 1 %}Chapter {{ chapter.number }}{% if chapter.title %}: {% endif %}{{ chapter.title|default:'' }}{% endif %}</a></h3>
 	{% if chapter.draft %}
-            <div class="uk-width-auto" id="chapter-draft-div">
-                <span id="chapter-draft-badge" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+            <div class="uk-width-auto uk-margin-small-top uk-margin-small-bottom" id="chapter-draft-div">
+                <span id="chapter-draft-badge" class="uk-label uk-label-warning"><strong>{% translate 'DRAFT CHAPTER' %}</strong></span>
             </div>
     {% endif %}
 </div>
 {% endif %}
+<div class="uk-width-1-1 uk-align-right uk-text-right" id="chapter-user-actions-parent">
+	{% if work.chapter_count > 1 or chapter.draft and work.owner %}
+        {% if chapter.draft %}
+        <a class="ourchive-icon-wrapper" id="chapter-{{chapter.id}}-publish-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/publish"><span id="chapter={{chapter.id}}-publish-icon" uk-icon="icon: ourchive-publish;ratio: 1" title="{% translate 'Publish' %}"></a>
+        {% endif %}
+        <a id="chapter-edit-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/edit?from_work={{chapter_offset}}" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-edit; ratio: 1" title="{% translate 'Edit' %}"></span></a>
+        <a id="chapter-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete"><span uk-icon="icon: ourchive-delete; ratio: 1" title="{% translate 'Delete' %}"></span></a>
+        {% include "delete_modal.html" with object='chapter' parent_object_id=work.id object_id=chapter.id %}
+    {% endif %}
+</div>
 {% if chapter.summary or chapter.notes or chapter.attributes %}
     <div id="chapter-context-parent" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid uk-padding-remove-horizontal" uk-grid>
         {% if chapter.notes or chapter.summary %}

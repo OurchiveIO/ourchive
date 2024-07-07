@@ -2,6 +2,11 @@
 {% load i18n %}
 {% block title %}{% translate 'Series' %}{% endblock %}
 {% block content %}
+    <script>
+        window.addEventListener("load", function() {
+            initShowMores('series', 'series-tag-container', 'series-description-container', 'tags', 'description');
+        });
+    </script>
     <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="series-uk-grid" uk-grid>
         {% if user_filter %}
             <div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="series-list-user-filter-parent">

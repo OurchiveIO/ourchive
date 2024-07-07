@@ -6,7 +6,7 @@ Ourchive is a configurable, multi-media archive application. We aim to meet the 
 
 <!-- MarkdownTOC -->
 
-- [Installation](#links)
+- [Links](#links)
 - [Installation](#installation)
 - [Contributor Guidelines](#contributor-guidelines)
     - [Ways to Contribute](#ways-to-contribute)
