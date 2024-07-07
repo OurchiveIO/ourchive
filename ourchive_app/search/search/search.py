@@ -465,7 +465,7 @@ class PostgresProvider:
             for field in user_search.reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
-        return {'data': result_json, 'page': {}, 'tags': []}
+        return {'pages': math.ceil(resultset.count()/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': {}, 'tags': []}
 
     def autocomplete_tags(self, term, tag_type, fetch_all=False):
         results = []
@@ -617,11 +617,11 @@ class PostgresProvider:
             result_dict.pop(field, None)
         result_dict['tag_type'] = tag_type
         result_json.append(result_dict)
-        tag_results = {'data': result_json, 'page': {'count': len(result_json)}}
+        tag_results = {'pages': math.ceil(1/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': {'count': len(result_json)}}
 
-        work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
-        bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
-        collection_results = {'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
+        work_results = {'pages': math.ceil(works_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
+        bookmark_results = {'pages': math.ceil(bookmarks_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
+        collection_results = {'pages': math.ceil(collections_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
         results = {'work': work_results, 'bookmark': bookmark_results, 'collection': collection_results,
                    'tag': tag_results, 'user': {'data': [], 'page': {}}}
         return results
@@ -673,11 +673,11 @@ class PostgresProvider:
         collections_processed = self.process_results(collections, bookmark_search.page, BookmarkCollection, base_string)
 
         # tag result object
-        tag_results = {'data': {}, 'page': {'count': 0}}
+        tag_results = {'pages': 0, 'data': {}, 'page': {'count': 0}}
 
-        work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
-        bookmark_results = {'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
-        collection_results = {'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
+        work_results = {'pages': math.ceil(works_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
+        bookmark_results = {'pages': math.ceil(bookmarks_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
+        collection_results = {'pages': math.ceil(collections_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
         results = {'work': work_results, 'bookmark': bookmark_results, 'collection': collection_results,
                    'tag': tag_results, 'user': {'data': [], 'page': {}}}
         return results
@@ -701,10 +701,12 @@ class PostgresProvider:
         base_string = f'/attributes/{kwargs["attr_id"]}?attr_id={kwargs["attr_id"]}&'
 
         works_processed = self.process_results(works, work_search.page, Work, base_string)
-
-        work_results = {'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
-        results = {'work': work_results, 'bookmark': {'data': [], 'page': {'count': 0}},
-                   'collection': {'data': [], 'page': {'count': 0}}, 'tag': {'data': [], 'page': {'count': 0}},
+        pages = math.ceil(works_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10))
+        data = self.build_work_resultset(works_processed[0], work_search.reserved_fields)
+        page = works_processed[1]
+        work_results = {'pages': pages, 'data': data, 'page': page}
+        results = {'work': work_results, 'bookmark': {'pages': 0, 'data': [], 'page': {'count': 0}},
+                   'collection': {'pages': 0, 'data': [], 'page': {'count': 0}}, 'tag': {'pages': 0, 'data': [], 'page': {'count': 0}},
                    'user': {'data': [], 'page': {'count': 0}}}
         return results
 
