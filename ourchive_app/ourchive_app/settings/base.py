@@ -20,7 +20,7 @@ APPEND_SLASH = True
 SECRET_KEY = os.getenv('OURCHIVE_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('OURCHIVE_DEBUG') == 'True'
+DEBUG = os.getenv('OURCHIVE_DEBUG', False) == 'True'
 
 hosts = []
 if os.getenv('OURCHIVE_DEV') == 'True' or DEBUG:
