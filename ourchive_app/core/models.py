@@ -1135,7 +1135,7 @@ class SearchGroup(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_on = models.DateTimeField(default=timezone.now)
     updated_on = models.DateTimeField(default=timezone.now)
-    label = models.CharField(max_length=200, blank=False, null=False, validators=[validate_slug])
+    label = models.CharField(max_length=200, blank=False, null=False)
     display_order = models.IntegerField(default=1)
 
     def __repr__(self):
