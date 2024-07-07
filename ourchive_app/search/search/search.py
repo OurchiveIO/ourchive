@@ -185,6 +185,10 @@ class PostgresProvider:
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
             resultset = obj.objects.filter(query)
+            if resultset is not None and has_drafts:
+                resultset = resultset.filter(draft=False)
+            if resultset is not None and has_private:
+                resultset = resultset.filter(is_private=False)
             end = time.time()
             length = end - start
             print(f'text execution: {length}')
@@ -210,10 +214,6 @@ class PostgresProvider:
         length = end - start
         print(f'filter execution: {length}')
         start = time.time()
-        if resultset is not None and has_drafts:
-            resultset = resultset.filter(draft=False)
-        if resultset is not None and has_private:
-            resultset = resultset.filter(is_private=False)
         if resultset is not None and len(resultset) == 0 and query and not filters:
             # if exact matching & filtering produced no results, let's do limited trigram searching
             if len(trigram_fields) > 1:

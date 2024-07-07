@@ -887,7 +887,7 @@ class RecentWorksList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return Work.objects.filter(draft=False).order_by("-updated_on")[:10]
+        return Work.objects.filter(draft=False).order_by("-system_updated_on")[:10]
 
 
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):

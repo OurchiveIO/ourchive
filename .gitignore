@@ -36,3 +36,6 @@ output
 # ignore python stuff
 **/__pycache__
 .coverage
+
+# ignore local static compilation - we don't want to check that in
+ourchive_app/static/*
