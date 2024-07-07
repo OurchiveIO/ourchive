@@ -307,9 +307,10 @@ class PostgresProvider:
         return {"tag_type": tag.tag_type.label, "text": tag.text, "display_text": tag.display_text,
          "id": tag.id, "search_group": tag.tag_type.search_group.label if tag.tag_type.search_group else TagType.DEFAULT_SEARCH_GROUP_LABEL}
 
-    def build_work_resultset(self, resultset, reserved_fields):
+    def build_work_resultset(self, resultset, reserved_fields, return_tags=False):
         # build final resultset
         result_json = []
+        all_tags = []
         for result in resultset:
             chapters = list(result.chapters.all())
             username = result.user.username
@@ -317,6 +318,8 @@ class PostgresProvider:
             for tag in result.tags.all():
                 tag_dict = self.get_tags_dict(tag)
                 tags.append(tag_dict)
+            if return_tags:
+                all_tags += tags
             attributes = []
             for attribute in result.attributes.all():
                 attribute_dict = {"attribute_type": attribute.attribute_type.display_name, "name": attribute.name,
@@ -353,10 +356,14 @@ class PostgresProvider:
                         "anthology": anthology.anthology.title
                     })
             result_json.append(result_dict)
-        return result_json
+        if not return_tags:
+            return result_json
+        else:
+            return result_json, all_tags
 
-    def build_bookmark_resultset(self, resultset, reserved_fields):
+    def build_bookmark_resultset(self, resultset, reserved_fields, return_tags=False):
         result_json = []
+        all_tags = []
         for result in resultset:
             username = result.user.username
             tags = []
@@ -364,6 +371,8 @@ class PostgresProvider:
                 tag_dict = {"tag_type": tag.tag_type.label, "text": tag.text, "display_text": tag.display_text,
                             "id": tag.id}
                 tags.append(tag_dict)
+            if return_tags:
+                all_tags += tags
             attributes = []
             for attribute in result.attributes.all():
                 attribute_dict = {"attribute_type": attribute.attribute_type.display_name, "name": attribute.name,
@@ -381,10 +390,14 @@ class PostgresProvider:
             for field in reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
-        return result_json
+        if not return_tags:
+            return result_json
+        else:
+            return result_json, all_tags
 
-    def build_collection_resultset(self, resultset, reserved_fields):
+    def build_collection_resultset(self, resultset, reserved_fields, return_tags=False):
         result_json = []
+        all_tags = []
         for result in resultset:
             username = result.user.username
             tags = []
@@ -392,6 +405,8 @@ class PostgresProvider:
                 tag_dict = {"tag_type": tag.tag_type.label, "text": tag.text, "display_text": tag.display_text,
                             "id": tag.id}
                 tags.append(tag_dict)
+            if return_tags:
+                all_tags += tags
             attributes = []
             for attribute in result.attributes.all():
                 attribute_dict = {"attribute_type": attribute.attribute_type.display_name, "name": attribute.name,
@@ -406,7 +421,10 @@ class PostgresProvider:
             for field in reserved_fields:
                 result_dict.pop(field, None)
             result_json.append(result_dict)
-        return result_json
+        if not return_tags:
+            return result_json
+        else:
+            return result_json, all_tags
 
     def search_works(self, options, **kwargs):
         work_search = WorkSearch()
@@ -619,9 +637,12 @@ class PostgresProvider:
         result_json.append(result_dict)
         tag_results = {'pages': math.ceil(1/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': {'count': len(result_json)}}
 
-        work_results = {'pages': math.ceil(works_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
-        bookmark_results = {'pages': math.ceil(bookmarks_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
-        collection_results = {'pages': math.ceil(collections_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
+        work_data, work_tag_data = self.build_work_resultset(works_processed[0], work_search.reserved_fields, True)
+        bookmark_data, bookmark_tag_data = self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields, True)
+        collection_data, collection_tag_data = self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields, True)
+        work_results = {'pages': math.ceil(works_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': work_data, 'tags': work_tag_data, 'page': works_processed[1]}
+        bookmark_results = {'pages': math.ceil(bookmarks_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': bookmark_data, 'tags': bookmark_tag_data, 'page': bookmarks_processed[1]}
+        collection_results = {'pages': math.ceil(collections_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': collection_data, 'tags': collection_tag_data, 'page': collections_processed[1]}
         results = {'work': work_results, 'bookmark': bookmark_results, 'collection': collection_results,
                    'tag': tag_results, 'user': {'data': [], 'page': {}}}
         return results
@@ -675,9 +696,14 @@ class PostgresProvider:
         # tag result object
         tag_results = {'pages': 0, 'data': {}, 'page': {'count': 0}}
 
-        work_results = {'pages': math.ceil(works_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_work_resultset(works_processed[0], work_search.reserved_fields), 'page': works_processed[1]}
-        bookmark_results = {'pages': math.ceil(bookmarks_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_bookmark_resultset(bookmarks_processed[0], bookmark_search.reserved_fields), 'page': bookmarks_processed[1]}
-        collection_results = {'pages': math.ceil(collections_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': self.build_collection_resultset(collections_processed[0], collection_search.reserved_fields), 'page': collections_processed[1]}
+        work_data, work_tag_data = self.build_work_resultset(works_processed[0], work_search.reserved_fields, True)
+        bookmark_data, bookmark_tag_data = self.build_bookmark_resultset(bookmarks_processed[0],
+                                                                         bookmark_search.reserved_fields, True)
+        collection_data, collection_tag_data = self.build_collection_resultset(collections_processed[0],
+                                                                               collection_search.reserved_fields, True)
+        work_results = {'pages': math.ceil(works_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': work_data, 'tags': work_tag_data, 'page': works_processed[1]}
+        bookmark_results = {'pages': math.ceil(bookmarks_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': bookmark_data, 'tags': bookmark_tag_data, 'page': bookmarks_processed[1]}
+        collection_results = {'pages': math.ceil(collections_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': collection_data, 'tags': collection_tag_data, 'page': collections_processed[1]}
         results = {'work': work_results, 'bookmark': bookmark_results, 'collection': collection_results,
                    'tag': tag_results, 'user': {'data': [], 'page': {}}}
         return results
@@ -696,7 +722,13 @@ class PostgresProvider:
             works = works.filter(work_filters[0])
         if work_filters[1]:
             works = works.filter(work_filters[1])
-        works = works.filter(draft=False).order_by('-updated_on').distinct()
+        works = works.filter(draft=False).order_by('-updated_on').distinct().prefetch_related('tags')
+        tags = []
+        for work in works:
+            for tag in work.tags.all():
+                tag_dict = {"tag_type": tag.tag_type.label, "text": tag.text, "display_text": tag.display_text,
+                            "id": tag.id}
+                tags.append(tag_dict)
 
         base_string = f'/attributes/{kwargs["attr_id"]}?attr_id={kwargs["attr_id"]}&'
 
@@ -704,7 +736,7 @@ class PostgresProvider:
         pages = math.ceil(works_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10))
         data = self.build_work_resultset(works_processed[0], work_search.reserved_fields)
         page = works_processed[1]
-        work_results = {'pages': pages, 'data': data, 'page': page}
+        work_results = {'pages': pages, 'data': data, 'page': page, 'tags': tags}
         results = {'work': work_results, 'bookmark': {'pages': 0, 'data': [], 'page': {'count': 0}},
                    'collection': {'pages': 0, 'data': [], 'page': {'count': 0}}, 'tag': {'pages': 0, 'data': [], 'page': {'count': 0}},
                    'user': {'data': [], 'page': {'count': 0}}}

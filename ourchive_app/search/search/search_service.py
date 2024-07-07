@@ -44,7 +44,8 @@ class OurchiveSearch:
 		if not kwargs['work_type_id'].isdigit():
 			return {'results': {'errors': ['Work type id must be a number.']}}
 		results = self.searcher.filter_by_work_type(**kwargs)
-		facets = self.result_builder.get_result_facets(results, kwargs)
+		tags = results['work'].pop('tags')
+		facets = self.result_builder.get_result_facets(results, kwargs, tags)
 		results['facets'] = facets['include_facets']
 		results['options'] = facets['options']
 		return results
@@ -53,7 +54,11 @@ class OurchiveSearch:
 		if not kwargs['tag_id'].isdigit():
 			return {'results': {'errors': ['Tag id must be a number.']}}
 		results = self.searcher.filter_by_tag(**kwargs)
-		facets = self.result_builder.get_result_facets(results, kwargs)
+		tags = []
+		tags = tags + results['work'].pop('tags')
+		tags = tags + results['collection'].pop('tags')
+		tags = tags + results['bookmark'].pop('tags')
+		facets = self.result_builder.get_result_facets(results, kwargs, tags)
 		results['facets'] = facets['include_facets']
 		results['options'] = facets['options']
 		return results
@@ -62,7 +67,11 @@ class OurchiveSearch:
 		if not kwargs['attr_id'].isdigit():
 			return {'results': {'errors': ['Attribute id must be a number.']}}
 		results = self.searcher.filter_by_attribute(**kwargs)
-		facets = self.result_builder.get_result_facets(results, kwargs)
+		tags = []
+		tags = tags + results['work'].pop('tags')
+		tags = tags + results['collection'].pop('tags')
+		tags = tags + results['bookmark'].pop('tags')
+		facets = self.result_builder.get_result_facets(results, kwargs, tags)
 		results['facets'] = facets['include_facets']
 		results['options'] = facets['options']
 		return results

@@ -364,7 +364,7 @@ class WorkSearch(object):
         self.term = ""
         self.include_mode = ""
         self.exclude_mode = ""
-        self.reserved_fields = ['_state', 'uid', 'created_on']
+        self.reserved_fields = ['_state', 'uid', 'created_on', '_prefetched_objects_cache']
         self.term_search_fields = ['title', 'summary',
                                    'chapters__title', 'chapters__summary', 'tags__text', 'attributes__name']
         self.page = 1
