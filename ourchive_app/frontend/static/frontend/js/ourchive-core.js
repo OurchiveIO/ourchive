@@ -206,7 +206,6 @@ function initShowMores(objType='chive', firstContainer='tag-container', secondCo
         let couldFit = (el.scrollHeight + document.getElementById(`show-${secondSelector}-${id}`).scrollHeight) < document.getElementById(`${objType}-${id}-tile-container`).scrollHeight;
         if (el.offsetHeight < el.scrollHeight) {
             if (!couldFit) {
-                console.log(`more-btn-${firstSelector}-${id}`);
                 var showMore = document.getElementById(`more-btn-${firstSelector}-${id}`);
                 if (showMore !== null)
                 {

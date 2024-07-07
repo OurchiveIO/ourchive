@@ -119,7 +119,6 @@ urlpatterns = [
     path('series/<int:pk>/delete', views.delete_series, name='delete-series'),
     path('series/<int:pk>/work/<int:work_id>/delete', views.delete_work_series, name='delete-work-series'),
     path('series/<int:pk>/works/render', views.render_series_work, name='fe-series-work-render'),
-    # TODO: ANTHOLOGIES
     path('anthologies/create', views.create_anthology, name='fe-create-anthology'),
     path('anthologies/<int:pk>/edit', views.edit_anthology, name='fe-edit-anthology'),
     path('anthologies-autocomplete', views.anthology_autocomplete, name='fe-anthology-autocomplete'),

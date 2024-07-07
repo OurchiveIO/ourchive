@@ -1,42 +1,41 @@
 {% load i18n %}
-<div id="bk-tile-parent" class="uk-width-1-1 uk-padding-remove-horizontal">
-	<div id="bk-tile-card" class="uk-card uk-card-default">
-	    <div id="bk-tile-header-parent" class="uk-card-header uk-padding-small ourchive-card-head">
-	        <div id="bk-tile-header-grid" class="uk-grid-small uk-flex-middle" uk-grid>
-		        <div id="bk-tile-header-content" class="uk-width-expand">
-                    <span id="bookmark-{{bookmark.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title">{% if bookmark.title %}{{ bookmark.title }}{% else %}{% translate 'Bookmark' %}: {{ bookmark.work.title }}{% endif %} by <a href="{% url 'user-profile-parent' bookmark.user_id %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark.user }}</a></span>
-	                {% if bookmark.user == request.user.username %}
-			        <div id="bk-tile-actions-parent" class="uk-align-right uk-margin-remove-bottom">
-			            <a class="ourchive-icon-wrapper" id="bk-tile-edit-{{ bookmark.id }}-link" href="/bookmarks/{{ bookmark.id }}/edit"><span id="bk-tile-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="Edit Bookmark {{ bookmark.id }}"></span> </a>
-			            <a class="ourchive-icon-wrapper" id="bk-tile-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: ourchive-delete;ratio:.75" id="bk-tile-delete-span" title="Delete"></span> </a>
-						{% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
-						{% if bookmark.draft %}<span class="uk-label uk-margin-remove-right uk-margin-left uk-text-small uk-inline uk-label-warning" id="bookmark-{{ bookmark.id }}-tile-draft-button-span"><strong>DRAFT</strong></span>{% endif %}
-			        </div>
-			        {% endif %}
-	                {% if settings.RatingsEnabled %}<span id="bk-tile-rating-span" class="uk-inline uk-align-right">{% for stars in rating_range %}
-	                    {% if stars <= bookmark.rating %}
-	                        <span id="bk-tile-rating-star-filled" uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}" class="rating-star uk-text-middle"></span>
-	                    {% else %}
-	                        <span id="bk-tile-rating-star-unfilled" uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}"></span>
-	                    {% endif %}
-				    {% endfor %}</span>
-				    {% endif %}
-		        </div>
-		    </div>
-		</div>
-		<div id="bk-tile-body" class="uk-card-body ourchive-card-body uk-padding-small">
-	    	{%  if bookmark.work %}<p id="bk-tile-work"><strong id="bk-tile-work-label">Work</strong>: <a href="{% url 'fe-work-view' bookmark.work.id %}" title="Bookmark work link" id="bookmark-work-link">{{ bookmark.work.title|default:bookmark.work.id }}</a> by <a href="{% url 'user-profile-parent' bookmark.work.user_id %}" title="Bookmark work creator" id="bookmark-work-creator-link">{{ bookmark.work.user }}</a></p>{%  endif %}
+<div class="ourchive-work-card uk-box-shadow-small uk-height-large uk-width-1-1" id="bookmark-{{bookmark.id}}-tile-container">
+    <div class="uk-grid uk-grid-small uk-height-1-1" uk-grid>
+        <div class="uk-width-1-1 card-info" id="bookmark-{{bookmark.id}}-tile-card">
+            <div class="uk-margin-small-bottom">
+                <span id="bookmark-{{bookmark.id}}-tile-title" class="uk-margin-remove-bottom ourchive-tile-title">{% if bookmark.title %}{{ bookmark.title }}{% else %}{% translate 'Bookmark' %}: {{ bookmark.work.title }}{% endif %} by <a href="{% url 'user-profile-parent' bookmark.user_id %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark.user }}</a></span>
+                {% if bookmark.user == request.user.username %}
+                    <div id="bk-tile-actions-parent" class="uk-align-right uk-margin-remove-bottom uk-inline">
+                        <a class="ourchive-icon-wrapper" id="bk-tile-edit-{{ bookmark.id }}-link" href="/bookmarks/{{ bookmark.id }}/edit"><span id="bk-tile-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="Edit Bookmark {{ bookmark.id }}"></span> </a>
+                        <a class="ourchive-icon-wrapper" id="bk-tile-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: ourchive-delete;ratio:.75" id="bk-tile-delete-span" title="Delete"></span> </a>
+                        {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
+                        {% if bookmark.draft %}<span class="uk-label uk-margin-remove-right uk-margin-left uk-text-small uk-inline uk-label-warning" id="bookmark-{{ bookmark.id }}-tile-draft-button-span"><strong>DRAFT</strong></span>{% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            {% if bookmark.languages_readonly %}<p class="uk-margin-remove-bottom uk-margin-small-top"><span class="uk-inline ourchive-muted uk-text-italic" id="bookmark-metadata-language">{% for language in bookmark.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}{% endfor %}</span></p>{% endif %}
+            {% if settings.RatingsEnabled %}<span id="bk-tile-rating-span" class="uk-inline uk-align-right">{% for stars in rating_range %}
+                {% if stars <= bookmark.rating %}
+                    <span id="bk-tile-rating-star-filled" uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}" class="rating-star uk-text-middle"></span>
+                {% else %}
+                    <span id="bk-tile-rating-star-unfilled" uk-icon="icon: star; ratio:1.1" id="rating_{{stars}}"></span>
+                {% endif %}
+            {% endfor %}</span>
+            {% endif %}
+
+        </div>
+        <div class="uk-width-1-1 card-info" id="bookmark-{{bookmark.id}}-info-card">
+            {%  if bookmark.work %}<p id="bk-tile-work"><strong id="bk-tile-work-label">Work</strong>: <a href="{% url 'fe-work-view' bookmark.work.id %}" title="Bookmark work link" id="bookmark-work-link">{{ bookmark.work.title|default:bookmark.work.id }}</a> by <a href="{% url 'user-profile-parent' bookmark.work.user_id %}" title="Bookmark work creator" id="bookmark-work-creator-link">{{ bookmark.work.user }}</a></p>{%  endif %}
 	        {% if settings.RatingsEnabled %}<p id="bk-tile-rating-body"><strong id="bk-tile-rating-body-label">Rating</strong>: {{ bookmark.rating }} stars</p>{% endif %}
 	        {% if bookmark.tags %}{% include "tag_partial.html" with obj_name='bookmark' tags=bookmark.tags %}{% endif %}
 		   	{% if bookmark.attributes %}{% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}{% endif %}
 		   	{% if bookmark.description %}
-            <div id="bookmark-description-text"><span class="uk-text-medium uk-text-bold"><strong>{{ bookmark.user }}'s {% translate 'comments' %}</strong></span> <div class="uk-margin-left">{{ bookmark.description|safe }}</div></div>	   
-        {% endif %}
-		</div>
-	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="bk-tile-footer-parent">
-			<div class="uk-width-1-1 uk-padding-small uk-margin-small">
-				{% include 'bookmark_metadata.html' %}
-			</div>
-	    </div>
-	</div>  
+                <div id="bookmark-description-text"><span class="uk-text-medium uk-text-bold"><strong>{{ bookmark.user }}'s {% translate 'comments' %}</strong></span> <div class="uk-margin-left">{{ bookmark.description|safe }}</div></div>
+            {% endif %}
+        </div>
+        <div class="uk-width-1-1 card-metadata" id="bookmark-{{ bookmark.id }}-list-meta">
+            <!-- language, complete status, updated, chapters, word count, comments, fingerguns -->
+            {% include 'bookmark_metadata.html' %}
+        </div>
+    </div>
 </div>
