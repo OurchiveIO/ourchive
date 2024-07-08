@@ -9,7 +9,12 @@
         });
     </script>
 <div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="anthology-uk-grid" uk-grid>
-    <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center">{% include "anthology_tile.html" %}</div>
+    {% if anthology.header_url %}
+    <div class="uk-width-auto uk-margin-small-top uk-align-center" id="anthology-{{anthology.id}}-header-img-parent">
+        <img class="anthology-header" alt="{{anthology.header_alt_text}}" src="{{anthology.header_url}}" id="anthology-{{anthology.id}}-header-image">
+    </div>
+    {% endif %}
+    <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center uk-width-1-1">{% include "anthology_tile.html" %}</div>
     {% if anthology.owner %}
         <div class="uk-width-1-1 uk-text-right">
             <a id="anthology-edit-link" class="ourchive-icon-wrapper" href="{% url 'fe-edit-anthology' anthology.id %}"><span uk-icon="icon: ourchive-edit; ratio: 1" title="Edit"></span> </a>

@@ -296,15 +296,15 @@ function getOptions(select) {
 // Listener for when the user wants to remove a given token.
 function removeToken(e) {
     // Get the value to remove
-    const value_to_remove = e.target.dataset.option;
-    const wrapper = e.target.parentNode.parentNode;
+    const value_to_remove = e.target.parentNode.getAttribute('data-option');
+    const wrapper = e.target.parentNode.parentNode.parentNode.parentNode;
     const input_search = wrapper.querySelector(".selected-input");
     const dropdown = wrapper.querySelector(".dropdown-icon");
     // Get the options in the select to be unselected
     const option_to_unselect = wrapper.querySelector(`select option[value="${value_to_remove}"]`);
     option_to_unselect.removeAttribute("selected");
     // Remove token attribute
-    e.target.parentNode.remove();
+    e.target.parentNode.parentNode.remove();
     input_search.focus();
     dropdown.classList.remove("active");
     const event = new Event('click');

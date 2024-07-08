@@ -226,7 +226,7 @@ function seriesCheck (e) {
                 <div class="uk-margin" id="work-form-languages-parent">
                     <label id="work-form-languages-label" class="uk-form-label" for="work-form-languages">{% translate 'Languages' %}</label>
                     <div id="work-form-languages-controls" class="uk-form-controls">
-                        <div id="work-form-languages-inline" class="uk-inline">
+                        <div id="work-form-languages-inline" class="uk-inline uk-form-width-large">
                             <select multiple data-multi-select-plugin name="languages[]" id="work-form-languages">
                                 {% for language in languages %}
                                     <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>

@@ -389,7 +389,6 @@ function removeToken(e) {
             }
         }
     }
-    console.log(wrapper);
     if (wrapper !== null) {
         const input_search = wrapper.querySelector(".selected-input");
         const dropdown = wrapper.querySelector(".dropdown-icon");

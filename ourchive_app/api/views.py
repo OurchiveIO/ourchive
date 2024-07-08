@@ -1632,9 +1632,13 @@ class WorkAnthologyList(APIView):
         works = request.data
         tracking = 1
         for work_obj in works:
-            anthology_work = AnthologyWork.objects.get(work__id=work_obj['work'], anthology__id=pk)
-            anthology_work.sort_order = int(work_obj['sort_order']) if str(work_obj['sort_order']).isdigit() else tracking
-            anthology_work.save()
+            sort_order = int(work_obj['sort_order']) if str(work_obj['sort_order']).isdigit() else tracking
+            anthology_work = AnthologyWork.objects.filter(work__id=work_obj['work'], anthology__id=pk).first()
+            if not anthology_work:
+                AnthologyWork.objects.create(work_id=work_obj['work'], anthology_id=pk, sort_order=sort_order)
+            else:
+                anthology_work.sort_order = sort_order
+                anthology_work.save()
             tracking = tracking + 1
         return Response({'message': 'Work anthology order updated.'}, status=200)
 

@@ -84,7 +84,7 @@
                 <div class="uk-margin" id="user-form-languages-parent">
                     <label id="user-form-languages-label" class="uk-form-label" for="user-form-languages">{% translate 'Default Languages' %}</label>
                     <div id="user-form-languages-controls" class="uk-form-controls">
-                        <div id="user-form-languages-inline" class="uk-inline">
+                        <div id="user-form-languages-inline" class="uk-inline uk-form-width-large">
                             <select multiple data-multi-select-plugin name="default_languages[]" id="user-form-languages">
                                 {% for language in default_languages %}
                                     <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>

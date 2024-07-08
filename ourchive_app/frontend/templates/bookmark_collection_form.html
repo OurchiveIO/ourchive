@@ -148,7 +148,7 @@ function populateUserInput(user_id, username) {
             <div class="uk-margin" id="bkcol-form-languages-parent">
                 <label id="bkcol-form-languages-label" class="uk-form-label" for="bkcol-form-languages">{% translate 'Languages' %}</label>
                 <div id="bkcol-form-languages-controls" class="uk-form-controls">
-                    <div id="bkcol-form-languages-inline" class="uk-inline">
+                    <div id="bkcol-form-languages-inline" class="uk-inline uk-form-width-large">
                         <select multiple data-multi-select-plugin name="languages[]" id="bkcol-form-languages">
                             {% for language in languages %}
                                 <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>

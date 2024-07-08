@@ -9,7 +9,7 @@
         });
     </script>
 <div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="series-uk-grid" uk-grid>
-    <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center">{% include "series_tile.html" %}</div>
+    <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center uk-width-1-1">{% include "series_tile.html" %}</div>
     {% if series.owner %}
         <div class="uk-width-1-1 uk-text-right uk-margin-small-top">
             <a id="series-edit-link" class="ourchive-icon-wrapper" href="{% url 'fe-edit-series' series.id %}"><span uk-icon="icon: ourchive-edit; ratio: 1" title="Edit"></span></a>

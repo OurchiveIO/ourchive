@@ -178,7 +178,7 @@ function handleModalDelete(url) {
             <div class="uk-margin" id="anthology-form-languages-parent">
                 <label id="anthology-form-languages-label" class="uk-form-label" for="anthology-form-languages">{% translate 'Languages' %}</label>
                 <div id="anthology-form-languages-controls" class="uk-form-controls">
-                    <div id="anthology-form-languages-inline" class="uk-inline">
+                    <div id="anthology-form-languages-inline" class="uk-inline uk-form-width-large">
                         <select multiple data-multi-select-plugin name="languages[]" id="anthology-form-languages">
                             {% for language in languages %}
                                 <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
@@ -194,11 +194,11 @@ function handleModalDelete(url) {
                 </label>
                 <div id="anthology-form-cover-controls" class="uk-form-controls">
                     {% if anthology.cover_url %}
-                        <div id="anthology-cover-image-toggle" class="uk-width-1-1"><a uk-toggle="target: #anthology-form-image-inline" class="uk-button uk-button-primary">{% translate 'Toggle cover' %}</a></div>
-                        <div id="anthology-form-image-inline" class="uk-width-1-1 uk-margin" hidden><img id="anthology-form-cover-img" src="{{ anthology.cover_url }}"/></div>
+                        <div id="anthology-cover-image-toggle" class="uk-width-1-1"><a uk-toggle="target: #anthology-form-cover-inline" class="uk-button uk-button-primary">{% translate 'Toggle cover' %}</a></div>
+                        <div id="anthology-form-cover-inline" class="uk-width-1-1 uk-margin" hidden><img id="anthology-form-cover-img" src="{{ anthology.cover_url }}"/></div>
                     {% endif %}
                     <div id="anthology-form-cover-inline" class="uk-inline uk-margin">
-                        {% include 'file_upload.html' with object='cover_url' replace_selector='anthology-form-cover-img' object_type='img' upload_placeholder='Upload cover image' original_value=anthology.cover_url %}
+                        {% include 'file_upload.html' with object='cover_url' replace_selector='anthology-form-cover-img' object_type='cover-img' upload_placeholder='Upload cover image' original_value=anthology.cover_url %}
                     </div>
 
                 </div>
@@ -213,7 +213,7 @@ function handleModalDelete(url) {
             </div>
             <div class="uk-margin" id="anthology-form-header-parent">
                 <label id="anthology-form-header-label" class="uk-form-label" for="anthology-form-header-inline">{% translate 'Header' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Anthology header help' %}"></sup>
-                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This image will show on your anthology and on the list view.{% endblocktranslate %}</div>
+                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This image will show on your anthology. Recommended rectangular dimensions, e.g. width x height of 800x200.{% endblocktranslate %}</div>
                 </label>
                 <div id="anthology-form-header-controls" class="uk-form-controls">
                     {% if anthology.header_url %}
@@ -221,7 +221,7 @@ function handleModalDelete(url) {
                         <div id="anthology-form-image-inline" class="uk-width-1-1 uk-margin" hidden><img id="anthology-form-header-img" src="{{ anthology.header_url }}"/></div>
                     {% endif %}
                     <div id="anthology-form-header-inline" class="uk-inline uk-margin">
-                        {% include 'file_upload.html' with object='header_url' replace_selector='anthology-form-header-img' object_type='img' upload_placeholder='Upload header image' original_value=anthology.header_url %}
+                        {% include 'file_upload.html' with object='header_url' replace_selector='anthology-form-header-img' object_type='header-img' upload_placeholder='Upload header image' original_value=anthology.header_url %}
                     </div>
 
                 </div>
@@ -257,7 +257,7 @@ function handleModalDelete(url) {
                     </script>
                     <div class="uk-form-controls" id="anthology-form-controls">
                     <ul class="uk-grid-small uk-child-width-1 uk-text-left" uk-sortable="handle: .uk-sortable-handle" uk-grid id="anthology-list">
-                        {% for work in anthology.works_readonly %}
+                        {% for work in anthology.works %}
                         <li id="work-list-{{work.id}}">
                             {% include "anthology_form_work.html" with work=work anthology=anthology %}
                         </li>

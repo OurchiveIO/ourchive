@@ -82,7 +82,7 @@
                 <div class="uk-margin" id="bookmark-form-languages-parent">
                     <label id="bookmark-form-languages-label" class="uk-form-label" for="bookmark-form-languages">{% translate 'Languages' %}</label>
                     <div id="bookmark-form-languages-controls" class="uk-form-controls">
-                        <div id="bookmark-form-languages-inline" class="uk-inline">
+                        <div id="bookmark-form-languages-inline" class="uk-inline uk-form-width-large">
                             <select multiple data-multi-select-plugin name="languages[]" id="bookmark-form-languages">
                                 {% for language in languages %}
                                     <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
