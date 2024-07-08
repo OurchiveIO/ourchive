@@ -156,14 +156,14 @@
     <div class="uk-grid uk-grid-small" uk-grid>
         <div class="uk-button-group uk-width-expand uk-flex-left uk-visible@s">
             <input id="saved-search-0-submit" class="uk-button uk-button-primary uk-margin-top uk-align-left uk-margin-small-bottom" type="submit" value="{% translate 'Apply Filters' %}"/>
-            <a id="saved-search-0-delete" class="uk-button uk-button-secondary uk-margin-top uk-align-left uk-margin-small-bottom" href="#" uk-toggle="target: #save-search-modal">{% translate 'Save Search' %}</a>
+            {% if request.user.is_authenticated %}<a id="saved-search-0-delete" class="uk-button uk-button-secondary uk-margin-top uk-align-left uk-margin-small-bottom" href="#" uk-toggle="target: #save-search-modal">{% translate 'Save Search' %}</a>{% endif %}
         </div>
         <div class="uk-width-1-1 uk-hidden@s">
             <input id="saved-search-0-submit" class="uk-button uk-button-primary uk-margin-small uk-align-center" type="submit" value="{% translate 'Apply Filters' %}"/>
         </div>
-        <div class="uk-width-1-1 uk-hidden@s">
+        {% if request.user.is_authenticated %}<div class="uk-width-1-1 uk-hidden@s">
             <a id="saved-search-0-delete" class="uk-button uk-button-secondary uk-margin-small uk-align-center uk-width-small uk-padding-remove-horizontal" href="#" uk-toggle="target: #save-search-modal">{% translate 'Save Search' %}</a>
-        </div>
+        </div>{% endif %}
     </div>
 </form>
 <div id="save-search-modal" uk-modal>

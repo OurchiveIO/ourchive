@@ -46,10 +46,10 @@
 		    	</div>
 	    	</li>
 			{% endfor %}
-            <div class="uk-child-width-1 uk-grid uk-grid-small uk-margin" id="search-save-name-parent">
+            {% if request.user.is_authenticated %}<div class="uk-child-width-1 uk-grid uk-grid-small uk-margin" id="search-save-name-parent">
                 <label id="save-search-label" for="search-name" class="uk-text-bold">{% translate 'Save search with name' %}</label>
                 <span><input id=search-name" class="uk-input uk-width-large" type="text" name="search-name" value="{{ search_name|default_if_none:'' }}"></span>
-            </div>
+            </div>{% endif %}
 			<select id="search-results-sort-select-hidden" name="order_by" class="uk-select" hidden>
 	            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
 	            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>

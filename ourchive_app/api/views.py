@@ -499,12 +499,12 @@ class UserSavedSearchesList(generics.ListCreateAPIView):
 class SavedSearchesList(generics.ListCreateAPIView):
     queryset = SavedSearch.objects.get_queryset().order_by('updated_on')
     serializer_class = SavedSearchSerializer
-    permission_classes = [IsOwner]
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
 
 
 class SavedSearchDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SavedSearchSerializer
-    permission_classes = [IsOwner]
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
     queryset = SavedSearch.objects.get_queryset().order_by('updated_on')
 
 
