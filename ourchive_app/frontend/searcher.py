@@ -52,7 +52,7 @@ def add_filter_to_collection(filter_val, filter_details, collection_filter):
 
 def add_filter_to_tag(filter_val, filter_details, tag_filter, work_filter, bookmark_filter, collection_filter):
 	tag_type = filter_details[0]
-	tag_text = filter_val.lower() if filter_val else ''
+	tag_text = filter_val if filter_val else ''
 	tag_filter['tag_type'].append(tag_type)
 	tag_filter['text'].append(tag_text)
 	work_filter['tags'].append(tag_text)
@@ -62,7 +62,7 @@ def add_filter_to_tag(filter_val, filter_details, tag_filter, work_filter, bookm
 
 
 def add_filter_to_attribute(filter_val, work_filter, bookmark_filter, collection_filter):
-	attribute_text = filter_val.lower() if filter_val else ''
+	attribute_text = filter_val if filter_val else ''
 	work_filter['attributes'].append(attribute_text)
 	bookmark_filter['attributes'].append(attribute_text)
 	collection_filter['attributes'].append(attribute_text)
@@ -82,7 +82,6 @@ def add_filter_to_bookmark(filter_val, filter_details, bookmark_filter):
 def build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val):
 	# TODO: split this into two methods, include and exclude. refactor first with include, then split.
 	filter_details = key.split(',')
-	# TODO: refactor: request object should stay a true object, __dict__ should be called
 	# on making the API request, and collections.defaultdict should be used to prevent cluttered logic
 	filter_key = filter_details[2] if len(filter_details) > 2 else filter_details[1]
 	filter_type = request_builder.get_object_type(filter_key)
@@ -122,7 +121,6 @@ def build_request_filters(request, include_exclude, request_object, request_buil
 			request_object.bookmark_search.exclude_filter = updated_filters[2]
 			request_object.collection_search.exclude_filter = updated_filters[3]
 	elif filter_type == 'attribute':
-		# TODO: validate & test
 		if include_exclude == 'include':
 			updated_filters = add_filter_to_attribute(
 				filter_val,
@@ -142,7 +140,6 @@ def build_request_filters(request, include_exclude, request_object, request_buil
 			request_object.bookmark_search.exclude_filter = updated_filters[1]
 			request_object.collection_search.exclude_filter = updated_filters[2]
 	elif filter_type == 'bookmark':
-		# TODO: validate & test
 		if include_exclude == 'include':
 			request_object.bookmark_search.include_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.include_filter)
 		else:
@@ -165,21 +162,38 @@ def get_empty_response_obj():
 
 def get_search_request(request, request_object, request_builder):
 	return_keys = ReturnKeys()
-	for key in request.POST:
+	request_data = request.POST.copy()
+	for key in request_data:
 		if key == 'tag_id' or key == 'attr_id' or key == 'work_type_id':
 			continue
-		filter_val = request.POST.get(key, None) if request.POST.get(key, None) != 'on' else None
-		include_exclude = 'exclude' if 'exclude_' in key else 'include'
-		key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
-		if key in NONFILTER_VALS or key in NONRETAIN_VALS:
-			continue
+		if key.endswith('tag[]'):
+			tag_facets = [x for x in request_data.getlist(key)]
+			for facet in tag_facets:
+				include_exclude = 'exclude' if 'exclude_' in key else 'include'
+				key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
+				if key in NONFILTER_VALS or key in NONRETAIN_VALS:
+					continue
+				else:
+					if ',' in key and not facet and not key.endswith(',input'):
+						return_keys.add_val(include_exclude, key)
+					elif facet:
+						key = key.replace(',input', '')
+						return_keys.add_val(include_exclude, f'{key},{facet}')
+				request_object = build_request_filters(request, include_exclude, request_object, request_builder, key, facet)
 		else:
-			if ',' in key and not filter_val and not key.endswith(',input'):
-				return_keys.add_val(include_exclude, key)
-			elif filter_val:
-				key = key.replace(',input', '')
-				return_keys.add_val(include_exclude, f'{key},{filter_val}')
-		request_object = build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val)
+			filter_val = request_data.get(key, None) if request_data.get(key, None) != 'on' else None
+			# TODO: YOU NEED TO GET ALL TAGS FROM THEIR LIST VALUES!!!
+			include_exclude = 'exclude' if 'exclude_' in key else 'include'
+			key = key.replace('exclude_', '') if include_exclude == 'exclude' else key.replace('include_', '')
+			if key in NONFILTER_VALS or key in NONRETAIN_VALS:
+				continue
+			else:
+				if ',' in key and not filter_val and not key.endswith(',input'):
+					return_keys.add_val(include_exclude, key)
+				elif filter_val:
+					key = key.replace(',input', '')
+					return_keys.add_val(include_exclude, f'{key},{filter_val}')
+			request_object = build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val)
 	return SearchRequest(request_object, return_keys)
 
 

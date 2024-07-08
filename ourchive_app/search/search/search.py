@@ -275,7 +275,7 @@ class PostgresProvider:
         length = end - start
         print(f'result processing: {length}')
         start = time.time()
-        tags = self.process_result_tags(resultset) if hasattr(obj, 'tags') else []
+        tags = self.process_result_tags(resultset) if resultset and hasattr(obj, 'tags') else []
         end = time.time()
         length = end - start
         print(f'tags: {length}')

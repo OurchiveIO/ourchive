@@ -2,7 +2,7 @@
 	{% if facet.object_type == 'tag' %}
 	<dd class="uk-margin-bottom">
 		<span class="uk-text-bold uk-text-small">Include</span>
-		<select data-testid="include-multiselect" multiple data-multi-select-plugin name="include_{{facet.label}},{{ facet.object_type }}">
+		<select data-testid="include-multiselect" multiple data-multi-select-plugin name="include_{{facet.label}},{{ facet.object_type }}[]">
 			{% for value in facet.values %} 
             <option id="{{ facet.label }},{{ value.label }},include{% if mobile %},mobile{% endif %}" name="include_{{ facet.label }},{{ value.label }},{{facet.object_type}}" value="{{value.label}}" {% if value.checked %}selected{% endif %}>{{value.label}}</option>
            {% endfor %}

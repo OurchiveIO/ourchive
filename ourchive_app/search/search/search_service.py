@@ -30,7 +30,8 @@ class OurchiveSearch:
 			tags = tags + results['tag'].pop('tags')
 		if ('user_search') in kwargs:
 			results['user'] = self.searcher.search_users(kwargs['options'], **kwargs['user_search'])
-			tags = tags + results['user'].pop('tags')
+			if 'tags' in results['user']:
+				tags = tags + results['user'].pop('tags')
 		if ('collection_search') in kwargs:
 			results['collection'] = self.searcher.search_collections(kwargs['options'], **kwargs['collection_search'])
 			tags = tags + results['collection'].pop('tags')

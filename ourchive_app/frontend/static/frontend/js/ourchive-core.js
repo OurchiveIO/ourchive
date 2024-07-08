@@ -110,7 +110,10 @@ function removeElement(include_exclude, tag) {
     document.getElementById(`${include_exclude}-${tag}-option`).selected = false;
 }
 function populateSavedSearch(element, includeLabel) {
-    let tag = element.querySelectorAll('span')[0].innerHTML;
+    let tag = element.querySelectorAll('span')[0].innerText;
+    if (document.getElementById(`${includeLabel}-wrapper-${tag}`) !== null) {
+        return;
+    }
     let search = document.getElementById(`${includeLabel}-wrapper`).querySelector(`.${includeLabel}-search-wrapper`);
     const tagWrapper = document.createElement("div");
     tagWrapper.classList.add("selected-wrapper");
@@ -125,12 +128,13 @@ function populateSavedSearch(element, includeLabel) {
     close.setAttribute("data-hits", 0);
     close.setAttribute("uk-icon", "icon: ourchive-close; ratio: .75");
     close.addEventListener("click", function() {
-        document.getElementById(`${includeLabel}-wrapper-${tag}`).remove()
+        document.getElementById(`${includeLabel}-wrapper-${tag}`).remove();
+        document.getElementById(`${includeLabel}-${tag}-option`).remove();
     });
     tagWrapper.appendChild(tagWrapperSpan);
     tagWrapper.appendChild(close);
     const hidden = document.createElement("option");
-    hidden.setAttribute("id", `${includeLabel}-${tag}`);
+    hidden.setAttribute("id", `${includeLabel}-${tag}-option`);
     hidden.setAttribute("name", `${includeLabel}-${tag}`);
     hidden.setAttribute("value", tag);
     hidden.selected = true;

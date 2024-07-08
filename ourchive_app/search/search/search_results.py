@@ -60,7 +60,9 @@ class SearchResults(object):
                 for tag_text in tags_dict[tag_type]['tags']:
                     checked_tag = True if (self.tag_id and tag_filter_name and tag_filter_name == tag_text) else False
                     if not checked_tag:
-                        checked_tag = tag_text.lower() in getattr(self, f'work_search_{context}').get('tags', [])
+                        checked_tag = tag_text in getattr(self, f'work_search_{context}').get('tags', [])
+                        if not checked_tag:
+                            checked_tag = tag_text.lower() in getattr(self, f'work_search_{context}').get('tags', [])
                         if not self.split_include_exclude:
                             inverse_checked = tag_text.lower() in getattr(self,
                                                                           f'work_search_{self.get_inverse_context(context)}').get(
@@ -126,6 +128,8 @@ class SearchResults(object):
                 attribute_filter_vals = []
                 for val in attributes_dict[key]['attrs']:
                     checked_attr = val.lower() in getattr(self, f'work_search_{context}').get('attributes', [])
+                    if not checked_attr:
+                        checked_attr = val in getattr(self, f'work_search_{context}').get('attributes', [])
                     attribute_filter_vals.append(FilterFacet(val, checked_attr))
                 result_facet = ResultFacet(attributes_dict[key]['type_id'], key, attribute_filter_vals,
                                            'attribute').to_dict()
@@ -233,13 +237,13 @@ class SearchResults(object):
         self.set_shared_vals(kwargs)
         result_json_include = self.get_contextual_result_facets(results, 'include', tags)
         options = self.get_options_facets()
-        results = {'include_facets': result_json_include, 'options': options}
-        if self.split_include_exclude:
-            results['exclude_facets'] = self.get_contextual_result_facets(results, 'exclude', tags)
+        dict_results = {'include_facets': result_json_include, 'options': options}
+        dict_results['exclude_facets'] = []
+        self.get_tag_facets(results, dict_results['exclude_facets'], 'exclude', tags)
         if self.search_name:
-            results['search_name'] = self.search_name
+            dict_results['search_name'] = self.search_name
             self.save_search(self.order_by, self.user_id)
-        return results
+        return dict_results
 
     def save_search(self, order_by, user_id):
         '''tag_id = models.IntegerField(null=True, blank=True)

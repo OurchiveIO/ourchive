@@ -12,7 +12,7 @@
         document.getElementById("search-name").value  = value;
     }
 </script>
-<form class="uk-form-stacked" name="search_filter_form" action="/savedsearch/filter" method="post">
+<form class="uk-form-stacked" id="index-search-filter-form" name="search_filter_form" action="/savedsearch/filter" method="post">
     {% csrf_token %}
     <input type="hidden" id="search_id" name="search_id" value="{{ search.id }}"/>
     <input type="hidden" id="search-name" name="search-name" value="{{ search.name }}"/>
@@ -129,11 +129,11 @@
                     <div class="selected-wrapper" id="include-wrapper-{{ tag }}"><span class="selected-label">{{tag}}</span><a class="selected-close" tabindex="-1" data-option="{{tag}}" data-hits="0" uk-icon="icon: ourchive-close" onclick="removeElement('include', '{{ tag }}')"></a></div>
                 {% endfor %}
                 <div class="uk-width-expand include-search-wrapper">
-                    <input id="include-tag-search" class="uk-form-blank" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for tags...' %}" oninput="doAutocomplete(this.value, 'search', 'savedsearchinclude', '', ',', 'populateSavedSearchInclude(this)')">
+                    <input id="include-tag-search" class="uk-form-blank uk-width-expand" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for tags...' %}" oninput="doAutocomplete(this.value, 'search', 'savedsearchinclude', '', ',', 'populateSavedSearchInclude(this)')">
                 </div>
                 <a href="" uk-icon="icon: chevron-down" class="uk-icon uk-margin-remove uk-flex-right"></a>
             </div>
-            <div id="tag-autocomplete-dropdown-savedsearchinclude" uk-drop></div>
+            <div id="tag-autocomplete-dropdown-savedsearchinclude" uk-drop="mode: hover; delay-hide: 2500; auto-update:false;"></div>
 
             <span class="ourchive-muted">Exclude</span>
             <div class="multi-select-component" id="exclude-wrapper">
@@ -146,11 +146,11 @@
                     <div class="selected-wrapper" id="exclude-wrapper-{{ tag }}"><span class="selected-label">{{tag}}</span><a class="selected-close" tabindex="-1" data-option="{{tag}}" data-hits="0" uk-icon="icon: ourchive-close" onclick="removeElement('exclude', '{{ tag }}')"></a></div>
                 {% endfor %}
                 <div class="uk-width-expand exclude-search-wrapper">
-                    <input id="exclude-tag-search" class="uk-form-blank" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for tags...' %}" oninput="doAutocomplete(this.value, 'search', 'savedsearchexclude', '', ',', 'populateSavedSearchExclude(this)')">
+                    <input id="exclude-tag-search" class="uk-form-blank uk-width-expand" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for tags...' %}" oninput="doAutocomplete(this.value, 'search', 'savedsearchexclude', '', ',', 'populateSavedSearchExclude(this)')">
                 </div>
                 <a uk-icon="icon: chevron-down" class="uk-icon uk-margin-remove uk-flex-right"></a>
             </div>
-            <div id="tag-autocomplete-dropdown-savedsearchexclude" uk-drop="toggle: #exclude-wrapper; delay=hide: 1500"></div>
+            <div id="tag-autocomplete-dropdown-savedsearchexclude" uk-drop="toggle: #exclude-wrapper; delay=hide: 2500; auto-update:false; mode: hover;"></div>
         </div>
     </div>
     <div class="uk-grid uk-grid-small" uk-grid>
@@ -171,7 +171,7 @@
         <h2 id="save-search-modal-header" class="uk-modal-title">Save Search</h2>
         <div class="uk-margin">
             <label class="uk-text-medium" for="new-search-name">{% blocktranslate %}Enter a name for this search:{% endblocktranslate %}</label>
-            <input class="uk-input" id="newsearchname" type="text" name="new-search-name" onkeyup="updateSearchName(this.value)"/>
+            <input class="uk-input" id="newsearchname" type="text" name="new-search-name" onkeyup="updateSearchName(this.value)" value="{{ search.name }}"/>
         </div>
         <p id="save-searchmodal-button-parent" class="uk-text-right">
             <a id="save-search-modal-cancel" class="uk-button uk-button-default uk-modal-close uk-margin-right">{% translate 'Cancel' %}</a>
