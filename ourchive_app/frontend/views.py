@@ -720,7 +720,7 @@ def saved_search_filter(request):
 	include_filter = {
 		'Work Type': data_dict.get('work_types', []),
 		'Language': data_dict.get('languages', []),
-		'Completion Status': completes if completes and completes != '-1' else ['0', '1'],
+		'Completion Status': completes if completes and completes != '-1' else [],
 		'tags': data_dict.get('include_facets', []),
 		"attributes": [],
 	}

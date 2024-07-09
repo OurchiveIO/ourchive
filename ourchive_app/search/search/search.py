@@ -621,7 +621,7 @@ class PostgresProvider:
             collections = collections.filter(collection_filters[1])
         collections = collections.filter(draft=False).order_by('-updated_on').distinct()
 
-        base_string = f'/tags/{kwargs["tag_id"]}?tag_id={kwargs["tag_id"]}&'
+        base_string = f'/search/?tag_id={kwargs["tag_id"]}&'
 
         works_processed = self.process_results(works, work_search.page, Work, base_string)
         bookmarks_processed = self.process_results(bookmarks, bookmark_search.page, Bookmark, base_string)
@@ -687,7 +687,7 @@ class PostgresProvider:
             collections = collections.filter(collection_filters[1])
         collections = collections.filter(draft=False).order_by('-updated_on').distinct()
 
-        base_string = f'/attributes/{kwargs["attr_id"]}?attr_id={kwargs["attr_id"]}&'
+        base_string = f'/search/?attr_id={kwargs["attr_id"]}&'
 
         works_processed = self.process_results(works, work_search.page, Work, base_string)
         bookmarks_processed = self.process_results(bookmarks, bookmark_search.page, Bookmark, base_string)
@@ -730,7 +730,7 @@ class PostgresProvider:
                             "id": tag.id}
                 tags.append(tag_dict)
 
-        base_string = f'/attributes/{kwargs["attr_id"]}?attr_id={kwargs["attr_id"]}&'
+        base_string = f'?work_type={work_type_id}&'
 
         works_processed = self.process_results(works, work_search.page, Work, base_string)
         pages = math.ceil(works_processed[1]['count']/settings.REST_FRAMEWORK.get('page_size', 10))

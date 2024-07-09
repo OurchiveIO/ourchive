@@ -2,33 +2,21 @@
 {% load i18n %}
 {% block title %}{{news.title}}{% endblock %}
 {% block content %}
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="news-detail-uk-grid" uk-grid>
-        <div id="news-detail-tile-parent" class="uk-width-expand uk-padding-remove-horizontal">
-            <div id="news-detail-tile-card" class="uk-card uk-card-default">
-                <div id="news-detail-tile-header-parent" class="uk-card-header uk-padding-small ourchive-card-head">
-                    <div id="news-detail-tile-header-grid" class="uk-grid-small uk-flex-middle" uk-grid>
-                        <div id="news-detail-tile-header-content" class="uk-width-expand">
-                            <span id="news-detail-{{news_item.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title">{{news.title}}</span>
-                        </div>
-                    </div>
-                </div>
-                <div id="news-tile-body" class="uk-card-body ourchive-card-body uk-padding-small">
-                    <div id="news-tile-description-text"><div class="uk-margin-left uk-text-truncate">{{ news.content|safe }}</div></div>
-                </div>
-                <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="news-tile-footer-parent">
-                    <div class="uk-width-1-1 uk-padding-small uk-margin-small">
-                        <div class="uk-inline ourchive-metadata-list">
-                            <span id="news-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{news.updated_on|date:'d M Y'}}</span>
-                        </div>
-                        <div class="uk-inline ourchive-metadata-list">
-                            <span id="news-metadata-status-divider" class="uk-inline uk-text-bold">-</span>
-                        </div>
-                        <div class="uk-inline ourchive-metadata-list">
-                            <a href="{% url 'fe-news-list' %}"><span id="news-metadata-all" class="uk-inline uk-text-bold">{% translate 'All news' %}</span></a>
-                        </div>
-                    </div>
-                </div>
+<div class="uk-height-large uk-margin-top uk-width-1-1 ourchive-chive-padding" id="news-{{news.id}}-detail-container">
+    <div class="uk-grid uk-grid-small ourchive-chive-grid uk-padding-remove-horizontal" uk-grid>
+        <div id="news-tile-header-content" class="uk-width-1-1">
+            <span id="news-detail-{{news_item.id}}-tile-title" class=" uk-margin-remove-bottom ourchive-tile-title">{{news.title}}</span>
+            <hr class="ourchive-hr"/>
+        </div>
+        <div class="uk-width-1-1">
+            <span class="uk-text-default">{{ news.content|safe }}</span>
+        </div>
+        <div class="uk-width-1-1 uk-padding-small uk-margin-small">
+            <div class="uk-inline ourchive-metadata-list">
+                <span id="news-metadata-updated" class="uk-inline ourchive-metadata-list">{% translate 'Updated' %}: {{news.updated_on|date:'d M Y'}}</span>
+                <a href="{% url 'fe-news-list' %}"><span id="news-metadata-all" class="uk-inline ourchive-badge-margins">{% translate 'All news' %}</span></a>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

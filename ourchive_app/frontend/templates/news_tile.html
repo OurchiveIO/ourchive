@@ -1,22 +1,18 @@
 {% load i18n %}
-<div id="news-tile-parent" class="uk-width-expand uk-padding-remove-horizontal">
-	<div id="news-tile-card" class="uk-card uk-card-default">
-	    <div id="news-tile-header-parent" class="uk-card-header uk-padding-small ourchive-card-head">
-	        <div id="news-tile-header-grid" class="uk-grid-small uk-flex-middle" uk-grid>
-		        <div id="news-tile-header-content" class="uk-width-expand">
-	                <span id="news-{{news_item.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a href="{% url 'fe-news-detail' news_item.id %}">{{news_item.title}}</a></span>      
-		        </div>
-		    </div>
-		</div>
-		<div id="news-tile-body" class="uk-card-body ourchive-card-body uk-padding-small">
-            <div id="news-tile-description-text"><div class="uk-margin-left uk-text-truncate">{{ news_item.content|safe|truncatechars:200 }}</div></div>	   
-		</div>
-	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="news-tile-footer-parent">
-			<div class="uk-width-1-1 uk-padding-small uk-margin-small">
-				<div class="uk-inline ourchive-metadata-list">
-					<span id="news-metadata-updated" class="uk-inline uk-text-bold">{% translate 'Updated' %}: {{news_item.updated_on|date:'d M Y'}}</span>
-				</div>
-			</div>
-	    </div>
-	</div>  
+<div class="ourchive-work-card uk-box-shadow-small uk-height-large uk-width-1-1" id="news-{{news.id}}-tile-container">
+    <div class="uk-grid uk-grid-small uk-height-1-1" uk-grid>
+        <div id="news-tile-header-content" class="uk-width-expand">
+            <span id="news-{{news_item.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a href="{% url 'fe-news-detail' news_item.id %}">{{news_item.title}}</a></span>
+        </div>
+    </div>
+    <div id="news-tile-body" class="uk-width-1-1 uk-padding-small">
+        <span id="news-tile-description-text">{{ news_item.content|safe }}</span>
+    </div>
+    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="news-tile-footer-parent">
+        <div class="uk-width-1-1 uk-padding-small uk-margin-small">
+            <div class="uk-inline ourchive-metadata-list">
+                <span id="news-metadata-updated" class="uk-inline ourchive-muted">{% translate 'Updated' %}: {{news_item.updated_on|date:'d M Y'}}</span>
+            </div>
+        </div>
+    </div>
 </div>

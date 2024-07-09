@@ -269,10 +269,12 @@ def execute_search(request, post_request):
 			active_tab = 3
 		elif object_type == 'Bookmark':
 			active_tab = 1
-	term = request.POST.get('term')
+	term = request.POST.get('term', '')
 	if not term:
 		term = request.GET.get('term')
 	tag_id = request.GET.get('tag_id', None)
+	attr_id = request.GET.get('attr_id', None)
+	work_type_id = request.GET.get('work_type_id', None)
 	# make request
 	logger.debug(f'Search request data: {post_request}')
 	response_json = do_post(f'api/search/', request, data=post_request).response_data
@@ -326,6 +328,10 @@ def execute_search(request, post_request):
 	}
 	if tag_id:
 		template_data['tag_id'] = tag_id
+	if attr_id:
+		template_data['attr_id'] = attr_id
+	if work_type_id:
+		template_data['work_type_id'] = work_type_id
 	return template_data
 
 

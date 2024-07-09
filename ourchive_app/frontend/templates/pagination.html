@@ -10,20 +10,22 @@
 </div>
 {% else %}
 <nav aria-label="Pagination">
+{{ page_params }}
+{{ next }}
     <ul class="uk-pagination uk-flex-center" uk-margin>
-        <li><a href="#"><span uk-pagination-previous></span></a></li>
+        <li><a href="{{ previous }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span uk-pagination-previous></span></a></li>
         {% for number in pagination_array %}
         {% if number != '...' %}
             {% if current_page == number %}
-                <li class="uk-active"><a href="?page={{ number }}{% if search_term %}&term={{search_term}}{%endif%}{% if page_params %}{{ page_params }}{% endif %}"><span aria-current="page">{{ number }}</span></a></li>
+                <li class="uk-active"><a href="?page={{ number }}{% if search_term and search_term != 'None' %}&term={{search_term|default_if_none:'' }}{%endif%}{% if tag_id %}&tag_id={{ tag_id }}{% endif %}{% if attr_id %}&attr_id={{ attr_id }}{% endif %}{% if work_type_id %}&work_type_id={{ work_type_id }}{% endif %}{% if page_params %}{{ page_params }}{% endif %}"><span aria-current="page">{{ number }}</span></a></li>
             {% else %}
-                <li><a href="?page={{ number }}{% if search_term %}&term={{search_term}}{%endif%}{% if page_params %}{{ page_params }}{% endif %}">{{ number }}</a></li>
+                <li><a href="?page={{ number }}{% if search_term and search_term != 'None' %}&term={{search_term|default_if_none:''}}{%endif%}{% if tag_id %}&tag_id={{ tag_id }}{% endif %}{% if attr_id %}&attr_id={{ attr_id }}{% endif %}{% if work_type_id %}&work_type_id={{ work_type_id }}{% endif %}{% if page_params %}{{ page_params }}{% endif %}">{{ number }}</a></li>
             {% endif %}
         {% else %}
             <li class="uk-disabled"><span>…</span></li>
         {% endif %}
         {% endfor %}
-        <li><a href="#"><span uk-pagination-next></span></a></li>
+        <li><a href="{{ next }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span uk-pagination-next></span></a></li>
     </ul>
 </nav>
 {% endif %}
