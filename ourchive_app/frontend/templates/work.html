@@ -36,7 +36,7 @@
     }
 </script>
     <div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="work-uk-grid" uk-grid>
-            <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center">{% include "work_tile.html" %}</div>
+            <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center uk-width-auto">{% include "work_tile.html" %}</div>
             {% if work.chapter_count > 1 %}
                 <div id="chapters-select" class="uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">
                     <select id="work-chapter-select" onchange="updateChapter('{{ chapters.0.id }}', '{{ chapters.0.number }}', '{{ work.id }}')" class="uk-select uk-width-medium" aria-label="{% translate 'Chapters' %}">
