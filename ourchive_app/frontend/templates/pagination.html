@@ -10,8 +10,6 @@
 </div>
 {% else %}
 <nav aria-label="Pagination">
-{{ page_params }}
-{{ next }}
     <ul class="uk-pagination uk-flex-center" uk-margin>
         <li><a href="{{ previous }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span uk-pagination-previous></span></a></li>
         {% for number in pagination_array %}
