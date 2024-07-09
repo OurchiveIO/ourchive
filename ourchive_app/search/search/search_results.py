@@ -36,6 +36,7 @@ class SearchResults(object):
         self.order_by = str(kwargs.get('options', {}).get('order_by', '-updated_on'))
         self.search_name = kwargs.get('search_name', None)
         self.user_id = kwargs.get('user_id', None)
+        self.term = kwargs.get('work_search', []).get('term', '')
 
     def flatten_search_groups(self, context):
         groups_array = []
@@ -268,7 +269,7 @@ class SearchResults(object):
         }
         include_facets = list(set(self.work_search_include['tags'] + self.collection_search_include['tags']))
         exclude_facets = list(set(self.work_search_exclude['tags'] + self.collection_search_exclude['tags']))
-        if SavedSearch.objects.filter(name=self.search_name).count() > 0:
+        if SavedSearch.objects.filter(name=self.search_name, user_id=user_id).count() > 0:
             saved_search = SavedSearch.objects.filter(name=self.search_name, user_id=user_id).first()
         else:
             saved_search = SavedSearch(user_id=user_id,
@@ -277,5 +278,6 @@ class SearchResults(object):
         saved_search.info_facets = info_facets
         saved_search.include_facets = include_facets
         saved_search.exclude_facets = exclude_facets
+        saved_search.term = self.term
         saved_search.save()
         return saved_search

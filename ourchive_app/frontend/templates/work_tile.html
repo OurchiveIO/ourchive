@@ -7,8 +7,7 @@
                 <a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}" data-testid="work-tile-title">{{work.title}}</a>
             </span> </p>
             <p class="uk-margin-remove-bottom uk-margin-small-top"><span id="work-{{ work.id }}-creators>">By
-                    {% for user in work.users %}<a id="work-{{work.id}}-user-link" data-testid="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>
-                        {% if not forloop.last %}, {% endif %}{% empty %}
+                    {% for user in work.users %}<a id="work-{{work.id}}-user-link" data-testid="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}
                         <a id="work-{{work.id}}-user-link" data-testid="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>
                     {% endfor %}
             </span></p>

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, pre_delete
 from django.dispatch import receiver
 from django.core.cache import caches, cache
 from django.utils.cache import get_cache_key
@@ -70,7 +70,7 @@ def spoil_work_cache_delete(sender, instance, **kwargs):
 def spoil_chapter_cache_update(sender, instance, **kwargs):
     spoil_work_cache(instance.work)
 
-@receiver(post_delete, sender=core.Chapter)
+@receiver(pre_delete, sender=core.Chapter)
 def spoil_chapter_cache_delete(sender, instance, **kwargs):
     spoil_work_cache(instance.work)
 
@@ -102,6 +102,6 @@ def spoil_collection_cache_delete(sender, instance, **kwargs):
 def spoil_user_collection_cache_update(sender, instance, **kwargs):
     spoil_collection_cache(instance.collection)
 
-@receiver(post_delete, sender=core.UserCollection)
+@receiver(pre_delete, sender=core.UserCollection)
 def spoil_user_collection_cache_delete(sender, instance, **kwargs):
     spoil_collection_cache(instance.collection)
