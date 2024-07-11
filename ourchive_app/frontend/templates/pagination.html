@@ -11,7 +11,7 @@
 {% else %}
 <nav aria-label="Pagination">
     <ul class="uk-pagination uk-flex-center" uk-margin>
-        <li><a href="{{ previous }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span uk-pagination-previous></span></a></li>
+        {% if previous and previous != None %}<li><a href="{{ previous }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span uk-pagination-previous></span></a></li>{% endif %}
         {% for number in pagination_array %}
         {% if number != '...' %}
             {% if current_page == number %}
@@ -23,7 +23,7 @@
             <li class="uk-disabled"><span>…</span></li>
         {% endif %}
         {% endfor %}
-        <li><a href="{{ next }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span uk-pagination-next></span></a></li>
+        {% if next and next != 'None' %}<li><a href="{{ next }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span uk-pagination-next></span></a></li>{% endif %}
     </ul>
 </nav>
 {% endif %}
