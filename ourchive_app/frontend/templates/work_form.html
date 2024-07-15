@@ -347,7 +347,7 @@ function seriesCheck (e) {
                 <input type="hidden" id="work_chapter_id" name="chapter_id" value="{{ work_chapter.id }}">
                 {% include 'chapter_form_body.html' with chapter=work_chapter suppress_info_fields=True %}
             </div>
-            <div id="work-form-multi-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.id %} hidden {% endif %} {% if work.chapter_count < 2 and chapters|length < 2 %} hidden {% endif %} {% if work.id and multichapter == 'false' %} hidden {% endif %} {% endif %}>
+            <div id="work-form-multi-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.id %} hidden {% endif %} {% if work.chapter_count < 2 and chapters|length < 2 %} hidden {% endif %} {% if work.id and multichapter == 'false' %} hidden {% endif %}>
                 <script>
                     var util = UIkit.util;
         
