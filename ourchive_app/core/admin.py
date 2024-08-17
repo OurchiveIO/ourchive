@@ -104,8 +104,8 @@ class SettingsForm(ModelForm):
 
 class OurchiveSettingAdmin(admin.ModelAdmin):
     form = SettingsForm
-    fields = ('name', 'value', 'valtype')
-    list_display = ('name', 'value', 'uid')
+    fields = ('name', 'value', 'valtype', 'description')
+    list_display = ('name', 'value', 'uid', 'description')
 
 
 @admin.action(description="Allow selected users to upload images")

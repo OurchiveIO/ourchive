@@ -913,6 +913,7 @@ class OurchiveSetting(models.Model):
     name = models.CharField(max_length=200, choices=Settings.choices)
     value = models.CharField(max_length=200)
     valtype = models.CharField(max_length=200, null=True, blank=True, choices=SettingsValTypes)
+    description = models.CharField(max_length=300, null=True, blank=True)
 
     def __repr__(self):
         return '<OurchiveSettings: {}>'.format(self.id)
