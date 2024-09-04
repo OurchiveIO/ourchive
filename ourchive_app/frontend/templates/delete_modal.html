@@ -18,12 +18,12 @@
             {% else %}
             {% if parent_object_id %}
                 {% if root_object_id %}
-                    <a id="{{object}}-{{object_id}}-modal-delete-root-link" class="uk-button uk-button-primary" href="#" onclick=handleModalDelete("{% url 'delete-'|add:object root_object_id parent_object_id object_id%}")>{% if not delete_verb %}{% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
+                    <a id="{{object}}-{{object_id}}-modal-delete-root-link" class="uk-button uk-button-primary" href="#" onclick="handleModalDelete('{% url "delete-"|add:object root_object_id parent_object_id object_id %}', {{ parent_object_id }})">{% if not delete_verb %}{% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
                 {% else %}
-                    <a id="{{object}}-{{object_id}}-modal-delete-parent-link" class="uk-button uk-button-primary" href="#" onclick=handleModalDelete("{% url 'delete-'|add:object parent_object_id object_id%}")>{% if not delete_verb %} {% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
+                    <a id="{{object}}-{{object_id}}-modal-delete-parent-link" class="uk-button uk-button-primary" href="#" onclick="handleModalDelete('{% url "delete-"|add:object parent_object_id object_id %}', {{ parent_object_id }})">{% if not delete_verb %} {% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
                 {% endif %}
             {% else %}
-                <a id="{{object}}-{{object_id}}-modal-delete-default-link" class="uk-button uk-button-primary" href="#" onclick=handleModalDelete("{% url 'delete-'|add:object object_id%}")>{% if not delete_verb %} {% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
+                <a id="{{object}}-{{object_id}}-modal-delete-default-link" class="uk-button uk-button-primary" href="#" onclick="handleModalDelete('{% url "delete-"|add:object object_id %}', {{ object_id }})">{% if not delete_verb %} {% translate 'Delete' %}{% else %}{{ delete_verb }}{% endif %}</a>
             {% endif %}
             {% endif %}
         </p>

@@ -1648,6 +1648,6 @@ class WorkAnthologyDetail(APIView):
     permission_classes = [IsOwnerOrReadOnly]
 
     def delete(self, request, pk, work_id):
-        AnthologyWork.objects.delete(work__id=work_id, anthology__id=pk)
+        AnthologyWork.objects.get(work__id=work_id, anthology__id=pk).delete()
         return Response({'message': 'Work removed from anthology.'}, status=200)
 

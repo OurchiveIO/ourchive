@@ -3,11 +3,7 @@
 {% load i18n %}
 {% block title %}{{ anthology.title }} - {% translate 'Anthology' %}{% endblock %}
 {% block content %}
-    <script>
-        window.addEventListener("load", function() {
-            initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
-        });
-    </script>
+<script src="{% static 'frontend/js/ourchive-anthologies.js' %}"></script>
 <div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="anthology-uk-grid" uk-grid>
     {% if anthology.header_url %}
     <div class="uk-width-auto uk-margin-small-top uk-align-center" id="anthology-{{anthology.id}}-header-img-parent">

@@ -865,6 +865,7 @@ def language_autocomplete(request):
 
 def bookmark_autocomplete(request):
 	term = request.GET.get('text')
+	obj_id = request.GET.get('obj_id', 0)
 	params = {'term': term}
 	response = do_get(f'api/bookmark-autocomplete', request, params, 'Work')
 	works = response.response_data['results']
@@ -872,7 +873,8 @@ def bookmark_autocomplete(request):
 		work['work']['title_clean'] = work['work']['title'].replace("'", "\\'")
 	template = 'bookmark_collection_autocomplete.html'
 	return render(request, template, {
-		'works': works})
+		'works': works,
+		'object_id': obj_id})
 
 
 def user_autocomplete(request):
@@ -2216,7 +2218,7 @@ def anthology(request, pk):
 def render_anthology_work(request, pk):
 	work_id = request.GET.get('work_id')
 	if pk > 0:
-		response = do_get(f'api/anthology/{pk}/', request, 'Anthology')
+		response = do_get(f'api/anthologies/{pk}/', request, 'Anthology')
 		anthology = response.response_data
 	else:
 		anthology = {
