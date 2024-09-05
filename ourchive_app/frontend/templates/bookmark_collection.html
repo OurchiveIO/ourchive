@@ -3,22 +3,6 @@
 {% load i18n %}
 {% block title %}{% translate 'Bookmark Collection' %} - {{ bkcol.title }}{% endblock %}
 {% block content %}
-    <script>
-        window.addEventListener("load", function() {
-            initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
-        });
-        function loadMoreComments(next, chapterId) {
-            fetch(next)
-              .then((response) => {
-                return response.text();
-              })
-              .then((myText) => {
-                document.getElementById('collection-{{bkcol.id}}-comments-child-container').innerHTML = "";
-                document.getElementById('collection-{{bkcol.id}}-comments-child-container').innerHTML = myText;
-                document.getElementById('collection-{{bokcol.id}}-comments-child-container').scrollIntoView();
-              });
-        }
-    </script>
 <div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="work-uk-grid" uk-grid>
     {% if bkcol.header_url %}
         <div id="bkcol-header-image" class="uk-width-1-1 uk-padding-remove">
@@ -71,4 +55,5 @@
     {% endif %}
     {% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
 </div>
+    <script src="{% static 'frontend/js/ourchive-collections.js' %}"></script>
 {% endblock %}

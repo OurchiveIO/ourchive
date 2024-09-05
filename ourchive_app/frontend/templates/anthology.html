@@ -3,7 +3,6 @@
 {% load i18n %}
 {% block title %}{{ anthology.title }} - {% translate 'Anthology' %}{% endblock %}
 {% block content %}
-<script src="{% static 'frontend/js/ourchive-anthologies.js' %}"></script>
 <div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="anthology-uk-grid" uk-grid>
     {% if anthology.header_url %}
     <div class="uk-width-auto uk-margin-small-top uk-align-center" id="anthology-{{anthology.id}}-header-img-parent">
@@ -36,4 +35,5 @@
     </div>
 </div>
 {% include "delete_modal.html" with object='anthology' object_friendly='anthology' object_id=anthology.id %}
+<script src="{% static 'frontend/js/ourchive-anthologies.js' %}"></script>
 {% endblock %}

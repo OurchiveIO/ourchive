@@ -3,30 +3,11 @@
 {% load static %}
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}
-<script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
 <link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
 <script src="{% static 'frontend/js/searchable-multiselect-generic.js' %}"></script>
     <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="bookmark-form-uk-grid" uk-grid>
         <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="bookmark-form-parent-grid">  
             <form class="uk-form-horizontal" method="post" id="bookmarkForm" onsubmit="return getRichText(['description'])">
-                <script>
-                    function colorStar(starNum) {
-                        if (!document.getElementById("rating_"+starNum).classList.contains("rating-star")) {
-                            for (let star = 1; star <= starNum; star++) {
-                                document.getElementById("rating_"+star).classList.add("rating-star");
-                                document.getElementById("bookmark_rating").setAttribute("value", star);
-                            }                
-                        }
-                        else {
-                            for (let star = starNum; star <= 100; star++) {
-                                var element = document.getElementById("rating_"+star);
-                                if (element == null) break;
-                                document.getElementById("rating_"+star).classList.remove("rating-star");                   
-                            } 
-                            document.getElementById("bookmark_rating").setAttribute("value", starNum - 1);               
-                        }
-                    }
-                </script>
                 {% csrf_token %}
                 <input id="bookmark-form-hidden-id" type="hidden" name="bookmark_id" value="{{ bookmark.id }}"/>
                 <div id="bookmark-form-actions-parent" class="uk-grid" uk-grid>
@@ -166,4 +147,6 @@
             </form>
         </div>
     </div>
+    <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
+    <script src="{% static 'frontend/js/ourchive-bookmarks.js' %}"></script>
 {% endblock %}

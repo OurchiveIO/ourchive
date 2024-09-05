@@ -1,21 +1,9 @@
 {% extends 'index.html' %}
 {% load i18n %}
+{% load static %}
 {% block title %}Bookmark - {{ bookmark.title|default:bookmark.work.title }}{% endblock %}
-{% block content %}	
-<script>
-	function loadMoreComments(next, chapterId) {
-		fetch(next)
-		  .then((response) => {
-		    return response.text();
-		  })
-		  .then((myText) => {			 
-			document.getElementById('bookmark-{{bookmark.id}}-comments-child-container').innerHTML = "";
-			document.getElementById('bookmark-{{bookmark.id}}-comments-child-container').innerHTML = myText;
-			document.getElementById('bookmark-{{bookmark.id}}-comments-child-container').scrollIntoView();
-		  });
-	}
-</script>
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="bookmark-uk-grid" uk-grid>
+{% block content %}
+<div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="bookmark-uk-grid" uk-grid>
 <article class="uk-article uk-width-expand uk-padding-remove" id="bookmark-uk-article">
     <div class="uk-child-width-2-1 ourchive-parent-grid" id="bookmark-uk-child-grid" uk-grid>
         <div class="uk-width-2-3" id="bookmark-title-parent">
@@ -81,5 +69,6 @@
         }
     </script>
 {% endif %}
-    </div>
+</div>
+<script src="{% static 'frontend/js/ourchive-bookmarks.js' %}"></script>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% load i18n %}
 <script>
-	function loadMoreComments(next, chapterId) {
+	function loadMoreComments(next, chapterId, obj_id) {
 		fetch(next)
 		  .then((response) => {
 		    return response.text();

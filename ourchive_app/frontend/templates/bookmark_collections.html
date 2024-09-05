@@ -1,12 +1,8 @@
 {% extends 'index.html' %}
 {% load i18n %}
+{% load static %}
 {% block title %}{% translate 'Collections' %}{% endblock %}
 {% block content %}
-    <script>
-        window.addEventListener("load", function() {
-            initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
-        });
-    </script>
     <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="collections-uk-grid" uk-grid>
         {% if user_filter %}
             <div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="user-bkcols-parent">
@@ -15,4 +11,5 @@
         {% endif %}
         <div class="uk-width-1-1 uk-padding-remove-horizontal">{% include "bookmark_collections_list.html" %}</div>
     </div>
+    <script src="{% static 'frontend/js/ourchive-collections.js' %}"></script>
 {% endblock %}
