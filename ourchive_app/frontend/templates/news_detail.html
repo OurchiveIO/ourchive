@@ -2,8 +2,7 @@
 {% load i18n %}
 {% block title %}{{news.title}}{% endblock %}
 {% block content %}
-<div class="uk-height-large uk-margin-top uk-width-1-1 ourchive-chive-padding" id="news-{{news.id}}-detail-container">
-    <div class="uk-grid uk-grid-small ourchive-chive-grid uk-padding-remove-horizontal" uk-grid>
+    <div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" uk-grid>
         <div id="news-tile-header-content" class="uk-width-1-1">
             <span id="news-detail-{{news_item.id}}-tile-title" class=" uk-margin-remove-bottom ourchive-tile-title">{{news.title}}</span>
             <hr class="ourchive-hr"/>
@@ -18,5 +17,4 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
