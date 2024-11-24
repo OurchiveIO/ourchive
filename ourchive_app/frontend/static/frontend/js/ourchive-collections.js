@@ -32,7 +32,7 @@ function doWorkAutocomplete(term) {
     });
 }
 
-function populateWorkInput(bookmark_id, bookmark_display) {
+function populateWorkInput(bookmark_id, bookmark_display, obj_id=null) {
     // visible list
     var list = document.getElementById("bookmarks_readonly_list")
     // bookmark to add
