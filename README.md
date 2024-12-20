@@ -75,5 +75,7 @@ All frameworks and tools we are using are open source, including:
 - The Noun Project (icons)
 - UIKit (CSS + JS)
 
+This project is tested with BrowserStack.
+
 [github issues]: https://github.com/c-e-p/ourchive/issues
 [pull request guidelines]: .github/PULL_REQUEST_TEMPLATE/pr_feature_template.md
