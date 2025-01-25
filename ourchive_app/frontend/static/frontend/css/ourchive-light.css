@@ -6354,6 +6354,10 @@ progress {
   --bs-gradient: none;
   color: #163C38; }
 
+.oc-badge {
+  color: #163C38;
+  background-color: #FDECCE; }
+
 .form-control {
   border-radius: 0; }
 

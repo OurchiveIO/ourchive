@@ -23,12 +23,12 @@
         </div>
         <div class="col-md-8 col-12" id="anthology-{{anthology.id}}-info-card">
             <div class="osm-container" id="show-description-{{ anthology.id }}">
-                <div class="collapse show" id="anthology-{{anthology.id}}-tile-summary-p">{% autoescape off %}{{ anthology.description|truncatechars:150 }}{% endautoescape %}</div>
-                <div class="collapse" id="anthology-{{anthology.id}}-tile-summary-p">{% autoescape off %}{{ anthology.description }}{% endautoescape %}</div>
+                <div class="collapse show" id="anthology-{{anthology.id}}-tile-summary-p">{% autoescape off %}{{ anthology.description|truncatechars:500 }}{% endautoescape %}</div>
+                {% if anthology.description|length > 500 %}<div class="collapse" id="anthology-{{anthology.id}}-tile-summary-p">{% autoescape off %}{{ anthology.description }}{% endautoescape %}</div>
                 <a data-bs-toggle="collapse" aria-expanded="false" aria-controls="anthology-{{anthology.id}}-tile-summary-p" id="more-btn-description-{{ anthology.id }}" class="link-underline link-underline-opacity-0 collapsed" href="#anthology-{{anthology.id}}-tile-summary-p">
                     <span class="oc-show-more">{% translate '+ Show More' %}</span>
                     <span class="oc-show-less">{% translate '- Show Less' %}</span>
-                </a>
+                </a>{% endif %}
             </div>
             <div class="osm-container" id="show-tags-{{ anthology.id }}">
                 {% if anthology.tags or anthology.attributes %}
@@ -37,7 +37,6 @@
                 {% if anthology.attributes %}{% include "object_attributes.html" with object='anthology' object_id=anthology.id attributes=anthology.attributes %}{% endif %}
                 {% if anthology.tags %}{% include "tag_partial.html" with obj_name='anthology' tags=anthology.tags %}{% endif %}
             </div>
-            <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleChiveData('{{ anthology.id }}', 'tags', anthology)" id="more-btn-tags-{{ anthology.id }}">{% translate 'Show more...' %}</a>
         </div>
     </div>
     <div class="row row-cols-1" id="anthology-{{ anthology.id }}-list-meta">
