@@ -38,20 +38,21 @@ function tagCheck (e, type, bypass_check=false, divider='$!$') {
 }
 
 function doAutocomplete(term, source, selector, tag_type='', divider='$!$', clickAction='') {
-  if (term.length < 3)
-  {
-    return;
-  }
-  var complete_select = 'tag-autocomplete-dropdown-'+selector;
-  fetch('/tag-autocomplete?text='+term+"&source="+source+"&type="+tag_type+"&click_action="+clickAction)
-    .then((response) => {
-      return response.text();
-    })
-    .then((templateText) => {      
-    document.getElementById(complete_select).innerHTML = "";
-    document.getElementById(complete_select).innerHTML = templateText;
-    UIkit.drop(document.getElementById(complete_select)).show();
-    });
+    let complete_select = 'tag-autocomplete-dropdown-'+selector;
+    let collapse = new bootstrap.Dropdown(`#tag-autocomplete-dropdown-btn`);
+    collapse.hide();
+    if (term.length < 3) {
+        return;
+    }
+    fetch('/tag-autocomplete?text='+term+"&source="+source+"&type="+tag_type+"&click_action="+clickAction)
+        .then((response) => {
+          return response.text();
+        })
+        .then((templateText) => {
+            document.getElementById(complete_select).innerHTML = "";
+            document.getElementById(complete_select).innerHTML = templateText;
+            collapse.show();
+        });
 }
 
 function updateIndexSearchText(term, inForm=false) {

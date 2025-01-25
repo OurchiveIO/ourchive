@@ -6,6 +6,8 @@
 	{% load cache %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'frontend/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'frontend/css/bootstrap-icons.min.css' %}">
     {% if css_mode %}
     <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/' %}ourchive-{{css_mode}}.css" />
     {% else %}
@@ -13,9 +15,9 @@
     {% endif %}
     <link rel="stylesheet" href="{% static 'frontend/css/editor.css' %}" />
     <link rel="shortcut icon" href="{% static 'favicon/favicon.svg' %}"/>
-    <link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
-    <script src="{% static 'frontend/js/uikit.min.js' %}"></script>
-    <script src="{% static 'frontend/js/uikit-icons.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'frontend/css/choices.min.css' %}" />
+    <script src="{% static 'frontend/js/choices.min.js' %}"></script>
+    <script src="{% static 'frontend/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'frontend/js/ourchive-tags.js' %}"></script>
     <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
     <script src="{% static 'frontend/js/ourchive-tinymce.js' %}"></script>
@@ -38,70 +40,89 @@
 		    expires = "; expires=" + date.toUTCString();
 		    document.cookie = name + "=" + "dismissed" + expires + "; path=/";
 		}
-	</script>
-	{% if 'accept-cookies' not in request.COOKIES and not request.user.cookies_accepted %}
-		<script>
-			UIkit.notification({
-			    message: 'Ourchive uses necessary cookies to allow you to log in and submit data. We do not collect or distribute any tracking information. By continuing to browse the site you are agreeing to allow cookies to be stored and used.',
-			    status: 'danger',
-			    pos: 'top-center',
-			    timeout: 10000
-			});
-			fetch('{{request.build_absolute_uri|slice:":-1"}}{% url 'accept-cookies' %}')
+        function acceptCookies() {
+            fetch('{{request.build_absolute_uri|slice:":-1"}}{% url 'accept-cookies' %}')
 			  .then((response) => {
 			  	var date = new Date();
 			  	date.setTime(date.getTime() + 86400*1000*7);
 			    const expires = date.toUTCString();
 				document.cookie =  'accept-cookies=true' + '; expires=' + expires + '; path=/'
 			  });
-		</script>
-	{% endif %}
-	{% if messages %}
-		{% for message in messages %}
-			<script>
-				var status = '{{message.tags}}' === 'success' ? 'primary' : 'danger';
-				UIkit.notification({
-				    message: '<div id="{{message.extra_tags}}" class="uk-padding-small uk-padding-remove-vertical"><strong>{{ message }}</strong></div>',
-				    status: status,
-				    pos: 'top-center',
-				    timeout: 8000
-				});
-			</script>
-		{% endfor %}
-	
-	{% endif %}
-	{% if admin_announcements %}
-	<div class="uk-width-expand uk-container uk-margin-remove uk-padding-remove" id="admin-messages-parent">	
-		<div id="content-block-parent-grid" class="uk-flex uk-flex-middle uk-flex-center uk-display-block">
-			{% for announcement in admin_announcements %}
-			<div class="uk-text-center uk-padding-small uk-width-expand" id="admin-announcement-{{announcement.id}}">
-			    <span class="uk-text-bold">{{ announcement.content|safe }}</span>
-			   	<span title="Dismiss" uk-toggle="target: #admin-announcement-{{announcement.id}}" onclick="dismissAnnouncement('{{announcement.id}}')" class="uk-link ourchive-span-link uk-align-right uk-text-middle" uk-icon="icon: ourchive-close;ratio:.75;" id="dismiss-announcement"></span>
-			</div>
-			{% endfor %}
-		</div>
-	</div>
-	{% endif %}
-	{% include 'index_navbar.html' %}
-	{% include 'index_sidenav.html' %}
-	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="icon:ourchive-up;ratio:.75"></span></button>
-	<div class="uk-container uk-container-expand" id="content-block-parent">
-		{% block content %}
-		{% include 'index_body.html' %}
-		{% endblock %}
-	</div>
-	<hr id="footer-hr" class="ourchive-hr">
-	<div id="footer-parent-grid" class="uk-grid uk-padding-small uk-margin-bottom uk-margin-left uk-margin-right" uk-grid>
-	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">
-	        <span id="footer-created-by" class="uk-text-meta"><a href="https://getourchive.io/">Ourchive</a> is created & maintained by <a href="https://federatedfandom.net/@kate" target="_blank">kate</a>, <a href="https://github.com/ladyofthelog">verity</a>, and <a href="https://federatedfandom.net/@imp" target="_blank">imp</a>.</span>
-	    </div>
-	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s uk-text-right">
-	        {% for page in content_pages %}
-	        <a href="/content-pages/{{page.id}}" class="uk-link uk-padding-small">{{page.name}}</a>
-	        {% endfor %}
-	    </div>
-	</div>
-		
-	<script src="{% static 'frontend/js/scroll-to-top.js' %}"></script>
+        }
+	</script>
+    {% if admin_announcements %}
+        <div class="container-fluid" id="admin-messages-parent">
+            <div id="content-block-parent-grid" class="row">
+                {% for announcement in admin_announcements %}
+                <div class="col-12 collapse show mb-1 mt-2" id="admin-announcement-{{announcement.id}}">
+                    <p class="fw-bold text-center">{{ announcement.content|safe }}  <button data-bs-toggle="collapse" data-bs-target="#admin-announcement-{{announcement.id}}" aria-expanded="true" aria-controls="admin-announcement-{{announcement.id}}" id="dismiss-announcement" type="button" onclick="dismissAnnouncement('{{announcement.id}}')" class="btn-close" aria-label="Dismiss"></button>
+</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    {% include 'index_navbar.html' %}
+    <div class="container pt-2" id="content-block-parent">
+        {% if 'accept-cookies' not in request.COOKIES and not request.user.cookies_accepted %}
+            <div class="toast-container bottom-50 start-50 translate-middle-x">
+              <div id="cookieToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                  <strong class="me-auto">Cookie Notification</strong>
+                  <button type="button" class="btn-close" data-bs-dismiss="toast" onclick="acceptCookies()" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                  Ourchive uses necessary cookies to allow you to log in and submit data. We do not collect or distribute any tracking information. By continuing to browse the site you are agreeing to allow cookies to be stored and used.
+                </div>
+              </div>
+            </div>
+            <script>
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(document.getElementById("cookieToast"));
+                toastBootstrap.show();
+            </script>
+        {% endif %}
+        {% if messages %}
+            <div class="toast-container top-0 start-50 translate-middle-x">
+            {% for message in messages %}
+                <div class="toast ourchive-msg-toast" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="toast-header justify-content-end">
+                    <strong class="me-auto">{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}{% translate 'Error' %}{% else %}{% translate 'Success' %}{% endif %}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+                  <div class="toast-body bg-body" id="{{message.extra_tags}}">
+                    {{ message }}
+                  </div>
+                </div>
+                <script>
+                    var status = '{{message.tags}}' === 'success' ? 'primary' : 'danger';
+                </script>
+            {% endfor %}
+            <script>
+                document.querySelectorAll(".ourchive-msg-toast").forEach(msg => {
+                    let toast = bootstrap.Toast.getOrCreateInstance(msg);
+                    toast.show();
+                });
+                var status = '{{message.tags}}' === 'success' ? 'primary' : 'danger';
+            </script>
+            </div>
+        {% endif %}
+        <button id="scroll-to-top-button" class="btn btn-primary scroll-to-top" style="display: none;" onclick="topFunction()"><i class="bi bi-chevron-bar-up"></i></button>
+        {% block content %}
+        {% include 'index_body.html' %}
+        {% endblock %}
+        <hr id="footer-hr" class="ourchive-hr">
+        <div id="footer-parent-grid" class="row mb-2">
+            <div id="footer-child-grid" class="col-md-6 col-12">
+                <span id="footer-created-by" class="uk-text-meta"><a href="https://getourchive.io/">Ourchive</a> is created & maintained by <a href="https://github.com/OurchiveIO" target="_blank">the Ourchive team</a>.</span>
+            </div>
+            <div class="col-xs-12 d-md-none"><hr id="footer-hr" class="ourchive-hr"></div>
+            <div id="footer-child-grid" class="col-md-6 col-12">
+                <p class="text-md-end">{% for page in content_pages %}
+                <a href="/content-pages/{{page.id}}" {% if not forloop.last %}class="me-1"{% endif %}>{{page.name}}</a>
+                {% endfor %}</p>
+            </div>
+        </div>
+        <script src="{% static 'frontend/js/scroll-to-top.js' %}"></script>
+    </div>
 </body>
 </html>

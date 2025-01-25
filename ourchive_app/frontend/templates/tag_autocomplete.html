@@ -1,13 +1,16 @@
 {% load i18n %}
+
 {% if tags %}
-<div class="uk-background-default uk-margin-small-top uk-padding-small uk-width-auto uk-height-max-medium ourchive-autocomplete-parent" id="search-tag-autocomplete-parent">
-	{% for tag in tags %}
-		<div class="ourchive-autocomplete-child" {% if not click_action %}onclick="goToUrl('/tags/{{tag.id}}?term={{tag.tag}}')"{% else %}onclick="{{ click_action }}"{% endif %}>
+<div id="search-tag-autocomplete-parent">
+        {% for tag in tags %}
+		<div class="ourchive-autocomplete-child dropdown-item" {% if not click_action %}onclick="goToUrl('/tags/{{tag.id}}?term={{tag.tag}}')"{% else %}onclick="{{ click_action }}"{% endif %}>
                 <a class="uk-link-text" id="populate-search-tag-href-{{tag.tag}}" {% if not click_action %}href="/tags/{{tag.id}}?term={{tag.tag}}"{% else %}onclick="{{ click_action }}"{% endif %}>
                     <span class="ourchive-autocomplete uk-text-bold uk-text-default" id="search-tag-autocorrect-span-{{tag.tag}}">{{tag.display_text|default:tag.tag}}</span><br>
                     <span class="ourchive-autocomplete uk-text-small uk-text-muted uk-text-small" id="search-tag-autocorrect-span-{{ tag.type_name }}">{{ tag.type }}</span>
                 </a>
         </div>
-	{% endfor %}
-</div>
+	    {% endfor %}
+    </div>
 {% endif %}
+
+

@@ -1,137 +1,92 @@
 {% load i18n %}
 {% load static %}
-<div class="ourchive-navbar" id="ourchive-navbar-parent">
-	<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small uk-padding-remove-vertical" uk-navbar id="uk-nav-parent">
-	    <div class="uk-navbar-left" id="uk-nav-left">
-	    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger">{% if request.session.has_notifications %}<div class="ourchive-notification" role="status"></div>{%endif%}</a>
-	        <ul class="uk-navbar-nav uk-visible@s">
-	            <li class="uk-active" id="nav-home"><a href="/" title="Home" data-testid="ourchive-logo-link" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
-	        </ul>
-	    </div>	 
-	    <div class="uk-navbar-center uk-visible@s" id="uk-nav-center">
-	    	 <ul class="uk-navbar-nav" id="uk-nav-center-ul">
-	    	 	<li id="nav-search-li">
-    					<div class="uk-navbar-item uk-margin-small-left">
-                        <script>
-                            function fetchSavedSearch(element, selector) {
-                                let id = element.value;
-                                  fetch(`/savedsearch/${id}`)
-                                    .then((response) => {
-                                      return response.text();
-                                    })
-                                    .then((templateText) => {
-                                        document.getElementById(selector).innerHTML = "";
-                                        document.getElementById(selector).innerHTML = templateText;
-                                    });
-                                }
-                        </script>
-                            <div>
-                                <a class="uk-button uk-button-default ourchive-filter-button" uk-toggle="target: #filter-toggle-dsk">{% translate 'Filters' %} <span uk-icon="icon: chevron-down"></span></a>
-                                <div id="filter-toggle-dsk" class="uk-padding ourchive-work-card" style="position: absolute;" hidden>
-                                    {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk' %}
-                                </div>
-                            </div>
+<script>
+    function fetchSavedSearch(element, selector) {
+        let id = element.value;
+          fetch(`/savedsearch/${id}`)
+            .then((response) => {
+              return response.text();
+            })
+            .then((templateText) => {
+                document.getElementById(selector).innerHTML = "";
+                document.getElementById(selector).innerHTML = templateText;
+            });
+        }
+</script>
+<nav class="navbar navbar-expand-lg bg-primary d-flex justify-content-between">
 
-            				<form class="uk-search uk-search-default ourchive-nav-search" action="/search/" method="post" id="nav-search-form">
-			                	{% csrf_token %}
-			                	<button type="submit" data-testid="navbar-search-submit" class="uk-search-icon-flip" uk-search-icon></button>
-			                    <input class="uk-search-input ourchive-nav-search ourchive-navbar-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
-							<div id="tag-autocomplete-dropdown-navbar" uk-drop="delay-hide: 1500"></div>
-			                </form>
-    					</div>
-	        	</li>
-	        </ul>
-	    </div>
-	    <div class="uk-navbar-right uk-hidden@s" id="uk-search-right">
-	    	 <ul class="uk-navbar-nav" id="uk-nav-mobile-ul">
-	    	 	<li id="nav-search-li">
-					<div class="uk-navbar-item">
-                            <div class="navbar-mobile-search">
-                                <a uk-icon="ourchive-filter" class="mobile-filter" uk-toggle="target: #filter-toggle-dsk-mobile"></a>
-                                <div id="filter-toggle-dsk-mobile" class="uk-padding ourchive-work-card" hidden>
-                                    {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk-mobile' %}
-                                </div>
-                            </div>
-        				<form class="uk-search uk-search-default" action="/search/" method="post" id="nav-search-form">
-		                	{% csrf_token %}
-		                	<a href="" class="uk-search-icon-flip" uk-search-icon></a>
-		                    <input class="uk-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
-						<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
-		                </form>
-					</div>
-	        	</li>
-	        	<li id="theme-switcher-li">
-	        		<div class="uk-navbar-item">
-		    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper uk-margin-small-top" title="Switch Modes">
-		    	 			{% if request.session.css_mode == "dark" %}
-		    	 			<span uk-icon="icon: ourchive-sun; ratio: 1" title="Light Mode" id="theme-switcher-light"></span>
-		    	 			{% else %}
-		    	 			<span uk-icon="icon: ourchive-sun-off; ratio: 1" title="Dark Mode" id="theme-switcher-dark"></span>
-		    	 			{% endif %}
-		    	 		</a>
-		    	 	</div>
-	    	 	</li>
-	        </ul>
-	    </div>
-	    <div class="uk-navbar-right uk-visible@s" id="uk-nav-right">
-	    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
-	    	 	<li id="theme-switcher-li">
-	    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper" title="Switch Modes">
-	    	 			{% if request.session.css_mode == "dark" %}
-	    	 			<span uk-icon="icon: ourchive-sun; ratio: 1" title="Light Mode" id="theme-switcher-light"></span>
-	    	 			{% else %}
-	    	 			<span uk-icon="icon: ourchive-sun-off; ratio: 1" title="Dark Mode" id="theme-switcher-dark"></span>
-	    	 			{% endif %}
-	    	 		</a>
-	    	 	</li>
-	    	 	{% if not request.user.is_authenticated %}
-	        	<li id="nav-right-main">		        
-            		<div id="nav-login-link" class="uk-navbar-item">
-            			<a href="{% url 'fe-login' %}" class="uk-button nav-button-default">
-            			{% translate 'Sign In' %}
-            			<span class="uk-margin-small-left" uk-icon="icon: ourchive-user;ratio:.75" title="Sign In" id="nav-login-icon"></span></a>
-            		</div>
-		        </li>
-		        {% else %}
-		        <li id="nav-right-main" class="uk-visible@s">
-		            <a class="uk-width-auto uk-text-truncate uk-navbar-item" title="{{ request.user }}" href="{% url 'user-profile-parent' request.user.id %}" id="nav-username">{% translate 'Account' %}{% if request.session.has_notifications %}<div class="ourchive-notification" role="status"></div>{%endif%}</a>
-		            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div" uk-dropdown="delay-hide: 1500; offset: -5">
-	                		<ul class="uk-nav uk-navbar-dropdown-nav uk-list-divider uk-list-collapse" id="nav-user-dropdown-ul">
-	                			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
-	                			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
-	                			<li id="nav-new-series-li"><a href="{% url 'fe-create-series' %}" id="nav-new-series-link">{% translate 'New Series' %}</a></li>
-	                			<li id="nav-new-anthology-li"><a href="{% url 'fe-create-anthology' %}" id="nav-new-anthology-link">{% translate 'New Anthology' %}</a></li>
-	                			<li id="nav-creations-li"><a href="#" id="nav-creations-link">{% translate 'My Chives' %}</a></li>
-	                			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="creations-subnav">
-	                				<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link" data-testid="user-bookmarks">{% translate 'Bookmarks' %}</a></li>
-	                				<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link" data-testid="user-collections">{% translate 'Collections' %}</a></li>
-	                				<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">{% translate 'Works' %}</a></li>
-	                				<li id="nav-series-li"><a href="{% url 'fe-user-series' request.user.username %}" data-testid="user-series" id="nav-series-link">{% translate 'Series' %}</a></li>
-	                				<li id="nav-anthologies-li"><a href="{% url 'fe-user-anthologies' request.user.username %}" data-testid="user-anthologies" id="nav-anthologies-link">{% translate 'Anthologies' %}</a></li>
-	                			</ul>
-	                			<li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a></li>
-							    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a></li>
-							    	<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="profile-subnav">
-	                				<li id="nav-edit-profile-li"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-edit-profile-link">{% translate 'User Settings' %}</a></li>
-	                				<li id="nav-edit-account-li"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-edit-account-link">{% translate 'Account Settings' %}</a></li>
-	                				<li id="nav-cocreator-approval-li"><a href="{% url 'fe-view-approvals'%}" id="nav-view-approvals-link">{% translate 'Approvals' %}</a></li>
-	                				<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">{% translate 'Blocklist' %}</a></li>
-	                			</ul>
-	                			<li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link">{% translate 'Import Work(s)' %}</a></li>
-	                			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="imports-subnav">
-							            <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}">{% translate 'Import Status' %}</a></li>
-							        </ul>
-	                			{% if request.session.has_notifications %}
-	                			<li id="nav-notifications-unread-li"><a class="uk-text-emphasis uk-text-secondary" href="/username/{{request.user}}/notifications" id="nav-notifications-unread-link">Notifications (Unread)</a></li>
-	                			{% else %}
-	                			<li id="nav-notifications-li"><a href="/username/{{request.user}}/notifications" id="nav-notifications-link">Notifications</a></li>
-	                			{% endif %}
-				            	<li id="nav-signout-li"><a href="/logout" id="nav-signout-link">Log Out</a></li>
-		        			</ul>
-		        	</div>	
-		        </li>
-		        {% endif %}
-	    	</ul>
-    	</div>
-	</nav>
-</div>
+    <div class="navbar-nav  col-md-4 col-5 align-items-start ms-1 ms-md-5">
+        <a class="navbar-brand" href="/" title="Home" data-testid="ourchive-logo-link" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home" width="40" height="40" />{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home" width="40" height="40"/>{% endif %}</a>
+    </div>
+    <div class="navbar-nav col-6 align-items-end d-md-none me-1">
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#navbarNavOffcanvas" aria-controls="navbarNavOffcanvas" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="col-md-4 col-12 d-flex justify-content-center">
+        <form role="search" action="/search/" method="post" id="nav-search-form" class="p-2">
+                  {% csrf_token %}
+                  <div class="input-group" id="index-search-parent">
+                      <div class="dropdown">
+                          <button class="btn btn-light dropdown-toggle" data-bs-auto-close="outside" type="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate 'Filters' %}</button>
+                          {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk' %}
+                      </div>
+                      <div class="dropdown">
+                        <input class="form-control me-2" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
+
+                          <button class="btn dropdown-toggle" hidden type="button" data-bs-toggle="dropdown" aria-expanded="false" id="tag-autocomplete-dropdown-btn">{% translate 'Close' %}</button>
+                          <div id="tag-autocomplete-dropdown-navbar" class="dropdown-menu">
+                            {% include 'tag_autocomplete.html' %}
+                          </div>
+                      </div>
+                      <button type="submit" data-testid="navbar-search-submit" class="btn btn-secondary"><i class="bi bi-search text-dark"></i></button>
+                  </div>
+              </form>
+    </div>
+
+    <div class="offcanvas offcanvas-end col-md-3 justify-content-md-end me-md-1" tabindex="-1" id="navbarNavOffcanvas">
+        <div class="offcanvas-header">
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+        <ul class="nav navbar-nav d-flex align-self-end" style="margin-right: 5em;">
+          <li id="theme-switcher-li" class="nav-item">
+            <a onclick="switchTheme()" href="#" id="theme-switcher-link" class="nav-link" title="Switch Modes">
+                {% if request.session.css_mode == "dark" %}
+                    <i class="bi bi-sun text-light"></i>
+                {% else %}
+                    <i class="bi bi-moon text-light"></i>
+                {% endif %}
+            </a>
+            </li>
+            {% if not request.user.is_authenticated %}
+            <li id="nav-right-main" class="nav-item">
+                <a href="{% url 'fe-login' %}" class="btn btn-secondary">{% translate 'Sign In' %}
+                    <i class="bi bi-person-circle text-dark"></i>
+                </a>
+            </li>
+            {% else %}
+            <li id="nav-right-main" class="nav-item dropdown">
+                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="{{ request.user }}" href="#" id="nav-username">{% translate 'Account' %}
+                    {% if request.session.has_notifications %}
+                        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                            <span class="visually-hidden">{% translate 'Notifications' %}</span>
+                        </span>
+                    {%endif%}
+                </a>
+                <ul class="dropdown-menu">
+                    <li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link" class="dropdown-item">{% translate 'New Collection' %}</a></li>
+                    <li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link" class="dropdown-item">New Work</a></li>
+                    <li id="nav-new-series-li"><a href="{% url 'fe-create-series' %}" id="nav-new-series-link" class="dropdown-item">{% translate 'New Series' %}</a></li>
+                    <li id="nav-new-anthology-li"><a href="{% url 'fe-create-anthology' %}" id="nav-new-anthology-link" class="dropdown-item">{% translate 'New Anthology' %}</a></li>
+                    <li id="nav-creations-li"><a href="{% url 'user-profile-parent' request.user.id %}" id="nav-creations-link" class="dropdown-item">{% translate 'My Chives' %}</a></li>
+                    <li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}" class="dropdown-item">{% translate 'Subscriptions' %}</a></li>
+                    <li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link" class="dropdown-item">{% translate 'Import Work(s)' %}</a></li>
+                    <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}" class="dropdown-item">{% translate 'Import Status' %}</a></li>
+                    <li id="nav-notifications-li"><a href="/username/{{request.user}}/notifications" id="nav-notifications-link" class="dropdown-item">Notifications</a></li>
+                    <li id="nav-signout-li"><a href="/logout" id="nav-signout-link" class="dropdown-item">Log Out</a></li>
+                </ul>
+            </li>
+            {% endif %}
+      </ul>
+    </div>
+</nav>

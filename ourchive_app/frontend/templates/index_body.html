@@ -1,11 +1,11 @@
 {% load i18n %}
 {% load cache %}
-<div class="uk-grid" id="homepage-intro-and-browse">
-    <div class="uk-width-3-4@l uk-width-1-1">
+<div class="row" id="homepage-intro-and-browse">
+    <div class="col-lg-9 col-12">
         {% cache 43200 homepage-intro %}
         <div id="index-content-intro-div" class="ourchive-content-padding">
-            <h2 id="index-content-heading" class="uk-heading-small">{{ heading_message }}</h2>
-            <span id="index-content-message">{{ long_message }}</span>
+            <h2 id="index-content-heading" class="h1">{{ heading_message }}</h2>
+            <p id="index-content-message" class="fs-3">{{ long_message }}</p>
         </div>
         {% endcache %}
         {%  if homepage_news.results %}
@@ -13,35 +13,41 @@
                 {% for news in homepage_news.results %}<span id="index-content-message">{{ news.content|safe }}</span>{% endfor %}
             </div>
         {%  endif %}
-        <div class="uk-grid uk-grid-small uk-child-width-1-1">
-                <ul uk-tab class="ourchive-content-padding uk-margin-auto-left">
-                    {% for item in browse_cards %}
-                    <li><a href="#">{{ item.label }}</a></li>
-                    {% endfor %}
-                </ul>
-            <div class="uk-switcher ourchive-content-padding">
+        <div>
+            <ul class="nav nav-tabs" role="tablist">
                 {% for item in browse_cards %}
-                <div class="uk-grid uk-margin-right uk-margin-remove-top uk-grid-small" id="browse-cards-item-{{ item.label }}" uk-grid>
-                    {% for card in item.cards %}
-                    <div class="uk-width-1-3">
-                        <div class="uk-card ourchive-homepage-card" id="browse-cards-{{ card.label }}"><a data-testid="browse-cards" href="{{card.url}}">{{card.label}}</a></div>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if forloop.first %}active{% endif %}" id="{{ forloop.counter }}-tab" data-bs-toggle="tab" data-bs-target="#{{ forloop.counter }}-tab-pane" type="button" role="tab" aria-controls="{{ forloop.counter }}-tab-pane" aria-selected="true">{{ item.label }}</button>
+                    </li>
+                {% endfor %}
+            </ul>
+            <div class="tab-content">
+                {% for item in browse_cards %}
+                <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" role="tabpanel" aria-labelledby="{{ forloop.counter }}-tab" tabindex="0" id="{{ forloop.counter }}-tab-pane">
+                    <div class="row">
+                        {% for card in item.cards %}
+                            <div class="card text-center mx-1 my-3 col-lg-3 col-5 text-bg-primary rounded-pill" id="browse-cards-{{ card.label }}">
+                              <a data-testid="browse-cards" href="{{card.url}}" class="link-light link-offset-2 link-underline-opacity-0"><div class="card-body">
+                                {{card.label}}
+                              </div></a>
+                            </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
                 {% endfor %}
             </div>
         </div>
     </div>
-    <div class="uk-width-1-4@l uk-width-1-1" id="homepage-news-and-recent-works">
+    <div class="col-lg-3 col-12 border-start-lg" id="homepage-news-and-recent-works">
         <div class="uk-grid ourchive-border-left uk-grid-small uk-child-width-1-1" uk-grid>
         {% cache 300 homepage-news %}
             <div id="news-column" class="ourchive-content-padding uk-padding-remove-horizontal">
-                <h2 id="news-header">{% translate 'News' %}</h2>
-                <ul class="uk-list" id="news-ul">
+                <h3 id="news-header">{% translate 'News' %}</h3>
+                <ul class="list-group" id="news-ul">
                     {% for item in news %}
-                    <li id="news-li-{{ item.id }}"><a href="{% url 'fe-news-detail' item.id %}">{{ item.title }}</a></li>
+                    <li id="news-li-{{ item.id }}" class="list-group-item border border-0"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{% url 'fe-news-detail' item.id %}">{{ item.title }}</a></li>
                     {% endfor %}
-                    <li id="news-see-more"><a href="{% url 'fe-news-list' %}">See All News >>></a></li>
+                    <li id="news-see-more" class="list-group-item border border-0"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{% url 'fe-news-list' %}">See All News >>></a></li>
                 </ul>
             </div>
         {% endcache %}
@@ -50,12 +56,12 @@
         </div>
         {% cache 300 homepage-recent-works %}
             <div id="recent-works-column" class="uk-padding-remove-horizontal">
-                <h2 id="recent-works-header">{% translate 'Recent Works' %}</h2>
-                <ul class="uk-list" id="recent-works-ul">
+                <h3 id="recent-works-header">{% translate 'Recent Works' %}</h3>
+                <ul class="list-group" id="recent-works-ul">
                     {% for work in recent_works %}
-                        <li id="recent-works-li-{{work.id}}"><a href="{% url 'fe-work-view' work.id %}" title="{{ work.title }}">{{ work.title }} {% translate 'by' %} {{ work.user }}</a></li>
+                        <li id="recent-works-li-{{work.id}}" class="list-group-item border border-0"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{% url 'fe-work-view' work.id %}" title="{{ work.title }}">{{ work.title }} {% translate 'by' %} {{ work.user }}</a></li>
                     {% endfor %}
-                    <li id="recent-works-see-more"><a href="{% url 'fe-all-works' %}">See All Works >>></a></li>
+                    <li id="recent-works-see-more" class="list-group-item border border-0"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{% url 'fe-all-works' %}">See All Works >>></a></li>
                 </ul>
             </div>
         {% endcache %}

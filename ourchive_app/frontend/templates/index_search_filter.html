@@ -12,34 +12,31 @@
         document.getElementById("search-name").value  = value;
     }
 </script>
-<form class="uk-form-stacked" id="index-search-filter-form" name="search_filter_form" action="/savedsearch/filter" method="post">
+<div class="dropdown-menu container-fluid">
+<div class="row-cols-1">
+    <form id="index-search-filter-form" name="search_filter_form" action="/savedsearch/filter" method="post">
     {% csrf_token %}
     <input type="hidden" id="search_id" name="search_id" value="{{ search.id }}"/>
     <input type="hidden" id="search-name" name="search-name" value="{{ search.name }}"/>
     {% if idx_saved_searches %}
-    <div class="uk-margin">
-        <label for="search-saved-searches" class="uk-text-bold uk-form-label">{% translate 'Saved Searches' %}</label>
-        <div id="search-searches-parent" class="uk-form-controls">
-            <select id="search-saved-searches" class="uk-select" onchange="fetchSavedSearch(this, '{{ dropdown_selector }}')">
-                <option value="0"> </option>
-                {% for idx_search in idx_saved_searches %}
-                    <option value="{{idx_search.id}}" {% if idx_search.id == search.id %}selected{% endif %}>{{idx_search.name}}</option>
-                {% endfor %}
-            </select>
-        </div>
+    <div class="mb-3">
+        <label for="search-saved-searches" class="form-label">{% translate 'Saved Searches' %}</label>
+        <select id="search-saved-searches" class="form-select" onchange="fetchSavedSearch(this, '{{ dropdown_selector }}')">
+            <option value="0"> </option>
+            {% for idx_search in idx_saved_searches %}
+                <option value="{{idx_search.id}}" {% if idx_search.id == search.id %}selected{% endif %}>{{idx_search.name}}</option>
+            {% endfor %}
+        </select>
     </div>
     {% endif %}
-    <div class="uk-margin">
-        <label for="search-text" class="uk-text-bold uk-form-label">{% translate 'Search Term' %}</label>
-        <div id="search-text-parent" class="uk-form-controls">
-            <input id="filter-search-text" name="term" class="uk-input" value="{{ search.term }}" oninput="updateIndexSearchText(this.value, true)"/>
-        </div>
+    <div class="mb-3">
+        <label for="filter-search-text" class="form-label">{% translate 'Search Term' %}</label>
+        <input id="filter-search-text" name="term" class="form-control" value="{{ search.term }}" oninput="updateIndexSearchText(this.value, true)"/>
     </div>
-    <div class="uk-margin">
-        <label for="saved-search-{{ search.id }}-languages" class="uk-text-bold uk-form-label">{% translate 'Language' %}</label>
-        <div id="saved-search-{{ search.id }}-languages" class="uk-form-controls">
+    <div class="mb-3">
+        <label for="language-search" class="form-label">{% translate 'Language' %}</label>
             <div class="multi-select-component" id="languages-wrapper">
-                <select multiple  name="languages[]" id="saved-search-languages" hidden>
+                <select multiple  name="languages[]" id="saved-search-{{ search.id }}-languages" hidden>
                 {% if search.languages %}
                     {% for language in search.languages %}
                         <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
@@ -63,27 +60,29 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-                <div class="uk-width-expand language-search-wrapper">
-                    <input id="language-search" class="uk-form-blank" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for languages...' %}" oninput="doLanguageAutocomplete(this.value, 'search', '', 'populateSavedSearchLanguage(this)')">
+                <div class="language-search-wrapper">
+                    <input id="language-search" class="form-control" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for languages...' %}" oninput="doLanguageAutocomplete(this.value, 'search', '', 'populateSavedSearchLanguage(this)')">
                 </div>
-                <a uk-icon="icon: chevron-down" class="uk-icon uk-margin-remove uk-flex-right"></a>
             </div>
-            <div id="language-autocomplete-dropdown" uk-drop="toggle: #language-search; delay-hide: 1500; offset: -8"></div>
+            <div id="language-autocomplete-dropdown"></div>
+    </div>
+
+    <div class="mb-3">
+        <label for="saved-search-{{ search.id }}-status" class="form-label">{% translate 'Status' %}</label>
+        <div id="saved-search-{{ search.id }}-status-0" class="form-check">
+            <input id="saved-search-{{ search.id }}-0" class="form-check-input" type="radio" name="complete" value="0" {% if '0' in search.work_statuses and '1' not in search.work_statuses %}checked{% endif %}><label class="form-check-label" for="saved-search-{{ search.id }}-0"> {% translate 'Incomplete' %}</label>
+        </div>
+        <div id="saved-search-{{ search.id }}-status-1" class="form-check">
+            <input id="saved-search-{{ search.id }}-1" class="form-check-input" type="radio" name="complete" value="1" {% if '1' in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}><label class="form-check-label" for="saved-search-{{ search.id }}-1"> {% translate 'Complete' %}</label>
+        </div>
+        <div id="saved-search-{{ search.id }}-status-2" class="form-check">
+            <input id="saved-search-{{ search.id }}-2" class="form-check-input" type="radio" name="complete" value="-1" {% if '1' in search.work_statuses and '0' in search.work_statuses %}checked{% elif '1' not in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}><label class="form-check-label" for="saved-search-{{ search.id }}-2"> {% translate 'Any' %}</label><br>
         </div>
     </div>
 
-    <div class="uk-margin">
-        <label for="saved-search-{{ search.id }}-status" class="uk-text-bold uk-form-label">{% translate 'Status' %}</label>
-        <div id="saved-search-{{ search.id }}-status" class="uk-form-controls">
-            <label><input class="uk-radio" type="radio" name="complete" value="0" {% if '0' in search.work_statuses and '1' not in search.work_statuses %}checked{% endif %}> {% translate 'Incomplete' %}</label><br>
-            <label><input class="uk-radio" type="radio" name="complete" value="1" {% if '1' in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}> {% translate 'Complete' %}</label><br>
-            <label><input class="uk-radio" type="radio" name="complete" value="-1" {% if '1' in search.work_statuses and '0' in search.work_statuses %}checked{% elif '1' not in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}> {% translate 'Any' %}</label><br>
-        </div>
-    </div>
+    <div class="mb-3">
+        <label for="saved-search-{{ search.id }}-work-types" class="form-label">{% translate 'Work Type' %}</label>
 
-    <div class="uk-margin">
-        <label for="saved-search-{{ search.id }}-work-types" class="uk-text-bold uk-form-label">{% translate 'Work Type' %}</label>
-        <div id="saved-search-{{ search.id }}-work-types" class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
             <select multiple id="work_types[]" name="work_types[]" hidden>
                 {% if search.work_types %}
                     {% for work_type in search.work_types %}
@@ -97,25 +96,31 @@
             </select>
             {% if search.work_types %}
                 {% for work_type in search.work_types %}
-                    <label><input class="uk-checkbox" type="checkbox" {% if work_type.checked %}checked{% endif %} onchange="addWorkType(this, '{{ work_type.id }}', '{{ work_type.type_name }}')"> {{ work_type.type_name }}</label>
+                    <div id="saved-search-{{ search.id }}-work-types" class="form-check">
+                        <input id="search-work-type-{{ work_type.id }}" class="form-check-input" type="checkbox" {% if work_type.checked %}checked{% endif %} onchange="addWorkType(this, '{{ work_type.id }}', '{{ work_type.type_name }}')"><label class="form-check-label" for="search-work-type-{{ work_type.id }}"> {{ work_type.type_name }}</label>
+                    </div>
                 {% endfor %}
             {% else %}
                 {% for work_type in idx_work_types %}
-                    <label><input class="uk-checkbox" type="checkbox" {% if work_type.checked %}checked{% endif %} onchange="addWorkType(this, '{{ work_type.id }}', '{{ work_type.type_name }}')"> {{ work_type.type_name }}</label>
+                    <div id="saved-search-{{ search.id }}-work-types" class="form-check">
+                        <input id="search-work-type-{{ work_type.id }}" class="form-check-input" type="checkbox" {% if work_type.checked %}checked{% endif %} onchange="addWorkType(this, '{{ work_type.id }}', '{{ work_type.type_name }}')"><label class="form-check-label" for="search-work-type-{{ work_type.id }}"> {{ work_type.type_name }}</label>
+                    </div>
                 {% endfor %}
             {% endif %}
-        </div>
+
     </div>
 
-    <div class="uk-margin">
-        <label for="word-count-{{ search.id }}" id="saved-search-{{ search.id }}-wordcount" class="uk-text-bold uk-form-label">{% translate 'Word Count' %}</label>
+    <div class="mb-3">
+        <label for="word-count-{{ search.id }}" id="saved-search-{{ search.id }}-wordcount" class="form-label fw-bold">{% translate 'Word Count' %}</label>
         <div class="uk-form-controls" id="word-count-{{ search.id }}">
-            <span class="uk-text-medium uk-hidden@m">{% translate 'From' %}</span><span class="uk-text-medium uk-visible@m">{% translate 'Between' %}</span>
-            <input class="uk-input uk-width-expand@s uk-width-small@m" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.word_count_gte|default_if_none:'' }}"/> <span class="uk-text-medium uk-visible@m">{% translate 'and' %}</span><span class="uk-text-medium uk-hidden@m">{% translate 'To' %}</span> <input class="uk-input uk-width-expand@s uk-width-small@m" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.word_count_lte|default_if_none:'' }}"/>
+            <label for="word_count_gte" class="form-label">{% translate 'From' %}</label>
+            <input class="form-control" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.word_count_gte|default_if_none:'' }}"/>
+            <label for="word_count_lte" class="form-label">{% translate 'To' %}</label>
+            <input class="form-control" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.word_count_lte|default_if_none:'' }}"/>
         </div>
     </div>
 
-    <div class="uk-margin">
+    <div class="mb-3">
         <label for="saved-search-{{ search.id }}-tags" class="uk-text-bold uk-form-label">{% translate 'Tags' %}</label>
         <div id="saved-search-{{ search.id }}-tags" class="uk-form-controls">
             <span class="ourchive-muted">Include</span>
@@ -153,20 +158,14 @@
             <div id="tag-autocomplete-dropdown-savedsearchexclude" uk-drop="toggle: #exclude-wrapper; delay=hide: 2500; auto-update:false; mode: hover; pos: bottom-center;"></div>
         </div>
     </div>
-    <div class="uk-grid uk-grid-small" uk-grid>
-        <div class="uk-button-group uk-width-expand uk-flex-left uk-visible@s">
-            <input id="saved-search-0-submit" class="uk-button uk-button-primary uk-margin-top uk-align-left uk-margin-small-bottom" type="submit" value="{% translate 'Apply Filters' %}"/>
-            {% if request.user.is_authenticated %}<a id="saved-search-0-delete" class="uk-button uk-button-secondary uk-margin-top uk-align-left uk-margin-small-bottom" href="#" uk-toggle="target: #save-search-modal">{% translate 'Save Search' %}</a>{% endif %}
-        </div>
-        <div class="uk-width-1-1 uk-hidden@s">
-            <input id="saved-search-0-submit" class="uk-button uk-button-primary uk-margin-small uk-align-center" type="submit" value="{% translate 'Apply Filters' %}"/>
-        </div>
-        {% if request.user.is_authenticated %}<div class="uk-width-1-1 uk-hidden@s">
-            <a id="saved-search-0-delete" class="uk-button uk-button-secondary uk-margin-small uk-align-center uk-width-small uk-padding-remove-horizontal" href="#" uk-toggle="target: #save-search-modal">{% translate 'Save Search' %}</a>
-        </div>{% endif %}
+    <div class="mb-3">
+        <input id="saved-search-0-submit" class="btn btn-primary" type="submit" value="{% translate 'Apply Filters' %}"/>
+        {% if request.user.is_authenticated %}<a id="saved-search-0-delete" class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#save-search-modal">{% translate 'Save Search' %}</a>{% endif %}
     </div>
 </form>
-<div id="save-search-modal" uk-modal>
+</div>
+
+<div id="save-search-modal" class="modal">
     <div class="uk-modal-dialog uk-modal-body" id="save-search-modal-body">
         <h2 id="save-search-modal-header" class="uk-modal-title">Save Search</h2>
         <div class="uk-margin">
@@ -178,4 +177,5 @@
             <a id="save-search-modal-add" class="uk-button uk-button-primary" onclick="saveSearch()">{% translate 'Save' %}</a>
         </p>
     </div>
+</div>
 </div>
