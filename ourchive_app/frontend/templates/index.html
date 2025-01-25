@@ -63,7 +63,7 @@
         </div>
     {% endif %}
     {% include 'index_navbar.html' %}
-    <div class="container pt-2" id="content-block-parent">
+    <div class="container pt-3" id="content-block-parent">
         {% if 'accept-cookies' not in request.COOKIES and not request.user.cookies_accepted %}
             <div class="toast-container bottom-50 start-50 translate-middle-x">
               <div id="cookieToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">

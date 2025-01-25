@@ -9,7 +9,7 @@
         </div>
         {% endcache %}
         {%  if homepage_news.results %}
-            <div id="index-content-news-div" class="ourchive-content-padding">
+            <div id="index-content-news-div">
                 {% for news in homepage_news.results %}<span id="index-content-message">{{ news.content|safe }}</span>{% endfor %}
             </div>
         {%  endif %}

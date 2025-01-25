@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="ourchive-metadata-list">
-	<span id="anthology-metadata-complete" class="uk-inline ourchive-muted">{% if anthology.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
-    {% if anthology.updated_on %}<span id="anthology-metadata-updated" class="uk-inline ourchive-muted">{% translate 'Updated' %} {{anthology.updated_on|date:'d M Y'}}</span>{% endif %}
+<div class="d-flex justify-content-between mt-3">
+	<span id="anthology-metadata-complete" class="fw-light">{% if anthology.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
+    {% if anthology.updated_on %}<span id="anthology-metadata-updated" class="fw-light">{% translate 'Updated' %} {{anthology.updated_on|date:'d M Y'}}</span>{% endif %}
 </div>
