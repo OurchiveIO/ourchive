@@ -46,7 +46,7 @@ urlpatterns = [
     path('register/', views.register, name='fe-register-account'),
     path('request-invite/', views.request_invite),
     path('logout/', views.log_out),
-    path('reset-password/', auth_views.PasswordResetView.as_view(template_name="reset_password.html")),
+    path('reset-password/', auth_views.PasswordResetView.as_view(template_name="reset_password.html"), name='fe-reset-password'),
     path('reset-password/done/', auth_views.PasswordResetDoneView.as_view(template_name="reset_password_done.html"), name='password_reset_done'),
     path('reset-password/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name="reset_password_confirm.html"), name='password_reset_confirm'),
     path('reset-password/complete/', auth_views.PasswordResetCompleteView.as_view(template_name="reset_password_complete.html"), name='password_reset_complete'),

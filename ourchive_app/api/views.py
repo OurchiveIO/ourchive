@@ -725,7 +725,8 @@ class UserSubscriptionAnthologyList(generics.ListAPIView):
             user__id=self.request.user.id).filter(
             subscribed_to_anthology=True)
         ids = anthologies.values_list('subscribed_user', flat=True).all()
-        return Anthology.objects.filter(owners__id__in=ids).order_by('-created_on')
+        return (Anthology.objects.filter(Q(owners__user_anthologies__id__in=ids) | Q(creating_user__id__in=ids))
+                .order_by('-created_on'))
 
 
 class UserSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
