@@ -158,28 +158,33 @@ class FileUpload(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, format=None):
-        if 'files[]' in request.FILES:
-            if 'image' in request.FILES['files[]'].content_type:
-                if not request.user.can_upload_images:
-                    return Response({'message': _('User does not have permission to upload images.')}, status=403)
-            elif 'audio' in request.FILES['files[]'].content_type:
-                if not request.user.can_upload_audio:
-                    return Response({'message': _('User does not have permission to upload audio.')}, status=403)
-            elif 'video' in request.FILES['files[]'].content_type:
-                if not request.user.can_upload_video:
-                    return Response({'message': _('User does not have permission to upload video.')}, status=403)
-            else:
-                if not request.user.can_upload_export_files:
-                    return Response({'message': 'User does not have permission to upload this file.'}, status=403)
-            service = FileHelperService.get_service()
-            if service is not None:
-                final_url = service.handle_uploaded_file(
-                    request.FILES['files[]'], request.FILES['files[]'].name, request.user.username)
-                if final_url is None:
-                    return Response({'message': 'Filetype not permitted.'}, status=403)
-                return Response({'final_url': final_url})
-            else:
-                return Response({'final_url': 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.'}, status=400)
+        key = 'files[]' if 'files[]' in request.FILES else None
+        if not key:
+            key = 'file' if 'file' in request.FILES else None
+            if not key:
+                return Response({'final_url': 'No valid file in form data.'},
+                                status=400)
+        if 'image' in request.FILES[key].content_type:
+            if not request.user.can_upload_images:
+                return Response({'message': _('User does not have permission to upload images.')}, status=403)
+        elif 'audio' in request.FILES[key].content_type:
+            if not request.user.can_upload_audio:
+                return Response({'message': _('User does not have permission to upload audio.')}, status=403)
+        elif 'video' in request.FILES[key].content_type:
+            if not request.user.can_upload_video:
+                return Response({'message': _('User does not have permission to upload video.')}, status=403)
+        else:
+            if not request.user.can_upload_export_files:
+                return Response({'message': 'User does not have permission to upload this file.'}, status=403)
+        service = FileHelperService.get_service()
+        if service is not None:
+            final_url = service.handle_uploaded_file(
+                request.FILES[key], request.FILES[key].name, request.user.username)
+            if final_url is None:
+                return Response({'message': 'Filetype not permitted.'}, status=403)
+            return Response({'final_url': final_url})
+        else:
+            return Response({'final_url': 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.'}, status=400)
 
 
 class Invitations(APIView):
