@@ -686,7 +686,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
         chapter = Chapter.objects.filter(id=chapter.id)
         validated_data = self.clean_empty_fields(validated_data)
-        self.validate_chapter_number(validated_data, chapter.first().id)
+        # self.validate_chapter_number(validated_data, chapter.first().id)
         chapter.update(**validated_data)
         if chapter.first().work.chapters.count() > 1:
             work_updated_on = chapter.first().updated_on
@@ -702,7 +702,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
         validated_data = self.clean_empty_fields(validated_data)
-        self.validate_chapter_number(validated_data)
+        # self.validate_chapter_number(validated_data)
         chapter = Chapter.objects.create(**validated_data)
         if attributes is not None:
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
