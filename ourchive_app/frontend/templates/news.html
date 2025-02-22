@@ -1,17 +1,13 @@
 {% extends 'index.html' %}
 {% block title %}News{% endblock %}
 {% block content %}	
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="news-form-uk-grid" uk-grid>
-        <div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="news-list-user-filter-parent">
-            <h1 id="news-list-user-h1" class="uk-heading-line uk-text-center"> <span id="news_header"> News</span> </h1>
-        </div>
-        <div class="uk-width-1-1 uk-padding-remove-horizontal">
-            {% for news_item in news %}
-                <div class="uk-margin-bottom">{% include "news_tile.html" %}</div>
-            {% endfor %}
-        </div>
-        <div class="uk-width-1-1 uk-padding-remove-horizontal">
-            {% include 'pagination.html' with previous=previous next=next object_name='news' %}
-        </div>
-    </div>
+<div class="row row-cols-1">
+    <h1 id="news-list-user-h1" class="justify-content-center">News</h1>
+    {% for news_item in news %}
+        <div class="row row-cols-1 mb-3">{% include "news_tile.html" %}</div>
+    {% endfor %}
+</div>
+<div class="row row-cols-1">
+    {% include 'pagination.html' with previous=previous next=next object_name='news' %}
+</div>
 {% endblock %}

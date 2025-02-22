@@ -9,9 +9,12 @@ function doWorkAutocomplete(term) {
       return response.text();
     })
     .then((templateText) => {
-    document.getElementById(complete_select).innerHTML = "";
-    document.getElementById(complete_select).innerHTML = templateText;
-    UIkit.drop(document.getElementById(complete_select)).show();
+        document.getElementById(complete_select).innerHTML = "";
+        document.getElementById(complete_select).innerHTML = templateText;
+        let dropdownElementList = [];
+        dropdownElementList.push(document.getElementById(complete_select));
+        const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl));
+        dropdownList[0].show();
     });
 }
 
@@ -20,6 +23,8 @@ function populateWorkInput(work_id, work_display, series_id=null) {
     var list = document.getElementById("series-list")
     var li = document.createElement('li');
     li.setAttribute('id', 'work-list-'+work_id);
+    li.classList.add(...['work-list-item', 'list-group-item', 'sortable-item']);
+    li.setAttribute('draggable', 'true');
     let fetch_url = '';
     if (series_id !== null) {
         fetch_url = `/series/${series_id}/works/render?work_id=${work_id}`;
@@ -55,7 +60,11 @@ function handleModalDelete(url, series_id=null) {
         else {
             work_id = url.replace('/series/1/work/', '').replace('/delete', '');
         }
-      UIkit.modal(document.getElementById('work-series-'+work_id+'-modal-delete')).hide();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('work-series-'+work_id+'-modal-delete')).hide();
       document.getElementById('work-list-'+work_id).remove();
     });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeListReorder('series-list', '.series-tracker');
+});

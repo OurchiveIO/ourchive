@@ -1,10 +1,10 @@
 {% load i18n %}
 {% if series %}
-<div class="uk-background-muted">
+<div>
 	{% for item in series %}
-	<div id="search-series-autocomplete-graf-{{item.id}}" class="uk-background-default uk-padding-small" onclick="populateSeriesInput('{{item.title}}', '{{item.id}}')"><span class="ourchive-autocomplete uk-text-small uk-link uk-text-bold" id="user-autocomplete-span-{{item.id}}">{{item.title}}</span></div>
+	<p id="search-series-autocomplete-graf-{{item.id}}" onclick="populateSeriesInput('{{item.title}}', '{{item.id}}')">{{item.title}}</p>
 	{% endfor %}
 </div>
 {% else %}
-<div class="uk-background-muted">{% translate 'No series found' %}</div>
+<div class="p-2">{% translate 'No series found' %}</div>
 {% endif %}

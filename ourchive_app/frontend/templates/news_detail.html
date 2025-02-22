@@ -2,19 +2,17 @@
 {% load i18n %}
 {% block title %}{{news.title}}{% endblock %}
 {% block content %}
-    <div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" uk-grid>
-        <div id="news-tile-header-content" class="uk-width-1-1">
-            <span id="news-detail-{{news_item.id}}-tile-title" class=" uk-margin-remove-bottom ourchive-tile-title">{{news.title}}</span>
-            <hr class="ourchive-hr"/>
-        </div>
-        <div class="uk-width-1-1">
-            <span class="uk-text-default">{{ news.content|safe }}</span>
-        </div>
-        <div class="uk-width-1-1 uk-padding-small uk-margin-small">
-            <div class="uk-inline ourchive-metadata-list">
-                <span id="news-metadata-updated" class="uk-inline ourchive-metadata-list">{% translate 'Updated' %}: {{news.updated_on|date:'d M Y'}}</span>
-                <a href="{% url 'fe-news-list' %}"><span id="news-metadata-all" class="uk-inline ourchive-badge-margins">{% translate 'All news' %}</span></a>
-            </div>
-        </div>
+<div id="news-tile-header-content" class="row row-cols-1">
+    <p class="fs-3">{{news.title}}</p>
+    <hr class="ourchive-hr"/>
+</div>
+<div class="row row-cols-1">
+    <p>{{ news.content|safe }}</p>
+</div>
+<div class="row row-cols-1">
+    <div class="d-flex justify-content-between mt-3">
+        <span id="news-metadata-updated" class="fw-light">{% translate 'Updated' %}: {{news.updated_on|date:'d M Y'}}</span>
+        <a href="{% url 'fe-news-list' %}">{% translate 'All news' %}</a>
     </div>
+</div>
 {% endblock %}

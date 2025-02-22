@@ -3,47 +3,46 @@
 {% load i18n %}
 {% block title %}{% translate 'Bookmark Collection' %} - {{ bkcol.title }}{% endblock %}
 {% block content %}
-<div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="work-uk-grid" uk-grid>
     {% if bkcol.header_url %}
-        <div id="bkcol-header-image" class="uk-width-1-1 uk-padding-remove">
-            <img src="{{bkcol.header_url}}" title="{{bkcol.header_alt_text}}" alt="{{bkcol.header_alt_text}}" class="uk-align-center"/>
+        <div id="bkcol-header-image">
+            <p class="text-center"><img src="{{bkcol.header_url}}" title="{{bkcol.header_alt_text}}" alt="{{bkcol.header_alt_text}}" class="img-fluid w-25"/></p>
         </div>
     {% endif %}
-    <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center">{% include "bookmark_collection_tile.html" with bookmark_collection=bkcol %}</div>
+    {% include "bookmark_collection_tile.html" with bookmark_collection=bkcol %}
     {% if bkcol.owner %}
-        <div class="uk-width-1-1 uk-text-right uk-margin-small-top">
+        <div class="row row-cols-1 m-2">
+            <p>
             {% if bkcol.draft %}
-            <a class="ourchive-icon-wrapper" id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><span uk-icon="icon: ourchive-publish; ratio: 1" title="Publish"></span> </a>
+            <a class="link link-underline-opacity-0" id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><i class="bi bi-megaphone"></i></a>
             {% endif %}
-            <a id="bkcol-edit-link" class="ourchive-icon-wrapper" href="/bookmark-collections/{{ bkcol.id }}/edit"><span uk-icon="icon: ourchive-edit; ratio: 1" title="Edit"></span> </a>
-            <a id="bookmark-collection-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #bookmark-collection-{{bkcol.id}}-modal-delete"><span title="Delete" uk-icon="icon: ourchive-delete; ratio: 1"></span> </a>
+            <a class="link link-underline-opacity-0" id="bkcol-edit-link" title="{% translate 'Edit' %}" href="/bookmark-collections/{{ bkcol.id }}/edit"><i class="bi bi-pencil"></i></a>
+            <a class="link link-underline-opacity-0" id="bookmark-collection-delete-link" title="{% translate 'Delete' %}" href="#" data-bs-toggle="modal" data-bs-target="#bookmark-collection-{{bkcol.id}}-modal-delete"><i class="bi bi-trash"></i></a>
+            </p>
         </div>
     {% endif %}
     {% if bkcol.description %}
-    <div id="bkcol-description-parent" class="uk-width-1-1 uk-padding-remove">
-        <span class="uk-text-medium" id="bkcol-description-text">{{bkcol.description|safe}}</span>
-        <hr class="ourchive-hr" id="bkcol-desc-hr"/>
+    <div id="bkcol-description-parent" class="row row-cols-1 m-2">
+        <p class="fs-3">{% translate 'Description' %}</p>
+        {{bkcol.description|safe}}
     </div>
     {% endif %}
-    <div class="uk-width-1-1 uk-margin-bottom uk-padding-remove ourchive-read-div" id="bkcol-slideshow-parent">
         {% if bkcol.works_readonly %}
-        <div id="bkcol-bookmarks-parent-sm">
-            <span class="uk-text-lead">{% translate 'Works' %}</span>
-            <ul class="uk-list uk-list-sriped">
-            {% for work in bkcol.works_readonly %}
-                <li class="ourchive-mobile-list uk-padding-small uk-margin-small-top uk-margin-small-bottom">
-                    <span class="uk-inline uk-text-uppercase uk-text-medium"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
-                    {% if work.summary %}
-                        <div class="uk-margin-left uk-margin-small-top uk-width-expand ourchive-collection-sm-desc">{{work.summary|safe}}</div>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-        </div>
+            <div class="row row-cols-1 m-2" id="bkcol-slideshow-parent">
+            <p class="fs-3">{% translate 'Works' %}</p>
+            <ul class="list-group">
+                {% for work in bkcol.works_readonly %}
+                    <li class="list-group-item">
+                        <a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}
+                        {% if work.summary %}
+                            <p class="mt-3">{{work.summary|safe}}</p>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+            </div>
         {% endif %}
-    </div>
-    {% if comments %}<div class="uk-width-1-1 uk-padding-remove"><hr class="ourchive-hr" id="bkcol-comment-hr"/></div>{% endif %}
-    <div class="uk-width-1-1 uk-padding-remove">
+    {% if comments %}<div class="row row-cols-1 m-2"><hr class="ourchive-hr" id="bkcol-comment-hr"/></div>{% endif %}
+    <div class="row row-cols-1 m-2">
         {% include 'comments_parent.html' with object_name='collection' comments=comments object=bkcol edit_action_url=bkcol.edit_action_url post_action_url=bkcol.post_action_url comment_offset=comment_offset delete_obj='collection-comment' load_more_base=load_more_base view_thread_base=view_thread_base comment_count=bkcol.comment_count %}
     </div>
     {% if scroll_comment_id %}
@@ -54,6 +53,4 @@
         </script>
     {% endif %}
     {% include "delete_modal.html" with object='bookmark-collection' object_friendly='bookmark collection' object_id=bkcol.id %}
-</div>
-    <script src="{% static 'frontend/js/ourchive-collections.js' %}"></script>
 {% endblock %}

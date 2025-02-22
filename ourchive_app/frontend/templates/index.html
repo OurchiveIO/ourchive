@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="{% if css_mode %}{{ css_mode }}{% else %}light{% endif %}">
 <head>
 	{% load static %}
 	{% load i18n %}
@@ -8,11 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{% static 'frontend/css/bootstrap.min.css' %}" />
     <link rel="stylesheet" href="{% static 'frontend/css/bootstrap-icons.min.css' %}">
-    {% if css_mode %}
-    <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/' %}ourchive-{{css_mode}}.css" />
-    {% else %}
-    <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/' %}ourchive-light.css" />
-    {% endif %}
+    <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/ourchive.css' %}" />
     <link rel="stylesheet" href="{% static 'frontend/css/editor.css' %}" />
     <link rel="shortcut icon" href="{% static 'favicon/favicon.svg' %}"/>
     <link rel="stylesheet" href="{% static 'frontend/css/choices.min.css' %}" />
@@ -28,7 +24,7 @@
 	<script>
 		function switchTheme() {
 			fetch('{% url 'switch-css-mode' %}').then((response) => {
-				localStorage.setItem("fe-theme", '{{css_mode}}' == 'dark' ? 'light' : 'dark');
+				localStorage.setItem("fe-theme", '{{css_mode}}' === 'dark' ? 'light' : 'dark');
 				window.location.reload();
 			});
 		}
@@ -72,7 +68,7 @@
                   <button type="button" class="btn-close" data-bs-dismiss="toast" onclick="acceptCookies()" aria-label="Close"></button>
                 </div>
                 <div class="toast-body">
-                  Ourchive uses necessary cookies to allow you to log in and submit data. We do not collect or distribute any tracking information. By continuing to browse the site you are agreeing to allow cookies to be stored and used.
+                  {% blocktranslate %}Ourchive uses necessary cookies to allow you to log in and submit data. We do not collect or distribute any tracking information. By continuing to browse the site you are agreeing to allow cookies to be stored and used.{% endblocktranslate %}
                 </div>
               </div>
             </div>
@@ -113,12 +109,12 @@
         <hr id="footer-hr" class="ourchive-hr">
         <div id="footer-parent-grid" class="row mb-2">
             <div id="footer-child-grid" class="col-md-6 col-12">
-                <span id="footer-created-by" class="uk-text-meta"><a href="https://getourchive.io/">Ourchive</a> is created & maintained by <a href="https://github.com/OurchiveIO" target="_blank">the Ourchive team</a>.</span>
+                <span id="footer-created-by" class="uk-text-meta"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="https://getourchive.io/">Ourchive</a> is created & maintained by <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="https://github.com/OurchiveIO" target="_blank">the Ourchive team</a>.</span>
             </div>
             <div class="col-xs-12 d-md-none"><hr id="footer-hr" class="ourchive-hr"></div>
             <div id="footer-child-grid" class="col-md-6 col-12">
                 <p class="text-md-end">{% for page in content_pages %}
-                <a href="/content-pages/{{page.id}}" {% if not forloop.last %}class="me-1"{% endif %}>{{page.name}}</a>
+                <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover ms-3" href="/content-pages/{{page.id}}" {% if not forloop.last %}class="me-1"{% endif %}>{{page.name}}</a>
                 {% endfor %}</p>
             </div>
         </div>

@@ -5,7 +5,7 @@
 {% block content %}
     {% if user_filter %}
         <div class="row row-cols-1" id="anthologies-list-user-filter-parent">
-            <h1 id="anthologies-list-user-h1" class="uk-heading-line uk-text-center"> <span id="user_anthologies_header">{% blocktranslate with user=user_filter %}Anthologies by {{ user }} {% endblocktranslate %}</span> </h1>
+            <h1 id="anthologies-list-user-h1" class="h1"> <span id="user_anthologies_header">{% blocktranslate with user=user_filter %}Anthologies by {{ user }} {% endblocktranslate %}</span> </h1>
         </div>
     {% endif %}
     {% include 'anthologies_list_body.html' %}

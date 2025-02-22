@@ -33,7 +33,6 @@
                       </div>
                       <div class="dropdown">
                         <input class="form-control me-2" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
-
                           <button class="btn dropdown-toggle" hidden type="button" data-bs-toggle="dropdown" aria-expanded="false" id="tag-autocomplete-dropdown-btn">{% translate 'Close' %}</button>
                           <div id="tag-autocomplete-dropdown-navbar" class="dropdown-menu">
                             {% include 'tag_autocomplete.html' %}

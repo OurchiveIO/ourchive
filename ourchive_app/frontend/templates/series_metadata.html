@@ -1,6 +1,5 @@
 {% load i18n %}
-<div class="uk-inline ourchive-metadata-list">
-	<span id="series-metadata-complete" class="uk-inline ourchive-muted">{% if series.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
-    {% if series.updated_on %}<span id="series-metadata-updated" class="uk-inline ourchive-muted">{% translate 'Updated' %} {{series.updated_on|date:'d M Y'}}</span>
+<div class="d-flex justify-content-between mt-3">
+	<span id="series-metadata-complete" class="fw-light">{% if series.is_complete %}{% translate 'Complete' %}{% else %}{% translate 'Incomplete' %}{% endif %}</span>
+    {% if series.updated_on %}<span id="series-metadata-updated" class="fw-light">{% translate 'Updated' %} {{series.updated_on|date:'d M Y'}}</span>{% endif %}
 </div>
-{% endif %}

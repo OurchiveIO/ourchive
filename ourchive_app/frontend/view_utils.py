@@ -60,6 +60,19 @@ def group_tags_for_edit(tags, tag_types=None):
 	return tag_parent
 
 
+def get_form_tags(request, form_dict, key, tags):
+	tags = []
+	tags_list = request.POST.getlist(key)
+	type_label = key.split('_tags[]')[0]
+	for t in tags_list:
+		if not t.strip():
+			continue
+		tag = {'tag_type': type_label, 'text': t}
+		tags.append(tag)
+	form_dict.pop(key)
+	return tags
+
+
 def process_attributes(obj_attrs, all_attrs):
 	obj_attrs = [attribute['name'] for attribute in obj_attrs]
 	for attribute in all_attrs:
@@ -202,15 +215,8 @@ def get_work_obj(request, work_id=None):
 		elif item == 'chapter_id':
 			chapter_dict['id'] = request.POST[item]
 			work_dict.pop('chapter_id')
-		elif 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
-			tag = {}
-			json_item = request.POST[item].split(settings.TAG_DIVIDER)
-			tag['tag_type'] = tag_types[json_item[2]]['label']
-			tag['text'] = json_item[1]
-			if not json_item[1].strip():
-				continue
-			tags.append(tag)
-			work_dict.pop(item)
+		elif '_tags[]' in item:
+			tags = tags + get_form_tags(request, work_dict, item, tags)
 		elif 'chapters_' in item and work_id is not None:
 			chapter_id = item[9:]
 			chapter_number = request.POST[item]
@@ -277,15 +283,8 @@ def get_bookmark_obj(request):
 	for item in result.response_data['results']:
 		tag_types[item['type_name']] = item
 	for item in request.POST:
-		if 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
-			tag = {}
-			json_item = request.POST[item].split(settings.TAG_DIVIDER)
-			if not json_item[1].strip():
-				continue
-			tag['tag_type'] = tag_types[json_item[2]]['label']
-			tag['text'] = json_item[1]
-			tags.append(tag)
-			bookmark_dict.pop(item)
+		if '_tags[]' in item:
+			tags = tags + get_form_tags(request, bookmark_dict, item, tags)
 	bookmark_dict["tags"] = tags
 	comments_permitted = bookmark_dict["comments_permitted"]
 	bookmark_dict["comments_permitted"] = comments_permitted == "All" or comments_permitted == "Registered users only"
@@ -312,15 +311,8 @@ def get_bookmark_collection_obj(request):
 	for item in result.response_data['results']:
 		tag_types[item['type_name']] = item
 	for item in request.POST:
-		if 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
-			tag = {}
-			json_item = request.POST[item].split(settings.TAG_DIVIDER)
-			tag['tag_type'] = tag_types[json_item[2]]['label']
-			tag['text'] = json_item[1]
-			if not json_item[1].strip():
-				continue
-			tags.append(tag)
-			collection_dict.pop(item)
+		if '_tags[]' in item:
+			tags = tags + get_form_tags(request, collection_dict, item, tags)
 		if 'workidstoadd' in request.POST[item]:
 			json_item = request.POST[item].split("_")
 			if len(json_item) < 2:
@@ -404,22 +396,15 @@ def get_anthology_obj(request):
 			work_id = json_item[1]
 			works.append(work_id)
 			anthology_dict.pop(item)
-		elif 'tags' in request.POST[item] and settings.TAG_DIVIDER in request.POST[item]:
-			tag = {}
-			json_item = request.POST[item].split(settings.TAG_DIVIDER)
-			tag['tag_type'] = tag_types[json_item[2]]['label']
-			tag['text'] = json_item[1]
-			if not json_item[1].strip():
-				continue
-			tags.append(tag)
-			anthology_dict.pop(item)
+		elif '_tags[]' in item:
+			tags = tags + get_form_tags(request, anthology_dict, item, tags)
 		elif item.startswith('anthology_cocreators_'):
 			user_id = item[21:]
 			users.append(user_id)
 	anthology_dict = get_list_from_form('languages', anthology_dict, request)
 	anthology_dict["users_to_add"] = users
-	anthology_dict["tags"] = tags
 	anthology_dict["works"] = works
+	anthology_dict["tags"] = tags
 	anthology_dict["creating_user"] = str(request.user)
 	if anthology_dict["updated_on"] == anthology_dict["updated_on_original"]:
 		anthology_dict["updated_on"] = str(datetime.now().date())

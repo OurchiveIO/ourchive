@@ -1,169 +1,115 @@
 {% load i18n %}
 {% csrf_token %}
-<h4 id="obj-attrs-form-header">Chapter Details</h4>
-<div id="chapter-form-title-parent" class="uk-margin" {% if suppress_info_fields %}hidden{% endif%}>
-    <label id="chapter-form-title-label" class="uk-form-label" for="chapter-form-title-input">Title</label>
-    <div id="chapter-form-title-controls" class="uk-form-controls">
-        <div id="chapter-form-title-inline" class="uk-inline">
-            <input id="chapter-form-title-input" class="uk-input uk-form-width-large" type="text" name="title" value="{{ chapter.title|default_if_none:'' }}">
-        </div>
-    </div>
+<div id="chapter-form-title-parent" class="mb-3 {% if suppress_info_fields %}d-none{% endif%}">
+    <label id="chapter-form-title-label" class="form-label" for="chapter-form-title-input">Title</label>
+    <input id="chapter-form-title-input" class="form-control" type="text" name="title" value="{{ chapter.title|default_if_none:'' }}">
 </div>
-<div class="uk-margin" id="chapter-form-draft-parent" {% if suppress_info_fields %}hidden{% endif %}>
-    <label id="chapter-form-draft-label" class="uk-form-label" for="chapter-form-draft">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75"></sup>    
-        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
-    </label>
-    <div class="uk-form-controls" id="chapter-form-draft-controls">
-        <div class="uk-inline" id="chapter-form-draft-inline">
-            <label id="chapter-form-draft-checkbox-label" class="switch"><input class="uk-checkbox" type="checkbox" id="chapter-form-draft" name="chapter_draft" {% if chapter.draft %} checked {% endif %}> <span class="slider round"></span></label>
-        </div>
-    </div>
+<div class="mb-3 {% if suppress_info_fields %}d-none{% endif%} form-check form-switch" id="chapter-form-draft-parent">
+    <input class="form-check-input" type="checkbox" role="switch" id="chapter-form-draft" name="chapter_draft" {% if chapter.draft %} checked {% endif %}>
+    <label id="chapter-form-draft-label" class="form-check-label" for="chapter-form-draft">Draft? <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#chapter-draft-help-text" title="{% translate 'Draft help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+    <div class="mb-3 collapse" id="chapter-draft-help-text">{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
 </div>
 {% if not suppress_info_fields %}
-<div class="uk-margin" id="chapter-form-created-parent">
-    <label id="chapter-form-created-label" class="uk-form-label" for="chapter-form-created-on">Post Date</label>
-    <div id="chapter-form-created-controls" class="uk-form-controls">
-        <div id="chapter-form-created-inline" class="uk-inline">
-            <input title="{% translate 'Chapter created on' %}" id="chapter-form-created-on" type="date" class="uk-input" name="created_on" value="{{ chapter.created_on }}"> 
-        </div>
-    </div>
+<div class="mb-3" id="chapter-form-created-parent">
+    <label id="chapter-form-created-label" class="form-label" for="chapter-form-created-on">{% translate 'Post Date' %}</label>
+    <input title="{% translate 'Chapter created on' %}" id="chapter-form-created-on" type="date" class="form-control" name="created_on" value="{{ chapter.created_on }}">
 </div>
-<div class="uk-margin" id="chapter-form-updated-parent">
-    <label id="chapter-form-updated-label" class="uk-form-label" for="chapter-form-updated-on">Update Date</label>
-    <div id="chapter-form-updated-controls" class="uk-form-controls">
-        <div id="chapter-form-updated-inline" class="uk-inline">
-            <input title="{% translate 'Chapter updated on' %}" id="chapter-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ chapter.updated_on }}"> 
-            <input title="{% translate 'Chapter updated on' %}" id="chapter-form-updated-on" type="date" class="uk-input" name="updated_on" value="{{ chapter.updated_on }}"> 
-        </div>
-    </div>
+<div class="mb-3" id="chapter-form-updated-parent">
+    <label id="chapter-form-updated-label" class="form-label" for="chapter-form-updated-on">{% translate 'Update Date' %}</label>
+    <input title="{% translate 'Chapter updated on' %}" id="chapter-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ chapter.updated_on }}">
+    <input title="{% translate 'Chapter updated on' %}" id="chapter-form-updated-on" type="date" class="form-control" name="updated_on" value="{{ chapter.updated_on }}">
 </div>
-{% if chapter.attribute_types %}
-    {% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types show_header=False %}
+{% if chapter.attribute_types %}{% include "object_attributes_form.html" with object='Chapter' attribute_types=chapter.attribute_types show_header=False %}{% endif %}
 {% endif %}
-{% endif %}
-<div class="uk-margin" id="chapter-form-summary-parent" {% if suppress_info_fields %}hidden{% endif%}>
-    <label id="chapter-form-summary-label" class="uk-form-label" for="summaryEditor">Summary</label>
+<div class="mb-3 {% if suppress_info_fields %}d-none{% endif%}" id="chapter-form-summary-parent">
+    <label id="chapter-form-summary-label" class="form-label" for="summaryEditor">{% translate 'Summary' %}</label>
     {% include 'ourchive_tinymce_template.html' with form_field_value=chapter.summary form_field='summary' obj_name='chapter' min_height=200 %}
 </div>
-<div class="uk-margin" id="chapter-form-notes-parent" {% if suppress_info_fields %}hidden{% endif%}>
-    <label class="uk-form-label" for="notesEditor" id="chapter-form-notes-label">{% translate 'Notes' %}</label>
+<div class="mb-3 {% if suppress_info_fields %}d-none{% endif%}" id="chapter-form-notes-parent">
+    <label class="form-label" for="notesEditor" id="chapter-form-notes-label">{% translate 'Notes' %}</label>
     {% include 'ourchive_tinymce_template.html' with form_field_value=chapter.notes form_field='notes' obj_name='chapter' min_height=200 %}
 </div>
-<div class="uk-margin" id="chapter-form-number-parent">
-    <label id="chapter-form-number-label" class="uk-form-label" for="chapter-form-number-input">Number</label>
-    <div id="chapter-form-number-controls" class="uk-form-controls">
-        <div id="chapter-form-number-inline" class="uk-inline">
-            <input id="chapter-form-number-input" class="uk-input" type="number" name="number" min="1" value="{{ chapter.number }}">
-        </div>
-    </div>            
+<div class="mb-3" id="chapter-form-number-parent">
+    <label id="chapter-form-number-label" class="form-label" for="chapter-form-number-input">{% translate 'Number' %}</label>
+    <input id="chapter-form-number-input" class="form-control" type="number" name="number" min="1" value="{{ chapter.number }}">
 </div>
-{% if not suppress_info_fields %}<h4 id="obj-attrs-form-header">Content</h3>{% endif %}
+{% if not suppress_info_fields %}<div class="mb-3"><h4 id="obj-attrs-form-header">{% translate "Content" %}</h4></div>{% endif %}
 {% if request.user.can_upload_images %}
-{% if not request.user.collapse_chapter_image %}
-<div class="uk-margin" id="chapter-form-image-all-parent">
-{% else %}
-<div class="uk-margin uk-width-small"><a class="uk-accordion-title uk-text-meta" uk-toggle="target: #chapter-form-image-hidden-parent" href="#">{% translate 'Image' %}</a></div>
-<div class="uk-accordion-content" id="chapter-form-image-hidden-parent" hidden>
-{% endif %}
-<div class="uk-margin" id="chapter-form-image-parent">
-<div class="uk-margin" id="chapter-form-image-hover-container" uk-toggle="target: #chapter-delete-overlay; mode: hover">
-    <label id="chapter-form-image-label" class="uk-form-label" for="chapter-form-image-upload-inline">Chapter Image</label>
-    {% if chapter.image_url and chapter.image_url != "None" %}
-    <div class="uk-inline" id="chapter-form-image-controls">
-        <img id="chapter-form-image" src="{{ chapter.image_url }}"/>
-        <div class="uk-overlay uk-dark uk-overlay-default uk-position-cover" id="chapter-delete-overlay" hidden>
-            <p class="uk-text-right"><a href="#" onclick="removeChapterImage()" title="{% translate 'Delete chapter image' %}"><span uk-icon="icon: ourchive-delete; ratio: 2"></span></a></p>
-        </div>
+    {% if request.user.collapse_chapter_image %}
+    <div class="mb-3" id="chapter-form-image-all-parent">
+        <a class="link-underline link-underline-opacity-0" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#chapter-form-image-parent">{% translate 'Image' %}</a>
     </div>
     {% endif %}
-</div>
-    <div class="uk-form-controls" id="chapter-form-image-upload-controls">
-        <div class="uk-inline" id="chapter-form-image-upload-inline" {% if not chapter.image_url %}uk-toggle="target: #chapter-form-image-alt-text-parent"{% endif %}>
-        	{% include 'file_upload.html' with object='image_url' replace_selector='chapter-form-image' object_type='chapter-img' upload_placeholder='Upload chapter image' original_value=chapter.image_url %}
+    <div class="mb-3 {% if request.user.collapse_chapter_image %}collapse{% endif %}" id="chapter-form-image-parent">
+        <div class="mb-3">
+            <label id="chapter-form-image-label" class="form-label" for="chapter-form-image-upload-inline">{% translate 'Chapter Image' %}</label>
+            <p><a id="chapter-form-image-toggle" data-bs-toggle="collapse" data-bs-target="#chapter-form-image-inline" aria-expanded="false" aria-controls="chapter-form-image-inline" class="btn btn-primary{% if not chapter.image_url %} disabled{% endif %}">{% translate 'Toggle image' %}</a></p>
+            <div id="chapter-form-image-inline" class="collapse mb-3"><img id="chapter-form-image" src="{{ chapter.image_url }}" alt="{% translate 'Chapter Image' %}"/></div>
+            {% include 'file_upload.html' with object='image_url' replace_selector='chapter-form-image' object_type='chapter-img' upload_placeholder='Upload chapter image' original_value=chapter.image_url %}
+        </div>
+        <div class="mb-3" id="chapter-form-image-alt-text-parent">
+            <label id="chapter-form-image-alt-text-label" class="form-label" for="chapter-form-image-alt-text">{% translate 'Image Alt Text' %}</label>
+            <textarea id="chapter-form-image-alt-text" class="form-control" rows="2" placeholder="Image alt text" name="image_alt_text" maxlength="600">{{ chapter.image_alt_text|default_if_none:'' }}</textarea>
         </div>
     </div>
-</div>
-<div class="uk-margin" id="chapter-form-image-alt-text-parent" {% if not chapter.image_url %}hidden{% endif %}>
-    <label id="chapter-form-image-alt-text-label" class="uk-form-label" for="chapter-form-image-alt-text">Image Alt Text</label>
-    <div id="chapter-form-image-alt-text-controls" class="uk-form-controls">
-        <div class="uk-inline" id="chapter-form-image-alt-text-inline">
-            <textarea id="chapter-form-image-alt-text" class="uk-textarea uk-form-width-large" rows="2" placeholder="Image alt text" name="image_alt_text" maxlength="600">{{ chapter.image_alt_text|default_if_none:'' }}</textarea>
-        </div>
-    </div>
-</div>
-</div>
 {% endif %}
 {% if request.user.can_upload_audio %}
-{% if not request.user.collapse_chapter_audio %}
-<div class="uk-margin" id="chapter-form-audio-parent">
-{% else %}
-<div class="uk-margin uk-width-small"><a class="uk-accordion-title uk-text-meta" uk-toggle="target: #chapter-form-audio-hidden-parent" href="#">{% translate 'Audio' %}</a></div>
-<div class="uk-accordion-content" id="chapter-form-audio-hidden-parent" hidden>
-{% endif %}
-<div class="uk-margin" id="chapter-form-audio-upload-parent">
-    <label id="chapter-form-audio-label" class="uk-form-label" for="chapter-form-audio-inline">Chapter Audio</label>
-    <div class="uk-form-controls" id="chapter-form-audio-controls">
-        <div class="uk-inline" id="chapter-form-audio-inline" {% if not chapter.audio_url %}uk-toggle="target: .ourchive-chapter-audio-toggle"{% endif %}>
-        	{% include 'file_upload.html' with object='audio_url' replace_selector='chapter-form-audio' object_type='audio' upload_placeholder='Upload chapter audio' original_value=chapter.audio_url %}
-        </div>
+    {% if request.user.collapse_chapter_audio %}
+    <div class="mb-3">
+        <a class="link-underline link-underline-opacity-0" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#chapter-form-audio-upload-parent" href="#">{% translate 'Audio' %}</a>
     </div>
-</div>
-<div class="uk-margin ourchive-chapter-audio-toggle" id="chapter-form-audio-description-parent" {% if not chapter.audio_url %}hidden{% endif %}>
-    <label id="chapter-form-audio-description-label" class="uk-form-label" for="chapter-form-audio-description">Audio Description</label>
-    <div id="chapter-form-audio-description-controls" class="uk-form-controls">
-        <div class="uk-inline" id="chapter-form-audio-description-inline">
-            <textarea id="chapter-form-audio-description" class="uk-textarea uk-form-width-large" rows="2" placeholder="Audio description" name="audio_description" maxlength="600">{{ chapter.audio_description|default_if_none:'' }}</textarea>
+    {% endif %}
+    <div class="mb-3 {% if request.user.collapse_chapter_audio %}collapse{% endif %}" id="chapter-form-audio-upload-parent">
+        <div class="mb-3">
+            <label id="chapter-form-audio-label" class="form-label" for="audio_url-upload-parent">{% translate 'Chapter Audio' %}</label>
+            {% include 'file_upload.html' with object='audio_url' replace_selector='chapter-form-audio' object_type='audio' upload_placeholder='Upload chapter audio' original_value=chapter.audio_url %}
         </div>
-    </div>
-</div>
-{% if not settings.AudioProcessing %}
-<div class="uk-margin ourchive-chapter-audio-toggle" id="chapter-form-audio-length-parent" {% if not chapter.audio_url %}hidden{% endif %}>
-    <label id="chapter-form-audio-length-label" class="uk-form-label" for="chapter-form-audio-length">Audio Length <sup uk-icon="icon: ourchive-help;ratio:.75"></sup><div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your admin has disabled automatic audio file processing, but you can add your own metadata here.{% endblocktranslate %}</div></label>
-    <div id="chapter-form-audio-length-controls" class="uk-form-controls">
-        <div class="uk-inline" id="chapter-form-audio-length-inline">
-            <input id="chapter-form-audio-length" class="uk-input uk-form-width-large" type="number" name="audio_length" value="{{ chapter.audio_length|default_if_none:0 }}">
+        <div class="mb-3">
+            <label id="chapter-form-audio-description-label" class="form-label" for="chapter-form-audio-description">{% translate 'Audio Description' %}</label>
+            <textarea id="chapter-form-audio-description" class="form-control" rows="2" placeholder="Audio description" name="audio_description" maxlength="600">{{ chapter.audio_description|default_if_none:'' }}</textarea>
         </div>
+        {% if not settings.AudioProcessing %}
+        <div class="mb-3" id="chapter-form-audio-length-parent">
+            <label id="chapter-form-audio-length-label" class="form-label" for="chapter-form-audio-length">{% translate 'Audio Length' %} <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#chapter-audio-length-help" title="{% translate 'Audio length help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+            <div class="mb-3 collapse" id="chapter-audio-length-help">{% blocktranslate %}Your admin has disabled automatic audio file processing, but you can add your own metadata here.{% endblocktranslate %}</div>
+            <input id="chapter-form-audio-length" class="form-control" type="number" name="audio_length" value="{{ chapter.audio_length|default_if_none:0 }}">
+        </div>
+        {% endif %}
     </div>
-</div>
-{% endif %}
-</div>
 {% endif %}
 {% if request.user.can_upload_video %}
-{% if not request.user.collapse_chapter_video %}
-<div class="uk-margin" id="chapter-form-video-parent">
-{% else %}
-<div class="uk-margin uk-width-small"><a class="uk-accordion-title uk-text-meta" uk-toggle="target: #chapter-form-video-hidden-parent" href="#">{% translate 'Video' %}</a></div>
-<div class="uk-accordion-content" id="chapter-form-video-hidden-parent" hidden>
-{% endif %}
-<div class="uk-margin" id="chapter-form-video-upload-parent">
-    <label id="chapter-form-video-label" class="uk-form-label" for="chapter-form-video-inline">Chapter Video</label>
-    <div class="uk-form-controls" id="chapter-form-video-controls">
-        <div class="uk-inline" id="chapter-form-video-inline">
+    {% if request.user.collapse_chapter_video %}
+        <div class="mb-3">
+            <a class="link-underline link-underline-opacity-0" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#chapter-form-video-hidden-parent">{% translate 'Video' %}</a>
+        </div>
+    {% endif %}
+    <div class="mb-3 {% if request.user.collapse_chapter_video %}collapse{% endif %}" id="chapter-form-video-hidden-parent">
+        <div class="mb-3" id="chapter-form-video-upload-parent">
+            <label id="chapter-form-video-label" class="form-label" for="video_url-upload-parent">{% translate 'Chapter Video' %}</label>
             {% include 'file_upload.html' with object='video_url' replace_selector='chapter-form-video' object_type='video' upload_placeholder='Upload chapter video' original_value=chapter.video_url %}
         </div>
     </div>
-</div>
+{% endif %}
+{% if request.user.collapse_chapter_text %}
+<div class="mb-3">
+    <a class="link-underline link-underline-opacity-0" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#chapter-form-text-parent">{% translate 'Text' %}</a>
 </div>
 {% endif %}
-{% if not request.user.collapse_chapter_text %}
-<div class="uk-margin" id="chapter-form-text-parent">
-{% else %}
-<div class="uk-margin uk-width-small"><a class="uk-accordion-title uk-text-meta" href="#" uk-toggle="target: #chapter-form-text-parent">{% translate 'Text' %}</a></div>
-<div class="uk-accordion-content" id="chapter-form-text-parent" hidden>
-{% endif %}
-    <div class="uk-margin-bottom">
-        <span class="uk-form-label" id="chapter-edit-mode-toggle-label">Rich Text? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75"></sup>    
-        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
-        </span>
-        <label id="chapter-text-edit-mode-label" class="switch uk-form-width-xsmall"><input class="uk-checkbox" type="checkbox" id="chapter-text-edit-mode-toggle" onclick="return updateModeText(true)" checked>
-        <span class="slider round"></span></label>
+<div class="mb-3 {% if request.user.collapse_chapter_text %}collapse{% endif %}" id="chapter-form-text-parent">
+    <div class="mb-3 form-check form-switch">
+        <input class="form-check-input" role="Switch" type="checkbox" id="chapter-text-edit-mode-toggle" data-bs-toggle="collapse" aria-expanded="false" data-bs-target=".chapter-text-toggle" onclick="return updateModeText(true)" checked>
+        <label class="form-label" for="chapter-text-edit-mode-toggle" id="chapter-edit-mode-toggle-label">Rich Text? <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#chapter-rich-text-help" title="{% translate 'Rich text help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+        <div class="mb-3 collapse" id="chapter-rich-text-help">{% blocktranslate %}The rich text editor allows you to copy-paste directly from platforms like Google Docs, or create your own formatting in the text box. The plain text editor takes HTML tags for italics, bold, and other formatting. We recommend picking one for this chapter. Don't switch between them!{% endblocktranslate %}</div>
     </div>
-    {% include 'ourchive_tinymce_template.html' with form_field_value=chapter.text form_field='text' obj_name='chapter' min_height=450 setup_id='toggle-chapter-richtext-area' init_callback='chapterTextInit()' %}
-    <div class="uk-width-1-1" id="chapter-form-html-text">
-        <textarea id="toggle-chapter-plaintext-area" rows="25" name="text_plain" class="chapter-text-toggle uk-width-expand" hidden>{{ chapter.text|safe|default_if_none:'' }}</textarea>
+    <div class="chapter-text-toggle mb-3 collapse show" id="chapter-form-rich-text">
+        {% include 'ourchive_tinymce_template.html' with form_field_value=chapter.text form_field='text' obj_name='chapter' min_height=450 setup_id='toggle-chapter-richtext-area' init_callback='chapterTextInit()' %}
+    </div>
+    <div class="chapter-text-toggle mb-3 collapse" id="chapter-form-html-text">
+        <label class="form-label" id="plaintext-label" for="toggle-chapter-plaintext-area">{% translate 'Chapter Text' %}</label>
+        <textarea id="toggle-chapter-plaintext-area" rows="25" name="text_plain" class="form-control">{{ chapter.text|safe|default_if_none:'' }}</textarea>
     </div>
 </div>
-<div class="uk-margin" id="chapter-form-end-notes-parent">
-    <label class="uk-form-label" for="end_notesEditor" id="chapter-form-end-notes-label">{% translate 'End Notes' %}</label>
+<div class="mb-3" id="chapter-form-end-notes-parent">
+    <label class="form-label" for="end_notesEditor" id="chapter-form-end-notes-label">{% translate 'End Notes' %}</label>
     {% include 'ourchive_tinymce_template.html' with form_field_value=chapter.end_notes form_field='end_notes' obj_name='chapter' min_height=200 %}
 </div>

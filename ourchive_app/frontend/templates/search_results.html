@@ -3,33 +3,29 @@
 {% load i18n %}
 {% block title %}Search Results{% endblock %}
 {% block content %}
-<script src="{% static 'frontend/js/searchable-multiselect.js' %}"></script>
 <script>
 	window.addEventListener("load", function(){
-        initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
-        initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
-        initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
 	    var activeTabs = localStorage.getItem('ourchive-active-tabs');
 	  	if (activeTabs !== null) {
 	  		activeTabs = activeTabs.split(",");
 	  		activeTabs.forEach(function(tab) {
 	  			var accordionItem = document.getElementById('accordion-item-'+tab);
     			if (accordionItem !== null && !accordionItem.classList.contains('uk-open')) {
-    				UIkit.accordion(document.getElementById('search-accordion')).toggle(tab, false);
-    				UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(tab, false);
+    				//UIkit.accordion(document.getElementById('search-accordion')).toggle(tab, false);
+    				//UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(tab, false);
     			}
 	  		});
 	  	}
 	  	else {
-	  		UIkit.accordion(document.getElementById('search-accordion')).toggle(0, false);
-	  		UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(0, false);
+	  		//UIkit.accordion(document.getElementById('search-accordion')).toggle(0, false);
+	  		//UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(0, false);
 	  	}
 
 	  	if (localStorage.getItem('ourchive-show-filters') == null) {
 	  		localStorage.setItem('ourchive-show-filters', '1');
 		}
 		if (localStorage.getItem('ourchive-show-filters') === '0') {
-			UIkit.toggle(document.getElementById('search-results-toggle-button')).toggle();
+			//UIkit.toggle(document.getElementById('search-results-toggle-button')).toggle();
 		}
 
 		const checkboxes = document.querySelectorAll("input[type='checkbox']:checked");
@@ -118,80 +114,98 @@
 			element.remove();
 		});
 	}
-
-    UIkit.util.on(document, 'show', '#search-results-works-parent', function() {
-        initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
-    });
-    UIkit.util.on(document, 'show', '#search-results-collections-content', function() {
-        initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
-    });
 </script>
-    <div class="uk-grid uk-grid-small ourchive-content-padding" id="search-uk-grid" uk-grid>
-        <div class="uk-width-1-1">
-            <ul uk-tab="animation: uk-animation-fade; active: {{default_tab}}; connect: .search-switcher" id="search-results-switcher-controls" class="uk-flex-center uk-width-1-1 ourchive-padding-remove-horizontal">
-                <li id="results-switcher-li-works" class="ourchive-search-tab"><a href="#" id="works_tab" data-testid="works-tab" onclick="updateActiveTab(0)">Works ({{ works.page.count }})</a></li>
-                <li id="results-switcher-li-bookmarks" class="ourchive-search-tab"><a href="#" id="bookmarks_tab" onclick="updateActiveTab(1)">Bookmarks ({{ bookmarks.page.count }})</a></li>
-                <li id="results-switcher-li-users" class="ourchive-search-tab"><a href="#" id="users_tab" onclick="updateActiveTab(2)">Collections ({{ collections.page.count }})</a></li>
-                {% if not tag_id %}<li id="results-switcher-li-tags" class="ourchive-search-tab"><a href="#" id="tags_tab" onclick="updateActiveTab(3)">Tags ({{ tags.page.count }})</a></li>
-                <li id="results-switcher-li-users" class="ourchive-search-tab"><a href="#" id="users_tab" onclick="updateActiveTab(4)">Users ({{ users.data|length }})</a></li>{% endif %}
-            </ul>
-        </div>
+<div class="row row-cols-1">
+    <ul class="nav nav-tabs" role="tablist">
+        <li id="results-switcher-li-works" class="nav-item" role="presentation">
+            <button class="nav-link {% if default_tab == 0 %}active{% endif %}" data-testid="works-tab" onclick="updateActiveTab(0)" id="works_tab" data-bs-toggle="tab" data-bs-target="#0-tab-pane" type="button" role="tab" aria-controls="0-tab-pane" aria-selected="{% if default_tab == 0 %}true{% else %}false{% endif %}">{% translate 'Works' %} ({{ works.page.count }})</button>
+        </li>
+        <li id="results-switcher-li-bookmarks" class="nav-item" role="presentation">
+            <button class="nav-link {% if default_tab == 1 %}active{% endif %}" onclick="updateActiveTab(1)" id="bookmarks_tab" data-bs-toggle="tab" data-bs-target="#1-tab-pane" type="button" role="tab" aria-controls="1-tab-pane" aria-selected="{% if default_tab == 1 %}true{% else %}false{% endif %}">{% translate 'Bookmarks' %} ({{ bookmarks.page.count }})</button>
+        </li>
+        <li id="results-switcher-li-users" class="nav-item" role="presentation">
+            <button class="nav-link {% if default_tab == 2 %}active{% endif %}" onclick="updateActiveTab(2)" id="collections_tab" data-bs-toggle="tab" data-bs-target="#2-tab-pane" type="button" role="tab" aria-controls="2-tab-pane" aria-selected="{% if default_tab == 2 %}true{% else %}false{% endif %}">{% translate 'Collections' %} ({{ collections.page.count }})</button>
+        </li>
+        {% if not tag_id %}<li id="results-switcher-li-tags" class="nav-item" role="presentation">
+            <button class="nav-link {% if default_tab == 3 %}active{% endif %}" onclick="updateActiveTab(3)" id="tags_tab" data-bs-toggle="tab" data-bs-target="#3-tab-pane" type="button" role="tab" aria-controls="3-tab-pane" aria-selected="{% if default_tab == 3 %}true{% else %}false{% endif %}">{% translate 'Tags' %} ({{ tags.page.count }})</button>
+        </li>
+        <li id="results-switcher-li-users" class="nav-item" role="presentation">
+            <button class="nav-link {% if default_tab == 4 %}active{% endif %}" onclick="updateActiveTab(4)" id="users_tab" data-bs-toggle="tab" data-bs-target="#4-tab-pane" type="button" role="tab" aria-controls="4-tab-pane" aria-selected="{% if default_tab == 4 %}true{% else %}false{% endif %}">{% translate 'Users' %} ({{ users.data|length }})</button>
+        </li>{% endif %}
+    </ul>
+</div>
+<div class="row row-cols-1">
+    <div id="selected-filters-list" class="mb-3">
+        <!-- Selected filters go here -->
+    </div>
+</div>
+<div class="row">
+    <div class="d-none d-lg-block col-4">
+        <h3 class="search-filter-sidebar collapse show">{% translate 'Filters' %} <span class="text-end"><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target=".search-filter-sidebar" class="link-underline link-underline-opacity-0" onClick="updateFilterToggle()"><i class="bi bi-x"></i></a></span></h3>
+        <button class="btn btn-primary collapse search-filter-sidebar w-50" type="button" data-bs-toggle="collapse" aria-expanded="false" data-bs-target=".search-filter-sidebar" onClick="updateFilterToggle()">
+            {% translate 'Filters' %}
+        </button>
+    </div>
+    <div class="d-none d-lg-block col-6">
+        <label for="search-results-sort-select-visible">{% translate 'Sort by: ' %}</label>
+        <select id="search-results-sort-select-visible" name="order_by" class="form-select-sm ms-2" onchange="updateSortOrder(value, false)">
+            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>{% translate 'Last Updated' %}</option>
+            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>{% translate 'Comments' %}</option>
+            <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>{% translate 'Fingerguns' %}</option>
+        </select>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+        <button class="btn btn-primary d-lg-none w-100" type="button" data-bs-toggle="offcanvas" data-bs-target="#search-filter-results" aria-controls="search-filter-results">
+            {% translate 'Filters' %}
+        </button>
+    </div>
+</div>
+<div class="d-lg-flex">
+    <div class="pe-3 mt-3 search-filter-sidebar collapse show flex-lg-shrink-1">
         {% include 'search_results_filters.html' %}
-        <div class="uk-width-expand">
-            <div id="selected-filters-list" class="uk-width-expand uk-margin-small-bottom">
-                <!-- Selected filters go here -->
-            </div>
-            <div class="uk-width-expand uk-margin-bottom" id="search-filter-controls">
-                <button class="uk-button uk-button-primary search-results-toggle uk-width-medium uk-inline" type="button" uk-toggle="target: .search-results-toggle" hidden id="search-results-toggle-button" onClick="updateFilterToggle()">Filter</button>
-                <button class="uk-button uk-button-primary search-results-toggle uk-inline uk-hidden@s uk-margin-small-bottom uk-width-expand" type="button" uk-toggle="target: #flyover-results" id="search-results-toggle-button-mobile" onClick="updateFilterToggle()">Filter</button>
-                <select id="search-results-sort-select-visible-mobile" name="order_by" class="uk-select uk-margin-small-top uk-hidden@s uk-width-expand" onchange="updateSortOrder(value, true)">
-                    <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
-                    <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
-                    <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
-                </select>
-                <select id="search-results-sort-select-visible" name="order_by" class="uk-select uk-width-medium uk-visible@s" onchange="updateSortOrder(value, false)">
-                    <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
-                    <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
-                    <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
-                </select>
-            </div>
-            <div class="uk-switcher search-switcher uk-width-expand uk-margin-small-left uk-inline uk-height-viewport">
-                <div class="uk-grid uk-grid-small" id="search-results-works-parent" uk-grid>
-                    {% for work in works.data %}
-                        {% include "work_tile.html" %}
-                    {% endfor %}
-                    {% if works.data %}
-                    <div class="uk-width-1-1 uk-align-right">
-                        {% include 'pagination.html' with pagination_array=works.pagination_array page_params=works.page.page_params current_page=works.page.current_page previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}
-                    </div>
-                    {% endif %}
+    </div>
+    <div class="tab-content mt-3 w-100" id="search-results-works-parent">
+        <div class="tab-pane fade {% if default_tab == 0 %}show active{% endif %}" role="tabpanel" aria-labelledby="works_tab" tabindex="0" id="0-tab-pane">
+            {% for work in works.data %}
+                <div class="row row-cols-1 mb-3">{% include "work_tile.html" %}</div>
+            {% endfor %}
+            {% if works.data %}
+                <div class="col-12">
+                    {% include 'pagination.html' with pagination_array=works.pagination_array page_params=works.page.page_params current_page=works.page.current_page previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}
                 </div>
-                <div class="uk-width-expand" id="search-results-bookmarks-content">
-                        {% for bookmark in bookmarks.data %}
-                            <div class="uk-margin-bottom">{% include "bookmark_tile.html" %} </div>
-                        {% endfor %}
-                        {% include 'pagination.html' with pagination_array=bookmarks.pagination_array page_params=bookmarks.page.page_params current_page=bookmarks.page.current_page previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
-                    </div>
-                    <div class="uk-width-expand" id="search-results-collections-content">
-                        {% for bookmark_collection in collections.data %}
-                            <div class="uk-margin-bottom">{% include "bookmark_collection_tile.html" %}</div>
-                        {% endfor %}
-                        {% include 'pagination.html' with pagination_array=collections.pagination_array page_params=collections.page.page_params current_page=collections.page.current_page previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
-                    </div>
-                    <div class="uk-width-expand" id="search-results-tags-content">
-                        <dl class="uk-description-list uk-description-list-divider" id="search-results-tags-content-dl">
-                        {% include "tag_partial.html" with obj_name='tag' tags=tags.data %}
-                        {% include 'pagination.html' with pagination_array=tags.pagination_array page_params=tags.page.page_params current_page=tags.page.current_page previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
-                        </dl>
-                    </div>
-                    <div uk-grid id="search-results-users-grid">
-                    <div class="uk-width-expand" id="search-results-users-content-parent">
-                        {% for user in users.data %}
-                            <p id="search-results-user-{{user.id}}"> <a id="search-results-user-{{user.id}}-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a> </p>
-                        {% endfor %}
-                    </div>
+            {% endif %}
+        </div>
+        <div class="tab-pane fade {% if default_tab == 1 %}show active{% endif %}" role="tabpanel" aria-labelledby="bookmarks_tab" tabindex="0" id="1-tab-pane">
+            {% for bookmark in bookmarks.data %}
+                    <div class="row row-cols-1 mb-3">{% include "bookmark_tile.html" %} </div>
+                {% endfor %}
+                {% include 'pagination.html' with pagination_array=bookmarks.pagination_array page_params=bookmarks.page.page_params current_page=bookmarks.page.current_page previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
+        </div>
+        <div class="tab-pane fade {% if default_tab == 2 %}show active{% endif %}" role="tabpanel" aria-labelledby="collections_tab" tabindex="0" id="2-tab-pane">
+            {% for bookmark_collection in collections.data %}
+                    <div class="row row-cols-1 mb-3">{% include "bookmark_collection_tile.html" %}</div>
+                {% endfor %}
+                {% include 'pagination.html' with pagination_array=collections.pagination_array page_params=collections.page.page_params current_page=collections.page.current_page previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
+        </div>
+        <div class="tab-pane fade {% if default_tab == 3 %}show active{% endif %}" role="tabpanel" aria-labelledby="tags_tab" tabindex="0" id="3-tab-pane">
+            <div class="row row-cols-1 mb-3">
+                {% include "tag_partial.html" with obj_name='tag' tags=tags.data %}
+                <div class="mt-3">
+                    {% include 'pagination.html' with pagination_array=tags.pagination_array page_params=tags.page.page_params current_page=tags.page.current_page previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
+
                 </div>
+            </div>
+        </div>
+        <div class="tab-pane fade {% if default_tab == 4 %}show active{% endif %}" role="tabpanel" aria-labelledby="users_tab" tabindex="0" id="4-tab-pane">
+            <div class="uk-width-expand" id="search-results-users-content-parent">
+                {% for user in users.data %}
+                    <p id="search-results-user-{{user.id}}"> <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="search-results-user-{{user.id}}-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a> </p>
+                {% endfor %}
             </div>
         </div>
     </div>
+</div>
+
 {% endblock %}

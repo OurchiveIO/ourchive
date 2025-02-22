@@ -1,4 +1,4 @@
 {% for bookmark_collection in bookmark_collections %} 
-	<div class="uk-margin-bottom">{% include "bookmark_collection_tile.html" %}</div>
+	<div class="row row-cols-1 mb-3">{% include "bookmark_collection_tile.html" %}</div>
 {% endfor %}
 {% include 'pagination.html' with previous=previous next=next object_name='collection' %}

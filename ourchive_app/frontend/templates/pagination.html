@@ -1,29 +1,31 @@
 {% load i18n %}
+<div id="{{object_name}}-pagination-parent" class="row row-cols-1">
 {% if not pagination_array %}
-<div id="{{object_name}}-pagination-grid" class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid>
-    <div id="{{object_name}}-pagination-parent">
-        <ul class="uk-pagination" id="{{object_name}}-pagination-ul">
-            {% if previous is not None %}<li id="{{object_name}}-pagination-prev-li"><a id="{{object_name}}-pagination-prev-link" href="{{ previous }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span id="{{object_name}}-pagination-prev-span" class="uk-margin-small-right" uk-pagination-previous></span> {% translate 'Previous' %}</a></li>{% endif %}
-            {% if next is not None %}<li id="{{object_name}}-pagination-next-li" class="uk-margin-auto-left"><a id="{{object_name}}-pagination-next-link" href="{{ next }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}>{% translate 'Next' %} <span id="{{object_name}}-pagination-next-span" class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
+    <nav aria-label="{% translate 'Pagination' %}" class="oc-justify-center">
+        <ul class="pagination">
+            {% if previous is not None %}<li class="page-item"><a href="{{ previous }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %} class="page-link">{% translate 'Previous' %}</a></li>{% endif %}
+            {% if next is not None %}<li class="page-item"><a href="{{ next }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %} class="page-link">{% translate 'Next' %}</a></li>{% endif %}
         </ul>
-    </div>        
-</div>
+    </nav>
 {% else %}
-<nav aria-label="Pagination">
-    <ul class="uk-pagination uk-flex-center" uk-margin>
-        {% if previous and previous != None %}<li><a href="{{ previous }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span uk-pagination-previous></span></a></li>{% endif %}
+<nav aria-label="{% translate 'Pagination' %}" class="oc-justify-center">
+    <ul class="pagination">
+        {% if previous and previous != None %}<li class="page-item"><a class="page-link" href="{{ previous }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}>{% translate 'Previous' %}</a></li>
+        {% else %}<li class="page-item"><a class="page-link disabled" href="#">{% translate 'Previous' %}</a></li>{% endif %}
         {% for number in pagination_array %}
         {% if number != '...' %}
             {% if current_page == number %}
-                <li class="uk-active"><a href="?page={{ number }}{% if search_term and search_term != 'None' %}&term={{search_term|default_if_none:'' }}{%endif%}{% if tag_id %}&tag_id={{ tag_id }}{% endif %}{% if attr_id %}&attr_id={{ attr_id }}{% endif %}{% if work_type_id %}&work_type_id={{ work_type_id }}{% endif %}{% if page_params %}{{ page_params }}{% endif %}"><span aria-current="page">{{ number }}</span></a></li>
+                <li class="page-item active" aria-current="page"><a class="page-link" href="?page={{ number }}{% if search_term and search_term != 'None' %}&term={{search_term|default_if_none:'' }}{%endif%}{% if tag_id %}&tag_id={{ tag_id }}{% endif %}{% if attr_id %}&attr_id={{ attr_id }}{% endif %}{% if work_type_id %}&work_type_id={{ work_type_id }}{% endif %}{% if page_params %}{{ page_params }}{% endif %}">{{ number }}</a></li>
             {% else %}
-                <li><a href="?page={{ number }}{% if search_term and search_term != 'None' %}&term={{search_term|default_if_none:''}}{%endif%}{% if tag_id %}&tag_id={{ tag_id }}{% endif %}{% if attr_id %}&attr_id={{ attr_id }}{% endif %}{% if work_type_id %}&work_type_id={{ work_type_id }}{% endif %}{% if page_params %}{{ page_params }}{% endif %}">{{ number }}</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ number }}{% if search_term and search_term != 'None' %}&term={{search_term|default_if_none:''}}{%endif%}{% if tag_id %}&tag_id={{ tag_id }}{% endif %}{% if attr_id %}&attr_id={{ attr_id }}{% endif %}{% if work_type_id %}&work_type_id={{ work_type_id }}{% endif %}{% if page_params %}{{ page_params }}{% endif %}">{{ number }}</a></li>
             {% endif %}
         {% else %}
-            <li class="uk-disabled"><span>…</span></li>
+            <li class="page-item disabled"><a class="page-link">…</a></li>
         {% endif %}
         {% endfor %}
-        {% if next and next != 'None' %}<li><a href="{{ next }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}><span uk-pagination-next></span></a></li>{% endif %}
+        {% if next and next != 'None' %}<li class="page-item"><a class="page-link" href="{{ next }}{% if search_term %}&term={{search_term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}>{% translate 'Next' %}</a></li>
+        {% else %}<li class="page-item"><a class="page-link disabled" href="#">{% translate 'Next' %}</a></li>{% endif %}
     </ul>
 </nav>
 {% endif %}
+</div>

@@ -1,11 +1,11 @@
 {% extends 'index.html' %}
 {% load i18n %}
 {% block title %}{% translate 'Work Subscriptions' %}{% endblock %}
-{% block content %}	
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="work-subscriptions-uk-grid" uk-grid>
-        <div class="uk-width-1-1" id="work-subscriptions-view-parent">
-            <h1 id="work-subscriptions-header-h1" class="uk-heading-line uk-text-center uk-margin-large-bottom"> <span id="work-subscriptions-header">{{request.user}}'s Work Subscriptions</span> </h1>
-            {% include "works_list.html" with works=works.results %}
-        </div>
+{% block content %}
+    <div class="row row-cols-1 mb-3" id="work-subscriptions-view-parent">
+        <h1 id="work-subscriptions-header-h1">{{request.user}}'s Work Subscriptions</h1>
+    </div>
+    <div class="row row-cols-1">
+        {% include "works_list.html" with works=works.results %}
     </div>
 {% endblock %}

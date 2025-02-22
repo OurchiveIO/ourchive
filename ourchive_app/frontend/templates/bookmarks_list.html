@@ -1,11 +1,4 @@
 {% for bookmark in bookmarks %}
-	<div class="uk-margin-bottom">{% include "bookmark_tile.html" %}</div>
+	<div class="row row-cols-1 mb-3">{% include "bookmark_tile.html" %}</div>
 {% endfor %}
-<div class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid id="bookmarks-pagination-parent">
-    <div id="bookmarks-pagination-child-div">
-        <ul class="uk-pagination" id="bookmarks-pagination-uk-ul">
-        {% if previous is not None %}<li id="bookmarks-pagination-prev-li"><a id="bookmarks-pagination-prev-link" href="{{ previous }}"><span id="bookmarks-pagination-prev-span" class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
-        {% if next is not None %}<li id="bookmarks-pagination-next-li" class="uk-margin-auto-left"><a href="{{ next }}" id="bookmarks-pagination-next-link">Next <span id="bookmarks-pagination-next-span" class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
-    </ul>
-    </div>        
-</div> 
+{% include 'pagination.html' with previous=previous next=next object_name='bookmark' %}

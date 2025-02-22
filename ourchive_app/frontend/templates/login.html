@@ -1,48 +1,31 @@
 {% extends 'index.html' %}
-{% block title %}Log In{% endblock %}
 {% load i18n %}
+{% block title %}{% translate 'Log In' %}{% endblock %}
 {% block content %}
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="login-uk-grid" uk-grid>
-        <form class="uk-form-horizontal" id="login-form" method="post">
-            {% csrf_token %}
-            <div class="uk-margin" id="login-username-parent">
-                <label id="login-username-label" class="uk-form-label" for="login-username-input">Username</label>
-                <div class="uk-form-controls" id="login-username-form-controls">
-                    <div class="uk-inline" id="login-username-inline">
-                        <span id="login-username-icon" class="uk-form-icon" uk-icon="icon: ourchive-user;ratio:.75"></span>
-                        <input id="login-username-input" class="uk-input" type="text" name="username">
-                    </div>
-                </div>
-            </div>
-            <input id="login-referrer" type="hidden" name="referrer" value="{{ referrer }}">
-            <div id="login-password-parent" class="uk-margin">
-                <label id="login-password-label" class="uk-form-label" for="login-password-input">Password</label>
-                <div id="login-password-form-controls" class="uk-form-controls">
-                    <div id="login-password-inline" class="uk-inline">
-                        <span id="login-password-icon" class="uk-form-icon uk-form-icon" uk-icon="icon: ourchive-lock;ratio:.75"></span>
-                        <input id="login-password-input" class="uk-input" type="password" name="password">
-                    </div>
-                </div>
-            </div>
-            <div class="uk-margin" id="login-submit-parent">
-                <label id="login-submit-label" class="uk-form-label" for="login-submit-button"></label>
-                <div id="login-submit-form-controls" class="uk-form-controls">
-                    <div id="login-submit-inline" class="uk-inline uk-align-right">
-                        <input id="login-submit-button" class="uk-button uk-button-default" type="submit" value="Log In"/>	
-                    </div>
-                    
-                </div>
-            </div>
-            <br/>
-            <div class="uk-margin" id="login-actions-parent">
-                <div id="login-pw-reset-inline" class="uk-inline">
-                        <span class="uk-text" id="login-pw-reset-span"><a id="login-pw-reset-link" href="/reset-password">Forgot password?</a></span>
-                </div>
-                <div id="login-register-inline" class="uk-inline uk-align-right">
-                        <span class="uk-text" id="login-register-span"><a id="login-register-link" href="{% url 'fe-register-account' %}">{% translate 'Create an account' %}</a></span>
-                </div>
-            </div>
-        </form>
+<div class="row row-cols-1" id="login-actions-parent">
+<h1>{% translate 'Log In' %}</h1>
+<form id="login-form" method="post">
+    {% csrf_token %}
+    <div class="mb-3" id="login-username-parent">
+        <label id="login-username-label" class="form-label" for="login-username-input">{% translate 'Username' %}</label>
+        <div class="input-group" id="login-username-form-controls">
+            <span id="login-username-icon" class="input-group-text"><i class="bi bi-person"></i></span>
+            <input id="login-username-input" class="form-control" type="text" name="username">
+        </div>
     </div>
-
+    <input id="login-referrer" type="hidden" name="referrer" value="{{ referrer }}">
+    <div id="login-password-parent" class="mb-3">
+        <label id="login-password-label" class="form-label" for="login-password-input">{% translate 'Password' %}</label>
+        <div id="login-password-form-controls" class="input-group">
+            <span id="login-password-icon" class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input id="login-password-input" class="form-control" type="password" name="password">
+        </div>
+    </div>
+    <input id="login-submit-button" class="btn btn-primary" type="submit" value="{% translate 'Log In' %}"/>
+</form>
+</div>
+<div class="row row-cols-1 mt-3" id="login-actions-parent">
+    <p><a id="login-pw-reset-link" href="{% url 'fe-reset-password' %}">{% translate 'Forgot password?' %}</a></p>
+    <p><a id="login-register-link" href="{% url 'fe-register-account' %}">{% translate 'Create an account' %}</a></p>
+</div>
 {% endblock %}

@@ -2,170 +2,98 @@
 {% load i18n %}
 {% load static %}
 {% block title %}{{ form_title }}{% endblock %}
-{% block content %}	
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="user-form-uk-grid" uk-grid>
-        <link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
-        <script src="{% static 'frontend/js/searchable-multiselect-generic.js' %}"></script>
-        <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="user-form-parent-div"> 
-            <form class="uk-form-horizontal"  method="post" id="userForm" onsubmit="return getRichText(['profile'])">
-                {% csrf_token %}
-                <div id="user-form-buttons-top-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
-                    <div class="uk-width-1-2@m uk-width-1-1@s" id="edit-profile-header-parent">
-                        <span id="edit-profile-header-span" class="uk-text-large">{% translate 'User Settings' %}</span>
-                    </div>
-                    <div class="uk-text-right uk-width-1-2@m uk-width-1-1@s" id="user-form-buttons-container">
-                        <input id="user-form-cancel" class="uk-button uk-width-small uk-button-default" onclick="history.back()" value="Cancel"/>
-                        <button id="user-form-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-                        <input id="user-form-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
-                    </div>
-                </div>
-            <hr id="user-form-fieldset-hr" class="ourchive-hr"/>
-                <input type="hidden" id="unaltered_icon" name="unaltered_icon" value="{{ user.icon }}">
-                <input type="hidden" id="user_id" name="user_id" value="{{ user.id }}">
-                <input type="hidden" id="user" name="user" value="{{ user.username }}">
-                {% if request.user.can_upload_images %}
-                <div class="uk-margin" id="user-icon-parent-div">
-                    <label id="user-icon-label" class="uk-form-label" for="user-icon-inline">User Icon</label>
-                    <div class="uk-form-controls" id="user-icon-controls">
-                        <div class="uk-inline" id="user-icon-inline">
-                            <img id="user-icon-img" src="{{ user.icon }}" style="border-radius: 50%; max-height: 50px; max-width: 50px;"/>
-                            {% include 'file_upload.html' with object='icon' replace_selector='user-icon-img' object_type='img' upload_placeholder='Upload new icon' original_value=user.icon %}
-                        </div>
-                    </div>
-                </div>
-        
-                <div class="uk-margin" id="icon-alt-text-parent">
-                    <label id="icon-alt-text-label" class="uk-form-label" for="icon-alt-text-area">Icon Alt Text</label>
-                    <div class="uk-form-controls" id="icon-alt-text-controls">
-                        <div class="uk-inline" id="icon-alt-text-inline">
-                            <textarea id="icon-alt-text-area" class="uk-textarea uk-form-width-large" rows="2" placeholder="Image alt text" name="icon_alt_text" maxlength="600">{{ user.icon_alt_text|default_if_none:'' }}</textarea>
-                        </div>
-                    </div>
-                </div>   
-                {% endif %}
-                <div class="uk-margin" id="default-content-parent">
-                    <label id="default-content-label" class="uk-form-label" for="default-content-select">Default Content <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Default content help' %}"></sup>
-                            <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This determines the content a user sees first when visiting your profile.{% endblocktranslate %}</div></label>
-                    <div class="uk-form-controls" id="default-content-controls">
-                        <select id="default-content-select" class="uk-select uk-form-width-small" name="default_content" title="{% translate 'Default content select' %}">
-                        {% if user.default_content == "Work" %}
-                            <option id="default-content-work-selected" value="Work" selected="selected">Work</option>
-                            <option id="default-content-work-bookmark" value="Bookmark">Bookmark</option>
-                            <option id="default-content-collection" value="Collection">Collection</option>
-                        {% elif user.default_content == "Bookmark" %} 
-                            <option id="default-content-bookmark-work" value="Work">Work</option>
-                            <option id="default-content-bookmark-selected" value="Bookmark" selected="selected">Bookmark</option>
-                            <option id="default-content-collection" value="Collection">Collection</option>
-                        {% elif user.default_content == "Collection" %} 
-                            <option id="default-content-collection-work" value="Work">Work</option>
-                            <option id="default-content-collection-bookmark" value="Bookmark" selected="selected">Bookmark</option>
-                            <option id="default-content-collection-selected" value="Collection" selected="selected">Collection</option>
-                        {% else %}
-                            <option id="default-content-work" value="Work">Work</option>
-                            <option id="default-content-bookmark" value="Bookmark">Bookmark</option>
-                            <option id="default-content-collection" value="Collection">Collection</option>
-                        {% endif %}
-                        </select>
-                    </div>
-                </div> 
-        
-                <div class="uk-margin" id="default-content-parent">
-                    <label id="default-work-type-label" class="uk-form-label" for="work-form-type-select">Default Work Type <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Default work type help' %}"></sup>    
-                            <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This determines the default work type shown on the work form.{% endblocktranslate %}</div></label>
-                    <div class="uk-form-controls" id="default-content-controls">
-                        <select id="work-form-type-select" class="uk-select uk-form-width-small" name="default_work_type" title="{% translate 'Default work type select' %}">
-                            {% for item in work_types %}
-                                <option id="type_{{item.type_name}}" value="{{item.type_name}}" {% if user.default_work_type == item.type_name %} selected="selected" {% endif %}>{{ item.type_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div> 
-        
-                <div class="uk-margin" id="user-form-languages-parent">
-                    <label id="user-form-languages-label" class="uk-form-label" for="user-form-languages">{% translate 'Default Languages' %}</label>
-                    <div id="user-form-languages-controls" class="uk-form-controls">
-                        <div id="user-form-languages-inline" class="uk-inline uk-form-width-large">
-                            <select multiple data-multi-select-plugin name="default_languages[]" id="user-form-languages">
-                                {% for language in default_languages %}
-                                    <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-        
-                {% if user.attribute_types %}
-                    {% include "object_attributes_form.html" with object='User' attribute_types=user.attribute_types show_header=False %}
-                {% endif %}
-        
-                <div class="uk-margin" id="profile-text-parent">
-                    <label id="profile-text-label" class="uk-form-label" for="profileEditor">Profile Text</label>
-                    {% include 'ourchive_tinymce_template.html' with form_field_value=user.profile form_field='profile' obj_name='user' min_height=300 %}
-                </div>
-                
-        
-                <hr class="ourchive-hr" id="user-settings-hr"/>
-                <div class="uk-margin" id="profile-collapse-image-parent">
-                    <label id="profile-collapse-image-label" class="uk-form-label" for="profile-collapse-image-checkbox">Collapse image fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse image fields help' %}"></sup>    
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter image fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
-                    </label>
-                    <div id="profile-collapse-image-controls" class="uk-form-controls">
-                        <div id="profile-collapse-image-inline" class="uk-inline">
-                            <label id="profile-collapse-image-switch" class="switch"><input class="uk-checkbox" title="{% translate 'Collapse image fields input' %}" id="profile-collapse-image-checkbox" type="checkbox" name="collapse_chapter_image" {% if user.collapse_chapter_image %} checked {% endif %}> <span id="profile-collapse-image-slider" class="slider round"></span></label>
-                        </div>
-                    </div>
-                </div> 
-        
-                <div class="uk-margin" id="profile-collapse-audio-parent">
-                    <label id="profile-collapse-audio-label" class="uk-form-label" for="profile-collapse-audio-checkbox">Collapse audio fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse audio fields help' %}"></sup>    
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter audio fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
-                    </label>
-                    <div id="profile-collapse-audio-controls" class="uk-form-controls">
-                        <div id="profile-collapse-audio-inline" class="uk-inline">
-                            <label id="profile-collapse-audio-switch" class="switch"><input class="uk-checkbox" title="{% translate 'Collapse audio fields input' %}" id="profile-collapse-audio-checkbox" type="checkbox" name="collapse_chapter_audio" {% if user.collapse_chapter_audio %} checked {% endif %}> <span id="profile-collapse-audio-slider" class="slider round"></span></label>
-                        </div>
-                    </div>
-                </div>   
-        
-                <div class="uk-margin" id="profile-collapse-video-parent">
-                    <label id="profile-collapse-video-label" class="uk-form-label" for="profile-collapse-video-checkbox">{% translate 'Collapse video fields?' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse video fields help' %}"></sup>    
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter video fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
-                    </label>
-                    <div id="profile-collapse-video-controls" class="uk-form-controls">
-                        <div id="profile-collapse-video-inline" class="uk-inline">
-                            <label id="profile-collapse-video-switch" class="switch"><input class="uk-checkbox" title="{% translate 'Collapse video fields input' %}" id="profile-collapse-video-checkbox" type="checkbox" name="collapse_chapter_video" {% if user.collapse_chapter_video %} checked {% endif %}> <span id="profile-collapse-video-slider" class="slider round"></span></label>
-                        </div>
-                    </div>
-                </div>  
-        
-                <div class="uk-margin" id="profile-collapse-text-parent">
-                    <label id="profile-collapse-text-label" class="uk-form-label" for="profile-collapse-text-checkbox">Collapse text fields? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collapse text fields help' %}"></sup>    
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, chapter text fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
-                    </label>
-                    <div id="profile-collapse-text-controls" class="uk-form-controls">
-                        <div id="profile-collapse-text-inline" class="uk-inline">
-                            <label id="profile-collapse-text-switch" class="switch"><input class="uk-checkbox" title="{% translate 'Collapse text fields input' %}" id="profile-collapse-text-checkbox" type="checkbox" name="collapse_chapter_text" {% if user.collapse_chapter_text %} checked {% endif %}> <span id="profile-collapse-text-slider" class="slider round"></span></label>
-                        </div>
-                    </div>
-                </div>   
-                <div class="uk-margin" id="copy-work-metadata-parent">
-                    <label id="copy-work-metadata-label" class="uk-form-label" for="copy-work-metadata-checkbox">Copy work metadata? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Copy work metadata help' %}"></sup>    
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you select this, your bookmark of a work will be auto-populated with the work's title and tags. You can always remove or modify this data before saving your bookmark.{% endblocktranslate %}</div>
-                    </label>
-                    <div id="copy-work-metadata-controls" class="uk-form-controls">
-                        <div id="copy-work-metadata-inline" class="uk-inline">
-                            <label id="copy-work-metadata-switch" class="switch"><input class="uk-checkbox" title="{% translate 'Copy work metadata' %}" id="copy-work-metadata-checkbox" type="checkbox" name="copy_work_metadata" {% if user.copy_work_metadata %} checked {% endif %}> <span id="copy-work-metadata-slider" class="slider round"></span></label>
-                        </div>
-                    </div>
-                </div>
-            <div id="user-form-buttons-bottom-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left" uk-grid>
-                <div class="uk-text-right uk-align-right uk-width-1-1" id="user-form-buttons-btm-container">
-                    <input id="user-form-btm-cancel" class="uk-button uk-width-small uk-button-default" onclick="history.back()" value="Cancel" title="{% translate 'Cancel' %}"/>
-                    <button id="user-form-btm-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-                    <input id="user-form-btm-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
-                </div>
-            </div>
-            </form>
-        </div>
+{% block content %}
+<div id="user-form-buttons-top-parent" class="row row-cols-1">
+    <div class="mb-3" id="edit-profile-header-parent">
+        <h1 id="edit-profile-header-span" class="uk-text-large">{% translate 'User Settings' %}</h1>
+        <hr id="user-form-fieldset-hr" class="ourchive-hr"/>
     </div>
+</div>
+<div class="row row-cols-1" id="user-form-parent-div">
+    <form method="post" id="userForm" onsubmit="return getRichText(['profile'])">
+        {% csrf_token %}
+        <input type="hidden" id="unaltered_icon" name="unaltered_icon" value="{{ user.icon }}">
+        <input type="hidden" id="user_id" name="user_id" value="{{ user.id }}">
+        <input type="hidden" id="user" name="user" value="{{ user.username }}">
+        {% if request.user.can_upload_images %}
+            <div class="mb-3" id="user-icon-parent-div">
+                <label id="user-icon-label" class="form-label" for="user-icon-img-upload">{% translate 'Icon' %}</label>
+                <p><img id="user-icon-img" src="{{ user.icon }}" class="rounded-circle oc-icon" alt="{{ user.username }} {% translate 'icon' %}"/></p>
+                {% include 'file_upload.html' with object='icon' replace_selector='user-icon-img' object_type='img' upload_placeholder='Upload new icon' original_value=user.icon %}
+            </div>
+            <div class="mb-3" id="icon-alt-text-parent">
+                <label id="icon-alt-text-label" class="form-label" for="icon-alt-text-area">{% translate 'Icon Alt Text' %}</label>
+                <input id="icon-alt-text-area" class="form-control" type="text" placeholder="Image alt text" name="icon_alt_text" value="{{ user.icon_alt_text|default_if_none:'' }}">
+            </div>
+        {% endif %}
+        <div class="mb-3" id="default-content-parent">
+            <label id="default-content-label" class="form-label" for="default-content-select">{% translate 'Default Chives' %} <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#default-chives-help" title="{% translate 'Default chives help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+            <div class="mb-3 collapse" id="default-chives-help">{% blocktranslate %}This determines the content a user sees first when visiting your profile.{% endblocktranslate %}</div>
+            <select id="default-content-select" class="form-select" name="default_content" title="{% translate 'Default chives select' %}">
+                    <option id="default-content-work-selected" value="Work" {% if user.default_content == "Work" %}selected="selected"{% endif %}>Work</option>
+                    <option id="default-content-work-bookmark" value="Bookmark" {% if user.default_content == "Bookmark" %}selected="selected"{% endif %}>Bookmark</option>
+                    <option id="default-content-collection" value="Collection" {% if user.default_content == "Collection" %}selected="selected"{% endif %}>Collection</option>
+            </select>
+        </div>
+
+        <div class="mb-3" id="default-content-parent">
+            <label id="default-work-type-label" class="form-label" for="work-form-type-select">{% translate 'Default Work Type' %} <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#default-wt-help" title="{% translate 'Default work type help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+            <div class="mb-3 collapse" id="default-wt-help">{% blocktranslate %}This determines the default work type shown on the work form.{% endblocktranslate %}</div>
+            <select id="work-form-type-select" class="form-select" name="default_work_type" title="{% translate 'Default work type select' %}">
+                {% for item in work_types %}
+                    <option id="type_{{item.type_name}}" value="{{item.type_name}}" {% if user.default_work_type == item.type_name %} selected="selected" {% endif %}>{{ item.type_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3" id="user-form-languages-parent">
+            <label id="user-form-languages-label" class="form-label" for="user-form-languages">{% translate 'Default Languages' %}</label>
+            <select class="form-select" multiple name="default_languages[]" id="user-form-languages">
+                {% for language in default_languages %}
+                    <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                {% endfor %}
+            </select>
+            <script>initializeMultiSelect('user-form-languages');</script>
+        </div>
+        {% if user.attribute_types %}
+            <div class="mb-3">{% include "object_attributes_form.html" with object='User' attribute_types=user.attribute_types show_header=False %}</div>
+        {% endif %}
+        <div class="mb-3" id="profile-text-parent">
+            <label id="profile-text-label" class="form-label" for="profileEditor">Profile Text</label>
+            {% include 'ourchive_tinymce_template.html' with form_field_value=user.profile form_field='profile' obj_name='user' min_height=300 %}
+        </div>
+        <hr class="ourchive-hr" id="user-settings-hr"/>
+        <div class="mb-3" id="profile-collapse-image-parent">
+            <p class="fs-4">{% translate 'Chive Form Configuration' %} <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#collapse-fields-help" title="{% translate 'Collapse fields help' %}"><i class="bi bi-question-circle"></i></a></sup></p>
+            <div class="mb-3 collapse" id="collapse-fields-help">{% blocktranslate %}If you select any collapse options, the fields will be collapsed (but still accessible) by default when you create a chapter.{% endblocktranslate %}</div>
+        </div>
+        <div class="mb-3 form-check form-switch">
+            <input class="form-check-input" role="switch" title="{% translate 'Collapse image fields input' %}" id="profile-collapse-image-checkbox" type="checkbox" name="collapse_chapter_image" {% if user.collapse_chapter_image %} checked {% endif %}>
+            <label id="profile-collapse-image-label" class="form-check-label" for="profile-collapse-image-checkbox">{% translate 'Collapse image fields?' %}</label>
+        </div>
+        <div class="mb-3 form-check form-switch" id="profile-collapse-audio-parent">
+            <label id="profile-collapse-audio-label" class="form-check-label" for="profile-collapse-audio-checkbox">{% translate 'Collapse audio fields?' %}</label>
+            <input class="form-check-input" role="switch" title="{% translate 'Collapse audio fields input' %}" id="profile-collapse-audio-checkbox" type="checkbox" name="collapse_chapter_audio" {% if user.collapse_chapter_audio %} checked {% endif %}>
+        </div>
+        <div class="mb-3 form-check form-switch" id="profile-collapse-video-parent">
+            <input class="form-check-input" role="switch" title="{% translate 'Collapse video fields input' %}" id="profile-collapse-video-checkbox" type="checkbox" name="collapse_chapter_video" {% if user.collapse_chapter_video %} checked {% endif %}>
+            <label id="profile-collapse-video-label" class="form-check-label" for="profile-collapse-video-checkbox">{% translate 'Collapse video fields?' %}</label>
+        </div>
+        <div class="mb-3 form-check form-switch" id="profile-collapse-text-parent">
+            <input class="form-check-input" role="switch" title="{% translate 'Collapse text fields input' %}" id="profile-collapse-text-checkbox" type="checkbox" name="collapse_chapter_text" {% if user.collapse_chapter_text %} checked {% endif %}>
+            <label id="profile-collapse-text-label" class="form-check-label" for="profile-collapse-text-checkbox">{% translate 'Collapse text fields?' %}</label>
+        </div>
+        <div class="mb-3" id="profile-collapse-image-parent">
+            <p class="fs-4">{% translate 'Bookmark Configuration' %}</p>
+        </div>
+        <div class="mb-3 form-check form-switch" id="copy-work-metadata-parent">
+            <input class="form-check-input" role="switch" title="{% translate 'Copy work metadata' %}" id="copy-work-metadata-checkbox" type="checkbox" name="copy_work_metadata" {% if user.copy_work_metadata %} checked {% endif %}>
+            <label id="copy-work-metadata-label" class="form-check-label" for="copy-work-metadata-checkbox">{% translate 'Copy work metadata?' %} <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#copy-metadata-help" title="{% translate 'Copy metadata help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+            <div class="mb-3 collapse" id="copy-metadata-help">{% blocktranslate %}If you select this, your bookmark of a work will be auto-populated with the work's title and tags. You can always remove or modify this data before saving your bookmark.{% endblocktranslate %}</div>
+        </div>
+        <div class="mb-3" id="user-form-buttons-btm-container">
+            <input id="user-form-btm-submit" class="btn btn-primary float-end m-2" type="submit" value="Submit"/>
+            <input id="user-form-btm-cancel" class="btn btn-secondary float-end m-2" type="button" onclick="history.back()" value="Cancel" title="{% translate 'Cancel' %}"/>
+        </div>
+    </form>
+</div>
 {% endblock %}

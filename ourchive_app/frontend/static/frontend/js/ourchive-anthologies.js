@@ -1,44 +1,17 @@
 window.addEventListener("load", function() {
     initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
 });
-
-function doUserAutocomplete(term) {
-  if (term.length < 2)
-  {
-    return;
-  }
-  var complete_select = 'anthology-find-user-dropdown';
-  fetch('/user-autocomplete?text='+term)
-    .then((response) => {
-      return response.text();
-    })
-    .then((templateText) => {
-    document.getElementById(complete_select).innerHTML = "";
-    document.getElementById(complete_select).innerHTML = templateText;
-    UIkit.drop(document.getElementById(complete_select)).show();
-    });
-}
-
 function removeUser(user_id) {
     var parent = document.getElementById("anthology-form-user-"+user_id+"-parent");
     parent.remove();
 }
 
 function populateUserInput(user_id, username) {
-    // parent div
     var parent = document.getElementById("anthology-form-users")
-    // user to add
-    var final = username;
     var wrapper= document.createElement('div');
-    wrapper.classList.add('uk-margin-small');
-    wrapper.classList.add('uk-inline');
-    wrapper.classList.add('uk-margin-remove-top');
     wrapper.setAttribute('id', 'anthology-form-user-'+user_id+'-parent');
-    wrapper.innerHTML= '<input id="anthology-form-cocreator-'+user_id+'-hidden" type="hidden" name="anthology_cocreators_'+user_id+'" value="'+user_id+'"> <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="anthology-user-'+user_id+'-display">'+username+' <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser('+user_id+')" id="anthology-user-'+user_id+'-delete"></span></span>';
-    var input = document.getElementById("anthology-form-user-search");
-    input.remove();
+    wrapper.innerHTML= '<input id="anthology-form-cocreator-'+user_id+'-hidden" type="hidden" name="anthology_cocreators_'+user_id+'" value="'+user_id+'"> <p id="anthology-user-'+user_id+'-display">'+username+' <a class="link-underline link-underline-opacity-0" onclick="removeUser('+user_id+')" id="anthology-user-'+user_id+'-delete"><i class="bi bi-backspace"></i></a></p>';
     parent.appendChild(wrapper);
-    parent.appendChild(input);
     document.getElementById("anthology-form-new-user").value = '';
     document.getElementById("anthology-form-new-user").focus();
     document.getElementById("anthology-find-user-dropdown").innerHTML = "";
@@ -54,9 +27,12 @@ function doWorkAutocomplete(term, anthology_id=0) {
       return response.text();
     })
     .then((templateText) => {
-    document.getElementById(complete_select).innerHTML = "";
-    document.getElementById(complete_select).innerHTML = templateText;
-    UIkit.drop(document.getElementById(complete_select)).show();
+        document.getElementById(complete_select).innerHTML = "";
+        document.getElementById(complete_select).innerHTML = templateText;
+        let dropdownElementList = [];
+        dropdownElementList.push(document.getElementById(complete_select));
+        const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl));
+        dropdownList[0].show();
     });
 }
 
@@ -65,6 +41,8 @@ function populateWorkInput(work_id, work_display, anthology_id=null) {
     var list = document.getElementById("anthology-list")
     var li = document.createElement('li');
     li.setAttribute('id', 'work-list-'+work_id);
+    li.classList.add(...['work-list-item', 'list-group-item', 'sortable-item']);
+    li.setAttribute('draggable', 'true');
     let fetch_url = '';
     if (anthology_id !== null && anthology_id > 0) {
         fetch_url = `/anthologies/${anthology_id}/works/render?work_id=${work_id}`;
@@ -103,7 +81,12 @@ function handleModalDelete(url, anthology_id=null) {
         else {
             work_id = url.replace('/anthologies/1/work/', '').replace('/delete', '');
         }
-      UIkit.modal(document.getElementById('work-anthology-'+work_id+'-modal-delete')).hide();
-      document.getElementById('work-list-'+work_id).remove();
+        document.getElementById('work-list-'+work_id).remove();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('work-anthology-'+work_id+'-modal-delete')).hide();
     });
 }
+document.addEventListener('DOMContentLoaded', () => {
+    initializeMultiSelect('anthology-form-languages');
+    initializeListReorder('anthology-list', '.anthology-tracker');
+    initializeEditTags();
+});

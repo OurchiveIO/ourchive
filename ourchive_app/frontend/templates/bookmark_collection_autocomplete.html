@@ -1,10 +1,10 @@
 {% load i18n %}
 {% if works %}
-<div class="uk-background-muted">
+<div>
 	{% for work in works %}
-	<div id="search-bookmark-autocomplete-graf-{{bookmark.id}}" class="uk-background-default uk-padding-small" onclick="populateWorkInput('{{work.work.id}}', '{{work.work.title_clean}}', '{{ object_id }}')"><span class="ourchive-autocomplete uk-text-small uk-link uk-text-bold" id="collection-autocomplete-span-{{tag.tag}}">{{work.work.title}}</span></div>
+	<div id="search-bookmark-autocomplete-graf-{{bookmark.id}}" class="p-1" onclick="populateWorkInput('{{work.work.id}}', '{{work.work.title_clean}}', '{{ object_id }}')"><span class="fw-bold" id="collection-autocomplete-span-{{tag.tag}}">{{work.work.title}}</span></div>
 	{% endfor %}
 </div>
 {% else %}
-<div class="uk-background-muted">{% translate 'No works found' %}</div>
+<div class="p-1">{% translate 'No works found' %}</div>
 {% endif %}

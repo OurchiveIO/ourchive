@@ -1,19 +1,22 @@
 {% extends 'index.html' %}
 {% load i18n %}
 {% block title %}Blocklist{% endblock %}
-{% block content %}	
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="user-blocklist-uk-grid" uk-grid>
-        <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="user-blocklist-grid">
-            <h1>{% translate 'Blocklist' %}</h1>
-            <hr/>
-            {% if not blocklist %}
-            <p id="user-blocklist-none-message">No users have been blocked. To block a user, navigate to their profile and click the "block" icon.</p>
-            {% endif %}
-            <p id="user-blocklist-info-message">Blocked users cannot comment on your works, bookmarks, or collections. If you are experiencing issues with a blocked user, please contact your admin or report the user.</p>
-            <ul class="uk-list uk-list-striped">
-            {% for block in blocklist %}
-                <li id="user-blocklist-{{block.id}}-user">{{block.blocked_user_name}} (<a id="user-blocklist-{{block.id}}-unblock-link" href="{% url 'fe-unblock-user' request.user.id block.id %}">Unblock</a>)</li>
-            {% endfor %}
-        </div>
+{% block content %}
+    <div class="row row-cols-1">
+        <h1>{% translate 'Blocklist' %}</h1>
+    </div>
+    <div class="row row-cols-1" >
+        <hr/>
+        {% if not blocklist %}
+        <p id="user-blocklist-none-message">{% blocktranslate %}No users have been blocked. To block a user, navigate to their profile and click the "block" icon.{% endblocktranslate %}</p>
+        {% endif %}
+        <p id="user-blocklist-info-message">{% blocktranslate %}Blocked users cannot comment on your works, bookmarks, or collections. If you are experiencing issues with a blocked user, please contact your admin or report the user.{% endblocktranslate %}</p>
+    </div>
+    <div class="row row-cols-1" id="user-blocklist-grid">
+        <ul class="list-group list-group-flush list-group-numbered">
+        {% for block in blocklist %}
+            <li class="list-group-item" id="user-blocklist-{{block.id}}-user">{{block.blocked_user_name}} (<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-blocklist-{{block.id}}-unblock-link" href="{% url 'fe-unblock-user' request.user.id block.id %}">{% translate 'Unblock' %}</a>)</li>
+        {% endfor %}
+        </ul>
     </div>
 {% endblock %}

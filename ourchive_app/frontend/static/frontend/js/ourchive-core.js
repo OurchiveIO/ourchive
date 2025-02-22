@@ -1,8 +1,105 @@
-function removeFile(object) {
+function removeFile(object, replace_selector, object_type) {
 	document.getElementById(object+'-file-input').value = "";
 	document.getElementById(object+'-file-uk-input').value = "";
-	console.log(document.getElementById(object+'-file-uk-input-original'));
-	document.getElementById(object+'-file-uk-input-original').value = "";
+    document.getElementById(object+'-file-uk-input-original').value = "";
+    if (object_type.includes('img')) {
+        document.getElementById(replace_selector).src = '';
+        document.getElementById(`${replace_selector}-toggle`).classList.add('disabled');
+        if (document.getElementById(`${replace_selector}-inline`).classList.contains('show')) {
+            document.getElementById(`${replace_selector}-inline`).classList.remove('show');
+        }
+    }
+}
+
+function resetFile(objectName) {
+    document.getElementById(`${ objectName }-file-input`).disabled = false;
+    document.getElementById(`${ objectName }-file-input`).value = null;
+}
+
+function ourchiveUpload(value, object, object_type, upload_url, replace_selector) {
+    if (value.target === undefined) {
+        return;
+    }
+
+    // Create a new FormData instance
+    let data = new FormData();
+
+    // Create a XMLHTTPRequest instance
+    let request = new XMLHttpRequest();
+    document.getElementById(`${ object }-file-input`).disabled = true;
+
+    // Set the response type
+    request.responseType = "json";
+
+    // Get a reference to the file
+    let file = value.target.files[0];
+
+    // Get a reference to the filename
+    let filename = file.name;
+
+    // Append the file to the FormData instance
+    data.append("file", file);
+
+    // request progress handler
+    request.upload.addEventListener("progress", function (e) {
+        // Get the loaded amount and total filesize (bytes)
+        let loaded = e.loaded;
+        let total = e.total
+
+        // Calculate percent uploaded
+        let percent_complete = (loaded / total) * 100;
+
+        // Update the progress text and progress bar
+        document.getElementById(`${ object }-progressbar-${ object_type }`).setAttribute("style", `width: ${Math.floor(percent_complete)}%`);
+        document.getElementById(`${ object }-progressbar-${ object_type }`).innerText = `${Math.floor(percent_complete)}%`;
+
+      })
+
+      // request load handler (transfer complete)
+      request.addEventListener("load", function (e) {
+        if (request.status === 200) {
+            document.getElementById(`${ object }-progressbar-${ object_type }`).setAttribute("style", `width: 100%`);
+            document.getElementById(`${ object }-progressbar-${ object_type }`).innerText = `100%`;
+            let result = request.response.final_url;
+            document.getElementById(`${ object }-file-uk-input`).value = result;
+            document.getElementById(`${ object }-file-uk-input-original`).value = result;
+            if (object_type.includes('img')) {
+                document.getElementById(replace_selector).src = result;
+                document.getElementById(`${replace_selector}-toggle`).classList.remove('disabled');
+            }
+            else if (document.getElementById(replace_selector) !== null) {
+                document.getElementById(replace_selector).style.visibility = "hidden";
+            }
+        }
+        else {
+            document.getElementById(`${ object }-progressbar-${ object_type }`).setAttribute("style", `width: 0%`);
+            document.getElementById(`${ object }-progressbar-${ object_type }`).innerText = `0%`;
+            document.getElementById(`${ object }-file-input`).value = null;
+        }
+        document.getElementById(`${ object }-file-input`).disabled = false;
+      });
+
+      // request error handler
+      request.addEventListener("error", function (e) {
+          console.log('error', arguments);
+          var result = JSON.parse(arguments[0].xhr.response)['message'];
+          const toastBootstrap = bootstrap.Toast.getOrCreateInstance(document.getElementById("uploadFailedToast"));
+          toastBootstrap.show();
+      });
+
+      // request abort handler
+      request.addEventListener("abort", function (e) {
+        resetFile();
+      });
+
+      // Open and send the request
+      request.open("post", upload_url);
+      request.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+      request.send(data);
+
+      document.getElementById(`${ object }-file-cancel`).addEventListener("click", function () {
+        request.abort();
+      });
 }
 
 function getCookie(name) {
@@ -231,4 +328,109 @@ function initShowMores(objType='chive', firstContainer='tag-container', secondCo
 
 function goToUrl(url) {
     window.location.href = url;
+}
+
+function doUserAutocomplete(term, select_id) {
+  if (term.length < 2)
+  {
+    return;
+  }
+  fetch('/user-autocomplete?text='+term)
+    .then((response) => {
+      return response.text();
+    })
+    .then((templateText) => {
+    document.getElementById(select_id).innerHTML = "";
+    document.getElementById(select_id).innerHTML = templateText;
+    new bootstrap.Dropdown(document.getElementById(select_id)).show();
+    });
+}
+
+function initializeEditTags() {
+    let tagElements = document.getElementsByClassName('oc-searchable-tags');
+    for (const tagElement of tagElements) {
+        const tag_choices = new Choices(tagElement, {
+            searchEnabled: true,
+            searchChoices: true,
+            removeItemButton: true,
+            loadingText: 'Loading...',
+        });
+
+        tag_choices.passedElement.element.addEventListener('search', function (event) {
+            let searchValue = event.detail.value;
+            if (searchValue.length < 3) return;
+            let source = 'edit';
+            let tagType = tagElement.getAttribute("data-tag-type");
+            fetch(`/tag-autocomplete?text=${searchValue}&source=${source}&type=${tagType}&fetch_all=true`)
+                .then((response) => {
+                  response.json().then((data) => {
+                      let result = [];
+                      data.tags.forEach(tag => {
+                          result.push({value: tag.display_text, label: tag.display_text});
+                      })
+                      if (result.length > 0) {
+                          tag_choices.setChoices(result, 'value', 'label', true);
+                      }
+                      else {
+                          tag_choices.setChoices([
+                              {value: searchValue, label: searchValue}
+                          ], 'value', 'label', true);
+                      }
+                  });
+                });
+        });
+    }
+}
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll
+        ('.sortable-item:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function initializeListReorder(listSelector, trackerSelector) {
+    const list = document.querySelector('.sortable-list');
+    let draggingItem = null;
+    list.addEventListener('dragstart', (e) => {
+        draggingItem = e.target;
+        e.target.classList.add('dragging');
+    });
+    list.addEventListener('dragend', (e) => {
+        e.target.classList.remove('dragging');
+        document.querySelectorAll('.sortable-item')
+            .forEach(item => item.classList.remove('over'));
+        draggingItem = null;
+        var list = document.getElementById(listSelector).getElementsByTagName("li");
+        var tracking = 1;
+        for (let item of list) {
+            var child = item.querySelector(trackerSelector)
+            child.value = tracking;
+            tracking += 1;
+        }
+    });
+    list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const draggingOverItem = getDragAfterElement(list, e.clientY);
+        document.querySelectorAll('.sortable-item').forEach
+            (item => item.classList.remove('over'));
+        if (draggingOverItem) {
+            draggingOverItem.classList.add('over');
+            list.insertBefore(draggingItem, draggingOverItem);
+        } else {
+            list.appendChild(draggingItem);
+        }
+    });
+}
+
+function initializeMultiSelect(selectId) {
+    const select_element = document.getElementById(selectId);
+    const select_choices = new Choices(select_element, { removeItemButton: true});
 }

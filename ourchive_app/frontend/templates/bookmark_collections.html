@@ -3,13 +3,10 @@
 {% load static %}
 {% block title %}{% translate 'Collections' %}{% endblock %}
 {% block content %}
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="collections-uk-grid" uk-grid>
-        {% if user_filter %}
-            <div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="user-bkcols-parent">
-                <h1 id="user-bkcols-header-h1" class="uk-heading-line uk-text-center"> <span id="user_bkcols_header"> {% translate 'Collections by' %} {{ user_filter }}</span> </h1> 
-            </div>
-        {% endif %}
-        <div class="uk-width-1-1 uk-padding-remove-horizontal">{% include "bookmark_collections_list.html" %}</div>
-    </div>
-    <script src="{% static 'frontend/js/ourchive-collections.js' %}"></script>
+    {% if user_filter %}
+        <div class="row row-cols-1" id="user-bkcols-parent">
+            <h1 id="user-bkcols-header-h1" class="h1"> <span id="user_bkcols_header"> {% translate 'Collections by' %} {{ user_filter }}</span> </h1>
+        </div>
+    {% endif %}
+    {% include "bookmark_collections_list.html" %}
 {% endblock %}

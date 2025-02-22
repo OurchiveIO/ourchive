@@ -1,55 +1,49 @@
 {% load i18n %}
-<div id="user-subscribe" uk-modal>
-    <div class="uk-modal-dialog uk-modal-body" id="user-subscribe-body">
-        <h2 id="user-subscribe-header" class="uk-modal-title">{% blocktranslate %}Subscribe to {% endblocktranslate %}{{ user.username }}</h2>
-        <form class="uk-form-horizontal" action="{% url 'fe-subscribe' %}" method="post" id="user-subscribe-form">
-            {% csrf_token %}
-            {% if subscription %}
-            <input type="hidden" id="subscribe-user-id" name="subscription_id" value="{{ subscription.id }}">
-            {% endif %}
-            <input type="hidden" id="subscribe-user-id" name="subscribed_to" value="{{ user.username }}">
-            <div class="uk-grid" uk-grid>
-                <div class="uk-width-1-1" id="user-subscribe-bookmarks-parent">
-                    <label id="user-subscribe-bookmarks-label" class="uk-form-label" for="user-subscribe-bookmarks-checkbox">{% translate 'Subscribe to bookmarks' %}
+<div id="user-subscribe" class="modal" tabindex="-1">
+    <div class="modal-dialog" id="user-subscribe-body">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="user-subscribe-header">{% blocktranslate %}Subscribe to {% endblocktranslate %}{{ user.username }}</h2>
+        </div>
+        <div class="modal-body">
+            <form action="{% url 'fe-subscribe' %}" method="post" id="user-subscribe-form">
+                {% csrf_token %}
+                {% if subscription %}
+                <input type="hidden" id="subscribe-user-id" name="subscription_id" value="{{ subscription.id }}">
+                {% endif %}
+                <input type="hidden" id="subscribe-user-id" name="subscribed_to" value="{{ user.username }}">
+                <div class="mb-3 form-check form-switch" id="user-subscribe-bookmarks-parent">
+                    <input class="form-check-input" role="switch" id="user-subscribe-bookmarks-checkbox" type="checkbox" name="subscribed_to_bookmark" {% if subscription.subscribed_to_bookmark %} checked {% endif %}>
+                    <label id="user-subscribe-bookmarks-label" class="form-check-label" for="user-subscribe-bookmarks-checkbox">{% translate 'Subscribe to bookmarks' %}
                     </label>
-                    <div class="uk-form-controls" id="user-subscribe-bookmarks-controls">
-                        <label id="user-subscribe-bookmarks-switch" class="switch"><input class="uk-checkbox" id="user-subscribe-bookmarks-checkbox" type="checkbox" name="subscribed_to_bookmark" {% if subscription.subscribed_to_bookmark %} checked {% endif %}> <span id="user-subscribe-bookmarks-slider" class="slider round"></span></label>
-                    </div>
                 </div>
-                <div class="uk-width-1-1" id="user-subscribe-collections-parent">
-                    <label id="user-subscribe-collections-label" class="uk-form-label" for="user-subscribe-collections-checkbox">{% translate 'Subscribe to collections' %}
+                <div class="mb-3 form-check form-switch" id="user-subscribe-collections-parent">
+                    <input class="form-check-input" id="user-subscribe-collections-checkbox" type="checkbox" role="switch" name="subscribed_to_collection" {% if subscription.subscribed_to_collection %} checked {% endif %}>
+                    <label id="user-subscribe-collections-label" class="form-check-label" for="user-subscribe-collections-checkbox">{% translate 'Subscribe to collections' %}
                     </label>
-                    <div class="uk-form-controls" id="user-subscribe-collections-controls">
-                        <label id="user-subscribe-collections-switch" class="switch"><input class="uk-checkbox" id="user-subscribe-collections-checkbox" type="checkbox" name="subscribed_to_collection" {% if subscription.subscribed_to_collection %} checked {% endif %}> <span id="user-subscribe-collections-slider" class="slider round"></span></label>
-                    </div>
                 </div>
-                <div class="uk-width-1-1" id="user-subscribe-works-parent">
-                    <label id="user-subscribe-works-label" class="uk-form-label" for="user-subscribe-works-checkbox">{% translate 'Subscribe to works' %}
+                <div class="mb-3 form-check form-switch" id="user-subscribe-works-parent">
+                    <input class="form-check-input" role="switch" id="user-subscribe-works-checkbox" type="checkbox" name="subscribed_to_work" {% if subscription.subscribed_to_work %} checked {% endif %}>
+                    <label id="user-subscribe-works-label" class="form-check-label" for="user-subscribe-works-checkbox">{% translate 'Subscribe to works' %}
                     </label>
-                    <div class="uk-form-controls" id="user-subscribe-works-controls">
-                        <label id="user-subscribe-works-switch" class="switch"><input class="uk-checkbox" id="user-subscribe-works-checkbox" type="checkbox" name="subscribed_to_work" {% if subscription.subscribed_to_work %} checked {% endif %}> <span id="user-subscribe-works-slider" class="slider round"></span></label>
-                    </div>
                 </div>
-                <div class="uk-width-1-1" id="user-subscribe-series-parent">
-                    <label id="user-subscribe-series-label" class="uk-form-label" for="user-subscribe-series-checkbox">{% translate 'Subscribe to series' %}
+                <div class="mb-3 form-check form-switch" id="user-subscribe-series-parent">
+                    <input class="form-check-input" role="switch" id="user-subscribe-series-checkbox" type="checkbox" name="subscribed_to_series" {% if subscription.subscribed_to_series %} checked {% endif %}>
+                    <label id="user-subscribe-series-label" class="form-check-label" for="user-subscribe-series-checkbox">{% translate 'Subscribe to series' %}
                     </label>
-                    <div class="uk-form-controls" id="user-subscribe-series-controls">
-                        <label id="user-subscribe-series-switch" class="switch"><input class="uk-checkbox" id="user-subscribe-series-checkbox" type="checkbox" name="subscribed_to_series" {% if subscription.subscribed_to_series %} checked {% endif %}> <span id="user-subscribe-series-slider" class="slider round"></span></label>
-                    </div>
                 </div>
-                <div class="uk-width-1-1" id="user-subscribe-anthologies-parent">
-                    <label id="user-subscribe-anthologies-label" class="uk-form-label" for="user-subscribe-anthologies-checkbox">{% translate 'Subscribe to anthologies' %}
+                <div class="mb-3 form-check form-switch" id="user-subscribe-anthologies-parent">
+                    <input class="form-check-input" role="switch" id="user-subscribe-anthologies-checkbox" type="checkbox" name="subscribed_to_anthology" {% if subscription.subscribed_to_anthology %} checked {% endif %}>
+                    <label id="user-subscribe-anthologies-label" class="form-check-label" for="user-subscribe-anthologies-checkbox">{% translate 'Subscribe to anthologies' %}
                     </label>
-                    <div class="uk-form-controls" id="user-subscribe-anthologies-controls">
-                        <label id="user-subscribe-anthologies-switch" class="switch"><input class="uk-checkbox" id="user-subscribe-anthologies-checkbox" type="checkbox" name="subscribed_to_anthology" {% if subscription.subscribed_to_anthology %} checked {% endif %}> <span id="user-subscribe-anthologies-slider" class="slider round"></span></label>
-                    </div>
                 </div>
-                <div class="uk-text-right uk-width-1-1" id="user-subscribe-buttons-container">
-                    <input id="user-subscribe-cancel" class="uk-button uk-width-small uk-button-default uk-modal-close" onclick="" value="Cancel"/>
+                <div class="mb-3" id="user-subscribe-buttons-container">
+                    <input id="user-subscribe-cancel" class="btn btn-secondary w-25" data-bs-dismiss="modal" value="{% translate 'Cancel' %}">
                     <button id="user-subscribe-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-                    <input id="user-subscribe-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
+                    <button id="user-subscribe-submit" class="btn btn-primary w-25" type="submit">{% translate 'Submit' %}</button>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
+    </div>
     </div>
 </div>

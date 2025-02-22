@@ -3,400 +3,201 @@
 {% load static %}
 {% block title %}{{ form_title }}{% endblock %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'frontend/css/choices.min.css' %}" />
+<script src="{% static 'frontend/js/choices.min.js' %}"></script>
+<script src="{% static 'frontend/js/ourchive-works.js' %}"></script>
 <script src="{% static 'frontend/js/ourchive-chapter.js' %}"></script>
-<link rel="stylesheet" href="{% static 'frontend/css/searchable-multiselect.css' %}" />
-<script src="{% static 'frontend/js/searchable-multiselect-generic.js' %}"></script>
-<script>
-function doUserAutocomplete(term) {
-  if (term.length < 2)
-  {
-    return;
-  }
-  var complete_select = 'work-find-user-dropdown';
-  fetch('/user-autocomplete?text='+term)
-    .then((response) => {
-      return response.text();
-    })
-    .then((templateText) => {      
-    document.getElementById(complete_select).innerHTML = "";
-    document.getElementById(complete_select).innerHTML = templateText;
-    UIkit.drop(document.getElementById(complete_select)).show();
-    });
-}
-
-function removeUser(user_id) {
-    var parent = document.getElementById("work-form-user-"+user_id+"-parent");
-    parent.remove();
-}
-
-function populateUserInput(user_id, username) {
-    // parent div
-    var parent = document.getElementById("work-form-users")
-    // user to add
-    var final = username;
-    var wrapper= document.createElement('div');
-    wrapper.classList.add('uk-margin-small');
-    wrapper.classList.add('uk-inline');
-    wrapper.classList.add('uk-margin-remove-top');
-    wrapper.setAttribute('id', 'work-form-user-'+user_id+'-parent');
-    wrapper.innerHTML= '<input id="work-form-cocreator-'+user_id+'-hidden" type="hidden" name="work_cocreators_'+user_id+'" value="'+user_id+'"> <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="work_user_'+user_id+'_display">'+username+' <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser('+user_id+')" id="work_user_'+user_id+'_delete"></span></span>';
-    var input = document.getElementById("work-form-user-search");
-    input.remove();
-    parent.appendChild(wrapper);
-    parent.appendChild(input);
-    document.getElementById("work_form_new_user").value = '';
-    document.getElementById("work_form_new_user").focus();
-    document.getElementById("work-find-user-dropdown").innerHTML = "";
-}
-function doSeriesAutocomplete(term) {
-  if (term.length < 2)
-  {
-    return;
-  }
-  var complete_select = 'work-series-dropdown';
-  fetch('/series-autocomplete?text='+term)
-    .then((response) => {
-      return response.text();
-    })
-    .then((templateText) => {      
-    document.getElementById(complete_select).innerHTML = "";
-    document.getElementById(complete_select).innerHTML = templateText;
-    UIkit.drop(document.getElementById(complete_select)).show();
-    });
-}
-
-function removeSeries(series_id) {
-    var parent = document.getElementById("work-form-series-existing-container");
-    if (parent !== null) {
-        parent.remove();
-    }
-}
-
-function populateSeriesInput(title, series_id) {
-    if (series_id === null) {
-        series_id = title;
-    }
-    removeSeries(null);
-    // parent div
-    var parent = document.getElementById("work-form-series-parent-parent");
-    var wrapper= document.createElement('div');
-    wrapper.classList.add('uk-margin-small');
-    wrapper.classList.add('uk-margin-remove-top');
-    wrapper.setAttribute('id', 'work-form-series-existing-container');
-    wrapper.innerHTML= '<input id="work-form-series-hidden" type="hidden" name="series_id" value="'+series_id+'"> <span class="uk-badge uk-text-default uk-padding-small uk-margin-small-right" id="work_series_display">'+title+' <span class="uk-text-default uk-padding-small uk-padding-remove-right" uk-icon="icon:close" onclick="removeSeries('+series_id+')" id="work_series_delete"></span></span>';
-    parent.appendChild(wrapper);
-    document.getElementById("work-form-series").value = '';
-    document.getElementById("work-form-series").focus();
-    document.getElementById("work-series-dropdown").innerHTML = "";
-}
-function addSeries(event) {
-    populateSeriesInput(document.getElementById("work-form-series").value, null);
-}
-function seriesCheck (e) {
-    if (e.keyCode == 188 || e.keyCode == 13) {
-        addSeries(e);
-    }
-}
-</script>
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="work-form-uk-grid" uk-grid>
-        <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="work-form-parent"> 
-        <form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
-            <script>
-                function getCurrentTab(submitted) {
-                    var new_chapter_clicked = submitted === "New Chapter";
-                    document.getElementById('redirect_toc').value = new_chapter_clicked;
-                    getRichText(['summary', 'notes']);
-                    getChapterRichTextValues();
-                }
-            </script>
+    <div class="row row-cols-1 mb-3" id="work-form-parent-header">
+        <div id="work-form-title-parent">
+            {% if work.id %}
+                <h1 id="work-form-title-span"><a id="work-form-title-link" class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="/works/{{work.id}}">{{ form_title }}</a></h1>
+            {% else %}
+                <h1 id="work-form-title-span">{{ work.title }}</h1>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row row-cols-1" id="work-form-parent">
+        <form method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
             {% csrf_token %}
             <input type="hidden" id="work-id-hidden" name="work_id" value="{{ work.id }}">
-            <div id="work-form-top-controls-parent" class="uk-grid" uk-grid>
-                <div id="work-form-title-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
-                    {% if work.id %}
-                        <span id="work-form-title-span" class="uk-text-large"><a id="work-form-title-link" href="/works/{{work.id}}">{{ form_title }}</a></span>
-                    {% else %}
-                        <span id="work-form-title-span" class="uk-text-large">{{ work.title }}</span>
-                    {% endif %}
-                </div>
-                <div class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="work-form-top-buttons-group">
-                     <button id="work-form-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-                     <input id="work-form-cancel-top" type="button" class="uk-button uk-button-default" onclick="history.back()" value="Cancel" />
-                    <input id="work-form-submit-top" class="uk-button uk-button-primary" onclick="this.form.submitted=this.value;" type="submit" value="Submit"/>
-                </div>
-            </div>
-            <hr id="work-form-title-content-divider" class="ourchive-hr"/>
-            <div id="work-form-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left">
-                <div class="uk-width-1-3 uk-align-right">
-                    <a class="uk-button uk-button-default uk-button-medium uk-align-right" href="#work-form-chapter-content-parent">Jump to chapters</a>
+                <div class="mb-3">
+                    <p class="text-end"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="#work-form-chapter-content-parent">Jump to chapters</a></p>
                 </div>
                 <input type="hidden" id="redirect_toc" name="redirect_toc">
-                <div class="uk-margin" id="work-form-type-parent">
-                    <label id="work-form-type-label" class="uk-form-label" for="work-form-type-select">Work Type <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work type help' %}"></sup>    
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Work types are admin-configured. Select the one that best matches what kind of work you're posting.{% endblocktranslate %}</div>
-                    </label>
-                    <div id="work-form-type-controls" class="uk-form-controls">
-                        <select id="work-form-type-select" class="uk-select uk-form-width-small" name="work_type" title="{% translate 'Work type dropdown' %}">
-                            {% for item in work_types %}
-                                {% if work.id %}
-                                    <option id="type_{{item.type_name}}" value="{{item.url}}" {% if work.work_type == item.url %} selected="selected" {% endif %}>{{ item.type_name }}</option>
-                                {% else %}
-                                    <option id="type_{{item.type_name}}" value="{{item.url}}" {% if user.default_work_type.type_name == item.type_name %} selected="selected" {% endif %}>{{ item.type_name }}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
+                <div class="mb-3" id="work-form-type-parent">
+                    <label id="work-form-type-label" class="form-label" for="work-form-type-select">Work Type <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#wt-help-text" title="{% translate 'Work type help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+                    <div class="collapse mb-3" id="wt-help-text">{% blocktranslate %}Work types are admin-configured. Select the one that best matches what kind of work you're posting.{% endblocktranslate %}</div>
+                    <select id="work-form-type-select" class="form-select" name="work_type" title="{% translate 'Work type dropdown' %}">
+                        {% for item in work_types %}
+                            {% if work.id %}
+                                <option id="type_{{item.type_name}}" value="{{item.url}}" {% if work.work_type == item.url %} selected="selected" {% endif %}>{{ item.type_name }}</option>
+                            {% else %}
+                                <option id="type_{{item.type_name}}" value="{{item.url}}" {% if user.default_work_type.type_name == item.type_name %} selected="selected" {% endif %}>{{ item.type_name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
                 </div>
-        
-                <div class="uk-margin" id="work-form-title-form-parent">
-                    <label id="work-form-title-form-label" class="uk-form-label" for="work-form-title-input">Title</label>
-                    <div id="work-form-title-controls" class="uk-form-controls">
-                        <div id="work-form-title-inline" class="uk-inline">
-                            <input id="work-form-title-input" class="uk-input uk-form-width-large" type="text" name="title" title="{% translate 'Work title input' %}" value="{{ work.title|default_if_none:'' }}">
-                        </div>
-                    </div>
+                <div class="mb-3" id="work-form-title-form-parent">
+                    <label id="work-form-title-form-label" class="form-label" for="work-form-title-input">{% translate 'Title' %}</label>
+                    <input id="work-form-title-input" class="form-control" type="text" name="title" title="{% translate 'Work title input' %}" value="{{ work.title|default_if_none:'' }}">
                 </div>
-                <div class="uk-margin" id="work-form-cocreator-form-parent">
-                    <label id="work-form-cocreator-form-label" class="uk-form-label" for="work_form_new_user">{% translate 'Co-creators' %}</label>
-                    <div id="work-form-cocreator-controls" class="uk-form-controls">   
-                        <div id="pending-cocreators" class="uk-margin-small-bottom"><span class="uk-text-small">{% translate 'Pending cocreators' %}: </span>{% for user in work.pending_users %}{{user.username}}{% if not forloop.last %}, {% endif %}{% endfor %}</div>          
-                        <div id="work-form-cocreator-inline" class="uk-inline">
-                            <div id="work-form-users">
-                                {% for user in work.users %}
-                                {% if user.username != request.user.username %}
-                                    <div class="uk-margin-small uk-inline uk-margin-remove-top" id="work-form-user-{{user.id}}-parent">
-                                        <input title="{% translate 'Work user' %}" id="work-form-cocreator-{{user.id}}-hidden" type="hidden" name="work_cocreators_{{user.id}}" value="{{ user.id }}"> 
-                                        <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="work_user_{{user.id}}_display">{{ user.username }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser({{user.id}})" id="work_user_{{user.id}}_delete"></span></span>
-                                    </div>
-                                {% endif %}
-                                {% endfor %}
-                                <div class="uk-margin-small uk-inline" id="work-form-user-search"><input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry uk-margin-small-bottom" type="text" placeholder="Find user..." id="work_form_new_user" oninput="doUserAutocomplete(this.value)">
-                                <div id="work-find-user-dropdown" uk-drop></div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <hr class="ourchive-hr"/>
-                <h4 id="obj-attrs-form-header">{% translate 'Work Settings' %}</h4>
-                <div class="uk-margin" id="work-form-complete-parent">
-                    <label id="work-form-complete-label" class="uk-form-label" for="work-form-complete-checkbox">{% translate 'Complete?' %}</label>
-                    <div id="work-form-complete-controls" class="uk-form-controls">
-                        <div id="work-form-complete-inline" class="uk-inline">
-                            <label id="work-form-complete-switch-label" class="switch"><input title="{% translate 'Work complete toggle' %}" class="uk-checkbox" id="work-form-complete-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}> <span id="work-form-complete-slider" class="slider round"></span> </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-margin" id="work-form-draft-parent">
-                    <label id="work-form-draft-label" class="uk-form-label" for="work-form-draft-checkbox">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work draft help' %}"></sup>    
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
-                    </label>
-                    <div id="work-form-draft-controls" class="uk-form-controls">
-                        <div id="work-form-draft-inline" class="uk-inline">
-                            <label id="work-form-draft-switch" class="switch"><input title="{% translate 'Work draft toggle' %}" class="uk-checkbox" id="work-form-draft-checkbox" type="checkbox" name="work_draft" {% if work.draft %} checked {% endif %}> <span id="work-form-draft-slider" class="slider round"></span></label>
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-margin" id="work-form-publish-all-parent">
-                    <label id="work-form-publish-all-label" class="uk-form-label" for="work-form-publish-all-checkbox">{% translate 'Publish All' %}? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work draft help' %}"></sup>    
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Your work and all chapters will no longer be in draft state.{% endblocktranslate %}</div>
-                    </label>
-                    <div id="work-form-publish-all-controls" class="uk-form-controls">
-                        <div id="work-form-publish-all-inline" class="uk-inline">
-                            <label id="work-form-publish-all-switch" class="switch"><input title="{% translate 'Work publish all toggle' %}" class="uk-checkbox" id="work-form-publish-all-checkbox" type="checkbox" name="publish_all"> <span id="work-form-publish-all-slider" class="slider round"></span></label>
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-margin" id="work-form-created-parent">
-                    <label id="work-form-created-label" class="uk-form-label" for="work-form-created-on-input">Post Date</label>
-                    <div id="work-form-created-controls" class="uk-form-controls">
-                        <div id="work-form-created-inline" class="uk-inline">
-                            <input title="{% translate 'Work created on' %}" id="work-form-created-on-input" type="date" class="uk-input" name="created_on" value="{{ work.created_on }}">
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-margin" id="work-form-updated-parent">
-                    <label id="work-form-updated-label" class="uk-form-label" for="work-form-updated-on-hidden">Update Date</label>
-                    <div id="work-form-updated-controls" class="uk-form-controls">
-                        <div id="work-form-updated-inline" class="uk-inline">
-                            <input title="{% translate 'Work updated on' %}" id="work-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ work.updated_on }}"> 
-                            <input title="{% translate 'Work updated on' %}" id="work-form-updated-on-input" type="date" class="uk-input" name="updated_on" value="{{ work.updated_on }}">
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-margin" id="work-form-languages-parent">
-                    <label id="work-form-languages-label" class="uk-form-label" for="work-form-languages">{% translate 'Languages' %}</label>
-                    <div id="work-form-languages-controls" class="uk-form-controls">
-                        <div id="work-form-languages-inline" class="uk-inline uk-form-width-large">
-                            <select multiple data-multi-select-plugin name="languages[]" id="work-form-languages">
-                                {% for language in languages %}
-                                    <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-margin" id="work-form-series-parent">
-                    <label id="work-form-series-label" class="uk-form-label" for="work-form-work-series">{% translate 'Series' %}</label>
-                    <div id="work-form-work-series" class="uk-form-controls">
-                        <div class="uk-margin-remove" id="work-form-series-parent-parent">
-                        {% if work.series %}
-                            <div class="uk-margin-small uk-margin-remove-top" id="work-form-series-existing-container">
-                                <input type="hidden" id="work-form-series-hidden" name="series_id" value="{{work.series.id}}">
-                                <span class="uk-badge uk-text-default uk-padding-small uk-margin-small-right" id="work_series_display">{{ work.series.title }} <span class="uk-text-default uk-padding-small uk-padding-remove-right" uk-icon="icon:close" onclick="removeSeries({{series.id}})" id="work_series_{{work.series.id}}_delete"></span></span>
+                <div class="mb-3" id="work-form-cocreator-form-parent">
+                    <label id="work-form-cocreator-form-label" class="form-label" for="work_form_new_user">{% translate 'Co-creators' %}</label>
+                    {% if work.pending_users %}<p id="work-pending-cocreators"><span class="fw-bold">{% translate 'Pending cocreators' %}</span>: {% for user in work.pending_users %}{{user.username}}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+                    <div id="work-form-users">{% for user in work.users %}
+                        {% if user.username != request.user.username %}
+                            <div class="mb-3" id="work-form-user-{{user.id}}-parent">
+                                <input title="{% translate 'Work user' %}" id="work-form-cocreator-{{user.id}}-hidden" type="hidden" name="work_cocreators_{{user.id}}" value="{{ user.id }}">
+                                <p id="work_user_{{user.id}}_display">{{ user.username }} <a class="link-underline link-underline-opacity-0" onclick="removeUser({{user.id}})" id="work_user_{{user.id}}_delete"><i class="bi bi-backspace"></i></a></p>
                             </div>
                         {% endif %}
-                        </div>
-                        <input autocomplete="off" class="uk-input uk-form-width-large ourchive-tag-entry" type="text" placeholder="Search for or create series..." id="work-form-series" oninput="doSeriesAutocomplete(this.value)" onkeyup="seriesCheck(event)"> <span title="Create series" uk-icon="icon:ourchive-add;ratio:.6" onclick="addSeries(event)"></span>
-                        <div class="uk-card-small" id="work-series-dropdown" uk-drop="target: #work-form-series"></div>
+                    {% endfor %}</div>
+                    <input autocomplete="off" class="form-control" type="text" placeholder="{% translate 'Find user...' %}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="#work-find-user-dropdown" id="work_form_new_user" oninput="doUserAutocomplete(this.value, 'work-find-user-dropdown')">
+                    <div id="work-find-user-dropdown" class="dropdown-menu p-4">{% translate 'Search for user..' %}</div>
+                </div>
+                <hr class="ourchive-hr"/>
+                <h4 id="obj-attrs-form-header">{% translate 'Settings' %}</h4>
+                <div class="mb-3 form-check form-switch" id="work-form-complete-parent">
+                    <input title="{% translate 'Work complete toggle' %}" class="form-check-input" role="switch" id="work-form-complete-checkbox" type="checkbox" name="is_complete" {% if work.is_complete %} checked {% endif %}>
+                    <label id="work-form-complete-label" class="form-check-label" for="work-form-complete-checkbox">{% translate 'Complete?' %}</label>
+                </div>
+                <div class="mb-3 form-check form-switch" id="work-form-draft-parent">
+                    <input title="{% translate 'Work draft toggle' %}" class="form-check-input" id="work-form-draft-checkbox" type="checkbox" role="switch" name="work_draft" {% if work.draft %} checked {% endif %}>
+                    <label id="work-form-draft-label" class="form-check-label" for="work-form-draft-checkbox">Draft? <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#draft-help-text" class="link-underline link-underline-opacity-0" title="{% translate 'Work draft help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+                    <div class="mb-3 collapse" id="draft-help-text">{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
+                </div>
+                <div class="mb-3 form-check form-switch" id="work-form-publish-all-parent">
+                    <input title="{% translate 'Work publish all toggle' %}" class="form-check-input" role="switch" id="work-form-publish-all-checkbox" type="checkbox" name="publish_all">
+                    <label id="work-form-publish-all-label" class="form-check-label" for="work-form-publish-all-checkbox">{% translate 'Publish All' %}? <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#publish-all-help" class="link-underline link-underline-opacity-0" title="{% translate 'Publish all help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+                    <div class="collapse mb-3" id="publish-all-help">{% blocktranslate %}Your work and all chapters will no longer be in draft state.{% endblocktranslate %}</div>
+                </div>
+                <div class="mb-3" id="work-form-created-parent">
+                    <label id="work-form-created-label" class="form-label" for="work-form-created-on-input">Post Date</label>
+                    <input title="{% translate 'Work created on' %}" id="work-form-created-on-input" type="date" class="form-control" name="created_on" value="{{ work.created_on }}">
+                </div>
+                <div class="mb-3" id="work-form-updated-parent">
+                    <label id="work-form-updated-label" class="form-label" for="work-form-updated-on-hidden">Update Date</label>
+                    <input title="{% translate 'Work updated on' %}" id="work-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ work.updated_on }}">
+                    <input title="{% translate 'Work updated on' %}" id="work-form-updated-on-input" type="date" class="form-control" name="updated_on" value="{{ work.updated_on }}">
+                </div>
+                <div class="mb-3" id="work-form-languages-parent">
+                    <label id="work-form-languages-label" class="form-label" for="work-form-languages">{% translate 'Languages' %}</label>
+                    <select multiple name="languages[]" id="work-form-languages" class="form-select">
+                        {% for language in languages %}
+                            <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3" id="work-form-series-parent">
+                    <label id="work-form-series-label" class="form-label" for="work-form-series">{% translate 'Series' %}</label>
+                    <div class="mb-3" id="work-form-series-existing-container">{% if work.series %}
+                        <input type="hidden" id="work-form-series-hidden" name="series_id" value="{{work.series.id}}">
+                        <span class="badge text-bg-primary" id="work_series_display">{{ work.series.title }} <a onclick="removeSeries({{series.id}})" id="work_series_{{work.series.id}}_delete"><i class="bi bi-x"></i></a></span>
+                    {% endif %}</div>
+                    <div class="input-group">
+                        <input class="form-control" autocomplete="off" data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="#work-series-dropdown" type="text" placeholder="Search for or create series..." id="work-form-series" oninput="doSeriesAutocomplete(this.value)" onkeyup="seriesCheck(event)"> <span class="input-group-text" title="{% translate 'Create series' %}" onclick="addSeries(event)"><i class="bi bi-plus-lg"></i></span>
+                        <div class="dropdown-menu p-4" id="work-series-dropdown"></div>
                     </div>
                 </div>
                 {% if settings.AllowComments %}
-                <div class="uk-margin" id="work-form-allow-comments-parent">
-                    <label id="work-form-allow-comments-label" class="uk-form-label" for="work-form-allow-comments-select">Allow Comments?</label>
-                    <div id="work-form-allow-comments-controls" class="uk-form-controls">
-                        <select id="work-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted" title="{% translate 'Comment settings' %}">                    
-                            <option id="work-form-allow-comments-all" {% if work.anon_comments_permitted and work.comments_permitted %} selected {% endif %}>All</option>
-                            <option id="work-form-allow-comments-registered" {% if work.anon_comments_permitted == False and work.comments_permitted %} selected {% endif %}>Registered users only</option>
-                            <option id="work-form-allow-comments-none" {% if not work.anon_comments_permitted and not work.comments_permitted %} selected {% endif %}>None</option>
-        
-                        </select>
-                    </div>
+                <div class="mb-3" id="work-form-allow-comments-parent">
+                    <label id="work-form-allow-comments-label" class="form-label" for="work-form-allow-comments-select">{% translate 'Allow Comments?' %}</label>
+                    <select id="work-form-allow-comments-select" class="form-select" name="comments_permitted" title="{% translate 'Comment settings' %}">
+                        <option id="work-form-allow-comments-all" {% if work.anon_comments_permitted and work.comments_permitted %} selected {% endif %}>{% translate 'All' %}</option>
+                        <option id="work-form-allow-comments-registered" {% if work.anon_comments_permitted == False and work.comments_permitted %} selected {% endif %}>{% translate 'Registered users only' %}</option>
+                        <option id="work-form-allow-comments-none" {% if not work.anon_comments_permitted and not work.comments_permitted %} selected {% endif %}>{% translate 'None' %}</option>
+                    </select>
                 </div>
                 {% endif %}
                 {% if user.can_upload_export_files %}
-                <div class="uk-margin" id="work-form-preferred-download-parent">
-                    <label id="work-form-preferred-download-label" class="uk-form-label" for="work-form-preferred-download-select">Preferred Export <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Preferred export help' %}"></sup>    
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}If you have a file for your work that you'd prefer users download, you can upload here and it will display at the top of the download list.{% endblocktranslate %}</div>
-                    </label>
-                    <div id="work-form-preferred-download-controls" class="uk-form-controls">
-                        <select id="work-form-preferred-download-select" class="uk-select uk-form-width-large" name="preferred_download"> 
-                            <option id="work-form-preferred-download-none">None</option>
-                        {% for choice in work.download_choices %}                   
-                            <option id="work-form-preferred-download-{{choice}}" {% if work.preferred_download == choice.0 %} selected {% endif %}>{{choice.1}}</option>
-                        {% endfor %}
-                        </select>
-                    </div>
+                <div class="mb-3" id="work-form-preferred-download-parent">
+                    <label id="work-form-preferred-download-label" class="form-label" for="work-form-preferred-download-select">Preferred Export <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#preferred-export-help" class="link-underline link-underline-opacity-0" title="{% translate 'Preferred export help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+                    <div class="collapse mb-3" id="preferred-export-help">{% blocktranslate %}If you have a file for your work that you'd prefer users download, you can upload here and it will display at the top of the download list.{% endblocktranslate %}</div>
+                    <select id="work-form-preferred-download-select" class="form-select" name="preferred_download">
+                        <option id="work-form-preferred-download-none">None</option>
+                    {% for choice in work.download_choices %}
+                        <option id="work-form-preferred-download-{{choice}}" {% if work.preferred_download == choice.0 %} selected {% endif %}>{{choice.1}}</option>
+                    {% endfor %}
+                    </select>
                 </div>
-                <div class="uk-margin" id="work-export-file-parent">
-                    <label id="work-export-file-parent" class="uk-form-label" for="work-export-file-inline">Export File</label>
+                <div class="mb-3" id="work-export-file-parent">
+                    <label id="work-export-file-parent" class="form-label" for="work-export-file-inline">Export File</label>
                     {% if work.preferred_download_url %}
-                    <div id="work-export-preferred-download" class="uk-form-controls">
-                        <p class="uk-text-break">Existing file: {{ work.preferred_download_url }}</p>
+                    <div id="work-export-preferred-download">
+                        <p>Existing file: {{ work.preferred_download_url }}</p>
                     </div>
                     {% endif %}
-                    <div id="work-export-file-controls" class="uk-form-controls">
-                        <div id="work-export-file-inline" class="uk-inline">
-                            {% include 'file_upload.html' with object='preferred_download_url' replace_selector='preferred-download-url' object_type='download' upload_placeholder='Upload file' original_value=work.preferred_download_url %}
-                        </div>
+                    <div id="work-export-file-inline">
+                        {% include 'file_upload.html' with object='preferred_download_url' replace_selector='preferred-download-url' object_type='download' upload_placeholder='Upload file' original_value=work.preferred_download_url %}
                     </div>
                 </div>
                 {% endif %}
                 <hr id="work-attributes-hr" class="ourchive-hr"/>
-                <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">{% translate 'Work Tags' %}</h4> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work tags help' %}"></sup>
-                        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div></span>
+                <span class="uk-inline"><h4 class="uk-inline" id="obj-attrs-form-header">{% translate 'Tags' %} <sup><a title="{% translate 'Tags help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#tags-help-text"><i class="bi bi-question-circle"></i></a></sup></h4>
+                <div class="collapse mb-3" id="tags-help-text">{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your anthology, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
                 {% include "object_attributes_form.html" with object='Work' attribute_types=work.attribute_types show_header=False %}
                 {% include "edit_tags.html" with object='work' object_friendly='Work' show_header=False %}
                 <hr class="ourchive-hr"/>
-                <h4 id="obj-attrs-form-header">{% translate 'Work Details' %}</h4>
-                <div class="uk-margin" id="work-form-summary-parent">
-                    <label id="work-form-summary-label" class="uk-form-label" for="summaryEditor">{% translate 'Summary' %}</label>
+                <h4 id="obj-attrs-form-header">{% translate 'Details' %}</h4>
+                <div class="mb-3" id="work-form-summary-parent">
+                    <label id="work-form-summary-label" class="form-label" for="summaryEditor">{% translate 'Summary' %}</label>
                     {% include 'ourchive_tinymce_template.html' with form_field_value=work.summary form_field='summary' obj_name='work' min_height=200 %}
                 </div>
-                <div class="uk-margin uk-width-1-6"><a href="#" id="work-notes-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-notes-hidden-parent">{% translate 'Notes' %}</a></div>
-                <div id="work-form-notes-hidden-parent" hidden>
-                <div class="uk-margin" id="work-form-notes-parent">
+                <div class="mb-3 osm-container"><a href="#" id="work-notes-label" class="link-underline link-underline-opacity-0 collapsed" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#work-form-notes-hidden-parent">
+                    <span class="oc-show-more">{% translate '+ Notes' %}</span>
+                    <span class="oc-show-less">{% translate '- Notes' %}</span>
+                </a></div>
+                <div id="work-form-notes-hidden-parent" class="collapse mb-3">
                     {% include 'ourchive_tinymce_template.html' with form_field_value=work.notes form_field='notes' obj_name='work' min_height=200 %}
                 </div>
-                </div>
                 {% if request.user.can_upload_images %}
-                <div class="uk-margin uk-width-1-6"><a href="#" id="work-cover-label" class="uk-accordion-title uk-text-meta" uk-toggle="target: #work-form-image-hidden-parent">{% translate 'Work Cover' %}</a></div>
-                <div id="work-form-image-hidden-parent" hidden>
-                <div class="uk-margin" id="work-form-cover-parent">
-                    <div id="work-form-existing-image" class="uk-form-controls">
-                        {% if work.cover_url %}
-                        <img id="work-form-cover-img" src="{{ work.cover_url }}" class="uk-margin-bottom"/>
-                        {% endif %}
+                <div class="mb-3 osm-container"><a href="#" id="work-cover-label" class="link-underline link-underline-opacity-0 collapsed" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#work-form-image-hidden-parent">
+                    <span class="oc-show-more">{% translate '+ Cover' %}</span>
+                    <span class="oc-show-less">{% translate '- Cover' %}</span>
+                </a></div>
+                <div id="work-form-image-hidden-parent" class="collapse mb-3">
+                    <div id="work-form-cover-parent">
+                        <p><a id="work-form-cover-img-toggle" data-bs-toggle="collapse" data-bs-target="#work-form-cover-img-inline" aria-expanded="false" aria-controls="work-form-cover-img-inline" class="btn btn-primary{% if not work.cover_url %} disabled{% endif %}">{% translate 'Toggle cover' %}</a></p>
+                        <div id="work-form-cover-img-inline" class="collapse mb-3"><img id="work-form-cover-img" src="{{ work.cover_url }}" alt="{% translate 'Work cover' %}"/></div>
+                        {% include 'file_upload.html' with object='cover_url' replace_selector='work-form-cover-img' object_type='work-img' upload_placeholder='Upload cover image' original_value=work.cover_url %}
                     </div>
-                    <div id="work-form-cover-controls" class="uk-form-controls">
-                        <div id="work-form-cover-inline" class="uk-inline" {% if not work.cover_url %}uk-toggle="target: #work-form-cover-alt-parent"{% endif %}>
-                            {% include 'file_upload.html' with object='cover_url' replace_selector='work-form-cover-img' object_type='work-img' upload_placeholder='Upload cover image' original_value=work.cover_url %}
-                        </div>
-                    </div>
-                </div>
-                <div id="work-form-cover-alt-parent" class="uk-margin" {% if not work.cover_url %}hidden{% endif %}>
-                    <label id="work-form-cover-alt-label" class="uk-form-label" for="work-form-cover-alt-input">Cover Alt Text</label>
-                    <div id="work-form-cover-alt-controls" class="uk-form-controls">
-                        <div id="work-form-cover-alt-inline" class="uk-inline">
-                            <input id="work-form-cover-alt-input" class="uk-input uk-form-width-large" placeholder="Add a description for your cover image" type="text" name="cover_alt_text" value="{{ work.cover_alt_text|default_if_none:'' }}">
-                        </div>
-                    </div>
-                </div>
+                    <label id="work-form-cover-alt-label" class="form-label" for="work-form-cover-alt-input">Cover Alt Text</label>
+                    <input id="work-form-cover-alt-input" class="form-control" placeholder="Add a description for your cover image" type="text" name="cover_alt_text" value="{{ work.cover_alt_text|default_if_none:'' }}">
                 </div>      
                 {% endif %}
-                
-            </div>
             <div><hr class="ourchive-hr"/></div>
-            <div id="multichapter-select" class="uk-width-1-1">
-                <label class="uk-form-label" for="work-form-multichapter-checkbox">Multichapter?</label>
-                <div id="work-form-multichapter-control" class="uk-form-controls">
-                    <label id="work-form-multichapter-switch" class="switch"><input class="uk-checkbox" id="work-form-multichapter-checkbox" title="{% translate 'Multichapter toggle' %}" type="checkbox" uk-toggle="target: .work-chapter-content" {% if chapters|length > 1 or multichapter == 'true' %} checked {% endif %} name="multichapter"><span id="work-form-multichapter-slider" class="slider round"></span></label>
-                </div>
+            <div id="multichapter-select" class="mb-3 form-check form-switch">
+                <input class="form-check-input" role="switch" id="work-form-multichapter-checkbox" title="{% translate 'Multichapter toggle' %}" type="checkbox" data-bs-toggle="collapse" aria-expanded="false" data-bs-target=".work-chapter-content" {% if chapters|length > 1 or multichapter == 'true' %} checked {% endif %} name="multichapter">
+                <label class="form-check-label" for="work-form-multichapter-checkbox">{% translate 'Multichapter?' %}</label>
             </div>
             <div id="work-form-chapter-content-parent">
-            <div id="work-form-single-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if chapters|length > 1 or multichapter == 'true' %} hidden {% endif %}>
-                <input type="hidden" id="work_chapter_id" name="chapter_id" value="{{ work_chapter.id }}">
-                {% include 'chapter_form_body.html' with chapter=work_chapter suppress_info_fields=True %}
-            </div>
-            <div id="work-form-multi-chapter-content-parent" class="uk-child-width-1@m uk-child-width-1@s uk-text-left work-chapter-content" {% if not work.id %} hidden {% endif %} {% if chapters|length < 2 and multichapter == 'false' %} hidden {% endif %}>
-                <script>
-                    var util = UIkit.util;
-        
-                    util.ready(function () {
-        
-                        util.on(document.body, 'stop', function (e, sortable, el) {
-                            var list = document.getElementById("chapters_list").getElementsByTagName("li");
-                            var tracking = 1;
-                            for (let item of list) {
-                                var child = item.querySelector('.chapters_tracker')
-                                child.value = tracking;
-                                tracking += 1;
-                            }
-                        });
-                    });
-                </script>
-                <h3 id="chapter-section-header">Chapters</h3>
-                <ul class="uk-grid-small uk-child-width-1 uk-text-left" uk-sortable="handle: .uk-sortable-handle" uk-grid id="chapters_list">
-                    {% for chapter in chapters %}
-                    <li id="chapters-list-{{chapter.id}}">
-                        <div id="chapter-{{chapter.id}}-card" class="uk-card uk-card-hover uk-card-body uk-grid-small uk-child-width-1-2 uk-text-left uk-padding-small" uk-grid>
-                            <div id="chapter-{{chapter.id}}-sortable" class="uk-sortable-handle">
-                                <span class="uk-margin-small-right" uk-icon="icon: ourchive-hamburger;ratio:.75"></span><span id="chapter-{{chapter.id}}-span" class="uk-text-medium">Chapter {{chapter.number}}{% if chapter.title %}: {{chapter.title}}{% endif %}</span>
-                            </div>
-                            <div id="chapter-{{chapter.id}}-controls-div"><a id="chapter-{{chapter.id}}-edit-link" href="/works/{{work.id}}/chapters/{{chapter.id}}/edit" title="{% translate 'Edit chapter' %} {{ chapter.id }}">Edit</a> | <a title="{% translate 'Delete chapter' %} {{ chapter.id }}" id="chapter-{{chapter.id}}-delete-link" uk-toggle="target: #chapter-{{chapter.id}}-modal-delete">Delete</a></div>
-                            {% if chapter.draft %}
-                                <div class="uk-width-auto" id="chapter-{{chapter.id}}-draft-div">
-                                    <span id="chapter-{{chapter.id}}-draft-span" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
+                <div id="work-form-single-chapter-content-parent" class="work-chapter-content collapse {% if chapters|length < 2 and multichapter == 'false' %}show{% endif %}" >
+                    <input type="hidden" id="work_chapter_id" name="chapter_id" value="{{ work_chapter.id }}">
+                    {% include 'chapter_form_body.html' with chapter=work_chapter suppress_info_fields=True %}
+                </div>
+                <div id="work-form-multi-chapter-content-parent" class="work-chapter-content collapse {% if chapters|length > 1 or multichapter == 'true' %}show{% endif %}">
+                    <h3 id="chapter-section-header">{% translate 'Chapters' %}</h3>
+                    <ul class="list-group sortable-list" id="chapters_list">
+                        {% for chapter in chapters %}
+                        <li id="chapters-list-{{chapter.id}}" class="chapter-list-item list-group-item sortable-item" draggable="true">
+                            <div id="chapter-{{chapter.id}}-card">
+                                <div id="chapter-{{chapter.id}}-sortable">
+                                    <i class="bi bi-list"></i> <span id="chapter-{{chapter.id}}-span">{% translate 'Chapter' %} {{chapter.number}}{% if chapter.title %}: {{chapter.title}}{% endif %} (<a class="link-underline link-underline-opacity-0" id="chapter-{{chapter.id}}-edit-link" href="/works/{{work.id}}/chapters/{{chapter.id}}/edit" title="{% translate 'Edit chapter' %} {{ chapter.id }}">{% translate 'Edit' %}</a> | <a class="link-underline link-underline-opacity-0" title="{% translate 'Delete chapter' %} {{ chapter.id }}" id="chapter-{{chapter.id}}-delete-link" href="#" data-bs-toggle="modal" data-bs-target="#chapter-{{chapter.id}}-modal-delete">{% translate 'Delete' %}</a>) {% if chapter.draft %}<span id="chapter-{{chapter.id}}-draft-span" class="badge text-bg-secondary fw-bold">DRAFT</span>{% endif %}</span>
                                 </div>
-                                {% endif %}
-                        </div>
-                        
-                        <input type="hidden" class="chapters_tracker" id="chapters_{{chapter.id}}" name="chapters_{{chapter.id}}" value="{{chapter.number}}">
-                    </li>
-                    {% include "delete_modal.html" with object='chapter' parent_object_id=work.id object_id=chapter.id %}
-                    {% endfor %}
-                    <input id="work-form-new-chapter-link" class="uk-button uk-button-link" style="width:15em;" onclick="this.form.submitted=this.value;" type="submit" value="New Chapter"/>
-                </ul>
-            </div>
-            </div>
-            <hr class="ourchive-hr"/>
-            <div id="work-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
-                <div class="uk-align-right uk-width-1-1@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="work-form-bottom-buttons-group">
-                     <button id="work-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-                     <input id="work-form-cancel-bottom" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel" />
-                    <input id="work-form-submit-bottom" class="uk-button uk-button-primary" onclick="this.form.submitted=this.value;" type="submit" value="Submit"/>
+                            </div>
+                            <input type="hidden" class="chapters_tracker" id="chapters_{{chapter.id}}" name="chapters_{{chapter.id}}" value="{{chapter.number}}">
+                        </li>
+                        {% include "delete_modal.html" with object='chapter' parent_object_id=work.id object_id=chapter.id %}
+                        {% endfor %}
+                    </ul>
+                    <input id="work-form-new-chapter-link" class="btn btn-primary mt-3" style="max-width: 8em;" onclick="this.form.submitted=this.value;" type="submit" value="New Chapter"/>
                 </div>
             </div>
+            <hr class="ourchive-hr"/>
+            <div class="mb-3" id="work-form-bottom-buttons-group">
+                <input id="work-form-submit-bottom" class="btn btn-primary float-end m-2" onclick="this.form.submitted=this.value;" type="submit" value="Submit"/>
+                <input id="work-form-cancel-bottom" class="btn btn-secondary float-end m-2" type="button" onclick="history.back()" value="Cancel" />
+            </div>
         </form>
-        </div>
     </div>
 {% endblock %}

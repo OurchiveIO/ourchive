@@ -2,34 +2,32 @@
 {% load i18n %}
 {% block title %}{{page_title}}{% endblock %}
 {% block content %}
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="import-status-uk-grid" uk-grid>
-        <div class="uk-width-1-1 uk-text-left" uk-grid id="user-blocklist-grid">
-            <div id="user-imports-content" class="uk-width-1-1">
-                <h3>{% blocktranslate %}Pending Imports{% endblocktranslate %}</h3>
-                {% if not user_imports.results %}
-                <p id="user-imports-none-message">{% blocktranslate %}No pending imports found.{% endblocktranslate %} <a href="{% url 'fe-import-works' request.user %}">{% translate 'Import works here.' %}</a></p>
-                {% else %}
-                <table class="uk-table uk-table-striped">
-                <thead>
-                    <tr>
-                        <th>{% translate 'Work ID' %}</th>
-                        <th>{% translate 'Processing?' %}</th>
-                        <th>{% translate 'Created On' %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for job in user_imports.results %}
-                    <tr id="user-imports-{{job.id}}-parent">
-                        <td id="user-subscriptions-{{job.id}}-work">{{job.work_id}}</td>
-                        <td id="user-subscriptions-{{job.id}}-processing">{% if job.processing %}{% translate 'Processing' %}{% else %}{% translate 'Queued for Import' %}{% endif %}</td>
-                        <td id="user-subscriptions-{{job.id}}-processing">{{job.created_on|date:'DATETIME_FORMAT'}} UTC</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-                </table>
-                {% include 'pagination.html' with previous=user_imports.prev_params next=user_imports.next_params object_name='user_import' %}
-                {% endif %}
-            </div>
-        </div>
+    <div id="user-imports-content" class="row row-cols-1 mb-3">
+        <h3>{% blocktranslate %}Pending Imports{% endblocktranslate %}</h3>
+    </div>
+    <div class="row row-cols-1 mb-3">
+        {% if not user_imports.results %}
+        <p id="user-imports-none-message">{% blocktranslate %}No pending imports found.{% endblocktranslate %} <a href="{% url 'fe-import-works' request.user %}">{% translate 'Import works here.' %}</a></p>
+        {% else %}
+        <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">{% translate 'Work ID' %}</th>
+                <th scope="col">{% translate 'Processing?' %}</th>
+                <th scope="col">{% translate 'Created On' %}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for job in user_imports.results %}
+            <tr id="user-imports-{{job.id}}-parent">
+                <td id="user-subscriptions-{{job.id}}-work">{{job.work_id}}</td>
+                <td id="user-subscriptions-{{job.id}}-processing">{% if job.processing %}{% translate 'Processing' %}{% else %}{% translate 'Queued for Import' %}{% endif %}</td>
+                <td id="user-subscriptions-{{job.id}}-processing">{{job.created_on|date:'DATETIME_FORMAT'}} UTC</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+        {% include 'pagination.html' with previous=user_imports.prev_params next=user_imports.next_params object_name='user_import' %}
+        {% endif %}
     </div>
 {% endblock %}

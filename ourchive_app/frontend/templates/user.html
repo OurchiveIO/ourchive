@@ -1,86 +1,60 @@
 {% extends 'index.html' %}
 {% load i18n %}
-{% block title %}User - {{ user.username }}{% endblock %}
+{% block title %}{% translate 'User' %} - {{ user.username }}{% endblock %}
 {% block content %}
-    <script>
-        window.addEventListener("load", function() {
-            initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
-            initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
-            initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
-            initShowMores('series', 'series-tag-container', 'series-description-container', 'tags', 'description');
-        });
-
-        UIkit.util.on(document, 'show', '#work_tab', function() {
-            initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
-        });
-        UIkit.util.on(document, 'show', '#anthology_tab', function() {
-            initShowMores('anthology', 'anthology-tag-container', 'anthology-description-container', 'tags', 'description');
-        });
-        UIkit.util.on(document, 'show', '#bookmark_collection_tab', function() {
-            initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
-        });
-        UIkit.util.on(document, 'show', '#series_tab', function() {
-            initShowMores('series', 'series-tag-container', 'series-description-container', 'tags', 'description');
-        });
-    </script>
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="user-uk-grid" uk-grid>
-        <div class="uk-width-1 uk-padding-remove-horizontal" id="user-profile-parent">
-            <div class="uk-text-right uk-width-1" id="user-profile-controls-parent">
-                {% if user.username == request.user.username %}
-                    <a class="ourchive-icon-wrapper" id="user-profile-edit-link" href="{% url 'fe-user-profile-edit' user.id %}"><span uk-icon="icon: ourchive-edit;ratio:.75" title="Edit"></span> </a>
-                    <a id="user-profile-blocklist-link" class="ourchive-icon-wrapper" href="{% url 'fe-user-blocklist' user.username %}"><span uk-icon="icon: ourchive-block;ratio:.75" title="{% translate 'Blocklist' %}"></span></a>
+    <div class="row row-cols-1" id="user-profile-parent">
+        <p class="text-end" id="user-profile-controls-parent">
+            {% if user.username == request.user.username %}
+                <a class="link-underline link-underline-opacity-0" id="user-profile-edit-link" title="Edit" href="{% url 'fe-user-profile-edit' user.id %}"><i class="bi bi-pencil"></i></a>
+                <a id="user-profile-blocklist-link" class="link-underline link-underline-opacity-0" href="{% url 'fe-user-blocklist' user.username %}" title="{% translate 'Blocklist' %}"><i class="bi bi-ban"></i></a>
+            {% else %}
+                {% if not user_blocked %}<a class="link-underline link-underline-opacity-0" id="user-block-link" href="{% url 'fe-block-user' user.id %}" title="{% translate 'Block' %}"><i class="bi bi-ban"></i></a>
                 {% else %}
-                    {% if not user_blocked %}<a class="ourchive-icon-wrapper" id="user-block-link" href="{% url 'fe-block-user' user.id %}"><span uk-icon="icon: ourchive-block;ratio:.75" title="{% translate 'Block' %}"></span> </a>
-                    {% else %}
-                    <a class="ourchive-icon-wrapper" id="user-unblock-link" href="{% url 'fe-unblock-user' user.id user_blocked %}"><span uk-icon="icon: ourchive-unblock;ratio:.75" title="Unblock"></span> </a>
-                    {% endif %}
-                    <a class="ourchive-icon-wrapper" id="user-block-link" href="{% url 'report-user' user.username %}"><span uk-icon="icon: ourchive-report;ratio:.75" title="Report"></span> </a>
-                    <a class="ourchive-icon-wrapper" id="user-subscribe-link" class="uk-button-small" uk-toggle="target: #user-subscribe"><span uk-icon="icon: ourchive-subscribe;ratio:.75" title="{% translate 'Subscribe' %}"></span></a>
+                <a class="link-underline link-underline-opacity-0" id="user-unblock-link" href="{% url 'fe-unblock-user' user.id user_blocked %}" title="{% translate 'Unblock' %}"><i class="bi bi-eye"></i></a>
                 {% endif %}
-                    
+                <a class="link-underline link-underline-opacity-0" id="user-block-link" href="{% url 'report-user' user.username %}" title="{% translate 'Report' %}"><i class="bi bi-flag"></i></a>
+                <a class="link-underline link-underline-opacity-0" id="user-subscribe-link" href="#" data-bs-toggle="modal" data-bs-target="#user-subscribe" title="{% translate 'Subscribe' %}"><i class="bi bi-send-plus"></i></a>
+            {% endif %}
+        </p>
+    </div>
+    <div class="row row-cols-1" id="user-profile-card-parent">
+        {% if user.icon and user.icon != "None" %} <p class="text-center"><img id="user-profile-icon" src="{{ user.icon }}" class="rounded-circle oc-icon" alt="{{ user.username }}"/> {% endif %}</p>
+        <h1 id="user-profile-username-h1" class="text-center">{{ user.username }}</h1>
+        {% if user.profile %}
+            <div class="uk-card uk-card-body uk-align-center uk-padding-remove-horizontal" id="user-profile-text-parent">
+                <h2 id="user-profile-text-h2"> Profile </h2>
+                <span id="user-profile-text-span">{% autoescape off %} {{ user.profile }} {% endautoescape %}</span>
             </div>
-            <div class="uk-width-1 uk-align-center" id="user-profile-card-parent">
-                <div class="uk-card uk-card-body uk-padding-remove-horizontal" id="user-profile-card-body"> 
-                    {% if user.icon and user.icon != "None" %} <img id="user-profile-icon" src="{{ user.icon }}" class="uk-align-center uk-height-max-small" style="border-radius: 50%"/> {% endif %}
-                    <h1 id="user-profile-username-h1" class="uk-heading-line uk-text-center"> <span id="user-profile-username-span">{{ user.username }}</span> </h1> 
-                </div>
-                {% if user.profile %}
-                    <div class="uk-card uk-card-body uk-align-center uk-padding-remove-horizontal" id="user-profile-text-parent">
-                        <h2 id="user-profile-text-h2"> Profile </h2>
-                        <span id="user-profile-text-span">{% autoescape off %} {{ user.profile }} {% endautoescape %}</span> 
-                    </div>
-                {% endif %}
-                {% if user.attributes %}
-                    <hr class="uk-margin-medium" id="user-attributes-hr"/>
-                    {% include "object_attributes.html" with object='user' object_id=user.id attributes=user.attributes %}
-                    <hr class="uk-margin-medium" id="user-attributes-lower-hr"/>
-                {% endif %}
-                <ul class="uk-subnav uk-subnav-pill" uk-switcher="active: {{ anchor }};" id="user_content_switcher_header">
-                    <li><a href="#work_tab" id="user_works_selector">{% translate 'Works' %} ({{ work_count }})</a></li>
-                    <li><a href="#bookmark_tab" id="user_bookmarks_selector">{% translate 'Bookmarks' %} ({{ bookmark_count }})</a></li>
-                    <li><a href="#bookmark_collection_tab" id="user_collections_selector">{% translate 'Collections' %} ({{ collection_count }})</a></li>
-                    <li><a href="#series_tab" id="user_series_selector">{% translate 'Series' %} ({{ series_count }})</a></li>
-                    <li><a href="#anthology_tab" id="user_anthologies_selector">{% translate 'Anthologies' %} ({{ anthology_count }})</a></li>
-                </ul>
-                <ul class="uk-switcher uk-margin" id="user_content_switcher">
-                    <li id="work_tab">
-                        {% include "works_list.html" with works=works root=root username=username next=works_next previous=works_previous include_header=False %} 
-                    </li>
-                    <li id="bookmark_tab">
-                        {% include "bookmarks_list.html" with bookmarks=bookmarks next=bookmarks_next previous=bookmarks_previous include_header=False %}
-                    </li>
-                    <li id="bookmark_collection_tab">
-                        {% include "bookmark_collections_list.html" with bookmark_collections=bookmark_collections next=bookmark_collections_next previous=bookmark_collections_previous include_header=False %}
-                    </li>
-                    <li id="series_tab">
-                        {% include "series_list_body.html" with series=series next=series_next previous=series_previous include_header=False %}
-                    </li>
-                    <li id="anthology_tab">
-                        {% include "anthologies_list_body.html" with anthologies=anthologies next=anthologies_next previous=anthologies_previous include_header=False %}
-                    </li>
-                </ul>
+        {% endif %}
+        {% if user.attributes %}
+            <hr id="user-attributes-hr"/>
+            {% include "object_attributes.html" with object='user' object_id=user.id attributes=user.attributes %}
+            <hr id="user-attributes-lower-hr"/>
+        {% endif %}
+        <ul class="nav nav-tabs" role="tablist" id="user_content_switcher_header">
+            <li class="nav-item" role="presentation"><button class="nav-link {% if anchor == 0 %}active{% endif %}" id="works-tab" data-bs-toggle="tab" data-bs-target="#works-tab-pane" type="button" role="tab" aria-controls="works-tab-pane" aria-selected="true">{% translate 'Works' %} ({{ work_count }})</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link {% if anchor == 1 %}active{% endif %}" id="bookmarks-tab" data-bs-toggle="tab" data-bs-target="#bookmarks-tab-pane" type="button" role="tab" aria-controls="bookmarks-tab-pane">{% translate 'Bookmarks' %} ({{ bookmark_count }})</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link {% if anchor == 2 %}active{% endif %}" id="collections-tab" data-bs-toggle="tab" data-bs-target="#collections-tab-pane" type="button" role="tab" aria-controls="collections-tab-pane">{% translate 'Collections' %} ({{ collection_count }})</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link {% if anchor == 3 %}active{% endif %}" id="series-tab" data-bs-toggle="tab" data-bs-target="#series-tab-pane" type="button" role="tab" aria-controls="series-tab-pane">{% translate 'Series' %} ({{ series_count }})</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link {% if anchor == 4 %}active{% endif %}" id="anthologies-tab" data-bs-toggle="tab" data-bs-target="#anthologies-tab-pane" type="button" role="tab" aria-controls="anthologies-tab-pane">{% translate 'Anthologies' %} ({{ anthology_count }})</button></li>
+        </ul>
+        <div class="tab-content mt-3" id="user_content_switcher">
+            <div class="tab-pane fade {% if anchor == 0 %}show active{% endif %}" role="tabpanel" aria-labelledby="works-tab" tabindex="0" id="works-tab-pane">
+                {% include "works_list.html" with works=works root=root username=username next=works_next previous=works_previous include_header=False %}
+            </div>
+            <div class="tab-pane fade {% if anchor == 1 %}show active{% endif %}" role="tabpanel" aria-labelledby="bookmarks-tab" tabindex="0" id="bookmarks-tab-pane">
+                {% include "bookmarks_list.html" with bookmarks=bookmarks next=bookmarks_next previous=bookmarks_previous include_header=False %}
+            </div>
+            <div class="tab-pane fade {% if anchor == 2 %}show active{% endif %}" role="tabpanel" aria-labelledby="collections-tab" tabindex="0" id="collections-tab-pane">
+                {% include "bookmark_collections_list.html" with bookmark_collections=bookmark_collections next=bookmark_collections_next previous=bookmark_collections_previous include_header=False %}
+            </div>
+            <div class="tab-pane fade {% if anchor == 3 %}show active{% endif %}" role="tabpanel" aria-labelledby="series-tab" tabindex="0" id="series-tab-pane">
+                {% include "series_list_body.html" with series=series next=series_next previous=series_previous include_header=False %}
+            </div>
+            <div class="tab-pane fade {% if anchor == 4 %}show active{% endif %}" role="tabpanel" aria-labelledby="anthologies-tab" tabindex="0" id="anthologies-tab-pane">
+                {% include "anthologies_list_body.html" with anthologies=anthologies next=anthologies_next previous=anthologies_previous include_header=False %}
             </div>
         </div>
-        {% include "user_subscribe_modal.html" %}
     </div>
+    {% include "user_subscribe_modal.html" %}
 {% endblock %}

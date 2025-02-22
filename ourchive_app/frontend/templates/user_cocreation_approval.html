@@ -1,78 +1,88 @@
 {% extends 'index.html' %}
 {% load i18n %}
 {% block title %}{% translate 'Co-Creator Approvals' %}{% endblock %}
-{% block content %}	
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="cocreator-approval-uk-grid" uk-grid>
-        <div id="user-cocreator-parent" class="uk-width-1-1 uk-padding-remove-horizontal">
-            <h1 id="user-cocreator-h1">{% translate 'Co-Creator Approvals' %}</h1>
-            <hr/>
-            <p class="uk-text-large">{% blocktranslate %}The following chives have you listed as a co-creator. You can approve or reject this relationship. If you reject it, you will be removed as a co-creator and will no longer be able to modify the chive.{% endblocktranslate %}</p>
-            {% if approvals %}
-            <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-cocreator-bulk-approve' %}">{% translate 'Approve all' %}</a>
-            <a class="uk-button uk-button-primary uk-align-right uk-text-right" href="{% url 'fe-cocreator-bulk-reject' %}">{% translate 'Reject all' %}</a>
-            {% else %}
-            <p id="user-cocreator-none-message">{% blocktranslate %}Nothing to approve.{% endblocktranslate %}</p>
-            {% endif %}
+{% block content %}
+    <div id="user-cocreator-parent" class="row row-cols-1 mb-3">
+        <h1 id="user-cocreator-h1">{% translate 'Co-Creator Approvals' %}</h1>
+        <hr/>
+        <p class="fs-6">{% blocktranslate %}The following chives have you listed as a co-creator. You can approve or reject this relationship. If you reject it, you will be removed as a co-creator and will no longer be able to modify the chive.{% endblocktranslate %}</p>
         {% if approvals %}
-        <div class="uk-overflow-auto uk-width-1-1 uk-padding-remove-horizontal">
-            <table class="uk-table uk-table-striped">
-            <thead>
-                <tr>
-                    <th>{% translate 'Creating User' %}</th>
-                    <th>{% translate 'Chive Title' %}</th>
-                    <th>{% translate 'Chive Type' %}</th>
-                    <th>{% translate 'Actions' %}</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for approval in approvals %}
-                <tr id="user-cocreator-{{approval.id}}-parent">
-                    <td id="user-cocreator-{{approval.id}}-user"><a href="{% url 'user-profile-parent' approval.creating_user.id %}">{{approval.creating_user.username}}</a></td>
-                    <td id="user-cocreator-{{approval.id}}-ct"><span class="uk-margin"><a class="uk-link" id="user-cocreator-{{approval.id}}-chive-link" {% if approval.type == 'work' %}href="{% url 'fe-work-view' approval.chive %}" {% elif approval.type == 'collection' %}href="{% url 'fe-view-collection' approval.chive %}"{% endif %}>{{approval.title}}</a></span></td>
-                    <td id="user-cocreator-{{approval.id}}-type"><span class="uk-text-medium" id="approval-{{approval.id}}-type">{{approval.type}}</span></td>
-                    <td id="user-cocreator-{{approval.id}}-ac"><a id="user-cocreator-{{approval.id}}-reject-link" uk-toggle="target: #approval-{{approval.id}}-remove">Reject</a> | <a id="user-cocreator-{{approval.id}}-approve-link" uk-toggle="target: #approval-{{approval.id}}-approve">Approve</a></td>
-                    <div id="approval-{{approval.id}}-remove" uk-modal>
-                        <div class="uk-modal-dialog uk-modal-body" id="approval-{{approval.id}}-remove-body">
-                            <h2 id="approval-{{approval.id}}-remove-header" class="uk-modal-title">Confirm Reject</h2>
-                            <form class="uk-form-horizontal" action="{% url 'fe-remove-as-cocreator' %}" method="post" id="remove-{{approval.id}}-form">
-                                {% csrf_token %}
-                                <input type="hidden" id="remove-chive-{{approval.chive}}-id" name="id" value="{{ approval.id }}">
-                                <input type="hidden" id="remove-chive-{{approval.chive}}-id" name="type" value="{{ approval.type }}">
-                                <div class="uk-grid" uk-grid>
-                                    <p><span class="uk-text-medium" id="remove-chive-{{approval.chive}}-confirm">{% translate 'Are you sure you want to remove yourself as a co-creator of this chive?' %} <strong>{{approval.title}}</strong></span></p>
-                                    <div class="uk-text-right uk-width-1-1" id="remove-{{approval.chive}}-buttons-container">
-                                        <input id="remove-cancel" class="uk-button uk-width-small uk-button-default uk-modal-close" value="Cancel"/>
-                                        <button id="remove-{{approval.chive}}-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-                                        <input id="remove-{{approval.chive}}-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div id="approval-{{approval.id}}-approve" uk-modal>
-                        <div class="uk-modal-dialog uk-modal-body" id="approval-{{approval.id}}-approve-body">
-                            <h2 id="approval-{{approval.id}}-approve-header" class="uk-modal-title">Confirm Approve</h2>
-                            <form class="uk-form-horizontal" action="{% url 'fe-approve-as-cocreator' %}" method="post" id="approve-{{approval.id}}-form">
-                                {% csrf_token %}
-                                <input type="hidden" id="approve-chive-{{approval.chive}}-id" name="id" value="{{ approval.id }}">
-                                <input type="hidden" id="approve-chive-{{approval.chive}}-id" name="type" value="{{ approval.type }}">
-                                <div class="uk-grid" uk-grid>
-                                    <p><span class="uk-text-medium" id="approve-chive-{{approval.chive}}-confirm">{% translate 'Are you sure you want to approve yourself as a co-creator of this chive?' %} <strong>{{approval.title}}</strong></span></p>
-                                    <div class="uk-text-right uk-width-1-1" id="approve-{{approval.chive}}-buttons-container">
-                                        <input id="approve-cancel" class="uk-button uk-width-small uk-button-default uk-modal-close" value="Cancel"/>
-                                        <button id="approve-{{approval.chive}}-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-                                        <input id="approve-{{approval.chive}}-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </tr>
-            {% endfor %}
-            </tbody>
-            </table>
-        </div>
+        <p class="text-end">
+            <a class="btn btn-primary" href="{% url 'fe-cocreator-bulk-approve' %}">{% translate 'Approve all' %}</a>
+            <a class="btn btn-danger" href="{% url 'fe-cocreator-bulk-reject' %}">{% translate 'Reject all' %}</a>
+        </p>
+        {% else %}
+        <p id="user-cocreator-none-message">{% blocktranslate %}Nothing to approve.{% endblocktranslate %}</p>
         {% endif %}
-        </div>
     </div>
+    {% if approvals %}
+    <div class="row row-cols-1">
+        <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">{% translate 'Creating User' %}</th>
+                <th scope="col">{% translate 'Chive Title' %}</th>
+                <th scope="col">{% translate 'Chive Type' %}</th>
+                <th scope="col">{% translate 'Actions' %}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for approval in approvals %}
+            <tr id="user-cocreator-{{approval.id}}-parent">
+                <td id="user-cocreator-{{approval.id}}-user"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{% url 'user-profile-parent' approval.creating_user.id %}">{{approval.creating_user.username}}</a></td>
+                <td id="user-cocreator-{{approval.id}}-ct"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-cocreator-{{approval.id}}-chive-link" {% if approval.type == 'work' %}href="{% url 'fe-work-view' approval.chive %}" {% elif approval.type == 'collection' %}href="{% url 'fe-view-collection' approval.chive %}"{% endif %}>{{approval.title}}</a></td>
+                <td id="user-cocreator-{{approval.id}}-type">{{approval.type}}</td>
+                <td id="user-cocreator-{{approval.id}}-ac"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-cocreator-{{approval.id}}-reject-link" href="#" data-bs-toggle="modal" data-bs-target="#approval-{{approval.id}}-remove">Reject</a> | <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-cocreator-{{approval.id}}-approve-link" href="#" data-bs-toggle="modal" data-bs-target="#approval-{{approval.id}}-approve">Approve</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    </div>
+        {% for approval in approvals %}
+        <div id="approval-{{approval.id}}-remove" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" id="approval-{{approval.id}}-remove-body">
+                    <div class="modal-header">
+                        <h2 id="approval-{{approval.id}}-remove-header" class="uk-modal-title">{% translate 'Confirm Reject' %}</h2>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'fe-remove-as-cocreator' %}" method="post" id="remove-{{approval.id}}-form">
+                            {% csrf_token %}
+                            <input type="hidden" id="remove-chive-{{approval.chive}}-id" name="id" value="{{ approval.id }}">
+                            <input type="hidden" id="remove-chive-{{approval.chive}}-id" name="type" value="{{ approval.type }}">
+                            <p id="remove-chive-{{approval.chive}}-confirm">{% translate 'Are you sure you want to remove yourself as a co-creator of this chive?' %} <strong>{{approval.title}}</strong></p>
+                            <div class="mb-3" id="remove-{{approval.chive}}-buttons-container">
+                                <input id="remove-cancel" class="btn btn-secondary w-25" data-bs-dismiss="modal" value="{% translate 'Cancel' %}"/>
+                                <button id="remove-{{approval.chive}}-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                                <input id="remove-{{approval.chive}}-submit" class="btn btn-primary w-25" type="submit" value="{% translate 'Submit' %}"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="approval-{{approval.id}}-approve" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" id="approval-{{approval.id}}-approve-body">
+                    <div class="modal-header">
+                        <h2 id="approval-{{approval.id}}-approve-header">Confirm Approve</h2>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'fe-approve-as-cocreator' %}" method="post" id="approve-{{approval.id}}-form">
+                            {% csrf_token %}
+                            <input type="hidden" id="approve-chive-{{approval.chive}}-id" name="id" value="{{ approval.id }}">
+                            <input type="hidden" id="approve-chive-{{approval.chive}}-id" name="type" value="{{ approval.type }}">
+                            <p id="approve-chive-{{approval.chive}}-confirm">{% translate 'Are you sure you want to approve yourself as a co-creator of this chive?' %} <strong>{{approval.title}}</strong></p>
+                            <div class="mb-3" id="approve-{{approval.chive}}-buttons-container">
+                                <input id="approve-cancel" class="btn btn-secondary w-25" value="{% translate 'Cancel' %}" data-bs-dismiss="modal"/>
+                                <button id="approve-{{approval.chive}}-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                                <input id="approve-{{approval.chive}}-submit" class="btn btn-primary w-25" type="submit" value="{% translate 'Submit' %}"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
 {% endblock %}

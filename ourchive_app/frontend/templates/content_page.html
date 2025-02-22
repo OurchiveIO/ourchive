@@ -1,11 +1,9 @@
 {% extends 'index.html' %}
 {% block title %}{{ content_page.name }}{% endblock %}
 {% block content %}	
-<div id="content-page-{{content_page.name}}-grid" class="uk-child-width-1-1 uk-text-left ourchive-chive-padding ourchive-content-padding" uk-grid>
-<article id="content-page-{{content_page.name}}-article" class="uk-article">
-    <h1 class="uk-article-title" id="content-page-{{content_page.name}}-header">{{content_page.name}}</h1>
+<div id="content-page-{{content_page.name}}-grid" class="row row-cols-1">
+    <h1 class="h1" id="content-page-{{content_page.name}}-header">{{content_page.name}}</h1>
     <hr/>
     <p id="content-page-{{content_page.name}}-text">{{content_page.content|safe}}</p>
-</article>
 </div>
 {% endblock %}

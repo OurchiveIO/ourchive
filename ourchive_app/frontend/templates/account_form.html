@@ -1,72 +1,73 @@
 {% extends 'index.html' %}
 {% load static %}
 {% load i18n %}
-{% block title %}Edit Account{% endblock %}
+{% block title %}{% translate 'Edit Account' %}{% endblock %}
 {% block content %}
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="account-form-uk-grid" uk-grid>
-        <div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="account-form-parent">
-            <form class="uk-form-horizontal"  method="post" id="accountForm">
-                {% csrf_token %}
-                <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="edit-account-header-parent" uk-grid>
-                    <div class="uk-width-1-2" id="edit-account-header-child">
-                        <span id="edit-account-header-span" class="uk-text-large">Edit Account Information</span>
-                    </div>
-                </div>
-            <hr id="edit-account-hr"/>
-            <fieldset id="edit-account-fieldset" class="uk-fieldset" >
-                <input type="hidden" id="edit-account-user-id" name="id" value="{{ user.id }}">
-                <div id="edit-account-form-parent" class="uk-margin">
-                    <label id="edit-account-email-label" class="uk-form-label" for="edit-account-email-input">Email</label>
-                    <div id="edit-account-email-form-controls" class="uk-form-controls">
-                        <div id="edit-account-email-input-div" class="uk-inline">
-                            <input id="edit-account-email-input" class="uk-input uk-form-width-large" type="email" name="email" value="{{ user.email }}">
-                        </div>
-                    </div>
-                    <div class="uk-margin" id="edit-account-password-confirm-parent">
-                        <label id="edit-account-confirm-password-label" class="uk-form-label" for="edit-account-confirm-password-input">Confirm Password</label>
-                        <div id="edit-account-confirm-password-form-controls" class="uk-form-controls">
-                            <div id="edit-account-confirm-password-input-div" class="uk-inline">
-                                <span id="edit-account-confirm-password-span" class="uk-form-icon uk-form-icon" uk-icon="icon: ourchive-lock;ratio:.75"></span>
-                                <input id="edit-account-confirm-password-input" class="uk-input" type="password" name="password">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="uk-width-1-3 uk-margin-medium-top" id="edit-account-controls-parent">
-                        <input id="edit-account-cancel-button" class="uk-button uk-width-small uk-button-default" onclick="history.back()" value="Cancel" />
-                        <button id="edit-account-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
-                        <input id="edit-account-submit-button" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
-                    </div>
-                </div>
-            </fieldset>
-            </form>
-            <hr id="destructive-account-actions-divider"/>
-            <a class="uk-link uk-button uk-button-secondary" href="/users/{{user.username}}/delete"><span class="uk-text-medium">I want to delete my account</span></a>
-            <a class="uk-link uk-button uk-button-secondary" href="{% url 'password_change' %}"><span class="uk-text-medium">I want to change my password</span></a>
-            <hr id="export-chives-divider"/>
-            <div class="uk-width-1-1" id="export-chives-header-container">
-                <span id="export-chives-header-span" class="uk-text-large">{% translate 'Export Chives' %}</span>
-                <p><span id="export-chives-information" class="uk-text-medium">{% blocktranslate %}To generate a chive export, click below. This data is in beta format (CSVs) and should not be used as a backup for your work. Additionally, to preserve your privacy, please note that only public chives are exported.{% endblocktranslate %}</span></p>
+    <div class="row row-cols-1" id="account-form-parent">
+    <h1>Edit Account Information</h1>
+        <hr id="edit-account-hr"/>
+    </div>
+    <div class="row row-cols-1">
+        <form method="post" class="w-50 mb-3" id="accountForm">
+            {% csrf_token %}
+            <input type="hidden" id="edit-account-user-id" name="id" value="{{ user.id }}">
+            <div id="edit-account-form-parent" class="mb-3">
+                <label id="edit-account-email-label" class="form-label" for="edit-account-email-input">Email</label>
+                <input id="edit-account-email-input" class="form-control" type="email" name="email" value="{{ user.email }}">
             </div>
-            <form class="uk-form-horizontal"  method="post" id="exportForm">
-                {% csrf_token %}
-                <fieldset id="export-chives-fieldset" class="uk-fieldset" >
-                    <input type="hidden" id="export-chives-user-id" name="id" value="{{ user.id }}">
-                    <div id="export-chives-form-parent" class="uk-margin">
-                        <label class="uk-display-block"><input id="export-chives-works-input" class="uk-checkbox" type="checkbox" name="export_works"> {% translate 'Export works' %}</label>
-                        <label class="uk-display-block"><input id="export-chives-bookmarks-input" class="uk-checkbox" type="checkbox" name="export_bookmarks"> {% translate 'Export bookmarks' %}</label>
-                        <label class="uk-display-block"><input id="export-chives-collections-input" class="uk-checkbox" type="checkbox" name="export_collections"> {% translate 'Export collections' %}</label>
-                        <label class="uk-display-block"><input id="export-chives-series-input" class="uk-checkbox" type="checkbox" name="export_series"> {% translate 'Export series' %}</label>
-                        <label class="uk-display-block"><input id="export-chives-anthologies-input" class="uk-checkbox" type="checkbox" name="export_anthologies"> {% translate 'Export anthologies' %}</label>
-                        <div class="uk-width-1-3 uk-margin-medium-top" id="export-chives-controls-parent">
-                            <button id="export-chives-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
-                            <input id="export-chives-submit-button" class="uk-button uk-width-small uk-button-primary" type="submit" formaction="{% url 'fe-export-chives' %}" value="Submit"/>
-                        </div>
-                    </div>
-                </fieldset>
-            </form>
-            {% if user.chive_export_url %}
-                <a class="uk-link" href="{{user.chive_export_url}}"><span class="uk-text-medium">{% translate 'Click to download existing archive' %}</span></a>
-            {% endif %}
+            <div class="mb-3" id="edit-account-password-confirm-parent">
+                <label id="edit-account-confirm-password-label" class="form-label" for="edit-account-confirm-password-input">Confirm Password</label>
+                <div id="edit-account-confirm-password-form-controls" class="input-group">
+                    <input id="edit-account-confirm-password-input" class="form-control" type="password" name="password">
+                    <span id="edit-account-confirm-password-span" class="input-group-text"><i class="bi bi-lock"></i></span>
+                </div>
+            </div>
+            <div class="mb-3" id="edit-account-controls-parent">
+                <input id="edit-account-cancel-button" class="btn btn-secondary w-25" onclick="history.back()" value="Cancel" />
+                <button id="edit-account-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                <input id="edit-account-submit-button" class="btn btn-primary w-25" type="submit" value="Submit"/>
+            </div>
+        </form>
+        <hr id="destructive-account-actions-divider"/>
+        <div>
+            <p><a class="btn btn-danger" href="/users/{{user.username}}/delete">{% translate 'I want to delete my account' %}</a>
+            <a class="btn btn-secondary" href="{% url 'password_change' %}">{% translate 'I want to change my password' %}</a></p>
         </div>
+        <hr id="export-chives-divider"/>
+        <div class="mb-3" id="export-chives-header-container">
+            <p class="fs-5 fw-bold">{% translate 'Export Chives' %}</p>
+            <p>{% blocktranslate %}To generate a chive export, click below. This data is in beta format (CSVs) and should not be used as a backup for your work. Additionally, to preserve your privacy, please note that only public chives are exported.{% endblocktranslate %}</p>
+        </div>
+        <form method="post" id="exportForm">
+            {% csrf_token %}
+                <input type="hidden" id="export-chives-user-id" name="id" value="{{ user.id }}">
+                <div class="mb-3 form-check form-switch">
+                    <input id="export-chives-works-input" class="form-check-input" role="switch" type="checkbox" name="export_works">
+                    <label class="form-check-label" for="export-chives-works-input">{% translate 'Export works' %}</label>
+                </div>
+                <div class="mb-3 form-check form-switch">
+                    <label class="form-check-label" for="export-chives-bookmarks-input"> {% translate 'Export bookmarks' %}</label>
+                    <input id="export-chives-bookmarks-input" class="form-check-input" role="switch" type="checkbox" name="export_bookmarks">
+                </div>
+                <div class="mb-3 form-check form-switch">
+                    <label class="form-check-label" for="export-chives-collections-input"> {% translate 'Export collections' %}</label>
+                    <input id="export-chives-collections-input" class="form-check-input" role="switch" type="checkbox" name="export_collections">
+                </div>
+                <div class="mb-3 form-check form-switch">
+                    <label class="form-check-label" for="export-chives-series-input"> {% translate 'Export series' %}</label>
+                    <input id="export-chives-series-input" class="form-check-input" role="switch" type="checkbox" name="export_series">
+                </div>
+                <div class="mb-3 form-check form-switch">
+                    <label class="form-check-label" for="export-chives-anthologies-input">{% translate 'Export anthologies' %}</label>
+                    <input id="export-chives-anthologies-input" class="form-check-input" role="switch" type="checkbox" name="export_anthologies">
+                </div>
+                <div class="mb-3 w-50" id="export-chives-controls-parent">
+                    <button id="export-chives-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                    <input id="export-chives-submit-button" class="btn btn-primary w-25" type="submit" formaction="{% url 'fe-export-chives' %}" value="Submit"/>
+                </div>
+        </form>
+        {% if user.chive_export_url %}
+            <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{{user.chive_export_url}}">{% translate 'Click to download existing archive' %}</a>
+        {% endif %}
     </div>
 {% endblock %}

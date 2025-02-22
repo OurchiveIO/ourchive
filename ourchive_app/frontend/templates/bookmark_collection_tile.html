@@ -1,38 +1,36 @@
 {% load i18n %}
-<div class="ourchive-work-card uk-box-shadow-small uk-height-large uk-width-1-1" id="collection-{{bookmark_collection.id}}-tile-container">
-    <div class="uk-grid uk-grid-small uk-height-1-1" uk-grid>
-        <div class="uk-width-1-3@m uk-width-1-1@s card-info" id="collection-{{bookmark_collection.id}}-tile-card">
-            <p class="uk-margin-small-bottom"><span id="collection-{{bookmark_collection.id}}-tile-title" class="uk-margin-remove-bottom ourchive-tile-title">
-                <a id="collection-{{bookmark_collection.id}}-tile-title-link" href="{% url 'fe-view-collection' bookmark_collection.id %}" data-testid="collection-tile-title">{{bookmark_collection.title}}</a>
-            </span> </p>
-            <p class="uk-margin-remove-bottom uk-margin-small-top"><span id="collection-{{ bookmark_collection.id }}-creators>">By
-                    {% for user in bookmark_collection.users %}<a id="collection-{{bookmark_collection.id}}-user-link" data-testid="collection-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>
-                        {% if not forloop.last %}, {% endif %}{% empty %}
-                        <a id="collection-{{bookmark_collection.id}}-user-link" data-testid="collection-user-link" href="{% url 'user-profile-parent' bookmark_collection.user_id %}">{{ bookmark_collection.user }}</a>
+<div class="border shadow-sm p-3" id="collection-{{bookmark_collection.id}}-tile-container">
+    <div class="row">
+        <div class="col-md-4 col-12" id="collection-{{bookmark_collection.id}}-tile-card">
+            <p class="mb-2 fs-3"><a class="link-underline link-underline-opacity-0" id="collection-{{bookmark_collection.id}}-tile-title-link" href="{% url 'fe-view-collection' bookmark_collection.id %}" data-testid="collection-tile-title">{{bookmark_collection.title}}</a></p>
+            <p class="fs-4">By
+                    {% for user in bookmark_collection.users %}<a class="link-underline link-underline-opacity-0" id="collection-{{bookmark_collection.id}}-user-link" data-testid="collection-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}
+                        <a class="link-underline link-underline-opacity-0" id="collection-{{bookmark_collection.id}}-user-link" data-testid="collection-user-link" href="{% url 'user-profile-parent' bookmark_collection.user_id %}">{{ bookmark_collection.user }}</a>
                     {% endfor %}
-            </span></p>
-            <p class="uk-margin-remove-bottom uk-margin-small-top"><span class="uk-inline ourchive-muted uk-text-italic" id="collection-metadata-language">{% for language in bookmark_collection.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}
-        {% endfor %}</span></p>
+            </p>
+            <p class="fw-light fst-italic">{% for language in bookmark_collection.languages_readonly %}{{ language.display_name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}</p>
         </div>
-        <div class="uk-width-2-3@m uk-width-1-1@s card-info" id="collection-{{bookmark_collection.id}}-info-card">
-            <div class="uk-grid uk-grid-small uk-child-width-1-1">
-                <div class="uk-height-max-small collection-description-container summary-container" id="show-description-{{ bookmark_collection.id }}">
-                    <p id="collection-{{bookmark_collection.id}}-tile-description-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ bookmark_collection.short_description }}{% endautoescape %}</p>
-                </div>
-                <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleChiveData('{{ bookmark_collection.id }}', 'description', 'collection', '{% translate 'Show More...' %}', '{% translate 'Hide' %}')" id="more-btn-description-{{ bookmark_collection.id }}">{% translate 'Show more...' %}</a>
-                <div class="uk-height-max-small collection-tag-container tag-container uk-margin-small-top" id="show-tags-{{ bookmark_collection.id }}">
+        <div class="col-md-8 col-12 mt-md-0 mt-4" id="collection-{{bookmark_collection.id}}-info-card">
+            <div class="osm-container">
+                <div class="collapse show" id="collection-{{bookmark_collection.id}}-tile-summary-p">{% autoescape off %}{{ bookmark_collection.short_description|truncatechars:500 }}{% endautoescape %}</div>
+                {% if bookmark_collection.short_description|length > 500 %}<div class="collapse" id="collection-{{bookmark_collection.id}}-tile-summary-p">{% autoescape off %}{{ bookmark_collection.short_description }}{% endautoescape %}</div>
+                <a data-bs-toggle="collapse" aria-expanded="false" aria-controls="collection-{{bookmark_collection.id}}-tile-summary-p" id="more-btn-description-{{ bookmark_collection.id }}" class="link-underline link-underline-opacity-0 collapsed" href="#collection-{{bookmark_collection.id}}-tile-summary-p">
+                    <span class="oc-show-more">{% translate '+ Show More' %}</span>
+                    <span class="oc-show-less">{% translate '- Show Less' %}</span>
+                </a>{% endif %}
+                <div class="osm-container" id="show-tags-{{ bookmark_collection.id }}">
                     {% if not bookmark_collection.description %}
                         <hr class="ourchive-hr"/>
                     {% endif %}
                     {% if bookmark_collection.attributes %}{% include "object_attributes.html" with object='bkcol' object_id=bookmark_collection.id attributes=bookmark_collection.attributes %}{% endif %}
                     {% if bookmark_collection.tags %}{% include "tag_partial.html" with obj_name='bk' tags=bookmark_collection.tags %}{% endif %}
                 </div>
-                <a class="show-more-btn uk-text-bold uk-margin-small-top" onclick="toggleChiveData('{{ bookmark_collection.id }}', 'tags', 'collection', '{% translate 'Show More...' %}', '{% translate 'Hide' %}')" id="more-btn-tags-{{ bookmark_collection.id }}">{% translate 'Show more...' %}</a>
             </div>
         </div>
-        <div class="uk-width-1-1 card-metadata" id="collection-{{ bookmark_collection.id }}-list-meta">
-            <!-- language, complete status, updated, chapters, word count, comments, fingerguns -->
-            {% include 'bookmark_collection_metadata.html' %}
-        </div>
+    </div>
+    <div class="row row-cols-1" id="collection-{{ bookmark_collection.id }}-list-meta">
+        <!-- language, complete status, updated, chapters, word count, comments, fingerguns -->
+        {% include 'bookmark_collection_metadata.html' %}
     </div>
 </div>

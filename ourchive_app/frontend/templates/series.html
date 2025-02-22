@@ -3,36 +3,29 @@
 {% load static %}
 {% load i18n %}
 {% block content %}
-    <script>
-        window.addEventListener("load", function() {
-            initShowMores('series', 'series-tag-container', 'series-description-container', 'tags', 'description');
-        });
-    </script>
-<div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="series-uk-grid" uk-grid>
-    <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center uk-width-1-1">{% include "series_tile.html" %}</div>
-    {% if series.owner %}
-        <div class="uk-width-1-1 uk-text-right uk-margin-small-top">
-            <a id="series-edit-link" class="ourchive-icon-wrapper" href="{% url 'fe-edit-series' series.id %}"><span uk-icon="icon: ourchive-edit; ratio: 1" title="Edit"></span></a>
-            <a id="series-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #series-{{series.id}}-modal-delete"><span title="Delete" uk-icon="icon: ourchive-delete; ratio: 1"></span></a>
-        </div>
-    {% endif %}
-    <div class="uk-width-1-1 uk-margin-bottom uk-margin-top uk-padding-remove ourchive-read-div" id="series-slideshow-parent">
-        {% if series.works_readonly %}
-        <div id="series-parent-sm">
-            <span class="uk-text-lead">{% translate 'Works' %}</span>
-            <ul class="uk-list uk-list-sriped">
-            {% for work in series.works_readonly %}
-                <li class="ourchive-mobile-list uk-padding-small uk-margin-small-top uk-margin-small-bottom">
-                    <span class="uk-inline uk-text-medium"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> by {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
-                    {% if work.summary %}
-                        <div class="uk-margin-left uk-margin-small-top uk-width-expand ourchive-collection-sm-desc">{{work.summary|safe}}</div>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-        </div>
-        {% endif %}
+{% include "series_tile.html" %}
+{% if series.owner %}
+    <div class="row row-cols-1 m-2">
+        <p>
+        <a id="series-edit-link" title="{% translate 'Edit' %}" class="link link-underline-opacity-0" href="{% url 'fe-edit-series' series.id %}"><i class="bi bi-pencil"></i></a>
+        <a id="series-delete-link" title="{% translate 'Delete' %}" class="link link-underline-opacity-0" href="#" data-bs-toggle="modal" data-bs-target="#series-{{series.id}}-modal-delete"><i class="bi bi-trash"></i></a>
+        </p>
     </div>
-    {% include "delete_modal.html" with object='series' object_friendly='series' object_id=series.id %}
+{% endif %}
+{% if series.works_readonly %}
+<div id="series-parent-sm" class="row row-cols-1 m-2">
+    <p class="fs-3">{% translate 'Works' %}</p>
+    <ul class="list-group">
+        {% for work in series.works_readonly %}
+            <li class="list-group-item">
+                <p><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> by {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</p>
+                {% if work.summary %}
+                    <p class="mt-3">{{work.summary|safe}}</p>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
 </div>
+{% endif %}
+{% include "delete_modal.html" with object='series' object_friendly='series' object_id=series.id %}
 {% endblock %}

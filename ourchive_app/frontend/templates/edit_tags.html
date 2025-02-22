@@ -1,53 +1,27 @@
 {% load i18n %} 
-{% if show_header != False %}<h3 id="obj-tags-form-header">{{ object_friendly|default_if_none:'' }} Tags <sup uk-icon="icon: ourchive-help;ratio:.75"></sup></h3>{% endif %}
+{% if show_header != False %}
+    <h3 id="obj-tags-form-header">{{ object_friendly|default_if_none:'' }} Tags <sup><a title="{% translate 'Tags help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#tags-help-text"><i class="bi bi-question-circle"></i></a></sup></h3>
+    <div class="collapse mb-3" id="tags-help-text">{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your anthology, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
+{% endif %}
 {% for type, tag_data in tags.items %}
     {% if tag_data.admin_administrated %}
-        <div class="uk-margin" id="{{ object }}-form-tag-parent">
-            <label id="{{ object }}-form-tag-type-label" class="uk-form-label" for="{{ tag_data.type_name }}_tags">{{ type }} <sup class="uk-margin-small-left">(admin)</sup>    
-                <div class="uk-card uk-card-body uk-card-default" uk-drop title="Admin-Administrated Tag">{% blocktranslate %}This tag type is administrated by your site admin(s). This means that you can select an existing {{ type }}, but cannot create a new one.{% endblocktranslate %}</div>
-            </label>
-            <div id="{{ object }}-form-tag-controls" class="uk-form-controls">                
-                <div id="{{ object }}-form-tag-inline" class="uk-inline">
-                    <div id="{{ tag_data.type_name }}_tags">
-                    {% if tag_data.tags %}
-                        {% for single_tag in tag_data.tags %}
-                            <input type="hidden" id="tags{{ divider }}{{ single_tag.id }}{{ divider }}{{ tag_data.type_name }}" name="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}" value="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}">
-                            <div class="uk-margin-small uk-inline"><span class="uk-button-primary uk-border-rounded ourchive-tag-list" id="tags{{ divider }}{{ single_tag.id }}{{ divider }}{{ tag_data.type_name }}{{ divider }}txt">{{ single_tag.display_text }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removetag('{{single_tag.id}}', '{{ tag_data.type_name }}', '{{ divider }}')" id="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}{{ divider }}delete"></span></span></div>
-                        {% endfor %}
-                        {% else %}
-                        <span class="uk-text-medium" id="no-tag-prompt-{{ tag_data.type_name }}">No tags yet. Add some below.</span>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="uk-margin-top ourchive-tag-entry-{{ tag_data.type_name }}">
-                    <input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="Search for tags..." id="{{ tag_data.type_name }}_new_tag" oninput="doAdminAutocomplete(this.value, 'edit', '{{ tag_data.type_name }}', '{{ tag_data.type_name }}', '{{ divider }}')">
-                    <div id="tag-autocomplete-dropdown-{{ tag_data.type_name }}" uk-drop="boundary: !.ourchive-tag-entry-{{ tag_data.type_name }}"></div>
-                </div>
-            </div>
+        <div class="mb-3 ourchive-tag-entry-{{ tag_data.type_name }}">
+            <label id="{{ object }}-form-tag-type-label" class="form-label" for="{{ tag_data.type_name }}_new_tag">{{ type }} <sup><a title="{% translate 'Locked tags help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#locked-tags-help-text"><i class="bi bi-lock"></i></a></sup></label>
+            <div class="collapse mb-3" id="locked-tags-help-text">{% blocktranslate %}This tag type is administrated by your site admin(s). This means that you can select an existing {{ type }}, but cannot create a new one.{% endblocktranslate %}</div>
+            <select multiple name="{{ tag_data.type_name }}_tags[]" id="{{ tag_data.type_name }}_new_tag" class="form-select oc-searchable-tags" data-tag-type="{{ type }}">
+                {% for single_tag in tag_data.tags %}
+                    <option value="{{single_tag.text}}" selected>{{single_tag.display_text}}</option>
+                {% endfor %}
+            </select>
         </div>
     {% else %}
-        <div class="uk-margin" id="{{ object }}-form-tag-parent">
-            <label id="{{ object }}-form-tag-type-label" class="uk-form-label" for="{{ tag_data.type_name }}_tags">{{ type }}</label>
-            <div id="{{ object }}-form-tag-controls" class="uk-form-controls">                
-                <div id="{{ object }}-form-tag-inline" class="uk-inline">
-                    <div id="{{ tag_data.type_name }}_tags">
-                    {% if tag_data.tags %}
-                        {% for single_tag in tag_data.tags %}
-                            <input type="hidden" id="tags{{ divider }}{{ single_tag.id }}{{ divider }}{{ tag_data.type_name }}" name="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}" value="tags{{ divider }}{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}">
-                            <div class="uk-margin-small uk-inline"><span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="tags{{ divider }}{{ single_tag.id }}{{ divider }}{{ tag_data.type_name }}{{ divider }}txt">{{ single_tag.display_text }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removetag('{{single_tag.id}}', '{{ tag_data.type_name }}', '{{ divider }}')" id="tags_{{ single_tag.text }}{{ divider }}{{ tag_data.type_name }}{{ divider }}delete"></span></span></div>
-                        {% endfor %}
-                        {% else %}
-                        <span class="uk-text-medium" id="no-tag-prompt-{{ tag_data.type_name }}">No tags yet. Add some below.</span>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="uk-margin-top">
-                    <div><input autocomplete="off" pattern="^[a-zA-Z0-9]+$" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry" type="text" placeholder="New tag..." id="{{ tag_data.type_name }}_new_tag" onkeyup="tagCheck(event, '{{ tag_data.type_name }}', false, '{{ divider }}')" oninput="doAutocomplete(this.value, 'edit', '{{ tag_data.type_name }}', '{{ tag_data.type_name }}', '{{ divider }}')"> <span title="Add tag for {{ type }}" uk-icon="icon:ourchive-add;ratio:.6" onclick="tagCheck(event, '{{ tag_data.type_name }}', true, '{{ divider }}')"></span>
-                        <div class="uk-card-small" id="tag-autocomplete-dropdown-{{ tag_data.type_name }}" uk-drop="target: #{{ tag_data.type_name }}_new_tag"></div>
-                    </div>
-                    
-                </div>
-            </div>
+        <div class="mb-3" id="{{ object }}-form-tag-parent">
+            <label id="{{ object }}-form-tag-type-label" class="form-label" for="{{ tag_data.type_name }}_new_tag">{{ type }}</label>
+            <select multiple name="{{ tag_data.type_name }}_tags[]" id="{{ tag_data.type_name }}_new_tag" class="form-select oc-searchable-tags" data-tag-type="{{ type }}">
+                {% for single_tag in tag_data.tags %}
+                    <option value="{{single_tag.text}}" selected>{{ single_tag.display_text }}</option>
+                {% endfor %}
+            </select>
         </div>
     {% endif %}
 {% endfor %}

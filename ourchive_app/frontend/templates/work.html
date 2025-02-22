@@ -1,85 +1,82 @@
 {% extends 'index.html' %}
 {% load i18n %}
 {% load static %}
-{% block title %}Work - {{ work.title }}{% endblock %}
+{% block title %}{{ work.title }}{% endblock %}
 {% block content %}
-    <div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="work-uk-grid" uk-grid>
-            <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center uk-width-auto">{% include "work_tile.html" %}</div>
-            {% if work.chapter_count > 1 %}
-                <div id="chapters-select" class="uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">
-                    <select id="work-chapter-select" onchange="updateChapter('{{ chapters.0.id }}', '{{ chapters.0.number }}', '{{ work.id }}')" class="uk-select uk-width-medium" aria-label="{% translate 'Chapters' %}">
-                        {% if view_full %}
-                            <option value="-1">{% translate 'View By Chapter' %}</option><span id="work-view-by-chapter-span"></span> </a>
-                        {% else %}
-                            <option value="-2">{% translate 'View Full' %}</option>
-                        {% endif %}
-                        {% for work_chapter in work.chapters %}
-                            <option value="{{ work_chapter.id }},{{ work_chapter.number }}" {% if chapters.0 and chapters.0.id == work_chapter.id %}selected{% endif %}>{% if work_chapter.number %}{% translate 'Chapter' %} {{ work_chapter.number }}{% if work_chapter.title %}: {% endif %}{% endif %}{{ work_chapter.title|default:'' }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            {% endif %}
-            <div id="work-controls-parent" class="uk-text-right uk-align-right {% if work.chapter_count > 1 %}uk-width-1-2@m{% else %}uk-width-1-1@m{% endif %} uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right">
+    <div class="row row-cols-1 mb-3">{% include "work_tile.html" %}</div>
+    <div id="chapters-select" class="row mb-3">
+        <div class="col-md-3 col-6">{% if work.chapter_count > 1 %}
+            <select id="work-chapter-select" onchange="updateChapter('{{ chapters.0.id }}', '{{ chapters.0.number }}', '{{ work.id }}')" class="form-select" aria-label="{% translate 'Chapters' %}">
+                {% if view_full %}
+                    <option value="-1">{% translate 'View By Chapter' %}</option>
+                {% else %}
+                    <option value="-2">{% translate 'View Full' %}</option>
+                {% endif %}
+                {% for work_chapter in work.chapters %}
+                    <option value="{{ work_chapter.id }},{{ work_chapter.number }}" {% if chapters.0 and chapters.0.id == work_chapter.id %}selected{% endif %}>{% if work_chapter.number %}{% translate 'Chapter' %} {{ work_chapter.number }}{% if work_chapter.title %}: {% endif %}{% endif %}{{ work_chapter.title|default:'' }}</option>
+                {% endfor %}
+            </select>
+        {% endif %}</div>
+        <div id="work-controls-parent" class="col-md-9 col-6">
+            <p class="text-end">
                 {% if work.owner %}
-                    {% if work.has_drafts %}<a id="work-publish-all-link" href="/works/{{ id }}/publish-full" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-publish; ratio: 1" title="{% translate 'Publish All' %}"></span> </a>{% endif %}
-                    <a class="ourchive-icon-wrapper" id="work-edit-link" href="/works/{{ id }}/edit"><span uk-icon="icon: ourchive-edit; ratio: 1" title="{% translate 'Edit' %}"></span></a>
-                    <a class="ourchive-icon-wrapper" id="work-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete"><span uk-icon="icon: ourchive-delete; ratio: 1" title="{% translate 'Delete' %}"></span></a>
-                    {% include "delete_modal.html" with object='work' object_id=work.id %}
+                    {% if work.has_drafts %}<a id="work-publish-all-link" href="/works/{{ id }}/publish-full" class="link-underline link-underline-opacity-0" title="{% translate 'Publish All' %}"><i class="bi bi-megaphone"></i></a>{% endif %}
+                    <a class="link-underline link-underline-opacity-0" id="work-edit-link" title="{% translate 'Edit' %}" href="/works/{{ id }}/edit"><i class="bi bi-pencil"></i></a>
+                        <a class="link-underline link-underline-opacity-0" id="work-delete-link" title="{% translate 'Delete' %}" href="#" data-bs-toggle="modal" data-bs-target="#work-{{work.id}}-modal-delete"><i class="bi bi-trash"></i></a>
+
                 {% endif %}
-                {% if not work.draft %}<a class="ourchive-icon-wrapper" title="Add to collection" id="bookmark-collection-link" uk-toggle="target: #bookmark-add-collection-modal"><span uk-icon="icon: ourchive-add;ratio:.75"></span> </a>{% endif %}
-                {% include "bookmark_collection_modal.html" %}
-                {% if not work.draft %}<a id="work-bookmark-link" class="ourchive-icon-wrapper" href="/bookmarks/new/{{ id }}?title={{ work.title }}"><span id="work-bookmark-span" uk-icon="icon: ourchive-bookmark;ratio: 1" title="{% translate 'Bookmark' %}"></span> </a>{% endif %}
-                <a id="work-fingerguns-link" href="/fingerguns/{{ id }}" class="ourchive-icon-wrapper"><span id="work-fingerguns-span" uk-icon="icon: ourchive-like; ratio: 1" title="{% translate 'Fingerguns' %}"></span> </a>
-                <div class="uk-inline">
-                    <a id="work-download-drop" class="ourchive-icon-wrapper" href="#"><span uk-icon="icon: ourchive-download;ratio:.75" title="{% translate 'Download' %}" id="work-download-span"></span> </a>
-                    <div class="uk-card uk-card-body uk-card-default uk-text-left" uk-drop>
-                        <ul class="uk-list uk-list-divider">
-                            {% if work.preferred_download_url and work.preferred_download_url != "None" %}<li><a href="{{ work.preferred_download_url }}">{{ work.preferred_download }} - Creator's Preferred</a></li>{% endif %}
-                            <li><a href="{% if work.epub_url %}{{work.epub_url}}{% else %}{% url 'export-work' work.id 'epub' %}{% endif %}">EPUB</a></li>
-                            <li><a href="{% if work.zip_url %}{{work.zip_url}}{% else %}{% url 'export-work' work.id 'zip' %}{% endif %}">ZIP</a></li>
-                        </ul>
-                    </div>
-                    {% if view_full %}
-                    <a id="jump-to-comments" href="#chapter-{{ work.last_chapter_id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: 1" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
-                    {% else %}
-                    <a id="jump-to-comments" href="#chapter-{{ chapters.0.id }}-comments-include" class="ourchive-icon-wrapper"><span uk-icon="icon: ourchive-comments;ratio: 1" title="{% translate 'Comments' %}" id="chapter-comments-span"></span></a>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="uk-width-1-1 uk-text-center uk-margin-remove-top uk-padding-remove-horizontal" id="work-header-parent">
-                <h3 id="work-title-h3"><a class="uk-link" id="work-title-link" href="/works/{{ id }}">{{ work.title }}</a></h3>
-                {% if work.draft %}
-                <div class="uk-width-auto" id="work-draft-div">
-                    <span id="work-draft-span" class="uk-label uk-label-warning"><strong>DRAFT</strong></span>
-                </div>
+                {% if not work.draft %}<a class="link-underline link-underline-opacity-0" title="{% translate 'Add to collection' %}" id="bookmark-collection-link" href="#" data-bs-toggle="modal" data-bs-target="#bookmark-add-collection-modal"><i class="bi bi-plus-lg"></i></a>{% endif %}
+                {% if not work.draft %}<a class="link-underline link-underline-opacity-0" id="work-bookmark-link" href="/bookmarks/new/{{ id }}?title={{ work.title }}" title="{% translate 'Bookmark' %}"><i class="bi bi-bookmark"></i></a>{% endif %}
+                <a id="work-fingerguns-link" href="/fingerguns/{{ id }}" title="{% translate 'Fingerguns' %}" class="link-underline link-underline-opacity-0"><i id="work-fingerguns-span" class="bi bi-hand-thumbs-up"></i> </a>
+                <a id="work-download-drop" title="{% translate 'Download' %}" class="link-underline link-underline-opacity-0" data-bs-toggle="collapse" data-bs-target="#download-options" aria-controls="download-options" aria-expanded="false"><i class="bi bi-download"></i></a>
+
+                {% if view_full %}
+                <a class="link-underline link-underline-opacity-0" id="jump-to-comments" title="{% translate 'Comments' %}" href="#chapter-{{ work.last_chapter_id }}-comments-include"><i class="bi bi-chat-left-text"></i></a>
+                {% else %}
+                <a class="link-underline link-underline-opacity-0" id="jump-to-comments" title="{% translate 'Comments' %}" href="#chapter-{{ chapters.0.id }}-comments-include"><i class="bi bi-chat-left-text"></i></a>
                 {% endif %}
+            </p>
+            <div id="download-options" class="collapse justify-end">
+                <ul class="list-group">
+                    {% if work.preferred_download_url and work.preferred_download_url != "None" %}<li class="list-group-item"><a class="link link-underline-opacity-0" href="{{ work.preferred_download_url }}">{{ work.preferred_download }} - {% translate "Creator's Preferred" %}</a></li>{% endif %}
+                    <li class="list-group-item"><a href="{% if work.epub_url %}{{work.epub_url}}{% else %}{% url 'export-work' work.id 'epub' %}{% endif %}">{% translate 'EPUB' %}</a></li>
+                    <li class="list-group-item"><a href="{% if work.zip_url %}{{work.zip_url}}{% else %}{% url 'export-work' work.id 'zip' %}{% endif %}">{% translate 'ZIP' %}</a></li>
+                </ul>
             </div>
-            <div id="work-intro-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid uk-padding-remove-horizontal" uk-grid>
-                {% if work.notes %}
-                    <div id="work-notes-div" class="uk-margin-large-left ourchive-blockquote">
-                        <p><span id="work-notes-span" class="uk-text-bold">Notes</span></p>
-                        <p><span id="work-notes-text-span" class="uk-text-medium">{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</span></p>
-                    </div>
-                {% endif %} 
-            </div>
-            <div id="work-chapter-hr-grid" class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" uk-grid><div><hr class="ourchive-hr" id="work-chapter-hr"/></div></div>
-            <div id="chapter-grid-parent" class="uk-width-1-1 uk-padding-remove-horizontal">
-                {% if chapter %} 
-                    {% include "chapter.html" %}  
-                {% elif chapters %}
-                    {% for chapter in chapters %}
-                        {% include "chapter.html" %}
-                        {% if view_full and work.chapter_count > 1 and not forloop.last %}<div id="chapter-divider" class="uk-margin-top uk-margin-bottom"><hr class="ourchive-hr" id="chapter-view-full-hr"/></div>{% endif %}
-                    {% endfor %}  
-                {% endif %}
-            </div>
-        {% if scroll_comment_id %}
-            <script>
-                window.onload = function(){
-                    document.getElementById("chapter-comment-{{scroll_comment_id}}-icon-div").scrollIntoView();
-                }
-            </script>
-        {% endif %}
-        <script src="{% static 'frontend/js/ourchive-works.js' %}"></script>
+        </div>
     </div>
+    <div class="row row-cols-1 mb-3" id="work-header-parent">
+        <h3 id="work-title-h3"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="work-title-link" href="/works/{{ id }}">{{ work.title }}</a></h3>
+        {% if work.draft %}
+        <p><span id="work-draft-span" class="badge text-bg-secondary"><strong>{% translate 'DRAFT' %}</strong></span></p>
+        {% endif %}
+    </div>
+        {% if work.notes %}
+            <div id="work-intro-grid" class="row mb-3">
+                <div class="col-11 offset-1 border-start">
+                    <p class="fw-bold">{% translate 'Notes' %}</p>
+                    <p>{% autoescape off %}{{ work.notes|default_if_none:'' }}{% endautoescape %}</p>
+                </div>
+            </div>
+        {% endif %}
+    <div id="chapter-grid-parent" class="border-top">
+        {% if chapter %}
+            {% include "chapter.html" %}
+        {% elif chapters %}
+            {% for chapter in chapters %}
+                {% include "chapter.html" %}
+                {% if view_full and work.chapter_count > 1 and not forloop.last %}<div id="chapter-divider" class="uk-margin-top uk-margin-bottom"><hr class="ourchive-hr" id="chapter-view-full-hr"/></div>{% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+{% if scroll_comment_id %}
+    <script>
+        window.onload = function(){
+            document.getElementById("chapter-comment-{{scroll_comment_id}}-header").scrollIntoView();
+        }
+    </script>
+{% endif %}
+    {% include "delete_modal.html" with object='work' object_id=work.id %}
+    {% include "bookmark_collection_modal.html" %}
+<script src="{% static 'frontend/js/ourchive-works.js' %}"></script>
 {% endblock %}

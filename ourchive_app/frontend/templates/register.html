@@ -1,9 +1,9 @@
 {% extends 'index.html' %}
 {% load i18n %}
 {% load cache %}
-{% block title %}Register{% endblock %}
-{% block content %}	
-<div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="register-uk-grid" uk-grid>
+{% block title %}{% translate 'Register' %}{% endblock %}
+{% block content %}
+
 {% if permit_registration %}
 <script>
     async function checkUsername(username) {
@@ -18,9 +18,10 @@
         var anyFalse = false;
         mandatoryAgrees.forEach((agreement) => {
             if (agreement.checked != true) {
-                document.getElementById("register-agree-"+agreement.name+"-checkbox").classList.add("uk-form-danger");
+                document.getElementById("register-agree-"+agreement.name+"-errors").classList.add("invalid-feedback");
                 document.getElementById("register-agree-"+agreement.name+"-errors").innerHTML = "{% translate 'You must agree to this item.' %}";
                 document.getElementById("register-agree-"+agreement.name+"-errors").style.visibility = "visible";
+                document.getElementById("register-agree-"+agreement.name+"-errors").style.display = "block";
                 anyFalse = true;
             }
         });
@@ -30,100 +31,86 @@
         var username = document.getElementById("register-user-name-input").value;
         checkUsername(username).then((username_exists) => {
             if (username_exists) {
-                document.getElementById("register-user-name-input").classList.add("uk-form-danger");
+                document.getElementById("register-user-name-input-errors").classList.add("invalid-feedback");
                 document.getElementById("register-user-name-input-errors").innerHTML = "{% translate 'Username exists, please choose another.' %}";
                 document.getElementById("register-user-name-input-errors").style.visibility = "visible";
+                document.getElementById("register-user-name-input-errors").style.display = "block";
                 return false;
             }
             var password = document.getElementById("register-password-input").value;
             var confirmedPassword = document.getElementById("register-confirm-password-input").value;
             if (password != confirmedPassword) {
-                document.getElementById("register-password-input").classList.add("uk-form-danger");
+                document.getElementById("register-password-input-errors").classList.add("invalid-feedback");
                 document.getElementById("register-password-input-errors").innerHTML = "Passwords must match.";
                 document.getElementById("register-password-input-errors").style.visibility = "visible";
+                document.getElementById("register-password-input-errors").style.display = "block";
                 return false;
             }
             event.target.submit();
         });  
     }
 </script>
-<form class="uk-form-horizontal"  method="post" onsubmit="return validateForm(event)" id="register-form">
+<form method="post" onsubmit="return validateForm(event)" id="register-form">
 	{% csrf_token %}
     <input id="invite-code-hidden-id" type="hidden" name="invite_code" value="{{ invite_code }}"/>
-    <div class="uk-margin" id="register-username-parent">
-    	<label id="register-username-label" class="uk-form-label" for="register-user-name-inputt">Username</label>
-        <div class="uk-form-controls" id="register-user-controls">
-            <div><span class="uk-text-small uk-text-danger" id="register-user-name-input-errors"></span></div>
-            <div class="uk-inline" id="register-user-input-parent">
-	            <span class="uk-form-icon" uk-icon="icon: ourchive-user;ratio:.75" id="register-user-icon"></span>
-	            <input class="uk-input" type="text" maxlength="150" name="username" id="register-user-name-input" required {% if username%}value="{{username}}"{%endif%}>
-	        </div>
+    <div class="mb-3" id="register-username-parent">
+    	<label id="register-username-label" class="form-label" for="register-user-name-input">{% translate 'Username' %}</label>
+        <div class="input-group" id="register-user-controls">
+            <span class="input-group-text" id="register-user-icon"><i class="bi bi-person"></i></span>
+            <input class="form-control" type="text" maxlength="150" name="username" id="register-user-name-input" required {% if username%}value="{{username}}"{%endif%}>
+        </div>
+        <div id="register-user-name-input-errors"></div>
+    </div>
+
+    <div class="mb-3" id="register-email-parent">
+        <label id="register-email-label" class="form-label" for="register-email-input">{% translate 'Email' %}</label>
+        <div id="register-email-controls" class="input-group">
+            <span class="input-group-text" id="register-email-icon"><i class="bi bi-envelope"></i></span>
+            <input class="form-control" type="email" name="email" id="register-email-input" required {% if email%}value="{{email}}"{%endif%}>
         </div>
         
     </div>
 
-    <div class="uk-margin" id="register-email-parent">
-        <label id="register-email-label" class="uk-form-label" for="register-email-input">Email</label>
-        <div id="register-email-controls" class="uk-form-controls">
-            <div class="uk-inline" id="register-email-input-parent">
-                <span class="uk-form-icon" uk-icon="icon: ourchive-mail;ratio:.75" id="register-email-icon"></span>
-                <input class="uk-input" type="email" name="email" id="register-email-input" required {% if email%}value="{{email}}"{%endif%}>
-            </div>
+    <div class="mb-3" id="register-password-parent">
+    	<label id="register-password-label" class="form-label" for="register-password-input">{% translate 'Password' %}</label>
+        <div class="input-group" id="register-password-input-parent">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input class="form-control" type="password" name="password" id="register-password-input" pattern=".{8,50}" title="{% translate 'Password must be 8-50 characters.' %}" required>
         </div>
-        
+        <div id="register-password-input-errors"></div>
     </div>
-
-    <div class="uk-margin" id="register-password-parent">
-    	<label id="register-password-label" class="uk-form-label" for="register-password-input">Password</label>
-        <div id="register-password-controls" class="uk-form-controls">
-            <div><span class="uk-text-small uk-text-danger" id="register-password-input-errors"></span></div>
-	        <div class="uk-inline" id="register-password-input-parent">
-	            <span class="uk-form-icon uk-form-icon" uk-icon="icon: ourchive-lock;ratio:.75" id="register-password-icon"></span>
-	            <input class="uk-input" type="password" name="password" id="register-password-input" pattern=".{8,50}" title="Password must be 8-50 characters." required>
-	        </div>
-	    </div>
-    </div>
-    <div class="uk-margin" id="register-confirm-password-parent">
-        <label id="register-confirm-password-label" class="uk-form-label" for="register-confirm-password-input">Confirm Password</label>
-        <div id="register-confirm-password-controls" class="uk-form-controls">
-            <div class="uk-inline" id="register-confirm-password-input-parent">
-                <span class="uk-form-icon uk-form-icon" uk-icon="icon: ourchive-lock;ratio:.75" id="register-confirm-password-icon"></span>
-                <input class="uk-input" type="password" name="confirm-password" id="register-confirm-password-input" required>
-            </div>
+    <div class="mb-3" id="register-confirm-password-parent">
+        <label id="register-confirm-password-label" class="form-label" for="register-confirm-password-input">{% translate 'Confirm Password' %}</label>
+        <div id="register-confirm-password-controls" class="input-group">
+            <span class="input-group-text" id="register-confirm-password-icon"><i class="bi bi-lock"></i></span>
+            <input class="form-control" type="password" name="confirm-password" id="register-confirm-password-input" required>
         </div>
     </div>
     {% for page in mandatory_agree_pages.results %}
-        <div class="uk-margin" id="register-agree-{{page.id}}">
-            <label id="register-agree-{{ page.id }}-label" class="uk-form-label" for="register-agree-{{ page.id }}-controls">{{ page.name }}</label>
-            <div id="register-agree-{{ page.id }}-controls" class="uk-form-controls">
-                <div class="uk-inline" id="register-agree-{{ page.id }}-input-parent">
-                    <div><span class="uk-text-small uk-text-danger" id="register-agree-{{ page.id }}-errors"></span></div>
-                    <input class="uk-checkbox uk-inline register-mandatory-agree" type="checkbox" title="Agree to {{ page.name }}" id="register-agree-{{ page.id }}-checkbox" name="{{ page.id }}"/>
-                    <label id="register-agree-{{ page.id }}-attr-label" class="uk-margin-small-left" for="register-agree-{{ page.id }}-checkbox">{% blocktranslate %}I have read and agree with the {% endblocktranslate %}<a title="{{ page.name }} link" target="_blank" href="{% url 'fe-content-page' page.id %}">{{ page.name }}</a>.</label>
-                </div>
+        <div class="mb-3" id="register-agree-{{page.id}}">
+            <label id="register-agree-{{ page.id }}-label" class="form-label" for="register-agree-{{ page.id }}-controls">{{ page.name }}</label>
+            <div id="register-agree-{{ page.id }}-controls" class="form-check">
+                <input class="form-check-input register-mandatory-agree" type="checkbox" title="Agree to {{ page.name }}" id="register-agree-{{ page.id }}-checkbox" name="{{ page.id }}"/>
+                <label id="register-agree-{{ page.id }}-attr-label" class="form-check-label" for="register-agree-{{ page.id }}-checkbox">{% blocktranslate %}I have read and agree with the {% endblocktranslate %}<a title="{{ page.name }} link" target="_blank" href="{% url 'fe-content-page' page.id %}">{{ page.name }}</a>.</label>
             </div>
+            <div id="register-agree-{{ page.id }}-errors"></div>
         </div>
     {% endfor %}
-    <div class="uk-margin uk-form-controls" id="of-age-confirm-parent">
-        <span id="of-age-confirm-child" class="uk-text-small">{% translate 'By signing up, you affirm you are at least 13 years of age.' %}</span>
+    <div class="mb-3" id="of-age-confirm-parent">
+        <p id="of-age-confirm-child"><small>{% translate 'By signing up, you affirm you are at least 13 years of age.' %}</small></p>
     </div>
-    <div class="uk-margin" id="register-submit-parent">
-    	<label id="register-submit-label" class="uk-form-label" for="register-submit-button"></label>
-        <div class="uk-form-controls" id="register-submit-controls">
-        	<div class="uk-inline" id="register-submit-input-parent">
-	    		<input id="register-submit-button" class="uk-button uk-button-default" type="submit" value="Register"/>
-	    	</div>
-        </div>
-    	
+    <div class="mb-3" id="register-submit-parent">
+    	<label id="register-submit-label" class="form-label" for="register-submit-button"></label>
+        <input id="register-submit-button" class="btn btn-primary" type="submit" value="Register"/>
     </div>
 </form>
 {% else %}
 {% cache 43200 registration-not-permitted %}
 <div>
-    <p><span id="registration-not-permitted-lead" class="uk-text-lead">Registration Not Permitted</span></p>
-    <p><span id="registration-not-permitted-message" class="uk-text-medium">We're sorry, registration is not permitted at this time. You can still browse as an anonymous user.</span></p>
+    <p><span id="registration-not-permitted-lead" class="fs-3">{% translate 'Registration Not Permitted' %}</span></p>
+    <p><span id="registration-not-permitted-message">{% blocktranslate %}We're sorry, registration is not permitted at this time. You can still browse as an anonymous user.{% endblocktranslate %}</span></p>
 </div>
 {% endcache %}
 {% endif %}
-</div>
+
 {% endblock %}

@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
@@ -7,7 +9,7 @@ from django.contrib import messages
 from core.models import Language
 from .search_models import SearchObject
 from html import escape, unescape
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, JsonResponse
 import logging
 from frontend.api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from django.utils.translation import gettext as _
@@ -847,11 +849,7 @@ def tag_autocomplete(request):
 	tags = response.response_data['results']
 	for tag in tags:
 		tag['display_text_clean'] = tag['display_text'].replace("'", "\\'")
-	return render(request, template, {
-		'tags': tags,
-		'divider': settings.TAG_DIVIDER,
-		'fetch_all': params['fetch_all'],
-		'click_action': request.GET.get('click_action', None)})
+	return JsonResponse({'tags': tags})
 
 
 def language_autocomplete(request):
@@ -2177,7 +2175,8 @@ def edit_anthology(request, pk):
 			'divider': settings.TAG_DIVIDER,
 			'anthology': anthology,
 			'tags': tags,
-			'languages': languages})
+			'languages': languages,
+			'remove_work_msg': _('Are you sure you want to remove this work from the anthology?')})
 	else:
 		anthology_dict = get_anthology_obj(request)
 		work_ids = get_work_order_nums(anthology_dict, 'sort_order')

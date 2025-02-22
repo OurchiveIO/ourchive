@@ -2,17 +2,10 @@
 {% load i18n %}
 {% block title %}{% translate 'Series' %}{% endblock %}
 {% block content %}
-    <script>
-        window.addEventListener("load", function() {
-            initShowMores('series', 'series-tag-container', 'series-description-container', 'tags', 'description');
-        });
-    </script>
-    <div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-grid" id="series-uk-grid" uk-grid>
-        {% if user_filter %}
-            <div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="series-list-user-filter-parent">
-                <h1 id="series-list-user-h1" class="uk-heading-line uk-text-center"> <span id="user_series_header">{% blocktranslate with user=user_filter %}Series by {{ user }}{% endblocktranslate %}</span> </h1>
-            </div>
-        {% endif %}
-        <div class="uk-padding-remove-horizontal uk-width-expand" uk-height-viewport="expand: true">{% include 'series_list_body.html' %}</div>
-    </div>
+    {% if user_filter %}
+        <div class="row row-cols-1" id="series-list-user-filter-parent">
+            <h1 id="series-list-user-h1" class="h1"> <span id="user_series_header">{% blocktranslate with user=user_filter %}Series by {{ user }}{% endblocktranslate %}</span> </h1>
+        </div>
+    {% endif %}
+    {% include 'series_list_body.html' %}
 {% endblock %}

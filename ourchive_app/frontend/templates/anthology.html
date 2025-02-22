@@ -3,37 +3,32 @@
 {% load i18n %}
 {% block title %}{{ anthology.title }} - {% translate 'Anthology' %}{% endblock %}
 {% block content %}
-<div class="uk-grid uk-grid-small ourchive-content-padding uk-padding-remove-horizontal ourchive-read-div ourchive-chive-grid" id="anthology-uk-grid" uk-grid>
     {% if anthology.header_url %}
-    <div class="uk-width-auto uk-margin-small-top uk-align-center" id="anthology-{{anthology.id}}-header-img-parent">
-        <img class="anthology-header" alt="{{anthology.header_alt_text}}" src="{{anthology.header_url}}" id="anthology-{{anthology.id}}-header-image">
+    <div id="anthology-{{anthology.id}}-header-img-parent">
+        <p class="text-center"><img class="img-fluid" alt="{{anthology.header_alt_text}}" src="{{anthology.header_url}}" id="anthology-{{anthology.id}}-header-image"></p>
     </div>
     {% endif %}
-    <div class="uk-margin-bottom uk-padding-remove-horizontal uk-align-center uk-width-1-1">{% include "anthology_tile.html" %}</div>
+    {% include "anthology_tile.html" %}
     {% if anthology.owner %}
-        <div class="uk-width-1-1 uk-text-right">
-            <a id="anthology-edit-link" class="ourchive-icon-wrapper" href="{% url 'fe-edit-anthology' anthology.id %}"><span uk-icon="icon: ourchive-edit; ratio: 1" title="Edit"></span> </a>
-            <a id="anthology-delete-link" class="ourchive-icon-wrapper" uk-toggle="target: #anthology-{{anthology.id}}-modal-delete"><span title="Delete" uk-icon="icon: ourchive-delete; ratio: 1"></span> </a>
+        <div class="row row-cols-1 m-2">
+            <p><a id="anthology-edit-link" class="link link-underline-opacity-0" title="{% translate 'Edit' %}" href="{% url 'fe-edit-anthology' anthology.id %}"><i class="bi bi-pencil"></i></a>
+            <a id="anthology-delete-link" class="link link-underline-opacity-0" title="{% translate 'Delete' %}" href="#" data-bs-toggle="modal" data-bs-target="#anthology-{{anthology.id}}-modal-delete"><i class="bi bi-trash"></i></a></p>
         </div>
     {% endif %}
-    <div class="uk-width-1-1 uk-margin-bottom uk-padding-remove ourchive-read-div" id="anthology-slideshow-parent">
-        {% if anthology.works %}
-        <div id="anthology-works-parent-sm">
-            <span class="uk-text-lead">{% translate 'Works' %}</span>
-            <ul class="uk-list uk-list-sriped">
-            {% for work in anthology.works %}
-                <li class="ourchive-mobile-list uk-padding-small uk-margin-small-top uk-margin-small-bottom">
-                    <span class="uk-inline uk-text-medium"><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
-                    {% if work.summary %}
-                        <div class="uk-margin-left uk-margin-small-top uk-width-expand ourchive-collection-sm-desc">{{work.summary|safe}}</div>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
+    {% if anthology.works %}
+        <div class="row row-cols-1 m-2">
+            <p class="fs-3">{% translate 'Works' %}</p>
+            <ul class="list-group">
+                {% for work in anthology.works %}
+                    <li class="list-group-item">
+                        <p><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</p>
+                        {% if work.summary %}
+                            <p class="mt-3">{{work.summary|safe}}</p>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
         </div>
-        {% endif %}
-    </div>
-</div>
+    {% endif %}
 {% include "delete_modal.html" with object='anthology' object_friendly='anthology' object_id=anthology.id %}
-<script src="{% static 'frontend/js/ourchive-anthologies.js' %}"></script>
 {% endblock %}

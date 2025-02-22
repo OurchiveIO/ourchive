@@ -1,68 +1,56 @@
 {% load i18n %}
-<div id="flyover-results" uk-offcanvas="flip: true" class="uk-offcanvas">
-	<div class="uk-offcanvas-bar" id="flyover-results-child">
-		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work_mobile" action="/search/filter" id="search-results-work-facet-form-flyover">	
-		{% csrf_token %}
-		<ul uk-accordion="multiple: true;" id="search-accordion-mobile">
-	    	{% for facet_group in facets %} 
-	    	<li id="accordion-item-{{forloop.counter0}}-mobile">
-	    		<a class="uk-accordion-title" href onclick="setSearchToggles({{ forloop.counter0 }}, true)">{{ facet_group.label }}</a>
-	    		<div class="uk-accordion-content">
-		    		{% for facet in facet_group.facets %}
-						{% include "facet_tile.html" with include='include' mobile='true' %}
-		    		{% endfor %}
-		    	</div>
-	    	</li>
-			{% endfor %}
-			<select id="search-results-sort-select-hidden-mobile" name="order_by" class="uk-select" hidden>
-	            <option id="search-results-sort-newest" value="-updated_on">Sort By: Last Updated</option>
-	            <option id="search-results-sort-oldest" value="-comment_count">Sort By: Comments</option>
-	            <option id="search-results-sort-oldest" value="-fingerguns">Sort By: Fingerguns</option>
-	        </select>
-	        <input type="hidden" id="term" name="term" value="{{ term }}">
-			{% if tag_id %}
-			<input type="hidden" id="tag_id" name="tag_id" value="{{ tag_id }}">
-			{% endif %}
-			<input type="hidden" id="active_tab" name="active_tab" value="{{ default_tab }}">
-		<input id="search-results-work-facet-form-submit" class="uk-button uk-button-primary uk-margin-top uk-align-center uk-width-medium uk-margin-small-bottom" type="submit" value="Filter"/>
-		<button class="uk-button uk-button-danger uk-margin-small-top uk-align-center uk-width-medium" type="button" onClick="clearAll()">Clear All</button>
-	</ul>
-	</form>
-	</div>
-</div>
-<div class="uk-width-1-4 uk-visible@s search-results-toggle" data-testid="result-filter-pane" id="search-results-desktop-filter-pane"> 
-	<div class="uk-inline uk-align-left"><span class="uk-text-bold uk-inline uk-text-large">Filters</span></div><div class="uk-inline uk-align-right"><a href="#" class="uk-link-reset" onClick="updateFilterToggle()"><span uk-icon="icon: ourchive-close" title="Close filters" id="search-results-close-desktop-filter" class="search-results-toggle" uk-toggle="target: .search-results-toggle"></span></a></div>
-	<div class="uk-align-left uk-width-expand">
-		<form class="uk-form-horizontal"  method="post" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">	
-		{% csrf_token %}
-		<ul uk-accordion="multiple: true;" id="search-accordion">
-	    	{% for facet_group in facets %} 
-	    	<li id="accordion-item-{{forloop.counter0}}">
-	    		<a class="uk-accordion-title" href onclick="setSearchToggles({{ forloop.counter0 }})">{{ facet_group.label }}</a>
-	    		<div class="uk-accordion-content">
-		    		{% for facet in facet_group.facets %}
-						{% include "facet_tile.html" with include='include'%}
-		    		{% endfor %}
-		    	</div>
-	    	</li>
-			{% endfor %}
-            {% if request.user.is_authenticated %}<div class="uk-child-width-1 uk-grid uk-grid-small uk-margin" id="search-save-name-parent">
-                <label id="save-search-label" for="search-name" class="uk-text-bold">{% translate 'Save search with name' %}</label>
-                <span><input id=search-name" class="uk-input uk-width-large" type="text" name="search-name" value="{{ search_name|default_if_none:'' }}"></span>
-            </div>{% endif %}
-			<select id="search-results-sort-select-hidden" name="order_by" class="uk-select" hidden>
-	            <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>Sort By: Last Updated</option>
-	            <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>Sort By: Comments</option>
-	            <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>Sort By: Fingerguns</option>
-	        </select>
-	        <input type="hidden" id="term" name="term" value="{{ term }}">
-			{% if tag_id %}
-			<input type="hidden" id="tag_id" name="tag_id" value="{{ tag_id }}">
-			{% endif %}
-			<input type="hidden" id="active_tab" name="active_tab" value="{{ default_tab }}">
-		<input id="search-results-work-facet-form-submit" class="uk-button uk-button-primary uk-margin-top uk-align-center uk-width-medium uk-margin-small-bottom" type="submit" value="Filter"/>
-		<button data-testid="search-facet-form-submit" class="uk-button uk-button-danger uk-margin-small-top uk-align-center uk-width-medium" type="button" onClick="clearAll()">Clear All</button>
-	</ul>
-	</form>
+<div data-testid="result-filter-pane" class="offcanvas-lg offcanvas-start" tabindex="-1" id="search-filter-results" aria-labelledby="search-filter-label">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="search-filter-label">{% translate 'Filters' %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#search-filter-results" aria-label="{% translate 'Close' %}"></button>
+    </div>
+	<div class="row overflow-auto">
+        <div class="col-12">
+            <form method="post" class="oc-fixed-width" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">
+                {% csrf_token %}
+                <div class="accordion" id="search-accordion">
+                    {% for facet_group in facets %}
+                        <div class="accordion-item" id="accordion-item-{{forloop.counter0}}">
+                            <h2 class="accordion-header">
+                                <a class="accordion-button {% if not forloop.first %}collapsed{% endif %} link-underline link-underline-opacity-0" data-bs-toggle="collapse" data-bs-target="#accordion-body-{{forloop.counter0}}" aria-expanded="true" aria-controls="accordion-body-{{forloop.counter0}}" href="#" onclick="setSearchToggles({{ forloop.counter0 }})">{{ facet_group.label }}</a>
+                            </h2>
+                            <div class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" id="accordion-body-{{forloop.counter0}}">
+                                <div class="accordion-body">
+                                    {% for facet in facet_group.facets %}
+                                        {% include "facet_tile.html" with include='include'%}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if request.user.is_authenticated %}
+                    <div class="border-start border-end border-bottom p-3" id="search-save-name-parent">
+                        <label id="save-search-label" for="search-name" class="form-label">{% translate 'Save search with name' %}</label>
+                        <input id="search-name" class="form-control" type="text" name="search-name" value="{{ search_name|default_if_none:'' }}">
+                    </div>
+                {% endif %}
+                <div class="border-start border-end border-bottom p-3">
+                    <label class="form-label" for="search-results-sort-select-hidden">{% translate 'Sort by...' %}</label>
+                    <select id="search-results-sort-select-hidden" name="order_by" class="form-select">
+                        <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>
+                            {% translate 'Last Updated' %}</option>
+                        <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>
+                            {% translate 'Comments' %}</option>
+                        <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>
+                            {% translate 'Fingerguns' %}</option>
+                    </select>
+                </div>
+                <input type="hidden" id="term" name="term" value="{{ term }}">
+                {% if tag_id %}
+                <input type="hidden" id="tag_id" name="tag_id" value="{{ tag_id }}">
+                {% endif %}
+                <input type="hidden" id="active_tab" name="active_tab" value="{{ default_tab }}">
+                <div class="mb-3 border-start border-end border-bottom p-3">
+                    <button data-testid="search-facet-form-submit" class="btn btn-secondary" type="button" onClick="clearAll()">Clear All</button>
+                    <input id="search-results-work-facet-form-submit" class="btn btn-primary" type="submit" value="Filter"/>
+                </div>
+	        </form>
+        </div>
 	</div>
 </div>

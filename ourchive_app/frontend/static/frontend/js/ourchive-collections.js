@@ -1,5 +1,6 @@
-window.addEventListener("load", function() {
-    initShowMores('collection', 'collection-tag-container', 'collection-description-container', 'tags', 'description');
+window.addEventListener('DOMContentLoaded', function() {
+    initializeMultiSelect('bkcol-form-languages');
+    initializeEditTags();
 });
 
 
@@ -26,24 +27,26 @@ function doWorkAutocomplete(term) {
       return response.text();
     })
     .then((templateText) => {
-    document.getElementById(complete_select).innerHTML = "";
-    document.getElementById(complete_select).innerHTML = templateText;
-    UIkit.drop(document.getElementById(complete_select)).show();
+        document.getElementById(complete_select).innerHTML = "";
+        document.getElementById(complete_select).innerHTML = templateText;
+        let dropdownElementList = [];
+        dropdownElementList.push(document.getElementById(complete_select));
+        const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl));
+        dropdownList[0].show();
     });
 }
 
 function populateWorkInput(bookmark_id, bookmark_display, obj_id=null) {
     // visible list
     var list = document.getElementById("bookmarks_readonly_list")
-    // bookmark to add
-    var final = bookmark_display;
-    var wrapper= document.createElement('div');
+    var wrapper= document.createElement('p');
     wrapper.innerHTML= '<input type="hidden" id="works_'+bookmark_id+'" name="workidstoadd_'+bookmark_id+'" value="workidstoadd_'+bookmark_id+'">';
     var div = wrapper.firstChild;
     list.appendChild(div);
     var li = document.createElement('li');
     li.setAttribute('id', 'works_'+bookmark_id+'_li');
-    li.innerHTML = bookmark_display+' (<a onclick="removeWork(event,'+bookmark_id+')">Remove</a>)';
+    li.classList.add("list-group-item");
+    li.innerHTML = bookmark_display+' (<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" onclick="removeWork(event,'+bookmark_id+')">Remove</a>)';
     list.appendChild(li);
     document.getElementById("bookmark_entry").value = '';
     document.getElementById("bookmark_entry").focus();
@@ -60,28 +63,9 @@ function addSelectedWorks() {
     var bookmarks = document.querySelectorAll('.add-to-collection-checkbox');
     bookmarks.forEach((bookmark) => {
         if (bookmark.checked) {
-            console.log(bookmark);
             var bookmark_display = document.getElementById("bookmark-"+bookmark.name+"-bookmark").innerHTML;
             populateWorkInput(bookmark.name, bookmark_display);
         }
-    });
-}
-
-// multi-user functionality
-function doUserAutocomplete(term) {
-  if (term.length < 2)
-  {
-    return;
-  }
-  var complete_select = 'collection-find-user-dropdown';
-  fetch('/user-autocomplete?text='+term)
-    .then((response) => {
-      return response.text();
-    })
-    .then((templateText) => {
-    document.getElementById(complete_select).innerHTML = "";
-    document.getElementById(complete_select).innerHTML = templateText;
-    UIkit.drop(document.getElementById(complete_select)).show();
     });
 }
 

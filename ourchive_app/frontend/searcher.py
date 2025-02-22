@@ -82,13 +82,13 @@ def add_filter_to_bookmark(filter_val, filter_details, bookmark_filter):
 def build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val):
 	# TODO: split this into two methods, include and exclude. refactor first with include, then split.
 	filter_details = key.split(',')
-	# on making the API request, and collections.defaultdict should be used to prevent cluttered logic
-	filter_key = filter_details[2] if len(filter_details) > 2 else filter_details[1]
-	filter_type = request_builder.get_object_type(filter_key)
 	if len(filter_details) == 1:
 		if not filter_val:
 			return request_object
-	elif filter_type == 'attribute':
+	# on making the API request, and collections.defaultdict should be used to prevent cluttered logic
+	filter_key = filter_details[2] if len(filter_details) > 2 else filter_details[1]
+	filter_type = request_builder.get_object_type(filter_key)
+	if filter_type == 'attribute':
 		filter_val = filter_details[1]
 	if filter_type == 'work':
 		if include_exclude == 'include':

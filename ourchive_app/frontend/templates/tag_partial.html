@@ -4,9 +4,7 @@
         <div class="{% if forloop.first %}mt-4{% else %}mt-2{% endif %}" id="{{obj_name}}-tags-dl-mb">
             <span class="fw-light">{{ type }} </span>
             {% for single_tag in tag %}
-                <a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link-mb" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}">
-                    <span class="badge oc-badge fs-6">{{ single_tag.display_text|default:single_tag.text }}</span>
-                </a>
+                <span class="badge oc-badge fs-6 m-1"><a class="link-underline link-underline-opacity-0 text-dark" id="{{obj_name}}-tile-tag-{{single_tag.id}}-link-mb" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}">{{ single_tag.display_text|default:single_tag.text }}</a></span>
             {% endfor %}
         </div>
     {% endfor %}
