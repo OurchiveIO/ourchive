@@ -1,9 +1,9 @@
 {% if attributes.items %}
 {% for attribute, attribute_values in attributes.items %}
-    <div id="{{attribute}}-tile-attribute-type-{{type}}" class="{% if forloop.first %}mt-4{% else %}mt-2{% endif %}">
+    <div data-testid="attribute-type" id="{{attribute}}-tile-attribute-type-{{attribute}}" class="{% if forloop.first %}mt-4{% else %}mt-2{% endif %}">
         <span class="fw-light">{{ attribute }}</span>
         {% for single_attr in attribute_values %}
-            <span class="badge oc-badge fs-6 m-1"><a class="link-underline link-underline-opacity-0 text-dark" id="{{single_attr.display_name}}-tile-attr-{{single_attr.display_name}}-link" href="/attributes/{{single_attr.id}}?attr_id={{single_attr.id}}">{{ single_attr.display_name }}</a></span>
+            <span data-testid="attribute-value" class="badge oc-badge fs-6 m-1"><a class="link-underline link-underline-opacity-0 text-dark" id="{{single_attr.display_name}}-tile-attr-{{single_attr.display_name}}-link" href="/attributes/{{single_attr.id}}?attr_id={{single_attr.id}}">{{ single_attr.display_name }}</a></span>
         {% endfor %}
     </div>
 {% endfor %}

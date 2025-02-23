@@ -6,19 +6,19 @@
         {% if attribute.allow_multiselect %}
                 {% for attribute_val in attribute.attribute_values %}
                     <div class="form-check form-switch">
-                        <input class="form-check-input" role="switch" type="checkbox" title="{{object}} {{attribute.name}}: {{attribute_val.name}}" id="{{object}}_attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute.name}}|_|{{attribute_val.name}}" name="attributevals" {% if attribute_val.checked %} checked {% endif %}>
+                        <input data-testid="attribute-check-multi" class="form-check-input" role="switch" type="checkbox" title="{{object}} {{attribute.name}}: {{attribute_val.name}}" id="{{object}}_attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute.name}}|_|{{attribute_val.name}}" name="attributevals" {% if attribute_val.checked %} checked {% endif %}>
                         <label id="{{attribute_val.name}}-attr-label" for="attribute_{{attribute.name}}_{{attribute_val.name}}" class="form-check-label">{{ attribute_val.display_name }}</label>
                     </div>
                 {% endfor %}
         {% else %}
             {% for attribute_val in attribute.attribute_values %}
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" title="{{object}} {{attribute.name}}: {{attribute_val.name}}" id="{{object}}_attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute.name}}|_|{{attribute_val.name}}" name="attributevals" {% if attribute_val.checked %} checked {% endif %}>
+                    <input data-testid="attribute-check-single" class="form-check-input" type="radio" title="{{object}} {{attribute.name}}: {{attribute_val.name}}" id="{{object}}_attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute.name}}|_|{{attribute_val.name}}" name="attributevals" {% if attribute_val.checked %} checked {% endif %}>
                     <label for="attribute_{{attribute.name}}_{{attribute_val.name}}" id="{{attribute_val.name}}-attr-label" class="form-check-label">{{ attribute_val.display_name }}</label>
                 </div>
             {% endfor %}
             <div class="form-check">
-                <input class="form-check-input" type="radio" title="None" id="empty-radio" value="None" name="attributevals">
+                <input class="form-check-input" data-testid="attribute-noval" type="radio" title="None" id="empty-radio" value="None" name="attributevals">
                 <label for="empty-radio" id="empty-radio-label" class="form-check-label">{% translate 'No selection' %}</label>
             </div>
         {% endif %}

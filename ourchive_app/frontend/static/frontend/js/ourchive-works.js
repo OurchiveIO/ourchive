@@ -1,7 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    initializeEditTags();
-    initializeMultiSelect('work-form-languages');
-    initializeListReorder('chapters_list', '.chapters_tracker');
+
+    if (document.getElementById('work-form-languages') !== null) {
+        initializeEditTags();
+        initializeMultiSelect('work-form-languages');
+        initializeListReorder('chapters_list', '.chapters_tracker');
+    }
+
 });
 
 function addSelectedCollection() {

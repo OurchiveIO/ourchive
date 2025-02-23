@@ -935,8 +935,7 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsWorkOwnerOrReadOnly]
 
     def get_queryset(self):
-        chapters = Chapter.objects.filter(Q(draft=False) | Q(work__users__id=self.request.user.id)).order_by('id')
-        return chapters
+        return Chapter.objects.filter(Q(draft=False) | Q(work__users__id=self.request.user.id)).distinct('id').order_by('id')
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'image_url' in self.request.data:

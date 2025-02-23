@@ -171,7 +171,7 @@
                 <label class="form-check-label" for="work-form-multichapter-checkbox">{% translate 'Multichapter?' %}</label>
             </div>
             <div id="work-form-chapter-content-parent">
-                <div id="work-form-single-chapter-content-parent" class="work-chapter-content collapse {% if chapters|length < 2 and multichapter == 'false' %}show{% endif %}" >
+                <div id="work-form-single-chapter-content-parent" class="work-chapter-content collapse {% if chapters|length < 2 and multichapter == 'false' %}show{% elif not work.id %}show{% endif %}" >
                     <input type="hidden" id="work_chapter_id" name="chapter_id" value="{{ work_chapter.id }}">
                     {% include 'chapter_form_body.html' with chapter=work_chapter suppress_info_fields=True %}
                 </div>

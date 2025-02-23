@@ -121,7 +121,7 @@ def user_name(request, pk):
 		anthology_params['limit'] = request.GET.get('anthology_limit', '')
 		anchor = 4
 	if anchor is None:
-		anchor = 0 if user.response_data['results'][0]["default_content"] == 'Work' else (1 if user.response_data['results'][0]["default_content"] == 'Bookmark' else 2)
+		anchor = 0 if user.response_data['results'][0]["default_content"] == 'Work' else (1 if user.response_data['results'][0]["default_content"] == 'Bookmark' else (2 if user.response_data['results'][0]["default_content"] == 'Collection' else 0))
 	# TODO: this violates DRY. all of this can be simplified, it's doing the exact same thing with multiple chives. also, we should just work with the results object instead of pulling out individual variables.
 	works_list = get_works_list(request, username)
 	works = works_list['works']
@@ -1079,6 +1079,7 @@ def edit_work(request, id):
 				if response.response_info.status_code >= 400:
 					messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
 			for chapter in chapters:
+				print(chapter)
 				response = do_patch(f'api/chapters/{chapter["id"]}/', request, data=chapter, object_name='Work')
 				if response.response_info.status_code >= 400:
 					messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)

@@ -72,15 +72,15 @@
     </div>
     <div class="row row-cols-1 d-none d-md-block" id="chapter-metadata-div">
         <div class="d-flex justify-content-between mt-3">
-            {% if chapter.updated_on %}<span id="chapter-metadata-updated" class="fw-light">{% translate 'Updated' %} {{chapter.updated_on|date:'d M Y'}}</span> {% endif %}
-            {% if chapter.word_count %}<span id="chapter-metadata-length" class="fw-light">{% blocktranslate with wc=chapter.word_count %}{{ wc }} Words{% endblocktranslate %}</span>{% endif %}
-            {% if chapter.audio_length %}<span class="fw-light" id="chapter-metadata-audio-length">{% blocktranslate with al=chapter.audio_length %}Audio Length: {{ al }}{% endblocktranslate %}</span>{% endif %}
-            {% if chapter.image_size %}<span class="fw-light" id="chapter-metadata-image-size">{% blocktranslate with imgs=chapter.image_size|default:0 %}Image Size: {{ imgs }}{% endblocktranslate %}</span>{% endif %}
-            {% if settings.AllowComments %}<span id="chapter-metadata-comment-count" class="fw-light">{% blocktranslate with cc=chapter.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span>
+            {% if chapter.updated_on %}<small><span id="chapter-metadata-updated" class="fw-light">{% translate 'Updated' %} {{chapter.updated_on|date:'d M Y'}}</span></small>{% endif %}
+            {% if chapter.word_count %}<small><span id="chapter-metadata-length" class="fw-light">{% blocktranslate with wc=chapter.word_count %}{{ wc }} Words{% endblocktranslate %}</span></small>{% endif %}
+            {% if chapter.audio_length %}<small><span class="fw-light" id="chapter-metadata-audio-length">{% blocktranslate with al=chapter.audio_length %}Audio Length: {{ al }}{% endblocktranslate %}</span></small>{% endif %}
+            {% if chapter.image_size %}<small><span class="fw-light" id="chapter-metadata-image-size">{% blocktranslate with imgs=chapter.image_size|default:0 %}Image Size: {{ imgs }}{% endblocktranslate %}</span></small>{% endif %}
+            {% if settings.AllowComments %}<small><span id="chapter-metadata-comment-count" class="fw-light">{% blocktranslate with cc=chapter.comment_count %}{{ cc }} Comments{% endblocktranslate %}{% endif %}</span></small>
         </div>
     </div>
+    <hr class="ourchive-hr" id="chapter-content-hr"/>
 {% endif %}
-<div class="row row-cols-1 mt-3"><hr class="ourchive-hr" id="chapter-content-hr"/></div>
 {% if chapter.image_url and chapter.image_url != "None" %}
     <div class="row row-cols-1 mb-3">
         <p id="chapter-image-graf" class="text-center">
