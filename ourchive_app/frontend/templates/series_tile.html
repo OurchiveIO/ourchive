@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="border shadow-sm p-3" id="series-tile-parent-{{ series.id }}">
+<div class="border shadow-sm p-3" id="series-tile-parent-{{ series.id }}" data-testid="series-tile">
     <div class="row">
         <div class="col-md-4 col-12" id="series-{{series.id}}-tile-card">
             <p class="mb-2 fs-3"><a class="link-underline link-underline-opacity-0" id="series-{{series.id}}-tile-title-link" href="{% url 'fe-series' series.id %}" data-testid="series-tile-title">{{series.title}}</a></p>

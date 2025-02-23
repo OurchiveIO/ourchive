@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="border shadow-sm p-3" id="collection-{{bookmark_collection.id}}-tile-container">
+<div class="border shadow-sm p-3" id="collection-{{bookmark_collection.id}}-tile-container" data-testid="collection-tile">
     <div class="row">
         <div class="col-md-4 col-12" id="collection-{{bookmark_collection.id}}-tile-card">
             <p class="mb-2 fs-3"><a class="link-underline link-underline-opacity-0" id="collection-{{bookmark_collection.id}}-tile-title-link" href="{% url 'fe-view-collection' bookmark_collection.id %}" data-testid="collection-tile-title">{{bookmark_collection.title}}</a></p>
