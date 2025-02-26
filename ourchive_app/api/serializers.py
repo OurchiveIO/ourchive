@@ -1263,7 +1263,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         for work in works_list:
             if work.draft:
                 raise serializers.ValidationError({"message": [_("Cannot add draft work to collection.")]})
-            bookmark_collection.bookmarks.add(work)
+            bookmark_collection.works.add(work)
         bookmark_collection.save()
         bookmark_collection = self.process_users(bookmark_collection, users)
         bookmark_collection.draft = validated_data['draft']

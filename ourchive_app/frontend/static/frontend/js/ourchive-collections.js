@@ -40,11 +40,12 @@ function populateWorkInput(bookmark_id, bookmark_display, obj_id=null) {
     // visible list
     var list = document.getElementById("bookmarks_readonly_list")
     var wrapper= document.createElement('p');
-    wrapper.innerHTML= '<input type="hidden" id="works_'+bookmark_id+'" name="workidstoadd_'+bookmark_id+'" value="workidstoadd_'+bookmark_id+'">';
+    wrapper.innerHTML= '<input data-testid="workidstoadd-hidden" type="hidden" id="works_'+bookmark_id+'" name="workidstoadd_'+bookmark_id+'" value="workidstoadd_'+bookmark_id+'">';
     var div = wrapper.firstChild;
     list.appendChild(div);
     var li = document.createElement('li');
     li.setAttribute('id', 'works_'+bookmark_id+'_li');
+    li.setAttribute("data-testid", "workidstoadd")
     li.classList.add("list-group-item");
     li.innerHTML = bookmark_display+' (<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" onclick="removeWork(event,'+bookmark_id+')">Remove</a>)';
     list.appendChild(li);

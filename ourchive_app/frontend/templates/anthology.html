@@ -16,12 +16,12 @@
         </div>
     {% endif %}
     {% if anthology.works %}
-        <div class="row row-cols-1 m-2">
+        <div class="row row-cols-1 m-2" data-testid="works-container">
             <p class="fs-3">{% translate 'Works' %}</p>
             <ul class="list-group">
                 {% for work in anthology.works %}
                     <li class="list-group-item">
-                        <p><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</p>
+                        <p><a href="{% url 'fe-work-view' work.id %}" target="_blank" data-testid="anthology-work">{{work.title}}</a> {% translate 'by' %} {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</p>
                         {% if work.summary %}
                             <p class="mt-3">{{work.summary|safe}}</p>
                         {% endif %}

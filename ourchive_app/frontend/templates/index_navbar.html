@@ -46,16 +46,16 @@
     <div class="offcanvas offcanvas-end col-md-3 justify-content-md-end me-md-1" tabindex="-1" id="navbarNavOffcanvas">
         <div class="offcanvas-header">
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-          </div>
+        </div>
         <ul class="nav navbar-nav d-flex align-self-end" style="margin-right: 5em;">
-          <li id="theme-switcher-li" class="nav-item">
-            <a onclick="switchTheme()" href="#" id="theme-switcher-link" class="nav-link" title="Switch Modes">
-                {% if request.session.css_mode == "dark" %}
-                    <i class="bi bi-sun text-light"></i>
-                {% else %}
-                    <i class="bi bi-moon text-light"></i>
-                {% endif %}
-            </a>
+            <li id="theme-switcher-li" class="nav-item">
+                <a onclick="switchTheme()" href="#" id="theme-switcher-link" class="nav-link" title="Switch Modes">
+                    {% if request.session.css_mode == "dark" %}
+                        <i class="bi bi-sun text-light"></i>
+                    {% else %}
+                        <i class="bi bi-moon text-light"></i>
+                    {% endif %}
+                </a>
             </li>
             {% if not request.user.is_authenticated %}
             <li id="nav-right-main" class="nav-item">
@@ -73,7 +73,7 @@
                     {%endif%}
                 </a>
                 <ul class="dropdown-menu">
-                    <li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link" class="dropdown-item">{% translate 'New Collection' %}</a></li>
+                    <li id="nav-new-collection-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-collection-link" class="dropdown-item">{% translate 'New Collection' %}</a></li>
                     <li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link" class="dropdown-item">New Work</a></li>
                     <li id="nav-new-series-li"><a href="{% url 'fe-create-series' %}" id="nav-new-series-link" class="dropdown-item">{% translate 'New Series' %}</a></li>
                     <li id="nav-new-anthology-li"><a href="{% url 'fe-create-anthology' %}" id="nav-new-anthology-link" class="dropdown-item">{% translate 'New Anthology' %}</a></li>

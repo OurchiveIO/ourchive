@@ -2,7 +2,7 @@
 {% if works %}
 <div>
 	{% for work in works %}
-	<div id="search-bookmark-autocomplete-graf-{{bookmark.id}}" class="p-1" onclick="populateWorkInput('{{work.work.id}}', '{{work.work.title_clean}}', '{{ object_id }}')"><span class="fw-bold" id="collection-autocomplete-span-{{tag.tag}}">{{work.work.title}}</span></div>
+	<div id="search-bookmark-autocomplete-graf-{{work.work.id}}" class="p-1" onclick="populateWorkInput('{{work.work.id}}', '{{work.work.title_clean}}', '{{ object_id }}')"><span data-testid="collection-autocomplete-result" class="fw-bold" id="collection-autocomplete-span-{{work.id}}">{{work.work.title}}</span></div>
 	{% endfor %}
 </div>
 {% else %}

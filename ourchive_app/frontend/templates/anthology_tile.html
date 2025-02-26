@@ -22,7 +22,7 @@
         </div>
         <div class="col-md-8 col-12 mt-md-0 mt-4" id="anthology-{{anthology.id}}-info-card">
             <div class="osm-container" id="show-description-{{ anthology.id }}">
-                <div class="collapse show" id="anthology-{{anthology.id}}-tile-summary-p">{% autoescape off %}{{ anthology.description|truncatechars:500 }}{% endautoescape %}</div>
+                <div class="collapse show" id="anthology-{{anthology.id}}-tile-summary-p" data-testid="anthology-summary">{% autoescape off %}{{ anthology.description|truncatechars:500 }}{% endautoescape %}</div>
                 {% if anthology.description|length > 500 %}<div class="collapse" id="anthology-{{anthology.id}}-tile-summary-p">{% autoescape off %}{{ anthology.description }}{% endautoescape %}</div>
                 <a data-bs-toggle="collapse" aria-expanded="false" aria-controls="anthology-{{anthology.id}}-tile-summary-p" id="more-btn-description-{{ anthology.id }}" class="link-underline link-underline-opacity-0 collapsed" href="#anthology-{{anthology.id}}-tile-summary-p">
                     <span class="oc-show-more">{% translate '+ Show More' %}</span>
