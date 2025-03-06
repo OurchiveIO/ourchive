@@ -13,27 +13,27 @@
                 {% endif %}
                 <input type="hidden" id="subscribe-user-id" name="subscribed_to" value="{{ user.username }}">
                 <div class="mb-3 form-check form-switch" id="user-subscribe-bookmarks-parent">
-                    <input class="form-check-input" role="switch" id="user-subscribe-bookmarks-checkbox" type="checkbox" name="subscribed_to_bookmark" {% if subscription.subscribed_to_bookmark %} checked {% endif %}>
+                    <input data-testid="subscribe-bookmark" class="form-check-input" role="switch" id="user-subscribe-bookmarks-checkbox" type="checkbox" name="subscribed_to_bookmark" {% if subscription.subscribed_to_bookmark %} checked {% endif %}>
                     <label id="user-subscribe-bookmarks-label" class="form-check-label" for="user-subscribe-bookmarks-checkbox">{% translate 'Subscribe to bookmarks' %}
                     </label>
                 </div>
                 <div class="mb-3 form-check form-switch" id="user-subscribe-collections-parent">
-                    <input class="form-check-input" id="user-subscribe-collections-checkbox" type="checkbox" role="switch" name="subscribed_to_collection" {% if subscription.subscribed_to_collection %} checked {% endif %}>
+                    <input data-testid="subscribe-collection" class="form-check-input" id="user-subscribe-collections-checkbox" type="checkbox" role="switch" name="subscribed_to_collection" {% if subscription.subscribed_to_collection %} checked {% endif %}>
                     <label id="user-subscribe-collections-label" class="form-check-label" for="user-subscribe-collections-checkbox">{% translate 'Subscribe to collections' %}
                     </label>
                 </div>
                 <div class="mb-3 form-check form-switch" id="user-subscribe-works-parent">
-                    <input class="form-check-input" role="switch" id="user-subscribe-works-checkbox" type="checkbox" name="subscribed_to_work" {% if subscription.subscribed_to_work %} checked {% endif %}>
+                    <input data-testid="subscribe-work" class="form-check-input" role="switch" id="user-subscribe-works-checkbox" type="checkbox" name="subscribed_to_work" {% if subscription.subscribed_to_work %} checked {% endif %}>
                     <label id="user-subscribe-works-label" class="form-check-label" for="user-subscribe-works-checkbox">{% translate 'Subscribe to works' %}
                     </label>
                 </div>
                 <div class="mb-3 form-check form-switch" id="user-subscribe-series-parent">
-                    <input class="form-check-input" role="switch" id="user-subscribe-series-checkbox" type="checkbox" name="subscribed_to_series" {% if subscription.subscribed_to_series %} checked {% endif %}>
+                    <input data-testid="subscribe-series" class="form-check-input" role="switch" id="user-subscribe-series-checkbox" type="checkbox" name="subscribed_to_series" {% if subscription.subscribed_to_series %} checked {% endif %}>
                     <label id="user-subscribe-series-label" class="form-check-label" for="user-subscribe-series-checkbox">{% translate 'Subscribe to series' %}
                     </label>
                 </div>
                 <div class="mb-3 form-check form-switch" id="user-subscribe-anthologies-parent">
-                    <input class="form-check-input" role="switch" id="user-subscribe-anthologies-checkbox" type="checkbox" name="subscribed_to_anthology" {% if subscription.subscribed_to_anthology %} checked {% endif %}>
+                    <input data-testid="subscribe-anthology" class="form-check-input" role="switch" id="user-subscribe-anthologies-checkbox" type="checkbox" name="subscribed_to_anthology" {% if subscription.subscribed_to_anthology %} checked {% endif %}>
                     <label id="user-subscribe-anthologies-label" class="form-check-label" for="user-subscribe-anthologies-checkbox">{% translate 'Subscribe to anthologies' %}
                     </label>
                 </div>

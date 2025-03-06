@@ -309,7 +309,7 @@ def execute_search(request, post_request):
 			[collections_count, 2],
 			[tag_count, 3],
 			[len(users['data']), 4]
-		]) if not active_tab else active_tab
+		]) if not active_tab else int(active_tab)
 	order_by = response_json.get('results', {}).get('options', {}).get('order_by', '-updated_on')
 	template_data = {
 		'works': works,

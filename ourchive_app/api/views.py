@@ -525,7 +525,7 @@ class UserWorkList(generics.ListCreateAPIView):
     permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+        return Work.objects.filter(Q(users__username=self.kwargs['username']) | Q(user__username=self.kwargs['username'])).filter(Q(draft=False) | Q(users__id=self.request.user.id)).order_by('-updated_on')
 
 
 class UserBookmarkList(generics.ListCreateAPIView):
@@ -555,7 +555,7 @@ class UserBookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        queryset = BookmarkCollection.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id))
+        queryset = BookmarkCollection.objects.filter(Q(users__username=self.kwargs['username']) | Q(user__username=self.kwargs['username'])).filter(Q(draft=False) | Q(user__id=self.request.user.id))
         if (self.request.GET.get('work_id', None)):
             queryset = queryset.exclude(works__id=self.request.GET.get('work_id'))
         return queryset.order_by('-updated_on')

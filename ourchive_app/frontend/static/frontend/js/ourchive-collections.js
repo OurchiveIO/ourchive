@@ -81,15 +81,9 @@ function populateUserInput(user_id, username) {
     // user to add
     var final = username;
     var wrapper= document.createElement('div');
-    wrapper.classList.add('uk-margin-small');
-    wrapper.classList.add('uk-inline');
-    wrapper.classList.add('uk-margin-remove-top');
     wrapper.setAttribute('id', 'collection-form-user-'+user_id+'-parent');
-    wrapper.innerHTML= '<input id="bkcol-form-cocreator-'+user_id+'-hidden" type="hidden" name="collection_cocreators_'+user_id+'" value="'+user_id+'"> <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="collection_user_'+user_id+'_display">'+username+' <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser('+user_id+')" id="collection_user_'+user_id+'_delete"></span></span>';
-    var input = document.getElementById("collection-form-user-search");
-    input.remove();
+    wrapper.innerHTML= '<input id="bkcol-form-cocreator-'+user_id+'-hidden" type="hidden" name="collection_cocreators_'+user_id+'" value="'+user_id+'"> <p id="collection_user_'+user_id+'_display">'+username+' <a class="link-underline link-underline-opacity-0" onclick="removeUser('+user_id+')" id="collection_user_'+user_id+'_delete"><i class="bi bi-backspace"></i></a></p>';
     parent.appendChild(wrapper);
-    parent.appendChild(input);
     document.getElementById("collection_form_new_user").value = '';
     document.getElementById("collection_form_new_user").focus();
     document.getElementById("collection-find-user-dropdown").innerHTML = "";

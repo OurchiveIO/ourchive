@@ -32,6 +32,8 @@ function colorStar(starNum) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    initializeMultiSelect('bookmark-form-languages');
-    initializeEditTags();
+    if (document.getElementById("bookmark-form-languages")) {
+        initializeMultiSelect('bookmark-form-languages');
+        initializeEditTags();
+    }
 });

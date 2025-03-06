@@ -12,8 +12,8 @@
         <div class="col-md-8 col-12 mt-md-0 mt-4" id="series-{{series.id}}-info-card">
             <div class="osm-container">
                 <!-- series/anthology, summary, tag/attribute group 1, 2, and 3 -->
-                <div class="collapse show" id="show-description-{{ series.id }}">{% autoescape off %}{{ series.description|truncatechars:500 }}{% endautoescape %}</div>
-                {% if series.description|length > 500 %}<div class="collapse" id="series-{{series.id}}-tile-summary-p">{% autoescape off %}{{ series.description }}{% endautoescape %}</div>
+                <div class="collapse show" data-testid="series-description" id="show-description-{{ series.id }}">{% autoescape off %}{{ series.description|truncatechars:500 }}{% endautoescape %}</div>
+                {% if series.description|length > 500 %}<div data-testid="series-description-full" class="collapse" id="series-{{series.id}}-tile-summary-p">{% autoescape off %}{{ series.description }}{% endautoescape %}</div>
                 <a data-bs-toggle="collapse" aria-expanded="false" aria-controls="series-{{series.id}}-tile-summary-p" id="more-btn-description-{{ series.id }}" class="link-underline link-underline-opacity-0 collapsed" href="#series-{{series.id}}-tile-summary-p">
                     <span class="oc-show-more">{% translate '+ Show More' %}</span>
                     <span class="oc-show-less">{% translate '- Show Less' %}</span>

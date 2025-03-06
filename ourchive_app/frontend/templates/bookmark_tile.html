@@ -2,12 +2,12 @@
 <div class="border shadow-sm p-3" id="bookmark-{{bookmark.id}}-tile-container">
     <div class="row">
         <div class="col-md-4 col-12" id="bookmark-{{bookmark.id}}-tile-card">
-            <p class="mb-2 fs-3">{% if bookmark.title %}{{ bookmark.title }}{% else %}{% translate 'Bookmark' %}: {{ bookmark.work.title }}{% endif %} by <a href="{% url 'user-profile-parent' bookmark.user_id %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark.user }}</a></p>
+            <p class="mb-2 fs-3" data-testid="bookmark-tile-title">{% if bookmark.title %}{{ bookmark.title }}{% else %}{% translate 'Bookmark' %}: {{ bookmark.work.title }}{% endif %} by <a href="{% url 'user-profile-parent' bookmark.user_id %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark.user }}</a></p>
             {% if bookmark.user == request.user.username %}
                 <div id="bk-tile-actions-parent" class="row row-cols-1 m-2">
                 <p>
-                    <a title="{% translate 'Edit' %}" class="link link-underline-opacity-0" id="bk-tile-edit-{{ bookmark.id }}-link" href="/bookmarks/{{ bookmark.id }}/edit"><i class="bi bi-pencil"></i></a>
-                    <a title="{% translate 'Delete' %}" class="link link-underline-opacity-0" id="bk-tile-delete-link" href="#" data-bs-toggle="modal" data-bs-target="#bookmark-{{bookmark.id}}-modal-delete"><i class="bi bi-trash"></i></a>
+                    <a data-testid="edit-bookmark" title="{% translate 'Edit' %}" class="link link-underline-opacity-0" id="bk-tile-edit-{{ bookmark.id }}-link" href="/bookmarks/{{ bookmark.id }}/edit"><i class="bi bi-pencil"></i></a>
+                    <a data-testid="delete-bookmark" title="{% translate 'Delete' %}" class="link link-underline-opacity-0" id="bk-tile-delete-link" href="#" data-bs-toggle="modal" data-bs-target="#bookmark-{{bookmark.id}}-modal-delete"><i class="bi bi-trash"></i></a>
                     {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
                 </p>
                 </div>
@@ -29,7 +29,7 @@
 		   	{% if bookmark.attributes %}{% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}{% endif %}
 		   	{% if bookmark.description %}
                 <p><strong>{{ bookmark.user }}'s {% translate 'comments' %}</strong></p>
-                <p class="mt-3">{{ bookmark.description|safe }}</p>
+                <div data-testid="bookmark-description" class="mt-3">{{ bookmark.description|safe }}</div>
             {% endif %}
         </div>
     </div>

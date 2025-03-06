@@ -869,6 +869,10 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 work.users.add(user)
                 if user not in backup_users:
                     new_users.add(user)
+                else:
+                    user_work = UserWork.objects.filter(work_id=work.id, user_id=user.id).first()
+                    user_work.approved = True
+                    user_work.save()
             if not work.users or len(work.users.all()) == 0 or work.user not in list(work.users.all()):
                 work.users.add(work.user)
             work.save()
@@ -876,6 +880,9 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             logger.error(f'Error trying to add new cocreators: {e}.')
             for user in backup_users:
                 work.users.add(user)
+                user_work = UserWork.objects.filter(work_id=work.id, user_id=user.id).first()
+                user_work.approved = True
+                user_work.save()
             work.save()
         for user in new_users:
             if user.id == work.user.id:
@@ -1135,6 +1142,10 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                 collection.users.add(user)
                 if user not in backup_users:
                     new_users.add(user)
+                else:
+                    user_collection = UserCollection.objects.filter(collection_id=collection.id, user_id=user.id).first()
+                    user_collection.approved = True
+                    user_collection.save()
             if not collection.users or len(collection.users.all()) == 0 or collection.user not in list(collection.users.all()):
                 collection.users.add(collection.user)
             collection.save()
@@ -1142,6 +1153,9 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             logger.error(f'Error trying to add new cocreators on collection: {e}')
             for user in backup_users:
                 collection.users.add(user)
+                user_collection = UserCollection.objects.filter(collection_id=collection.id, user_id=user.id).first()
+                user_collection.approved = True
+                user_collection.save()
             collection.save()
         for user in new_users:
             if user.id == collection.user.id:
@@ -1414,13 +1428,20 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
                 anthology.owners.add(user)
                 if user not in backup_users:
                     new_users.add(user)
-            if not anthology.owners or len(anthology.users.all()) == 0 or anthology.creating_user not in list(anthology.owners.all()):
+                else:
+                    user_anthology = UserAnthology.objects.filter(anthology_id=anthology.id, user_id=user.id).first()
+                    user_anthology.approved = True
+                    user_anthology.save()
+            if not anthology.owners or len(anthology.owners.all()) == 0 or anthology.creating_user not in list(anthology.owners.all()):
                 anthology.owners.add(anthology.creating_user)
             anthology.save()
         except Exception as e:
             logger.error(f'Error trying to add new anthology owners: {e}.')
             for user in backup_users:
                 anthology.owners.add(user)
+                user_anthology = UserAnthology.objects.filter(anthology_id=anthology.id, user_id=user.id).first()
+                user_anthology.approved = True
+                user_anthology.save()
             anthology.save()
         for user in new_users:
             if user.id == anthology.creating_user.id:

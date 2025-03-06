@@ -849,7 +849,11 @@ def tag_autocomplete(request):
 	tags = response.response_data['results']
 	for tag in tags:
 		tag['display_text_clean'] = tag['display_text'].replace("'", "\\'")
-	return JsonResponse({'tags': tags})
+	return JsonResponse({'tags': tags}) if request.GET.get('source') != 'search' else render(request, template, {
+		'tags': tags,
+		'divider': settings.TAG_DIVIDER,
+		'fetch_all': params['fetch_all'],
+		'click_action': request.GET.get('click_action', None)})
 
 
 def language_autocomplete(request):

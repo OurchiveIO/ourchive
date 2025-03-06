@@ -199,7 +199,7 @@
             </div>
         </div>
         <div class="tab-pane fade {% if default_tab == 4 %}show active{% endif %}" role="tabpanel" aria-labelledby="users_tab" tabindex="0" id="4-tab-pane">
-            <div class="uk-width-expand" id="search-results-users-content-parent">
+            <div id="search-results-users-content-parent">
                 {% for user in users.data %}
                     <p id="search-results-user-{{user.id}}"> <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="search-results-user-{{user.id}}-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a> </p>
                 {% endfor %}

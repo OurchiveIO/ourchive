@@ -1,6 +1,6 @@
 import logging
 from django.core.management.base import BaseCommand
-from core.models import Work, Anthology, WorkSeries, BookmarkCollection, Bookmark
+from core.models import Work, Anthology, WorkSeries, BookmarkCollection, Bookmark, UserSubscription
 from datetime import datetime, time
 
 logger = logging.getLogger(__name__)
@@ -21,6 +21,8 @@ class Command(BaseCommand):
             BookmarkCollection.objects.filter(updated_on__gte=delete_date).delete()
         if options.get('bookmarks') == 'y':
             Bookmark.objects.filter(updated_on__gte=delete_date).delete()
+        if options.get('subscriptions') == 'y':
+            UserSubscription.objects.filter(updated_on__gte=delete_date).delete()
 
     def add_arguments(self, parser):
         # Named (optional) arguments
@@ -47,6 +49,11 @@ class Command(BaseCommand):
         parser.add_argument(
             "-b", "--bookmarks",
             help="Delete bookmarks y/n? Default: y",
+            default='y',
+        )
+        parser.add_argument(
+            "-sb", "--subscriptions",
+            help="Delete subscriptions y/n? Default: y",
             default='y',
         )
 

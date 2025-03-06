@@ -17,7 +17,7 @@
     <p class="fs-3">{% translate 'Works' %}</p>
     <ul class="list-group">
         {% for work in series.works_readonly %}
-            <li class="list-group-item">
+            <li class="list-group-item" data-testid="series-work">
                 <p><a href="{% url 'fe-work-view' work.id %}" target="_blank">{{work.title}}</a> by {% for user in work.users %}<a id="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</p>
                 {% if work.summary %}
                     <p class="mt-3">{{work.summary|safe}}</p>

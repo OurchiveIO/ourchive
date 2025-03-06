@@ -21,9 +21,9 @@
         {% if user.icon and user.icon != "None" %} <p class="text-center"><img id="user-profile-icon" src="{{ user.icon }}" class="rounded-circle oc-icon" alt="{{ user.username }}"/> {% endif %}</p>
         <h1 id="user-profile-username-h1" class="text-center">{{ user.username }}</h1>
         {% if user.profile %}
-            <div class="uk-card uk-card-body uk-align-center uk-padding-remove-horizontal" id="user-profile-text-parent">
-                <h2 id="user-profile-text-h2"> Profile </h2>
-                <span id="user-profile-text-span">{% autoescape off %} {{ user.profile }} {% endautoescape %}</span>
+            <div id="user-profile-text-parent">
+                <h3 id="user-profile-text-h2"> Profile </h3>
+                <div id="user-profile-text-span">{% autoescape off %} {{ user.profile }} {% endautoescape %}</div>
             </div>
         {% endif %}
         {% if user.attributes %}

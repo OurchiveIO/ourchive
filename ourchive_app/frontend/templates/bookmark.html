@@ -3,64 +3,11 @@
 {% load static %}
 {% block title %}Bookmark - {{ bookmark.title|default:bookmark.work.title }}{% endblock %}
 {% block content %}
-<div class="uk-grid uk-grid-small ourchive-content-padding ourchive-chive-padding ourchive-chive-grid" id="bookmark-uk-grid" uk-grid>
-<article class="uk-article uk-width-expand uk-padding-remove" id="bookmark-uk-article">
-    <div class="uk-child-width-2-1 ourchive-parent-grid" id="bookmark-uk-child-grid" uk-grid>
-        <div class="uk-width-2-3" id="bookmark-title-parent">
-            <h1 id="bookmark-title-header" class="uk-article-title" style="display: inline;"><a class="uk-link-reset" id="bookmark-title-link" href="/bookmarks/{{ bookmark.id }}">{{ bookmark.title|default:bookmark.work.title }}</a></h1> <span id="bookmark-user-span" class="uk-text-large uk-margin-left"> {% translate 'bookmarked by' %} </span><a href="{% url 'user-profile-parent' bookmark.user_id %}"><span id="bookmark-username-span" class="uk-text-large">{{bookmark.user}}</span></a>
-            {% if bookmark.draft %}
-            <div id="bookmark-draft-badge" class="uk-width-auto">
-                <span id="bookmark-draft-span" class="uk-label uk-label-warning"><strong id="bookmark-draft-text">DRAFT</strong></span>
-            </div>
-            {% endif %}
-        </div>
-        <div class="uk-text-right uk-width-1-3" id="bookmark-user-controls-parent">
-            {% if bookmark.user == request.user.username %}
-            {% if bookmark.draft %}
-            <a class="ourchive-icon-wrapper" id="bookmark-publish-link" href="/bookmarks/{{ bookmark.id }}/publish"><span uk-icon="icon: ourchive-publish;ratio:.75" title="Publish"></span> </a>
-            {% endif %}
-            <a class="ourchive-icon-wrapper" id="bookmark-edit-link" href="/bookmarks/{{ bookmark.id }}/edit"><span uk-icon="icon: ourchive-edit;ratio:.75"></span> </a>
-            <a class="ourchive-icon-wrapper" id="bookmark-delete-link" uk-toggle="target: #bookmark-{{bookmark.id}}-modal-delete"><span uk-icon="icon: ourchive-delete;ratio:.75"></span> </a>
-            {% include "delete_modal.html" with object='bookmark' object_id=bookmark.id %}
-            {% endif %}
-        </div>
-    </div>
-    <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" id="bookmark-content-grid-parent" uk-grid>
-        <div id="bookmark-work-link-grid-hr" class="uk-width-1-1"><hr/></div>
-    	<div id="bookmark-work-link-grid-span" class="uk-width-1-2"><span id="bookmark-work-link-span" class="uk-text-bold">Work:</span> <a id="bookmark-work-link-id" class="uk-link uk-text-medium" href="{% url 'fe-work-view' work.id %}">{{ work.title }}</a> by <a href="{% url 'user-profile-parent' bookmark.work.user_id %}" title="Bookmark work creator" id="bookmark-work-creator-link">{{work.user}}</a></a></span></div>
-    	{% if settings.RatingsEnabled %}
-	    <div id="bookmark-rating-parent" class="uk-width-1-2">
-	    	<p id="bookmark-description-hed" class="uk-text-medium"><span>{{bookmark.user}}'s rating:</span>
-    	    	{% for stars in rating_range %}
-    	            <div id="bookmark-star-parent" class="uk-animation-toggle uk-inline" tabindex="0">
-    	                <div id="bookkmark-star-child">
-    	                    {% if stars <= bookmark.rating %}
-    	                        <span id="bookmark-star-filled-span" uk-icon="icon: star" id="rating_{{stars}}" class="rating-star"></span>
-    	                    {% else %}
-    	                        <span id="bookmark-star-empty-span" uk-icon="icon: star" id="rating_{{stars}}"></span>
-    	                    {% endif %}
-    	                    
-    	                </div>
-    	            </div>
-    	        {% endfor %}
-            </p>
-	    </div>	
-        {% endif %} 
-        {% if bookmark.description %}
-            <div id="bookmark-description-parent" class="uk-margin-top"><span class="uk-text-large">{{bookmark.user}} says:</span></div>
-            <div id="bookmark-description-text" class="uk-text-medium"><span class="uk-text-medium">{{ bookmark.description|safe }}</span></div>	   
-        {% endif %}
-    </div>
-    {% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}
-    {% include "tag_partial.html" with obj_name='bookmark-tag' tags=tags %}
-    <div class="uk-grid-column-small uk-grid-row-small uk-child-width-1-1@s ourchive-parent-grid" id="bookmark-comments-grid-parent" uk-grid>
-        <div class="uk-text-right" id="bookmark-metadata-parent">
-        {% include 'bookmark_metadata.html' %}
-        </div>
+    {% include "bookmark_tile.html" %}
+    <div class="row row-cols-1" id="bookmark-comments-grid-parent">
         {% if settings.AllowComments %}<div id="bookmark-comments-divider-hr" class="uk-margin-top"><hr id="bookmark-comments-hr" class="ourchive-hr"/></div>{% endif %}
         <div class="uk-width-1" id="bookmark-parent-comments-include-container">{% include 'comments_parent.html' with object_name='bookmark' comments=comments object=bookmark edit_action_url=bookmark.edit_action_url post_action_url=bookmark.post_action_url comment_offset=comment_offset delete_obj='bookmark-comment' load_more_base=load_more_base view_thread_base=view_thread_base comment_count=bookmark.comment_count %}</div>  
     </div>
-</article>
 
 {% if scroll_comment_id %}
     <script>
@@ -69,6 +16,5 @@
         }
     </script>
 {% endif %}
-</div>
 <script src="{% static 'frontend/js/ourchive-bookmarks.js' %}"></script>
 {% endblock %}

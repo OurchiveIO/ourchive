@@ -4,7 +4,7 @@
 <div class="row row-cols-1">
     <h1 id="news-list-user-h1" class="justify-content-center">News</h1>
     {% for news_item in news %}
-        <div class="row row-cols-1 mb-3">{% include "news_tile.html" %}</div>
+        <div class="row row-cols-1 mb-3" data-testid="news-tile">{% include "news_tile.html" %}</div>
     {% endfor %}
 </div>
 <div class="row row-cols-1">
