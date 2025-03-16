@@ -47,8 +47,8 @@
                 {% endif %}
                 <input type="hidden" id="active_tab" name="active_tab" value="{{ default_tab }}">
                 <div class="mb-3 border-start border-end border-bottom p-3">
-                    <button data-testid="search-facet-form-submit" class="btn btn-secondary" type="button" onClick="clearAll()">Clear All</button>
-                    <input id="search-results-work-facet-form-submit" class="btn btn-primary" type="submit" value="Filter"/>
+                    <button data-testid="search-facet-form-cancel" class="btn btn-secondary" type="button" onClick="clearAll()">Clear All</button>
+                    <input data-testid="search-facet-form-submit" id="search-results-work-facet-form-submit" class="btn btn-primary" type="submit" value="Filter"/>
                 </div>
 	        </form>
         </div>

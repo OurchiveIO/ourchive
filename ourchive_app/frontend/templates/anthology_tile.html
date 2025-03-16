@@ -29,7 +29,7 @@
                     <span class="oc-show-less">{% translate '- Show Less' %}</span>
                 </a>{% endif %}
             </div>
-            <div class="osm-container" id="show-tags-{{ anthology.id }}">
+            <div class="osm-container" id="show-tags-{{ anthology.id }}" data-testid="anthology-attrs">
                 {% if anthology.tags or anthology.attributes %}
                     <hr class="ourchive-hr"/>
                 {% endif %}
@@ -38,7 +38,7 @@
             </div>
         </div>
     </div>
-    <div class="row row-cols-1" id="anthology-{{ anthology.id }}-list-meta">
+    <div class="row row-cols-1" id="anthology-{{ anthology.id }}-list-meta" data-testid="anthology-meta">
         {% include 'anthology_metadata.html' %}
     </div>
 </div>

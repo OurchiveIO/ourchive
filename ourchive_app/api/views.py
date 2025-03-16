@@ -104,8 +104,9 @@ class TagAutocomplete(APIView):
 
     def get(self, request, format=None):
         searcher = OurchiveSearch()
+        tag_type = request.GET.get('type') if request.GET.get('type') and request.GET.get('type') != 'null' else None
         results = searcher.do_tag_search(request.GET.get(
-            'term'), request.GET.get('type'), request.GET.get('fetch_all', False))
+            'term'),  tag_type, request.GET.get('fetch_all', False))
         return Response({'results': results})
 
 

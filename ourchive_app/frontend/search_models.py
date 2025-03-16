@@ -22,18 +22,16 @@ class ParentSearch():
 
 
 class ObjectSearch():
-	def __init__(self, mode, term, include_filter=None, exclude_filter=None):
+	def __init__(self, term, include_filter=None, exclude_filter=None):
 		self.term = term
-		self.include_mode = mode[0]
-		self.exclude_mode = mode[1]
 		self.page = 1
 		self.include_filter = {'tags': [], 'attributes': []} if not include_filter else include_filter
 		self.exclude_filter = {'tags': [], 'attributes': []} if not exclude_filter else exclude_filter
 
 
 class TagSearch(ObjectSearch):
-	def __init__(self, mode, term):
-		super(TagSearch, self).__init__(mode, term, {'tag_type': [], 'text': []}, {'tag_type': [], 'text': []})
+	def __init__(self, term):
+		super(TagSearch, self).__init__(term, {'tag_type': [], 'text': []}, {'tag_type': [], 'text': []})
 
 
 class WorkSearch(object):
@@ -61,12 +59,12 @@ class WorkSearch(object):
 
 
 class SearchObject(object):
-	def with_term(self, term, pagination=None, mode=('all', 'all'), order_by='-updated_on', search_name=None):
-		work_search = ObjectSearch(mode, term)
-		bookmark_search = ObjectSearch(mode, term)
-		collection_search = ObjectSearch(mode, term)
-		user_search = ObjectSearch(mode, term)
-		tag_search = TagSearch(mode, term)
+	def with_term(self, term, pagination=None, order_by='-updated_on', search_name=None):
+		work_search = ObjectSearch(term)
+		bookmark_search = ObjectSearch(term)
+		collection_search = ObjectSearch(term)
+		user_search = ObjectSearch(term)
+		tag_search = TagSearch(term)
 		return_obj = ParentSearch(work_search, bookmark_search, collection_search, user_search, tag_search, order_by, search_name)
 
 		if pagination:

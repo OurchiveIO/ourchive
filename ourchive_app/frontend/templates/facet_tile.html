@@ -1,16 +1,16 @@
 {% load i18n %}
 <div class="mb-3">
-    <p class="fw-bold fs-5">{{ facet.label }}</p>
+    <p data-testid="facet-label" class="fw-bold fs-5">{{ facet.label }}</p>
 	{% if facet.object_type == 'tag' %}
 	<div class="mb-3">
-		<label class="form-label fw-bold" for="include_{{facet.label}},{{ facet.object_type }}">{% translate 'Include' %}</label>
+		<label data-testid="include-label" class="form-label fw-bold" for="include_{{facet.label}},{{ facet.object_type }}">{% translate 'Include' %}</label>
 		<select data-testid="include-multiselect" multiple name="include_{{facet.label}},{{ facet.object_type }}[]" id="include_{{facet.label}},{{ facet.object_type }}" class="form-select">
 			{% for value in facet.values %} 
             <option id="{{ facet.label }},{{ value.label }},include" name="include_{{ facet.label }},{{ value.label }},{{facet.object_type}}" value="{{value.label}}" {% if value.checked %}selected{% endif %}>{{value.label}}</option>
            {% endfor %}
         </select>
-        <label class="form-label fw-bold mt-2" for="exclude_{{facet.label}},{{ facet.object_type }}">{% translate 'Exclude' %}</label>
-        <select class="form-select" multiple name="exclude_{{facet.label}},{{ facet.object_type }}" id="exclude_{{facet.label}},{{ facet.object_type }}">
+        <label data-testid="exclude-label" class="form-label fw-bold mt-2" for="exclude_{{facet.label}},{{ facet.object_type }}">{% translate 'Exclude' %}</label>
+        <select data-testid="exclude-multiselect" class="form-select" multiple name="exclude_{{facet.label}},{{ facet.object_type }}[]" id="exclude_{{facet.label}},{{ facet.object_type }}">
 			{% for value in facet.values %} 
             <option id="{{ facet.label }},{{ value.label }},exclude{% if mobile %},mobile{% endif %}" name="exclude_{{ facet.label }},{{ value.label }},{{facet.object_type}}" value="{{value.label}}" {% if value.inverse_checked %}selected{% endif %}>{{value.label}}</option>
            {% endfor %}

@@ -85,7 +85,6 @@ def build_request_filters(request, include_exclude, request_object, request_buil
 	if len(filter_details) == 1:
 		if not filter_val:
 			return request_object
-	# on making the API request, and collections.defaultdict should be used to prevent cluttered logic
 	filter_key = filter_details[2] if len(filter_details) > 2 else filter_details[1]
 	filter_type = request_builder.get_object_type(filter_key)
 	if filter_type == 'attribute':
@@ -218,6 +217,7 @@ def build_search(request):
 	work_type_id = None
 	valid_search = False
 	search_name = request.POST.get('search-name', None)
+	term = ''
 	if 'term' in request.GET:
 		term = request.GET['term']
 		valid_search = True
@@ -239,13 +239,11 @@ def build_search(request):
 	if not valid_search:
 		logger.info(f'Not a valid search. Returning. Request get: {request.GET} Request post: {request.POST}')
 		return None
-	include_filter_any = 'any' if request.POST.get('include_any_all') == 'on' else 'all'
-	exclude_filter_any = 'any' if request.POST.get('exclude_any_all') == 'on' else 'all'
 	order_by = request.POST['order_by'] if 'order_by' in request.POST else '-updated_on'
 	request_builder = SearchObject()
 	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
-	request_object = request_builder.with_term(term, pagination, (include_filter_any, exclude_filter_any), order_by,
-											   search_name)
+	request_object = request_builder.with_term(
+		term, pagination, order_by, search_name)
 	if tag_id:
 		request_object.tag_id = tag_id
 	if attr_id:

@@ -842,7 +842,7 @@ def saved_search(request, pk):
 def tag_autocomplete(request):
 	term = request.GET.get('text')
 	params = {'term': term}
-	params['type'] = request.GET.get('type') if 'type' in request.GET else ''
+	params['type'] = request.GET.get('type') if 'type' in request.GET else None
 	params['fetch_all'] = request.GET.get('fetch_all') if 'fetch_all' in request.GET else ''
 	response = do_get(f'api/tag-autocomplete', request, params, 'Tag')
 	template = 'tag_autocomplete.html' if request.GET.get('source') == 'search' else 'edit_tag_autocomplete.html'

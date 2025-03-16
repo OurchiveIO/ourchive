@@ -34,7 +34,7 @@
 			if (document.getElementById(checkbox_id+"_badge") !== null) {
 	            return;
 	        }
-			createToken(document.getElementById("selected-filters-list"), checkbox.parentNode.innerText, checkbox.parentNode.innerText, checkbox_id+"_badge");
+			//createToken(document.getElementById("selected-filters-list"), checkbox.parentNode.innerText, checkbox.parentNode.innerText, checkbox_id+"_badge");
 		});
 
 		const inputboxes = document.querySelectorAll(".facet-val-input");
@@ -46,7 +46,7 @@
 			if (inputbox.value.trim() !== "") {
 				let labelParts = inputbox.id.split(',');
 			    let label = labelParts[1] + ": " + inputbox.value; 
-			    createToken(document.getElementById("selected-filters-list"), label, label, input_id+"_badge");
+			    //createToken(document.getElementById("selected-filters-list"), label, label, input_id+"_badge");
 			}
 		});
 	});
@@ -114,6 +114,13 @@
 			element.remove();
 		});
 	}
+
+    function handleFacetCheckUncheck(e) {
+
+    }
+    function handleFacetInput(e) {
+
+    }
 </script>
 <div class="row row-cols-1">
     <ul class="nav nav-tabs" role="tablist">
@@ -207,5 +214,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}

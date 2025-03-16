@@ -7170,12 +7170,22 @@ progress {
   min-width: 335px;
 }
 
+.choices__list[aria-expanded=true] {
+  z-index: 1000 !important;
+}
+
 @media (min-width: 992px) {
   .oc-fixed-width {
     width: 430px;
   }
   .oc-filter-dropdown {
-    min-width: 500px;
+    min-width: 600px;
+  }
+  .nav-search-input {
+    min-width: 600px;
+  }
+  .oc-nav-items-right {
+    min-width: 200px;
   }
 }
 

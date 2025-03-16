@@ -13,17 +13,12 @@
             });
         }
 </script>
-<nav class="navbar navbar-expand-lg bg-primary d-flex justify-content-between">
-
-    <div class="navbar-nav  col-md-4 col-5 align-items-start ms-1 ms-md-5">
+<nav class="navbar navbar-expand-md bg-primary">
+    <div class="navbar ms-2 order-0">
         <a class="navbar-brand" href="/" title="Home" data-testid="ourchive-logo-link" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home" width="40" height="40" />{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home" width="40" height="40"/>{% endif %}</a>
+
     </div>
-    <div class="navbar-nav col-6 align-items-end d-md-none me-1">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#navbarNavOffcanvas" aria-controls="navbarNavOffcanvas" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-    <div class="col-md-4 col-12 d-flex justify-content-center">
+    <div class="container-fluid mx-auto justify-content-center order-2">
         <form role="search" action="/search/" method="post" id="nav-search-form" class="p-2">
                   {% csrf_token %}
                   <div class="input-group" id="index-search-parent">
@@ -32,7 +27,7 @@
                           {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk' %}
                       </div>
                       <div class="dropdown">
-                        <input class="form-control me-2" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
+                        <input class="form-control me-2 nav-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
                           <button class="btn dropdown-toggle" hidden type="button" data-bs-toggle="dropdown" aria-expanded="false" id="tag-autocomplete-dropdown-btn">{% translate 'Close' %}</button>
                           <div id="tag-autocomplete-dropdown-navbar" class="dropdown-menu">
                             {% include 'tag_autocomplete.html' %}
@@ -42,13 +37,9 @@
                   </div>
               </form>
     </div>
-
-    <div class="offcanvas offcanvas-end col-md-3 justify-content-md-end me-md-1" tabindex="-1" id="navbarNavOffcanvas">
-        <div class="offcanvas-header">
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <ul class="nav navbar-nav d-flex align-self-end" style="margin-right: 5em;">
-            <li id="theme-switcher-li" class="nav-item">
+    <div class="navbar me-2 order-1 order-md-3 oc-nav-items-right" id="navbarNavOffcanvas">
+        <ul class="list-inline">
+            <li id="theme-switcher-li" class="list-inline-item">
                 <a onclick="switchTheme()" href="#" id="theme-switcher-link" class="nav-link" title="Switch Modes">
                     {% if request.session.css_mode == "dark" %}
                         <i class="bi bi-sun text-light"></i>
@@ -58,13 +49,13 @@
                 </a>
             </li>
             {% if not request.user.is_authenticated %}
-            <li id="nav-right-main" class="nav-item">
+            <li id="nav-right-main" class="list-inline-item">
                 <a href="{% url 'fe-login' %}" class="btn btn-secondary">{% translate 'Sign In' %}
                     <i class="bi bi-person-circle text-dark"></i>
                 </a>
             </li>
             {% else %}
-            <li id="nav-right-main" class="nav-item dropdown">
+            <li id="nav-right-main" class="list-inline-item dropdown">
                 <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="{{ request.user }}" href="#" id="nav-username">{% translate 'Account' %}
                     {% if request.session.has_notifications %}
                         <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
@@ -72,7 +63,7 @@
                         </span>
                     {%endif%}
                 </a>
-                <ul class="dropdown-menu">
+                <ul class="dropdown-menu dropdown-menu-end">
                     <li id="nav-new-collection-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-collection-link" class="dropdown-item">{% translate 'New Collection' %}</a></li>
                     <li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link" class="dropdown-item">New Work</a></li>
                     <li id="nav-new-series-li"><a href="{% url 'fe-create-series' %}" id="nav-new-series-link" class="dropdown-item">{% translate 'New Series' %}</a></li>

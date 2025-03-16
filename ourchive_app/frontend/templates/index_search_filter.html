@@ -18,6 +18,7 @@
     {% csrf_token %}
     <input type="hidden" id="search_id" name="search_id" value="{{ search.id }}"/>
     <input type="hidden" id="search-name" name="search-name" value="{{ search.name }}"/>
+    <input type="hidden" id="filter-search-text" name="term" value="{{ search.term }}"/>
     {% if idx_saved_searches %}
     <div class="mb-3">
         <label for="search-saved-searches" class="form-label">{% translate 'Saved Searches' %}</label>
@@ -30,59 +31,37 @@
     </div>
     {% endif %}
     <div class="mb-3">
-        <label for="filter-search-text" class="form-label">{% translate 'Search Term' %}</label>
-        <input id="filter-search-text" name="term" class="form-control" value="{{ search.term }}" oninput="updateIndexSearchText(this.value, true)"/>
-    </div>
-    <div class="mb-3">
-        <label for="language-search" class="form-label">{% translate 'Language' %}</label>
+        <label for="saved-search-{{ search.id }}-languages" class="form-label fw-bold">{% translate 'Language' %}</label>
             <div class="multi-select-component" id="languages-wrapper">
-                <select multiple  name="languages[]" id="saved-search-{{ search.id }}-languages" hidden>
-                {% if search.languages %}
-                    {% for language in search.languages %}
-                        <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
-                    {% endfor %}
-                {% else %}
-                    {% for language in idx_languages %}
-                        <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
-                    {% endfor %}
-                {% endif %}
+                <select multiple name="languages[]" id="saved-search-{{ search.id }}-languages" class="form-select">
+                    {% if search.languages %}
+                        {% for language in search.languages %}
+                            <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                        {% endfor %}
+                    {% else %}
+                        {% for language in idx_languages %}
+                            <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                        {% endfor %}
+                    {% endif %}
                 </select>
-                {% if search.languages %}
-                    {% for language in search.languages %}
-                        {% if language.selected %}
-                        <div class="selected-wrapper" id="language-wrapper-{{ language.display_name }}"><span class="selected-label">{{language.display_name}}</span><a class="selected-close" tabindex="-1" data-option="{{language.display_name}}" data-hits="0" uk-icon="icon: ourchive-close" onclick="removeElement('language', '{{ language.display_name }}')"></a></div>
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    {% for language in idx_languages %}
-                        {% if language.selected %}
-                        <div class="selected-wrapper" id="language-wrapper-{{ language.display_name }}"><span class="selected-label">{{language.display_name}}</span><a class="selected-close" tabindex="-1" data-option="{{language.display_name}}" data-hits="0" uk-icon="icon: ourchive-close" onclick="removeElement('language', '{{ language.display_name }}')"></a></div>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-                <div class="language-search-wrapper">
-                    <input id="language-search" class="form-control" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for languages...' %}" oninput="doLanguageAutocomplete(this.value, 'search', '', 'populateSavedSearchLanguage(this)')">
-                </div>
+                <script>initializeMultiSelect('saved-search-{{ search.id }}-languages')</script>
             </div>
-            <div id="language-autocomplete-dropdown"></div>
     </div>
-
-    <div class="mb-3">
-        <label for="saved-search-{{ search.id }}-status" class="form-label">{% translate 'Status' %}</label>
-        <div id="saved-search-{{ search.id }}-status-0" class="form-check">
-            <input id="saved-search-{{ search.id }}-0" class="form-check-input" type="radio" name="complete" value="0" {% if '0' in search.work_statuses and '1' not in search.work_statuses %}checked{% endif %}><label class="form-check-label" for="saved-search-{{ search.id }}-0"> {% translate 'Incomplete' %}</label>
+    <div class="row mb-3">
+        <div class="col-6">
+            <label for="saved-search-{{ search.id }}-status" class="form-label fw-bold">{% translate 'Status' %}</label>
+            <div id="saved-search-{{ search.id }}-status-0" class="form-check">
+                <input id="saved-search-{{ search.id }}-0" class="form-check-input" type="radio" name="complete" value="0" {% if '0' in search.work_statuses and '1' not in search.work_statuses %}checked{% endif %}><label class="form-check-label" for="saved-search-{{ search.id }}-0"> {% translate 'Incomplete' %}</label>
+            </div>
+            <div id="saved-search-{{ search.id }}-status-1" class="form-check">
+                <input id="saved-search-{{ search.id }}-1" class="form-check-input" type="radio" name="complete" value="1" {% if '1' in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}><label class="form-check-label" for="saved-search-{{ search.id }}-1"> {% translate 'Complete' %}</label>
+            </div>
+            <div id="saved-search-{{ search.id }}-status-2" class="form-check">
+                <input id="saved-search-{{ search.id }}-2" class="form-check-input" type="radio" name="complete" value="-1" {% if '1' in search.work_statuses and '0' in search.work_statuses %}checked{% elif '1' not in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}><label class="form-check-label" for="saved-search-{{ search.id }}-2"> {% translate 'Any' %}</label><br>
+            </div>
         </div>
-        <div id="saved-search-{{ search.id }}-status-1" class="form-check">
-            <input id="saved-search-{{ search.id }}-1" class="form-check-input" type="radio" name="complete" value="1" {% if '1' in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}><label class="form-check-label" for="saved-search-{{ search.id }}-1"> {% translate 'Complete' %}</label>
-        </div>
-        <div id="saved-search-{{ search.id }}-status-2" class="form-check">
-            <input id="saved-search-{{ search.id }}-2" class="form-check-input" type="radio" name="complete" value="-1" {% if '1' in search.work_statuses and '0' in search.work_statuses %}checked{% elif '1' not in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}><label class="form-check-label" for="saved-search-{{ search.id }}-2"> {% translate 'Any' %}</label><br>
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <label for="saved-search-{{ search.id }}-work-types" class="form-label">{% translate 'Work Type' %}</label>
-
+        <div class="col-6">
+            <label for="saved-search-{{ search.id }}-work-types" class="form-label fw-bold">{% translate 'Work Type' %}</label>
             <select multiple id="work_types[]" name="work_types[]" hidden>
                 {% if search.work_types %}
                     {% for work_type in search.work_types %}
@@ -107,56 +86,35 @@
                     </div>
                 {% endfor %}
             {% endif %}
-
+        </div>
     </div>
-
-    <div class="mb-3">
+    <div class="row mb-3">
         <label for="word-count-{{ search.id }}" id="saved-search-{{ search.id }}-wordcount" class="form-label fw-bold">{% translate 'Word Count' %}</label>
-        <div class="uk-form-controls" id="word-count-{{ search.id }}">
+        <div class="col-6" id="word-count-from-{{ search.id }}">
             <label for="word_count_gte" class="form-label">{% translate 'From' %}</label>
             <input class="form-control" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.word_count_gte|default_if_none:'' }}"/>
+        </div>
+        <div class="col-6">
             <label for="word_count_lte" class="form-label">{% translate 'To' %}</label>
             <input class="form-control" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.word_count_lte|default_if_none:'' }}"/>
         </div>
     </div>
-
     <div class="mb-3">
-        <label for="saved-search-{{ search.id }}-tags" class="uk-text-bold uk-form-label">{% translate 'Tags' %}</label>
-        <div id="saved-search-{{ search.id }}-tags" class="uk-form-controls">
-            <span class="ourchive-muted">Include</span>
-            <div class="multi-select-component" id="include-wrapper">
-                <select multiple id="include_facets[]" name="include_facets[]" hidden>
-                    {% for tag in search.include_facets_json %}
-                        <option id="include-{{ tag }}-option" value="{{ tag }}" selected>{{ tag }}</option>
-                    {% endfor %}
-                </select>
-                {% for tag in search.include_facets_json %}
-                    <div class="selected-wrapper" id="include-wrapper-{{ tag }}"><span class="selected-label">{{tag}}</span><a class="selected-close" tabindex="-1" data-option="{{tag}}" data-hits="0" uk-icon="icon: ourchive-close" onclick="removeElement('include', '{{ tag }}')"></a></div>
-                {% endfor %}
-                <div class="uk-width-expand include-search-wrapper">
-                    <input id="include-tag-search" class="uk-form-blank uk-width-expand" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for tags...' %}" oninput="doAutocomplete(this.value, 'search', 'savedsearchinclude', '', ',', 'populateSavedSearchInclude(this)')">
-                </div>
-                <a href="" uk-icon="icon: chevron-down" class="uk-icon uk-margin-remove uk-flex-right"></a>
-            </div>
-            <div id="tag-autocomplete-dropdown-savedsearchinclude" uk-drop="mode: hover; delay-hide: 2500; auto-update:false; pos: bottom-center"></div>
-            <span class="ourchive-muted">Exclude</span>
-            <div class="multi-select-component" id="exclude-wrapper">
-                <select multiple id="exclude_facets[]" name="exclude_facets[]" hidden>
-                    {% for tag in search.exclude_facets_json %}
-                        <option id="exclude-{{ tag }}-option" value="{{ tag }}" selected>{{ tag }}</option>
-                    {% endfor %}
-                </select>
-                {% for tag in search.exclude_facets_json %}
-                    <div class="selected-wrapper" id="exclude-wrapper-{{ tag }}"><span class="selected-label">{{tag}}</span><a class="selected-close" tabindex="-1" data-option="{{tag}}" data-hits="0" uk-icon="icon: ourchive-close" onclick="removeElement('exclude', '{{ tag }}')"></a></div>
-                {% endfor %}
-                <div class="uk-width-expand exclude-search-wrapper">
-                    <input id="exclude-tag-search" class="uk-form-blank uk-width-expand" autocomplete="off" tabindex="0" placeholder="{% translate 'Search for tags...' %}" oninput="doAutocomplete(this.value, 'search', 'savedsearchexclude', '', ',', 'populateSavedSearchExclude(this)')">
-                </div>
-                <a uk-icon="icon: chevron-down" class="uk-icon uk-margin-remove uk-flex-right"></a>
-            </div>
-            <div id="tag-autocomplete-dropdown-savedsearchexclude" uk-drop="toggle: #exclude-wrapper; delay=hide: 2500; auto-update:false; mode: hover; pos: bottom-center;"></div>
-        </div>
+        <p class="fw-bold">{% translate 'Tags' %}</p>
+        <label for="include_filter,tag[]" class="form-label">{% translate 'Include' %}</label>
+        <select data-testid="filter-tag-select" multiple name="include_filter,tag[]" id="include_filter,tag[]" class="form-select oc-searchable-tags">
+            {% for tag in search.include_facets_json %}
+                <option id="include-{{ tag }}-option" value="{{ tag }}" selected>{{ tag }}</option>
+            {% endfor %}
+        </select>
+        <label for="exclude_filter,tag[]" class="form-label">{% translate 'Exclude' %}</label>
+        <select data-testid="filter-tag-select" multiple name="exclude_filter,tag[]" id="exclude_filter,tag[]" class="form-select oc-searchable-tags">
+            {% for tag in search.exclude_facets_json %}
+                <option id="exclude-{{ tag }}-option" value="{{ tag }}" selected>{{ tag }}</option>
+            {% endfor %}
+        </select>
     </div>
+    <script>initializeEditTags()</script>
     <div class="mb-3">
         <input id="saved-search-0-submit" class="btn btn-primary" type="submit" value="{% translate 'Apply Filters' %}"/>
         {% if request.user.is_authenticated %}<a id="saved-search-0-delete" class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#save-search-modal">{% translate 'Save Search' %}</a>{% endif %}
