@@ -1,0 +1,20 @@
+{% load i18n %}
+<div class="col-12">
+    <div id="{{chive_name}}-pagination-parent" class="row row-cols-1">
+        <nav aria-label="{% translate 'Pagination' %}" class="oc-justify-center">
+            <ul class="pagination">
+                {% if chive.page.prev_params and chive.page.prev_params != None %}<li class="page-item"><a class="page-link" href="{{ chive.page.prev_params }}{% if term and term is not None %}&term={{term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}>{% translate 'Previous' %}</a></li>
+                {% else %}<li class="page-item"><a class="page-link disabled" href="#">{% translate 'Previous' %}</a></li>{% endif %}
+                {% for number in chive.pagination_array %}
+                {% if number != '...' %}
+                    <li class="page-item {% if chive.page.current_page == number %}active{% endif %}"><a class="page-link" onclick="searchWorks({{ number }}, '{{term}}', {% if tag_id %}{{ tag_id }}{% else %}0{% endif %}, {% if attr_id %}{{ attr_id }}{% else %}0{% endif %}, {% if work_type_id %}{{ work_type_id }}{% else %}0{% endif %}, {% if chive.page.page_params %}'{{ chive.page.page_params }}'{% else %}''{% endif %})">{{ number }}</a></li>
+                {% else %}
+                    <li class="page-item disabled"><a class="page-link">…</a></li>
+                {% endif %}
+                {% endfor %}
+                {% if chive.page.next_params and chive.page.next_params != 'None' %}<li class="page-item"><a class="page-link" href="{{ chive.page.next_params }}{% if term %}&term={{term}}{%endif%}" {% if click_func %}onclick="{{click_func}}"{% endif %}>{% translate 'Next' %}</a></li>
+                {% else %}<li class="page-item"><a class="page-link disabled" href="#">{% translate 'Next' %}</a></li>{% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>

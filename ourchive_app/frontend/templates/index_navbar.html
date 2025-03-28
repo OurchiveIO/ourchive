@@ -19,23 +19,24 @@
 
     </div>
     <div class="container-fluid mx-auto justify-content-center order-2">
-        <form role="search" action="/search/" method="post" id="nav-search-form" class="p-2">
-                  {% csrf_token %}
-                  <div class="input-group" id="index-search-parent">
-                      <div class="dropdown">
-                          <button class="btn btn-light dropdown-toggle" data-bs-auto-close="outside" type="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate 'Filters' %}</button>
-                          {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk' %}
-                      </div>
-                      <div class="dropdown">
-                        <input class="form-control me-2 nav-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
-                          <button class="btn dropdown-toggle" hidden type="button" data-bs-toggle="dropdown" aria-expanded="false" id="tag-autocomplete-dropdown-btn">{% translate 'Close' %}</button>
-                          <div id="tag-autocomplete-dropdown-navbar" class="dropdown-menu">
-                            {% include 'tag_autocomplete.html' %}
-                          </div>
-                      </div>
-                      <button type="submit" data-testid="navbar-search-submit" class="btn btn-secondary"><i class="bi bi-search text-dark"></i></button>
+        <div class="dropdown">
+          <button class="btn btn-light dropdown-toggle" data-bs-auto-close="outside" type="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate 'Filters' %}</button>
+          {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk' %}
+        </div>
+        <form role="search" action="/search/" method="post" id="nav-search-form" class="p-2 ps-0">
+          {% csrf_token %}
+          <div class="input-group" id="index-search-parent">
+
+              <div class="dropdown">
+                <input class="form-control me-2 nav-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
+                  <button class="btn dropdown-toggle" hidden type="button" data-bs-toggle="dropdown" aria-expanded="false" id="tag-autocomplete-dropdown-btn">{% translate 'Close' %}</button>
+                  <div id="tag-autocomplete-dropdown-navbar" class="dropdown-menu">
+                    {% include 'tag_autocomplete.html' %}
                   </div>
-              </form>
+              </div>
+              <button type="submit" data-testid="navbar-search-submit" class="btn btn-secondary"><i class="bi bi-search text-dark"></i></button>
+          </div>
+      </form>
     </div>
     <div class="navbar me-2 order-1 order-md-3 oc-nav-items-right" id="navbarNavOffcanvas">
         <ul class="list-inline">

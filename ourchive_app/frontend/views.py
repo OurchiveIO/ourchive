@@ -2254,7 +2254,7 @@ def user_saved_searches(request, username):
 	languages = get_languages(request)
 	work_types = get_work_types(request)
 	for saved_search in saved_searches.get('results', []):
-		saved_search['languages'] = process_languages(languages, saved_search.get('languages_readonly', []))
+		saved_search['languages'] = process_languages(languages, saved_search.get('info_facets_json').get('languages', []), True)
 		get_saved_search_chive_info(saved_search, work_types)
 	return render(request, 'user_saved_searches.html', {
 		'saved_searches': saved_searches})

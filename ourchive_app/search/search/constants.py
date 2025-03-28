@@ -1,4 +1,5 @@
 TAG_SEARCH_KEY = 'tags__text__icontains'
+TAG_FILTER_KEY = 'tags__text__iexact'
 WORD_COUNT_FILTER_KEY_GTE = 'word_count_gte'
 WORD_COUNT_FILTER_KEY_LTE = 'word_count_lte'
 COMPLETE_KEY = 'is_complete__exact'

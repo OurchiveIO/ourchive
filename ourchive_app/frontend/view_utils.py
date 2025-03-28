@@ -21,6 +21,7 @@ from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
 from datetime import *
 from search.search import constants as search_constants
+from copy import deepcopy
 
 from search.search.constants import WORK_TYPE_FILTER_KEY
 
@@ -547,12 +548,17 @@ def get_languages(request):
 	return do_get(f'api/languages', request, params={}, object_name='Languages').response_data.get('results', [])
 
 
-def process_languages(languages, obj_languages):
+def process_languages(languages, obj_languages, str_array=False):
 	for language in languages:
+		language['selected'] = False
 		for obj_language in obj_languages:
-			if language.get('display_name', None) == obj_language.get('display_name'):
-				language['selected'] = True
-	return languages
+			if str_array:
+				if language.get('display_name', None) == obj_language:
+					language['selected'] = True
+			else:
+				if language.get('display_name', None) == obj_language.get('display_name'):
+					language['selected'] = True
+	return deepcopy(languages)
 
 
 def get_work_types(request):
@@ -567,7 +573,7 @@ def create_browse_cards(request):
 	for wt in work_types:
 		browse_cards[0]['cards'].append({
 			'label': wt['type_name'],
-			'url': f'/search/?work_type={wt["id"]}',
+			'url': f'/search/?work_type_id={wt["id"]}',
 			'id': f'{wt["id"]}'
 		})
 	for tt in tag_types:

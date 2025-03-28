@@ -121,6 +121,37 @@
     function handleFacetInput(e) {
 
     }
+
+    function searchWorks(number, term, tag_id, attr_id, work_type_id, page_params) {
+        if (tag_id < 1) {
+            tag_id = '';
+        }
+        else {
+            tag_id = `&tag_id=${tag_id}`;
+        }
+        if (attr_id < 1) {
+            attr_id = '';
+        }
+        else {
+            attr_id = `&attr_id=${attr_id}`;
+        }
+        if (work_type_id < 1) {
+            work_type_id = '';
+        }
+        else {
+            work_type_id = `&work_type_id=${work_type_id}`;
+        }
+        if (term === 'None') {
+            term = ''
+        }
+        else
+        {
+            term = `&term=${term}`;
+        }
+        let search_form = document.getElementById("search-results-work-facet-form");
+        search_form.action = `/search/filter?page=${number}${term}${tag_id}${attr_id}${work_type_id}${page_params}`;
+        document.getElementById("search-results-work-facet-form").submit();
+    }
 </script>
 <div class="row row-cols-1">
     <ul class="nav nav-tabs" role="tablist">
@@ -179,29 +210,25 @@
                 <div class="row row-cols-1 mb-3">{% include "work_tile.html" %}</div>
             {% endfor %}
             {% if works.data %}
-                <div class="col-12">
-                    {% include 'pagination.html' with pagination_array=works.pagination_array page_params=works.page.page_params current_page=works.page.current_page previous=works.page.prev_params next=works.page.next_params object_name='work_search' search_term=term %}
-                </div>
+
             {% endif %}
         </div>
         <div class="tab-pane fade {% if default_tab == 1 %}show active{% endif %}" role="tabpanel" aria-labelledby="bookmarks_tab" tabindex="0" id="1-tab-pane">
             {% for bookmark in bookmarks.data %}
-                    <div class="row row-cols-1 mb-3">{% include "bookmark_tile.html" %} </div>
-                {% endfor %}
-                {% include 'pagination.html' with pagination_array=bookmarks.pagination_array page_params=bookmarks.page.page_params current_page=bookmarks.page.current_page previous=bookmarks.page.prev_params next=bookmarks.page.next_params object_name='bookmark_search' search_term=term %}
+                <div class="row row-cols-1 mb-3">{% include "bookmark_tile.html" %} </div>
+            {% endfor %}
+            {% include 'search_results_pagination.html' with chive=bookmarks chive_name='bookmark_search' %}
         </div>
         <div class="tab-pane fade {% if default_tab == 2 %}show active{% endif %}" role="tabpanel" aria-labelledby="collections_tab" tabindex="0" id="2-tab-pane">
             {% for bookmark_collection in collections.data %}
                     <div class="row row-cols-1 mb-3">{% include "bookmark_collection_tile.html" %}</div>
                 {% endfor %}
-                {% include 'pagination.html' with pagination_array=collections.pagination_array page_params=collections.page.page_params current_page=collections.page.current_page previous=collections.page.prev_params next=collections.page.next_params object_name='collection_search' search_term=term %}
-        </div>
+                {% include 'search_results_pagination.html' with chive=collections chive_name='collection_search' %}        </div>
         <div class="tab-pane fade {% if default_tab == 3 %}show active{% endif %}" role="tabpanel" aria-labelledby="tags_tab" tabindex="0" id="3-tab-pane">
             <div class="row row-cols-1 mb-3">
                 {% include "tag_partial.html" with obj_name='tag' tags=tags.data %}
                 <div class="mt-3">
-                    {% include 'pagination.html' with pagination_array=tags.pagination_array page_params=tags.page.page_params current_page=tags.page.current_page previous=tags.page.prev_params next=tags.page.next_params object_name='tag_search' search_term=term %}
-
+                    {% include 'search_results_pagination.html' with chive=tags chive_name='tag_search' %}
                 </div>
             </div>
         </div>

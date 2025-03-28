@@ -34,7 +34,7 @@ class WorkFilter(object):
                 COMPLETE_KEY: [],
             },
             'tags': {
-                TAG_SEARCH_KEY: [],
+                TAG_FILTER_KEY: [],
             },
             'attributes': {
                 'attributes__display_name__icontains': [],
@@ -68,7 +68,7 @@ class WorkFilter(object):
                 COMPLETE_KEY: [],
             },
             'tags': {
-                TAG_SEARCH_KEY: [],
+                TAG_FILTER_KEY: [],
             },
             'attributes': {
                 'attributes__display_name__icontains': [],
@@ -97,7 +97,7 @@ class WorkFilter(object):
             self.include_filters['complete'][COMPLETE_KEY] = completes
             self.include_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.include_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
-            self.include_filters['tags'][TAG_SEARCH_KEY] = tags
+            self.include_filters['tags'][TAG_FILTER_KEY] = tags
             self.include_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
             for range_tuple in dict_obj.get('audio_length_range', []):
                 self.include_filters['audio_length_range']['ranges'].append(range_tuple)
@@ -110,7 +110,7 @@ class WorkFilter(object):
             self.exclude_filters['complete'][COMPLETE_KEY] = completes
             self.exclude_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.exclude_filters['image_formats']['chapters__image_format__icontains'] = dict_obj.get('image_formats', [])
-            self.exclude_filters['tags'][TAG_SEARCH_KEY] = tags
+            self.exclude_filters['tags'][TAG_FILTER_KEY] = tags
             self.exclude_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
             for range_tuple in dict_obj.get('audio_length_range', []):
                 self.exclude_filters['audio_length_range']['ranges'].append(range_tuple)
@@ -135,7 +135,7 @@ class BookmarkFilter(object):
                 'attributes__display_name__icontains': [],
             },
             'tags': {
-                TAG_SEARCH_KEY: [],
+                TAG_FILTER_KEY: [],
             },
             'languages': {
                 'languages__display_name__iexact': [],
@@ -149,7 +149,7 @@ class BookmarkFilter(object):
                 'attributes__display_name__icontains': [],
             },
             'tags': {
-                TAG_SEARCH_KEY: [],
+                TAG_FILTER_KEY: [],
             },
             'languages': {
                 'languages__display_name__iexact': [],
@@ -162,12 +162,12 @@ class BookmarkFilter(object):
             self.include_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
             self.include_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.include_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
-            self.include_filters['tags'][TAG_SEARCH_KEY] = tags
+            self.include_filters['tags'][TAG_FILTER_KEY] = tags
         else:
             self.exclude_filters['rating']['rating__exact'] = dict_obj.get('rating_gte', [])
             self.exclude_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
             self.exclude_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
-            self.exclude_filters['tags'][TAG_SEARCH_KEY] = tags
+            self.exclude_filters['tags'][TAG_FILTER_KEY] = tags
 
     def to_dict(self):
         self_dict = self.__dict__
@@ -221,7 +221,7 @@ class CollectionFilter(object):
                 COMPLETE_KEY: [],
             },
             'tags': {
-                TAG_SEARCH_KEY: [],
+                TAG_FILTER_KEY: [],
             },
             'languages': {
                 'languages__display_name__iexact': [],
@@ -235,7 +235,7 @@ class CollectionFilter(object):
                 COMPLETE_KEY: [],
             },
             'tags': {
-                TAG_SEARCH_KEY: [],
+                TAG_FILTER_KEY: [],
             },
             'languages': {
                 'languages__display_name__iexact': [],
@@ -247,12 +247,12 @@ class CollectionFilter(object):
         if include:
             self.include_filters['complete'][COMPLETE_KEY] = dict_obj.get('complete', [])
             self.include_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
-            self.include_filters['tags'][TAG_SEARCH_KEY] = tags
+            self.include_filters['tags'][TAG_FILTER_KEY] = tags
             self.include_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
         else:
             self.exclude_filters['complete'][COMPLETE_KEY] = dict_obj.get('complete', [])
             self.exclude_filters['languages']['languages__display_name__iexact'] = dict_obj.get('Language', [])
-            self.exclude_filters['tags'][TAG_SEARCH_KEY] = tags
+            self.exclude_filters['tags'][TAG_FILTER_KEY] = tags
             self.exclude_filters['attributes']['attributes__display_name__icontains'] = dict_obj.get('attributes', [])
 
     def to_dict(self):

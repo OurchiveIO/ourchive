@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 # values we don't want to send to the API
 NONFILTER_VALS = ['csrfmiddlewaretoken', 'term', 'order_by', 'search-name', 'search_id']
 # values we don't want to add to the frontend facets
-NONRETAIN_VALS = ['order_by', 'active_tab', 'work_type']
+NONRETAIN_VALS = ['order_by', 'active_tab', 'work_type_id']
 
 
 def get_default_search_result_tab(resultsets):
@@ -232,8 +232,8 @@ def build_search(request):
 		attr_id = request.GET['attr_id']
 		term = ""
 		valid_search = True
-	elif 'work_type' in request.GET:
-		work_type_id = request.GET['work_type']
+	elif 'work_type_id' in request.GET:
+		work_type_id = request.GET['work_type_id']
 		term = ""
 		valid_search = True
 	if not valid_search:
@@ -270,6 +270,7 @@ def execute_search(request, post_request):
 	term = request.POST.get('term', '')
 	if not term:
 		term = request.GET.get('term')
+	term = '' if term == 'None' else term
 	tag_id = request.GET.get('tag_id', None)
 	attr_id = request.GET.get('attr_id', None)
 	work_type_id = request.GET.get('work_type_id', None)

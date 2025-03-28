@@ -312,13 +312,13 @@ class SavedSearchSerializer(serializers.HyperlinkedModelSerializer):
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
 
     def get_info_facets_json(self, obj):
-        return json.loads(obj.info_facets.replace('\'', '\"')) if obj.info_facets else {}
+        return json.loads(obj.info_facets.replace('\'', '\"').replace("None", "")) if obj.info_facets else {}
 
     def get_include_facets_json(self, obj):
-        return json.loads(obj.include_facets.replace('\'', '\"')) if obj.include_facets else []
+        return json.loads(obj.include_facets.replace('\'', '\"').replace("None", "")) if obj.include_facets else []
 
     def get_exclude_facets_json(self, obj):
-        return json.loads(obj.exclude_facets.replace('\'', '\"')) if obj.exclude_facets else []
+        return json.loads(obj.exclude_facets.replace('\'', '\"').replace("None", "")) if obj.exclude_facets else []
 
     class Meta:
         model = SavedSearch
@@ -391,10 +391,11 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, tag, validated_data):
         tag_type = TagType.objects.get(label=validated_data['tag_type'])
-        if (tag_type.admin_administrated):
-            user = validated_data['user']
+        user = validated_data.get('user', None)
+        if user:
             validated_data.pop('user')
-            if (user.is_superuser):
+        if (tag_type.admin_administrated):
+            if (user and user.is_superuser):
                 Tag.objects.filter(id=tag.id).update(**validated_data)
                 return Tag.objects.filter(id=tag.id).first()
             else:
@@ -405,10 +406,11 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         tag_type = TagType.objects.get(label=validated_data['tag_type'])
-        if (tag_type.admin_administrated):
-            user = validated_data['user']
+        user = validated_data.get('user', None)
+        if user:
             validated_data.pop('user')
-            if (user.is_superuser):
+        if (tag_type.admin_administrated):
+            if (user and user.is_superuser):
                 tag = Tag.objects.create(**validated_data)
                 return tag
             else:
