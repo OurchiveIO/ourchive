@@ -10,6 +10,8 @@
             .then((templateText) => {
                 document.getElementById(selector).innerHTML = "";
                 document.getElementById(selector).innerHTML = templateText;
+                initializeMultiSelect(`saved-search-${id}-languages`);
+                initializeEditTags();
             });
         }
 </script>
@@ -21,7 +23,24 @@
     <div class="container-fluid mx-auto justify-content-center order-2">
         <div class="dropdown">
           <button class="btn btn-light dropdown-toggle" data-bs-auto-close="outside" type="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate 'Filters' %}</button>
-          {% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk' %}
+            <div class="dropdown-menu container-fluid oc-filter-dropdown">{% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk' %}</div>
+            <div id="save-search-modal" class="modal" tabindex="-1">
+                <div class="modal-dialog" id="save-search-modal-body">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 id="save-search-modal-header" class="uk-modal-title">{% translate 'Save Search' %}</h2>
+                        </div>
+                        <div class="modal-body">
+                            <label class="form-label" for="newsearchname">{% blocktranslate %}Enter a name for this search:{% endblocktranslate %}</label>
+                            <input class="form-control" id="newsearchname" type="text" name="new-search-name" onkeyup="updateSearchName(this.value)" value="{{ search.name }}"/>
+                        </div>
+                        <div id="save-searchmodal-button-parent" class="modal-footer">
+                            <a id="save-search-modal-cancel" data-bs-dismiss="modal" class="btn btn-secondary">{% translate 'Cancel' %}</a>
+                            <a id="save-search-modal-add" class="btn btn-primary" onclick="saveSearch()">{% translate 'Save' %}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <form role="search" action="/search/" method="post" id="nav-search-form" class="p-2 ps-0">
           {% csrf_token %}
