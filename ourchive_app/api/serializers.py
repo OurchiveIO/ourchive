@@ -312,7 +312,7 @@ class SavedSearchSerializer(serializers.HyperlinkedModelSerializer):
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
 
     def get_info_facets_json(self, obj):
-        return json.loads(obj.info_facets.replace('\'', '\"').replace("None", "")) if obj.info_facets else {}
+        return json.loads(obj.info_facets.replace('\'', '\"').replace("None", "").replace("Language", "languages")) if obj.info_facets else {}
 
     def get_include_facets_json(self, obj):
         return json.loads(obj.include_facets.replace('\'', '\"').replace("None", "")) if obj.include_facets else []

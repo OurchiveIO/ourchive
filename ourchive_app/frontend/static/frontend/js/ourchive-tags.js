@@ -67,7 +67,7 @@ function updateIndexSearchText(term, inForm=false) {
 }
 
 function doIndexAutocomplete(term, source, selector, tag_type='', divider='$!$', clickAction='') {
-    updateIndexSearchText(term, true);
+    updateIndexSearchText(term, false);
     document.getElementById("filter-search-text").value = term;
     doAutocomplete(term, source, selector, tag_type, divider, clickAction);
 }

@@ -12,6 +12,8 @@
                 document.getElementById(selector).innerHTML = templateText;
                 initializeMultiSelect(`saved-search-${id}-languages`);
                 initializeEditTags();
+                document.getElementById("newsearchname").value = document.getElementById("search-name").value;
+                document.getElementById("nav-search-input").value = document.getElementById("filter-search-text").value;
             });
         }
 </script>

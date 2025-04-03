@@ -3,7 +3,12 @@
 <script>
     function saveSearch() {
         let search_form = document.getElementById("index-search-filter-form");
-		search_form.action = "/savedsearch/filter?save_new=True";
+        if (document.getElementById("search_id").value < 1) {
+            search_form.action = "/savedsearch/filter?save_new=True";
+        }
+		else {
+            search_form.action = "/savedsearch/filter";
+        }
         document.getElementById("index-search-filter-form").submit();
 	}
 
@@ -17,7 +22,6 @@
         {% csrf_token %}
         <input type="hidden" id="search_id" name="search_id" value="{{ search.id }}"/>
         <input type="hidden" id="search-name" name="search-name" value="{{ search.name }}"/>
-        <input type="hidden" id="filter-search-text" name="term" value="{{ search.term }}"/>
         {% if idx_saved_searches %}
         <div class="mb-3">
             <label for="search-saved-searches" class="form-label">{% translate 'Saved Searches' %}</label>
@@ -29,6 +33,10 @@
             </select>
         </div>
         {% endif %}
+        <div class="mb-3">
+            <label for="filter-search-text" class="form-label fw-bold">{% translate 'Search Term' %}</label>
+            <input class="form-control" autocomplete="off" aria-label="Search" type="search" name="term" value="{{ search.term|default_if_none:'' }}" id="filter-search-text" oninput="updateIndexSearchText(this.value, true)">
+        </div>
         <div class="mb-3">
             <label for="saved-search-{{ search.id }}-languages" class="form-label fw-bold">{% translate 'Language' %}</label>
                 <div class="multi-select-component" id="languages-wrapper">
@@ -60,7 +68,7 @@
                 </div>
             </div>
             <div class="col-6">
-                <label for="saved-search-{{ search.id }}-work-types" class="form-label fw-bold">{% translate 'Work Type' %}</label>
+                <label for="work_types[]" class="form-label fw-bold">{% translate 'Work Type' %}</label>
                 <select multiple id="work_types[]" name="work_types[]" hidden>
                     {% if search.work_types %}
                         {% for work_type in search.work_types %}
@@ -91,23 +99,23 @@
             <label for="word-count-{{ search.id }}" id="saved-search-{{ search.id }}-wordcount" class="form-label fw-bold">{% translate 'Word Count' %}</label>
             <div class="col-6" id="word-count-from-{{ search.id }}">
                 <label for="word_count_gte" class="form-label">{% translate 'From' %}</label>
-                <input class="form-control" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.word_count_gte }}"/>
+                <input class="form-control" id="word_count_gte" name="word_count_gte" type="text" value="{{ search.info_facets_json.word_count_gte }}"/>
             </div>
             <div class="col-6">
                 <label for="word_count_lte" class="form-label">{% translate 'To' %}</label>
-                <input class="form-control" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.word_count_lte }}"/>
+                <input class="form-control" id="word_count_lte" name="word_count_lte" type="text" value="{{ search.info_facets_json.word_count_lte }}"/>
             </div>
         </div>
         <div class="mb-3">
             <p class="fw-bold">{% translate 'Tags' %}</p>
-            <label for="include_filter,tag[]" class="form-label">{% translate 'Include' %}</label>
-            <select data-testid="filter-tag-select" multiple name="include_filter,tag[]" id="include_filter,tag[]" class="form-select oc-searchable-tags">
+            <label for="include_facets[]" class="form-label">{% translate 'Include' %}</label>
+            <select data-testid="filter-tag-select" multiple name="include_facets[]" id="include_facets[]" class="form-select oc-searchable-tags">
                 {% for tag in search.include_facets_json %}
                     <option id="include-{{ tag }}-option" value="{{ tag }}" selected>{{ tag }}</option>
                 {% endfor %}
             </select>
-            <label for="exclude_filter,tag[]" class="form-label">{% translate 'Exclude' %}</label>
-            <select data-testid="filter-tag-select" multiple name="exclude_filter,tag[]" id="exclude_filter,tag[]" class="form-select oc-searchable-tags">
+            <label for="exclude_facets[]" class="form-label">{% translate 'Exclude' %}</label>
+            <select data-testid="filter-tag-select" multiple name="exclude_facets[]" id="exclude_facets[]" class="form-select oc-searchable-tags">
                 {% for tag in search.exclude_facets_json %}
                     <option id="exclude-{{ tag }}-option" value="{{ tag }}" selected>{{ tag }}</option>
                 {% endfor %}
@@ -116,7 +124,7 @@
         <script>initializeEditTags()</script>
         <div class="mb-3">
             <input id="saved-search-0-submit" class="btn btn-primary" type="submit" value="{% translate 'Apply Filters' %}"/>
-            {% if request.user.is_authenticated %}<a id="saved-search-0-delete" class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#save-search-modal">{% translate 'Save Search' %}</a>{% endif %}
+            <!--{% if request.user.is_authenticated %}<a id="saved-search-0-delete" class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#save-search-modal">{% translate 'Save Search' %}</a>{% endif %}-->
         </div>
     </form>
 </div>

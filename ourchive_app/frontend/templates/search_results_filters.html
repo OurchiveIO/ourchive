@@ -27,6 +27,7 @@
                 {% if request.user.is_authenticated %}
                     <div class="border-start border-end border-bottom p-3" id="search-save-name-parent">
                         <label id="save-search-label" for="search-name" class="form-label">{% translate 'Save search with name' %}</label>
+                        <input type="hidden" id="search_id" name="search_id" value="{{ search_id|default_if_none:0 }}"/>
                         <input id="search-name" class="form-control" type="text" name="search-name" value="{{ search_name|default_if_none:'' }}">
                     </div>
                 {% endif %}
