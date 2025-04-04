@@ -31,6 +31,7 @@ from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, Token
 from search.search.search_service import OurchiveSearch
 from search.search.search_obj import GlobalSearch
 from search.models import SavedSearch
+from django.utils.timezone import make_aware
 
 
 @api_view(['GET'])
@@ -526,7 +527,7 @@ class UserWorkList(generics.ListCreateAPIView):
     permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(Q(users__username=self.kwargs['username']) | Q(user__username=self.kwargs['username'])).filter(Q(draft=False) | Q(users__id=self.request.user.id)).order_by('-updated_on')
+        return Work.objects.filter(Q(users__username=self.kwargs['username']) | Q(user__username=self.kwargs['username'])).filter(Q(draft=False) | Q(users__id=self.request.user.id)).distinct().order_by('-updated_on')
 
 
 class UserBookmarkList(generics.ListCreateAPIView):
@@ -1518,7 +1519,7 @@ class AdminAnnouncementActiveList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return AdminAnnouncement.objects.exclude(expires_on__lte=datetime.datetime.now()).filter(active=True).order_by('id')
+        return AdminAnnouncement.objects.exclude(expires_on__lte=make_aware(datetime.datetime.now())).filter(active=True).order_by('id')
 
 
 class AdminAnnouncementDetail(generics.RetrieveUpdateDestroyAPIView):

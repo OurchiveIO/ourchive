@@ -612,7 +612,7 @@ class Tag(models.Model):
         ]
         ordering = ('tag_type__sort_order', 'tag_type__label',)
         constraints = [
-            models.UniqueConstraint(Lower('text').desc(), 'tag_type_id', name='unique_text_and_type')
+            models.UniqueConstraint(fields=['text', 'tag_type_id'], name='unique_text_and_type')
         ]
         db_table = 'core_tag'
 
