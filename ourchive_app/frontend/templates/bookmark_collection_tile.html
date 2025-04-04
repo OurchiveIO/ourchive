@@ -13,8 +13,8 @@
         </div>
         <div class="col-md-8 col-12 mt-md-0 mt-4" id="collection-{{bookmark_collection.id}}-info-card">
             <div class="osm-container">
-                <div class="collapse show" id="collection-{{bookmark_collection.id}}-tile-summary-p" data-testid="collection-tile-short-desc">{% autoescape off %}{{ bookmark_collection.short_description|truncatechars:500 }}{% endautoescape %}</div>
-                {% if bookmark_collection.short_description|length > 500 %}<div class="collapse" id="collection-{{bookmark_collection.id}}-tile-summary-p" data-testid="collection-tile-short-desc">{% autoescape off %}{{ bookmark_collection.short_description }}{% endautoescape %}</div>
+                <div class="collapse show chive-rich-text" id="collection-{{bookmark_collection.id}}-tile-summary-p" data-testid="collection-tile-short-desc">{% autoescape off %}{{ bookmark_collection.short_description|truncatechars:500 }}{% endautoescape %}</div>
+                {% if bookmark_collection.short_description|length > 500 %}<div class="collapse chive-rich-text" id="collection-{{bookmark_collection.id}}-tile-summary-p" data-testid="collection-tile-short-desc">{% autoescape off %}{{ bookmark_collection.short_description }}{% endautoescape %}</div>
                 <a data-bs-toggle="collapse" aria-expanded="false" aria-controls="collection-{{bookmark_collection.id}}-tile-summary-p" id="more-btn-description-{{ bookmark_collection.id }}" class="link-underline link-underline-opacity-0 collapsed" href="#collection-{{bookmark_collection.id}}-tile-summary-p">
                     <span class="oc-show-more">{% translate '+ Show More' %}</span>
                     <span class="oc-show-less">{% translate '- Show Less' %}</span>

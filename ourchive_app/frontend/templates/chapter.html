@@ -90,7 +90,7 @@
     </div>
 {% endif %}
 {% if chapter.audio_url and chapter.audio_url != "None" %}<div class="row row-cols-1 mb-3"><p id="chapter-audio-graf"><audio id="chapter-audio" src="{{ chapter.audio_url }}" controls></audio></p><hr class="ourchive-hr" id="chapter-audio-hr"/></div>{% endif %}
-{% if chapter.video_url and chapter.video_url != "None" %}<div class="row row-cols-1 mb-3"><p id="chapter-{{chapter.id}}-video-graf"><video id="chapter-{{chapter.id}}-video" src="{{chapter.video_url}}" controls>{% translate 'Your browser does not support the HTML5 video tag.' %}</video></p><hr class="ourchive-hr" id="chapter-{{chapter.id}}video-hr"/></div>{% endif %}
+{% if chapter.video_url and chapter.video_url != "None" %}<div class="row row-cols-1 mb-3 chive-rich-text"><p id="chapter-{{chapter.id}}-video-graf"><video id="chapter-{{chapter.id}}-video" src="{{chapter.video_url}}" controls>{% translate 'Your browser does not support the HTML5 video tag.' %}</video></p><hr class="ourchive-hr" id="chapter-{{chapter.id}}video-hr"/></div>{% endif %}
 {% if chapter.text %}
     <div id="chapter-text" class="row row-cols-1 mb-3">
         {% autoescape off %}{{ chapter.text }}{% endautoescape %}
