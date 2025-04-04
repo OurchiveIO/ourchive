@@ -561,14 +561,15 @@ def process_languages(languages, obj_languages, str_array=False):
 	return deepcopy(languages)
 
 
-def get_work_types(request):
-	return do_get(f'api/worktypes', request, {}, 'Work Type').response_data.get('results', [])
+def get_work_types(request, has_works=False):
+	url = f'api/worktypes' if not has_works else f'api/worktypes?has_works=true'
+	return do_get(url, request, {}, 'Work Type').response_data.get('results', [])
 
 
 def create_browse_cards(request):
-	work_types = get_work_types(request)
-	tag_types = do_get(f'api/tagtypes/browsable', request, {}, 'Tag Type').response_data.get('results', [])
-	attribute_types = do_get(f'api/attributetypes/browsable', request, {}, 'Attribute Type').response_data.get('results', [])
+	work_types = get_work_types(request, True)
+	tag_types = do_get(f'api/tagtypes/browsable?has_chives=true', request, {}, 'Tag Type').response_data.get('results', [])
+	attribute_types = do_get(f'api/attributetypes/browsable?has_chives=true', request, {}, 'Attribute Type').response_data.get('results', [])
 	browse_cards = [{'label': 'Work Types', 'cards': []}]
 	for wt in work_types:
 		browse_cards[0]['cards'].append({

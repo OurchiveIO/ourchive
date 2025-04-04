@@ -813,9 +813,18 @@ class WorkTypeDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class WorkTypeList(generics.ListCreateAPIView):
-    queryset = WorkType.objects.get_queryset().order_by('sort_order')
     serializer_class = WorkTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        if self.request.GET.get('has_works', False):
+            return WorkType.objects.annotate(
+                nwork=Count('works')
+            ).filter(
+                nwork__gte=1
+            )
+        else:
+            return WorkType.objects.get_queryset().order_by('sort_order')
 
 
 class WorkByTypeList(generics.ListCreateAPIView):
@@ -855,7 +864,15 @@ class BrowsableTagType(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        return TagType.objects.filter(show_for_browse=True)
+        if self.request.GET.get('has_chives', False):
+            return TagType.objects.annotate(
+                ntag=Count('tags')
+            ).filter(
+                show_for_browse=True,
+                ntag__gte=1
+            )
+        else:
+            return TagType.objects.filter(show_for_browse=True)
 
 
 class TagsByType(generics.ListCreateAPIView):
@@ -1426,7 +1443,15 @@ class BrowsableAttributeType(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        return AttributeType.objects.filter(show_for_browse=True)
+        if self.request.GET.get('has_chives', False):
+            return AttributeType.objects.annotate(
+                nattr=Count('attribute_values')
+            ).filter(
+                show_for_browse=True,
+                nattr__gte=1
+            )
+        else:
+            return AttributeType.objects.filter(show_for_browse=True)
 
 
 class AttributesByType(generics.ListCreateAPIView):
