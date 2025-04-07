@@ -13,8 +13,10 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Get the code
-COPY . /ourchive_app
+COPY --from=root ./ourchive_app /ourchive_app
+COPY entrypoint.sh /ourchive_app
 WORKDIR /ourchive_app
+RUN ls
 
 # grab gosu for easy step-down from root
 # https://github.com/tianon/gosu/blob/master/INSTALL.md
@@ -48,18 +50,20 @@ RUN set -eux; \
     # install Ourchive dependencies
     python -m pip install --upgrade pip; \
     python -m pip install wheel; \
-    python -m pip install -r ourchive_app/requirements.txt; \
-    python ourchive_app/manage.py compilemessages; \
-    python ourchive_app/manage.py collectstatic --no-input; \
-    chmod +x docker/entrypoint.sh; \
+    python -m pip install -r requirements.txt; \
+    python manage.py compilemessages; \
+    python manage.py collectstatic --no-input; \
+    chmod +x entrypoint.sh; \
     # cp docker/config.py settings/config.py; \
     #  create ourchive group and user to use it and give permissions over the code (in entrypoint)
     groupadd --system ourchive --gid=999; \
     useradd --system --no-create-home --gid ourchive --uid=999 --shell=/bin/bash ourchive; \
     # mkdir -p /ourchive_app/media/exports; \
-    chown -R ourchive:ourchive /ourchive_app; \
-    # remove unneeded files and packages
-    apt-get purge -y \
+    chown -R ourchive:ourchive /ourchive_app
+
+
+       # remove unneeded files and packages
+RUN    apt-get purge -y \
        build-essential \
        gettext \
        git \
@@ -71,12 +75,12 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*; \
     rm -rf /root/.cache; \
     # clean ourchive
-    rm ourchive_app/requirements.txt; \
+    rm requirements.txt; \
     find . -name '__pycache__' -exec rm -r '{}' +; \
     find . -name '*pyc' -exec rm -r '{}' +; \
     find . -name '*po' -exec rm -r '{}' +
 
-ENV DJANGO_SETTINGS_MODULE=settings.base
+ENV DJANGO_SETTINGS_MODULE=ourchive_app.settings.base
 
 EXPOSE 8000
-ENTRYPOINT ["./docker/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
