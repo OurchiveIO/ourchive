@@ -12,7 +12,7 @@ python manage.py loadourchivedata
 
 # Give permission to ourchive:ourchive after mounting volumes
 echo Give permission to ourchive:ourchive
-chown -R ourchive:ourchive /ourchive_app
+chown -R ourchive:ourchive .
 
 # Start Ourchive processes
 echo Starting Ourchive...

@@ -193,7 +193,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-STATIC_URL = '/static/'
+STATIC_URL = f"{ os.getenv('OURCHIVE_SCHEME', 'http') }://{ os.getenv('OURCHIVE_DOMAIN', 'localhost:9000') }/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 

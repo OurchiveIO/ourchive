@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 LABEL maintainer="getourchive@gmail.com"
 
 # Avoid prompting for configuration
@@ -47,10 +47,11 @@ RUN set -eux; \
 	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
 	command -v gpgconf && gpgconf --kill all || :; \
 	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
-    # install Ourchive dependencies
     python -m pip install --upgrade pip; \
-    python -m pip install wheel; \
-    python -m pip install -r requirements.txt; \
+    python -m pip install wheel
+
+
+RUN python -m pip install -r requirements.txt; \
     python manage.py compilemessages; \
     python manage.py collectstatic --no-input; \
     chmod +x entrypoint.sh; \
