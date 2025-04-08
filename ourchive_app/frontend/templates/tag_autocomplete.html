@@ -3,9 +3,9 @@
 <div id="search-tag-autocomplete-parent">
         {% for tag in tags %}
 		<div class="ourchive-autocomplete-child dropdown-item" {% if not click_action %}onclick="goToUrl('/tags/{{tag.id}}?term={{tag.tag}}')"{% else %}onclick="{{ click_action }}"{% endif %}>
-                <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="populate-search-tag-href-{{tag.tag}}" {% if not click_action %}href="/tags/{{tag.id}}?term={{tag.tag}}"{% else %}onclick="{{ click_action }}"{% endif %}>
+                <a class="link-underline link-underline-opacity-0" id="populate-search-tag-href-{{tag.tag}}" {% if not click_action %}href="/tags/{{tag.id}}?term={{tag.tag}}"{% else %}onclick="{{ click_action }}"{% endif %}>
                     <span class="fw-bold" id="search-tag-autocorrect-span-{{tag.tag}}">{{tag.display_text}}</span><br>
-                    <span class="fw-bold" id="search-tag-autocorrect-span-{{ tag.type_name }}">{{ tag.type }}</span>
+                    <small><span id="search-tag-autocorrect-span-{{ tag.type_name }}">{{ tag.type }}</span></small>
                 </a>
         </div>
 	    {% endfor %}
