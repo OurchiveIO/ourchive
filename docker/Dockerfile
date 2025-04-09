@@ -59,7 +59,7 @@ RUN python -m pip install -r requirements.txt; \
     #  create ourchive group and user to use it and give permissions over the code (in entrypoint)
     groupadd --system ourchive --gid=999; \
     useradd --system --no-create-home --gid ourchive --uid=999 --shell=/bin/bash ourchive; \
-    # mkdir -p /ourchive_app/media/exports; \
+    mkdir -p tmp; \
     chown -R ourchive:ourchive /ourchive_app
 
 
@@ -77,6 +77,7 @@ RUN    apt-get purge -y \
     rm -rf /root/.cache; \
     # clean ourchive
     rm requirements.txt; \
+    rm -f ourchive_app/.env; \
     find . -name '__pycache__' -exec rm -r '{}' +; \
     find . -name '*pyc' -exec rm -r '{}' +; \
     find . -name '*po' -exec rm -r '{}' +
