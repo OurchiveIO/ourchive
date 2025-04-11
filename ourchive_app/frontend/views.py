@@ -35,7 +35,7 @@ def index(request):
 	recent_works = []
 	response = do_get(f'api/tags/top', request, params=request.GET, object_name='top tags')
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
-		top_tags = response.response_data['results']
+		top_tags = response.response_data.get('results', [])
 		top_tags = sorted(top_tags, key=itemgetter('tag_count'), reverse=True)
 		highest_count = top_tags[0]['tag_count'] if len(top_tags) > 0 else 0
 		tag_max_size = 3

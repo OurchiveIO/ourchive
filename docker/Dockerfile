@@ -77,6 +77,7 @@ RUN    apt-get purge -y \
     rm -rf /root/.cache; \
     # clean ourchive
     rm requirements.txt; \
+    rm ourchive.log; \
     rm -f ourchive_app/.env; \
     find . -name '__pycache__' -exec rm -r '{}' +; \
     find . -name '*pyc' -exec rm -r '{}' +; \

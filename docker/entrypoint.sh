@@ -10,6 +10,10 @@ python manage.py migrate
 echo Load default data
 python manage.py loadourchivedata
 
+# Create superuser
+echo Create superuser
+python manage.py createourchivesuperuser
+
 # Give permission to ourchive:ourchive after mounting volumes
 echo Give permission to ourchive:ourchive
 chown -R ourchive:ourchive .
@@ -23,4 +27,5 @@ exec gosu ourchive gunicorn ourchive_app.wsgi:application \
     --worker-tmp-dir /dev/shm \
     --log-level=info \
     --access-logfile - \
+    --error-logfile - \
     "$@"

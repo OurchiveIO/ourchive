@@ -1,4 +1,5 @@
 - model: core.ourchivesetting
+  pk: 1
   fields:
     uid: ede4e7de-ea94-4817-b971-ad17b721ebca
     name: Search Provider
@@ -6,6 +7,7 @@
     valtype: choice
     description: 'The backend search provider - Elastic or Postgres.'
 - model: core.ourchivesetting
+  pk: 2
   fields:
     uid: ee2ebbfc-99ba-43b9-ad20-cb94533dfb82
     name: Upload Endpoint
@@ -13,6 +15,7 @@
     valtype: generic
     description: 'The default endpoint for uploads. Leave blank for OOTB functionality.'
 - model: core.ourchivesetting
+  pk: 3
   fields:
     uid: 39a08b93-c749-4831-9a0b-05f99a2670da
     name: Registration Permitted
@@ -20,6 +23,7 @@
     valtype: truefalse
     description: 'If true, users can register for the site.'
 - model: core.ourchivesetting
+  pk: 4
   fields:
     uid: e3d806ae-106f-4822-b65e-ba8a3f52cdd7
     name: Invite Only
@@ -27,6 +31,7 @@
     valtype: truefalse
     description: 'If true, users can request registration, but you must approve them.'
 - model: core.ourchivesetting
+  pk: 5
   fields:
     uid: c9e6e7f4-90ce-49f0-9fb9-3fb8995c5eb6
     name: Use Invite Queue
@@ -34,6 +39,7 @@
     valtype: truefalse
     description: 'Not currently used. If true, holds invites for manual approval.'
 - model: core.ourchivesetting
+  pk: 6
   fields:
     uid: 47f5248f-b2be-41b0-ac01-ec8bafd26641
     name: Invite Queue Limit
@@ -41,6 +47,7 @@
     valtype: choice
     description: 'Not currently used. The maximum number of pending users permitted.'
 - model: core.ourchivesetting
+  pk: 7
   fields:
     uid: 932ae848-f37d-41cc-a168-3f3cd61f423b
     name: Default Icon URL
@@ -48,6 +55,7 @@
     valtype: generic
     description: 'The default icon filename, expected to be in the static files directory.'
 - model: core.ourchivesetting
+  pk: 8
   fields:
     uid: 398c31c8-44a6-43ab-ac56-2d3210d3479e
     name: Audio Processing
@@ -55,6 +63,7 @@
     valtype: truefalse
     description: 'If true, uploaded audio will be processed on the server to determine length and other metadata.'
 - model: core.ourchivesetting
+  pk: 9
   fields:
     uid: af2f38f1-9226-4488-9ba2-b1ae3c99b66f
     name: Rating Star Count
@@ -62,6 +71,7 @@
     valtype: choice
     description: 'The number of stars to show for bookmark rating.'
 - model: core.ourchivesetting
+  pk: 10
   fields:
     uid: 12b47873-71f8-4b84-a9df-3b6a3e7f238c
     name: Allow Comments
@@ -69,6 +79,7 @@
     valtype: truefalse
     description: 'If true, allows users to comment on chives on the site. Individual creators can disable comments at the chive level.'
 - model: core.ourchivesetting
+  pk: 11
   fields:
     uid: 4b7ea84c-7cb8-49de-9152-653758d1cf40
     name: Ratings Enabled
@@ -76,6 +87,7 @@
     valtype: truefalse
     description: 'If true, allows users to rate chives as part of bookmark creation.'
 - model: core.ourchivesetting
+  pk: 12
   fields:
     uid: 9250a09d-b2fd-400b-b1e8-41fd9bc5cd7f
     name: Auto-Allow Upload
@@ -83,11 +95,13 @@
     valtype: truefalse
     description: 'If true, users, upon registering, are automatically granted upload permissions. Toggle with care - this can be dangerous if you have open registration.'
 - model: core.notificationtype
+  pk: 1
   fields:
     uid: ffc22294-a6d8-497d-a87a-430f3e88b6b1
     type_label: System Notification
     send_email: false
 - model: core.notificationtype
+  pk: 2
   fields:
     uid: 639718d0-2c5d-4ddd-a34d-b904873b95bf
     type_label: Comment Notification

@@ -21,7 +21,10 @@ def load_data(path, filename):
                 model_obj = data_keys[setting['model']]
                 obj = model_obj(**setting['fields'])
                 if setting.get('pk', None):
-                    obj.id = setting.get('pk')
+                    obj_id = setting.get('pk')
+                    if model_obj.objects.filter(id=obj_id).count() > 0:
+                        continue
+                    obj.id = obj_id
                 obj.save()
                 objs_added += 1
             return objs_added

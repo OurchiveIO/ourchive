@@ -13,12 +13,14 @@ class Command(BaseCommand):
             ourchive_fixtures.load_data(path, required_filename)
         except Exception as e:
             print(f'Could not load required data. Please check path or refer to repo defaults. Error: {e}')
+            return
         if not load_optional:
             return
         try:
             ourchive_fixtures.load_data(path, optional_filename)
         except Exception as e:
             print(f'Could not load recommended data. Please check path or refer to repo defaults. Error: {e}')
+            return
         print('Data loaded successfully.')
 
     def add_arguments(self, parser):

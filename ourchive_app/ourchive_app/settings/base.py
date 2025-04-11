@@ -23,15 +23,18 @@ SECRET_KEY = os.getenv('OURCHIVE_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('OURCHIVE_DEBUG', False) == 'True'
 
-hosts = []
+hosts = ["0.0.0.0", "127.0.0.1:8000", "localhost"]
 if os.getenv('OURCHIVE_DEV') == 'True' or DEBUG:
-    hosts = ["127.0.0.1:8000", "*", ]
+    #hosts = hosts + ["127.0.0.1:8000", "*", ]
+    hosts = hosts + [os.getenv("OURCHIVE_ROOT_URL"), os.getenv("OURCHIVE_SERVER_IP")]
+#elif os.getenv('OURCHIVE_DOCKER'):
+#    hosts = ["*"]
 else:
-    hosts = [os.getenv("OURCHIVE_ROOT_URL"), os.getenv("OURCHIVE_SERVER_IP")]
+    hosts = hosts + [os.getenv("OURCHIVE_ROOT_URL"), os.getenv("OURCHIVE_SERVER_IP")]
 
 ALLOWED_HOSTS = hosts
 
-API_PROTOCOL = 'http://' if DEBUG else 'https://'
+API_PROTOCOL = f"{os.getenv('OURCHIVE_SCHEME', 'http')}://"
 ROOT_URL = os.getenv('OURCHIVE_ROOT_URL')
 
 # Application definition
@@ -272,7 +275,7 @@ CHIVE_HEADER_URLS = [
 CHIVE_COVER_URLS = [
 ]
 
-if not DEBUG:
+if not DEBUG and os.getenv('OURCHIVE_CACHE', False):
     CACHE_MIDDLEWARE_ALIAS = "default"
     CACHE_MIDDLEWARE_SECONDS = 3600
     CACHE_MIDDLEWARE_KEY_PREFIX = ""
