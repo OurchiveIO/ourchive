@@ -16,7 +16,7 @@ python manage.py createourchivesuperuser
 
 # Give permission to ourchive:ourchive after mounting volumes
 echo Give permission to ourchive:ourchive
-chown -R ourchive:ourchive .
+chown -R ourchive:ourchive /ourchive_app
 
 # Start Ourchive processes
 echo Starting Ourchive...

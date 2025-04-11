@@ -106,3 +106,21 @@
     uid: 639718d0-2c5d-4ddd-a34d-b904873b95bf
     type_label: Comment Notification
     send_email: false
+- model: core.language
+  pk: 1
+  fields:
+    uid: dd007f55-dca5-48fb-aa76-20dab1347b67
+    display_name: English
+    ietf_code: en
+- model: core.language
+  pk: 2
+  fields:
+    uid: 96ef8138-1835-4bcf-8d2a-b2a7fae60081
+    display_name: Spanish (LatAm)
+    ietf_code: es-419
+- model: core.language
+  pk: 3
+  fields:
+    uid: e53cfab2-c5d0-4c05-9a4c-3fc1cf921b55
+    display_name: Spanish
+    ietf_code: es

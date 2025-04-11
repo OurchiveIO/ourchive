@@ -1,5 +1,5 @@
 import yaml
-from core.models import OurchiveSetting, NotificationType, WorkType, TagType, AttributeType, AttributeValue, SearchGroup
+from core.models import OurchiveSetting, NotificationType, WorkType, TagType, AttributeType, AttributeValue, SearchGroup, Language
 from etl.models import ObjectMapping
 
 data_keys = {'core.ourchivesetting': OurchiveSetting,
@@ -9,7 +9,8 @@ data_keys = {'core.ourchivesetting': OurchiveSetting,
              'core.attributetype': AttributeType,
              'core.attributevalue': AttributeValue,
              'core.tagtype': TagType,
-             'core.searchgroup': SearchGroup,}
+             'core.searchgroup': SearchGroup,
+             'core.language': Language}
 
 
 def load_data(path, filename):

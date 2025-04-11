@@ -23,12 +23,9 @@ SECRET_KEY = os.getenv('OURCHIVE_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('OURCHIVE_DEBUG', False) == 'True'
 
-hosts = ["0.0.0.0", "127.0.0.1:8000", "localhost"]
+hosts = ["0.0.0.0", "localhost", "127.0.0.1"]
 if os.getenv('OURCHIVE_DEV') == 'True' or DEBUG:
-    #hosts = hosts + ["127.0.0.1:8000", "*", ]
-    hosts = hosts + [os.getenv("OURCHIVE_ROOT_URL"), os.getenv("OURCHIVE_SERVER_IP")]
-#elif os.getenv('OURCHIVE_DOCKER'):
-#    hosts = ["*"]
+    hosts = hosts + ["127.0.0.1:8000", "*", ]
 else:
     hosts = hosts + [os.getenv("OURCHIVE_ROOT_URL"), os.getenv("OURCHIVE_SERVER_IP")]
 

@@ -16,6 +16,13 @@ class Command(BaseCommand):
         password = os.getenv('OURCHIVE_SUPERUSER_PASSWORD')
         email = os.getenv('OURCHIVE_SUPERUSER_EMAIL')
         get_user_model().objects.create_superuser(username, email, password)
+        user = get_user_model().objects.filter(username=username).first()
+        user.can_upload_audio = True
+        user.can_upload_video = True
+        user.can_upload_document = True
+        user.can_upload_images = True
+        user.can_upload_export_files = True
+        user.save()
 
 
 

@@ -60,7 +60,9 @@ RUN python -m pip install -r requirements.txt; \
     groupadd --system ourchive --gid=999; \
     useradd --system --no-create-home --gid ourchive --uid=999 --shell=/bin/bash ourchive; \
     mkdir -p tmp; \
-    chown -R ourchive:ourchive /ourchive_app
+    mkdir -p media; \
+    chown -R ourchive:ourchive /ourchive_app; \
+    chmod 755 /ourchive_app
 
 
        # remove unneeded files and packages
