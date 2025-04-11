@@ -987,7 +987,7 @@ def new_work(request):
 				'tags': work_data[0]['tags'],
 				'divider': settings.TAG_DIVIDER,
 				'form_title': 'New Work',
-				'work_types': work_types['results'],
+				'work_types': work_types,
 				'work': work_data[0],
 				'work_chapter': chapter_dict})
 		if work_data[5] and not work_data[5].isdigit():
