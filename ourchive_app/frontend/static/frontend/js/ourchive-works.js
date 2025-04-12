@@ -74,6 +74,9 @@ function removeSeries(series_id) {
 }
 
 function populateSeriesInput(title, series_id) {
+    if (!title) {
+        return;
+    }
     if (series_id === null) {
         series_id = title;
     }
@@ -86,7 +89,11 @@ function populateSeriesInput(title, series_id) {
     document.getElementById("work-series-dropdown").innerHTML = "";
 }
 function addSeries(event) {
-    populateSeriesInput(document.getElementById("work-form-series").value, null);
+    let val = document.getElementById("work-form-series").value;
+    if (!val) {
+        return;
+    }
+    populateSeriesInput(val, null);
 }
 function seriesCheck (e) {
     if (e.keyCode == 188 || e.keyCode == 13) {
