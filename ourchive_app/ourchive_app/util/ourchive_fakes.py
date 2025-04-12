@@ -483,7 +483,9 @@ class OurchiveFakes:
             display_text = self.generate_unique_word(kwargs.get('token', ''))
             search_group = self.get_random_obj(models.SearchGroup)
             tag_type = models.TagType(label=display_text,
-                                      type_name=display_text.lower(), search_group=search_group)
+                                      type_name=display_text.lower(),
+                                      search_group=search_group,
+                                      show_for_browse=self.fake.pybool())
             tag_types.append(tag_type)
             if persist_db:
                 tag_type.save()
@@ -502,6 +504,7 @@ class OurchiveFakes:
                                                   allow_on_work=self.fake.pybool(),
                                                   allow_on_chapter=self.fake.pybool(),
                                                   allow_on_anthology=self.fake.pybool(),
+                                                  show_for_browse=self.fake.pybool(),
                                                   search_group=search_group)
             attribute_types.append(attribute_type)
             if persist_db:

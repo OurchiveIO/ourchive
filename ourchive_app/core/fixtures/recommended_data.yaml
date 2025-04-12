@@ -38,6 +38,7 @@
     label: Fandom
     type_name: fandom
     admin_administrated: false
+    show_for_browse: true
     required: false
     sort_order: 1
     search_group_id: 1
@@ -46,6 +47,7 @@
   fields:
     label: Trope
     type_name: trope
+    show_for_browse: true
     required: false
     sort_order: 4
     search_group_id: 1

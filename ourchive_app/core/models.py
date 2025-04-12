@@ -199,7 +199,7 @@ class Work(models.Model):
         on_delete=models.CASCADE,
     )
 
-    work_type = models.ForeignKey('WorkType', on_delete=models.SET_NULL, null=True)
+    work_type = models.ForeignKey('WorkType', on_delete=models.SET_NULL, null=True, related_name='works')
     series = models.ForeignKey('WorkSeries', on_delete=models.SET_NULL, null=True, related_name='works')
     series_num = models.IntegerField(default=1)
     languages = models.ManyToManyField('Language')
@@ -612,13 +612,14 @@ class Tag(models.Model):
         ]
         ordering = ('tag_type__sort_order', 'tag_type__label',)
         constraints = [
-            models.UniqueConstraint(Lower('text').desc(), 'tag_type_id', name='unique_text_and_type')
+            models.UniqueConstraint(fields=['text', 'tag_type_id'], name='unique_text_and_type')
         ]
         db_table = 'core_tag'
 
     tag_type = models.ForeignKey(
         'TagType',
         on_delete=models.CASCADE,
+        related_name='tags'
     )
 
     @property

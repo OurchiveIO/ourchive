@@ -29,7 +29,7 @@ def set_user_data(request):
     settings_dict = {
         x['name'].replace(' ', ''): x['value'] if x['value'].lower() != 'true' and x['value'].lower() != 'false' else (
             convert_boolean(x['value'])) for x in oc_settings['results']} if 'results' in oc_settings else {}
-    announcements = do_get(f'api/adminannouncements/active', request).response_data
+    announcements = do_get(f'api/adminannouncements/active/', request).response_data
     announcements = [x for x in announcements.get('results', []) if
                      not request.COOKIES.get(f'dismiss_announcement_{x["id"]}')]
 

@@ -7098,6 +7098,30 @@ progress {
   color: #163C38;
 }
 
+.chive-rich-text {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.chive-rich-text iframe {
+  top: 0;
+  left: 0.5em;
+  bottom: 0;
+  right: 0.5em;
+  width: 100%;
+  height: 100%;
+}
+
+.chive-rich-text video {
+  top: 0;
+  left: 0.5em;
+  bottom: 0.5em;
+  right: 0.5em;
+  width: 100%;
+  height: 100%;
+}
+
 .form-control {
   border-radius: 0;
 }
