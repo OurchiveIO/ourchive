@@ -23,6 +23,8 @@ echo Starting Ourchive...
 exec gosu ourchive gunicorn ourchive_app.wsgi:application \
     --name ourchive \
     --bind 0.0.0.0:8000 \
+    --timeout=5 \
+    --worker-class=gevent \
     --workers 3 \
     --worker-tmp-dir /dev/shm \
     --log-level=info \

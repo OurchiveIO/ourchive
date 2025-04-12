@@ -1078,6 +1078,7 @@ def edit_work(request, id):
 			series_id = create_work_series(request, work_dict[5], id)
 			if not series_id:
 				messages.add_message(request, messages.ERROR, _('Series could not be created. Please contact an administrator for help.'), 'Series')
+		print(work_dict[0])
 		response = do_patch(f'api/works/{id}/', request, data=work_dict[0], object_name='Work')
 		if response.response_info.status_code == 200:
 			messages.add_message(request, messages.SUCCESS, response.response_info.message, response.response_info.type_label)

@@ -61,14 +61,14 @@ def group_tags_for_edit(tags, tag_types=None):
 	return tag_parent
 
 
-def get_form_tags(request, form_dict, key, tags):
+def get_form_tags(request, form_dict, key, tag_types):
 	tags = []
 	tags_list = request.POST.getlist(key)
 	type_label = key.split('_tags[]')[0]
 	for t in tags_list:
 		if not t.strip():
 			continue
-		tag = {'tag_type': type_label, 'text': t}
+		tag = {'tag_type': tag_types[type_label].get('label', type_label), 'text': t}
 		tags.append(tag)
 	form_dict.pop(key)
 	return tags
@@ -217,7 +217,7 @@ def get_work_obj(request, work_id=None):
 			chapter_dict['id'] = request.POST[item]
 			work_dict.pop('chapter_id')
 		elif '_tags[]' in item:
-			tags = tags + get_form_tags(request, work_dict, item, tags)
+			tags = tags + get_form_tags(request, work_dict, item, tag_types)
 		elif 'chapters_' in item and work_id is not None:
 			chapter_id = item[9:]
 			chapter_number = request.POST[item]

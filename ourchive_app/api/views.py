@@ -536,9 +536,9 @@ class UserBookmarkList(generics.ListCreateAPIView):
     def list(self, request, *args, **kwargs):
         response = super(UserBookmarkList, self).list(request, args, kwargs)
         try:
-            if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
+            if OurchiveSetting.objects.filter(name='Rating Star Count').first() is not None:
                 response.data['star_count'] = [x for x in range(
-                    1, int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
+                    1, int(OurchiveSetting.objects.filter(name='Rating Star Count').first().value) + 1)]
             else:
                 response.data['star_count'] = [1, 2, 3, 4, 5]
         except ObjectDoesNotExist:

@@ -767,6 +767,7 @@ class MiniChapterSerializer(serializers.HyperlinkedModelSerializer):
         model = Chapter
         fields = ['id', 'title', 'number']
 
+
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
     series = WorkSeriesSerializer(required=False)
