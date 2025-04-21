@@ -42,7 +42,12 @@ class SearchResults(object):
         groups_array = []
         for group in getattr(self, f'{context}_search_groups').keys():
             if getattr(self, f'{context}_search_groups')[group]:
-                groups_array.append({'label': group, 'facets': getattr(self, f'{context}_search_groups')[group]})
+                facets = getattr(self, f'{context}_search_groups')[group]
+                has_checked = False
+                for facet in facets:
+                    if facet.get('expand', False):
+                        has_checked = True
+                groups_array.append({'label': group, 'facets': facets, 'expand': has_checked})
         return groups_array
 
     def process_tag_tags(self, tags, tags_dict):
@@ -57,9 +62,11 @@ class SearchResults(object):
     def build_final_tag_facets(self, tag_filter_name, result_json, tags_dict, context):
         for tag_type in tags_dict:
             if len(tags_dict[tag_type]['tags']) > 0:
+                has_vals = False
                 tag_filter_vals = []
                 for tag_text in tags_dict[tag_type]['tags']:
                     checked_tag = True if (self.tag_id and tag_filter_name and tag_filter_name == tag_text) else False
+                    inverse_checked = False
                     if not checked_tag:
                         checked_tag = tag_text in getattr(self, f'work_search_{context}').get('tags', [])
                         if not checked_tag:
@@ -71,7 +78,9 @@ class SearchResults(object):
                             tag_filter_vals.append(ContextualFilterFacet(tag_text, checked_tag, inverse_checked))
                         else:
                             tag_filter_vals.append(FilterFacet(tag_text, checked_tag))
+                    has_vals = checked_tag if checked_tag else (inverse_checked if inverse_checked else has_vals)
                 result_facet = ResultFacet(tags_dict[tag_type]['type_id'], tag_type, tag_filter_vals, 'tag').to_dict()
+                result_facet['expand'] = has_vals
                 getattr(self, f'{context}_search_groups')[tags_dict[tag_type]['group']].append(result_facet)
 
     def get_tag_facets(self, results, result_json, context, tags):
@@ -127,13 +136,16 @@ class SearchResults(object):
         for key in attributes_dict:
             if len(attributes_dict[key]['attrs']) > 0:
                 attribute_filter_vals = []
+                has_vals = False
                 for val in attributes_dict[key]['attrs']:
                     checked_attr = val.lower() in getattr(self, f'work_search_{context}').get('attributes', [])
                     if not checked_attr:
                         checked_attr = val in getattr(self, f'work_search_{context}').get('attributes', [])
                     attribute_filter_vals.append(FilterFacet(val, checked_attr))
+                    has_vals = checked_attr if checked_attr else has_vals
                 result_facet = ResultFacet(attributes_dict[key]['type_id'], key, attribute_filter_vals,
                                            'attribute').to_dict()
+                result_facet['expand'] = has_vals
                 try:
                     getattr(self, f'{context}_search_groups')[attributes_dict[key]['group']].append(result_facet)
                 except Exception as e:
@@ -143,6 +155,7 @@ class SearchResults(object):
                     continue
 
     def get_chive_info_facets(self, context):
+        expand = False
         chive_info = {"label": "Chive Info", "facets": []}
         work_types = WorkType.objects.all()
         work_types_list = []
@@ -152,6 +165,7 @@ class SearchResults(object):
                 checked = work_type.type_name in getattr(self, f'work_search_{context}').get('Work Type', [])
             work_types_list.append(
                 {"label": work_type.type_name, "filter_val": work_type.type_name, "checked": checked})
+            expand = True if checked else expand
         work_types_dict = {}
         work_types_dict["display_type"] = 'checkbox'
         work_types_dict["label"] = "Work Type"
@@ -167,6 +181,7 @@ class SearchResults(object):
                 self, f'collection_search_{context}').get('Language', [])
             languages_list.append(
                 {"label": language.display_name, "filter_val": language.display_name, "checked": checked})
+            expand = True if checked else expand
         languages_dict = {}
         languages_dict["display_type"] = 'checkbox'
         languages_dict["label"] = "Language"
@@ -186,6 +201,7 @@ class SearchResults(object):
             {"label": "From", "filter_val": "word_count_gte", "type": "text_range", "value": input_value_gte},
             {"label": "To", "filter_val": "word_count_lte", "type": "text_range", "value": input_value_lte}]
         chive_info["facets"].append(word_count_dict)
+        expand = True if input_value_gte != [""] or input_value_lte != [""] else expand
 
         # TODO: ADD FILTER
         audio_length_dict = {}
@@ -213,7 +229,9 @@ class SearchResults(object):
                                     "checked": "0" in getattr(self, f'work_search_{context}').get("Completion Status",
                                                                                                   [])}]
         chive_info["facets"].append(complete_dict)
+        expand = True if complete_dict["values"][0]["checked"] or complete_dict["values"][1]["checked"] else expand
 
+        chive_info["expand"] = expand
         return chive_info
 
     def get_options_facets(self):

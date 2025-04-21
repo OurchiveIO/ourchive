@@ -12,9 +12,9 @@
                     {% for facet_group in facets %}
                         <div class="accordion-item" id="accordion-item-{{forloop.counter0}}">
                             <h2 class="accordion-header">
-                                <a class="accordion-button {% if not forloop.first %}collapsed{% endif %} link-underline link-underline-opacity-0" data-bs-toggle="collapse" data-bs-target="#accordion-body-{{forloop.counter0}}" aria-expanded="true" aria-controls="accordion-body-{{forloop.counter0}}" href="#" onclick="setSearchToggles({{ forloop.counter0 }})">{{ facet_group.label }}</a>
+                                <a class="accordion-button {% if not forloop.first and not facet_group.expand %}collapsed{% endif %} link-underline link-underline-opacity-0" data-bs-toggle="collapse" data-bs-target="#accordion-body-{{forloop.counter0}}" aria-expanded="true" aria-controls="accordion-body-{{forloop.counter0}}" href="#" onclick="setSearchToggles({{ forloop.counter0 }})">{{ facet_group.label }}</a>
                             </h2>
-                            <div class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" id="accordion-body-{{forloop.counter0}}">
+                            <div class="accordion-collapse collapse {% if forloop.first or facet_group.expand %}show{% endif %}" id="accordion-body-{{forloop.counter0}}">
                                 <div class="accordion-body">
                                     {% for facet in facet_group.facets %}
                                         {% include "facet_tile.html" with include='include'%}

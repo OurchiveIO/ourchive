@@ -13,6 +13,7 @@ class OurchiveSearch:
 	def do_search(self, user_id, **kwargs):
 		results = {}
 		tags = []
+		self.searcher.init_tags()
 		if 'tag_id' in kwargs and kwargs['tag_id']:
 			return self.filter_by_tag(**kwargs)
 		if 'attr_id' in kwargs and kwargs['attr_id']:

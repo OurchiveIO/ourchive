@@ -264,8 +264,6 @@ class BookmarkSearch(object):
     def __init__(self):
         self.filter = BookmarkFilter()
         self.term = ""
-        self.include_mode = ""
-        self.exclude_mode = ""
         self.reserved_fields = ['_state', 'uid', 'created_on']
         self.term_search_fields = ['title', 'description', 'tags__text', 'attributes__name']
         self.page = 1
@@ -275,8 +273,6 @@ class BookmarkSearch(object):
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         if 'term' in dict_obj:
             self.term = unidecode.unidecode(dict_obj['term'])
-        self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
-        self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -290,8 +286,6 @@ class CollectionSearch(object):
     def __init__(self):
         self.filter = CollectionFilter()
         self.term = ""
-        self.include_mode = ""
-        self.exclude_mode = ""
         self.reserved_fields = ['_state', 'uid', 'created_on']
         self.term_search_fields = ['title', 'short_description', 'tags__text', 'attributes__name']
         self.page = 1
@@ -301,8 +295,6 @@ class CollectionSearch(object):
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         if 'term' in dict_obj:
             self.term = unidecode.unidecode(dict_obj['term'])
-        self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
-        self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -316,8 +308,6 @@ class TagSearch(object):
     def __init__(self):
         self.filter = TagFilter()
         self.term = ""
-        self.include_mode = ""
-        self.exclude_mode = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', 'updated_on']
         self.term_search_fields = ['text']
         self.page = 1
@@ -327,8 +317,6 @@ class TagSearch(object):
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         if 'term' in dict_obj:
             self.term = unidecode.unidecode(dict_obj['term'])
-        self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
-        self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
 
     def to_dict(self):
         self.filter = self.filter.to_dict()
@@ -362,8 +350,6 @@ class WorkSearch(object):
     def __init__(self):
         self.filter = WorkFilter()
         self.term = ""
-        self.include_mode = ""
-        self.exclude_mode = ""
         self.reserved_fields = ['_state', 'uid', 'created_on', '_prefetched_objects_cache']
         self.term_search_fields = ['title', 'summary',
                                    'chapters__title', 'chapters__summary', 'tags__text', 'attributes__name']
@@ -374,8 +360,6 @@ class WorkSearch(object):
         self.filter.from_dict(dict_obj['exclude_filter'], False)
         if 'term' in dict_obj:
             self.term = unidecode.unidecode(dict_obj['term'])
-        self.include_mode = dict_obj['include_mode'].lower() if 'include_mode' in dict_obj else 'all'
-        self.exclude_mode = dict_obj['exclude_mode'].lower() if 'exclude_mode' in dict_obj else 'all'
 
     def to_dict(self):
         self.filter = self.filter.to_dict()

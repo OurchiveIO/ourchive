@@ -5,22 +5,6 @@
 {% block content %}
 <script>
 	window.addEventListener("load", function(){
-	    var activeTabs = localStorage.getItem('ourchive-active-tabs');
-	  	if (activeTabs !== null) {
-	  		activeTabs = activeTabs.split(",");
-	  		activeTabs.forEach(function(tab) {
-	  			var accordionItem = document.getElementById('accordion-item-'+tab);
-    			if (accordionItem !== null && !accordionItem.classList.contains('uk-open')) {
-    				//UIkit.accordion(document.getElementById('search-accordion')).toggle(tab, false);
-    				//UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(tab, false);
-    			}
-	  		});
-	  	}
-	  	else {
-	  		//UIkit.accordion(document.getElementById('search-accordion')).toggle(0, false);
-	  		//UIkit.accordion(document.getElementById('search-accordion-mobile')).toggle(0, false);
-	  	}
-
 	  	if (localStorage.getItem('ourchive-show-filters') == null) {
 	  		localStorage.setItem('ourchive-show-filters', '1');
 		}

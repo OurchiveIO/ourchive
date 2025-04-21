@@ -63,6 +63,10 @@ class ElasticSearchServiceBuilder:
 
 class PostgresProvider:
 
+    def init_tags(self):
+        self.tag_filters = {'include': [], 'exclude': []}
+        self.attr_filters = {'include': [], 'exclude': []}
+
     def init_provider(self):
         logger.debug("Postgres provider initialized.")
 
@@ -100,19 +104,30 @@ class PostgresProvider:
                 query = query & or_query
         return query
 
-    def build_filter_query(self, filter_array, filter_text, existing_query):
+    def build_filter_query(self, filter_array, filter_text, existing_query, exclude_ctx='include'):
         if len(filter_array) > 0:
             or_query = None
-            for array_item in filter_array:
-                q = Q(**{filter_text: array_item})
-                if or_query is None:
-                    or_query = q
-                else:
-                    or_query = or_query | q
-            if existing_query is None:
-                existing_query = or_query
+            # this is a workaround - I can't figure out how to chain these filters in a way
+            # that applies AND logic to all items in the many-to-many relationship.
+            # so instead we're chaining filters. if you can do this in a cleaner way please do PR.
+            if 'tags' in filter_text:
+                for val in filter_array:
+                    self.tag_filters[exclude_ctx].append(Q(tags__text__icontains=val))
+            elif 'attributes' in filter_text:
+                for val in filter_array:
+                    self.attr_filters[exclude_ctx].append(Q(attributes__display_name__icontains=val))
             else:
-                existing_query = existing_query | or_query if 'count' not in filter_text else existing_query & or_query
+                for array_item in filter_array:
+                    q = Q(**{filter_text: array_item})
+                    if or_query is None:
+                        or_query = q
+                    else:
+                        or_query = or_query | q if 'tags' not in filter_text else or_query & q
+                if existing_query is None:
+                    existing_query = or_query
+                else:
+                    existing_query = existing_query | or_query if 'count' not in filter_text else existing_query & or_query
+
         return existing_query
 
     def build_range_query(self, filter_obj, existing_query):
@@ -132,8 +147,9 @@ class PostgresProvider:
             existing_query = existing_query | or_query
         return existing_query
 
-    def build_filters(self, filters, mode, include):
+    def build_filters(self, filters, include):
         full_filters = None
+        join_filters_arr = []
         for field in filters:
             join_filters = None
             if '_range' in field:
@@ -142,19 +158,15 @@ class PostgresProvider:
             else:
                 for key in filters[field]:
                     join_filters = self.build_filter_query(
-                        filters[field][key], key, join_filters)
+                        filters[field][key], key, join_filters, 'include' if include else 'exclude')
             if join_filters:
                 if not include:
                     join_filters = ~join_filters
                 if full_filters is None:
                     full_filters = join_filters
                 else:
-                    if mode == "all":
-                        full_filters = Q(full_filters & join_filters)
-                    elif mode == "any":
-                        full_filters = Q(full_filters | join_filters)
-                    else:
-                        full_filters = Q(full_filters & join_filters)
+                    full_filters = Q(full_filters & join_filters)
+                join_filters_arr.append(join_filters)
         return full_filters
 
     def process_result_tags(self, resultset):
@@ -184,7 +196,7 @@ class PostgresProvider:
         start = time.time()
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
-            resultset = obj.objects.filter(query)
+            resultset = obj.objects.filter(query).distinct()
             if resultset is not None and has_drafts:
                 resultset = resultset.filter(draft=False)
             if resultset is not None and has_private:
@@ -193,23 +205,26 @@ class PostgresProvider:
             length = end - start
             print(f'text execution: {length}')
             start = time.time()
-        if filters is not None and (not not term and resultset and len(resultset) > 0):
-            if self.include_mode == "all" and filters[0]:
-                for q_item in filters[0].children:
-                    resultset = resultset.filter(q_item) if resultset else obj.objects.filter(q_item)
-            else:
-                if not resultset and filters[0]:
-                    resultset = obj.objects.filter(filters[0])
-                elif filters[0]:
-                    resultset = resultset.filter(filters[0])
-            if self.exclude_mode == "any" and filters[1]:
-                for q_item in filters[1].children:
-                    resultset = resultset.filter(~Q(q_item)) if resultset else obj.objects.filter(q_item)
-            else:
-                if not resultset and filters[1]:
-                    resultset = obj.objects.filter(filters[1])
-                elif filters[1]:
-                    resultset = resultset.filter(filters[1])
+        if filters is not None and (not not term and resultset is not None and len(resultset) > 0):
+            if resultset is None and filters[0]:
+                resultset = obj.objects.filter(filters[0])
+            elif filters[0]:
+                resultset = resultset.filter(filters[0])
+                if hasattr(obj, 'tags'):
+                    for tag in self.tag_filters['include']:
+                        resultset = resultset.filter(tag)
+                    for tag in self.tag_filters['exclude']:
+                        resultset = resultset.filter(~tag)
+                if hasattr(obj, 'attributes'):
+                    for attribute in self.attr_filters['include']:
+                        resultset = resultset.filter(attribute)
+                    for attribute in self.attr_filters['exclude']:
+                        resultset = resultset.filter(~attribute)
+                resultset = resultset.distinct()
+            if resultset is None and filters[1]:
+                resultset = obj.objects.filter(filters[1])
+            elif filters[1]:
+                resultset = resultset.filter(filters[1])
         end = time.time()
         length = end - start
         print(f'filter execution: {length}')
@@ -288,9 +303,9 @@ class PostgresProvider:
 
     def get_filters(self, search_object):
         include_filters = self.build_filters(
-            search_object.filter.include_filters, search_object.include_mode, True)
+            search_object.filter.include_filters, True)
         exclude_filters = self.build_filters(
-            search_object.filter.exclude_filters, search_object.exclude_mode, False)
+            search_object.filter.exclude_filters,False)
         return [include_filters, exclude_filters]
 
     def get_user_dict(self, users):
@@ -430,9 +445,6 @@ class PostgresProvider:
         work_search = WorkSearch()
         work_search.from_dict(kwargs)
         work_filters = self.get_filters(work_search)
-        # TODO: this is global - shouldn't really be here
-        self.include_mode = work_search.include_mode
-        self.exclude_mode = work_search.exclude_mode
         # build query
         query = self.get_query(work_search.term, work_search.term_search_fields)
         if not query and not work_filters:
