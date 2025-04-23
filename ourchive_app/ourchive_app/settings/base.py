@@ -246,12 +246,17 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'ourchive.log',
             'formatter': 'verbose',
-        }
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
     },
     'loggers': {
         '': {
             'level': os.getenv("OURCHIVE_LOG_LEVEL", "INFO"),
-            'handlers': ['file'],
+            'handlers': ['console'],
         },
     },
 }

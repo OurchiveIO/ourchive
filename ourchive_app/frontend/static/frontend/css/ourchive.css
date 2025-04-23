@@ -7098,6 +7098,12 @@ progress {
   color: #163C38;
 }
 
+.choices__list--multiple .choices__item {
+  background-color: #1D7E75 !important;
+  border: 1px solid #163C38 !important;
+  border-radius: 0px;
+}
+
 .chive-rich-text {
   position: relative;
   overflow: hidden;

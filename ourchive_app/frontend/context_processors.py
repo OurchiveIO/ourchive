@@ -8,14 +8,12 @@ from core.utils import convert_boolean
 def set_user_data(request):
     css_mode = request.session.get('css_mode')
     saved_searches = []
-    work_types = []
-    languages = []
+    work_types = [{'type_name': work_type.type_name, 'id': work_type.id} for work_type in WorkType.objects.all()]
+    languages = [{'display_name': language.display_name, 'id': language.id} for language in Language.objects.all()]
     if request.user.is_authenticated:
         request_url = f"api/users/{request.user.id}/"
         response = do_get(request_url, request).response_data
         saved_searches = [{'name': search.name, 'id': search.id} for search in SavedSearch.objects.filter(user_id=request.user.id).all()]
-        work_types = [{'type_name': work_type.type_name, 'id': work_type.id} for work_type in WorkType.objects.all()]
-        languages = [{'display_name': language.display_name, 'id': language.id} for language in Language.objects.all()]
         if 'has_notifications' in response:
             has_notifications = response['has_notifications']
             request.session['has_notifications'] = has_notifications
