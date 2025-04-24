@@ -706,6 +706,7 @@ def search_filter(request):
 
 
 def saved_search_filter(request):
+	search_id = request.POST.get('search_id', 0) if isinstance(request.POST.get('search_id', 0), int) else 0
 	if request.GET.get('save_new', False):
 		search_data = get_save_search_data(request)
 		search_data['name'] = request.POST.get('search-name')
@@ -713,7 +714,7 @@ def saved_search_filter(request):
 		response = do_post(f'api/savedsearches/', request, data=search_data, object_name='saved search')
 		if response.response_info.status_code >= 400:
 			messages.add_message(request, messages.ERROR, _("Something went wrong saving this search."))
-	elif int(request.POST.get('search_id', 0)) > 0:
+	elif search_id > 0:
 		search_data = get_save_search_data(request)
 		search_id = request.POST.get('search_id')
 		do_patch(f'api/savedsearches/{search_id}/', request, data=search_data, object_name='saved search')
@@ -805,7 +806,7 @@ def saved_search_filter(request):
 		'work_type_id': ''
 	}
 	template_data = execute_search(request, search_request)
-	template_data['search_id'] = int(request.POST.get('search_id', 0))
+	template_data['search_id'] = search_id
 	if not template_data:
 		return redirect('/')
 	return render(request, 'search_results.html', template_data)

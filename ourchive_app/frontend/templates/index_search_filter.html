@@ -22,7 +22,7 @@
         {% csrf_token %}
         <input type="hidden" id="search_id" name="search_id" value="{{ search.id }}"/>
         <input type="hidden" id="search-name" name="search-name" value="{{ search.name }}"/>
-        {% if idx_saved_searches %}
+        {% if request.user.is_authenticated %}
         <div class="mb-3">
             <label for="search-saved-searches" class="form-label">{% translate 'Saved Searches' %}</label>
             <select id="search-saved-searches" class="form-select" onchange="fetchSavedSearch(this, '{{ dropdown_selector }}')">
