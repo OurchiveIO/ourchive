@@ -12,7 +12,9 @@ from django.utils.translation import gettext_lazy as _
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
-if not os.getenv('OURCHIVE_DOCKER', False):
+OURCHIVE_DOCKER = os.getenv('OURCHIVE_DOCKER', False)
+
+if not OURCHIVE_DOCKER:
     load_dotenv(find_dotenv())
 
 APPEND_SLASH = True
@@ -99,7 +101,7 @@ TMP_ROOT = os.getenv('OURCHIVE_TMP_ROOT', 'tmp')
 
 SCRIPTS_ROOT = os.getenv('OURCHIVE_SCRIPTS_ROOT', 'scripts')
 
-FILE_PROCESSOR = os.getenv('OURCHIVE_FILE_PROCESSOR')
+FILE_PROCESSOR = os.getenv('OURCHIVE_FILE_PROCESSOR', 'local')
 
 S3_BUCKET = os.getenv('OURCHIVE_S3_BUCKET')
 

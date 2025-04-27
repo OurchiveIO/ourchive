@@ -59,7 +59,7 @@ class LocalFileHelper:
             logger.warning(f"Invalid content type: {file.content_type}")
             return None
         media_root = settings.MEDIA_ROOT if settings.MEDIA_ROOT.endswith('/') else f'{settings.MEDIA_ROOT}/'
-        full_name = (media_root[1:] if media_root.startswith('/') else media_root) + content_type + username + "/" + filename
+        full_name = (media_root[1:] if media_root.startswith('/') and settings.OURCHIVE_DOCKER else media_root) + content_type + username + "/" + filename
         logger.debug(f"File upload: {full_name}")
         os.makedirs(os.path.dirname(full_name), exist_ok=True)
         with open(full_name, 'wb+') as destination:
