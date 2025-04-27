@@ -1,0 +1,98 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}{% translate 'Saved Searches' %}{% endblock %}
+{% block content %}
+    <div class="row row-cols-1" id="user-saved-searches-grid">
+        <div><h1>{% translate 'Saved Searches' %}</h1>
+        <hr/></div>
+        {% if not saved_searches or saved_searches.count < 1 %}
+        <p id="user-saved-searches-none-message">{% translate 'No searches have been saved. To save a search, use the filters dialogue.' %}</p>
+        {% endif %}
+    </div>
+    <div class="row row-cols-4">
+    {% for search in saved_searches.results %}
+            <div id="saved-search-{{ search.id }}">
+                <div>
+                    <h3>{{ search.name }}</h3>
+                    <hr class="ourchive-hr"/>
+
+                <form action="save-search" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" id="search_id" name="search_id" value="{{ search.id }}"/>
+                    <div class="mb-3">
+                        <label for="saved-search-{{ search.id }}-name" class="form-label">{% translate 'Name' %}</label>
+                        <input type="text" id="saved-search-{{ search.id }}-name" class="form-control" value="{{ search.name }}"/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="saved-search-{{ search.id }}-languages" class="form-label">{% translate 'Language' %}</label>
+                        <select multiple name="languages[]" id="saved-search-{{ search.id }}-languages" class="form-select">
+                            {% for language in search.languages %}
+                                <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                            {% endfor %}
+                        </select>
+                        <script>initializeMultiSelect("saved-search-{{ search.id }}-languages")</script>
+                    </div>
+                    <div class="mb-3">
+                        <label for="saved-search-{{ search.id }}-status" class="form-label">{% translate 'Status' %}</label>
+                        <div id="saved-search-{{ search.id }}-status" class="form-check">
+                            <input id="saved-search-complete-0" data-testid="saved-search-complete-0" class="form-check-input" type="radio" name="complete" value="0" {% if '0' in search.work_statuses and '1' not in search.work_statuses %}checked{% endif %}>
+                            <label for="saved-search-complete-0" class="form-check-label">{% translate 'Incomplete' %}</label>
+                        </div>
+                        <div id="saved-search-{{ search.id }}-status" class="form-check">
+                            <input id="saved-search-complete-1" data-testid="saved-search-complete-1" class="form-check-input" type="radio" name="complete" value="1" {% if '1' in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}>
+                            <label for="saved-search-complete-1" class="form-check-label">{% translate 'Complete' %}</label>
+                        </div>
+                        <div id="saved-search-{{ search.id }}-status" class="form-check">
+                            <input id="saved-search-complete-minus-one" data-testid="saved-search-complete-minus-one" class="form-check-input" type="radio" name="complete" value="-1" {% if '1' in search.work_statuses and '0' in search.work_statuses %}checked{% elif '1' not in search.work_statuses and '0' not in search.work_statuses %}checked{% endif %}>
+                            <label for="saved-search-complete-minus-one" class="form-check-label">{% translate 'Any' %}</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="saved-search-{{ search.id }}-work-types" class="form-label">{% translate 'Work Type' %}</label>
+                        <select multiple id="{{ search.id }}-work_types[]" name="work_types[]" id="saved-search-{{ search.id }}-work-types" class="form-select">
+                            {% for work_type in search.work_types %}
+                                <option id="work-type-{{ work_type.id }}" value="{{ work_type.type_name }}" {% if work_type.checked %}selected{% endif %}>{{ work_type.type_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <script>initializeMultiSelect("{{ search.id }}-work_types[]")</script>
+                    </div>
+                    <div>
+                        <label for="word_count_{{ search.id }}-gte" id="saved-search-{{ search.id }}-wordcount" class="form-label">{% translate 'Word Count' %}</label>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input class="form-control" id="word_count_{{ search.id }}-gte" name="word_count_gte" type="text" value="{{ search.word_count_gte|default_if_none:'' }}"/>
+                        <label class="input-group-text" for="word_count_{{ search.id }}-lte">{% translate 'to' %}</label>
+                        <input class="form-control" id="word_count_{{ search.id }}-lte" name="word_count_lte" type="text" value="{{ search.word_count_lte|default_if_none:'' }}"/>
+                    </div>
+                    <div class="mb-3">
+                        <p class="fw-bold">{% translate 'Tags' %}</p>
+                        <label class="form-label" for="{{ search.id }}-include_facets[]">Include</label>
+                        <select multiple id="{{ search.id }}-include_facets[]" name="include_facets[]" hidden>
+                            {% for tag in search.include_facets_json %}
+                                <option id="include-{{ tag }}-option" value="{{ tag }}" selected>{{ tag }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label class="form-label" for="{{ search.id }}-exclude_facets[]">Include</label>
+                        <select multiple id="{{ search.id }}-exclude_facets[]" name="exclude_facets[]" hidden>
+                            {% for tag in search.exclude_facets_json %}
+                                <option id="exclude-{{ tag }}-option" value="{{ tag }}" selected>{{ tag }}</option>
+                            {% endfor %}
+                        </select>
+                        <script>
+                            initializeMultiSelect("{{ search.id }}-include_facets[]")
+                            initializeMultiSelect("{{ search.id }}-exclude_facets[]")
+                        </script>
+                    </div>
+                    <div class="mb-3">
+                        <input id="saved-search-{{ search.id }}-submit" class="btn btn-primary" type="submit" value="{% translate 'Update' %}"/>
+                        {% if show_delete %}<a id="saved-search-{{ search.id }}-delete" class="btn btn-secondary" href="/searches/{{ search.id }}/delete">{% translate 'Delete' %}</a>{% endif %}
+                    </div>
+                </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}

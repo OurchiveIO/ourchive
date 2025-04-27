@@ -13,6 +13,14 @@
 				container_block.innerHTML = myText;
 			  });
 		}
+
+        window.addEventListener("load", function() {
+            initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
+        });
+
+        UIkit.util.on(document, 'show', '#tag-results-works-switcher-content', function() {
+            initShowMores('work', 'works-tag-container', 'works-summary-container', 'tags', 'summary');
+        });
 	</script>
 	<div uk-grid id="tag-results-parent">
 		<div class="uk-width-1" id="tag-results-switcher-parent">
@@ -28,7 +36,7 @@
 				<div uk-grid id="tag-results-works-grid">
 		    	<div class="uk-width-3-4" id="tag-results-works-div">
 		    		<div id="works_list">
-						{% include "paginated_works.html" %}     
+						{% include "paginated_works.html" %}
 			    	</div>
 				</div>
 				</div>

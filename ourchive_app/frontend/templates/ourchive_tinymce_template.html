@@ -1,5 +1,5 @@
-<div id="{{obj_name}}-form-{{form_field}}-form-controls" class="uk-form-controls">
-    <div id="{{obj_name}}-form-{{form_field}}-inline" class="uk-inline uk-child-width-expand uk-width-expand">
+<div id="{{obj_name}}-form-{{form_field}}-form-controls">
+    <div id="{{obj_name}}-form-{{form_field}}-inline">
         <input type="hidden" id="{{form_field}}" name="{{form_field}}" value="{{form_field_value|safe|default_if_none:''}}">
         <textarea id="{{form_field}}Editor"></textarea>
         <script type="text/javascript">
@@ -20,11 +20,11 @@
                     toolbar_mode: 'sliding',
                     plugins: [
                       'link', 'image', 'lists', 'charmap', 'preview', 'anchor', 'pagebreak',
-                      'fullscreen', 'insertdatetime',
+                      'fullscreen', 'insertdatetime', 'code', 
                       'media', 'table', 'emoticons'
                     ],
                     toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-                      'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+                      'bullist numlist outdent indent | link image | print preview media fullscreen code | ' +
                       'forecolor backcolor emoticons | help',
                     menubar: '',
                     {% if setup_id %}

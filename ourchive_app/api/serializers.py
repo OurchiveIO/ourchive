@@ -1,18 +1,18 @@
+import json
+
 from django.contrib.auth.models import Group, AnonymousUser
 from rest_framework import serializers
 from django.db import IntegrityError
 from rest_framework_recursive.fields import RecursiveField
+
+from search.models import SavedSearch
 from .custom_fields import UserPrivateField
-from api.models import Work, Tag, Chapter, TagType, WorkType, \
-    Bookmark, BookmarkCollection, ChapterComment, BookmarkComment, Message, \
-    NotificationType, Notification, OurchiveSetting, Fingergun, UserBlocks, \
-    Invitation, AttributeType, AttributeValue, User, ContentPage, UserReport, \
-    UserReportReason, UserSubscription, CollectionComment, AdminAnnouncement
+from core.models import *
 import datetime
 import logging
 from django.conf import settings
 from django.core.mail import send_mail
-from .utils import convert_boolean, clean_text, count_words
+from core.utils import convert_boolean, clean_text, count_words
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 import unidecode
@@ -20,6 +20,7 @@ from etl.models import WorkImport
 from django.db.models.signals import post_save
 import itertools
 from django.utils.translation import gettext as _
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +54,19 @@ class AttributeValueSerializer(serializers.HyperlinkedModelSerializer):
 
 class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
     attribute_values = AttributeValueSerializer(many=True, required=False)
+    id = serializers.IntegerField()
+    search_group = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = AttributeType
+        fields = '__all__'
+
+
+class LanguageSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = Language
         fields = '__all__'
 
 
@@ -71,7 +82,7 @@ class ContentPageSerializer(serializers.Serializer):
 class ContentPageDetailSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     name = serializers.ReadOnlyField()
-    value = serializers.ReadOnlyField()
+    content = serializers.ReadOnlyField()
 
     class Meta:
         model = ContentPage
@@ -142,10 +153,10 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, subscription, validated_data):
         UserSubscription.objects.filter(id=subscription.id).update(**validated_data)
-        subscription = UserSubscription.objects.filter(id=subscription.id)
+        subscription = UserSubscription.objects.filter(id=subscription.id).first()
         post_save.send(UserSubscription, instance=subscription, created=False)
         subscription = UserSubscription.objects.get(id=subscription.id)
-        if not subscription.subscribed_to_bookmark and not subscription.subscribed_to_collection:
+        if not subscription.subscribed_to_bookmark and not subscription.subscribed_to_collection and not subscription.subscribed_to_work and not subscription.subscribed_to_series:
             subscription.delete()
         return subscription
 
@@ -184,6 +195,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     can_upload_export_files = serializers.ReadOnlyField(required=False)
     can_upload_video = serializers.ReadOnlyField(required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    default_languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='default_languages')
+    default_languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
     default_work_type = serializers.SlugRelatedField(
         queryset=WorkType.objects.all(),
         slug_field='type_name', required=False)
@@ -195,8 +208,22 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                   'icon', 'icon_alt_text', 'has_notifications', 'default_content',
                   'attributes', 'cookies_accepted', 'can_upload_audio', 'can_upload_export_files',
                   'can_upload_images', 'can_upload_video', 'default_work_type', 'collapse_chapter_image',
-                  'collapse_chapter_audio', 'collapse_chapter_text', 'copy_work_metadata', 'chive_export_url')
+                  'collapse_chapter_audio', 'collapse_chapter_text', 'copy_work_metadata', 'chive_export_url',
+                  'default_languages_readonly', 'default_languages')
         extra_kwargs = {'password': {'write_only': True}}
+
+    def process_languages(self, user, languages):
+        backup_languages = list(user.default_languages.all())
+        user.default_languages.clear()
+        try:
+            for language in languages:
+                user.default_languages.add(language)
+            user.save()
+        except Exception:
+            for language in backup_languages:
+                user.default_languages.add(language)
+            user.save()
+        return user
 
     def create(self, validated_data):
         require_invite = OurchiveSetting.objects.filter(
@@ -228,6 +255,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             attributes = validated_data.pop('attributes')
         else:
             attributes = None
+        languages = validated_data.pop('default_languages') if 'default_languages' in validated_data else []
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -248,9 +276,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         user.save()
         if attributes is not None:
             user = AttributeValueSerializer.process_attributes(user, validated_data, attributes)
+        user = self.process_languages(user, languages)
         return user
 
     def update(self, user, validated_data):
+        languages = validated_data.pop('default_languages') if 'default_languages' in validated_data else []
         if 'icon' in validated_data and not validated_data['icon'] or validated_data['icon'].lower() == 'none':
             validated_data['icon_alt_text'] = "Default icon"
             icon = OurchiveSetting.objects.filter(name='Default Icon URL').first()
@@ -264,7 +294,35 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             attributes = validated_data.pop('attributes')
             user = AttributeValueSerializer.process_attributes(user, validated_data, attributes)
         User.objects.filter(id=user.id).update(**validated_data)
+        user = User.objects.get(id=user.id)
+        user = self.process_languages(user, languages)
         return user
+
+
+class SavedSearchSerializer(serializers.HyperlinkedModelSerializer):
+    languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
+    languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True,
+                                             slug_field='display_name')
+    info_facets_json = serializers.SerializerMethodField()
+    include_facets_json = serializers.SerializerMethodField()
+    exclude_facets_json = serializers.SerializerMethodField()
+    id = serializers.IntegerField(read_only=True)
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+
+    def get_info_facets_json(self, obj):
+        return json.loads(obj.info_facets.replace('\'', '\"').replace("None", "").replace("Language", "languages")) if obj.info_facets else {}
+
+    def get_include_facets_json(self, obj):
+        return json.loads(obj.include_facets.replace('\'', '\"').replace("None", "")) if obj.include_facets else []
+
+    def get_exclude_facets_json(self, obj):
+        return json.loads(obj.exclude_facets.replace('\'', '\"').replace("None", "")) if obj.exclude_facets else []
+
+    class Meta:
+        model = SavedSearch
+        fields = '__all__'
 
 
 class SearchResultsSerializer(serializers.Serializer):
@@ -281,6 +339,8 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TagTypeSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.IntegerField()
+    search_group = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = TagType
         fields = '__all__'
@@ -331,10 +391,11 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, tag, validated_data):
         tag_type = TagType.objects.get(label=validated_data['tag_type'])
-        if (tag_type.admin_administrated):
-            user = validated_data['user']
+        user = validated_data.get('user', None)
+        if user:
             validated_data.pop('user')
-            if (user.is_superuser):
+        if (tag_type.admin_administrated):
+            if (user and user.is_superuser):
                 Tag.objects.filter(id=tag.id).update(**validated_data)
                 return Tag.objects.filter(id=tag.id).first()
             else:
@@ -345,10 +406,11 @@ class TagSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         tag_type = TagType.objects.get(label=validated_data['tag_type'])
-        if (tag_type.admin_administrated):
-            user = validated_data['user']
+        user = validated_data.get('user', None)
+        if user:
             validated_data.pop('user')
-            if (user.is_superuser):
+        if (tag_type.admin_administrated):
+            if (user and user.is_superuser):
                 tag = Tag.objects.create(**validated_data)
                 return tag
             else:
@@ -437,19 +499,18 @@ class ChapterCommentSerializer(serializers.HyperlinkedModelSerializer):
         comment_count = validated_data.pop('comment_count') if 'comment_count' in validated_data else None
         validated_data['text'] = clean_text(validated_data['text'], self.context['request'].user) if validated_data['text'] is not None else ''
         comment = ChapterComment.objects.create(**validated_data)
-        comment.chapter.comment_count = ChapterComment.objects.filter(chapter__id=comment.chapter.id).count()
-        comment.chapter.work.comment_count = ChapterComment.objects.filter(chapter__work__id=comment.chapter.work.id).count()
         comment.chapter.save()
         comment.chapter.work.save()
         comment_link = self.get_comment_link(comment, chapter_offset, comment_thread, comment_count)
         user = User.objects.filter(id=comment.chapter.user.id).first()
-        notification_type = NotificationType.objects.filter(
-            type_label="Comment Notification").first()
-        notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Chapter Comment",
-                                                   content=f"""A new comment for the work {comment.chapter.work.title} has been left on chapter {comment.chapter.number}! <a href='{comment_link}'>Click here</a> to view.""")
-        notification.save()
-        user.has_notifications = True
-        user.save()
+        if comment.user.id != user.id:
+            notification_type = NotificationType.objects.filter(
+                type_label="Comment Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Chapter Comment",
+                                                       content=f"""A new comment for the work {comment.chapter.work.title} has been left on chapter {comment.chapter.number}! <a href='{comment_link}'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         if comment.parent_comment is not None and comment.parent_comment.user.id != comment.chapter.user.id:
             user = User.objects.filter(id=comment.parent_comment.user.id).first()
             notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
@@ -491,14 +552,14 @@ class BookmarkCommentSerializer(serializers.HyperlinkedModelSerializer):
         validated_data['text'] = clean_text(validated_data['text'], self.context['request'].user)
         comment = BookmarkComment.objects.create(**validated_data)
         user = User.objects.filter(id=comment.bookmark.user.id).first()
-        notification_type = NotificationType.objects.filter(
-            type_label="Comment Notification").first()
-        notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Bookmark Comment",
-                                                   content=f"""A new comment has been left on your bookmark titled {comment.bookmark.title}! <a href='/bookmarks/{comment.bookmark.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
-        notification.save()
-        user.has_notifications = True
-        user.save()
-        comment.bookmark.comment_count = BookmarkComment.objects.filter(bookmark__id=comment.bookmark.id).count()
+        if comment.user.id != user.id:
+            notification_type = NotificationType.objects.filter(
+                type_label="Comment Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Bookmark Comment",
+                                                       content=f"""A new comment has been left on your bookmark titled {comment.bookmark.title}! <a href='/bookmarks/{comment.bookmark.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         comment.bookmark.save()
         if comment.parent_comment is not None and comment.parent_comment.user.id != comment.bookmark.user.id:
             user = User.objects.filter(id=comment.parent_comment.user.id).first()
@@ -541,15 +602,14 @@ class CollectionCommentSerializer(serializers.HyperlinkedModelSerializer):
         validated_data['text'] = clean_text(validated_data['text'], self.context['request'].user)
         comment = CollectionComment.objects.create(**validated_data)
         user = User.objects.filter(id=comment.collection.user.id).first()
-        notification_type = NotificationType.objects.filter(
-            type_label="Comment Notification").first()
-        notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Collection Comment",
-                                                   content=f"""A new comment has been left on your collection titled {comment.collection.title}! <a href='/bookmark-collections/{comment.collection.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
-        notification.save()
-        user.has_notifications = True
-        user.save()
-        comment.collection.comment_count = CollectionComment.objects.filter(collection__id=comment.collection.id).count()
-        comment.collection.save()
+        if comment.user.id != user.id:
+            notification_type = NotificationType.objects.filter(
+                type_label="Comment Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title="New Collection Comment",
+                                                       content=f"""A new comment has been left on your collection titled {comment.collection.title}! <a href='/bookmark-collections/{comment.collection.id}/?expandComments=true&scrollCommentId={comment.id}&comment_offset=0'>Click here</a> to view.""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
         if comment.parent_comment is not None and comment.parent_comment.user.id != comment.collection.user.id:
             user = User.objects.filter(id=comment.parent_comment.user.id).first()
             notification_type = NotificationType.objects.filter(type_label="Comment Notification").first()
@@ -586,8 +646,8 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.IntegerField(read_only=True)
     word_count = serializers.IntegerField(read_only=True)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
-    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
 
     class Meta:
         model = Chapter
@@ -628,7 +688,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
         chapter = Chapter.objects.filter(id=chapter.id)
         validated_data = self.clean_empty_fields(validated_data)
-        self.validate_chapter_number(validated_data, chapter.first().id)
+        # self.validate_chapter_number(validated_data, chapter.first().id)
         chapter.update(**validated_data)
         if chapter.first().work.chapters.count() > 1:
             work_updated_on = chapter.first().updated_on
@@ -644,7 +704,7 @@ class ChapterSerializer(serializers.HyperlinkedModelSerializer):
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
         validated_data = self.clean_empty_fields(validated_data)
-        self.validate_chapter_number(validated_data)
+        # self.validate_chapter_number(validated_data)
         chapter = Chapter.objects.create(**validated_data)
         if attributes is not None:
             chapter = AttributeValueSerializer.process_attributes(chapter, validated_data, attributes)
@@ -658,7 +718,7 @@ class ChapterAllSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     number = serializers.IntegerField()
     title = serializers.ReadOnlyField()
-    updated_on = serializers.DateTimeField(read_only=True)
+    updated_on = serializers.DateField(read_only=True)
 
     class Meta:
         model = Chapter
@@ -679,8 +739,41 @@ class TopTagSerializer(serializers.HyperlinkedModelSerializer):
         return tag_count
 
 
+class WorkSeriesSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = WorkSeries
+        fields = ['title', 'id']
+
+
+class WorkAnthologySerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    anthology = serializers.SerializerMethodField()
+
+    def get_anthology(self, obj):
+        return obj.anthology.title
+
+    class Meta:
+        model = AnthologyWork
+        fields = ['anthology', 'id']
+
+class MiniChapterSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    title = serializers.CharField()
+    number = serializers.IntegerField()
+
+    class Meta:
+        model = Chapter
+        fields = ['id', 'title', 'number']
+
+
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
+    series = WorkSeriesSerializer(required=False)
+    series_id = serializers.PrimaryKeyRelatedField(queryset=WorkSeries.objects.all(), required=False)
+    languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
+    languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
@@ -689,29 +782,40 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     word_count = serializers.IntegerField(read_only=True)
     audio_length = serializers.IntegerField(read_only=True, required=False)
+    chapters = MiniChapterSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-    users = MiniUserSerializer(many=True, required=False, read_only=True)
+    anthologies = WorkAnthologySerializer(many=True, required=False, read_only=True, source='anthology_work')
+    users = serializers.SerializerMethodField()
+    pending_users = serializers.SerializerMethodField()
     users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
     preferred_download = serializers.ChoiceField(choices=Work.DOWNLOAD_CHOICES, required=False)
-    chapter_count = serializers.IntegerField(
-        source='chapters.count',
-        read_only=True
-    )
+    chapter_count = serializers.SerializerMethodField()
     work_type_name = serializers.CharField(
         source='work_type.type_name',
         read_only=True
     )
     has_drafts = serializers.SerializerMethodField()
-    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
-    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
 
     class Meta:
         model = Work
         fields = '__all__'
 
+    def get_chapter_count(self, obj):
+        return obj.chapters.filter(draft=False).count()
+
     def get_has_drafts(self, obj):
         has_drafts = obj.draft or obj.chapters.all().filter(draft=True).exists()
         return has_drafts
+
+    def get_users(self, obj):
+        users = obj.users.filter((Q(user_works__work_id=obj.id) & Q(user_works__approved=True)) | Q(id=obj.user.id)).all()
+        return MiniUserSerializer(users, many=True, required=False, read_only=True).data
+
+    def get_pending_users(self, obj):
+        users = obj.users.filter((Q(user_works__work_id=obj.id) & Q(user_works__approved=False) & ~Q(user_works__user_id=obj.user.id))).all()
+        return MiniUserSerializer(users, many=True, required=False, read_only=True).data
 
     def process_tags(self, work, validated_data, tags):
         tags_to_add = []
@@ -746,6 +850,19 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         work.save()
         return work
 
+    def process_languages(self, work, languages):
+        backup_languages = list(work.languages.all())
+        work.languages.clear()
+        try:
+            for language in languages:
+                work.languages.add(language)
+            work.save()
+        except Exception:
+            for language in backup_languages:
+                work.languages.add(language)
+            work.save()
+        return work
+
     def process_users(self, work, users):
         backup_users = list(work.users.all())
         work.users.clear()
@@ -755,6 +872,10 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 work.users.add(user)
                 if user not in backup_users:
                     new_users.add(user)
+                else:
+                    user_work = UserWork.objects.filter(work_id=work.id, user_id=user.id).first()
+                    user_work.approved = True
+                    user_work.save()
             if not work.users or len(work.users.all()) == 0 or work.user not in list(work.users.all()):
                 work.users.add(work.user)
             work.save()
@@ -762,14 +883,17 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             logger.error(f'Error trying to add new cocreators: {e}.')
             for user in backup_users:
                 work.users.add(user)
+                user_work = UserWork.objects.filter(work_id=work.id, user_id=user.id).first()
+                user_work.approved = True
+                user_work.save()
             work.save()
         for user in new_users:
             if user.id == work.user.id:
                 continue
             notification_type = NotificationType.objects.filter(
                 type_label="System Notification").first()
-            notification = Notification.objects.create(notification_type=notification_type, user=user, title="Pending Approvals",
-                                                       content=f"""You have co-creator listings pending approval. <a href='/users/cocreator-approvals'>Click here</a> to view.""")
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title=_("Work Pending Approval"),
+                                                       content=f"""{_("Someone added you as a cocreator to the work")} <strong>{work.title}</strong>. <a href='/users/cocreator-approvals'>{_("Click to approve or reject the relationship.</a>")}""")
             notification.save()
             user.has_notifications = True
             user.save()
@@ -777,6 +901,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, work, validated_data):
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
         if 'tags' in validated_data:
             tags = validated_data.pop('tags') if 'tags' in validated_data else []
             work = self.process_tags(work, validated_data, tags)
@@ -799,13 +924,15 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         Work.objects.filter(id=work.id).update(**validated_data)
         work = Work.objects.get(id=work.id)
         self.process_users(work, users)
-        work.draft = validated_data['draft']
+        work = self.process_languages(work, languages)
+        work.draft = validated_data.get('draft', False)
         work.save()
         return Work.objects.filter(id=work.id).first()
 
     def create(self, validated_data):
         tags = validated_data.pop('tags') if 'tags' in validated_data else []
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
         attributes = None
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
@@ -819,6 +946,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         work = Work.objects.create(**validated_data)
         work = self.process_tags(work, validated_data, tags)
         work = self.process_users(work, users)
+        work = self.process_languages(work, languages)
         work.draft = validated_data['draft']
         work.save()
         if attributes is not None:
@@ -842,6 +970,8 @@ class BookmarkWorkSerializer(serializers.HyperlinkedModelSerializer):
 class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     work = BookmarkWorkSerializer(required=False)
     work_id = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all())
+    languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
+    languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
@@ -851,8 +981,8 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
-    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
-    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
 
     # TODO: gotta be a better way to do this
     class Meta:
@@ -900,6 +1030,19 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         bookmark.save()
         return bookmark
 
+    def process_languages(self, bookmark, languages):
+        backup_languages = list(bookmark.languages.all())
+        bookmark.languages.clear()
+        try:
+            for language in languages:
+                bookmark.languages.add(language)
+            bookmark.save()
+        except Exception:
+            for language in backup_languages:
+                bookmark.languages.add(language)
+            bookmark.save()
+        return bookmark
+
     def update(self, bookmark, validated_data):
         if 'title' in validated_data and validated_data['title'] == '':
             validated_data['title'] = f'Bookmark: {bookmark.work.title}'
@@ -914,10 +1057,12 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
             bookmark = AttributeValueSerializer.process_attributes(bookmark, validated_data, attributes)
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
         Bookmark.objects.filter(id=bookmark.id).update(**validated_data)
         bookmark = Bookmark.objects.get(id=bookmark.id)
         bookmark.draft = validated_data['draft']
         bookmark.save()
+        self.process_languages(bookmark, languages)
         return Bookmark.objects.filter(id=bookmark.id).first()
 
     def create(self, validated_data):
@@ -964,8 +1109,11 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
     user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
-    users = MiniUserSerializer(many=True, required=False, read_only=True)
+    users = serializers.SerializerMethodField()
+    pending_users = serializers.SerializerMethodField()
     users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
+    languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
+    languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
     id = serializers.ReadOnlyField()
     tags = TagSerializer(many=True, required=False)
     attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
@@ -973,8 +1121,16 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     works = serializers.PrimaryKeyRelatedField(queryset=Work.objects.all(), required=False, many=True)
     bookmarks_readonly = BookmarkSerializer(many=True, required=False, source='bookmarks')
     bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), required=False, many=True)
-    created_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
-    updated_on = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
+
+    def get_users(self, obj):
+        users = obj.users.filter((Q(user_collections__collection_id=obj.id) & Q(user_collections__approved=True)) | Q(id=obj.user.id)).all()
+        return MiniUserSerializer(users, many=True, required=False, read_only=True).data
+
+    def get_pending_users(self, obj):
+        users = obj.users.filter((Q(user_collections__collection_id=obj.id) & Q(user_collections__approved=False) & ~Q(user_collections__user_id=obj.user.id))).all()
+        return MiniUserSerializer(users, many=True, required=False, read_only=True).data
 
     class Meta:
         model = BookmarkCollection
@@ -989,6 +1145,10 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
                 collection.users.add(user)
                 if user not in backup_users:
                     new_users.add(user)
+                else:
+                    user_collection = UserCollection.objects.filter(collection_id=collection.id, user_id=user.id).first()
+                    user_collection.approved = True
+                    user_collection.save()
             if not collection.users or len(collection.users.all()) == 0 or collection.user not in list(collection.users.all()):
                 collection.users.add(collection.user)
             collection.save()
@@ -996,17 +1156,33 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             logger.error(f'Error trying to add new cocreators on collection: {e}')
             for user in backup_users:
                 collection.users.add(user)
+                user_collection = UserCollection.objects.filter(collection_id=collection.id, user_id=user.id).first()
+                user_collection.approved = True
+                user_collection.save()
             collection.save()
         for user in new_users:
             if user.id == collection.user.id:
                 continue
             notification_type = NotificationType.objects.filter(
                 type_label="System Notification").first()
-            notification = Notification.objects.create(notification_type=notification_type, user=user, title="Pending Approvals",
-                                                       content=f"""You have co-creator listings pending approval. <a href='/users/cocreator-approvals'>Click here</a> to view.""")
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title=_("Collection Pending Approval"),
+                                                       content=f"""{_("Someone added you as a cocreator to the collection")} <strong>{collection.title}</strong>. <a href='/users/cocreator-approvals'>{_("Click to approve or reject the relationship.</a>")}""")
             notification.save()
             user.has_notifications = True
             user.save()
+        return collection
+
+    def process_languages(self, collection, languages):
+        backup_languages = list(collection.languages.all())
+        collection.languages.clear()
+        try:
+            for language in languages:
+                collection.languages.add(language)
+            collection.save()
+        except Exception:
+            for language in backup_languages:
+                collection.languages.add(language)
+            collection.save()
         return collection
 
     def update(self, bookmark, validated_data):
@@ -1057,10 +1233,12 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             collection.save()
         if 'bookmarks' in validated_data:
             validated_data.pop('bookmarks')
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
         BookmarkCollection.objects.filter(
             id=bookmark.id).update(**validated_data)
         bookmark = BookmarkCollection.objects.get(id=bookmark.id)
         self.process_users(bookmark, users)
+        self.process_languages(bookmark, languages)
         bookmark.draft = validated_data['draft']
         bookmark.save()
         return BookmarkCollection.objects.filter(id=bookmark.id).first()
@@ -1069,6 +1247,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         bookmark_list = validated_data.pop('bookmarks') if 'bookmarks' in validated_data else []
         works_list = validated_data.pop('works') if 'works' in validated_data else []
         users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
         tags = []
         attributes = None
         if 'tags' in validated_data:
@@ -1101,11 +1280,12 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         for work in works_list:
             if work.draft:
                 raise serializers.ValidationError({"message": [_("Cannot add draft work to collection.")]})
-            bookmark_collection.bookmarks.add(work)
+            bookmark_collection.works.add(work)
         bookmark_collection.save()
         bookmark_collection = self.process_users(bookmark_collection, users)
         bookmark_collection.draft = validated_data['draft']
         bookmark_collection.save()
+        self.process_languages(bookmark_collection, languages)
         if attributes is not None:
             bookmark_collection = AttributeValueSerializer.process_attributes(bookmark_collection, validated_data, attributes)
         return bookmark_collection
@@ -1150,4 +1330,196 @@ class AdminAnnouncementSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = AdminAnnouncement
+        fields = '__all__'
+
+
+class NewsSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+
+    class Meta:
+        model = News
+        fields = '__all__'
+
+
+class SeriesSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+    works_readonly = serializers.SerializerMethodField()
+    works = serializers.PrimaryKeyRelatedField(many=True, queryset=Work.objects.all())
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
+
+    def get_works_readonly(self, instance):
+        works = instance.works.all().order_by('series_num')
+        return WorkSerializer(works, many=True, required=False, read_only=True, context={'request': self.context['request']}).data
+
+    class Meta:
+        model = WorkSeries
+        fields = '__all__'
+
+
+class AnthologySerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    creating_user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    users_to_add = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=User.objects.all())
+    creating_user_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+    works = serializers.SerializerMethodField()
+    created_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    languages_readonly = LanguageSerializer(many=True, required=False, read_only=True, source='languages')
+    languages = serializers.SlugRelatedField(queryset=Language.objects.all(), required=False, many=True, slug_field='display_name')
+    tags = TagSerializer(many=True, required=False)
+    attributes = AttributeValueSerializer(many=True, required=False, read_only=True)
+    owners = serializers.SerializerMethodField()
+    pending_owners = serializers.SerializerMethodField()
+
+    def process_tags(self, anthology, validated_data, tags):
+        tags_to_add = []
+        required_tag_types = list(TagType.objects.filter(required=True))
+        has_any_required = len(required_tag_types) > 0
+        for item in tags:
+            tag_id = unidecode.unidecode(clean_text(item['text'].lower()))
+            tag_friendly_name = item['text']
+            tag_type = item['tag_type']
+            tag_type_id = tag_type.id
+            if tag_type in required_tag_types:
+                if tag_id is None or tag_id == '':
+                    # todo: error
+                    return None
+                else:
+                    required_tag_types.pop()
+            try:
+                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+            except IntegrityError:
+                logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Anthology: {anthology.id}')
+                continue
+            if tag.display_text == '':
+                tag.display_text = tag_friendly_name
+                tag.save()
+            tags_to_add.append(tag)
+        if has_any_required and len(required_tag_types) > 0:
+            # todo: error
+            return None
+        anthology.tags.clear()
+        for tag in tags_to_add:
+            anthology.tags.add(tag)
+        anthology.save()
+        return anthology
+
+    def process_languages(self, anthology, languages):
+        backup_languages = list(anthology.languages.all())
+        anthology.languages.clear()
+        try:
+            for language in languages:
+                anthology.languages.add(language)
+            anthology.save()
+        except Exception:
+            for language in backup_languages:
+                anthology.languages.add(language)
+            anthology.save()
+        return anthology
+
+    def process_owners(self, anthology, users):
+        backup_users = list(anthology.owners.all())
+        anthology.owners.clear()
+        new_users = set()
+        try:
+            for user in users:
+                anthology.owners.add(user)
+                if user not in backup_users:
+                    new_users.add(user)
+                else:
+                    user_anthology = UserAnthology.objects.filter(anthology_id=anthology.id, user_id=user.id).first()
+                    user_anthology.approved = True
+                    user_anthology.save()
+            if not anthology.owners or len(anthology.owners.all()) == 0 or anthology.creating_user not in list(anthology.owners.all()):
+                anthology.owners.add(anthology.creating_user)
+            anthology.save()
+        except Exception as e:
+            logger.error(f'Error trying to add new anthology owners: {e}.')
+            for user in backup_users:
+                anthology.owners.add(user)
+                user_anthology = UserAnthology.objects.filter(anthology_id=anthology.id, user_id=user.id).first()
+                user_anthology.approved = True
+                user_anthology.save()
+            anthology.save()
+        for user in new_users:
+            if user.id == anthology.creating_user.id:
+                continue
+            notification_type = NotificationType.objects.filter(
+                type_label="System Notification").first()
+            notification = Notification.objects.create(notification_type=notification_type, user=user, title=_("Anthology Pending Approval"),
+                                                       content=f"""{_("Someone added you as a cocreator to the anthology")} <strong>{anthology.title}</strong>. <a href='/users/cocreator-approvals'>{_("Click to approve or reject the relationship.</a>")}""")
+            notification.save()
+            user.has_notifications = True
+            user.save()
+        return anthology
+
+    def update(self, anthology, validated_data):
+        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
+        if 'tags' in validated_data:
+            tags = validated_data.pop('tags') if 'tags' in validated_data else []
+            anthology = self.process_tags(anthology, validated_data, tags)
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+            anthology = AttributeValueSerializer.process_attributes(anthology, validated_data, attributes)
+        if 'description' in validated_data:
+            validated_data['description'] = clean_text(validated_data['description'], self.context['request'].user) if validated_data['description'] is not None else ''
+        if 'cover_url' in validated_data:
+            if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
+                validated_data['cover_url'] = ''
+        if 'header_url' in validated_data:
+            if validated_data['header_url'] is None or validated_data['header_url'] == "None":
+                validated_data['header_url'] = ''
+        if 'updated_on' not in validated_data:
+            validated_data['updated_on'] = datetime.datetime.now()
+        Anthology.objects.filter(id=anthology.id).update(**validated_data)
+        anthology = Anthology.objects.get(id=anthology.id)
+        self.process_owners(anthology, users)
+        self.process_languages(anthology, languages)
+        return Anthology.objects.filter(id=anthology.id).first()
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags') if 'tags' in validated_data else []
+        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else []
+        attributes = None
+        if 'attributes' in validated_data:
+            attributes = validated_data.pop('attributes')
+        if 'cover_url' in validated_data:
+            if validated_data['cover_url'] is None or validated_data['cover_url'] == "None":
+                validated_data['cover_url'] = ''
+        if 'header_url' in validated_data:
+            if validated_data['header_url'] is None or validated_data['header_url'] == "None":
+                validated_data['header_url'] = ''
+        validated_data['description'] = clean_text(validated_data['description'], self.context['request'].user) if validated_data['description'] is not None else ''
+        if 'updated_on' not in validated_data:
+            validated_data['updated_on'] = datetime.datetime.now()
+        anthology = Anthology.objects.create(**validated_data)
+        anthology = self.process_tags(anthology, validated_data, tags)
+        anthology = self.process_owners(anthology, users)
+        anthology = self.process_languages(anthology, languages)
+        if attributes is not None:
+            anthology = AttributeValueSerializer.process_attributes(anthology, validated_data, attributes)
+        return anthology
+
+    def get_works(self, instance):
+        works = instance.works.all().order_by('anthology_work__sort_order')
+        return WorkSerializer(works, many=True, required=False, read_only=True, context={'request': self.context['request']}).data
+
+    def get_owners(self, obj):
+        # TODO: this is a very dumb hack, gotta be a better way
+        owners = obj.owners.filter((Q(user_anthologies__anthology_id=obj.id) & Q(user_anthologies__approved=True)) | Q(id=obj.creating_user.id)).all() | User.objects.filter(id=obj.creating_user.id)
+        return MiniUserSerializer(owners, many=True, required=False, read_only=True).data
+
+    def get_pending_owners(self, obj):
+        users = obj.owners.filter((Q(user_anthologies__anthology_id=obj.id) & Q(user_anthologies__approved=False) & ~Q(user_anthologies__user_id=obj.creating_user.id))).all()
+        return MiniUserSerializer(users, many=True, required=False, read_only=True).data
+
+    class Meta:
+        model = Anthology
         fields = '__all__'

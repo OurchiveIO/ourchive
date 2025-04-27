@@ -1,0 +1,18 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block title %}{{news.title}}{% endblock %}
+{% block content %}
+<div id="news-tile-header-content" class="row row-cols-1">
+    <p class="fs-3">{{news.title}}</p>
+    <hr class="ourchive-hr"/>
+</div>
+<div class="row row-cols-1">
+    <p>{{ news.content|safe }}</p>
+</div>
+<div class="row row-cols-1">
+    <div class="d-flex justify-content-between mt-3">
+        <span id="news-metadata-updated" class="fw-light">{% translate 'Updated' %}: {{news.updated_on|date:'d M Y'}}</span>
+        <a href="{% url 'fe-news-list' %}">{% translate 'All news' %}</a>
+    </div>
+</div>
+{% endblock %}

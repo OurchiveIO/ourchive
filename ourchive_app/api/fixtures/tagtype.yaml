@@ -1,4 +1,4 @@
-- model: api.tagtype
+- model: core.tagtype
   pk: 1
   fields:
     label: Fandom
@@ -6,7 +6,7 @@
     admin_administrated: false
     required: false
     sort_order: 1
-- model: api.tagtype
+- model: core.tagtype
   pk: 2
   fields:
     label: Trope
@@ -14,7 +14,7 @@
     admin_administrated: true
     required: false
     sort_order: 4
-- model: api.tagtype
+- model: core.tagtype
   pk: 169
   fields:
     label: Language
@@ -22,7 +22,7 @@
     admin_administrated: false
     required: false
     sort_order: 5
-- model: api.tagtype
+- model: core.tagtype
   pk: 170
   fields:
     label: Pairing
@@ -30,7 +30,7 @@
     admin_administrated: false
     required: false
     sort_order: 2
-- model: api.tagtype
+- model: core.tagtype
   pk: 171
   fields:
     label: Warnings
@@ -38,7 +38,7 @@
     admin_administrated: false
     required: false
     sort_order: 6
-- model: api.tagtype
+- model: core.tagtype
   pk: 172
   fields:
     label: Additional Tags
@@ -46,7 +46,7 @@
     admin_administrated: false
     required: false
     sort_order: 7
-- model: api.tagtype
+- model: core.tagtype
   pk: 173
   fields:
     label: Characters

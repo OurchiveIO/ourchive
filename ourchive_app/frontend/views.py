@@ -1,15 +1,19 @@
+import json
+
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
+
+from core.models import Language
 from .search_models import SearchObject
 from html import escape, unescape
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, JsonResponse
 import logging
-from .api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
+from frontend.api_utils import do_get, do_post, do_patch, do_delete, validate_captcha
 from django.utils.translation import gettext as _
-from api import utils
+from core import utils
 from django.views.decorators.cache import never_cache
 from dateutil.parser import *
 from dateutil import tz
@@ -18,9 +22,10 @@ import random
 from django.core.cache import cache
 from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
-from .searcher import build_and_execute_search
-from .view_utils import *
+from frontend.searcher import build_and_execute_search, execute_search
+from frontend.view_utils import *
 from datetime import *
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +35,7 @@ def index(request):
 	recent_works = []
 	response = do_get(f'api/tags/top', request, params=request.GET, object_name='top tags')
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
-		top_tags = response.response_data['results']
+		top_tags = response.response_data.get('results', [])
 		top_tags = sorted(top_tags, key=itemgetter('tag_count'), reverse=True)
 		highest_count = top_tags[0]['tag_count'] if len(top_tags) > 0 else 0
 		tag_max_size = 3
@@ -45,6 +50,9 @@ def index(request):
 	response = do_get(f'api/works/recent', request, params=request.GET, object_name='recent works')
 	if response.response_info.status_code >= 200 and response.response_info.status_code < 300:
 		recent_works = response.response_data['results']
+	news = get_news(request).response_data.get('results', [])
+	homepage_news = do_get(f'api/news/homepage/', request, params=request.GET, object_name='news').response_data
+	browse_cards = create_browse_cards(request)
 	return render(request, 'index.html', {
 		'heading_message': _('ourchive_welcome'),
 		'long_message': _('ourchive_intro_copy'),
@@ -52,7 +60,10 @@ def index(request):
 		'top_tags': top_tags,
 		'recent_works': recent_works,
 		'stylesheet_name': 'ourchive-light.css',
-		'has_notifications': request.session.get('has_notifications')
+		'has_notifications': request.session.get('has_notifications'),
+		'news': news,
+		'browse_cards': browse_cards,
+		'homepage_news': homepage_news
 	})
 
 
@@ -86,29 +97,42 @@ def user_name(request, pk):
 	work_params = {}
 	bookmark_params = {}
 	bookmark_collection_params = {}
+	series_params = {}
+	anthology_params = {}
 	anchor = None
-	if 'work_offset' in request.GET:
-		work_params['offset'] = request.GET['work_offset']
-		work_params['limit'] = request.GET['work_limit']
-		anchor = "work_tab"
-	if 'bookmark_offset' in request.GET:
-		bookmark_params['offset'] = request.GET['bookmark_offset']
-		bookmark_params['limit'] = request.GET['bookmark_limit']
-		anchor = "bookmark_tab"
-	if 'bookmark_collection_offset' in request.GET:
-		bookmark_collection_params['offset'] = request.GET['bookmark_collection_offset']
-		bookmark_collection_params['limit'] = request.GET['bookmark_collection_limit']
-		anchor = "bookmark_collection_tab"
-	works_response = do_get(f'api/users/{username}/works', request, params=work_params, object_name='Works')
-	works = works_response.response_data['results']
-	works = get_object_tags(works)
-	works = format_date_for_template(works, 'updated_on', True)
-	work_next = f'/username/{pk}/{works_response.response_data["next_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=")}' if works_response.response_data["next_params"] is not None else None
-	work_previous = f'/username/{pk}/{works_response.response_data["prev_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=")}' if works_response.response_data["prev_params"] is not None else None
+	if request.GET.get('work_offset', '') or request.GET.get('work_limit', ''):
+		work_params['offset'] = request.GET.get('work_offset', '')
+		work_params['limit'] = request.GET.get('work_limit', '')
+		anchor = 0
+	if request.GET.get('bookmark_offset', '') or request.GET.get('bookmark_limit', ''):
+		bookmark_params['offset'] = request.GET.get('bookmark_offset', '')
+		bookmark_params['limit'] = request.GET.get('bookmark_limit', '')
+		anchor = 1
+	if request.GET.get('bookmark_collection_offset', '') or request.GET.get('bookmark_collection_limit', ''):
+		bookmark_collection_params['offset'] = request.GET.get('bookmark_collection_offset', '')
+		bookmark_collection_params['limit'] = request.GET.get('bookmark_collection_limit', '')
+		anchor = 2
+	if request.GET.get('series_offset', '') or request.GET.get('series_limit', ''):
+		series_params['offset'] = request.GET.get('series_offset', '')
+		series_params['limit'] = request.GET.get('series_limit', '')
+		anchor = 3
+	if request.GET.get('anthology_offset', '') or request.GET.get('anthology_limit', ''):
+		anthology_params['offset'] = request.GET.get('anthology_offset', '')
+		anthology_params['limit'] = request.GET.get('anthology_limit', '')
+		anchor = 4
+	if anchor is None:
+		anchor = 0 if user.response_data['results'][0]["default_content"] == 'Work' else (1 if user.response_data['results'][0]["default_content"] == 'Bookmark' else (2 if user.response_data['results'][0]["default_content"] == 'Collection' else 0))
+	# TODO: this violates DRY. all of this can be simplified, it's doing the exact same thing with multiple chives. also, we should just work with the results object instead of pulling out individual variables.
+	works_list = get_works_list(request, username)
+	works = works_list['works']
+	work_next = works_list['next_params'].replace("limit=", "work_limit=").replace("offset=", "work_offset=") if works_list['next_params'] else None
+	work_previous = works_list["prev_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=") if works_list["prev_params"] else None
+	work_count = works_list.get('count', 0)
 	bookmarks_response = do_get(f'api/users/{username}/bookmarks', request, params=bookmark_params).response_data
 	bookmarks = bookmarks_response['results']
 	bookmark_next = f'/username/{pk}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
 	bookmark_previous = f'/username/{pk}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
+	bookmark_count = bookmarks_response.get('count', 0)
 	bookmarks = get_object_tags(bookmarks)
 	bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
 	bookmark_collection_response = do_get(f'api/users/{username}/bookmarkcollections', request, params=bookmark_collection_params).response_data
@@ -117,6 +141,22 @@ def user_name(request, pk):
 	bookmark_collection_previous = f'/username/{pk}/{bookmark_collection_response["prev_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["prev_params"] is not None else None
 	bookmark_collection = get_object_tags(bookmark_collection)
 	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on', True)
+	collection_count = bookmark_collection_response.get('count', 0)
+	series_response = do_get(f'api/users/{username}/series', request, params=series_params).response_data
+	series = series_response['results']
+	series_next = f'/username/{pk}/{series_response["next_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["next_params"] is not None else None
+	series_previous = f'/username/{pk}/{series_response["prev_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["prev_params"] is not None else None
+	series_count = series_response.get('count', 0)
+	series = format_date_for_template(series, 'updated_on', True)
+	anthologies_response = do_get(f'api/users/{username}/anthologies', request, params=anthology_params).response_data
+	anthologies = anthologies_response['results']
+	anthology_next = f'/username/{pk}/{anthologies_response["next_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["next_params"] is not None else None
+	anthology_previous = f'/username/{pk}/{anthologies_response["prev_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["prev_params"] is not None else None
+	anthologies = format_date_for_template(anthologies, 'updated_on', True)
+	anthologies = get_object_tags(anthologies)
+	anthology_count = anthologies_response.get('count', 0)
+	for anthology in anthologies:
+		anthology['attributes'] = get_attributes_for_display(anthology.get('attributes', []))
 	user = user.response_data['results'][0]
 	user['attributes'] = get_attributes_for_display(user['attributes'])
 	subscription = do_get(f"api/subscriptions/", request, params={'subscribed_to': username}, object_name='Subscription')
@@ -138,8 +178,19 @@ def user_name(request, pk):
 		'bookmark_collections': bookmark_collection,
 		'bookmark_collections_next': bookmark_collection_next,
 		'bookmark_collections_previous': bookmark_collection_previous,
+		'series': series,
+		'series_next': series_next,
+		'series_previous': series_previous,
+		'anthologies': anthologies,
+		'anthologies_next': anthology_next,
+		'anthologies_previous': anthology_previous,
 		'user': user,
-		'subscription' : subscription
+		'subscription': subscription,
+		'work_count': work_count,
+		'bookmark_count': bookmark_count,
+		'collection_count': collection_count,
+		'series_count': series_count,
+		'anthology_count': anthology_count
 	})
 
 
@@ -246,7 +297,6 @@ def user_works(request, username):
 	next_params = response['next_params']
 	prev_params = response['prev_params']
 	works = response['works']
-	works = format_date_for_template(works, 'updated_on', True)
 	# TODO: there is a better/DRYer way to do this
 	for work in works:
 		work['owner'] = get_owns_object(work, request)
@@ -254,6 +304,50 @@ def user_works(request, username):
 		'works': works,
 		'next': f"/username/{username}/works/{next_params}" if next_params is not None else None,
 		'previous': f"/username/{username}/works/{prev_params}" if prev_params is not None else None,
+		'user_filter': username,
+		'root': settings.ROOT_URL})
+
+
+def user_series(request, username):
+	response = do_get(f'api/users/{username}/series', request, params=request.GET, object_name='User series')
+	series = {}
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	else:
+		series = response.response_data['results']
+	next_params = response.response_data['next_params'] if 'next_params' in response.response_data else None
+	prev_params = response.response_data['prev_params'] if 'prev_params' in response.response_data else None
+	series = format_date_for_template(series, 'updated_on', True)
+	for single_series in series:
+		single_series = get_series_users(request, single_series)
+	return render(request, 'series_list.html', {
+		'series': series,
+		'next': f"/username/{username}/series/{next_params}" if next_params is not None else None,
+		'previous': f"/username/{username}/series/{prev_params}" if prev_params is not None else None,
+		'user_filter': username,
+		'root': settings.ROOT_URL})
+
+
+def user_anthologies(request, username):
+	response = do_get(f'api/users/{username}/anthologies', request, params=request.GET, object_name='chive list')
+	anthologies = {}
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	else:
+		anthologies = response.response_data['results']
+	next_params = response.response_data['next_params'] if 'next_params' in response.response_data else None
+	prev_params = response.response_data['prev_params'] if 'prev_params' in response.response_data else None
+	anthologies = format_date_for_template(anthologies, 'updated_on', True)
+	anthologies = get_object_tags(anthologies)
+	for anthology in anthologies:
+		anthology['attributes'] = get_attributes_for_display(anthology.get('attributes', []))
+		anthology['owner'] = get_owns_object(anthology, request, 'owners', 'creating_user_id')
+	return render(request, 'anthologies_list.html', {
+		'anthologies': anthologies,
+		'next': f"/username/{username}/anthologies/{next_params}" if next_params is not None else None,
+		'previous': f"/username/{username}/anthologies/{prev_params}" if prev_params is not None else None,
 		'user_filter': username,
 		'root': settings.ROOT_URL})
 
@@ -319,13 +413,15 @@ def edit_user(request, pk):
 		user_data['collapse_chapter_audio'] = 'collapse_chapter_audio' in user_data
 		user_data['collapse_chapter_text'] = 'collapse_chapter_text' in user_data
 		user_data["attributes"] = get_attributes_from_form_data(request)
+		user_data = get_list_from_form('default_languages', user_data, request)
 		response = do_patch(f'api/users/{user_id}/', request, data=user_data, object_name='User Profile')
 		message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
 		messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
 		return redirect(f'/username/{pk}/')
 	else:
 		if request.user.is_authenticated:
-			work_types = do_get(f'api/worktypes', request, 'Work').response_data['results']
+			work_types = get_work_types(request)
+			languages = get_languages(request)
 			response = do_get(f"api/users/profile/{request.user.id}", request, 'User Profile')
 			if response.response_info.status_code >= 400:
 				messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
@@ -336,10 +432,12 @@ def edit_user(request, pk):
 				user['profile'] = sanitize_rich_text(user['profile'])
 			user_attributes = do_get(f'api/attributetypes', request, params={'allow_on_user': True}, object_name='Attribute')
 			user['attribute_types'] = process_attributes(user['attributes'], user_attributes.response_data['results'])
+			languages = process_languages(languages, user.get('default_languages_readonly', []))
 			return render(request, 'user_form.html', {
 				'user': user, 'form_title': 'Edit User',
 				'work_types': work_types,
-				})
+				'default_languages': languages
+			})
 		else:
 			messages.add_message(request, messages.ERROR, _('You must log in as this user to perform this action.'), 'user-profile-unauthorized-error')
 			return redirect('/login')
@@ -377,7 +475,7 @@ def user_bookmarks(request, username):
 
 
 def user_bookmark_collections(request, username):
-	response = do_get(f'api/users/{username}/bookmarkcollections', request, params=request.GET, object_name='Bookmark Collections')
+	response = do_get(f'api/users/{username}/bookmarkcollections', request, params=request.GET, object_name='Collections')
 	bookmark_collections = response.response_data['results']
 	bookmark_collections = get_object_tags(bookmark_collections)
 	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
@@ -497,6 +595,42 @@ def user_work_subscriptions(request, username):
 	return page_content
 
 
+def user_series_subscriptions(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
+		return redirect('/')
+	cache_key = f'subscription_{username}_{request.user}_series'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
+	response = do_get(f'api/users/{username}/subscriptions/series', request, params=request.GET)
+	page_content = render(request, 'user_series_subscriptions.html', {
+		'series': response.response_data,
+		'next': f"/users/{username}/subscriptions/series/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
+		'previous': f"/users/{username}/subscriptions/series/{response.response_data['prev_params']}" if response.response_data['prev_params'] is not None else None,
+	})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
+
+
+def user_anthology_subscriptions(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
+		return redirect('/')
+	cache_key = f'subscription_{username}_{request.user}_anthology'
+	if cache.get(cache_key):
+		return cache.get(cache_key)
+	response = do_get(f'api/users/{username}/subscriptions/anthologies', request, params=request.GET)
+	page_content = render(request, 'user_anthology_subscriptions.html', {
+		'anthologies': response.response_data,
+		'next': f"/users/{username}/subscriptions/anthologies/{response.response_data['next_params']}" if response.response_data['next_params'] is not None else None,
+		'previous': f"/users/{username}/subscriptions/anthologies/{response.response_data['prev_params']}" if response.response_data['prev_params'] is not None else None,
+	})
+	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
+		cache.set(cache_key, page_content, 60 * 60)
+	return page_content
+
+
 def user_subscriptions(request, username):
 	if not request.user.is_authenticated or not request.user.username == username:
 		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
@@ -526,6 +660,10 @@ def unsubscribe(request, username):
 			patch_data['subscribed_to_collection'] = False
 		if request.POST.get('subscribed_to_work'):
 			patch_data['subscribed_to_work'] = False
+		if request.POST.get('subscribed_to_series'):
+			patch_data['subscribed_to_series'] = False
+		if request.POST.get('subscribed_to_anthology'):
+			patch_data['subscribed_to_anthology'] = False
 		response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
 		process_message(request, response)
 	return referrer_redirect(request)
@@ -541,6 +679,8 @@ def subscribe(request):
 	post_data['subscribed_to_bookmark'] = True if request.POST.get('subscribed_to_bookmark') else False
 	post_data['subscribed_to_collection'] = True if request.POST.get('subscribed_to_collection') else False
 	post_data['subscribed_to_work'] = True if request.POST.get('subscribed_to_work') else False
+	post_data['subscribed_to_series'] = True if request.POST.get('subscribed_to_series') else False
+	post_data['subscribed_to_anthology'] = True if request.POST.get('subscribed_to_anthology') else False
 	post_data['user'] = request.user.username
 	post_data['subscribed_user'] = request.POST.get('subscribed_to')
 	if 'subscription_id' in request.POST:
@@ -565,24 +705,176 @@ def search_filter(request):
 	return render(request, 'search_results.html', template_data)
 
 
+def saved_search_filter(request):
+	search_id = request.POST.get('search_id', 0) if isinstance(request.POST.get('search_id', 0), int) else 0
+	if request.GET.get('save_new', False):
+		search_data = get_save_search_data(request)
+		search_data['name'] = request.POST.get('search-name')
+		search_data['user'] = str(request.user)
+		response = do_post(f'api/savedsearches/', request, data=search_data, object_name='saved search')
+		if response.response_info.status_code >= 400:
+			messages.add_message(request, messages.ERROR, _("Something went wrong saving this search."))
+	elif search_id > 0:
+		search_data = get_save_search_data(request)
+		search_id = request.POST.get('search_id')
+		do_patch(f'api/savedsearches/{search_id}/', request, data=search_data, object_name='saved search')
+	data_dict = request.POST.copy()
+	data_dict = get_list_from_form('include_facets', data_dict, request)
+	data_dict = get_list_from_form('exclude_facets', data_dict, request)
+	data_dict = get_list_from_form('work_types', data_dict, request)
+	data_dict = get_list_from_form('languages', data_dict, request)
+	completes = data_dict.get('complete', None)
+	include_filter = {
+		'Work Type': data_dict.get('work_types', []),
+		'Language': data_dict.get('languages', []),
+		'Completion Status': completes if completes and completes != '-1' else [],
+		'tags': data_dict.get('include_facets', []),
+		"attributes": [],
+	}
+	if data_dict.get('word_count_gte'):
+		include_filter['word_count_gte'] = [data_dict.get('word_count_gte')]
+	if data_dict.get('word_count_lte'):
+		include_filter['word_count_lte'] = [data_dict.get('word_count_lte')]
+	# TODO: clean this up
+	search_request = {
+		'work_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': include_filter,
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'bookmark_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+				'tags': data_dict.get('include_facets', []),
+				"attributes": [],
+			},
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'collection_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+				'tags': data_dict.get('include_facets', []),
+				"attributes": [],
+			},
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'user_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+				'tags': data_dict.get('include_facets', []),
+				"attributes": [],
+			},
+			"exclude_filter": {
+				'tags': data_dict.get('exclude_facets', []),
+				"attributes": [],
+			},
+		},
+		'tag_search': {
+			'term': request.POST.get('term', ''),
+			'include_mode': 'all',
+			'exclude_mode': 'all',
+			'page': 1,
+			'include_filter': {
+			},
+			"exclude_filter": {
+			},
+		},
+		'options': {'order_by': '-updated_on', 'split_include_exclude': False},
+		'tag_id': '',
+		'attr_id': '',
+		'work_type_id': ''
+	}
+	template_data = execute_search(request, search_request)
+	template_data['search_id'] = search_id
+	if not template_data:
+		return redirect('/')
+	return render(request, 'search_results.html', template_data)
+
+
+def search_delete(request, pk):
+	response = do_delete(f'api/savedsearches/{pk}/delete', request, object_name='saved search')
+	process_message(request, response)
+	return referrer_redirect(request)
+
+
+def search_save(request, username):
+	search_data = get_save_search_data(request)
+	search_id = request.POST.get('search_id')
+	do_patch(f'api/savedsearches/{search_id}/', request, data=search_data, object_name='saved search')
+	return redirect(f'/users/{username}/savedsearches')
+
+
+def saved_search(request, pk):
+	if pk == 0:
+		return render(request, 'index_search_filter.html', {
+			'search': {}
+		})
+	search_response = do_get(f'api/savedsearches/{pk}', request, object_name='saved search')
+	if search_response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view this saved search.'),
+							 'search-not-authed')
+		return referrer_redirect(request)
+	search_data = search_response.response_data
+	languages = get_languages(request)
+	work_types = get_work_types(request)
+	facets = search_data.get('info_facets_json', [])
+	search_data['languages'] = process_languages(languages, facets.get('languages', []), True)
+	get_saved_search_chive_info(search_data, work_types)
+	return render(request, 'index_search_filter.html', {
+		'search': search_data
+	})
+
+
 def tag_autocomplete(request):
 	term = request.GET.get('text')
 	params = {'term': term}
-	params['type'] = request.GET.get('type') if 'type' in request.GET else ''
+	params['type'] = request.GET.get('type') if 'type' in request.GET else None
 	params['fetch_all'] = request.GET.get('fetch_all') if 'fetch_all' in request.GET else ''
 	response = do_get(f'api/tag-autocomplete', request, params, 'Tag')
 	template = 'tag_autocomplete.html' if request.GET.get('source') == 'search' else 'edit_tag_autocomplete.html'
 	tags = response.response_data['results']
 	for tag in tags:
 		tag['display_text_clean'] = tag['display_text'].replace("'", "\\'")
-	return render(request, template, {
+	return JsonResponse({'tags': tags}) if request.GET.get('source') != 'search' else render(request, template, {
 		'tags': tags,
 		'divider': settings.TAG_DIVIDER,
-		'fetch_all': params['fetch_all']})
+		'fetch_all': params['fetch_all'],
+		'click_action': request.GET.get('click_action', None)})
+
+
+def language_autocomplete(request):
+	term = request.GET.get('text')
+	languages = Language.objects.filter(display_name__icontains=term).all()
+	languages = [{'display': language.display_name, 'id': language.id} for language in languages]
+	return render(request, 'generic_autocomplete.html', {
+		'items': languages,
+		'click_action': request.GET.get('click_action', None)})
 
 
 def bookmark_autocomplete(request):
 	term = request.GET.get('text')
+	obj_id = request.GET.get('obj_id', 0)
 	params = {'term': term}
 	response = do_get(f'api/bookmark-autocomplete', request, params, 'Work')
 	works = response.response_data['results']
@@ -590,7 +882,8 @@ def bookmark_autocomplete(request):
 		work['work']['title_clean'] = work['work']['title'].replace("'", "\\'")
 	template = 'bookmark_collection_autocomplete.html'
 	return render(request, template, {
-		'works': works})
+		'works': works,
+		'object_id': obj_id})
 
 
 def user_autocomplete(request):
@@ -601,6 +894,26 @@ def user_autocomplete(request):
 	template = 'user_autocomplete.html'
 	return render(request, template, {
 		'users': users})
+
+
+def series_autocomplete(request):
+	term = request.GET.get('text')
+	params = {'term': term}
+	response = do_get(f'api/series-autocomplete', request, params, 'Series')
+	series = response.response_data['results']
+	template = 'series_autocomplete.html'
+	return render(request, template, {
+		'series': series})
+
+
+def anthology_autocomplete(request):
+	term = request.GET.get('text')
+	params = {'term': term}
+	response = do_get(f'api/anthology-autocomplete', request, params, 'Anthology')
+	anthology = response.response_data['results']
+	template = 'anthology_autocomplete.html'
+	return render(request, template, {
+		'anthology': anthology})
 
 
 @require_http_methods(["GET"])
@@ -630,7 +943,7 @@ def works_by_type(request, type_id):
 
 
 def new_work(request):
-	work_types = do_get(f'api/worktypes', request, 'Work').response_data
+	work_types = get_work_types(request)
 	if request.user.is_authenticated and request.method != 'POST':
 		work = {
 			'title': 'Untitled Work',
@@ -649,17 +962,20 @@ def new_work(request):
 			'created_on': str(datetime.now().date()),
 			'updated_on': str(datetime.now().date())
 		}
-		tag_types = do_get(f'api/tagtypes', request, 'Tag').response_data
+		tag_types = do_get(f'api/tagtypes', request, {}, 'Tag').response_data
 		tags = group_tags_for_edit([], tag_types)
 		work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Work Attributes')
 		work['attribute_types'] = process_attributes([], work_attributes.response_data['results'])
+		languages = get_languages(request)
+		languages = populate_default_languages(languages, request)
 		return render(request, 'work_form.html', {
 			'tags': tags,
 			'divider': settings.TAG_DIVIDER,
 			'form_title': 'New Work',
-			'work_types': work_types['results'],
+			'work_types': work_types,
 			'work': work,
-			'work_chapter': work_chapter})
+			'work_chapter': work_chapter,
+			'languages': languages})
 	elif request.user.is_authenticated:
 		work_data = get_work_obj(request)
 		chapter_dict = work_data[3]
@@ -672,9 +988,13 @@ def new_work(request):
 				'tags': work_data[0]['tags'],
 				'divider': settings.TAG_DIVIDER,
 				'form_title': 'New Work',
-				'work_types': work_types['results'],
+				'work_types': work_types,
 				'work': work_data[0],
 				'work_chapter': chapter_dict})
+		if work_data[5] and not work_data[5].isdigit():
+			series_id = create_work_series(request, work_data[5], work['id'])
+			if not series_id:
+				messages.add_message(request, messages.ERROR, _('Series could not be created. Please contact an administrator for help.'), 'Series')
 		if chapter_dict:
 			chapter_dict['work'] = work['id']
 			response = do_post(f'api/chapters/', request, chapter_dict, 'Chapter')
@@ -755,6 +1075,11 @@ def edit_work(request, id):
 		work_dict = get_work_obj(request, id)
 		chapters = work_dict[2]
 		chapter_dict = work_dict[3]
+		if work_dict[5] and not work_dict[5].isdigit():
+			series_id = create_work_series(request, work_dict[5], id)
+			if not series_id:
+				messages.add_message(request, messages.ERROR, _('Series could not be created. Please contact an administrator for help.'), 'Series')
+		print(work_dict[0])
 		response = do_patch(f'api/works/{id}/', request, data=work_dict[0], object_name='Work')
 		if response.response_info.status_code == 200:
 			messages.add_message(request, messages.SUCCESS, response.response_info.message, response.response_info.type_label)
@@ -766,6 +1091,7 @@ def edit_work(request, id):
 				if response.response_info.status_code >= 400:
 					messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
 			for chapter in chapters:
+				print(chapter)
 				response = do_patch(f'api/chapters/{chapter["id"]}/', request, data=chapter, object_name='Work')
 				if response.response_info.status_code >= 400:
 					messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
@@ -781,8 +1107,8 @@ def edit_work(request, id):
 	else:
 		if request.user.is_authenticated:
 			multichapter = request.GET.get('multichapter', 'false')
-			work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
-			tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+			work_types = get_work_types(request)
+			tag_types = do_get(f'api/tagtypes', request, {}, 'Tag Type').response_data
 			works_response = do_get(f'api/works/{id}/', request, 'Work')
 			if works_response.response_info.status_code >= 400:
 				messages.add_message(request, messages.ERROR, works_response.response_info.message, works_response.response_info.type_label)
@@ -792,6 +1118,8 @@ def edit_work(request, id):
 			work['notes'] = sanitize_rich_text(work['notes'])
 			work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Attribute')
 			work['attribute_types'] = process_attributes(work['attributes'], work_attributes.response_data['results'])
+			languages = get_languages(request)
+			languages = process_languages(languages, work['languages_readonly'])
 			chapters = do_get(f'api/works/{id}/chapters/all', request, 'Chapter').response_data
 			chapter_count = int(work['chapter_count'])
 			if chapter_count < 2:
@@ -801,7 +1129,7 @@ def edit_work(request, id):
 			work_chapter = prepare_chapter_data(work_chapter, request)
 			tags = group_tags_for_edit(work['tags'], tag_types) if 'tags' in work else group_tags_for_edit([], tag_types)
 			return render(request, 'work_form.html', {
-				'work_types': work_types['results'],
+				'work_types': work_types,
 				'form_title': 'Edit Work',
 				'work': work,
 				'tags': tags,
@@ -810,7 +1138,8 @@ def edit_work(request, id):
 				'show_chapter': request.GET.get('show_chapter') if 'show_chapter' in request.GET else None,
 				'chapters': chapters,
 				'work_chapter': work_chapter,
-				'chapter_count': len(chapters)})
+				'chapter_count': len(chapters),
+				'languages': languages})
 		else:
 			return get_unauthorized_message(request, '/login', 'work-update-unauthorized-error')
 
@@ -880,12 +1209,15 @@ def delete_chapter(request, work_id, chapter_id):
 def new_bookmark(request, work_id):
 	if request.user.is_authenticated and request.method != 'POST':
 		bookmark_boilerplate = get_bookmark_boilerplate(request, work_id)
+		languages = get_languages(request)
+		languages = populate_default_languages(languages, request)
 		return render(request, 'bookmark_form.html', {
 			'tags': bookmark_boilerplate[1],
 			'divider': settings.TAG_DIVIDER,
 			'rating_range': bookmark_boilerplate[2],
 			'form_title': 'New Bookmark',
-			'bookmark': bookmark_boilerplate[0]
+			'bookmark': bookmark_boilerplate[0],
+			'languages': languages
 		})
 	elif request.user.is_authenticated:
 		bookmark_dict = get_bookmark_obj(request)
@@ -917,18 +1249,21 @@ def edit_bookmark(request, pk):
 		return redirect(f'/bookmarks/{pk}')
 	else:
 		if request.user.is_authenticated:
-			tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+			tag_types = do_get(f'api/tagtypes', request, {}, 'Tag Type').response_data
 			bookmark = do_get(f'api/bookmarks/{pk}/draft', request, 'Bookmark').response_data
 			bookmark['description'] = sanitize_rich_text(bookmark['description'])
 			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark': True}, object_name='Attribute')
 			bookmark['attribute_types'] = process_attributes(bookmark['attributes'], bookmark_attributes.response_data['results'])
 			tags = group_tags_for_edit(bookmark['tags'], tag_types) if 'tags' in bookmark else group_tags_for_edit([], tag_types)
+			languages = get_languages(request)
+			languages = process_languages(languages, bookmark['languages_readonly'])
 			return render(request, 'bookmark_form.html', {
 				'rating_range': bookmark['star_count'],
 				'divider': settings.TAG_DIVIDER,
 				'form_title': 'Edit Bookmark',
 				'bookmark': bookmark,
-				'tags': tags})
+				'tags': tags,
+				'languages': languages})
 		else:
 			return get_unauthorized_message(request, '/login', 'bookmark-update-login-error')
 
@@ -942,7 +1277,7 @@ def delete_bookmark(request, bookmark_id):
 
 
 def bookmark_collections(request):
-	response = do_get(f'api/bookmarkcollections/', request, 'Bookmark Collection').response_data
+	response = do_get(f'api/bookmarkcollections/', request, 'Collection').response_data
 	bookmark_collections = response['results']
 	bookmark_collections = get_object_tags(bookmark_collections)
 	bookmark_collections = format_date_for_template(bookmark_collections, 'updated_on', True)
@@ -959,7 +1294,7 @@ def bookmark_collections(request):
 def new_bookmark_collection(request):
 	if request.user.is_authenticated and request.method != 'POST':
 		bookmark_collection = {
-			'title': 'New Bookmark Collection',
+			'title': 'New Collection',
 			'description': '',
 			'user': request.user.username,
 			'is_private': True,
@@ -971,18 +1306,21 @@ def new_bookmark_collection(request):
 		}
 		bookmark_collection_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
 		bookmark_collection['attribute_types'] = process_attributes([], bookmark_collection_attributes.response_data['results'])
-		tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+		tag_types = do_get(f'api/tagtypes', request, {}, 'Tag Type').response_data
 		tags = group_tags_for_edit([], tag_types)
 		bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks').response_data
+		languages = get_languages(request)
+		languages = populate_default_languages(languages, request)
 		return render(request, 'bookmark_collection_form.html', {
 			'tags': tags,
 			'divider': settings.TAG_DIVIDER,
 			'form_title': _('New Collection'),
 			'bookmark_collection': bookmark_collection,
-			'bookmarks': bookmarks})
+			'bookmarks': bookmarks,
+			'languages': languages})
 	elif request.user.is_authenticated:
 		collection_dict = get_bookmark_collection_obj(request)
-		response = do_post(f'api/bookmarkcollections/', request, data=collection_dict, object_name='Bookmark Collection')
+		response = do_post(f'api/bookmarkcollections/', request, data=collection_dict, object_name='Collection')
 		process_message(request, response)
 		if 'id' in response.response_data:
 			return redirect(f'/bookmark-collections/{response.response_data["id"]}')
@@ -995,24 +1333,27 @@ def new_bookmark_collection(request):
 def edit_bookmark_collection(request, pk):
 	if request.method == 'POST':
 		collection_dict = get_bookmark_collection_obj(request)
-		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict, object_name='Bookmark Collection')
+		response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=collection_dict, object_name='Collection')
 		process_message(request, response)
 		return redirect(f'/bookmark-collections/{pk}')
 	else:
 		if request.user.is_authenticated:
-			tag_types = do_get(f'api/tagtypes', request, 'Tag Type').response_data
+			tag_types = do_get(f'api/tagtypes', request, {}, 'Tag Type').response_data
 			bookmark_collection = do_get(f'api/bookmarkcollections/{pk}/', request).response_data
 			bookmark_collection['description'] = sanitize_rich_text(bookmark_collection['description'])
 			bookmark_attributes = do_get(f'api/attributetypes', request, params={'allow_on_bookmark_collection': True}, object_name='Attribute')
 			bookmark_collection['attribute_types'] = process_attributes(bookmark_collection['attributes'], bookmark_attributes.response_data['results'])
 			tags = group_tags_for_edit(bookmark_collection['tags'], tag_types) if 'tags' in bookmark_collection else []
 			bookmarks = do_get(f'api/users/{request.user.username}/bookmarks?draft=false', request, 'Bookmarks')
+			languages = get_languages(request)
+			languages = process_languages(languages, bookmark_collection['languages_readonly'])
 			return render(request, 'bookmark_collection_form.html', {
 				'bookmark_collection': bookmark_collection,
 				'bookmarks': bookmarks,
 				'divider': settings.TAG_DIVIDER,
-				'form_title': 'Edit Bookmark Collection',
-				'tags': tags})
+				'form_title': 'Edit Collection',
+				'tags': tags,
+				'languages': languages})
 		else:
 			return get_unauthorized_message(request, '/login', 'bookmark-collection-update-login-error')
 
@@ -1033,20 +1374,20 @@ def bookmark_collection(request, pk):
 	cache_key = f'collection_{pk}_{request.user}_{expand_comments}_{scroll_comment_id}_{comment_id}_{comment_offset}_{comment_count}'
 	if cache.get(cache_key):
 		return cache.get(cache_key)
-	bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request, 'Bookmark Collection').response_data
+	bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request, 'Collection').response_data
 	tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
 	bookmark_collection['tags'] = tags
 	bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
 	bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on')
 	bookmark_collection['owner'] = get_owns_object(bookmark_collection, request)
 	if 'comment_thread' in request.GET:
-		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Bookmark Collection Comments').response_data
+		comments = do_get(f"api/collectioncomments/{comment_id}", request, 'Collection Comments').response_data
 		comment_offset = 0
 		comments = {'results': [comments], 'count': comment_count}
 		bookmark_collection['post_action_url'] = f"/bookmark-collections/{pk}/comments/new?offset={comment_offset}&comment_thread={comment_id}"
 		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit?offset={comment_offset}&comment_thread={comment_id}"""
 	else:
-		comments = do_get(f'api/bookmarkcollections/{pk}/comments?limit=10&offset={comment_offset}', request, 'Bookmark Collection Comments').response_data
+		comments = do_get(f'api/bookmarkcollections/{pk}/comments?limit=10&offset={comment_offset}', request, 'Collection Comments').response_data
 		bookmark_collection['post_action_url'] = f"/bookmark-collections/{pk}/comments/new"
 		bookmark_collection['edit_action_url'] = f"""/bookmark-collections/{pk}/comments/edit"""
 	user_can_comment = (bookmark_collection['comments_permitted'] and (bookmark_collection['anon_comments_permitted'] or request.user.is_authenticated)) if 'comments_permitted' in bookmark_collection else False
@@ -1067,7 +1408,7 @@ def bookmark_collection(request, pk):
 
 
 def delete_bookmark_collection(request, pk):
-	response = do_delete(f'api/bookmarkcollections/{pk}/', request, 'Bookmark Collection')
+	response = do_delete(f'api/bookmarkcollections/{pk}/', request, 'Collection')
 	process_message(request, response)
 	if request.META is not None and 'HTTP_REFERER' in request.META and str(pk) in request.META.get('HTTP_REFERER'):
 		return redirect('/bookmark-collections')
@@ -1076,7 +1417,7 @@ def delete_bookmark_collection(request, pk):
 
 def publish_bookmark_collection(request, pk):
 	data = {'id': pk, 'draft': False}
-	response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=data, object_name='Bookmark Collection')
+	response = do_patch(f'api/bookmarkcollections/{pk}/', request, data=data, object_name='Collection')
 	process_message(request, response)
 	return redirect(f'/bookmark-collections/{pk}')
 
@@ -1201,21 +1542,21 @@ def log_out(request):
 @require_http_methods(["GET"])
 def work(request, pk, chapter_offset=0):
 	view_full = request.GET.get('view_full', False)
-	expand_comments = 'expandComments' in request.GET and request.GET['expandComments'].lower() == "true"
+	expand_comments = request.GET.get('expandComments', 'True').lower() == 'true'
 	comment_offset = request.GET.get('comment_offset', 0)
 	comment_id = request.GET.get('comment_thread', None)
 	comment_count = request.GET.get('comment_count')
 	cache_key = f'work_{pk}_{chapter_offset}_{request.user}_{view_full}_{expand_comments}_{comment_offset}_{comment_id}_{comment_count}'
 	if cache.get(cache_key):
 		return cache.get(cache_key)
-	work_types = do_get(f'api/worktypes', request, 'Work Type').response_data
+	work_types = get_work_types(request)
 	url = f'api/works/{pk}/'
 	work_response = do_get(url, request, 'Work')
 	if work_response.response_info.status_code >= 400:
 		messages.add_message(request, messages.ERROR, work_response.response_info.message, work_response.response_info.type_label)
 		return redirect('/')
 	work = work_response.response_data
-	tags = group_tags(work['tags']) if 'tags' in work else {}
+	work['tags'] = group_tags(work['tags']) if 'tags' in work else {}
 	work['attributes'] = get_attributes_for_display(work['attributes'])
 	work = format_date_for_template(work, 'updated_on')
 	work['owner'] = get_owns_object(work, request)
@@ -1264,16 +1605,15 @@ def work(request, pk, chapter_offset=0):
 			chapters[-1]['post_action_url'] = f"/works/{pk}/chapters/{chapters[-1]['id']}/comments/new?view_full=true&offset={comment_offset}"
 			chapters[-1]['edit_action_url'] = f"""/works/{pk}/chapters/{chapters[-1]['id']}/comments/edit?view_full=true&offset={comment_offset}"""
 		work['last_chapter_id'] = chapters[-1]['id']
-	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections', request, 'Collections').response_data
+	collections = do_get(f'api/users/{request.user.username}/bookmarkcollections?work_id={pk}', request, object_name='Collections').response_data
 	page_content = render(request, 'work.html', {
-		'work_types': work_types['results'],
+		'work_types': work_types,
 		'work': work,
 		'collections': collections,
 		'user_can_comment': user_can_comment,
 		'expand_comments': expand_comments,
 		'scroll_comment_id': request.GET.get("scrollCommentId") if request.GET.get("scrollCommentId") is not None else None,
 		'id': pk,
-		'tags': tags,
 		'view_full': view_full,
 		'root': settings.ROOT_URL,
 		'chapters': chapters,
@@ -1433,7 +1773,6 @@ def edit_comment_common(request, object_name, error_redirect, redirect_url, redi
 		comment_dict["user"] = str(request.user)
 	else:
 		comment_dict["user"] = None
-	print(comment_dict)
 	response = do_patch(f"api/{object_name}comments/{comment_dict['id']}/", request, data=comment_dict, object_name='Comment')
 	process_message(request, response)
 	redirect_url = f'{redirect_url}expandComments=true&scrollCommentId={comment_dict["id"]}&comment_offset={comment_offset}'
@@ -1665,6 +2004,268 @@ def cocreator_approvals(request):
 	else:
 		messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'user-unauthorized-error')
 		return redirect('/login')
+
+
+def news_list(request):
+	response = do_get(f'api/news/', request, params=request.GET, object_name='News')
+	news_response = response.response_data
+	news = response.response_data.get('results', [])
+	news = format_date_for_template(news, 'updated_on', True)
+	next_params = news_response.get('next_params', None)
+	prev_params = news_response.get('prev_params', None)
+	return render(request, 'news.html', {
+		'news': news,
+		'next': f"/news{next_params}" if next_params is not None else None,
+		'previous': f"/news{prev_params}" if prev_params is not None else None,
+		'root': settings.ROOT_URL})
+
+
+def news(request, pk):
+	response = do_get(f'api/news/{pk}', request, params=request.GET, object_name='News')
+	news = response.response_data
+	news = format_date_for_template(news, 'updated_on', False)
+	return render(request, 'news_detail.html', {
+		'news': news,
+		'root': settings.ROOT_URL})
+
+
+def create_series(request):
+	if request.user.is_authenticated and request.method != 'POST':
+		series = {
+			'title': _('New Series'),
+			'user': request.user.username,
+			'description': '',
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date()),
+			'id': 0
+		}
+		return render(request, 'series_form.html', {
+			'form_title': _('New Series'),
+			'series': series})
+	elif request.user.is_authenticated and request.method == 'POST':
+		series_dict = get_series_obj(request)
+		work_ids = get_work_order_nums(series_dict, 'series_num')
+		response = do_post(f'api/series/', request, data=series_dict, object_name='Series')
+		if response.response_info.status_code < 400:
+			work_response = do_patch(f'api/series/{response.response_data["id"]}/works', request, data=work_ids, object_name='Series works')
+			if work_response.response_info.status_code >= 400:
+				# we don't need to show duplicate success messages
+				# but if something went wrong with this step let's show it
+				process_message(request, work_response)
+		process_message(request, response)
+		if 'id' in response.response_data:
+			return redirect(f'/series/{response.response_data["id"]}')
+		else:
+			return redirect(f'/series/new')
+	else:
+		messages.add_message(request, messages.ERROR, _('You must be logged in to create a series.'), 'Not Authorized')
+		return redirect('/')
+
+
+def edit_series(request, pk):
+	if request.user.is_authenticated and request.method != 'POST':
+		response = do_get(f'api/series/{pk}', request, params=request.GET, object_name='Series')
+		series = response.response_data
+		return render(request, 'series_form.html', {
+			'form_title': _('Edit Series'),
+			'series': series})
+	else:
+		series_dict = get_series_obj(request)
+		work_ids = get_work_order_nums(series_dict, 'series_num')
+		response = do_patch(f'api/series/{pk}/', request, data=series_dict, object_name='Series')
+		if response.response_info.status_code < 400:
+			work_response = do_patch(f'api/series/{pk}/works', request, data=work_ids, object_name='Series works')
+			if work_response.response_info.status_code >= 400:
+				# we don't need to show duplicate success messages
+				# but if something went wrong with this step let's show it
+				process_message(request, work_response)
+		process_message(request, response)
+		return redirect(f'/series/{pk}')
+
+
+def delete_series(request, pk):
+	response = do_delete(f'api/series/{pk}/', request, 'Series')
+	process_message(request, response)
+	if str(pk) in request.META.get('HTTP_REFERER'):
+		return redirect(f'/username/{request.user.id}')
+	return referrer_redirect(request)
+
+
+def series(request, pk):
+	response = do_get(f'api/series/{pk}/', request, object_name='Series')
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	series = response.response_data
+	series = format_date_for_template(series, 'updated_on')
+	series = get_series_users(request, series)
+	return render(request, 'series.html', {
+		'series': series
+	})
+
+
+def render_series_work(request, pk):
+	work_id = request.GET.get('work_id')
+	if pk > 0:
+		response = do_get(f'api/series/{pk}/', request, 'Series')
+		series = response.response_data
+	else:
+		series = {
+			'id': 1
+		}
+	response = do_get(f'api/works/{work_id}', request, 'Work')
+	work = response.response_data
+	template = 'series_form_work.html'
+	return render(request, template, {
+		'series': series,
+		'work': work})
+
+
+def delete_work_series(request, pk, work_id):
+	response = do_delete(f'api/series/{pk}/work/{work_id}', request, 'Series')
+	process_message(request, response)
+	if pk > 0:
+		return redirect(f'/series/{pk}/edit')
+	else:
+		return redirect(f'/series/create')
+
+
+def create_anthology(request):
+	if request.user.is_authenticated and request.method != 'POST':
+		anthology = {
+			'title': _('New Anthology'),
+			'user': request.user.username,
+			'description': '',
+			'created_on': str(datetime.now().date()),
+			'updated_on': str(datetime.now().date()),
+			'id': 0,
+			'divider': settings.TAG_DIVIDER
+		}
+		tag_types = do_get(f'api/tagtypes', request, {}, 'Tag').response_data
+		tags = group_tags_for_edit([], tag_types)
+		anthology_attributes = do_get(f'api/attributetypes', request, params={'allow_on_anthology': True}, object_name='Anthology attributes')
+		anthology['attribute_types'] = process_attributes([], anthology_attributes.response_data['results'])
+		languages = get_languages(request)
+		languages = populate_default_languages(languages, request)
+		return render(request, 'anthology_form.html', {
+			'form_title': _('New Anthology'),
+			'anthology': anthology,
+			'tags': tags,
+			'languages': languages
+		})
+	elif request.user.is_authenticated and request.method == 'POST':
+		anthology_dict = get_anthology_obj(request)
+		work_ids = get_work_order_nums(anthology_dict, 'sort_order')
+		response = do_post(f'api/anthologies/', request, data=anthology_dict, object_name='Anthology')
+		if response.response_info.status_code < 400:
+			work_response = do_patch(f'api/anthologies/{response.response_data["id"]}/works', request, data=work_ids, object_name='Anthology works')
+			if work_response.response_info.status_code >= 400:
+				# we don't need to show duplicate success messages
+				# but if something went wrong with this step let's show it
+				process_message(request, work_response)
+		process_message(request, response)
+		if 'id' in response.response_data:
+			return redirect(f'/anthologies/{response.response_data["id"]}')
+		else:
+			return redirect(f'/anthologies/create')
+	else:
+		messages.add_message(request, messages.ERROR, _('You must be logged in to create an anthology.'), 'Not Authorized')
+		return redirect('/')
+
+
+def edit_anthology(request, pk):
+	if request.user.is_authenticated and request.method != 'POST':
+		response = do_get(f'api/anthologies/{pk}', request, params=request.GET, object_name='Anthology')
+		anthology = response.response_data
+		tag_types = do_get(f'api/tagtypes', request, {}, 'Tag').response_data
+		tags = group_tags_for_edit(anthology.get('tags', []), tag_types)
+		anthology_attributes = do_get(f'api/attributetypes', request, params={'allow_on_anthology': True}, object_name='Anthology attributes')
+		anthology['attribute_types'] = process_attributes(anthology.get('attributes', []), anthology_attributes.response_data['results'])
+		languages = get_languages(request)
+		languages = process_languages(languages, anthology.get('languages_readonly', []))
+		return render(request, 'anthology_form.html', {
+			'form_title': _('Edit Anthology'),
+			'divider': settings.TAG_DIVIDER,
+			'anthology': anthology,
+			'tags': tags,
+			'languages': languages,
+			'remove_work_msg': _('Are you sure you want to remove this work from the anthology?')})
+	else:
+		anthology_dict = get_anthology_obj(request)
+		work_ids = get_work_order_nums(anthology_dict, 'sort_order')
+		response = do_patch(f'api/anthologies/{pk}/', request, data=anthology_dict, object_name='Anthology')
+		if response.response_info.status_code < 400:
+			work_response = do_patch(f'api/anthologies/{pk}/works', request, data=work_ids, object_name='Anthology works')
+			if work_response.response_info.status_code >= 400:
+				# we don't need to show duplicate success messages
+				# but if something went wrong with this step let's show it
+				process_message(request, work_response)
+		process_message(request, response)
+		return redirect(f'/anthologies/{pk}')
+
+
+def delete_anthology(request, pk):
+	response = do_delete(f'api/anthologies/{pk}/', request, 'Anthology')
+	process_message(request, response)
+	if str(pk) in request.META.get('HTTP_REFERER'):
+		return redirect(f'/username/{request.user.id}')
+	return referrer_redirect(request)
+
+
+def anthology(request, pk):
+	response = do_get(f'api/anthologies/{pk}/', request, object_name='Anthology')
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	anthology = response.response_data
+	anthology = format_date_for_template(anthology, 'updated_on')
+	anthology = get_anthology_users(request, anthology)
+	anthology['attributes'] = get_attributes_for_display(anthology['attributes'])
+	anthology['tags'] = group_tags(anthology['tags']) if 'tags' in anthology else {}
+	return render(request, 'anthology.html', {
+		'anthology': anthology
+	})
+
+
+def render_anthology_work(request, pk):
+	work_id = request.GET.get('work_id')
+	if pk > 0:
+		response = do_get(f'api/anthologies/{pk}/', request, 'Anthology')
+		anthology = response.response_data
+	else:
+		anthology = {
+			'id': 1
+		}
+	response = do_get(f'api/works/{work_id}', request, 'Work')
+	work = response.response_data
+	template = 'anthology_form_work.html'
+	return render(request, template, {
+		'anthology': anthology,
+		'work': work})
+
+
+def delete_work_anthology(request, pk, work_id):
+	response = do_delete(f'api/anthologies/{pk}/work/{work_id}', request, 'Anthology')
+	process_message(request, response)
+	if pk > 0:
+		return redirect(f'/anthologies/{pk}/edit')
+	else:
+		return redirect(f'/anthologies/create')
+
+
+def user_saved_searches(request, username):
+	response = do_get(f'api/users/{username}/savedsearches', request, None, 'saved searches')
+	if response.response_info.status_code >= 400:
+		messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
+		return redirect('/')
+	saved_searches = response.response_data
+	languages = get_languages(request)
+	work_types = get_work_types(request)
+	for saved_search in saved_searches.get('results', []):
+		saved_search['languages'] = process_languages(languages, saved_search.get('info_facets_json').get('languages', []), True)
+		get_saved_search_chive_info(saved_search, work_types)
+	return render(request, 'user_saved_searches.html', {
+		'saved_searches': saved_searches})
 
 
 @never_cache

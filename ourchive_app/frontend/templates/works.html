@@ -1,10 +1,11 @@
 {% extends 'index.html' %}
-{% block title %}Works{% endblock %}
-{% block content %}	
-	{% if user_filter %}
-    	<div class="uk-margin uk-width-1-1 uk-padding-remove-horizontal" id="works-list-user-filter-parent">
-			<h1 id="works-list-user-h1" class="uk-heading-line uk-text-center"> <span id="user_works_header"> Works by {{ user_filter }}</span> </h1> 
-		</div>
-	{% endif %}
-<div class="uk-padding-remove-horizontal">{% include "works_list.html" %}</div>
+{% load i18n %}
+{% block title %}{% translate 'Works' %}{% endblock %}
+{% block content %}
+    {% if user_filter %}
+        <div class="row row-cols-1" id="works-list-user-filter-parent">
+            <h1 id="works-list-user-h1">{% blocktranslate with user=user_filter %}Works by {{ user }} {% endblocktranslate %}</h1>
+        </div>
+    {% endif %}
+    {% include "works_list.html" %}
 {% endblock %}

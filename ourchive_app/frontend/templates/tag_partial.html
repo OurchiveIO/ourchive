@@ -1,18 +1,11 @@
-<div class="uk-visible@s uk-grid ourchive-parent-grid" id="{{obj_name}}-tags-dl" uk-grid>
-{% for type, tag in tags %}
-    <div id="{{obj_name}}-tile-tag-type-{{type}}" class="uk-margin-small uk-visible@s {% if not forloop.last %}uk-width-1-2{% else %} uk-width-1-1 {% endif %}">
-        <div class="uk-margin-remove"><span class="uk-text-bold uk-margin-right">{{ type }}</span></div>
-        {% for single_tag in tag %}
-            <div class="uk-inline uk-button-tag"><a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link" class="uk-link-muted uk-inline uk-text-break" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}">{{ single_tag.display_text|default:single_tag.text }}</a></div>
-        {% endfor %}
-    </div>
-{% endfor %}
-</div>
-{% for type, tag in tags %}
-<div class="uk-margin-small-top uk-hidden@s uk-width-medium" id="{{obj_name}}-tags-dl-mb">
-    <span class="uk-text-bold uk-margin-small uk-hidden@s">{{ type }}: </span>
-    {% for single_tag in tag %}
-        <a id="{{obj_name}}-tile-tag-{{single_tag.id}}-link-mb" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}" class="uk-hidden@s ourchive-mobile-tag-list uk-inline uk-text-break">{{ single_tag.display_text|default:single_tag.text }}{% if not forloop.last %},{% endif %}</a>
+{% for group, group_tags in tags.items %}
+    {% if not forloop.first %}<hr class="ourchive-hr"/>{% endif %}
+    {% for type, tag in group_tags.items %}
+        <div data-testid="tag-type" class="{% if forloop.first %}mt-4{% else %}mt-2{% endif %}" id="{{obj_name}}-tags-dl-mb">
+            <span class="fw-light">{{ type }} </span>
+            {% for single_tag in tag %}
+                <span data-testid="tag-value" class="badge oc-badge fs-6 m-1"><a class="link-underline link-underline-opacity-0 text-dark" id="{{obj_name}}-tile-tag-{{single_tag.id}}-link-mb" href="/tags/{{single_tag.id}}?tag_id={{single_tag.id}}">{{ single_tag.display_text|default:single_tag.text }}</a></span>
+            {% endfor %}
+        </div>
     {% endfor %}
-</div>
 {% endfor %}

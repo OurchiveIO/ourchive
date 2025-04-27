@@ -1,14 +1,14 @@
-- model: api.worktype
+- model: core.worktype
   pk: 1
   fields:
     uid: 1b036584-185c-46c5-93fd-066e8b0b554b
     type_name: Podfic
-- model: api.worktype
+- model: core.worktype
   pk: 2
   fields:
     uid: e5890253-b6fc-4973-bda2-9ed0e39d2ed8
     type_name: Fic
-- model: api.worktype
+- model: core.worktype
   pk: 3
   fields:
     uid: 44d0bf3a-480f-466b-8e48-3b9be4e297c1

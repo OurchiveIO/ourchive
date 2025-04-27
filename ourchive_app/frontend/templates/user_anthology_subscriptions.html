@@ -1,0 +1,11 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block title %}{% translate 'Anthology Subscriptions' %}{% endblock %}
+{% block content %}
+    <div class="row row-cols-1 mb-3" id="anthology-subscriptions-view-parent">
+        <h1 id="anthology-subscriptions-header-h1">{{request.user}}'s Anthology Subscriptions</h1>
+    </div>
+    <div class="row row-cols-1">
+        {% include "anthologies_list_body.html" with anthologies=anthologies.results %}
+    </div>
+{% endblock %}

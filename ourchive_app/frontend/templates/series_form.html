@@ -1,0 +1,64 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}{{ form_title }}{% endblock %}
+{% block content %}
+    <script src="{% static 'frontend/js/ourchive-series.js' %}"></script>
+    <div id="series-form-actions-parent" class="row row-cols-1 mb-3">
+        <div id="series-form-header-parent">
+            <h1 id="series-form-header-span">{{ form_title }}</h1>
+            <hr id="series-form-hr" class="ourchive-hr"/>
+        </div>
+    </div>
+    <div class="row row-cols-1 mb-3" id="series-form-parent-grid">
+        <form method="post" id="seriesForm" onsubmit="return getRichText(['description'])">
+            {% csrf_token %}
+            <input id="series-form-hidden-id" type="hidden" name="series_id" {% if series.id != 0 %}value="{{ series.id }}"{% else %} value=""{% endif %}/>
+            <div id="series-form-title-parent" class="mb-3">
+                <label id="series-form-title-label" class="form-label" for="series-form-title-input">{% translate 'Title' %}</label>
+                <input id="series-form-title-input" title="{% translate 'Series Title' %}" class="form-control" type="text" name="title" value="{{ series.title|default_if_none:'' }}">
+            </div>
+            <div class="mb-3" id="series-form-created-parent">
+                <label id="series-form-created-label" class="form-label" for="series-form-created-on">{% translate 'Post Date' %}</label>
+                <input title="{% translate 'Series created on' %}" id="series-form-created-on" type="date" class="form-control" name="created_on" value="{{ series.created_on }}">
+            </div>
+            <div class="mb-3" id="series-form-updated-parent">
+                <label id="series-form-updated-label" class="form-label" for="series-form-updated-on">{% translate 'Update Date' %}</label>
+                <input title="{% translate 'Series updated on' %}" id="series-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ series.updated_on }}">
+                <input title="{% translate 'Series updated on' %}" id="series-form-updated-on" type="date" class="form-control" name="updated_on" value="{{ series.updated_on }}">
+            </div>
+            <div class="mb-3 form-check form-switch" id="series-form-complete-parent">
+                <input title="{% translate 'Series complete toggle' %}" class="form-check-input" role="switch" id="series-form-complete-checkbox" type="checkbox" name="is_complete" {% if series.is_complete %} checked {% endif %}>
+                <label id="series-form-complete-label" class="form-check-label" for="series-form-complete-checkbox">{% translate 'Complete?' %}</label>
+            </div>
+            <div class="mb-3">
+                <hr id="series-form-details-hr" class="ourchive-hr"/>
+                <h3 id="series-form-header">{% translate 'Details' %}</h3>
+            </div>
+            <div class="mb-3" id="series-works-list">
+                <label id="series-works-form-label" class="form-label" for="series-list">{% translate 'Works' %}</label>
+                <ul class="list-group sortable-list" id="series-list">
+                    {% for work in series.works_readonly %}
+                    <li id="work-list-{{work.id}}" class="work-list-item list-group-item sortable-item" draggable="true">
+                        {% include "series_form_work.html" with work=work series=series %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div id="series-form-works-parent" class="mb-3">
+                <label id="series-form-works-label" class="form-label" for="series_entry">{% translate 'Add work by title' %}</label>
+                <input autocomplete="off" class="form-control" type="text" placeholder="{% translate 'Search for work...' %}" data-bs-toggle="dropdown" aria-expanded="false" id="series_entry" oninput="doWorkAutocomplete(this.value)">
+                <div id="series-autocomplete-dropdown" class="dropdown-menu p-4">{% translate 'Search for work...' %}</div>
+            </div>
+            <div id="series-form-description-parent" class="mb-3">
+                <label id="series-form-description-label" class="form-label" for="descriptionEditor">{% translate 'Description' %}</label>
+                {% include 'ourchive_tinymce_template.html' with form_field_value=series.description form_field='description' obj_name='series' %}
+            </div>
+            <hr id="series-actions-footer-hr" class="ourchive-hr"/>
+            <div class="mb-3" id="series-form-actions-footer-parent">
+                <input id="series-form-actions-footer-submit" class="btn btn-primary float-end m-2" type="submit" value="{% translate 'Submit' %}"/>
+                <input id="series-form-actions-footer-cancel" class="btn btn-secondary float-end m-2" type="button" onclick="history.back()" value="{% translate 'Cancel' %}"/>
+            </div>
+        </form>
+    </div>
+{% endblock %}

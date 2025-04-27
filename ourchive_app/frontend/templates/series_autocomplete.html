@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if series %}
+<div>
+	{% for item in series %}
+	<p id="search-series-autocomplete-graf-{{item.id}}" onclick="populateSeriesInput('{{item.title}}', '{{item.id}}')">{{item.title}}</p>
+	{% endfor %}
+</div>
+{% else %}
+<div class="p-2">{% translate 'No series found' %}</div>
+{% endif %}

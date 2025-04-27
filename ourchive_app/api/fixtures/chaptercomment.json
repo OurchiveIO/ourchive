@@ -1,6 +1,6 @@
 [
 {
-    "model": "api.chaptercomment",
+    "model": "core.chaptercomment",
     "pk": 5,
     "fields": {
         "uid": "98d98c7f-9585-42ad-b749-be847670b2f6",
@@ -13,7 +13,7 @@
     }
 },
 {
-    "model": "api.chaptercomment",
+    "model": "core.chaptercomment",
     "pk": 6,
     "fields": {
         "uid": "246bf2ff-f779-40dc-85dc-5edfa29c6451",
@@ -26,7 +26,7 @@
     }
 },
 {
-    "model": "api.chaptercomment",
+    "model": "core.chaptercomment",
     "pk": 7,
     "fields": {
         "uid": "06a7ce2d-4126-4a0f-a95d-8041ba3bc2de",
@@ -39,7 +39,7 @@
     }
 },
 {
-    "model": "api.chaptercomment",
+    "model": "core.chaptercomment",
     "pk": 8,
     "fields": {
         "uid": "6edf6e61-3f16-4693-95ac-f1292e514617",
@@ -52,7 +52,7 @@
     }
 },
 {
-    "model": "api.chaptercomment",
+    "model": "core.chaptercomment",
     "pk": 9,
     "fields": {
         "uid": "b54cf90e-3d44-4708-9f6a-6479237cbdf7",
@@ -65,7 +65,7 @@
     }
 },
 {
-    "model": "api.chaptercomment",
+    "model": "core.chaptercomment",
     "pk": 10,
     "fields": {
         "uid": "6ba7a3ab-ebed-47d1-a33c-1af6f22a5dd4",

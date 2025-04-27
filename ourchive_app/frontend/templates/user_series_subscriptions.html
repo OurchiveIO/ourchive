@@ -1,0 +1,11 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block title %}{% translate 'Series Subscriptions' %}{% endblock %}
+{% block content %}
+    <div class="row row-cols-1 mb-3" id="series-subscriptions-view-parent">
+        <h1 id="series-subscriptions-header-h1">{{request.user}}'s Series Subscriptions</h1>
+    </div>
+    <div class="row row-cols-1">
+        {% include "series_list_body.html" with series=series.results %}
+    </div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if anthologies %}
+<div class="oc-bg-secondary">
+	{% for anthology in anthologies %}
+	<div id="search-anthology-autocomplete-graf-{{anthology.id}}" class="p-1" onclick="populateAnthologyInput('{{anthology.title}}', '{{anthology.id}}')"><span id="user-autocomplete-span-{{anthology.id}}">{{anthology.title}}</span></div>
+	{% endfor %}
+</div>
+{% else %}
+<div class="oc-bg-secondary">{% translate 'No anthology found' %}</div>
+{% endif %}

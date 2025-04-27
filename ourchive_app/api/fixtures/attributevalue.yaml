@@ -1,67 +1,67 @@
-- model: api.attributevalue
+- model: core.attributevalue
   pk: 1
   fields:
     uid: 4446678a-d5c8-4958-824c-c2c73d7d2f16
     name: general audiences
     display_name: General Audiences
     attribute_type: 1
-- model: api.attributevalue
+- model: core.attributevalue
   pk: 2
   fields:
     uid: b45809ef-c905-4287-ba23-950dc6f7b640
     name: teen
     display_name: Teen
     attribute_type: 1
-- model: api.attributevalue
+- model: core.attributevalue
   pk: 3
   fields:
     uid: 9332d3c7-49a8-4391-861a-2dc8a0bd76d9
     name: mature
     display_name: Mature
     attribute_type: 1
-- model: api.attributevalue
+- model: core.attributevalue
   pk: 4
   fields:
     uid: cfd7bff9-ccfb-4e9f-aadc-8dd0fc62ab44
     name: romance
     display_name: Romance
     attribute_type: 2
-- model: api.attributevalue
+- model: core.attributevalue
   pk: 5
   fields:
     uid: 8f761c7a-8aaa-4894-8145-b6501607796f
     name: adventure
     display_name: Adventure
     attribute_type: 2
-- model: api.attributevalue
+- model: core.attributevalue
   pk: 6
   fields:
     uid: ffc9a187-211d-4111-88e1-53acd3f509dc
     name: rec
     display_name: Rec
     attribute_type: 3
-- model: api.attributevalue
+- model: core.attributevalue
   pk: 7
   fields:
     uid: ab29f8fe-d6f5-4fb0-ab24-f729250ddb03
     name: fic
     display_name: Fic
     attribute_type: 4
-- model: api.attributevalue
+- model: core.attributevalue
   pk: 8
   fields:
     uid: 3629ffa4-8771-40cf-bb04-2077656edf3e
     name: podfic
     display_name: Podfic
     attribute_type: 4
-- model: api.attributevalue
+- model: core.attributevalue
   pk: 9
   fields:
     uid: 2893a996-4712-4986-9835-7d191c10fbeb
     name: recs
     display_name: Recs
     attribute_type: 4
-- model: api.attributevalue
+- model: core.attributevalue
   pk: 10
   fields:
     uid: 5f17183c-38d1-4e10-af54-23526ff47b73

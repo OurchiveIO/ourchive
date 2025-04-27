@@ -1,10 +1,10 @@
-- model: api.notificationtype
+- model: core.notificationtype
   pk: 1
   fields:
     uid: ffc22294-a6d8-497d-a87a-430f3e88b6b1
     type_label: System Notification
     send_email: false
-- model: api.notificationtype
+- model: core.notificationtype
   pk: 2
   fields:
     uid: 639718d0-2c5d-4ddd-a34d-b904873b95bf

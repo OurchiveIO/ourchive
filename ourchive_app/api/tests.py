@@ -1,10 +1,11 @@
 from django.test import TestCase
 from rest_framework.test import force_authenticate, APIRequestFactory
-import api.models as models
+import core.models as models
 import api.views as api_views
 from django.core.management import call_command
-from api.utils import count_words
+from core.utils import count_words
 from unittest import skip
+
 
 class ApiTests(TestCase):
 
@@ -77,15 +78,18 @@ class ApiTests(TestCase):
         }
         factory = APIRequestFactory()
         user = models.User.objects.get(username='test_user')
-        work = models.Work.objects.get(id=1)
+        work = models.Work.objects.exclude(user_id=user.id).first()
+        if not work:
+            work = models.Work(user_id=models.User.objects.exclude(id=user.id).first().id, title="test")
+            work.save()
         view = api_views.WorkDetail.as_view()
-        request = factory.patch(f'/works/1/', work_update_json, format='json')
+        request = factory.patch(f'/works/{work.id}/', work_update_json, format='json')
         force_authenticate(request, user=self.test_user)
-        response = view(request, pk=1)
+        response = view(request, pk=work.id)
         # test_user doesn't own work id=1
-        self.assertEquals(response.status_code, 403)
+        self.assertEquals(response.status_code, 404)
         force_authenticate(request, user=self.test_admin_user)
-        response = view(request, pk=1)
+        response = view(request, pk=work.id)
         self.assertEquals(response.status_code, 200)
 
     def test_can_view_bookmarks(self):
@@ -107,8 +111,8 @@ class ApiTests(TestCase):
             "title": "ok ok",
             "rating": 0,
             "description": "<p>hello</p>",
-            "created_on": "2023-08-14T14:32:14.349520Z",
-            "updated_on": "2023-08-14T14:32:14.362771Z",
+            "created_on": "2023-08-14",
+            "updated_on": "2023-08-14",
             "draft": False,
             "anon_comments_permitted": True,
             "comments_permitted": True,
@@ -152,8 +156,8 @@ class ApiTests(TestCase):
             "header_alt_text": None,
             "short_description": "does what it says on the tin",
             "description": "",
-            "created_on": "2023-08-14T14:32:22.792308Z",
-            "updated_on": "2023-08-14T14:32:22.803361Z",
+            "created_on": "2023-08-14",
+            "updated_on": "2023-08-14",
             "draft": False,
             "anon_comments_permitted": True,
             "comments_permitted": True,
@@ -499,10 +503,16 @@ class ApiTests(TestCase):
     def test_cannot_view_nonowned_draft_work(self):
         factory = APIRequestFactory()
         user = models.User.objects.get(username='test_user')
+        other_user = models.User.objects.exclude(id=user.id).first()
+        work_id = 2
+        if not models.Work.objects.filter(id=other_user.id).exists():
+            work_id = models.Work(user_id=other_user.id, title='test').save().id
+        else:
+            work_id = models.Work.objects.exclude(id=user.id).first()
         view = api_views.WorkDetail.as_view()
-        request = factory.get(f'/works/2/')
+        request = factory.get(f'/works/{work_id}/')
         force_authenticate(request, user=user)
-        response = view(request, pk=2)
+        response = view(request, pk=work_id)
         self.assertEquals(response.status_code, 404)
 
     def test_cannot_view_nonowned_draft_chapter(self):
@@ -548,10 +558,10 @@ class ApiTests(TestCase):
         factory = APIRequestFactory()
         user = models.User.objects.get(username='test_user')
         view = api_views.WorkDetail.as_view()
-        request = factory.get(f'/works/3/')
+        request = factory.get(f'/works/{models.Work.objects.filter(user_id=user.id).first().id}/')
         force_authenticate(request, user=user)
         response = view(request, pk=2)
-        self.assertEquals(response.status_code, 404)
+        self.assertEquals(response.status_code, 200)
     
     def test_can_view_owned_draft_collection(self):
         factory = APIRequestFactory()

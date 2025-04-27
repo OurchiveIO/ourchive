@@ -1,47 +1,33 @@
 {% extends 'index.html' %}
-{% block title %}Request Invite{% endblock %}
+{% load i18n %}
+{% block title %}{% translate 'Request Invite' %}{% endblock %}
 {% block content %}	
-<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="request-invite-parent-grid">
+<div class="row row-cols-1" id="request-invite-parent-grid">
 {% if invite_sent %}
-<div class="uk-margin-bottom"><span class="uk-text-lead">Invite Requested</span></div>
-<div><span class="uk-text-medium">Your invitation has been requested. You will receive an email with an invite code after admin approval.</span></div>
+<p class="fs-3">{% translate 'Invite Requested' %}</p>
+<p>{% blocktranslate %}Your invitation has been requested. You will receive an email with an invite code after admin approval.{% endblocktranslate %}</p>
 {% else %}
-<div class="uk-margin-bottom"><span class="uk-text-lead">Request Invite</span></div>
-<div><span class="uk-text-medium">Registration is currently invite-only. You can request an invite code below.</span></div>
-<form class="uk-form-horizontal"  method="post" id="request-invite-form">
+<p class="fs-3">Request Invite</p>
+<p>{% blocktranslate %}Registration is currently invite-only. You can request an invite code below.{% endblocktranslate %}</p>
+<form method="post" id="request-invite-form">
 	{% csrf_token %}
-    <div class="uk-margin" id="request-invite-email-parent">
-        <label id="request-invite-email-label" class="uk-form-label" for="request-invite-email-input">Email</label>
-        <div id="request-invite-email-controls" class="uk-form-controls">
-            <div class="uk-inline" id="request-invite-email-input-parent">
-                <span class="uk-form-icon" uk-icon="icon: ourchive-mail;ratio:.75" id="request-invite-email-icon"></span>
-                <input class="uk-input" type="email" name="email" id="request-invite-email-input">
-            </div>
-        </div>
-        
+    <div class="mb-3" id="request-invite-email-parent">
+        <label id="request-invite-email-label" class="form-label" for="request-invite-email-input">{% translate 'Email' %}</label>
+        <input class="form-control" type="email" name="email" id="request-invite-email-input">
     </div>
-    <div class="uk-margin" id="request-invite-join-reason-parent">
-        <label id="request-invite-join-reason-label" class="uk-form-label" for="request-invite-join-reason-input">Join Reason</label>
-        <div id="request-invite-join-reason-controls" class="uk-form-controls">
-            <div class="uk-inline" id="request-invite-join-reason-input-parent">
-                <textarea class="uk-textarea" rows="3" name="join_reason" id="request-invite-join-reason-input"></textarea>
-            </div>
-        </div>
-        
+    <div class="mb-3" id="request-invite-join-reason-parent">
+        <label id="request-invite-join-reason-label" class="form-label" for="request-invite-join-reason-input">{% translate 'Join Reason' %}</label>
+        <textarea class="form-control" rows="3" name="join_reason" id="request-invite-join-reason-input"></textarea>
     </div>
     {% if captcha_site_key %}
         {% if not request.user.is_authenticated %}
-        <div class="uk-margin uk-form-controls" id ="request-invite-captcha-parent">
+        <div class="mb-3" id ="request-invite-captcha-parent">
             <div class="h-captcha" data-sitekey="{{captcha_site_key}}"></div>
               <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
         </div>
         {% endif %}
     {% endif %}
-    <div class="uk-margin" id="request-invite-submit-parent">
-    	<div class="uk-inline uk-align-right" id="request-invite-submit-input-parent">
-    		<input id="request-invite-submit-button" class="uk-button uk-button-primary" type="submit" value="Request Invite"/>
-    	</div>
-    </div>
+    <input id="request-invite-submit-button" class="btn btn-primary" type="submit" value="{% translate 'Request Invite' %}"/>
 </form>
 {% endif %}
 </div>

@@ -1,100 +1,58 @@
 {% extends 'index.html' %}
-{% load i18n %} 
-{% block title %}{{ form_title }}{% endblock %}
-{% block content %}	
+{% load i18n %}
 {% load static %}
-<div class="uk-width-1-1 uk-text-left" id="work-import-form-parent"> 
-    <div>
-    <div id="work-import-form-title-parent" class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
-        <span id="work-import-form-title-span" class="uk-text-large">{{form_title}}</span>
-        <hr class="ourchive-hr"/>
+{% block title %}{{ form_title }}{% endblock %}
+{% block content %}
+    <div class="row row-cols-1" id="work-import-form-parent">
+            <div id="work-import-form-title-parent" class="mb-3">
+                <h1>{{form_title}}</h1>
+                <hr class="ourchive-hr"/>
+            </div>
+            <div id="work-import-form-directions">
+                <p class="fw-bold">We are currently in the process of testing bulk import. You may receive flaky failure messages or see strange behavior.</p>
+                <p>{% blocktranslate %}Input an AO3 username or single work (ID or URL) below. The work ID can be found in the work URL.{% endblocktranslate %}</p>
+                <p>{% blocktranslate %}Accepted work URL formats:{% endblocktranslate %}</p>
+                <ul>
+                    <li>https://archiveofourown.org/works/33568501/chapters/83411257</li>
+                    <li>https://archiveofourown.org/works/33568501</li>
+                    <li>https://archiveofourown.org/works/33568501/</li>
+                    <li>https://archiveofourown.org/works/33568501?view_full_work=true</li>
+                </ul>
+                <p class="fw-bold">{% blocktranslate %}To ensure account security, restricted works will not be imported. We recommend temporarily making restricted works public or manually recreating them.{%endblocktranslate%}</p>
+            </div>
+    <form method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
+        {% csrf_token %}
+        <input type="hidden" id="referer-hidden" name="referer" value="{{ referer }}">
+        <div class="mb-3 form-check form-switch" id="work-import-form-complete-parent">
+            <input class="form-check-input" role="switch" title="{% translate 'Import single toggle' %}" id="work-import-form-complete-checkbox" type="checkbox" name="mode" data-bs-toggle="collapse" data-bs-target=".multi-collapse" aria-expanded="false" aria-controls="work-import-form-username-parent work-import-form-single-work-parent">
+            <label id="work-import-form-complete-label" class="form-check-label" for="work-import-form-complete-checkbox">{% translate 'Import single work' %}</label>
+        </div>
+            <div class="mb-3 multi-collapse collapse show" id="work-import-form-username-parent">
+                <label id="work-import-form-username-label" class="form-label" for="work-import-form-username-input">{% translate 'AO3 Username' %}</label>
+                <input title="{% translate 'AO3 Username field' %}" id="work-import-form-username-input" class="form-control" type="text" name="username">
+            </div>
+            <div class="mb-3 multi-collapse collapse" id="work-import-form-single-work-parent">
+                <label id="work-import-form-username-label" class="form-label" for="work-import-form-work-id-input">Work ID or URL <sup title="{% translate 'Work ID help' %}"><a class="link-underline link-underline-opacity-0" data-bs-toggle="collapse" data-bs-target="#workIdHelp" aria-controls="workIdHelp" aria-expanded="false"><i class="bi bi-question-circle"></i></a></sup></label>
+                <p id="workIdHelp" class="collapse">{% blocktranslate %}The work ID is the unique number that follows 'works/' in the URL (ex: archiveofourown.org/works/<strong>33568501</strong>){% endblocktranslate %}</p>
+                <input title="{% translate 'Work ID input' %}" id="work-import-form-work-id-input" class="form-control" type="text" name="work_id">
+            </div>
+            <div class="mb-3 form-check form-switch" id="work-import-form-draft-parent">
+                <input class="form-check-input" role="switch" title="{% translate 'Save as draft?' %}" id="work-import-form-draft-checkbox" type="checkbox" name="save_as_draft">
+                <label id="work-import-form-draft-label" class="form-check-label" for="work-import-form-draft-checkbox">{% translate 'Save work(s) as draft' %}</label>
+            </div>
+            <div class="mb-3 form-check form-switch" id="work-import-form-comments-parent">
+                <input class="form-check-input" role="switch" title="{% translate 'Allow any comments toggle' %}" id="work-import-form-comments-checkbox" type="checkbox" name="allow_comments" data-bs-toggle="collapse" data-bs-target="#work-import-form-anon-parent" aria-expanded="false" aria-controls="work-import-form-anon-parent" checked>
+                <label id="work-import-form-comments-label" class="form-check-label" for="work-import-form-comments-checkbox">{% translate 'Allow comments on work(s)' %}</label>
+            </div>
+            <div class="mb-3 form-check form-switch collapse show" id="work-import-form-anon-parent">
+                <input class="form-check-input" role="switch" title="{% translate 'Allow anon comments toggle' %}" id="work-import-form-anon-checkbox" type="checkbox" name="allow_anon_comments">
+                <label id="work-import-form-anon-label" class="form-check-label" for="work-import-form-anon-checkbox">{% translate 'Allow anon comments on work(s)' %}</label>
+            </div>
+            <div class="mb-3 w-50" id="work-import-form-bottom-buttons-group">
+                <button id="work-import-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                <input id="work-import-form-cancel-bottom" class="btn btn-secondary w-25" type="button" onclick="history.back()" value="Cancel" title="{% translate 'Cancel' %}"/>
+                <input id="work-import-form-submit-bottom" class="btn btn-primary w-25" onclick="this.form.submitted=this.value;" type="submit" value="Submit" uk-toggle="target: #modal-full"/>
+            </div>
+    </form>
     </div>
-    <div id="work-import-form-directions" class="uk-width-1-1 uk-padding-small">
-        <p class="uk-text uk-text-bold">We are currently in the process of testing bulk import. You may receive flaky failure messages or see strange behavior. Use the beta tester discord to alert us of these issues.</p>
-        <p class="uk-text">{% blocktranslate %}Input an AO3 username or single work (ID or URL) below. The work ID can be found in the work URL.{% endblocktranslate %}</p>
-        <p>{% blocktranslate %}Accepted work URL formats:{% endblocktranslate %}</p>
-        <ul class="uk-text-break"><li>https://archiveofourown.org/works/33568501/chapters/83411257</li>
-        <li>https://archiveofourown.org/works/33568501</li>
-        <li>https://archiveofourown.org/works/33568501/</li>
-        <li>https://archiveofourown.org/works/33568501?view_full_work=true</li></ul>
-        <p class="uk-text uk-text-bold">{% blocktranslate %}To ensure account security, restricted works will not be imported. We recommend temporarily making restricted works public or manually recreating them.{%endblocktranslate%}</p>
-    </div>
-</div>
-<form class="uk-form-horizontal"  method="post" id="workForm" onsubmit="return getCurrentTab(this.submitted)">
-    {% csrf_token %}
-    <input type="hidden" id="referer-hidden" name="referer" value="{{ referer }}">
-    <div id="work-import-form-content-parent" class="uk-child-width-1-1@m uk-child-width-1@s uk-text-left uk-margin-top" uk-grid>
-        <div class="uk-margin" id="work-import-form-complete-parent">
-            <label id="work-import-form-complete-label" class="uk-form-label" for="work-import-form-complete-checkbox">Import single work</label>
-            <div id="work-import-form-complete-controls" class="uk-form-controls">
-                <div id="work-import-form-complete-inline" class="uk-inline">
-                    <label id="work-import-form-complete-switch-label" class="switch"><input class="uk-checkbox" title="{% translate 'Import single toggle' %}" id="work-import-form-complete-checkbox" type="checkbox" name="mode" uk-toggle="target: .toggle"> <span id="work-import-form-complete-slider" class="slider round"></span> </label>
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin toggle" id="work-import-form-username-parent">
-            <label id="work-import-form-username-label" class="uk-form-label" for="work-import-form-username-input">AO3 Username</label>
-            <div id="work-import-form-username-controls" class="uk-form-controls">
-                <div id="work-import-form-username-inline" class="uk-inline">
-                    <input title="{% translate 'AO3 Username field' %}" id="work-import-form-username-input" class="uk-input uk-form-width-large" type="text" name="username">
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin toggle" id="work-import-form-username-parent" hidden>
-            <label id="work-import-form-username-label" class="uk-form-label" for="work-import-form-work-id-input">Work ID or URL <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work ID help' %}"></sup>    
-                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}The work ID is the unique number that follows 'works/' in the URL (ex: archiveofourown.org/works/<strong>33568501</strong> ){% endblocktranslate %}</div></label>
-            <div id="work-import-form-work-id-controls" class="uk-form-controls">
-                <div id="work-import-form-work-id-inline" class="uk-inline">
-                    <input title="{% translate 'Work ID input' %}" id="work-import-form-work-id-input" class="uk-input uk-form-width-large" type="text" name="work_id">
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin" id="work-import-form-draft-parent">
-            <label id="work-import-form-draft-label" class="uk-form-label" for="work-import-form-draft-checkbox">{% translate 'Save work(s) as draft' %}</label>
-            <div id="work-import-form-draft-controls" class="uk-form-controls">
-                <div id="work-import-form-draft-inline" class="uk-inline">
-                    <label id="work-import-form-draft-switch-label" class="switch"><input class="uk-checkbox" title="{% translate 'Save as draft toggle' %}" id="work-import-form-draft-checkbox" type="checkbox" name="save_as_draft"> <span id="work-import-form-draft-slider" class="slider round"></span> </label>
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin" id="work-import-form-comments-parent">
-            <label id="work-import-form-comments-label" class="uk-form-label" for="work-import-form-comments-checkbox">{% translate 'Allow any comments on work(s)' %}</label>
-            <div id="work-import-form-comments-controls" class="uk-form-controls">
-                <div id="work-import-form-comments-inline" class="uk-inline">
-                    <label id="work-import-form-comments-switch-label" class="switch"><input class="uk-checkbox" title="{% translate 'Allow any comments toggle' %}" id="work-import-form-comments-checkbox" type="checkbox" name="allow_comments" uk-toggle="target: #work-import-form-anon-parent" checked> <span id="work-import-form-comments-slider" class="slider round"></span> </label>
-                </div>
-            </div>
-        </div>
-        <div class="uk-margin" id="work-import-form-anon-parent" hidden>
-            <label id="work-import-form-anon-label" class="uk-form-label" for="work-import-form-anon-checkbox">{% translate 'Allow anon comments on work(s)' %}</label>
-            <div id="work-import-form-anon-controls" class="uk-form-controls">
-                <div id="work-import-form-anon-inline" class="uk-inline">
-                    <label id="work-import-form-anon-switch-label" class="switch"><input class="uk-checkbox" title="{% translate 'Allow anon comments toggle' %}" id="work-import-form-anon-checkbox" type="checkbox" name="allow_anon_comments"> <span id="work-import-form-anon-slider" class="slider round"></span> </label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="work-import-form-bottom-controls-parent" class="uk-grid uk-align-right" uk-grid>
-        <div class="uk-align-right uk-width-1-1@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right" id="work-import-form-bottom-buttons-group">
-             <button id="work-import-form-bottom-prevent-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-             <input id="work-import-form-cancel-bottom" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel" title="{% translate 'Cancel' %}"/>
-            <input id="work-import-form-submit-bottom" class="uk-button uk-button-primary" onclick="this.form.submitted=this.value;" type="submit" value="Submit" uk-toggle="target: #modal-full"/>
-        </div>
-        
-    </div>
-</div> 
-</form>
-</div>
-<div id="modal-full" class="uk-modal-full" uk-modal hidden="alert('hi')">
-    <div class="uk-modal-dialog">
-        <button class="uk-modal-close-full uk-close-large" type="button" uk-close></button>
-        <div class="uk-grid-collapse uk-child-width-1-2@s uk-flex-middle" uk-grid>
-            <div class="uk-background-cover" style="background-image: url('images/photo.jpg');" uk-height-viewport></div>
-            <div class="uk-padding-large">
-                <p><span class="uk-text-large">Initiating import...</span></p>
-                <div uk-spinner></div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

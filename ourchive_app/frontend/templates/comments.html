@@ -1,68 +1,62 @@
 {% load i18n %}
+{% load static %}
 {% if top_level %}
-<ul class="uk-comment-list ourchive-top-level" id="{{object_name}}-{{object.id}}-comments-list">
+<div class="row row-cols-1" id="{{object_name}}-{{object.id}}-comments-list">
 {% endif %}
 {% for comment in comments %}
 {% if comment.parent_comment != null %}
-<ul class="uk-comment-list ourchive-replies-list" id="{{object_name}}-comment-{{comment.id}}-ul">
+<div class="row row-cols-1 mb-3 ms-2" id="{{object_name}}-comment-{{comment.id}}-ul">
 {% endif %}
-<li id="{{object_name}}-comment-{{comment.id}}-li">
-<article class="uk-comment {% if depth < 1 and not forloop.counter|divisibleby:'2' %}ourchive-comment-even{% elif depth > 1 and depth|divisibleby:'2' and top_level %}ourchive-comment-even{% elif forloop.counter > 1 and depth > 0 and forloop.counter|divisibleby:'2' %}ourchive-comment-even{% else %}ourchive-comment-odd{%endif%}" id="comment_container_{{comment.id}}">
-    <header id="{{object_name}}-comment-{{comment.id}}-header" class="uk-comment-header uk-grid-medium uk-flex-middle" uk-grid>
-        {% if comment.user is not None %}
-        <div class="uk-width-auto" id="{{object_name}}-comment-{{comment.id}}-icon-div">
-            <img id="{{object_name}}-comment-{{comment.id}}-icon" class="uk-comment-avatar" src="{{ comment.user.icon }}" width="80" height="80" alt="">
-        </div>
-        {% else %}
-            {% load static %}
-            <div class="uk-width-auto" id="{{object_name}}-comment-{{comment.id}}-icon-div">
-                <img id="{{object_name}}-comment-{{comment.id}}-icon" class="uk-comment-avatar" src="{% static 'icon-default.png' %}" width="80" height="80" alt="">
-            </div>
-        {% endif %}
-        <div id="{{object_name}}-comment-{{comment.id}}-parent-div" class="uk-width-expand">
-            {% if comment.user is not None %}
-            <h4 id="{{object_name}}-comment-{{comment.id}}-username-h4" class="uk-comment-title uk-margin-remove"><a class="uk-link-reset" id="{{object_name}}-comment-{{comment.id}}-username-link" href="{% url 'user-profile-parent' comment.user.id %}">{{comment.user.username}}</a></h4>
+<div id="{{object_name}}-comment-{{comment.id}}-li">
+<div class="border mt-3 {% if depth < 1 and not forloop.counter|divisibleby:'2' %}oc-bg-light{% elif depth > 1 and depth|divisibleby:'2' and top_level %}oc-bg-secondary{% elif forloop.counter > 1 and depth > 0 and forloop.counter|divisibleby:'2' %}oc-bg-light{% else %}oc-bg-secondary{%endif%}" id="comment_container_{{comment.id}}">
+    <div id="{{object_name}}-comment-{{comment.id}}-header" class="p-3 row">
+        <div class="col-1">
+            {% if comment.user is not None and comment.user.icon %}
+                <img id="{{object_name}}-comment-{{comment.id}}-icon" class="rounded-circle" src="{{ comment.user.icon }}" width="80" height="80" alt="{% translate 'Avatar' %}">
             {% else %}
-            <h4 id="{{object_name}}-comment-{{comment.id}}-anon-h4" class="uk-comment-title uk-margin-remove">{% translate 'Anonymous' %}</h4>
+                <img id="{{object_name}}-comment-{{comment.id}}-icon" class="rounded-circle" src="{% static 'icon-default.png' %}" width="80" height="80" alt="{% translate 'Avatar' %}">
             {% endif %}
-            <span class="uk-text uk-text-meta uk-text-muted">Updated: {{comment.updated_on|date:'d M Y'}}</span>
         </div>
-    </header>
-    <div class="uk-comment-body uk-grid" id="{{object_name}}-comment-{{comment.id}}-text-parent" uk-grid>
-        <div id="{{object_name}}-comment-{{comment.id}}-text" class="uk-width-1-1"><span class="uk-text-medium ourchive-comment">{{comment.text|safe }}</span></div>
-        <div class="uk-width-1-1 uk-text-right uk-align-right uk-margin-remove-bottom uk-margin-small-top">
-            <span class="uk-text uk-text-meta uk-flex-inline">Replies: {{comment.replies|length}}</span>
-            <ul id="{{object_name}}-comment-{{comment.id}}-actions-ul" class="uk-list uk-flex-inline uk-margin-left uk-margin-remove-vertical">
-                <li id="{{object_name}}-comment-{{comment.id}}-reply-li">
-                    <a href="#" id="{{object_name}}-comment-{{comment.id}}-reply-button" class="ourchive-icon-wrapper" uk-toggle="target: #comment-{{comment.id}}-reply"><span id="{{object_name}}-comment-{{comment.id}}-reply-span" uk-icon="icon: ourchive-reply;ratio:.75" title="{% translate 'Reply to' %} {{comment.id}}"></span></a>
-                    {% if comment.user.username == request.user.username %}
-                    <a id="{{object_name}}-comment-{{comment.id}}-edit-button" class="ourchive-icon-wrapper" uk-toggle="target: #comment-{{comment.id}}-edit"><span id="{{object_name}}-comment-{{comment.id}}-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="{% translate 'Edit comment' %} {{comment.id}}"></span> </a>
-                    <a class="ourchive-icon-wrapper" id="{{object_name}}-comment-{{comment.id}}-delete-link" href="#" uk-toggle="target: #{{object_name}}-comment-{{comment.id}}-modal-delete"><span id="{{object_name}}-comment-{{comment.id}}-delete-span" uk-icon="icon: ourchive-delete;ratio:.75" title="{% translate 'Delete comment' %} {{comment.id}}"></span> </a>
-                    {% endif %}
-                </li>
-            </ul>
-            {% include "comment_actions.html" with post_action=post_action_url object_name=object_name object_id=object.id edit_action=edit_action_url comment_count=comment_count current_offset=current_offset %}   
+        <div id="{{object_name}}-comment-{{comment.id}}-parent-div" class="col-11">
+            {% if comment.user is not None %}
+            <h4 id="{{object_name}}-comment-{{comment.id}}-username-h4"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="{{object_name}}-comment-{{comment.id}}-username-link" href="{% url 'user-profile-parent' comment.user.id %}">{{comment.user.username}}</a></h4>
+            {% else %}
+            <h4 id="{{object_name}}-comment-{{comment.id}}-anon-h4">{% translate 'Anonymous' %}</h4>
+            {% endif %}
+            <small><span class="fw-light">Updated: {{comment.updated_on|date:'d M Y'}}</span></small>
         </div>
-    </div>    
-</article>
+    </div>
+    <div class="p-3 row" id="{{object_name}}-comment-{{comment.id}}-text-parent">
+        <div id="{{object_name}}-comment-{{comment.id}}-text">{{comment.text|safe }}</div>
+    </div>
+    <div class="p-3 row">
+        <div class="col-1"><small><span class="fw-light">Replies: {{comment.replies|length}}</span></small></div>
+        <div class="col-11"><p class="text-end"><a id="{{object_name}}-comment-{{comment.id}}-reply-button" title="{% translate 'Reply' %}" class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover fs-5" href="#" data-bs-toggle="collapse" data-bs-target="#comment-{{comment.id}}-reply"><i class="bi bi-reply"></i></a>
+        {% if comment.user.username == request.user.username %}
+            <a id="{{object_name}}-comment-{{comment.id}}-edit-button" title="{% translate 'Edit' %}" class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="#" data-bs-toggle="collapse" data-bs-target="#comment-{{comment.id}}-edit"><i class="bi bi-pencil"></i></a>
+            <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" title="{% translate 'Delete' %}" id="{{object_name}}-comment-{{comment.id}}-delete-link" href="#" data-bs-toggle="collapse" data-bs-target="#{{object_name}}-comment-{{comment.id}}-modal-delete"><i class="bi bi-trash"></i></a>
+        {% endif %}</p></div>
+        {% include "comment_actions.html" with post_action=post_action_url object_name=object_name object_id=object.id edit_action=edit_action_url comment_count=comment_count current_offset=current_offset %}
+    </div>
+</div>
 {% include "delete_modal.html" with object=delete_obj object_friendly='comment' root_object_id=root_obj_id parent_object_id=object.id object_id=comment.id %}
 {% if comment.replies %}
     {% include "comments.html" with comments=comment.replies object=object post_action=post_action_url object_name=object_name object_id=object.id edit_action_url=edit_action_url next_params=comment.replies.next_params prev_params=comment.replies.prev_params comment_count=comment_count current_offset=current_offset depth=depth|add:1 object_name=object_name delete_obj=delete_obj view_thread_base=view_thread_base %}
 {% endif %}
-</li>  
+</div>
 {% if comment.parent_comment != null %}
-</ul>
+</div>
 {% endif %}
 {% endfor %}
 {% if comment.parent_comment == null %}
 <div id="{{object_name}}-{{object.id}}-pagination" class="uk-width-1-1 uk-margin-top">
     <ul class="uk-pagination">
-        {% if prev_params %}<li><a onclick='loadMoreComments("{{load_more_base}}{{prev_params}}&depth={{depth}}")'><span class="uk-margin-small-right" uk-pagination-previous></span> {% translate 'Previous Comments' %}</a></li>{% endif %}
-        {% if next_params %}<li class="uk-margin-auto-left"><a onclick='loadMoreComments("{{load_more_base}}{{next_params}}&depth={{depth}}")'>{% translate 'Next Comments' %} <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
+        {% if prev_params %}<li><a onclick='loadMoreComments("{{load_more_base}}{{prev_params}}&depth={{depth}}", {{ object.id }})'><span class="uk-margin-small-right" uk-pagination-previous></span> {% translate 'Previous Comments' %}</a></li>{% endif %}
+        {% if next_params %}<li class="uk-margin-auto-left"><a onclick='loadMoreComments("{{load_more_base}}{{next_params}}&depth={{depth}}", {{ object.id }})'>{% translate 'Next Comments' %} <span class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
     </ul>  
 </div>  
 {% endif %}
 {% if top_level %}
-</ul>
+</div>
 {% endif %}
 

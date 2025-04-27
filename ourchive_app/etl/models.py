@@ -1,6 +1,6 @@
 from django.db import models
 import uuid
-from api import models as api
+from core import models as core
 
 
 class WorkImport(models.Model):
@@ -21,7 +21,7 @@ class WorkImport(models.Model):
     allow_comments = models.BooleanField(default=True)
 
     user = models.ForeignKey(
-        api.User,
+        core.User,
         on_delete=models.CASCADE,
     )
 
@@ -43,9 +43,11 @@ class ChiveExport(models.Model):
     export_works = models.BooleanField(default=True)
     export_bookmarks = models.BooleanField(default=True)
     export_collections = models.BooleanField(default=True)
+    export_series = models.BooleanField(default=True)
+    export_anthologies = models.BooleanField(default=True)
 
     user = models.ForeignKey(
-        api.User,
+        core.User,
         on_delete=models.CASCADE,
     )
 

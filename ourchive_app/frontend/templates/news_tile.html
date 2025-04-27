@@ -1,0 +1,14 @@
+{% load i18n %}
+<div class="border shadow-sm p-3" id="news-{{news_item.id}}-tile-container">
+    <div class="row row-cols-1">
+        <p><a href="{% url 'fe-news-detail' news_item.id %}" data-testid="news-item-tile-link">{{news_item.title}}</a></p>
+    </div>
+    <div id="news-tile-body" class="row row-cols-1">
+        <p id="news-{{ news_item.id }}-tile-description-text">{{ news_item.content|safe }}</p>
+    </div>
+    <div class="row row-cols-1" id="news-{{ news_item.id }}-tile-footer-parent">
+        <div class="d-flex justify-content-between mt-3">
+            <small><span id="news-{{ news_item.id }}-metadata-updated" class="fw-light" data-testid="news-metadata-updated">{% translate 'Updated' %}: {{news_item.updated_on|date:'d M Y'}}</span></small>
+        </div>
+    </div>
+</div>

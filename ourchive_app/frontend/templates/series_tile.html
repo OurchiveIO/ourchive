@@ -1,0 +1,27 @@
+{% load i18n %}
+<div class="border shadow-sm p-3" id="series-tile-parent-{{ series.id }}" data-testid="series-tile">
+    <div class="row">
+        <div class="col-md-4 col-12" id="series-{{series.id}}-tile-card">
+            <p class="mb-2 fs-3"><a class="link-underline link-underline-opacity-0" id="series-{{series.id}}-tile-title-link" href="{% url 'fe-series' series.id %}" data-testid="series-tile-title">{{series.title}}</a></p>
+            <p class="fs-4">By
+                    {% for user in series.users %}<a class="link-underline link-underline-opacity-0" id="series-{{series.id}}-user-link" data-testid="series-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}
+                        <a class="link-underline link-underline-opacity-0" id="series-{{series.id}}-user-link" data-testid="series-user-link" href="{% url 'user-profile-parent' series.user_id %}">{{ series.user }}</a>
+                    {% endfor %}
+            </p>
+        </div>
+        <div class="col-md-8 col-12 mt-md-0 mt-4" id="series-{{series.id}}-info-card">
+            <div class="osm-container">
+                <!-- series/anthology, summary, tag/attribute group 1, 2, and 3 -->
+                <div class="collapse show chive-rich-text" data-testid="series-description" id="show-description-{{ series.id }}">{% autoescape off %}{{ series.description|truncatechars:500 }}{% endautoescape %}</div>
+                {% if series.description|length > 500 %}<div data-testid="series-description-full" class="collapse chive-rich-text" id="series-{{series.id}}-tile-summary-p">{% autoescape off %}{{ series.description }}{% endautoescape %}</div>
+                <a data-bs-toggle="collapse" aria-expanded="false" aria-controls="series-{{series.id}}-tile-summary-p" id="more-btn-description-{{ series.id }}" class="link-underline link-underline-opacity-0 collapsed" href="#series-{{series.id}}-tile-summary-p">
+                    <span class="oc-show-more">{% translate '+ Show More' %}</span>
+                    <span class="oc-show-less">{% translate '- Show Less' %}</span>
+                </a>{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="row row-cols-1" id="series-{{ series.id }}-list-meta">
+        {% include 'series_metadata.html' %}
+    </div>
+</div>

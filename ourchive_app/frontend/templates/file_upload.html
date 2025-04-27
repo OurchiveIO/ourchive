@@ -1,64 +1,27 @@
 {% load i18n %}
-<div id="{{ object }}-upload-parent" class="js-upload-{{ object_type }} uk-placeholder uk-text-right uk-width-medium">
-    <div id="{{ object }}-upload-form" uk-form-custom="target: true" class="uk-inline">
-        <input type="file" id="{{ object }}-file-input">
-        <input id="{{ object }}-file-uk-input" class="uk-input uk-form-width-medium" type="text" placeholder="{{ upload_placeholder }}" name="{{ object }}-upload">
+<div id="{{ object }}-upload-parent" class="js-upload-{{ object_type }}">
+    <div id="{{ object }}-upload-form" class="mb-3 input-group">
+        <input type="file" id="{{ object }}-file-input" class="form-control">
+        <span class="input-group-text" title="{% translate 'Delete file. Will save delete on submit.' %}" onclick="removeFile('{{object}}', '{{ replace_selector }}', '{{ object_type }}')"><i class="bi bi-trash"></i></span>
+        <input id="{{ object }}-file-uk-input" type="hidden" placeholder="{{ upload_placeholder }}" name="{{ object }}-upload">
+        <input id="{{ object }}-file-uk-input-original" type="hidden" value="{{ original_value }}" name="{{ object }}" placeholder="">
+        <button type="button" id="{{ object }}-file-cancel" class="btn btn-secondary d-none">Cancel upload</button>
     </div>
-    <a onclick="removeFile('{{object}}')" title="{% translate 'Delete file' %}"><span uk-icon="icon: ourchive-delete; ratio: .75"></span></a>
-    <progress id="{{ object }}-progressbar-{{ object_type }}" class="uk-progress" value="0" max="100" hidden></progress>
+    <div class="progress" role="progressbar" aria-label="{{ object }} upload" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="{{ object }}-progressbar-{{ object_type }}-parent">
+      <div class="progress-bar" style="width: 0%" id="{{ object }}-progressbar-{{ object_type }}">{% translate 'No upload in progress.' %}</div>
+    </div>
+    <div class="toast-container bottom-50 start-50 translate-middle-x">
+      <div id="uploadFailedToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">Upload Failed</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            {% translate 'An error occurred uploading your file. If this continues, please contact your administrator.' %}
+        </div>
+      </div>
+    </div>
     <script>
-	    var bar = document.getElementById('{{ object }}-progressbar-{{ object_type }}');
-	    UIkit.upload('.js-upload-{{ object_type }}', {
-	        url: '{% url 'api-file-upload' %}',
-	        multiple: false,
-	        beforeSend: function () {
-	            var csrftoken = getCookie('csrftoken');
-	            arguments[0]['headers']['X-CSRFToken'] = csrftoken;
-	        },
-	        beforeAll: function () {
-	        },
-	        load: function () {
-	        },
-	        error: function () {
-	        	console.log('error', arguments);
-	        	var result = JSON.parse(arguments[0].xhr.response)['message'];
-	        	UIkit.notification(result, {pos: 'top-center', status: 'danger'});
-	        },
-	        complete: function () {
-	        },
-	        loadStart: function (e) {
-	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').removeAttribute('hidden');
-	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').max = e.total;
-	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').value = e.loaded;
-	        },
-
-	        progress: function (e) {
-	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').max = e.total;
-	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').value = e.loaded;
-	        },
-
-	        loadEnd: function (e) {
-	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').max = e.total;
-	            document.getElementById('{{ object }}-progressbar-{{ object_type }}').value = e.loaded;
-	        },
-
-	        completeAll: function () {
-	            //console.log('completeAll', arguments);
-	            setTimeout(function () {
-	                document.getElementById('{{ object }}-progressbar-{{ object_type }}').setAttribute('hidden', 'hidden');
-	            }, 1000);
-	            var result = JSON.parse(arguments[0]['response'])['final_url'];
-	            document.getElementById('{{ object }}-file-uk-input').value = result;
-	            document.getElementById('{{ object }}-file-uk-input-original').value = result;
-	            document.getElementById('{{ object }}-file-uk-input-original-p').style.visibility = "hidden";
-	            var replace_selector = '{{ replace_selector }}';
-	            {% if 'img' in object_type %}
-	            document.getElementById(replace_selector).src = result;
-	            {% else %}
-	            document.getElementById(replace_selector).style.visibility = "hidden";
-	            {% endif %}
-	        }
-	    });
+        document.getElementById('{{ object }}-file-input').addEventListener('change', (event) => ourchiveUpload(event, '{{ object }}', '{{ object_type }}', '{% url 'api-file-upload' %}', '{{ replace_selector }}'));
 	</script>
-	<input style="border:0;" id="{{ object }}-file-uk-input-original" class="uk-input uk-text-muted uk-margin-small-bottom uk-text-right" type="text" value="{{ original_value }}" name="{{ object }}" placeholder=""><br/>
 </div>

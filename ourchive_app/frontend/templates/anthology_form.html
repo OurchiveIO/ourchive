@@ -1,0 +1,123 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}{{ form_title }}{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'frontend/css/choices.min.css' %}" />
+<script src="{% static 'frontend/js/choices.min.js' %}"></script>
+<script src="{% static 'frontend/js/ourchive-anthologies.js' %}"></script>
+<div id="anthology-form-actions-parent" class="row row-cols-1 mb-3">
+        <div id="anthology-form-header-parent">
+            <h1 id="anthology-form-header-span">{{ form_title }}</h1>
+            <hr/>
+        </div>
+    </div>
+<div class="row row-cols-1" id="anthology-form-parent-grid">
+    <form method="post" id="anthologyForm" onsubmit="return getRichText(['description'])">
+        {% csrf_token %}
+        <input id="anthology-form-hidden-id" type="hidden" name="anthology_id" {% if anthology.id != 0 %}value="{{ anthology.id }}"{% else %} value=""{% endif %}/>
+        <div id="anthology-form-title-parent" class="mb-3">
+            <label id="anthology-form-title-label" class="form-label" for="anthology-form-title-input">{% translate 'Title' %}</label>
+            <input id="anthology-form-title-input" title="{% translate 'Anthology Title' %}" class="form-control" type="text" name="title" value="{{ anthology.title|default_if_none:'' }}">
+        </div>
+        <div class="mb-3" id="anthology-form-cocreator-form-parent">
+            <label id="anthology-form-cocreator-form-label" class="form-label" for="anthology-form-new-user">{% translate 'Co-creators' %}</label>
+            {% if anthology.pending_owners %}<p id="pending-cocreators"><span class="fw-bold">{% translate 'Pending cocreators' %}</span>: {% for user in anthology.pending_owners %}{{user.username}}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+            <div id="anthology-form-users">{% for user in anthology.owners %}
+                {% if user.username != request.user.username %}
+                    <div class="mb-3" id="anthology-form-user-{{user.id}}-parent">
+                        <input title="{% translate 'Anthology user' %}" id="anthology-form-cocreator-{{user.id}}-hidden" type="hidden" name="anthology_cocreators_{{user.id}}" value="{{ user.id }}">
+                        <p id="anthology-user-{{user.id}}-display">{{ user.username }} <a class="link-underline link-underline-opacity-0" onclick="removeUser({{user.id}})" id="anthology-user-{{user.id}}-delete"><i class="bi bi-backspace"></i></a></p>
+                    </div>
+                {% endif %}
+            {% endfor %}</div>
+            <input autocomplete="off" class="form-control" type="text" placeholder="{% translate 'Find user...' %}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="#anthology-find-user-dropdown" id="anthology-form-new-user" oninput="doUserAutocomplete(this.value, 'anthology-find-user-dropdown')">
+            <div id="anthology-find-user-dropdown" class="dropdown-menu p-4">{% translate 'Search for user..' %}</div>
+        </div>
+        <div class="mb-3 form-check form-switch" id="anthology-form-complete-parent">
+            <input title="{% translate 'Anthology complete toggle' %}" class="form-check-input" role="switch" id="anthology-form-complete-checkbox" type="checkbox" name="is_complete" {% if anthology.is_complete %} checked {% endif %}>
+            <label id="anthology-form-complete-label" class="form-check-label" for="anthology-form-complete-checkbox">{% translate 'Complete?' %}</label>
+        </div>
+        <div class="mb-3" id="anthology-form-created-parent">
+            <label id="anthology-form-created-label" class="form-label" for="anthology-form-created-on">{% translate 'Post Date' %}</label>
+            <input title="{% translate 'Anthology created on' %}" id="anthology-form-created-on" type="date" class="form-control" name="created_on" value="{{ anthology.created_on }}">
+        </div>
+        <div class="mb-3" id="anthology-form-updated-parent">
+            <label id="anthology-form-updated-label" class="form-label" for="anthology-form-updated-on">{% translate 'Update Date' %}</label>
+            <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ anthology.updated_on }}">
+            <input title="{% translate 'Anthology updated on' %}" id="anthology-form-updated-on" type="date" class="form-control" name="updated_on" value="{{ anthology.updated_on }}">
+        </div>
+        <div class="mb-3" id="anthology-form-languages-parent">
+            <label id="anthology-form-languages-label" class="form-label" for="anthology-form-languages">{% translate 'Languages' %}</label>
+            <select multiple name="languages[]" id="anthology-form-languages" class="form-select">
+                {% for language in languages %}
+                    <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if request.user.can_upload_images %}
+        <div class="mb-3" id="anthology-form-cover-parent">
+            <label id="anthology-form-cover-label" class="form-label" for="anthology-form-cover-inline">{% translate 'Cover' %}</label> <sup><a title="{% translate 'Anthology cover help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#cover-help-text"><i class="bi bi-question-circle"></i></a></sup>
+            <div class="collapse mb-3" id="cover-help-text">{% blocktranslate %}This image will show on your anthology and on the list view.{% endblocktranslate %}</div>
+            <div id="anthology-form-cover-controls">
+                <p><a id="anthology-form-cover-img-toggle" data-bs-toggle="collapse" data-bs-target="#anthology-form-cover-img-inline" aria-expanded="false" aria-controls="anthology-form-cover-img-inline" class="btn btn-primary{% if not anthology.cover_url %} disabled{% endif %}">{% translate 'Toggle cover' %}</a></p>
+                <div id="anthology-form-cover-img-inline" class="collapse mb-3"><img id="anthology-form-cover-img" src="{{ anthology.cover_url }}" alt="{% translate 'Anthology cover' %}"/></div>
+                {% include 'file_upload.html' with object='cover_url' replace_selector='anthology-form-cover-img' object_type='cover-img' upload_placeholder='Upload cover image' original_value=anthology.cover_url %}
+            </div>
+        </div>
+        <div class="mb-3" id="anthology-form-cover-alt-text-parent">
+            <label id="anthology-form-cover-alt-text-label" class="form-label" for="anthology-cover-alt-text">{% translate 'Cover Alt Text' %}</label>
+            <textarea id="anthology-cover-alt-text" class="form-control" rows="2" placeholder="{% translate 'Cover alt text' %}" name="cover_alt_text" maxlength="600">{{ anthology.cover_alt_text|default_if_none:'' }}</textarea>
+        </div>
+        <div class="mb-3" id="anthology-form-header-parent">
+            <label id="anthology-form-header-label" class="form-label" for="anthology-form-header-inline">{% translate 'Header' %}</label> <sup><a title="{% translate 'Anthology header help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#header-help-text"><i class="bi bi-question-circle"></i></a></sup>
+            <div class="collapse mb-3" id="header-help-text">{% blocktranslate %}This image will show on your anthology. Recommended rectangular dimensions, e.g. width x height of 800x200.{% endblocktranslate %}</div>
+            <div id="anthology-form-header-controls">
+                <p><a id="anthology-form-header-img-toggle" data-bs-toggle="collapse" data-bs-target="#anthology-form-header-img-inline" aria-expanded="false" aria-controls="anthology-form-header-img-inline" class="btn btn-primary{% if not anthology.header_url %} disabled{% endif %}">{% translate 'Toggle header' %}</a></p>
+                <div id="anthology-form-header-img-inline" class="collapse mb-3"><img id="anthology-form-header-img" src="{{ anthology.header_url }}" alt="{% translate 'Anthology header' %}"/></div>
+                {% include 'file_upload.html' with object='header_url' replace_selector='anthology-form-header-img' object_type='header-img' upload_placeholder='Upload header image' original_value=anthology.header_url %}
+            </div>
+        </div>
+        <div class="mb-3" id="anthology-form-header-alt-text-parent">
+            <label id="anthology-form-header-alt-text-label" class="form-label" for="anthology-header-alt-text">{% translate 'Header Alt Text' %}</label>
+            <textarea id="anthology-header-alt-text" class="form-control" rows="2" placeholder="{% translate 'Header alt text' %}" name="header_alt_text" maxlength="600">{{ anthology.header_alt_text|default_if_none:'' }}</textarea>
+        </div>
+        {% endif %}
+        <div class="mb-3">
+            <hr id="anthology-form-details-hr" class="ourchive-hr"/>
+            <h3 id="anthology-form-header">{% translate 'Details' %}</h3>
+        </div>
+        <div class="mb-3" id="anthology-works-list">
+            <label id="anthology-works-form-label" class="form-label" for="anthology-list">{% translate 'Works' %}</label>
+            <ul class="list-group sortable-list" id="anthology-list">
+                {% for work in anthology.works %}
+                <li id="work-list-{{work.id}}" class="work-list-item list-group-item sortable-item" draggable="true">
+                    {% include "anthology_form_work.html" with work=work anthology=anthology %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div id="anthology-form-works-parent" class="mb-3">
+            <label id="anthology-form-works-label" class="form-label" for="anthology-entry">{% translate 'Add work by title' %}</label>
+            <input autocomplete="off" class="form-control" type="text" placeholder="{% translate 'Search for work...' %}" data-bs-toggle="dropdown" aria-expanded="false" id="anthology-entry" oninput="doWorkAutocomplete(this.value, '{{ anthology.id }}')">
+            <div id="anthology-autocomplete-dropdown" class="dropdown-menu p-4">{% translate 'Search for work...' %}</div>
+        </div>
+        <div id="anthology-form-description-parent" class="mb-3">
+            <label id="anthology-form-description-label" class="form-label" for="descriptionEditor">Description</label>
+            {% include 'ourchive_tinymce_template.html' with form_field_value=anthology.description form_field='description' obj_name='anthology' %}
+        </div>
+        <hr id="anthology-attributes-hr" class="ourchive-hr"/>
+        <div id="anthology-form-tags-parent" class="mb-3">
+            <h4 class="uk-inline" id="obj-attrs-form-header">{% translate 'Anthology Tags' %} <sup><a title="{% translate 'Tags help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#tags-help-text"><i class="bi bi-question-circle"></i></a></sup></h4>
+            <div class="collapse mb-3" id="tags-help-text">{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your anthology, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
+            {% include "object_attributes_form.html" with object='Anthology' attribute_types=anthology.attribute_types show_header=False %}
+            {% include "edit_tags.html" with object='anthology' object_friendly='Anthology' show_header=False %}
+        </div>
+        <hr id="anthology-actions-footer-hr" class="ourchive-hr"/>
+        <div class="mb-3" id="anthology-form-actions-footer-parent">
+            <input id="anthology-form-actions-footer-submit" class="btn btn-primary float-end m-2" type="submit" value="Submit"/>
+            <input id="anthology-form-actions-footer-cancel" class="btn btn-secondary float-end m-2" type="button" onclick="history.back()" value="Cancel"/>
+        </div>
+    </form>
+</div>
+{% endblock %}

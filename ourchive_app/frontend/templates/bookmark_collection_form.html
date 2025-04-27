@@ -1,262 +1,122 @@
 {% extends 'index.html' %}
 {% load i18n %}
-{% block title %}{{ form_title }}{% endblock %}
-{% block content %}	
 {% load static %}
-<script>
-function doWorkAutocomplete(term) {
-  if (term.length < 2)
-  {
-    return;
-  }
-  var complete_select = 'bookmark-autocomplete-dropdown';
-  fetch('/bookmark-autocomplete?text='+term+"&source=edit")
-    .then((response) => {
-      return response.text();
-    })
-    .then((templateText) => {      
-    document.getElementById(complete_select).innerHTML = "";
-    document.getElementById(complete_select).innerHTML = templateText;
-    UIkit.drop(document.getElementById(complete_select)).show();
-    });
-}
-
-function populateWorkInput(bookmark_id, bookmark_display) {
-    // visible list
-    var list = document.getElementById("bookmarks_readonly_list")
-    // bookmark to add
-    var final = bookmark_display;
-    var wrapper= document.createElement('div');
-    wrapper.innerHTML= '<input type="hidden" id="works_'+bookmark_id+'" name="workidstoadd_'+bookmark_id+'" value="workidstoadd_'+bookmark_id+'">';
-    var div = wrapper.firstChild;
-    list.appendChild(div);
-    var li = document.createElement('li');
-    li.setAttribute('id', 'works_'+bookmark_id+'_li');
-    li.innerHTML = bookmark_display+' (<a onclick="removeWork(event,'+bookmark_id+')">Remove</a>)';
-    list.appendChild(li);
-    document.getElementById("bookmark_entry").value = '';
-    document.getElementById("bookmark_entry").focus();
-    document.getElementById("bookmark-autocomplete-dropdown").innerHTML = "";
-}
-function removeWork(event, bookmark_id) {
-    var li = document.getElementById("works_"+bookmark_id+"_li");
-    var hidden = document.getElementById("works_"+bookmark_id);
-    li.remove();
-    hidden.remove();
-}
-
-function addSelectedWorks() {
-    var bookmarks = document.querySelectorAll('.add-to-collection-checkbox');
-    bookmarks.forEach((bookmark) => {
-        if (bookmark.checked) {
-            console.log(bookmark);
-            var bookmark_display = document.getElementById("bookmark-"+bookmark.name+"-bookmark").innerHTML;
-            populateWorkInput(bookmark.name, bookmark_display);
-        }
-    });
-}
-
-// multi-user functionality
-function doUserAutocomplete(term) {
-  if (term.length < 2)
-  {
-    return;
-  }
-  var complete_select = 'collection-find-user-dropdown';
-  fetch('/user-autocomplete?text='+term)
-    .then((response) => {
-      return response.text();
-    })
-    .then((templateText) => {      
-    document.getElementById(complete_select).innerHTML = "";
-    document.getElementById(complete_select).innerHTML = templateText;
-    UIkit.drop(document.getElementById(complete_select)).show();
-    });
-}
-
-function removeUser(user_id) {
-    var parent = document.getElementById("collection-form-user-"+user_id+"-parent");
-    parent.remove();
-}
-
-function populateUserInput(user_id, username) {
-    // parent div
-    var parent = document.getElementById("collection-form-users")
-    // user to add
-    var final = username;
-    var wrapper= document.createElement('div');
-    wrapper.classList.add('uk-margin-small');
-    wrapper.classList.add('uk-inline');
-    wrapper.classList.add('uk-margin-remove-top');
-    wrapper.setAttribute('id', 'collection-form-user-'+user_id+'-parent');
-    wrapper.innerHTML= '<input id="work-form-cocreator-'+user_id+'-hidden" type="hidden" name="collection_cocreators_'+user_id+'" value="'+user_id+'"> <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="collection_user_'+user_id+'_display">'+username+' <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser('+user_id+')" id="collection_user_'+user_id+'_delete"></span></span>';
-    var input = document.getElementById("collection-form-user-search");
-    input.remove();
-    parent.appendChild(wrapper);
-    parent.appendChild(input);
-    document.getElementById("collection_form_new_user").value = '';
-    document.getElementById("collection_form_new_user").focus();
-    document.getElementById("collection-find-user-dropdown").innerHTML = "";
-}
-</script>
-<div class="uk-width-1-1 uk-text-left uk-padding-remove-horizontal" id="bkcol-form-parent-grid">  
-<form class="uk-form-horizontal" method="post" id="bookmarkCollectionForm" onsubmit="return getRichText(['description'])">
-    {% csrf_token %}
-    <input id="bkcol-form-hidden-id" type="hidden" name="bookmark_collection_id" value="{{ bookmark_collection.id }}"/>
-    <div id="bkcol-form-actions-parent" class="uk-grid" uk-grid>
-        <div id="bkcol-form-header-parent" class="uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-padding-remove-vertical uk-margin-remove-bottom">
-            <span id="bkcol-form-header-span" class="uk-text-large">{{ form_title }}</span>
-        </div>
-        <div id="bkcol-form-actions-group" class="uk-align-right uk-width-1-2@m uk-width-1-1@s uk-margin-remove-left uk-margin-remove-right uk-margin-remove-bottom uk-padding-remove-vertical uk-text-right">
-            <input id="bkcol-form-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
-            <button id="bkcol-form-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
-            <input id="bkcol-form-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
-        </div>
+{% block title %}{{ form_title }}{% endblock %}
+{% block content %}
+    <div id="bkcol-form-header-parent" class="row row-cols-1">
+        <h1 id="bkcol-form-header-span">{{ form_title }}</h1>
+        <hr id="bkcol-form-hr" class="ourchive-hr"/>
     </div>
-    <hr id="bkcol-form-hr"/>
-    <div id="bkcol-form-title-parent" class="uk-margin">
-        <label id="bkcol-form-title-label" class="uk-form-label" for="bkcol-form-title-input">Title</label>
-        <div id="bkcol-form-title-form-control" class="uk-form-controls">
-            <div id="bkcol-form-title-inline-div" class="uk-inline">
-                <input id="bkcol-form-title-input" title="{% translate 'Collection Title' %}" class="uk-input uk-form-width-large" type="text" name="title" value="{{ bookmark_collection.title|default_if_none:'' }}">
+    <div class="row row-cols-1" id="bkcol-form-parent-grid">
+        <form method="post" id="bookmarkCollectionForm" onsubmit="return getRichText(['description'])">
+            {% csrf_token %}
+            <input id="bkcol-form-hidden-id" type="hidden" name="bookmark_collection_id" value="{{ bookmark_collection.id }}"/>
+            <div id="bkcol-form-title-parent" class="mb-3">
+                <label id="bkcol-form-title-label" class="form-label" for="bkcol-form-title-input">{% translate 'Title' %}</label>
+                <input id="bkcol-form-title-input" title="{% translate 'Collection Title' %}" class="form-control" type="text" name="title" value="{{ bookmark_collection.title|default_if_none:'' }}">
             </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="collection-form-cocreator-form-parent">
-            <label id="collection-form-cocreator-form-label" class="uk-form-label" for="collection_form_new_user">{% translate 'Co-creators' %}</label>
-            <div id="collection-form-cocreator-controls" class="uk-form-controls">                
-                <div id="collection-form-cocreator-inline" class="uk-inline">
-                    <div id="collection-form-users">
-                        {% for user in bookmark_collection.users %}
-                        {% if user.username != request.user.username %}
-                            <div class="uk-margin-small uk-inline uk-margin-remove-top" id="collection-form-user-{{user.id}}-parent">
-                                <input title="{% translate 'Collection user' %}" id="collection-form-cocreator-{{user.id}}-hidden" type="hidden" name="collection_cocreators_{{user.id}}" value="{{ user.id }}"> 
-                                <span class="uk-button-primary uk-border-rounded ourchive-tag-list uk-margin-small-right" id="collection_user_{{user.id}}_display">{{ user.username }} <span uk-icon="icon:ourchive-backspace;ratio:.6" onclick="removeUser({{user.id}})" id="collection_user_{{user.id}}_delete"></span></span>
-                            </div>
-                        {% endif %}
-                        {% endfor %}
-                        <div class="uk-margin-small uk-inline" id="collection-form-user-search"><input autocomplete="off" class="uk-input uk-form-width-small uk-form-small ourchive-tag-entry uk-margin-small-bottom" type="text" placeholder="Find user..." id="collection_form_new_user" oninput="doUserAutocomplete(this.value)">
-                        <div id="collection-find-user-dropdown" uk-drop></div></div>
-                    </div>
+            <div class="mb-3" id="collection-form-cocreator-form-parent">
+                <label id="collection-form-cocreator-form-label" class="form-label" for="collection_form_new_user">{% translate 'Co-creators' %}</label>
+                {% if bookmark_collection.pending_users %}<p><span class="fw-bold">{% translate 'Pending cocreators' %}: </span>{% for user in bookmark_collection.pending_users %}{{user.username}}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+                <div id="collection-form-users">{% for user in bookmark_collection.users %}
+                    {% if user.username != request.user.username %}
+                        <div class="mb-3" id="collection-form-user-{{user.id}}-parent">
+                            <input title="{% translate 'Collection user' %}" id="collection-form-cocreator-{{user.id}}-hidden" type="hidden" name="collection_cocreators_{{user.id}}" value="{{ user.id }}">
+                            <p id="collection_user_{{user.id}}_display">{{ user.username }} <a class="link-underline link-underline-opacity-0" onclick="removeUser({{user.id}})" id="collection_user_{{user.id}}_delete"><i class="bi bi-backspace"></i></a></p>
+                        </div>
+                    {% endif %}
+                {% endfor %}</div>
+                <input autocomplete="off" class="form-control" type="text" placeholder="Find user..." data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="#collection-find-user-dropdown" id="collection_form_new_user" oninput="doUserAutocomplete(this.value, 'collection-find-user-dropdown')">
+                <div id="collection-find-user-dropdown" class="dropdown-menu p-4">{% translate 'Search for user..' %}</div>
+            </div>
+            <div class="mb-3" id="bkcol-form-languages-parent">
+                <label id="bkcol-form-languages-label" class="form-label" for="bkcol-form-languages">{% translate 'Languages' %}</label>
+                <select multiple class="form-select" name="languages[]" id="bkcol-form-languages">
+                    {% for language in languages %}
+                        <option value="{{language.display_name}}" {% if language.selected%} selected {% endif %}>{{language.display_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="bkcol-form-short-desc-parent" class="mb-3">
+                <label id="bkcol-form-short-desc-label" class="form-label" for="bkcol-form-short-desc-input">{% translate 'Short Description' %}</label>
+                <textarea rows="3" placeholder="Enter a short summary of this collection" id="bkcol-form-short-desc-input" class="form-control" type="text" name="short_description">{{ bookmark_collection.short_description|default_if_none:'' }}</textarea>
+            </div>
+            {% if request.user.can_upload_images %}
+                <div class="mb-3" id="bkcol-form-header-parent">
+                    <label id="bkcol-form-header-label" class="form-label" for="bookmark-collection-form-header-inline">{% translate 'Header' %} <sup><a title="{% translate 'Header help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#header-help-text"><i class="bi bi-question-circle"></i></a></sup></label>
+                    <div class="mb-3 collapse" id="header-help-text">{% blocktranslate %}This image will show directly below site nav. We recommend a rectangular image with width:height ratio of 2:1 or higher.{% endblocktranslate %}</div>
+                    <p><a id="bookmark-collection-header-img-toggle" data-bs-toggle="collapse" data-bs-target="#bookmark-collection-form-image-inline" aria-expanded="false" aria-controls="bookmark-collection-form-image-inline" class="btn btn-primary{% if not bookmark_collection.header_url %} disabled{% endif %}">{% translate 'Toggle cover' %}</a></p>
+                    <div id="bookmark-collection-form-image-inline" class="collapse mb-3"><img id="bookmark-collection-form-header-img" src="{{ bookmark_collection.header_url }}" alt="{% translate 'Collection header' %}"/></div>
+                    {% include 'file_upload.html' with object='header_url' replace_selector='bookmark-collection-form-header-img' object_type='img' upload_placeholder='Upload header image' original_value=bookmark_collection.header_url %}
                 </div>
-            </div>
-        </div>
-    <div id="bkcol-form-short-desc-parent" class="uk-margin">
-        <label id="bkcol-form-short-desc-label" class="uk-form-label" for="bkcol-form-short-desc-input">Short Description</label>
-        <div id="bkcol-form-short-desc-form-control" class="uk-form-controls">
-            <div id="bkcol-form-short-desc-inline-div" class="uk-inline">
-                <textarea rows="3" placeholder="Enter a short summary of this collection" id="bkcol-form-short-desc-input" class="uk-textarea uk-form-width-large" type="text" name="short_description">{{ bookmark_collection.short_description|default_if_none:'' }}</textarea>
-            </div>
-        </div>
-    </div>
-    {% if request.user.can_upload_images %}
-    <div class="uk-margin" id="bkcol-form-header-parent">
-        <label id="bkcol-form-header-label" class="uk-form-label" for="bookmark-collection-form-header-inline">Header <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Collection header help' %}"></sup>    
-            <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}This image will show directly below site nav. We recommend a rectangular image with width:height ratio of 2:1 or higher.{% endblocktranslate %}</div>
-        </label>
-        <div id="bookmark-collection-form-header-controls" class="uk-form-controls">
-            {% if bookmark_collection.header_url %}
-                <div id="bookmark-collection-header-image-toggle" class="uk-width-1-1"><a uk-toggle="target: #bookmark-collection-form-image-inline" class="uk-button uk-button-primary">Toggle Header</a></div>
-                <div id="bookmark-collection-form-image-inline" class="uk-width-1-1 uk-margin" hidden><img id="bookmark-collection-form-header-img" src="{{ bookmark_collection.header_url }}"/></div>
+                <div class="mb-3" id="bookmark-collection-form-header-alt-text-parent">
+                    <label id="bookmark-collection-form-header-alt-text-label" class="form-label" for="bookmark-collection-header-alt-text">{% translate 'Header Alt Text' %}</label>
+                    <textarea id="bookmark-collection-header-alt-text" class="form-control" rows="2" placeholder="Header alt text" name="header_alt_text" maxlength="600">{{ bookmark_collection.header_alt_text|default_if_none:'' }}</textarea>
+                </div>
             {% endif %}
-            <div id="bookmark-collection-form-header-inline" class="uk-inline uk-margin">
-                {% include 'file_upload.html' with object='header_url' replace_selector='bookmark-collection-form-header-img' object_type='img' upload_placeholder='Upload header image' original_value=bookmark_collection.header_url %}
+            <div class="mb-3">
+                <hr id="bkcol-comments-hr" class="ourchive-hr"/>
+                <h3 id="bkcol-settings-header">{% translate 'Settings' %}</h3>
             </div>
-            
-        </div>
-    </div>
-    <div class="uk-margin" id="bookmark-collection-form-header-alt-text-parent">
-            <label id="bookmark-collection-form-header-alt-text-label" class="uk-form-label" for="bookmark-collection-header-alt-text">Header Alt Text</label>
-            <div id="bookmark-collection-form-header-alt-text-controls" class="uk-form-controls">
-                <div class="uk-inline" id="bookmark-collection-header-alt-text-inline">
-                    <textarea id="bookmark-collection-header-alt-text" class="uk-textarea uk-form-width-large" rows="2" placeholder="Header alt text" name="header_alt_text" maxlength="600">{{ bookmark_collection.header_alt_text|default_if_none:'' }}</textarea>
+            <div class="mb-3 form-check form-switch" id="bkcol-form-draft-parent">
+                <input id="bkcol-form-draft-input" title="{% translate 'Draft checkbox' %}" class="form-check-input" role="switch" type="checkbox" name="draft" {% if bookmark_collection.draft %} checked {% endif %}>
+                <label id="bkcol-form-draft-label" class="form-check-label" for="bkcol-form-draft-input">{% translate 'Draft?' %} <sup><a title="{% translate 'Draft help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#draft-help-text"><i class="bi bi-question-circle"></i></a></sup></label>
+                <div class="mb-3 collapse" id="draft-help-text">{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
+            </div>
+            <div class="mb-3" id="bkcol-form-created-parent">
+                <label id="bkcol-form-created-label" class="form-label" for="bkcol-form-created-on">{% translate 'Post Date' %}</label>
+                <input title="{% translate 'Collection created on' %}" id="bkcol-form-created-on" type="date" class="form-control" name="created_on" value="{{ bookmark_collection.created_on }}">
+            </div>
+            <div class="mb-3" id="bkcol-form-updated-parent">
+                <label id="bkcol-form-updated-label" class="form-label" for="bkcol-form-updated-on">{% translate 'Update Date' %}</label>
+                <input title="{% translate 'Collection updated on' %}" id="bkcol-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ bookmark_collection.updated_on }}">
+                <input title="{% translate 'Collection updated on' %}" id="bkcol-form-updated-on" type="date" class="form-control" name="updated_on" value="{{ bookmark_collection.updated_on }}">
+            </div>
+            {% if settings.AllowComments %}
+                <div class="mb-3" id="bkcol-form-allow-comments-parent">
+                    <label id="bkcol-form-allow-comments-label" class="form-label" for="bkcol-form-allow-comments-select">{% translate 'Allow Comments?' %}</label>
+                    <select id="bkcol-form-allow-comments-select" class="form-select" name="comments_permitted" title="{% translate 'Comment settings' %}">
+                        <option {% if bookmark_collection.anon_comments_permitted and bookmark_collection.comments_permitted %} selected {% endif %}>All</option>
+                        <option {% if bookmark_collection.anon_comments_permitted == False and bookmark_collection.comments_permitted %} selected {% endif %}>Registered users only</option>
+                        <option {% if not bookmark_collection.anon_comments_permitted and not bookmark_collection.comments_permitted %} selected {% endif %}>None</option>
+                    </select>
                 </div>
+            {% endif %}
+            <hr class="ourchive-hr"/>
+            <div class="mb-3">
+                <h3 id="obj-attrs-form-header">Tags <sup><a title="{% translate 'Draft help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#tags-help"><i class="bi bi-question-circle"></i></a></sup></h3>
+                <div class="mb-3 collapse" id="tags-help">{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
+                {% include "object_attributes_form.html" with object='Bookmark Collection' attribute_types=bookmark_collection.attribute_types show_header=False %}
+                {% include "edit_tags.html" with object='bookmark_collection' show_header=False %}
             </div>
-        </div>
-    {% endif %}
-    <hr id="bkcol-comments-hr"/>
-    <h3 id="bkcol-settings-header">Settings</h3>
-    <div class="uk-margin" id="bkcol-form-draft-parent">
-        <label id="bkcol-form-draft-label" class="uk-form-label" for="bkcol-form-draft-input">Draft? <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Draft help' %}"></sup>    
-            <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
-        </label>
-        <div id="bkcol-form-draft-controls" class="uk-form-controls">
-            <div id="bkcol-form-draft-inline" class="uk-inline">
-                <label id="bkcol-form-draft-label" class="switch"><input id="bkcol-form-draft-input" title="{% translate 'Draft checkbox' %}" class="uk-checkbox" type="checkbox" name="draft" {% if bookmark_collection.draft %} checked {% endif %}> <span class="slider round"></span> </label>
+            <hr id="bkcol-form-tags-hr" class="ourchive-hr"/>
+            <div class="mb-3"><h3 id="obj-attrs-form-header">{% translate 'Details' %}</h3></div>
+            <div class="mb-3" id="bkcol-bookmarks-list">
+                <label id="bkcol-works-form-label" class="form-label" for="bookmarks_readonly_list">{% translate 'Works' %}</label>
+                <ul class="list-group sortable-list" id="bookmarks_readonly_list">
+                    {% for work in bookmark_collection.works_readonly %}
+                        <input type="hidden" id="works_{{work.id}}" name="workidstoadd_{{work.id}}" value="workidstoadd_{{work.id}}"/>
+                        <li id="works_{{work.id}}_li" class="list-group-item">{{work.title}} (<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" onclick="removeWork(event, {{work.id}})">Remove</a>)</li>
+                    {% endfor %}
+                </ul>
             </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="bkcol-form-created-parent">
-        <label id="bkcol-form-created-label" class="uk-form-label" for="bkcol-form-created-on">Post Date</label>
-        <div id="bkcol-form-created-controls" class="uk-form-controls">
-            <div id="bkcol-form-created-inline" class="uk-inline">
-                <input title="{% translate 'Collection created on' %}" id="bkcol-form-created-on" type="date" name="created_on" value="{{ bookmark_collection.created_on }}"> 
+            <div id="bkcol-form-bookmarks-parent" class="mb-3">
+                <label id="bkcol-form-bookmarks-label" class="form-label" for="bookmark_entry">{% translate 'Add Work' %}</label>
+                <input autocomplete="off" class="form-control" data-bs-toggle="dropdown" aria-expanded="false" data-bs-target="bookmark-autocomplete-dropdown" type="text" placeholder="{% translate 'Search for work...' %}" id="bookmark_entry" oninput="doWorkAutocomplete(this.value)">
+                <div id="bookmark-autocomplete-dropdown" class="dropdown-menu p-4">{% translate 'Search for work...' %}</div>
+                <a class="link-underline link-underline-opacity-0" id="collection-add-bookmark-modal-toggle"href="#" data-bs-toggle="modal" data-bs-target="#collection-add-bookmark-modal">{% translate 'Add from list' %}</a>
             </div>
-        </div>
-    </div>
-    <div class="uk-margin" id="bkcol-form-updated-parent">
-        <label id="bkcol-form-updated-label" class="uk-form-label" for="bkcol-form-updated-on">Update Date</label>
-        <div id="bkcol-form-updated-controls" class="uk-form-controls">
-            <div id="bkcol-form-updated-inline" class="uk-inline">
-                <input title="{% translate 'Collection updated on' %}" id="bkcol-form-updated-on-hidden" type="hidden" name="updated_on_original" value="{{ bookmark_collection.updated_on }}"> 
-                <input title="{% translate 'Collection updated on' %}" id="bkcol-form-updated-on" type="date" name="updated_on" value="{{ bookmark_collection.updated_on }}"> 
+            <div id="bkcol-form-description-parent" class="mb-3">
+                <label id="bkcol-form-description-label" class="form-label" for="descriptionEditor">{% translate 'Description' %}</label>
+                {% include 'ourchive_tinymce_template.html' with form_field_value=bookmark_collection.description form_field='description' obj_name='bkcol' %}
             </div>
-        </div>
+            <hr class="ourchive-hr"/>
+            <div class="mb-3" id="bkcol-form-actions-footer-parent">
+                <input id="bkcol-form-actions-footer-submit" class="btn btn-primary float-end m-2" type="submit" value="Submit"/>
+                <input id="bkcol-form-actions-footer-cancel" class="btn btn-secondary float-end m-2" type="button" onclick="history.back()" value="Cancel"/>
+            </div>    
+        </form>
     </div>
-    {% if settings.AllowComments %}
-    <div class="uk-margin" id="bkcol-form-allow-comments-parent">
-        <label id="bkcol-form-allow-comments-label" class="uk-form-label" for="bkcol-form-allow-comments-select">Allow Comments?</label>
-        <div id="bkcol-form-allow-comments-controls" class="uk-form-controls">
-            <select id="bkcol-form-allow-comments-select" class="uk-select uk-form-width-large" name="comments_permitted" title="{% translate 'Comment settings' %}">                    
-                <option {% if bookmark_collection.anon_comments_permitted and bookmark_collection.comments_permitted %} selected {% endif %}>All</option>
-                <option {% if bookmark_collection.anon_comments_permitted == False and bookmark_collection.comments_permitted %} selected {% endif %}>Registered users only</option>
-                <option {% if not bookmark_collection.anon_comments_permitted and not bookmark_collection.comments_permitted %} selected {% endif %}>None</option>
-
-            </select>
-        </div>
-    </div>
-    {% endif %}
-    <hr/>
-    <span class="uk-inline"><h3 class="uk-inline" id="obj-attrs-form-header">Tags</h3> <sup class="uk-margin-small-left uk-inline" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Tags help' %}"></sup>
-        <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your work, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
-    </span>
-    {% include "object_attributes_form.html" with object='Bookmark Collection' attribute_types=bookmark_collection.attribute_types show_header=False %}
-    {% include "edit_tags.html" with object='bookmark_collection' show_header=False %}
-    <hr id="bkcol-form-tags-hr"/>
-    <h3 id="obj-attrs-form-header">Details</h3>
-    <div class="uk-margin" id="bkcol-bookmarks-list">
-        {% if bookmark_collection.works %}<div class="uk-margin-medium-left"><h4 id="obj-attrs-form-header">{% translate 'Works' %}</h4></div>{% endif %}
-        <ul id="bookmarks_readonly_list" class="uk-margin-medium-left"> 
-        {% for work in bookmark_collection.works_readonly %}
-            <input type="hidden" id="works_{{work.id}}" name="workidstoadd_{{work.id}}" value="workidstoadd_{{work.id}}"/>
-            <li id="works_{{work.id}}_li">{{work.title}} (<a onclick="removeWork(event, {{work.id}})">Remove</a>)</li>
-        {% endfor %}
-        </ul>
-        <div id="bkcol-form-bookmarks-parent" class="uk-margin uk-margin-medium-top">
-            <label id="bkcol-form-bookmarks-label" class="uk-form-label" for="bookmark_entry">{% translate 'Add Work' %} <sup class="uk-margin-small-left" uk-icon="icon: ourchive-help;ratio:.75" title="{% translate 'Work help' %}"></sup>    
-                    <div class="uk-card uk-card-body uk-card-default" uk-drop>{% blocktranslate %}Search for works by title.{% endblocktranslate %}</div>
-            </label>
-            <div id="bkcol-form-bookmarks-form-control" class="uk-form-controls">
-                <div id="bkcol-form-bookmarks-inline-div" class="uk-inline">
-                    <input autocomplete="off" class="uk-input uk-form-width-medium uk-form-medium ourchive-tag-entry" type="text" placeholder="Search for work..." id="bookmark_entry" oninput="doWorkAutocomplete(this.value)">
-                    <div id="bookmark-autocomplete-dropdown" uk-drop></div>
-                    <a class="uk-margin-left" href="#" id="collection-add-bookmark-modal-toggle" uk-toggle="target: #collection-add-bookmark-modal">Add from list</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="bkcol-form-description-parent" class="uk-margin">
-        <label id="bkcol-form-description-label" class="uk-form-label" for="descriptionEditor">Description</label>
-        {% include 'ourchive_tinymce_template.html' with form_field_value=bookmark_collection.description form_field='description' obj_name='bkcol' %}
-    </div>
-    <hr/>
-    <div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="bkcol-form-actions-footer-parent" uk-grid>
-        <div class="uk-text-right uk-width-1-1" id="bkcol-form-actions-footer-child">
-            <input id="bkcol-form-actions-footer-cancel" class="uk-button uk-button-default" type="button" onclick="history.back()" value="Cancel"/>
-            <input id="bkcol-form-actions-footer-submit" class="uk-button uk-button-primary" type="submit" value="Submit"/>
-        </div>
-    </div>    
-</form>
-</div>
-{% include 'collection_form_bookmark_modal.html' %}
+    {% include 'collection_form_bookmark_modal.html' %}
+    <script src="{% static 'frontend/js/ourchive-collections.js' %}"></script>
 {% endblock %}

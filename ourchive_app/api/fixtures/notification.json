@@ -1,6 +1,6 @@
 [
 {
-    "model": "api.notification",
+    "model": "core.notification",
     "pk": 2,
     "fields": {
         "uid": "22ee685d-8f6b-4299-847f-9b95ea42e481",
@@ -13,7 +13,7 @@
     }
 },
 {
-    "model": "api.notification",
+    "model": "core.notification",
     "pk": 3,
     "fields": {
         "uid": "d1c2c2d8-2d44-47b8-9f9a-533642c58872",
@@ -26,7 +26,7 @@
     }
 },
 {
-    "model": "api.notification",
+    "model": "core.notification",
     "pk": 4,
     "fields": {
         "uid": "a0ec0311-39d9-407a-ae24-02c18eb20231",
@@ -39,7 +39,7 @@
     }
 },
 {
-    "model": "api.notification",
+    "model": "core.notification",
     "pk": 5,
     "fields": {
         "uid": "8236c269-bf28-4b50-9199-2f09ce108e3e",

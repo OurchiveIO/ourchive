@@ -66,6 +66,16 @@ class ChiveExportOrchestrator:
 			file_info = ('collections.csv', f'{export_helpers.get_temp_directory(username, loc_uuid)}collections.csv')
 			filenames.append(file_info)
 			self.write_csv(queryset, file_info)
+		if job.export_series:
+			queryset = api.WorkSeries.objects.filter(user_id=job.user_id).all()
+			file_info = ('series.csv', f'{export_helpers.get_temp_directory(username, loc_uuid)}series.csv')
+			filenames.append(file_info)
+			self.write_csv(queryset, file_info)
+		if job.export_anthologies:
+			queryset = api.Anthology.objects.filter(creating_user_id=job.user_id).all()
+			file_info = ('anthologies.csv', f'{export_helpers.get_temp_directory(username, loc_uuid)}anthologies.csv')
+			filenames.append(file_info)
+			self.write_csv(queryset, file_info)
 		results = self.create_zip(filenames, username, loc_uuid)
 		# clean up parent folder
 		shutil.rmtree(export_helpers.get_temp_directory(username, loc_uuid))
@@ -94,11 +104,8 @@ class ChiveExportOrchestrator:
 						try:
 							items = []
 							for item in value.all():
-								friendly = getattr(item, 'display_text')
-								if friendly:
-									items.append(f'{friendly}')
-								else:
-									items.append(f'{item}')
+								friendly = item.display_text if hasattr(item, 'display_text') else f'{item}'
+								items.append(friendly)
 							value = items
 						except Exception as ex:
 							value = f'Error retrieving value: {ex}'

@@ -1,4 +1,4 @@
-- model: api.attributetype
+- model: core.attributetype
   pk: 1
   fields:
     uid: dac213b3-6ea0-4764-b136-b9ba514bc6c5
@@ -9,7 +9,7 @@
     allow_on_chapter: true
     allow_on_user: false
     allow_multiselect: true
-- model: api.attributetype
+- model: core.attributetype
   pk: 2
   fields:
     uid: 7d09374c-bbdd-4f02-a3e5-019e10138cf1
@@ -20,7 +20,7 @@
     allow_on_chapter: true
     allow_on_user: false
     allow_multiselect: false
-- model: api.attributetype
+- model: core.attributetype
   pk: 3
   fields:
     uid: 0f96d320-b0ce-4353-b95a-29f831107482
@@ -31,7 +31,7 @@
     allow_on_chapter: false
     allow_on_user: false
     allow_multiselect: true
-- model: api.attributetype
+- model: core.attributetype
   pk: 4
   fields:
     uid: 01149db5-347d-4612-96a5-9359a09b8c95

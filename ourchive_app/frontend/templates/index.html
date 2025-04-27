@@ -1,20 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="{% if css_mode %}{{ css_mode }}{% else %}light{% endif %}">
 <head>
 	{% load static %}
 	{% load i18n %}
 	{% load cache %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% if css_mode %}
-    <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/' %}ourchive-{{css_mode}}.css" />
-    {% else %}
-    <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/' %}ourchive-light.css" />
-    {% endif %}
+    <link rel="stylesheet" href="{% static 'frontend/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'frontend/css/bootstrap-icons.min.css' %}">
+    <link rel="stylesheet" id="theme-link" href="{% static 'frontend/css/ourchive.css' %}" />
     <link rel="stylesheet" href="{% static 'frontend/css/editor.css' %}" />
     <link rel="shortcut icon" href="{% static 'favicon/favicon.svg' %}"/>
-    <script src="{% static 'frontend/js/uikit.min.js' %}"></script>
-    <script src="{% static 'frontend/js/uikit-icons.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'frontend/css/choices.min.css' %}" />
+    <script src="{% static 'frontend/js/choices.min.js' %}"></script>
+    <script src="{% static 'frontend/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'frontend/js/ourchive-tags.js' %}"></script>
     <script src="{% static 'frontend/js/tinymce.min.js' %}"></script>
     <script src="{% static 'frontend/js/ourchive-tinymce.js' %}"></script>
@@ -25,7 +24,7 @@
 	<script>
 		function switchTheme() {
 			fetch('{% url 'switch-css-mode' %}').then((response) => {
-				localStorage.setItem("fe-theme", '{{css_mode}}' == 'dark' ? 'light' : 'dark');
+				localStorage.setItem("fe-theme", '{{css_mode}}' === 'dark' ? 'light' : 'dark');
 				window.location.reload();
 			});
 		}
@@ -37,222 +36,89 @@
 		    expires = "; expires=" + date.toUTCString();
 		    document.cookie = name + "=" + "dismissed" + expires + "; path=/";
 		}
-	</script>
-	{% if 'accept-cookies' not in request.COOKIES and not request.user.cookies_accepted %}
-		<script>
-			UIkit.notification({
-			    message: 'Ourchive uses necessary cookies to allow you to log in and submit data. We do not collect or distribute any tracking information. By continuing to browse the site you are agreeing to allow cookies to be stored and used.',
-			    status: 'danger',
-			    pos: 'top-center',
-			    timeout: 10000
-			});
-			fetch('{{request.build_absolute_uri|slice:":-1"}}{% url 'accept-cookies' %}')
+        function acceptCookies() {
+            fetch('{{request.build_absolute_uri|slice:":-1"}}{% url 'accept-cookies' %}')
 			  .then((response) => {
 			  	var date = new Date();
 			  	date.setTime(date.getTime() + 86400*1000*7);
 			    const expires = date.toUTCString();
 				document.cookie =  'accept-cookies=true' + '; expires=' + expires + '; path=/'
 			  });
-		</script>
-	{% endif %}
-	{% if messages %}
-		{% for message in messages %}
-			<script>
-				var status = '{{message.tags}}' === 'success' ? 'primary' : 'danger';
-				UIkit.notification({
-				    message: '<div id="{{message.extra_tags}}"><strong>{{ message }}</strong></div>',
-				    status: status,
-				    pos: 'top-center',
-				    timeout: 8000
-				});
-			</script>
-		{% endfor %}
-	
-	{% endif %}
-	{% if admin_announcements %}
-	<div class="uk-width-expand uk-container uk-margin-remove uk-padding-remove" id="admin-messages-parent">	
-		<div id="content-block-parent-grid" class="uk-flex uk-flex-middle uk-flex-center uk-display-block">
-			{% for announcement in admin_announcements %}
-			<div class="uk-text-center uk-padding-small uk-width-expand" id="admin-announcement-{{announcement.id}}">
-			    <span class="uk-text-bold">{{ announcement.content|safe }}</span>
-			   	<span title="Dismiss" uk-toggle="target: #admin-announcement-{{announcement.id}}" onclick="dismissAnnouncement('{{announcement.id}}')" class="uk-link ourchive-span-link uk-align-right uk-text-middle" uk-icon="icon: ourchive-close;ratio:.75;" id="dismiss-announcement"></span>
-			</div>
-			{% endfor %}
-		</div>
-	</div>
-	{% endif %}
-	<div class="ourchive-navbar" id="ourchive-navbar-parent">
-		<nav class="uk-navbar-container uk-navbar-transparent uk-padding-small uk-padding-remove-vertical" uk-navbar id="uk-nav-parent">
-		    <div class="uk-navbar-left" id="uk-nav-left">
-		    	<a class="uk-navbar-toggle uk-hidden@s" uk-toggle="target: #sidenav"  uk-navbar-toggle-icon id="uk-nav-hamburger"></a>
-		        <ul class="uk-navbar-nav uk-visible@s">
-		            <li class="uk-active" id="nav-home"><a href="/" title="Home" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home"/>{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home"/>{% endif %}</a></li>
-		            <li><a href="/works/" id="nav-works">{% translate 'Works' %}</a></li>
-		            <li><a href="/bookmark-collections/" id="nav-bookmark-collections">{% translate 'Collections' %}</a></li>
-		        </ul>
-		    </div>	    
-		    <div class="uk-navbar-right uk-margin-right" id="uk-nav-right">
-		    	 <ul class="uk-navbar-nav" id="uk-nav-right-ul">
-		    	 	<li id="nav-search-li">
-			                {% if not term %}<div class="nav-overlay uk-navbar-right">
-			                	<a class="uk-navbar-toggle ourchive-icon-wrapper" id="search-toggle-overlay" uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"><span uk-icon="icon: ourchive-search; ratio: .75" title="Search" id="ourchive-nav-search-icon"></a>
-			                </div>{% endif %}
-    					{% if not term %}<div class="nav-overlay uk-navbar-left uk-flex-1" hidden>
-    					{% else %}<div class="nav-overlay uk-navbar-left uk-flex-1">{% endif %}
-        					<div class="uk-navbar-item uk-width-expand uk-margin-small-left">
-	            				<form class="uk-search uk-search-navbar uk-width-1-1" action="/search/" method="post" id="nav-search-form">
-				                	{% csrf_token %}
-				                    <input class="uk-search-input ourchive-nav-search" autocomplete="off" type="search" placeholder="Search..." autofocus name="term" value="{{ term }}" id="nav-search-input" oninput="doAutocomplete(this.value, 'search', 'navbar')">
-								<div id="tag-autocomplete-dropdown-navbar" uk-drop></div>
-				                </form>
-        					</div>
-        					{% if not term %}<a class="uk-navbar-toggle" uk-close uk-toggle="target: .nav-overlay; animation: uk-animation-fade" href="#"></a>{% endif %}
-
-    					</div>
-		        	</li>
-		    	 	<li id="theme-switcher-li">
-		    	 		<a onclick="switchTheme()" href="#" id="theme-switcher-link" class="ourchive-icon-wrapper" title="Switch Modes">
-		    	 			{% if request.session.css_mode == "dark" %}
-		    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Light Mode" id="theme-switcher-light">
-		    	 			{% else %}
-		    	 			<span uk-icon="icon: ourchive-mode-switcher; ratio: 1.2" title="Dark Mode" id="theme-switcher-dark">
-		    	 			{% endif %}
-		    	 		</a></span>
-		    	 	</li>
-		        	<li id="nav-right-main">		        
-			            {% if not request.user.is_authenticated %}
-			            	<li class="uk-active" id="nav-login-li">
-			            		<a href="/login" id="nav-login-link">
-			            			<span uk-icon="icon: ourchive-login;ratio:.75" title="Sign In" id="nav-login-icon"></span>
-			            		</a>
-			            	</li>
-			            	<li class="uk-active" id="nav-register-li">
-			            		<a href="/register" id="nav-register-link">
-			            			<span uk-icon="icon: ourchive-register;ratio:.75" title="Register" id="nav-register-icon"></span>
-			            		</a>
-			            	</li>
-			            {% endif %}
-			            {% if request.user.is_authenticated %}
-			            	<a class="uk-width-auto uk-text-truncate" title="{{ request.user }}" href="#" id="nav-username">{{ request.user }}</a>
-			            	<div class="uk-navbar-dropdown uk-width-medium" id="nav-user-dropdown-div" uk-dropdown="delay-hide: 1500">
-	                    		<ul class="uk-nav uk-navbar-dropdown-nav uk-list-divider uk-list-collapse" id="nav-user-dropdown-ul">
-	                    			<li id="nav-new-bkcol-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-work-link">{% translate 'New Collection' %}</a></li>
-	                    			<li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link">New Work</a></li>
-	                    			<li id="nav-creations-li"><a href="#" id="nav-creations-link">{% translate 'My Chives' %}</a></li>
-	                    			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="creations-subnav">
-	                    				<li id="nav-bookmarks-li"><a href="/username/{{request.user}}/bookmarks/" id="nav-bookmarks-link">Bookmarks</a></li>
-	                    				<li id="nav-bookmarks-li"><a href="{% url 'fe-user-collections' request.user %}" id="nav-bookmark-collections-link">{% translate 'Collections' %}</a></li>
-	                    				<li id="nav-works-li"><a href="/username/{{request.user}}/works" id="nav-works-link">Works</a></li>
-	                    			</ul>
-	                    			<li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}">{% translate 'Subscriptions' %}</a></li>
-								    <li id="nav-account-parent"><a href="{% url 'user-profile-parent' request.user.id %}">{% translate 'Profile' %}</a></li>
-								    	<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="profile-subnav">
-	                    				<li id="nav-edit-profile-li"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-edit-profile-link">{% translate 'User Settings' %}</a></li>
-	                    				<li id="nav-edit-account-li"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-edit-account-link">{% translate 'Account Settings' %}</a></li>
-	                    				<li id="nav-cocreator-approval-li"><a href="{% url 'fe-view-approvals'%}" id="nav-view-approvals-link">{% translate 'Approvals' %}</a></li>
-	                    				<li id="nav-blocklist-li"><a href="/users/{{request.user}}/blocklist" id="nav-blocklist-link">{% translate 'Blocklist' %}</a></li>
-	                    			</ul>
-	                    			<li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link">{% translate 'Import Work(s)' %}</a></li>
-	                    			<ul class="uk-nav-sub uk-list-divider uk-list-collapse" id="imports-subnav">
-								            <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}">{% translate 'Import Status' %}</a></li>
-								        </ul>
-	                    			{% if request.session.has_notifications %}
-	                    			<li id="nav-notifications-unread-li"><a class="uk-text-emphasis uk-text-secondary" href="/username/{{request.user}}/notifications" id="nav-notifications-unread-link">Notifications (Unread)</a></li>
-	                    			{% else %}
-	                    			<li id="nav-notifications-li"><a href="/username/{{request.user}}/notifications" id="nav-notifications-link">Notifications</a></li>
-	                    			{% endif %}
-					            	<li id="nav-signout-li"><a href="/logout" id="nav-signout-link">Log Out</a></li>
-			        			</ul>
-			        	</div>
-			        	{% endif %}
-			        </li>
-		    </ul>
-	    </div>
-
-		</nav>
-	</div>
-	<div id="sidenav" uk-offcanvas="flip: true" class="uk-offcanvas">
-		<div class="uk-offcanvas-bar" id="sidenav-parent-div">
-			<ul class="uk-nav" id="sidenav-ul">
-				<li id="sidenav-home-li" class="uk-active"><a id="sidenav-home-link" href="/">{% translate 'Home' %}</a></li>
-	            <li id="sidenav-works-li"><a id="sidenav-works-link" href="/works/">{% translate 'Works' %}</a></li>
-	            <li id="sidenav-bookmark-collections-li"><a id="sidenav-bookmark-collections-link" href="/bookmark-collections/">{% translate 'Collections' %}</a></li>
-	            <li id="sidenav-search-li"><a id="sidenav-search-link" href="/search">Search</a></li>
-	            {% if not request.user.is_authenticated %}
-	            	<li id="sidenav-sign-in-li" class="uk-active">
-	            		<a id="sidenav-sign-in-link" href="/login">Sign In</a></li>
-	            	<li id="sidenav-register-li" class="uk-active">
-	            		<a id="sidenav-register-link" href="/register">Register</a></li>
-	            {% endif %}
-	            {% if request.user.is_authenticated %}
-	            	<li id="sidenav-signout-li" class="uk-active">
-	            		<a id="sidenav-signout-link" href="/logout"><span uk-icon="icon: ourchive-logout; ratio: .75;" title="Sign out"></span></a></li>
-	            {% endif %}
-			</ul>
-		</div>
-	</div>
-	<button id="scroll-to-top-button" class="uk-button uk-button-primary scroll-to-top" style="display: none;" onclick="topFunction()" uk-scroll><span uk-icon="icon:ourchive-up;ratio:.75"></span></button>
-	<div class="uk-width-expand uk-container uk-margin content-block-parent ourchive-content-block-parent" id="content-block-parent">	
-		<div uk-grid id="parent-grid" id="content-block-parent-grid" uk-height-viewport="expand: true" class="uk-grid uk-margin-remove ourchive-top-level-grid">
-			{% block content %}
-				{% cache 43200 homepage-intro %}
-				<div class="uk-width-1-1 uk-margin-remove-left uk-margin-remove-bottom ourchive-parent-grid" id="index-content-intro-div">
-				        <h1 id="index-content-heading" class="uk-heading-medium">{{ heading_message }}</h1>
-				  		<span id="index-content-message">{{ long_message }}</span>
-				</div>
-				{% endcache %}
-				{% cache 300 homepage-recent-works %}
-				<div class="uk-width-1-3@m uk-width-1-1@s uk-margin-remove-left uk-margin-medium-top ourchive-parent-grid ourchive-border-right" id="recent-works-column">
-					<h2 id="recent-works-header">{% translate 'Recent Works' %}</h2>
-					<ul class="uk-list uk-list-striped" id="recent-works-ul">
-						{% for work in recent_works %}
-							<li id="recent-works-li-{{work.id}}"><a href="{% url 'fe-work-view' work.id %}" title="{{ work.title }}">{{ work.title }} {% translate 'by' %} {{ work.user }}</a></li>
-						{% endfor %}
-					</ul>
-				</div>
-				{% endcache %}
-				{% cache 3600 homepage-top-tags %}
-				<div class="uk-width-2-3@m uk-width-1-1@s uk-margin-remove-right uk-margin-medium-top ourchive-parent-grid" id="index-content-tag-cloud-div">
-					<h2 class="uk-text-center" id="top-tags-header">{% translate 'Top Tags' %}</h2>
-					<!-- Tag cloud adapted from https://css-tricks.com/create-a-tag-cloud-with-some-simple-css-and-even-simpler-javascript/ -->
-						<ul class="ourchive-homepage-tags" id="cloud-tag-ul">
-						{% for tag in top_tags %}
-							<li class="ourchive-homepage-tag" id="cloud-tag-li-{{tag.id}}">
-							  <a
-							    class="ourchive-homepage-tag__link"
-							    title="{{ tag.display_text }}"
-							    href="/tags/{{tag.id}}?tag_id={{tag.id}}"
-							    style="font-size: {{tag.font_size}}">
-							    {{ tag.display_text }}
-							  </a>
-							</li>
-						{% endfor %}
-						</ul>
-						<div class="ourchive-homepage-search uk-center">
-							<form id="index-content-search-form" class="uk-search uk-search-large uk-align-center" method="post" action="search/">
-								{% csrf_token %}
-								<input autocomplete="off" id="index-content-search-input" class="uk-search-input" type="search" name="term" placeholder="Search..." value="{{ term }}" oninput="doAutocomplete(this.value, 'search', 'main')">
-								<div id="tag-autocomplete-dropdown-main" uk-drop></div>
-							</form>
-					</div>
-				</div>
-				{% endcache %}
-				<!---->
-			{% endblock %}
-	    </div>
-	</div>
-	<hr id="footer-hr" class="ourchive-hr">
-	<div id="footer-parent-grid" class="uk-grid uk-padding-small uk-margin-bottom uk-margin-left uk-margin-right" uk-grid>
-	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s uk-padding-remove-horizontal">
-	        <span id="footer-created-by" class="uk-text-meta"><a href="https://getourchive.io/">Ourchive</a> is created & maintained by <a href="https://federatedfandom.net/@kate" target="_blank">kate</a>, <a href="https://github.com/ladyofthelog">verity</a>, and <a href="https://federatedfandom.net/@imp" target="_blank">imp</a>.</span>
-	    </div>
-	    <div id="footer-child-grid" class="uk-width-1-2@m uk-width-1-1@s uk-text-right">
-	        {% for page in content_pages %}
-	        <a href="/content-pages/{{page.id}}" class="uk-link uk-padding-small">{{page.name}}</a>
-	        {% endfor %}
-	    </div>
-	</div>
-		
-	<script src="{% static 'frontend/js/scroll-to-top.js' %}"></script>
+        }
+	</script>
+    {% if admin_announcements %}
+        <div class="container-fluid" id="admin-messages-parent">
+            <div id="content-block-parent-grid" class="row">
+                {% for announcement in admin_announcements %}
+                <div class="col-12 collapse show mb-1 mt-2" id="admin-announcement-{{announcement.id}}">
+                    <p class="fw-bold text-center">{{ announcement.content|safe }}  <button data-bs-toggle="collapse" data-bs-target="#admin-announcement-{{announcement.id}}" aria-expanded="true" aria-controls="admin-announcement-{{announcement.id}}" id="dismiss-announcement" type="button" onclick="dismissAnnouncement('{{announcement.id}}')" class="btn-close" aria-label="Dismiss"></button>
+</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    {% include 'index_navbar.html' %}
+    <div class="container pt-3" id="content-block-parent">
+        {% if 'accept-cookies' not in request.COOKIES and not request.user.cookies_accepted %}
+            <div class="toast-container bottom-50 start-50 translate-middle-x">
+              <div id="cookieToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                  <strong class="me-auto">Cookie Notification</strong>
+                  <button type="button" class="btn-close" data-testid="accept-cookies-btn" data-bs-dismiss="toast" onclick="acceptCookies()" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                  {% blocktranslate %}Ourchive uses necessary cookies to allow you to log in and submit data. We do not collect or distribute any tracking information. By continuing to browse the site you are agreeing to allow cookies to be stored and used.{% endblocktranslate %}
+                </div>
+              </div>
+            </div>
+            <script>
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(document.getElementById("cookieToast"));
+                toastBootstrap.show();
+            </script>
+        {% endif %}
+        {% if messages %}
+            <div class="toast-container top-0 start-50 translate-middle-x">
+            {% for message in messages %}
+                <div class="toast ourchive-msg-toast" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="toast-header justify-content-end">
+                    <strong class="me-auto">{% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}{% translate 'Error' %}{% else %}{% translate 'Success' %}{% endif %}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+                  <div class="toast-body bg-body" id="{{message.extra_tags}}">
+                    {{ message }}
+                  </div>
+                </div>
+                <script>
+                    var status = '{{message.tags}}' === 'success' ? 'primary' : 'danger';
+                </script>
+            {% endfor %}
+            <script>
+                document.querySelectorAll(".ourchive-msg-toast").forEach(msg => {
+                    let toast = bootstrap.Toast.getOrCreateInstance(msg);
+                    toast.show();
+                });
+                var status = '{{message.tags}}' === 'success' ? 'primary' : 'danger';
+            </script>
+            </div>
+        {% endif %}
+        <button id="scroll-to-top-button" class="btn btn-primary scroll-to-top" style="display: none;" onclick="topFunction()"><i class="bi bi-chevron-bar-up"></i></button>
+        {% block content %}
+        {% include 'index_body.html' %}
+        {% endblock %}
+        <hr id="footer-hr" class="ourchive-hr">
+        <div id="footer-parent-grid" class="row mb-2">
+            <div id="footer-child-grid" class="col-md-6 col-12">
+                <span id="footer-created-by" class="uk-text-meta"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="https://getourchive.io/">Ourchive</a> is created & maintained by <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="https://github.com/OurchiveIO" target="_blank">the Ourchive team</a>.</span>
+            </div>
+            <div class="col-xs-12 d-md-none"><hr id="footer-hr" class="ourchive-hr"></div>
+            <div id="footer-child-grid" class="col-md-6 col-12">
+                <p class="text-md-end">{% for page in content_pages %}
+                <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover ms-3" href="/content-pages/{{page.id}}" {% if not forloop.last %}class="me-1"{% endif %}>{{page.name}}</a>
+                {% endfor %}</p>
+            </div>
+        </div>
+        <script src="{% static 'frontend/js/scroll-to-top.js' %}"></script>
+    </div>
 </body>
 </html>

@@ -1,43 +1,52 @@
 {% load i18n %}
-<div class="uk-width-1-1 uk-padding-remove-horizontal" id="work-{{work.id}}-tile-parent">
-	<div class="uk-card uk-card-default" id="work-{{work.id}}-tile-card">
-	    <div class="uk-card-header uk-padding-small ourchive-card-head" id="work-{{work.id}}-tile-card-header">
-	        <div class="uk-grid-small uk-flex-middle" uk-grid id="work-{{work.id}}-tile-card-header-grid">
-	            {% if work.cover_url != "None" and work.cover_url is not None and work.cover_url != "" %}
-	            <div class="uk-width-auto" id="work-{{work.id}}-tile-img-parent">
-	                <img class="uk-border-circle" width="40" height="40" alt="{{work.cover_alt_text}}" src="{{work.cover_url}}" id="work-{{work.id}}-tile-image">
-	            </div>
-	            {% endif %}
-	            <div class="uk-width-expand" id="work-{{work.id}}-tile-title-parent">
-	                {% if work.draft == True %}
-	                	<span id="work-{{work.id}}-tile-draft-title" class="uk-text-medium uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-draft-title-link" href="{% url 'fe-work-view' work.id %}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {% for user in work.users %}<a id="work-{{work.id}}-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
-		                <p class="uk-label uk-margin-remove-top uk-margin-remove-right uk-margin-remove-left uk-text-small uk-inline uk-label-warning" id="work-{{work.id}}-tile-draft-button-span"><strong>DRAFT</strong></p>
-	                {% else %}
-	                	<span id="work-{{work.id}}-tile-title" class=" uk-margin-remove-bottom uk-inline ourchive-tile-title"><a id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}">{% if work.work_type_name %}[{{work.work_type_name}}] {% endif %}{{work.title}}</a> by {% for user in work.users %}<a id="work-{{work.id}}-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a id="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>{% endfor %}</span>
-	                {% endif %}
-	            </div>
-	            {% if work.owner %}
-		        <div class="uk-align-right uk-text-right uk-margin-small-top uk-visible@s uk-margin-remove-bottom" id="work-{{work.id}}-header-user-controls">
-		            <a id="work-{{work.id}}-header-edit-link" title="Edit Work {{ work.id }}" href="/works/{{ work.id }}/edit" class="ourchive-icon-wrapper"><span id="work={{work.id}}-header-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="{% translate 'Edit Work' %} {{ work.id }}"></span></a>
-		            <a id="work-{{work.id}}-header-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete" class="ourchive-icon-wrapper"><span id="work-{{work.id}}-header-delete-span" uk-icon="icon: ourchive-delete;ratio:.75" title="{% translate 'Delete Work' %} {{ work.id }}"></span></a>
-		            {% include "delete_modal.html" with object='work' object_id=work.id %}
-		        </div>
-		        <div class="uk-align-left uk-text-left uk-margin-small-top uk-hidden@s uk-margin-remove-bottom uk-width-1-1" id="work-{{work.id}}-header-user-controls">
-		        	<a id="work-{{work.id}}-header-edit-link" title="Edit Work {{ work.id }}" href="/works/{{ work.id }}/edit" class="ourchive-icon-wrapper"><span id="work={{work.id}}-header-edit-span" uk-icon="icon: ourchive-edit;ratio:.75" title="{% translate 'Edit Work' %} {{ work.id }}"></span></a>
-		            <a id="work-{{work.id}}-header-delete-link" uk-toggle="target: #work-{{work.id}}-modal-delete" class="ourchive-icon-wrapper"><span id="work-{{work.id}}-header-delete-span" uk-icon="icon: ourchive-delete;ratio:.75" title="{% translate 'Delete Work' %} {{ work.id }}"></span></a>
-		            {% include "delete_modal.html" with object='work' object_id=work.id %}
-		        </div>
-		        {% endif %}
-	        </div>
-	    </div>
-	    {% if work.summary or work.attributes or work.tags %}<div class="uk-card-body ourchive-card-body uk-padding-small" id="work-{{work.id}}-tile-card-body">
-	        {% if work.summary %}<p id="work-{{work.id}}-tile-summary-p" class="uk-margin-remove-vertical">{% autoescape off %}{{ work.summary }}{% endautoescape %}</p>{% endif %}
-	        {% if work.attributes %}{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}{% endif %}
-		    {% if work.tags.items %}{% include "tag_partial.html" with obj_name='work' tags=work.tags.items %}{% endif %}
-	    </div>{% endif %}
-	    <div class="uk-card-footer ourchive-card-footer uk-padding-remove" id="work-{{work.id}}-tile-footer-parent">
-	        <div class="uk-width-1-1 uk-padding-small uk-margin-small">{% include 'work_metadata.html' %}</div>
-	    </div>
-
-	</div>  
-</div> 
+<div class="border shadow-sm p-3" id="work-{{work.id}}-tile-container" data-testid="work-tile">
+    <div class="row">
+        <div class="col-md-4 col-12" id="work-{{work.id}}-tile-card">
+            <!-- title, author, work type, 1 tag/attribute type, cover -->
+            <p id="work-{{work.id}}-tile-title" class="fs-3 mb-2"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}" data-testid="work-tile-title">{{work.title}}</a></p>
+            <p class="fs-4" id="work-{{ work.id }}-creators>">By {% for user in work.users %}<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="work-{{work.id}}-user-link" data-testid="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="work-{{work.id}}-user-link" data-testid="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>
+                    {% endfor %}
+            </p>
+            <p class="fw-light" id="work-{{ work.id }}-type">{{ work.work_type_name|default_if_none:'' }}</p>
+            <p class="fw-light fst-italic" id="work-metadata-language">{% for language in work.languages_readonly %}{{ language.display_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+            <!-- TODO: ADD CLICK TO EXPAND -->
+            {% if work.cover_url != "None" and work.cover_url is not None and work.cover_url != "" %}
+            <img class="img-fluid w-75" alt="{{work.cover_alt_text}}" src="{{work.cover_url}}" id="work-{{work.id}}-tile-image">
+            {% endif %}
+        </div>
+        <div class="col-md-8 col-12 mt-md-0 mt-4" id="work-{{work.id}}-info-card">
+            <!-- series/anthology, summary, tag/attribute group 1, 2, and 3 -->
+            <div class="osm-container" id="show-summary-{{ work.id }}">
+                <div class="collapse show chive-rich-text" id="work-{{work.id}}-tile-summary-p">{% autoescape off %}{{ work.summary|truncatechars:500 }}{% endautoescape %}</div>
+                {% if work.summary|length > 500 %}<div class="collapse chive-rich-text" id="work-{{work.id}}-tile-summary-p">{% autoescape off %}{{ work.summary }}{% endautoescape %}</div>
+                <a data-bs-toggle="collapse" aria-expanded="false" aria-controls="work-{{work.id}}-tile-summary-p" id="more-btn-summary-{{ work.id }}" class="link-underline link-underline-opacity-0 collapsed" href="#work-{{work.id}}-tile-summary-p">
+                    <span class="oc-show-more">{% translate '+ Show More' %}</span>
+                    <span class="oc-show-less">{% translate '- Show Less' %}</span>
+                </a>{% endif %}
+            </div>
+            <div class="osm-container {% if not work.anthologies and not work.series %}mt-3{% endif %}" id="show-tags-{{ work.id }}">
+                {% if not work.anthologies and not work.series and work.summary %}
+                    <hr class="ourchive-hr"/>
+                {% endif %}
+                {% if work.attributes %}{% include "object_attributes.html" with object='work' object_id=work.id attributes=work.attributes %}{% endif %}
+                {% if work.tags %}{% include "tag_partial.html" with obj_name='work' tags=work.tags %}{% endif %}
+            </div>
+            {% if work.series %}
+                <hr class="ourchive-hr"/>
+                <p id="work-metadata-series">{% blocktranslate with series_num=work.series_num %}Part {{ series_num }} of {% endblocktranslate %}<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{% url 'fe-series' work.series.id%}">{{work.series.title}}</a></p>
+                <hr class="ourchive-hr"/>
+            {% endif %}
+            {% if work.anthologies %}
+                    {% if not work.series and work.summary %}
+                        <hr class="ourchive-hr"/>
+                    {% endif %}
+                    <p id="work-metadata-series">{% translate 'Part of' %} {% for anthology in work.anthologies %}<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{% url 'fe-anthology' anthology.id%}">{{anthology.anthology}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                    <hr class="ourchive-hr"/>
+            {% endif %}
+        </div>
+        <div class="mt-3 border-top" id="work-{{ work.id }}-list-meta">
+            <!-- language, complete status, updated, chapters, word count, comments, fingerguns -->
+            {% include 'work_metadata.html' %}
+        </div>
+    </div>
+</div>

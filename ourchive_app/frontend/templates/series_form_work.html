@@ -1,0 +1,9 @@
+{% load i18n %}
+<div id="work-{{work.id}}-card">
+    <div id="work-{{work.id}}-sortable">
+        <i class="bi bi-list"></i><a href="{% url 'fe-work-view' work.id %}" title="{{work.title}}" target="_blank" class="ms-1">{{work.title}}</a> (<a title="{% translate 'Remove from series' %} {{ work.id }}" id="work-{{work.id}}-delete-link" href="#" data-bs-toggle="modal" data-bs-target="#work-series-{{work.id}}-modal-delete">{% translate 'Remove' %}</a>)
+    </div>
+</div>
+<input type="hidden" class="series-tracker" id="work_{{work.id}}" name="work_series_num_{{work.id}}" value="{{work.series_num}}">
+<input type="hidden" id="works_{{work.id}}" name="workidstoadd_{{work.id}}" value="workidstoadd_{{work.id}}"/>
+{% include "delete_modal.html" with object='work-series' parent_object_id=series.id object_id=work.id delete_verb="Remove" delete_msg="Are you sure you want to remove this work from the series?" handle_js=True %}

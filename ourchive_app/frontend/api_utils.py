@@ -3,11 +3,13 @@ from django.conf import settings
 import logging
 import json
 from django.utils.translation import gettext as _
+from requests import JSONDecodeError
 
 logger = logging.getLogger(__name__)
 
+
 class ResponseInfo():
-	status_code = None 
+	status_code = None
 	message = None
 	type_label = None
 
@@ -15,6 +17,7 @@ class ResponseInfo():
 		self.status_code = status_code
 		self.message = message
 		self.type_label = type_label
+
 
 class ResponseFull():
 	response_data = {}
@@ -48,7 +51,10 @@ def get_200s_message(status_code, object_name, html_obj_name) -> tuple[str, str]
 
 def get_400s_message(status_code, object_name, html_obj_name, response=None) -> tuple[str, str]:
 	if status_code == 400:
-		content_json = response.json()
+		try:
+			content_json = response.json()
+		except JSONDecodeError:
+			content_json = {}
 		if 'status_code' in content_json:
 			content_json.pop('status_code')
 		error_string = ""

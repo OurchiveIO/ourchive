@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-25 16:07-0600\n"
+"POT-Creation-Date: 2024-07-03 08:35-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,62 +18,88 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: api/views.py:157
+#: api/serializers.py:882
+msgid "Work Pending Approval"
+msgstr ""
+
+#: api/serializers.py:1148
+msgid "Collection Pending Approval"
+msgstr ""
+
+#: api/serializers.py:1262
+msgid "Cannot add draft work to collection."
+msgstr ""
+
+#: api/serializers.py:1427
+msgid "Anthology Pending Approval"
+msgstr ""
+
+#: api/views.py:164
 msgid "User does not have permission to upload images."
 msgstr ""
 
-#: api/views.py:160
+#: api/views.py:167
 msgid "User does not have permission to upload audio."
 msgstr ""
 
-#: api/views.py:163
+#: api/views.py:170
 msgid "User does not have permission to upload video."
 msgstr ""
 
-#: api/views.py:190
+#: api/views.py:197
 msgid "Invitation has already been used. Please request a new invite link."
 msgstr ""
 
-#: api/views.py:205
+#: api/views.py:212
 msgid "New Registration Request"
 msgstr ""
 
-#: api/views.py:206
+#: api/views.py:213
 msgid ""
 "You've received a new registration request for Ourchive. Go to 'Invitations' "
 "in your admin site to review."
 msgstr ""
 
-#: api/views.py:358 api/views.py:380
-msgid "type_to_remove must be in POST request and must be work or collection."
+#: api/views.py:381 api/views.py:406
+msgid ""
+"type_to_remove must be in POST request and must be work, anthology or "
+"collection."
 msgstr ""
 
-#: api/views.py:360 api/views.py:382
+#: api/views.py:383 api/views.py:408
 #, python-brace-format
 msgid "Approval having id {approval_id} does not exist."
 msgstr ""
 
-#: api/views.py:362 api/views.py:384
+#: api/views.py:385 api/views.py:410
 msgid "Request user is not record user."
 msgstr ""
 
-#: api/views.py:364
+#: api/views.py:387
 msgid "Association removed."
 msgstr ""
 
-#: api/views.py:387
+#: api/views.py:413
 msgid "Association approved."
 msgstr ""
 
-#: api/views.py:1064
+#: api/views.py:433
+msgid "Cocreators approved."
+msgstr ""
+
+#: api/views.py:450
+msgid "Cocreators rejected."
+msgstr ""
+
+#: api/views.py:1198
 msgid "Missing field: collection_id and work_id required for POST request."
 msgstr ""
 
-#: api/views.py:1068
+#: api/views.py:1202
 msgid "Collection or work not found."
 msgstr ""
 
-#: api/views.py:1070
+#: api/views.py:1204
 msgid "You do not have permission to modify this collection"
 msgstr ""
 
@@ -104,31 +130,31 @@ msgstr ""
 msgid "Work Imports Processed"
 msgstr ""
 
-#: etl/ao3/work_import.py:444
+#: etl/ao3/work_import.py:445
 msgid ""
 "Imported from Archive of Our Own. Original work id: {self.import_job.work_id "
 "if self.import_job else _(\"Unknown Work ID\")}."
 msgstr ""
 
-#: etl/ao3/work_import.py:467
+#: etl/ao3/work_import.py:468
 msgid "Your work import was not successfully processed."
 msgstr ""
 
-#: etl/ao3/work_import.py:470 etl/ao3/work_import.py:480
+#: etl/ao3/work_import.py:471 etl/ao3/work_import.py:481
 msgid "Work Import Processed"
 msgstr ""
 
-#: etl/ao3/work_import.py:481
+#: etl/ao3/work_import.py:482
 msgid ""
 "Your work import has been processed. You can view your works in your profile."
 msgstr ""
 
-#: etl/export/chive_export.py:112
+#: etl/export/chive_export.py:119
 #, python-brace-format
 msgid "Export job for {job.user} failed. Check logs for errors."
 msgstr ""
 
-#: etl/export/chive_export.py:117
+#: etl/export/chive_export.py:124
 #, fuzzy
 #| msgid ""
 #| "An error has occurred while reporting this user. Please contact your "
@@ -140,11 +166,11 @@ msgstr ""
 "An error has occurred while reporting this user. Please contact your "
 "administrator."
 
-#: etl/export/chive_export.py:124
+#: etl/export/chive_export.py:131
 msgid "Chive Export Failed"
 msgstr ""
 
-#: etl/export/chive_export.py:133
+#: etl/export/chive_export.py:140
 #, python-brace-format
 msgid ""
 "Export job for {job.user} complete. Export works: {job.export_works} Export "
@@ -152,55 +178,55 @@ msgid ""
 "export_collections}"
 msgstr ""
 
-#: etl/export/chive_export.py:138
+#: etl/export/chive_export.py:145
 msgid ""
 "Your export request has been processed. You can view your export files in "
 "your profile."
 msgstr ""
 
-#: etl/export/chive_export.py:145
+#: etl/export/chive_export.py:152
 msgid "Chive Exports Processed"
-msgstr ""
-
-#: frontend/api_utils.py:42
-#, python-brace-format
-msgid "{object_name}(s) updated successfully."
 msgstr ""
 
 #: frontend/api_utils.py:44
 #, python-brace-format
-msgid "{object_name}(s) created successfully."
+msgid "{object_name}(s) updated successfully."
 msgstr ""
 
 #: frontend/api_utils.py:46
 #, python-brace-format
+msgid "{object_name}(s) created successfully."
+msgstr ""
+
+#: frontend/api_utils.py:48
+#, python-brace-format
 msgid "{object_name}(s) deleted successfully."
 msgstr ""
 
-#: frontend/api_utils.py:64
+#: frontend/api_utils.py:66
 #, python-brace-format
 msgid "Bad request. Please address the following errors: {error_string}"
 msgstr ""
 
-#: frontend/api_utils.py:66
+#: frontend/api_utils.py:68
 #, python-brace-format
 msgid ""
 "You are not authorized to access this {object_name}. Please contact your "
 "administrator for more information."
 msgstr ""
 
-#: frontend/api_utils.py:68
+#: frontend/api_utils.py:70
 #, python-brace-format
 msgid ""
 "We could not find this {object_name}. You may not have access to it, or it "
 "may not exist."
 msgstr ""
 
-#: frontend/api_utils.py:73
+#: frontend/api_utils.py:75
 msgid "An unknown error occurred."
 msgstr ""
 
-#: frontend/api_utils.py:77
+#: frontend/api_utils.py:79
 #, fuzzy, python-brace-format
 #| msgid ""
 #| "An error has occurred while reporting this user. Please contact your "
@@ -212,35 +238,43 @@ msgstr ""
 "An error has occurred while reporting this user. Please contact your "
 "administrator."
 
-#: frontend/templates/account_form.html:46
+#: frontend/templates/account_form.html:47
 msgid "Export Chives"
 msgstr ""
 
-#: frontend/templates/account_form.html:47
+#: frontend/templates/account_form.html:48
 msgid ""
 "To generate a chive export, click below. This data is in beta format (CSVs) "
 "and should not be used as a backup for your work. Additionally, to preserve "
 "your privacy, please note that only public chives are exported."
 msgstr ""
 
-#: frontend/templates/account_form.html:54
+#: frontend/templates/account_form.html:55
 msgid "Export works"
 msgstr ""
 
-#: frontend/templates/account_form.html:55
+#: frontend/templates/account_form.html:56
 msgid "Export bookmarks"
 msgstr ""
 
-#: frontend/templates/account_form.html:56
+#: frontend/templates/account_form.html:57
 msgid "Export collections"
 msgstr ""
 
-#: frontend/templates/account_form.html:65
+#: frontend/templates/account_form.html:58
+msgid "Export series"
+msgstr ""
+
+#: frontend/templates/account_form.html:59
+msgid "Export anthologies"
+msgstr ""
+
+#: frontend/templates/account_form.html:68
 msgid "Click to download existing archive"
 msgstr ""
 
 #: frontend/templates/admin/rich_text_content_page.html:19
-#: frontend/templates/index.html:175
+#: frontend/templates/index_sidenav.html:5
 msgid "Home"
 msgstr "Home"
 
@@ -255,134 +289,343 @@ msgid_plural "Please correct the errors below."
 msgstr[0] "Please correct the error below."
 msgstr[1] "Please correct the errors below."
 
-#: frontend/templates/bookmark.html:21
-msgid "bookmarked by"
+#: frontend/templates/anthologies_list.html:3
+#: frontend/templates/index_navbar.html:116 frontend/templates/user.html:52
+#: frontend/templates/user_subscriptions.html:18
+#: frontend/templates/user_subscriptions.html:43
+#: frontend/templates/work_tile.html:88
+msgid "Anthologies"
 msgstr ""
 
-#: frontend/templates/bookmark_collection_autocomplete.html:9
-msgid "No works found"
+#: frontend/templates/anthologies_list.html:8
+#, python-format
+msgid "Anthologies by %(user)s "
 msgstr ""
 
-#: frontend/templates/bookmark_collection_form.html:121
-msgid "Collection Title"
+#: frontend/templates/anthology.html:4
+msgid "Anthology"
 msgstr ""
 
-#: frontend/templates/bookmark_collection_form.html:126
-#: frontend/templates/work_form.html:108
-msgid "Co-creators"
+#: frontend/templates/anthology.html:13 frontend/templates/anthology.html:41
+#: frontend/templates/bookmark_collection.html:28
+#: frontend/templates/bookmark_collection.html:65
+#: frontend/templates/index_body.html:56
+msgid "by"
 msgstr ""
 
-#: frontend/templates/bookmark_collection_form.html:133
-msgid "Collection user"
-msgstr ""
-
-#: frontend/templates/bookmark_collection_form.html:154
-msgid "Collection header help"
-msgstr ""
-
-#: frontend/templates/bookmark_collection_form.html:155
-msgid ""
-"This image will show directly below site nav. We recommend a rectangular "
-"image with width:height ratio of 2:1 or higher."
-msgstr ""
-"This image will show directly below site nav. We recommend a rectangular "
-"image with width:height ratio of 2:1 or higher."
-
-#: frontend/templates/bookmark_collection_form.html:180
-msgid "Draft help"
-msgstr ""
-
-#: frontend/templates/bookmark_collection_form.html:181
-#: frontend/templates/bookmark_form.html:61
-#: frontend/templates/chapter_form_body.html:14
-#: frontend/templates/work_form.html:138
-msgid ""
-"A draft will not be seen by any user except you. You can publish your drafts "
-"at any time."
-msgstr ""
-"A draft will not be seen by any user except you. You can publish your drafts "
-"at any time."
-
-#: frontend/templates/bookmark_collection_form.html:185
-msgid "Draft checkbox"
-msgstr ""
-
-#: frontend/templates/bookmark_collection_form.html:193
-msgid "Collection created on"
-msgstr ""
-
-#: frontend/templates/bookmark_collection_form.html:201
-#: frontend/templates/bookmark_collection_form.html:202
-msgid "Collection updated on"
-msgstr ""
-
-#: frontend/templates/bookmark_collection_form.html:210
-#: frontend/templates/work_form.html:177
-msgid "Comment settings"
-msgstr ""
-
-#: frontend/templates/bookmark_collection_form.html:220
-msgid "Tags help"
-msgstr ""
-
-#: frontend/templates/bookmark_collection_form.html:221
-#: frontend/templates/bookmark_form.html:111
-#: frontend/templates/work_form.html:216
-msgid ""
-"Tags are used in searching and filtering. Tags let other people find your "
-"work, so don't hesitate to be creative! Existing tags will be shown in a "
-"dropdown after you start typing."
-msgstr ""
-"Tags are used in searching and filtering. Tags let other people find your "
-"work, so don't hesitate to be creative! Existing tags will be shown in a "
-"dropdown after you start typing."
-
-#: frontend/templates/bookmark_collection_form.html:228
-#: frontend/templates/index.html:89 frontend/templates/index.html:176
-#: frontend/templates/user_subscriptions.html:15
-#: frontend/templates/user_subscriptions.html:39
+#: frontend/templates/anthology.html:37
+#: frontend/templates/anthology_form.html:241
+#: frontend/templates/bookmark_collection.html:61
+#: frontend/templates/bookmark_collection_form.html:244
+#: frontend/templates/index_navbar.html:114 frontend/templates/series.html:34
+#: frontend/templates/series_form.html:118 frontend/templates/user.html:48
+#: frontend/templates/user_subscriptions.html:16
+#: frontend/templates/user_subscriptions.html:41
 msgid "Works"
 msgstr ""
 
-#: frontend/templates/bookmark_collection_form.html:236
+#: frontend/templates/anthology_autocomplete.html:9
+#, fuzzy
+#| msgid "User not found."
+msgid "No anthology found"
+msgstr "User not found."
+
+#: frontend/templates/anthology_form.html:126
+#: frontend/templates/series_form.html:83
+msgid "Title"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:129
+msgid "Anthology Title"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:134
+#: frontend/templates/bookmark_collection_form.html:129
+#: frontend/templates/work_form.html:160
+msgid "Co-creators"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:136
+#: frontend/templates/bookmark_collection_form.html:131
+#: frontend/templates/work_form.html:162
+msgid "Pending cocreators"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:142
+msgid "Anthology user"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:154
+#: frontend/templates/series_form.html:108
+#: frontend/templates/work_form.html:182
+msgid "Complete?"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:157
+msgid "Anthology complete toggle"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:162
+#: frontend/templates/series_form.html:91
+msgid "Post Date"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:165
+msgid "Anthology created on"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:170
+#: frontend/templates/series_form.html:99
+msgid "Update Date"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:173
+#: frontend/templates/anthology_form.html:174
+msgid "Anthology updated on"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:179
+#: frontend/templates/anthology_metadata.html:20
+#: frontend/templates/bookmark_collection_form.html:149
+#: frontend/templates/bookmark_collection_metadata.html:24
+#: frontend/templates/bookmark_form.html:83
+#: frontend/templates/bookmark_metadata.html:16
+#: frontend/templates/work_form.html:227
+msgid "Languages"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:192
+msgid "Cover"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:192
+msgid "Anthology cover help"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:193
+#: frontend/templates/anthology_form.html:216
+msgid "This image will show on your anthology and on the list view."
+msgstr ""
+
+#: frontend/templates/anthology_form.html:197
+msgid "Toggle cover"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:207
+msgid "Cover Alt Text"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:210
+msgid "Cover alt text"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:215
+msgid "Header"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:215
+msgid "Anthology header help"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:220
+msgid "Toggle header"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:230
+msgid "Header Alt Text"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:233
+msgid "Header alt text"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:239
+#: frontend/templates/series_form.html:116
+msgid "Details"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:269
+#: frontend/templates/bookmark_collection_form.html:252
+#: frontend/templates/series_form.html:146
 msgid "Add Work"
 msgstr ""
 
-#: frontend/templates/bookmark_collection_form.html:236
+#: frontend/templates/anthology_form.html:269
+#: frontend/templates/bookmark_collection_form.html:252
+#: frontend/templates/series_form.html:146
 msgid "Work help"
 msgstr ""
 
-#: frontend/templates/bookmark_collection_form.html:237
+#: frontend/templates/anthology_form.html:270
+#: frontend/templates/bookmark_collection_form.html:253
+#: frontend/templates/series_form.html:147
 #, fuzzy
 #| msgid "Search for your bookmarks by title."
 msgid "Search for works by title."
 msgstr "Search for your bookmarks by title."
 
-#: frontend/templates/bookmark_collection_metadata.html:4
+#: frontend/templates/anthology_form.html:285
+msgid "Anthology Tags"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:285
+msgid "Anthology tags help"
+msgstr ""
+
+#: frontend/templates/anthology_form.html:286
+#, fuzzy
+#| msgid ""
+#| "Tags are used in searching and filtering. Tags let other people find your "
+#| "work, so don't hesitate to be creative! Existing tags will be shown in a "
+#| "dropdown after you start typing."
+msgid ""
+"Tags are used in searching and filtering. Tags let other people find your "
+"anthology, so don't hesitate to be creative! Existing tags will be shown in "
+"a dropdown after you start typing."
+msgstr ""
+"Tags are used in searching and filtering. Tags let other people find your "
+"work, so don't hesitate to be creative! Existing tags will be shown in a "
+"dropdown after you start typing."
+
+#: frontend/templates/anthology_form_work.html:6
+#: frontend/templates/series_form_work.html:6
+msgid "Remove from series"
+msgstr ""
+
+#: frontend/templates/anthology_form_work.html:6
+#: frontend/templates/series_form_work.html:6
+msgid "Remove"
+msgstr ""
+
+#: frontend/templates/anthology_metadata.html:3
+#: frontend/templates/index_search_filter.html:70
+#: frontend/templates/series_metadata.html:3
+#: frontend/templates/user_saved_searches.html:43
+msgid "Status"
+msgstr ""
+
+#: frontend/templates/anthology_metadata.html:3
+#: frontend/templates/bookmark_collection_metadata.html:3
+#: frontend/templates/index_search_filter.html:73
+#: frontend/templates/series_metadata.html:3
+#: frontend/templates/user_saved_searches.html:46
 #: frontend/templates/work_metadata.html:3
 msgid "Complete"
 msgstr ""
 
-#: frontend/templates/bookmark_collection_metadata.html:4
+#: frontend/templates/anthology_metadata.html:3
+#: frontend/templates/bookmark_collection_metadata.html:3
+#: frontend/templates/index_search_filter.html:72
+#: frontend/templates/series_metadata.html:3
+#: frontend/templates/user_saved_searches.html:45
 #: frontend/templates/work_metadata.html:3
 msgid "Incomplete"
 msgstr ""
 
-#: frontend/templates/bookmark_collection_metadata.html:11
+#: frontend/templates/anthology_metadata.html:10
+#: frontend/templates/bookmark_collection_metadata.html:17
+#: frontend/templates/bookmark_metadata.html:3
+#: frontend/templates/chapter.html:47 frontend/templates/news_detail.html:21
+#: frontend/templates/news_tile.html:17
+#: frontend/templates/series_metadata.html:10
+#: frontend/templates/work_metadata.html:4
+msgid "Updated"
+msgstr ""
+
+#: frontend/templates/bookmark.html:22
+msgid "bookmarked by"
+msgstr ""
+
+#: frontend/templates/bookmark_collection.html:4
+#, fuzzy
+#| msgid "User not found."
+msgid "Bookmark Collection"
+msgstr "User not found."
+
+#: frontend/templates/bookmark_collection_autocomplete.html:9
+msgid "No works found"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_form.html:124
+msgid "Collection Title"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_form.html:137
+msgid "Collection user"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_form.html:170
+msgid "Collection header help"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_form.html:171
+msgid ""
+"This image will show directly below site nav. We recommend a rectangular "
+"image with width:height ratio of 2:1 or higher."
+msgstr ""
+"This image will show directly below site nav. We recommend a rectangular "
+"image with width:height ratio of 2:1 or higher."
+
+#: frontend/templates/bookmark_collection_form.html:196
+msgid "Draft help"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_form.html:197
+#: frontend/templates/bookmark_form.html:64
+#: frontend/templates/chapter_form_body.html:14
+#: frontend/templates/work_form.html:191
+msgid ""
+"A draft will not be seen by any user except you. You can publish your drafts "
+"at any time."
+msgstr ""
+"A draft will not be seen by any user except you. You can publish your drafts "
+"at any time."
+
+#: frontend/templates/bookmark_collection_form.html:201
+msgid "Draft checkbox"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_form.html:209
+msgid "Collection created on"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_form.html:217
+#: frontend/templates/bookmark_collection_form.html:218
+msgid "Collection updated on"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_form.html:226
+#: frontend/templates/work_form.html:257
+msgid "Comment settings"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_form.html:236
+msgid "Tags help"
+msgstr ""
+
+#: frontend/templates/bookmark_collection_form.html:237
+#: frontend/templates/bookmark_form.html:126
+#: frontend/templates/work_form.html:296
+msgid ""
+"Tags are used in searching and filtering. Tags let other people find your "
+"work, so don't hesitate to be creative! Existing tags will be shown in a "
+"dropdown after you start typing."
+msgstr ""
+"Tags are used in searching and filtering. Tags let other people find your "
+"work, so don't hesitate to be creative! Existing tags will be shown in a "
+"dropdown after you start typing."
+
+#: frontend/templates/bookmark_collection_metadata.html:10
 #: frontend/templates/bookmark_metadata.html:9
-#: frontend/templates/work_metadata.html:27
+#: frontend/templates/work_metadata.html:7
 #, python-format
 msgid "Comments: %(cc)s"
 msgstr ""
 
-#: frontend/templates/bookmark_collection_metadata.html:18
-#: frontend/templates/bookmark_metadata.html:3
-#: frontend/templates/chapter.html:60 frontend/templates/work_metadata.html:9
-msgid "Updated"
-msgstr ""
-
 #: frontend/templates/bookmark_collection_modal.html:5
-msgid "Add this work to any of your 10 most recent collections."
+msgid ""
+"Add this work to one of your most recent collections. Only collections not "
+"containing this work are shown."
 msgstr ""
 
 #: frontend/templates/bookmark_collection_modal.html:10
@@ -398,40 +641,43 @@ msgstr ""
 
 #: frontend/templates/bookmark_collection_modal.html:25
 #: frontend/templates/collection_form_bookmark_modal_body.html:34
-#: frontend/templates/user_form.html:145
-#: frontend/templates/work_import_form.html:80
+#: frontend/templates/delete_modal.html:7
+#: frontend/templates/index_search_filter.html:163
+#: frontend/templates/series_form.html:76
+#: frontend/templates/series_form.html:163
+#: frontend/templates/user_form.html:163
+#: frontend/templates/work_import_form.html:81
 msgid "Cancel"
 msgstr ""
 
 #: frontend/templates/bookmark_collections.html:3
-#: frontend/templates/index.html:90 frontend/templates/index.html:143
-#: frontend/templates/index.html:177
-#: frontend/templates/user_subscriptions.html:14
-#: frontend/templates/user_subscriptions.html:39
+#: frontend/templates/index_navbar.html:113 frontend/templates/user.html:50
+#: frontend/templates/user_subscriptions.html:15
+#: frontend/templates/user_subscriptions.html:41
 msgid "Collections"
 msgstr ""
 
-#: frontend/templates/bookmark_collections.html:7
+#: frontend/templates/bookmark_collections.html:8
 msgid "Collections by"
 msgstr ""
 
-#: frontend/templates/bookmark_form.html:71
+#: frontend/templates/bookmark_form.html:74
 msgid "A private bookmark will not be seen by anyone but you."
 msgstr ""
 
-#: frontend/templates/bookmark_form.html:83
+#: frontend/templates/bookmark_form.html:98
 msgid "Bookmark created on"
 msgstr ""
 
-#: frontend/templates/bookmark_form.html:91
+#: frontend/templates/bookmark_form.html:106
 msgid "Bookmark updated on original"
 msgstr ""
 
-#: frontend/templates/bookmark_form.html:92
+#: frontend/templates/bookmark_form.html:107
 msgid "Bookmark updated on"
 msgstr ""
 
-#: frontend/templates/bookmark_form.html:120
+#: frontend/templates/bookmark_form.html:135
 msgid ""
 "You decide what a rating means. The number of stars are controlled by your "
 "admin."
@@ -439,10 +685,9 @@ msgstr ""
 "You decide what a rating means. The number of stars are controlled by your "
 "admin."
 
-#: frontend/templates/bookmark_tile.html:7 frontend/templates/chapter.html:26
-#: frontend/templates/chapter.html:85
+#: frontend/templates/bookmark_tile.html:7 frontend/templates/chapter.html:80
 #: frontend/templates/collection_form_bookmark_modal_body.html:9
-#: frontend/templates/work.html:30
+#: frontend/templates/work.html:59
 msgid "Bookmark"
 msgstr ""
 
@@ -450,63 +695,57 @@ msgstr ""
 msgid "comments"
 msgstr ""
 
-#: frontend/templates/bookmarks.html:7
+#: frontend/templates/bookmarks.html:8
 msgid "Bookmarks by"
 msgstr ""
 
-#: frontend/templates/chapter.html:18
-msgid "Publish"
+#: frontend/templates/change_password_done.html:3
+msgid "Password Changed"
 msgstr ""
 
-#: frontend/templates/chapter.html:20 frontend/templates/work.html:20
-msgid "Edit"
-msgstr ""
-
-#: frontend/templates/chapter.html:21 frontend/templates/work.html:21
-msgid "Delete"
-msgstr ""
-
-#: frontend/templates/chapter.html:27 frontend/templates/chapter.html:86
-#: frontend/templates/work.html:31
-msgid "Fingerguns"
-msgstr ""
-
-#: frontend/templates/chapter.html:29 frontend/templates/chapter.html:88
-#: frontend/templates/work.html:33
-msgid "Download"
-msgstr ""
-
-#: frontend/templates/chapter.html:37 frontend/templates/chapter.html:39
-#: frontend/templates/chapter.html:96 frontend/templates/chapter.html:98
-msgid "Comments"
-msgstr ""
-
-#: frontend/templates/chapter.html:60
+#: frontend/templates/chapter.html:48
 #, python-format
 msgid "%(wc)s Words"
 msgstr ""
 
-#: frontend/templates/chapter.html:60
+#: frontend/templates/chapter.html:49
 #, python-format
 msgid "Audio Length: %(al)s"
 msgstr ""
 
-#: frontend/templates/chapter.html:60
+#: frontend/templates/chapter.html:50
 #, python-format
 msgid "Image Size: %(imgs)s"
 msgstr ""
 
-#: frontend/templates/chapter.html:60
+#: frontend/templates/chapter.html:51
 #, python-format
 msgid "%(cc)s Comments"
 msgstr ""
 
-#: frontend/templates/chapter.html:65
-msgid "Nothing to see here..."
+#: frontend/templates/chapter.html:66
+msgid "Your browser does not support the HTML5 video tag."
 msgstr ""
 
-#: frontend/templates/chapter.html:77
-msgid "Your browser does not support the HTML5 video tag."
+#: frontend/templates/chapter.html:81 frontend/templates/work.html:60
+msgid "Fingerguns"
+msgstr ""
+
+#: frontend/templates/chapter.html:83 frontend/templates/work.html:62
+msgid "Download"
+msgstr ""
+
+#: frontend/templates/chapter.html:91 frontend/templates/chapter.html:93
+#: frontend/templates/work.html:71 frontend/templates/work.html:73
+msgid "Comments"
+msgstr ""
+
+#: frontend/templates/chapter.html:97 frontend/templates/pagination.html:5
+msgid "Previous"
+msgstr ""
+
+#: frontend/templates/chapter.html:98 frontend/templates/pagination.html:6
+msgid "Next"
 msgstr ""
 
 #: frontend/templates/chapter_form_body.html:27
@@ -519,7 +758,7 @@ msgid "Chapter updated on"
 msgstr ""
 
 #: frontend/templates/chapter_form_body.html:49
-#: frontend/templates/work_form.html:225
+#: frontend/templates/work_form.html:305
 msgid "Notes"
 msgstr ""
 
@@ -620,6 +859,29 @@ msgstr ""
 msgid "Confirm Password"
 msgstr ""
 
+#: frontend/templates/delete_modal.html:4
+msgid "Confirm Delete"
+msgstr ""
+
+#: frontend/templates/delete_modal.html:4
+msgid "Confirm"
+msgstr ""
+
+#: frontend/templates/delete_modal.html:5
+msgid "Are you sure you want to delete this"
+msgstr ""
+
+#: frontend/templates/delete_modal.html:11
+#: frontend/templates/delete_modal.html:13
+#: frontend/templates/delete_modal.html:16
+#: frontend/templates/delete_modal.html:21
+#: frontend/templates/delete_modal.html:23
+#: frontend/templates/delete_modal.html:26
+#: frontend/templates/user_saved_searches.html:113
+#: frontend/templates/work.html:54
+msgid "Delete"
+msgstr ""
+
 #: frontend/templates/edit_tag_autocomplete.html:10
 #, fuzzy
 #| msgid "User not found."
@@ -635,69 +897,200 @@ msgstr ""
 "This tag type is administrated by your site admin(s). This means that you "
 "can select an existing %(type)s, but you cannot create a new one."
 
-#: frontend/templates/index.html:138 frontend/views.py:969
-msgid "New Collection"
+#: frontend/templates/file_upload.html:7
+msgid "Delete file"
 msgstr ""
 
-#: frontend/templates/index.html:140
-msgid "My Chives"
+#: frontend/templates/index_body.html:39
+msgid "News"
 msgstr ""
 
-#: frontend/templates/index.html:146
-msgid "Subscriptions"
-msgstr ""
-
-#: frontend/templates/index.html:147
-msgid "Profile"
-msgstr ""
-
-#: frontend/templates/index.html:149
-msgid "Edit Profile"
-msgstr ""
-
-#: frontend/templates/index.html:150
-msgid "Edit Account"
-msgstr ""
-
-#: frontend/templates/index.html:151 frontend/templates/user.html:19
-#: frontend/templates/user_block_list.html:6
-msgid "Blocklist"
-msgstr ""
-
-#: frontend/templates/index.html:153
-msgid "Import Work(s)"
-msgstr ""
-
-#: frontend/templates/index.html:155
-msgid "Import Status"
-msgstr ""
-
-#: frontend/templates/index.html:204
+#: frontend/templates/index_body.html:53
 msgid "Recent Works"
 msgstr ""
 
-#: frontend/templates/index.html:207
-msgid "by"
+#: frontend/templates/index_navbar.html:41
+msgid "Filters"
 msgstr ""
 
-#: frontend/templates/index.html:214
-msgid "Top Tags"
+#: frontend/templates/index_navbar.html:97
+#: frontend/templates/index_sidenav.html:19
+msgid "Sign In"
 msgstr ""
 
-#: frontend/templates/notifications.html:8
+#: frontend/templates/index_navbar.html:103
+#: frontend/templates/index_sidenav.html:25
+msgid "Account"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:106
+#: frontend/templates/index_sidenav.html:27 frontend/views.py:1291
+msgid "New Collection"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:108
+#: frontend/templates/index_sidenav.html:29 frontend/views.py:2009
+#: frontend/views.py:2017
+msgid "New Series"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:109
+#: frontend/templates/index_sidenav.html:30 frontend/views.py:2110
+#: frontend/views.py:2125
+msgid "New Anthology"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:110
+#: frontend/templates/index_sidenav.html:31
+msgid "My Chives"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:112 frontend/templates/user.html:49
+#: frontend/templates/user_subscriptions.html:14
+#: frontend/templates/user_subscriptions.html:41
+msgid "Bookmarks"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:115
+#: frontend/templates/series_list.html:3 frontend/templates/user.html:51
+#: frontend/templates/user_subscriptions.html:17
+#: frontend/templates/user_subscriptions.html:42
+#: frontend/templates/work_form.html:239
+msgid "Series"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:118
+#: frontend/templates/index_sidenav.html:32
+msgid "Subscriptions"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:119
+#: frontend/templates/index_sidenav.html:33
+msgid "Profile"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:121
+#: frontend/templates/index_sidenav.html:35
+#: frontend/templates/user_form.html:14
+msgid "User Settings"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:122
+#: frontend/templates/index_sidenav.html:36
+msgid "Account Settings"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:123
+#: frontend/templates/index_sidenav.html:37
+msgid "Approvals"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:124
+#: frontend/templates/index_sidenav.html:38 frontend/templates/user.html:20
+#: frontend/templates/user_block_list.html:7
+msgid "Blocklist"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:126
+#: frontend/templates/index_sidenav.html:40
+msgid "Import Work(s)"
+msgstr ""
+
+#: frontend/templates/index_navbar.html:128
+#: frontend/templates/index_sidenav.html:42
+msgid "Import Status"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:16
+#: frontend/templates/user_saved_searches.html:4
+#: frontend/templates/user_saved_searches.html:10
+msgid "Saved Searches"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:27
+msgid "Search Term"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:33
+#: frontend/templates/user_saved_searches.html:32
+msgid "Language"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:61
+msgid "Search for languages..."
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:74
+#: frontend/templates/user_saved_searches.html:47
+msgid "Any"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:79
+#: frontend/templates/user_saved_searches.html:52
+msgid "Work Type"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:105
+#: frontend/templates/user_saved_searches.html:66
+msgid "Word Count"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:107
+#: frontend/templates/user_saved_searches.html:68
+msgid "Between"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:108
+#: frontend/templates/user_saved_searches.html:69
+msgid "and"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:113
+#: frontend/templates/user_saved_searches.html:74
+msgid "Tags"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:126
+#: frontend/templates/index_search_filter.html:143
+#: frontend/templates/user_saved_searches.html:87
+#: frontend/templates/user_saved_searches.html:104
+msgid "Search for tags..."
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:151
+msgid "Apply Filters"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:152
+msgid "Save Search"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:159
+msgid "Enter a name for this search:"
+msgstr ""
+
+#: frontend/templates/index_search_filter.html:164
+msgid "Save"
+msgstr ""
+
+#: frontend/templates/login.html:42
+msgid "Create an account"
+msgstr ""
+
+#: frontend/templates/news_detail.html:27
+msgid "All news"
+msgstr ""
+
+#: frontend/templates/notifications.html:9
 msgid "Mark all read"
 msgstr ""
 
-#: frontend/templates/notifications.html:12
-msgid "You don't have any notifications yet."
+#: frontend/templates/notifications.html:10
+msgid "Delete all"
 msgstr ""
 
-#: frontend/templates/pagination.html:5
-msgid "Previous"
-msgstr ""
-
-#: frontend/templates/pagination.html:6
-msgid "Next"
+#: frontend/templates/notifications.html:14
+msgid "You don't have any notifications. When you do, they'll appear here."
 msgstr ""
 
 #: frontend/templates/register.html:22
@@ -712,12 +1105,67 @@ msgstr ""
 msgid "I have read and agree with the "
 msgstr ""
 
-#: frontend/templates/user.html:21
+#: frontend/templates/register.html:108
+msgid "By signing up, you affirm you are at least 13 years of age."
+msgstr ""
+
+#: frontend/templates/search_results_filters.html:50
+msgid "Save search with name"
+msgstr ""
+
+#: frontend/templates/series_autocomplete.html:9
+#, fuzzy
+#| msgid "User not found."
+msgid "No series found"
+msgstr "User not found."
+
+#: frontend/templates/series_form.html:78
+#: frontend/templates/series_form.html:164
+msgid "Submit"
+msgstr ""
+
+#: frontend/templates/series_form.html:86
+msgid "Series Title"
+msgstr ""
+
+#: frontend/templates/series_form.html:94
+msgid "Series created on"
+msgstr ""
+
+#: frontend/templates/series_form.html:102
+#: frontend/templates/series_form.html:103
+msgid "Series updated on"
+msgstr ""
+
+#: frontend/templates/series_form.html:111
+msgid "Series complete toggle"
+msgstr ""
+
+#: frontend/templates/series_form.html:151
+#, fuzzy
+#| msgid "Search for your bookmarks by title."
+msgid "Search for work..."
+msgstr "Search for your bookmarks by title."
+
+#: frontend/templates/series_form.html:157
+msgid "Description"
+msgstr ""
+
+#: frontend/templates/series_list.html:8
+#, python-format
+msgid "Series by %(user)s"
+msgstr ""
+
+#: frontend/templates/user.html:22
 msgid "Block"
 msgstr ""
 
-#: frontend/templates/user.html:26
+#: frontend/templates/user.html:27
 msgid "Subscribe"
+msgstr ""
+
+#: frontend/templates/user_anthology_subscriptions.html:3
+msgid "Anthology Subscriptions"
 msgstr ""
 
 #: frontend/templates/user_autocomplete.html:9
@@ -731,43 +1179,51 @@ msgid "Bookmark Subscriptions"
 msgstr ""
 
 #: frontend/templates/user_cocreation_approval.html:3
-#: frontend/templates/user_cocreation_approval.html:6
+#: frontend/templates/user_cocreation_approval.html:7
 msgid "Co-Creator Approvals"
 msgstr ""
 
-#: frontend/templates/user_cocreation_approval.html:8
+#: frontend/templates/user_cocreation_approval.html:9
 msgid ""
 "The following chives have you listed as a co-creator. You can approve or "
 "reject this relationship. If you reject it, you will be removed as a co-"
 "creator and will no longer be able to modify the chive."
 msgstr ""
 
-#: frontend/templates/user_cocreation_approval.html:10
+#: frontend/templates/user_cocreation_approval.html:11
+msgid "Approve all"
+msgstr ""
+
+#: frontend/templates/user_cocreation_approval.html:12
+msgid "Reject all"
+msgstr ""
+
+#: frontend/templates/user_cocreation_approval.html:14
 msgid "Nothing to approve."
 msgstr ""
 
-#: frontend/templates/user_cocreation_approval.html:17
+#: frontend/templates/user_cocreation_approval.html:21
 msgid "Creating User"
 msgstr ""
 
-#: frontend/templates/user_cocreation_approval.html:18
+#: frontend/templates/user_cocreation_approval.html:22
 msgid "Chive Title"
 msgstr ""
 
-#: frontend/templates/user_cocreation_approval.html:19
+#: frontend/templates/user_cocreation_approval.html:23
 msgid "Chive Type"
 msgstr ""
 
-#: frontend/templates/user_cocreation_approval.html:20
-#: frontend/templates/user_subscriptions.html:32
+#: frontend/templates/user_cocreation_approval.html:24
+#: frontend/templates/user_subscriptions.html:34
 msgid "Actions"
 msgstr ""
 
-#: frontend/templates/user_cocreation_approval.html:38
+#: frontend/templates/user_cocreation_approval.html:42
 msgid "Are you sure you want to remove yourself as a co-creator of this chive?"
 msgstr ""
 
-#: frontend/templates/user_cocreation_approval.html:56
+#: frontend/templates/user_cocreation_approval.html:60
 msgid ""
 "Are you sure you want to approve yourself as a co-creator of this chive?"
 msgstr ""
@@ -776,144 +1232,148 @@ msgstr ""
 msgid "Collection Subscriptions"
 msgstr ""
 
-#: frontend/templates/user_form.html:44
+#: frontend/templates/user_form.html:47
 msgid "Default content help"
 msgstr ""
 
-#: frontend/templates/user_form.html:45
+#: frontend/templates/user_form.html:48
 msgid ""
 "This determines the content a user sees first when visiting your profile."
 msgstr ""
 "This determines the content a user sees first when visiting your profile."
 
-#: frontend/templates/user_form.html:47
+#: frontend/templates/user_form.html:50
 msgid "Default content select"
 msgstr ""
 
-#: frontend/templates/user_form.html:70
+#: frontend/templates/user_form.html:73
 msgid "Default work type help"
 msgstr ""
 
-#: frontend/templates/user_form.html:71
+#: frontend/templates/user_form.html:74
 msgid "This determines the default work type shown on the work form."
 msgstr ""
 
-#: frontend/templates/user_form.html:73
+#: frontend/templates/user_form.html:76
 msgid "Default work type select"
 msgstr ""
 
-#: frontend/templates/user_form.html:82
+#: frontend/templates/user_form.html:85
+msgid "Default Languages"
+msgstr ""
+
+#: frontend/templates/user_form.html:109
 msgid "Collapse image fields help"
 msgstr ""
 
-#: frontend/templates/user_form.html:83
+#: frontend/templates/user_form.html:110
 msgid ""
 "If you select this, chapter image fields will be collapsed (but still "
 "accessible) by default when you create a chapter."
 msgstr ""
 
-#: frontend/templates/user_form.html:87
+#: frontend/templates/user_form.html:114
 msgid "Collapse image fields input"
 msgstr ""
 
-#: frontend/templates/user_form.html:93
+#: frontend/templates/user_form.html:120
 msgid "Collapse audio fields help"
 msgstr ""
 
-#: frontend/templates/user_form.html:94
+#: frontend/templates/user_form.html:121
 msgid ""
 "If you select this, chapter audio fields will be collapsed (but still "
 "accessible) by default when you create a chapter."
 msgstr ""
 
-#: frontend/templates/user_form.html:98
+#: frontend/templates/user_form.html:125
 msgid "Collapse audio fields input"
 msgstr ""
 
-#: frontend/templates/user_form.html:104
+#: frontend/templates/user_form.html:131
 msgid "Collapse video fields?"
 msgstr ""
 
-#: frontend/templates/user_form.html:104
+#: frontend/templates/user_form.html:131
 msgid "Collapse video fields help"
 msgstr ""
 
-#: frontend/templates/user_form.html:105
+#: frontend/templates/user_form.html:132
 msgid ""
 "If you select this, chapter video fields will be collapsed (but still "
 "accessible) by default when you create a chapter."
 msgstr ""
 
-#: frontend/templates/user_form.html:109
+#: frontend/templates/user_form.html:136
 msgid "Collapse video fields input"
 msgstr ""
 
-#: frontend/templates/user_form.html:115
+#: frontend/templates/user_form.html:142
 msgid "Collapse text fields help"
 msgstr ""
 
-#: frontend/templates/user_form.html:116
+#: frontend/templates/user_form.html:143
 msgid ""
 "If you select this, chapter text fields will be collapsed (but still "
 "accessible) by default when you create a chapter."
 msgstr ""
 
-#: frontend/templates/user_form.html:120
+#: frontend/templates/user_form.html:147
 msgid "Collapse text fields input"
 msgstr ""
 
-#: frontend/templates/user_form.html:125
+#: frontend/templates/user_form.html:152
 msgid "Copy work metadata help"
 msgstr ""
 
-#: frontend/templates/user_form.html:126
+#: frontend/templates/user_form.html:153
 msgid ""
 "If you select this, your bookmark of a work will be auto-populated with the "
 "work's title and tags. You can always remove or modify this data before "
 "saving your bookmark."
 msgstr ""
 
-#: frontend/templates/user_form.html:130
+#: frontend/templates/user_form.html:157
 msgid "Copy work metadata"
 msgstr ""
 
-#: frontend/templates/user_import_status.html:7 frontend/views.py:180
+#: frontend/templates/user_import_status.html:8 frontend/views.py:217
 msgid "Pending Imports"
 msgstr ""
 
-#: frontend/templates/user_import_status.html:9
+#: frontend/templates/user_import_status.html:10
 msgid "No pending imports found."
 msgstr ""
 
-#: frontend/templates/user_import_status.html:9
+#: frontend/templates/user_import_status.html:10
 msgid "Import works here."
 msgstr ""
 
-#: frontend/templates/user_import_status.html:14
+#: frontend/templates/user_import_status.html:15
 msgid "Work ID"
 msgstr ""
 
-#: frontend/templates/user_import_status.html:15
+#: frontend/templates/user_import_status.html:16
 msgid "Processing?"
 msgstr ""
 
-#: frontend/templates/user_import_status.html:16
+#: frontend/templates/user_import_status.html:17
 msgid "Created On"
 msgstr ""
 
-#: frontend/templates/user_import_status.html:23
+#: frontend/templates/user_import_status.html:24
 msgid "Processing"
 msgstr ""
 
-#: frontend/templates/user_import_status.html:23
+#: frontend/templates/user_import_status.html:24
 msgid "Queued for Import"
 msgstr ""
 
-#: frontend/templates/user_report_form.html:23
+#: frontend/templates/user_report_form.html:24
 msgid "The user you are reporting. They will not be notified of your report."
 msgstr "The user you are reporting. They will not be notified of your report."
 
-#: frontend/templates/user_report_form.html:31
+#: frontend/templates/user_report_form.html:32
 msgid ""
 "These reasons are configured by your admin. Pick the one that most closely "
 "matches why you are reporting this user."
@@ -921,11 +1381,29 @@ msgstr ""
 "These reasons are configured by your admin. Pick the one that most closely "
 "matches why you are reporting this user."
 
-#: frontend/templates/user_report_form.html:43
+#: frontend/templates/user_report_form.html:44
 msgid ""
 "Add any context for the report here. Reports are reviewed by site admins."
 msgstr ""
 "Add any context for the report here. Reports are reviewed by site admins."
+
+#: frontend/templates/user_saved_searches.html:13
+msgid ""
+"No users have been blocked. To block a user, navigate to their profile and "
+"click the \"block\" icon."
+msgstr ""
+
+#: frontend/templates/user_saved_searches.html:25
+msgid "Name"
+msgstr ""
+
+#: frontend/templates/user_saved_searches.html:112
+msgid "Update"
+msgstr ""
+
+#: frontend/templates/user_series_subscriptions.html:3
+msgid "Series Subscriptions"
+msgstr ""
 
 #: frontend/templates/user_subscribe_modal.html:4
 msgid "Subscribe to "
@@ -943,76 +1421,91 @@ msgstr ""
 msgid "Subscribe to works"
 msgstr ""
 
-#: frontend/templates/user_subscriptions.html:10
+#: frontend/templates/user_subscribe_modal.html:34
+msgid "Subscribe to series"
+msgstr ""
+
+#: frontend/templates/user_subscribe_modal.html:41
+msgid "Subscribe to anthologies"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:11
 msgid ""
 "Welcome to your subscriptions page. You can access your subscription feeds "
 "by clicking the links below, or manage your subscriptions in the table."
 msgstr ""
 
-#: frontend/templates/user_subscriptions.html:13
-#: frontend/templates/user_subscriptions.html:39
-msgid "Bookmarks"
-msgstr ""
-
-#: frontend/templates/user_subscriptions.html:16
-msgid "Anthologies"
-msgstr ""
-
-#: frontend/templates/user_subscriptions.html:16
-msgid "Coming Soon!"
-msgstr ""
-
-#: frontend/templates/user_subscriptions.html:22
+#: frontend/templates/user_subscriptions.html:24
 msgid ""
 "No subscriptions yet. To create a subscription, navigate to a user's profile "
 "and click the 'subscribe' button."
 msgstr ""
 
-#: frontend/templates/user_subscriptions.html:30
+#: frontend/templates/user_subscriptions.html:32
 msgid "User"
 msgstr ""
 
-#: frontend/templates/user_subscriptions.html:31
+#: frontend/templates/user_subscriptions.html:33
 msgid "Subscribed to"
 msgstr ""
 
-#: frontend/templates/user_subscriptions.html:50
+#: frontend/templates/user_subscriptions.html:53
 msgid "Unsubscribe All"
 msgstr ""
 
-#: frontend/templates/user_subscriptions.html:59
+#: frontend/templates/user_subscriptions.html:61
 msgid "Unsubscribe Bookmarks"
 msgstr ""
 
-#: frontend/templates/user_subscriptions.html:68
+#: frontend/templates/user_subscriptions.html:70
 msgid "Unsubscribe Collections"
 msgstr ""
 
-#: frontend/templates/user_subscriptions.html:77
+#: frontend/templates/user_subscriptions.html:79
 msgid "Unsubscribe Works"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:88
+msgid "Unsubscribe Series"
+msgstr ""
+
+#: frontend/templates/user_subscriptions.html:97
+msgid "Unsubscribe Anthology"
 msgstr ""
 
 #: frontend/templates/user_work_subscriptions.html:3
 msgid "Work Subscriptions"
 msgstr ""
 
-#: frontend/templates/work.html:19 frontend/templates/work_form.html:147
-msgid "Publish All"
+#: frontend/templates/work.html:38
+msgid "Chapters"
 msgstr ""
 
-#: frontend/templates/work.html:52
+#: frontend/templates/work.html:40
 msgid "View By Chapter"
 msgstr ""
 
-#: frontend/templates/work.html:54
+#: frontend/templates/work.html:42
 msgid "View Full"
 msgstr ""
 
-#: frontend/templates/work_form.html:83
+#: frontend/templates/work.html:45
+msgid "Chapter"
+msgstr ""
+
+#: frontend/templates/work.html:52 frontend/templates/work_form.html:200
+msgid "Publish All"
+msgstr ""
+
+#: frontend/templates/work.html:53
+msgid "Edit"
+msgstr ""
+
+#: frontend/templates/work_form.html:135
 msgid "Work type help"
 msgstr ""
 
-#: frontend/templates/work_form.html:84
+#: frontend/templates/work_form.html:136
 msgid ""
 "Work types are admin-configured. Select the one that best matches what kind "
 "of work you're posting."
@@ -1020,51 +1513,55 @@ msgstr ""
 "Work types are admin-configured. Select the one that best matches what kind "
 "of work you're posting."
 
-#: frontend/templates/work_form.html:87
+#: frontend/templates/work_form.html:139
 msgid "Work type dropdown"
 msgstr ""
 
-#: frontend/templates/work_form.html:103
+#: frontend/templates/work_form.html:155
 msgid "Work title input"
 msgstr ""
 
-#: frontend/templates/work_form.html:115
+#: frontend/templates/work_form.html:168
 msgid "Work user"
 msgstr ""
 
-#: frontend/templates/work_form.html:132
+#: frontend/templates/work_form.html:180
+msgid "Work Settings"
+msgstr ""
+
+#: frontend/templates/work_form.html:185
 msgid "Work complete toggle"
 msgstr ""
 
-#: frontend/templates/work_form.html:137 frontend/templates/work_form.html:147
+#: frontend/templates/work_form.html:190 frontend/templates/work_form.html:200
 msgid "Work draft help"
 msgstr ""
 
-#: frontend/templates/work_form.html:142
+#: frontend/templates/work_form.html:195
 msgid "Work draft toggle"
 msgstr ""
 
-#: frontend/templates/work_form.html:148
+#: frontend/templates/work_form.html:201
 msgid "Your work and all chapters will no longer be in draft state."
 msgstr ""
 
-#: frontend/templates/work_form.html:152
+#: frontend/templates/work_form.html:205
 msgid "Work publish all toggle"
 msgstr ""
 
-#: frontend/templates/work_form.html:160
+#: frontend/templates/work_form.html:213
 msgid "Work created on"
 msgstr ""
 
-#: frontend/templates/work_form.html:168 frontend/templates/work_form.html:169
+#: frontend/templates/work_form.html:221 frontend/templates/work_form.html:222
 msgid "Work updated on"
 msgstr ""
 
-#: frontend/templates/work_form.html:188
+#: frontend/templates/work_form.html:268
 msgid "Preferred export help"
 msgstr ""
 
-#: frontend/templates/work_form.html:189
+#: frontend/templates/work_form.html:269
 msgid ""
 "If you have a file for your work that you'd prefer users download, you can "
 "upload here and it will display at the top of the download list."
@@ -1072,226 +1569,253 @@ msgstr ""
 "If you have a file for your work that you'd prefer users download, you can "
 "upload here and it will display at the top of the download list."
 
-#: frontend/templates/work_form.html:215
+#: frontend/templates/work_form.html:295
+msgid "Work Tags"
+msgstr ""
+
+#: frontend/templates/work_form.html:295
 msgid "Work tags help"
 msgstr ""
 
-#: frontend/templates/work_form.html:232
+#: frontend/templates/work_form.html:300
+msgid "Work Details"
+msgstr ""
+
+#: frontend/templates/work_form.html:302
+msgid "Summary"
+msgstr ""
+
+#: frontend/templates/work_form.html:312
 msgid "Work Cover"
 msgstr ""
 
-#: frontend/templates/work_form.html:262
+#: frontend/templates/work_form.html:342
 msgid "Multichapter toggle"
 msgstr ""
 
-#: frontend/templates/work_form.html:295
+#: frontend/templates/work_form.html:375
 msgid "Edit chapter"
 msgstr ""
 
-#: frontend/templates/work_form.html:295
+#: frontend/templates/work_form.html:375
 msgid "Delete chapter"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:14
+#: frontend/templates/work_import_form.html:15
 msgid ""
 "Input an AO3 username or single work (ID or URL) below. The work ID can be "
 "found in the work URL."
 msgstr ""
 
-#: frontend/templates/work_import_form.html:15
+#: frontend/templates/work_import_form.html:16
 msgid "Accepted work URL formats:"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:20
+#: frontend/templates/work_import_form.html:21
 msgid ""
 "To ensure account security, restricted works will not be imported. We "
 "recommend temporarily making restricted works public or manually recreating "
 "them."
 msgstr ""
 
-#: frontend/templates/work_import_form.html:31
+#: frontend/templates/work_import_form.html:32
 msgid "Import single toggle"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:39
+#: frontend/templates/work_import_form.html:40
 msgid "AO3 Username field"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:44
+#: frontend/templates/work_import_form.html:45
 msgid "Work ID help"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:45
+#: frontend/templates/work_import_form.html:46
 msgid ""
 "The work ID is the unique number that follows 'works/' in the URL (ex: "
 "archiveofourown.org/works/<strong>33568501</strong> )"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:48
+#: frontend/templates/work_import_form.html:49
 msgid "Work ID input"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:53
+#: frontend/templates/work_import_form.html:54
 msgid "Save work(s) as draft"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:56
+#: frontend/templates/work_import_form.html:57
 msgid "Save as draft toggle"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:61
+#: frontend/templates/work_import_form.html:62
 msgid "Allow any comments on work(s)"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:64
+#: frontend/templates/work_import_form.html:65
 msgid "Allow any comments toggle"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:69
+#: frontend/templates/work_import_form.html:70
 msgid "Allow anon comments on work(s)"
 msgstr ""
 
-#: frontend/templates/work_import_form.html:72
+#: frontend/templates/work_import_form.html:73
 msgid "Allow anon comments toggle"
 msgstr ""
 
-#: frontend/templates/work_metadata.html:3
-msgid "Status"
-msgstr ""
-
-#: frontend/templates/work_metadata.html:15
+#: frontend/templates/work_metadata.html:5
 #, python-format
 msgid "Fingerguns: %(fg)s"
 msgstr ""
 
-#: frontend/templates/work_metadata.html:21
+#: frontend/templates/work_metadata.html:6
 #, python-format
 msgid "Chapters: %(cc)s"
 msgstr ""
 
-#: frontend/templates/work_metadata.html:33
+#: frontend/templates/work_metadata.html:8
 #, python-format
 msgid "Words: %(wc)s"
 msgstr ""
 
-#: frontend/templates/work_tile.html:21 frontend/templates/work_tile.html:26
-msgid "Edit Work"
+#: frontend/templates/work_tile.html:33
+msgid "Hide"
 msgstr ""
 
-#: frontend/templates/work_tile.html:22 frontend/templates/work_tile.html:27
-msgid "Delete Work"
+#: frontend/templates/work_tile.html:39 frontend/templates/work_tile.html:74
+#: frontend/templates/work_tile.html:99
+msgid "Show more..."
 msgstr ""
 
-#: frontend/view_utils.py:363 frontend/views.py:239 frontend/views.py:306
-#: frontend/views.py:738 frontend/views.py:1569 frontend/views.py:1604
-#: frontend/views.py:1618 frontend/views.py:1631
+#: frontend/templates/work_tile.html:79
+#, python-format
+msgid "Part %(series_num)s of "
+msgstr ""
+
+#: frontend/view_utils.py:530 frontend/views.py:276 frontend/views.py:386
+#: frontend/views.py:1045 frontend/views.py:1893 frontend/views.py:1928
+#: frontend/views.py:1942 frontend/views.py:1954 frontend/views.py:1966
+#: frontend/views.py:1979
 msgid "You must log in to perform this action."
 msgstr ""
 
-#: frontend/views.py:48
+#: frontend/views.py:55
 msgid "ourchive_welcome"
 msgstr "Welcome to Ourchive"
 
-#: frontend/views.py:49
+#: frontend/views.py:56
 msgid "ourchive_intro_copy"
-msgstr ""
-"Ourchive is fan-created archive software with work posting and curation "
-"capabilities, written in Django and deployable with a standard stack."
+msgstr " "
 
-#: frontend/views.py:147 frontend/views.py:174
+#: frontend/views.py:184 frontend/views.py:211
 msgid "You must be logged in to import works."
 msgstr ""
 
-#: frontend/views.py:164
+#: frontend/views.py:201
 msgid "Import has started. You will receive a notification when it completes."
 msgstr ""
 
-#: frontend/views.py:167
+#: frontend/views.py:204
 msgid "Import AO3 Work(s)"
 msgstr ""
 
-#: frontend/views.py:215
+#: frontend/views.py:252
 msgid "User unblocked."
 msgstr "User unblocked."
 
-#: frontend/views.py:293 frontend/views.py:343
+#: frontend/views.py:373 frontend/views.py:427
 msgid "You must log in as this user to perform this action."
 msgstr ""
 
-#: frontend/views.py:302
+#: frontend/views.py:382
 msgid "Your export has begun. You will be notified when it is complete."
 msgstr ""
 
-#: frontend/views.py:354
+#: frontend/views.py:438
 #, fuzzy
 #| msgid "You are not authorized to view this blocklist."
 msgid "You are not authorized to view this page."
 msgstr "You are not authorized to view this blocklist."
 
-#: frontend/views.py:394
+#: frontend/views.py:478
 msgid "You do not have permission to view these notifications."
 msgstr ""
 
-#: frontend/views.py:401
+#: frontend/views.py:485
 msgid "Notifications"
 msgstr ""
 
-#: frontend/views.py:439 frontend/views.py:455 frontend/views.py:473
-#: frontend/views.py:491
+#: frontend/views.py:533 frontend/views.py:549 frontend/views.py:567
+#: frontend/views.py:585 frontend/views.py:603 frontend/views.py:621
 msgid "You do not have permission to view these subscriptions."
 msgstr ""
 
-#: frontend/views.py:525
+#: frontend/views.py:659
 msgid "You must be logged in to subscribe to users."
 msgstr ""
 
-#: frontend/views.py:680
+#: frontend/views.py:700
+msgid "Something went wrong saving this search."
+msgstr ""
+
+#: frontend/views.py:814
+#, fuzzy
+#| msgid "You are not authorized to view this blocklist."
+msgid "You do not have permission to view this saved search."
+msgstr "You are not authorized to view this blocklist."
+
+#: frontend/views.py:973 frontend/views.py:1057
+msgid "Series could not be created. Please contact an administrator for help."
+msgstr ""
+
+#: frontend/views.py:987
 msgid "You must log in to post a new work."
 msgstr ""
 
-#: frontend/views.py:716
+#: frontend/views.py:1023
 msgid "You must log in to post a new chapter."
 msgstr ""
 
-#: frontend/views.py:1078
+#: frontend/views.py:1404
 msgid "Login successful."
 msgstr ""
 
-#: frontend/views.py:1081
+#: frontend/views.py:1407
 msgid "Login unsuccessful. Please try again."
 msgstr ""
 
-#: frontend/views.py:1103
+#: frontend/views.py:1429
 msgid "Reset successful."
 msgstr ""
 
-#: frontend/views.py:1106
+#: frontend/views.py:1432
 msgid "Reset unsuccessful. Please try again."
 msgstr ""
 
-#: frontend/views.py:1121
+#: frontend/views.py:1447
 msgid "You are already logged in."
 msgstr ""
 
-#: frontend/views.py:1126
+#: frontend/views.py:1452
 msgid "Registration successful!"
 msgstr ""
 
-#: frontend/views.py:1129
+#: frontend/views.py:1455
 msgid "Registration is not permitted at this time. Please contact site admin."
 msgstr ""
 
-#: frontend/views.py:1143
+#: frontend/views.py:1469
 msgid ""
 "Your invite code or email is incorrect. Please check your link again and "
 "contact site admin."
 msgstr ""
 
-#: frontend/views.py:1172
+#: frontend/views.py:1498
 msgid "You have been added to the invite queue."
 msgstr ""
 
-#: frontend/views.py:1175
+#: frontend/views.py:1501
 #, fuzzy
 #| msgid ""
 #| "An error has occurred while reporting this user. Please contact your "
@@ -1301,29 +1825,45 @@ msgstr ""
 "An error has occurred while reporting this user. Please contact your "
 "administrator."
 
-#: frontend/views.py:1178
+#: frontend/views.py:1504
 msgid "Your account already exists. Please log in or reset your password."
 msgstr ""
 
-#: frontend/views.py:1186
+#: frontend/views.py:1512
 msgid "Logout successful."
 msgstr ""
 
-#: frontend/views.py:1241
+#: frontend/views.py:1567
 msgid "Work Comments"
 msgstr ""
 
-#: frontend/views.py:1409
+#: frontend/views.py:1734
 msgid "Invalid URL."
 msgstr ""
 
-#: frontend/views.py:1529
+#: frontend/views.py:1853
 #, fuzzy
 #| msgid "User not found."
 msgid "Bookmark not found."
 msgstr "User not found."
 
-#: ourchive_app/settings.py:183
+#: frontend/views.py:2035
+msgid "You must be logged in to create a series."
+msgstr ""
+
+#: frontend/views.py:2044
+msgid "Edit Series"
+msgstr ""
+
+#: frontend/views.py:2146
+msgid "You must be logged in to create an anthology."
+msgstr ""
+
+#: frontend/views.py:2161
+msgid "Edit Anthology"
+msgstr ""
+
+#: ourchive_app/settings/base.py:183
 msgid "English"
 msgstr "English"
 

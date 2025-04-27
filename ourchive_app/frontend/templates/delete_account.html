@@ -1,31 +1,23 @@
 {% extends 'index.html' %}
-{% block content %}	
 {% load i18n %}
-<div class="uk-width-1-1 uk-text-left" id="account-form-parent"> 
-	<form class="uk-form-horizontal"  method="post" id="delete-account-form" action="/users/{{user.username}}/delete">
+{% block content %}
+<div class="row row-cols-1" id="account-form-parent">
+    <h1>{% translate 'Delete Account' %}</h1>
+    <form method="post" id="delete-account-form" action="/users/{{user.username}}/delete">
 		{% csrf_token %}
-		<div class="uk-child-width-1@m uk-child-width-1@s uk-text-left" id="delete-account-header-parent" uk-grid>
-			<div class="uk-width-1-2" id="delete-account-header-child">
-            	<span id="delete-account-header-span" class="uk-text-large">Delete account</span>
-        	</div>
-	    </div>
-	<fieldset id="delete-account-fieldset" class="uk-fieldset" >
-		<span class="uk-text-medium">{% translate 'Are you sure you want to delete your account? This action is irrevocable and will remove all data associated with your account, including works, comments, and bookmarks.' %}</span>
-        <div class="uk-margin" id="delete-account-password-confirm-parent">
-	    	<label id="delete-account-confirm-password-label" class="uk-form-label" for="delete-account-confirm-password-input">{% translate 'Confirm Password' %}</label>
-	        <div id="delete-account-confirm-password-form-controls" class="uk-form-controls">
-		        <div id="delete-account-confirm-password-input-div" class="uk-inline">
-		            <span id="delete-account-confirm-password-span" class="uk-form-icon uk-form-icon" uk-icon="icon: ourchive-help;ratio:.75"></span>
-		            <input id="delete-account-confirm-password-input" class="uk-input" type="password" name="password">
-		        </div>
+        <div class="mb-3">
+            <p>{% translate 'Are you sure you want to delete your account? This action is irrevocable and will remove all data associated with your account, including works, comments, and bookmarks.' %}</p>
+        </div>
+        <div class="mb-3" id="delete-account-password-confirm-parent">
+	    	<label id="delete-account-confirm-password-label" class="form-label" for="delete-account-confirm-password-input">{% translate 'Confirm Password' %}</label>
+	        <div id="delete-account-confirm-password-form-controls" class="input-group">
+                <span id="delete-account-confirm-password-span" class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input id="delete-account-confirm-password-input" class="form-control" type="password" name="password">
 		    </div>
-	    </div>      
-    </fieldset>
-    <div class="uk-text-uk-width-1-2" id="delete-account-controls-parent">
-    	<input id="delete-account-cancel-button" class="uk-button uk-width-small uk-button-primary" onclick="history.back()" value="Cancel" />
+	    </div>
+    	<input id="delete-account-cancel-button" class="btn btn-primary" onclick="history.back()" value="{% translate 'Cancel' %}" />
     	<button id="delete-account-prevent-default-action-button" type="submit" disabled style="display: none" aria-hidden="true"></button>
-        <input id="delete-account-submit-button" class="uk-button uk-width-medium uk-button-danger" type="submit" value="Delete Account"/>
-    </div>
+        <input id="delete-account-submit-button" class="btn btn-danger" type="submit" value="{% translate 'Delete Account' %}"/>
 	</form>
 </div>
 {% endblock %}

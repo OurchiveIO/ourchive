@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from api.models import OurchiveSetting, Chapter, UserBlocks, Bookmark, BookmarkCollection
+from core.models import OurchiveSetting, Chapter, UserBlocks, Bookmark, BookmarkCollection
 from django.contrib.auth.models import AnonymousUser
 
 
@@ -21,7 +21,19 @@ class IsMultiOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return request.user in obj.users.all() or request.user == obj.user or request.user.is_superuser
+        if hasattr(obj, 'users'):
+            return request.user in obj.users.all() or request.user == obj.user or request.user.is_superuser
+        else:
+            return request.user in obj.owners.all() or request.user == obj.creating_user or request.user.is_superuser
+
+
+class IsWorksMultiOwnerOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if any(user == request.user for user in [work.user for work in obj.works.all()]):
+            return True
+        return request.user == obj.user or request.user.is_superuser
 
 
 class ObjectIsLocked(permissions.BasePermission):
@@ -205,7 +217,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user or request.user.is_superuser
+        return request.user.is_authenticated and (obj.user == request.user or request.user.is_superuser)
 
 
 class IsMultiOwner(permissions.BasePermission):

@@ -1,0 +1,4 @@
+{% for anthology in anthologies %}
+    <div class="row row-cols-1 mb-3">{% include "anthology_tile.html" %}</div>
+{% endfor %}
+{% include 'pagination.html' with previous=previous next=next object_name='anthology' %}

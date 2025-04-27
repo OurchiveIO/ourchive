@@ -1,0 +1,104 @@
+{% load i18n %}
+{% load static %}
+<script>
+    function fetchSavedSearch(element, selector) {
+        let id = element.value;
+          fetch(`/savedsearch/${id}`)
+            .then((response) => {
+              return response.text();
+            })
+            .then((templateText) => {
+                document.getElementById(selector).innerHTML = "";
+                document.getElementById(selector).innerHTML = templateText;
+                initializeMultiSelect(`saved-search-${id}-languages`);
+                initializeEditTags();
+                document.getElementById("newsearchname").value = document.getElementById("search-name").value;
+                document.getElementById("nav-search-input").value = document.getElementById("filter-search-text").value;
+            });
+        }
+</script>
+<nav class="navbar navbar-expand-md bg-primary">
+    <div class="navbar ms-2 order-0">
+        <a class="navbar-brand" href="/" title="Home" data-testid="ourchive-logo-link" id="ourchive-home-link">{% if css_mode == 'dark' %}<img src="{% static 'ourchive_big_darkmode.svg' %}" class="ourchive-logo-nav" id="ourchive-logo-light" title="Home" width="40" height="40" />{% else %}<img src="{% static 'ourchive_big_lightmode.png' %}" class="ourchive-logo-nav" id="ourchive-logo-dark" title="Home" width="40" height="40"/>{% endif %}</a>
+
+    </div>
+    <div class="container-fluid mx-auto justify-content-center order-2">
+        <div class="dropdown">
+          <button class="btn btn-light dropdown-toggle" data-bs-auto-close="outside" type="button" data-bs-toggle="dropdown" aria-expanded="false">{% translate 'Filters' %}</button>
+            <div class="dropdown-menu container-fluid oc-filter-dropdown">{% include 'index_search_filter.html' with dropdown_selector='filter-toggle-dsk' %}</div>
+            <div id="save-search-modal" class="modal" tabindex="-1">
+                <div class="modal-dialog" id="save-search-modal-body">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 id="save-search-modal-header" class="uk-modal-title">{% translate 'Save Search' %}</h2>
+                        </div>
+                        <div class="modal-body">
+                            <label class="form-label" for="newsearchname">{% blocktranslate %}Enter a name for this search:{% endblocktranslate %}</label>
+                            <input class="form-control" id="newsearchname" type="text" name="new-search-name" onkeyup="updateSearchName(this.value)" value="{{ search.name }}"/>
+                        </div>
+                        <div id="save-searchmodal-button-parent" class="modal-footer">
+                            <a id="save-search-modal-cancel" data-bs-dismiss="modal" class="btn btn-secondary">{% translate 'Cancel' %}</a>
+                            <a id="save-search-modal-add" class="btn btn-primary" onclick="saveSearch()">{% translate 'Save' %}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form role="search" action="/search/" method="post" id="nav-search-form" class="p-2 ps-0">
+          {% csrf_token %}
+          <div class="input-group" id="index-search-parent">
+
+              <div class="dropdown">
+                <input class="form-control me-2 nav-search-input" autocomplete="off" aria-label="Search" type="search" placeholder="Search..." autofocus name="term" value="{{ term|default_if_none:'' }}" id="nav-search-input" oninput="doIndexAutocomplete(this.value, 'search', 'navbar')">
+                  <button class="btn dropdown-toggle" hidden type="button" data-bs-toggle="dropdown" aria-expanded="false" id="tag-autocomplete-dropdown-btn">{% translate 'Close' %}</button>
+                  <div id="tag-autocomplete-dropdown-navbar" class="dropdown-menu">
+                    {% include 'tag_autocomplete.html' %}
+                  </div>
+              </div>
+              <button type="submit" data-testid="navbar-search-submit" class="btn btn-secondary"><i class="bi bi-search text-dark"></i></button>
+          </div>
+      </form>
+    </div>
+    <div class="navbar me-2 order-1 order-md-3 oc-nav-items-right" id="navbarNavOffcanvas">
+        <ul class="list-inline">
+            <li id="theme-switcher-li" class="list-inline-item">
+                <a onclick="switchTheme()" href="#" id="theme-switcher-link" class="nav-link" title="Switch Modes">
+                    {% if request.session.css_mode == "dark" %}
+                        <i class="bi bi-sun text-light"></i>
+                    {% else %}
+                        <i class="bi bi-moon text-light"></i>
+                    {% endif %}
+                </a>
+            </li>
+            {% if not request.user.is_authenticated %}
+            <li id="nav-right-main" class="list-inline-item">
+                <a href="{% url 'fe-login' %}" class="btn btn-secondary">{% translate 'Sign In' %}
+                    <i class="bi bi-person-circle text-dark"></i>
+                </a>
+            </li>
+            {% else %}
+            <li id="nav-right-main" class="list-inline-item dropdown">
+                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="{{ request.user }}" href="#" id="nav-username">{% translate 'Account' %}
+                    {% if request.session.has_notifications %}
+                        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                            <span class="visually-hidden">{% translate 'Notifications' %}</span>
+                        </span>
+                    {%endif%}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li id="nav-new-collection-li"><a href="{% url 'fe-new-collection' %}" id="nav-new-collection-link" class="dropdown-item">{% translate 'New Collection' %}</a></li>
+                    <li id="nav-new-work-li"><a href="/works/new/" id="nav-new-work-link" class="dropdown-item">New Work</a></li>
+                    <li id="nav-new-series-li"><a href="{% url 'fe-create-series' %}" id="nav-new-series-link" class="dropdown-item">{% translate 'New Series' %}</a></li>
+                    <li id="nav-new-anthology-li"><a href="{% url 'fe-create-anthology' %}" id="nav-new-anthology-link" class="dropdown-item">{% translate 'New Anthology' %}</a></li>
+                    <li id="nav-creations-li"><a href="{% url 'user-profile-parent' request.user.id %}" id="nav-creations-link" class="dropdown-item">{% translate 'My Chives' %}</a></li>
+                    <li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}" class="dropdown-item">{% translate 'Subscriptions' %}</a></li>
+                    <li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link" class="dropdown-item">{% translate 'Import Work(s)' %}</a></li>
+                    <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}" class="dropdown-item">{% translate 'Import Status' %}</a></li>
+                    <li id="nav-notifications-li"><a href="/username/{{request.user}}/notifications" id="nav-notifications-link" class="dropdown-item">Notifications</a></li>
+                    <li id="nav-signout-li"><a href="/logout" id="nav-signout-link" class="dropdown-item">Log Out</a></li>
+                </ul>
+            </li>
+            {% endif %}
+      </ul>
+    </div>
+</nav>

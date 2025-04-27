@@ -1,31 +1,13 @@
 from django.contrib.auth.models import Group
 from rest_framework import viewsets, generics, permissions
-from api.serializers import AttributeTypeSerializer, AttributeValueSerializer, \
-    UserSerializer, GroupSerializer, WorkSerializer, TagSerializer, \
-    BookmarkCollectionSerializer, ChapterSerializer, TagTypeSerializer, \
-    WorkTypeSerializer, BookmarkSerializer, ChapterCommentSerializer, \
-    BookmarkCommentSerializer, MessageSerializer, NotificationSerializer, \
-    NotificationTypeSerializer, OurchiveSettingSerializer, FingergunSerializer, \
-    UserBlocksSerializer, ContentPageSerializer, ContentPageDetailSerializer, \
-    UserReportSerializer, UserSubscriptionSerializer, AdminAnnouncementSerializer, \
-    BookmarkSummarySerializer, BookmarkCollectionSummarySerializer, CollectionCommentSerializer, \
-    ImportSerializer, TopTagSerializer
-from api.models import User, Work, Tag, Chapter, TagType, WorkType, Bookmark, \
-    BookmarkCollection, ChapterComment, BookmarkComment, Message, Notification, \
-    NotificationType, OurchiveSetting, Fingergun, UserBlocks, Invitation, AttributeType, \
-    AttributeValue, ContentPage, UserReport, UserReportReason, UserSubscription, CollectionComment, \
-    AdminAnnouncement, UserWork, UserCollection
-from api.permissions import IsOwnerOrReadOnly, UserAllowsBookmarkComments, UserAllowsBookmarkAnonComments, \
-    UserAllowsWorkComments, UserAllowsWorkAnonComments, IsOwner, IsAdminOrReadOnly, RegistrationPermitted, \
-    UserAllowsCollectionComments, UserAllowsCollectionAnonComments, ObjectIsLocked, WorkIsNotDraft, \
-    ObjectIsPrivate, IsWorkOwner, IsWorkOwnerOrReadOnly, IsMultiOwner, IsMultiOwnerOrReadOnly
+from api.serializers import *
+from core.models import *
+from api.permissions import *
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser, MultiPartParser
-from .search.search_service import OurchiveSearch
-from .search.search_obj import GlobalSearch
 from django.db.models import Q
 import datetime
 from django.utils.crypto import get_random_string
@@ -40,12 +22,16 @@ from etl import ao3
 import threading
 from etl.models import WorkImport, ChiveExport
 from etl.ao3 import util
-from .utils import get_star_count
+from core.utils import get_star_count
 from django.core.mail import send_mail
 from django.utils.translation import gettext as _
 from django.db.models import Count
 from api.custom_pagination import NonPaginatedResultSetPagination
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope, TokenHasScope
+from search.search.search_service import OurchiveSearch
+from search.search.search_obj import GlobalSearch
+from search.models import SavedSearch
+from django.utils.timezone import make_aware
 
 
 @api_view(['GET'])
@@ -79,7 +65,7 @@ class SearchList(APIView):
 
     def post(self, request, format=None):
         searcher = OurchiveSearch()
-        results = searcher.do_search(**request.data)
+        results = searcher.do_search(request.user.id, **request.data)
         return Response({'results': results})
 
     def get(self, request, format=None):
@@ -119,18 +105,19 @@ class TagAutocomplete(APIView):
 
     def get(self, request, format=None):
         searcher = OurchiveSearch()
+        tag_type = request.GET.get('type') if request.GET.get('type') and request.GET.get('type') != 'null' else None
         results = searcher.do_tag_search(request.GET.get(
-            'term'), request.GET.get('type'), request.GET.get('fetch_all', False))
+            'term'),  tag_type, request.GET.get('fetch_all', False))
         return Response({'results': results})
 
 
-class BookmarkAutocomplete(APIView):
+class WorkAutocomplete(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, format=None):
         searcher = OurchiveSearch()
-        results = searcher.do_bookmark_search(request.GET.get(
+        results = searcher.do_work_search(request.GET.get(
             'term'), request.user.id)
         return Response({'results': results})
 
@@ -146,33 +133,60 @@ class UserAutocomplete(APIView):
         return Response({'results': results})
 
 
+class SeriesAutocomplete(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, format=None):
+        searcher = OurchiveSearch()
+        results = searcher.do_series_search(request.GET.get(
+            'term'), request.user.id)
+        return Response({'results': results})
+
+
+class AnthologyAutocomplete(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, format=None):
+        searcher = OurchiveSearch()
+        results = searcher.do_anthology_search(request.GET.get(
+            'term'), request.user.id)
+        return Response({'results': results})
+
+
 class FileUpload(APIView):
     parser_classes = [MultiPartParser]
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, format=None):
-        if 'files[]' in request.FILES:
-            if 'image' in request.FILES['files[]'].content_type:
-                if not request.user.can_upload_images:
-                    return Response({'message': _('User does not have permission to upload images.')}, status=403)
-            elif 'audio' in request.FILES['files[]'].content_type:
-                if not request.user.can_upload_audio:
-                    return Response({'message': _('User does not have permission to upload audio.')}, status=403)
-            elif 'video' in request.FILES['files[]'].content_type:
-                if not request.user.can_upload_video:
-                    return Response({'message': _('User does not have permission to upload video.')}, status=403)
-            else:
-                if not request.user.can_upload_export_files:
-                    return Response({'message': 'User does not have permission to upload this file.'}, status=403)
-            service = FileHelperService.get_service()
-            if service is not None:
-                final_url = service.handle_uploaded_file(
-                    request.FILES['files[]'], request.FILES['files[]'].name, request.user.username)
-                if final_url is None:
-                    return Response({'message': 'Filetype not permitted.'}, status=403)
-                return Response({'final_url': final_url})
-            else:
-                return Response({'final_url': 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.'}, status=400)
+        key = 'files[]' if 'files[]' in request.FILES else None
+        if not key:
+            key = 'file' if 'file' in request.FILES else None
+            if not key:
+                return Response({'final_url': 'No valid file in form data.'},
+                                status=400)
+        if 'image' in request.FILES[key].content_type:
+            if not request.user.can_upload_images:
+                return Response({'message': _('User does not have permission to upload images.')}, status=403)
+        elif 'audio' in request.FILES[key].content_type:
+            if not request.user.can_upload_audio:
+                return Response({'message': _('User does not have permission to upload audio.')}, status=403)
+        elif 'video' in request.FILES[key].content_type:
+            if not request.user.can_upload_video:
+                return Response({'message': _('User does not have permission to upload video.')}, status=403)
+        else:
+            if not request.user.can_upload_export_files:
+                return Response({'message': 'User does not have permission to upload this file.'}, status=403)
+        service = FileHelperService.get_service()
+        if service is not None:
+            final_url = service.handle_uploaded_file(
+                request.FILES[key], request.FILES[key].name, request.user.username)
+            if final_url is None:
+                return Response({'message': 'Filetype not permitted.'}, status=403)
+            return Response({'final_url': final_url})
+        else:
+            return Response({'final_url': 'This instance is trying to use a file processor not supported by file helpers. Please contact your administrator.'}, status=400)
 
 
 class Invitations(APIView):
@@ -324,6 +338,7 @@ class UserApprovalList(APIView):
         data = []
         pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
+        pending_anthologies = UserAnthology.objects.filter(user__id=request.user.id).filter(approved=False)
         for work in pending_works:
             approval = {
                 'id': f'{work.id}_work',
@@ -342,6 +357,15 @@ class UserApprovalList(APIView):
                 'title': collection.collection.title
             }
             data.append(approval)
+        for anthology in pending_anthologies:
+            approval = {
+                'id': f'{anthology.id}_anthology',
+                'type': 'anthology',
+                'creating_user': {'id': anthology.anthology.creating_user.id, 'username': anthology.anthology.creating_user.username},
+                'chive': anthology.anthology.id,
+                'title': anthology.anthology.title
+            }
+            data.append(approval)
         return Response(data, status=200)
 
 
@@ -358,8 +382,10 @@ class UserApprovalRemove(APIView):
             approval = UserWork.objects.get(id=approval_id)
         elif type_to_remove == 'collection':
             approval = UserCollection.objects.get(id=approval_id)
+        elif type_to_remove == 'anthology':
+            approval = UserAnthology.objects.get(id=approval_id)
         else:
-            return Response({'message': [_('type_to_remove must be in POST request and must be work or collection.')]}, status=400)
+            return Response({'message': [_('type_to_remove must be in POST request and must be work, anthology or collection.')]}, status=400)
         if not approval:
             return Response({'message': [_(f'Approval having id {approval_id} does not exist.')]}, status=403)
         if approval.user.id != user_to_remove:
@@ -381,8 +407,10 @@ class UserApprovalApprove(APIView):
             approval = UserWork.objects.get(id=approval_id)
         elif type_to_approve == 'collection':
             approval = UserCollection.objects.get(id=approval_id)
+        elif type_to_approve == 'anthology':
+            approval = UserAnthology.objects.get(id=approval_id)
         else:
-            return Response({'message': [_('type_to_remove must be in POST request and must be work or collection.')]}, status=400)
+            return Response({'message': [_('type_to_remove must be in POST request and must be work, anthology or collection.')]}, status=400)
         if not approval:
             return Response({'message': [_(f'Approval having id {approval_id} does not exist.')]}, status=403)
         if approval.user.id != user_to_approve:
@@ -399,12 +427,16 @@ class CocreateApproveBulk(APIView):
     def patch(self, request):
         pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
+        pending_anthologies = UserAnthology.objects.filter(user__id=request.user.id).filter(approved=False)
         for work in pending_works:
             work.approved = True
             work.save()
         for collection in pending_collections:
             collection.approved = True
             collection.save()
+        for anthology in pending_anthologies:
+            anthology.approved = True
+            anthology.save()
         return Response({'message': _('Cocreators approved.')}, status=200)
 
 
@@ -415,10 +447,13 @@ class CocreateRejectBulk(APIView):
     def patch(self, request):
         pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
+        pending_anthologies = UserAnthology.objects.filter(user__id=request.user.id).filter(approved=False)
         for work in pending_works:
             work.delete()
         for collection in pending_collections:
             collection.delete()
+        for anthology in pending_anthologies:
+            anthology.delete()
         return Response({'message': _('Cocreators rejected.')}, status=200)
 
 
@@ -460,6 +495,26 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
         return response
 
 
+class UserSavedSearchesList(generics.ListCreateAPIView):
+    serializer_class = SavedSearchSerializer
+    permission_classes = [IsOwner]
+
+    def get_queryset(self):
+        return SavedSearch.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
+
+
+class SavedSearchesList(generics.ListCreateAPIView):
+    queryset = SavedSearch.objects.get_queryset().order_by('updated_on')
+    serializer_class = SavedSearchSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+
+class SavedSearchDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = SavedSearchSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
+    queryset = SavedSearch.objects.get_queryset().order_by('updated_on')
+
+
 class GroupList(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, TokenHasScope]
     required_scopes = ['groups']
@@ -472,7 +527,7 @@ class UserWorkList(generics.ListCreateAPIView):
     permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+        return Work.objects.filter(Q(users__username=self.kwargs['username']) | Q(user__username=self.kwargs['username'])).filter(Q(draft=False) | Q(users__id=self.request.user.id)).distinct().order_by('-updated_on')
 
 
 class UserBookmarkList(generics.ListCreateAPIView):
@@ -482,9 +537,9 @@ class UserBookmarkList(generics.ListCreateAPIView):
     def list(self, request, *args, **kwargs):
         response = super(UserBookmarkList, self).list(request, args, kwargs)
         try:
-            if OurchiveSetting.objects.get(name='Rating Star Count') is not None:
+            if OurchiveSetting.objects.filter(name='Rating Star Count').first() is not None:
                 response.data['star_count'] = [x for x in range(
-                    1, int(OurchiveSetting.objects.get(name='Rating Star Count').value) + 1)]
+                    1, int(OurchiveSetting.objects.filter(name='Rating Star Count').first().value) + 1)]
             else:
                 response.data['star_count'] = [1, 2, 3, 4, 5]
         except ObjectDoesNotExist:
@@ -502,7 +557,10 @@ class UserBookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return BookmarkCollection.objects.filter(user__username=self.kwargs['username']).filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+        queryset = BookmarkCollection.objects.filter(Q(users__username=self.kwargs['username']) | Q(user__username=self.kwargs['username'])).filter(Q(draft=False) | Q(user__id=self.request.user.id))
+        if (self.request.GET.get('work_id', None)):
+            queryset = queryset.exclude(works__id=self.request.GET.get('work_id'))
+        return queryset.order_by('-updated_on')
 
 
 class UserBookmarkDraftList(generics.ListCreateAPIView):
@@ -534,13 +592,16 @@ class WorkList(generics.ListCreateAPIView):
         return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
     def perform_create(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'cover_url' in self.request.data:
             self.request.data.pop('cover_url')
         if 'created_on' in self.request.data and not self.request.data['created_on']:
             self.request.data['created_on'] = str(datetime.datetime.now().date())
         if 'updated_on' in self.request.data and not self.request.data['updated_on']:
             self.request.data['updated_on'] = str(datetime.datetime.now().date())
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, attributes=attributes)
 
 
 class UserWorkDraftList(generics.ListCreateAPIView):
@@ -582,6 +643,7 @@ class UserBlockSingleDetail(APIView):
             return Response({'user_blocked': True, 'block_id': blocked_user.id}, status=200)
         else:
             return Response({'user_blocked': False}, status=200)
+
 
 class UserReportList(generics.ListCreateAPIView):
     serializer_class = UserReportSerializer
@@ -647,6 +709,31 @@ class UserSubscriptionWorkList(generics.ListAPIView):
             subscribed_to_work=True)
         ids = subscriptions.values_list('subscribed_user', flat=True).all()
         return Work.objects.filter(draft=False).filter(user__id__in=ids).order_by('-created_on')
+
+
+class UserSubscriptionSeriesList(generics.ListAPIView):
+    serializer_class = WorkSerializer
+    permission_classes = [IsOwner]
+
+    def get_queryset(self):
+        subscriptions = UserSubscription.objects.filter(
+            user__id=self.request.user.id).filter(
+            subscribed_to_series=True)
+        ids = subscriptions.values_list('subscribed_user', flat=True).all()
+        return WorkSeries.objects.filter(user__id__in=ids).order_by('-created_on')
+
+
+class UserSubscriptionAnthologyList(generics.ListAPIView):
+    serializer_class = AnthologySerializer
+    permission_classes = [IsOwner]
+
+    def get_queryset(self):
+        anthologies = UserSubscription.objects.filter(
+            user__id=self.request.user.id).filter(
+            subscribed_to_anthology=True)
+        ids = anthologies.values_list('subscribed_user', flat=True).all()
+        return (Anthology.objects.filter(Q(owners__user_anthologies__id__in=ids) | Q(creating_user__id__in=ids))
+                .order_by('-created_on'))
 
 
 class UserSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -727,9 +814,18 @@ class WorkTypeDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class WorkTypeList(generics.ListCreateAPIView):
-    queryset = WorkType.objects.get_queryset().order_by('sort_order')
     serializer_class = WorkTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        if self.request.GET.get('has_works', False):
+            return WorkType.objects.annotate(
+                nwork=Count('works')
+            ).filter(
+                nwork__gte=1
+            )
+        else:
+            return WorkType.objects.get_queryset().order_by('sort_order')
 
 
 class WorkByTypeList(generics.ListCreateAPIView):
@@ -764,6 +860,30 @@ class TagTypeList(generics.ListCreateAPIView):
         return TagType.objects.all()
 
 
+class BrowsableTagType(generics.ListCreateAPIView):
+    serializer_class = TagTypeSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        if self.request.GET.get('has_chives', False):
+            return TagType.objects.annotate(
+                ntag=Count('tags')
+            ).filter(
+                show_for_browse=True,
+                ntag__gte=1
+            )
+        else:
+            return TagType.objects.filter(show_for_browse=True)
+
+
+class TagsByType(generics.ListCreateAPIView):
+    serializer_class = TagSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return Tag.objects.filter(tag_type_id=self.request.GET.get('tag_type'))
+
+
 class TagList(generics.ListCreateAPIView):
     queryset = Tag.objects.get_queryset().order_by('id')
     serializer_class = TagSerializer
@@ -792,7 +912,7 @@ class RecentWorksList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return Work.objects.filter(draft=False).order_by("-updated_on")[:10]
+        return Work.objects.filter(draft=False).order_by("-system_updated_on")[:10]
 
 
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -834,7 +954,7 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsWorkOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Chapter.objects.get_queryset().filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
+        return Chapter.objects.filter(Q(draft=False) | Q(work__users__id=self.request.user.id)).distinct('id').order_by('id')
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'image_url' in self.request.data:
@@ -1052,13 +1172,16 @@ class BookmarkCollectionList(generics.ListCreateAPIView):
         return BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
 
     def perform_create(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
         if not self.request.user.can_upload_images and 'header_url' in self.request.data:
             self.request.data.pop('header_url')
         if 'created_on' in self.request.data and not self.request.data['created_on']:
             self.request.data['created_on'] = str(datetime.datetime.now().date())
         if 'updated_on' in self.request.data and not self.request.data['updated_on']:
             self.request.data['updated_on'] = str(datetime.datetime.now().date())
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, attributes=attributes)
 
 
 class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -1308,9 +1431,36 @@ class AttributeTypeList(generics.ListCreateAPIView):
         elif 'allow_on_bookmark_collection' in self.request.GET:
             queryset = queryset.filter(
                 allow_on_bookmark_collection=self.request.GET['allow_on_bookmark_collection'])
+        elif self.request.GET.get('allow_on_anthology', None):
+            queryset = queryset.filter(
+                allow_on_anthology=self.request.GET.get('allow_on_anthology'))
         else:
             return AttributeType.objects.order_by('name')
         return queryset.order_by('name')
+
+
+class BrowsableAttributeType(generics.ListCreateAPIView):
+    serializer_class = AttributeTypeSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        if self.request.GET.get('has_chives', False):
+            return AttributeType.objects.annotate(
+                nattr=Count('attribute_values')
+            ).filter(
+                show_for_browse=True,
+                nattr__gte=1
+            )
+        else:
+            return AttributeType.objects.filter(show_for_browse=True)
+
+
+class AttributesByType(generics.ListCreateAPIView):
+    serializer_class = AttributeValueSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return AttributeValue.objects.filter(attribute_type_id=self.request.GET.get('attribute_type'))
 
 
 class AttributeTypeDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -1369,10 +1519,168 @@ class AdminAnnouncementActiveList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return AdminAnnouncement.objects.exclude(expires_on__lte=datetime.datetime.now()).filter(active=True).order_by('id')
+        return AdminAnnouncement.objects.exclude(expires_on__lte=make_aware(datetime.datetime.now())).filter(active=True).order_by('id')
 
 
 class AdminAnnouncementDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = AdminAnnouncement.objects.get_queryset()
     serializer_class = AdminAnnouncementSerializer
     permission_classes = [permissions.IsAdminUser]
+
+
+class LanguageList(generics.ListAPIView):
+    queryset = Language.objects.get_queryset()
+    serializer_class = LanguageSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class NewsList(generics.ListAPIView):
+    queryset = News.objects.get_queryset()
+    serializer_class = NewsSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class HomepageNewsList(generics.ListAPIView):
+    serializer_class = NewsSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return News.objects.filter(embed_in_homepage=True).order_by('-updated_on')
+
+
+class NewsDetail(generics.RetrieveAPIView):
+    queryset = News.objects.get_queryset()
+    serializer_class = NewsSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class SeriesList(generics.ListCreateAPIView):
+    queryset = WorkSeries.objects.get_queryset()
+    serializer_class = SeriesSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def perform_create(self, serializer):
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
+        serializer.save(user=self.request.user)
+
+
+class SeriesDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = WorkSeries.objects.get_queryset()
+    serializer_class = SeriesSerializer
+    permission_classes = [IsWorksMultiOwnerOrReadOnly]
+
+    def perform_update(self, serializer):
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
+        serializer.save(user=self.request.user)
+
+
+class WorkSeriesList(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def patch(self, request, pk):
+        works = request.data
+        tracking = 1
+        for work_obj in works:
+            work = Work.objects.get(id=work_obj['work'])
+            work.series_num = int(work_obj['series_num']) if str(work_obj['series_num']).isdigit() else tracking
+            work.save()
+            tracking = tracking + 1
+        return Response({'message': 'Work series numbers updated.'}, status=200)
+
+
+class WorkSeriesDetail(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def delete(self, request, pk, work_id):
+        work = Work.objects.get(id=work_id)
+        work.series = None
+        work.series_num = None
+        work.save()
+        return Response({'message': 'Work removed from series.'}, status=200)
+
+
+class UserSeriesList(generics.ListCreateAPIView):
+    serializer_class = SeriesSerializer
+    permission_classes = [IsWorksMultiOwnerOrReadOnly]
+
+    def get_queryset(self):
+        return WorkSeries.objects.filter(user__username=self.kwargs['username']).order_by('-updated_on')
+
+
+class UserAnthologyList(generics.ListCreateAPIView):
+    serializer_class = AnthologySerializer
+    permission_classes = [IsWorksMultiOwnerOrReadOnly]
+
+    def get_queryset(self):
+        return Anthology.objects.filter(Q(owners__username=self.kwargs['username']) | Q(creating_user__username=self.kwargs['username'])).order_by('-system_updated_on')
+
+
+class AnthologyList(generics.ListCreateAPIView):
+    serializer_class = AnthologySerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return Anthology.objects.get_queryset().order_by('-system_updated_on')
+
+    def perform_create(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
+        serializer.save(creating_user=self.request.user, attributes=attributes)
+
+
+class AnthologyDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Anthology.objects.get_queryset()
+    serializer_class = AnthologySerializer
+    permission_classes = [IsMultiOwnerOrReadOnly]
+
+    def perform_update(self, serializer):
+        attributes = []
+        if 'attributes' in self.request.data:
+            attributes = self.request.data['attributes']
+        if 'created_on' in self.request.data and not self.request.data['created_on']:
+            self.request.data['created_on'] = str(datetime.datetime.now().date())
+        if 'updated_on' in self.request.data and not self.request.data['updated_on']:
+            self.request.data['updated_on'] = str(datetime.datetime.now().date())
+        serializer.save(attributes=attributes)
+
+
+class WorkAnthologyList(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def patch(self, request, pk):
+        works = request.data
+        tracking = 1
+        for work_obj in works:
+            sort_order = int(work_obj['sort_order']) if str(work_obj['sort_order']).isdigit() else tracking
+            anthology_work = AnthologyWork.objects.filter(work__id=work_obj['work'], anthology__id=pk).first()
+            if not anthology_work:
+                AnthologyWork.objects.create(work_id=work_obj['work'], anthology_id=pk, sort_order=sort_order)
+            else:
+                anthology_work.sort_order = sort_order
+                anthology_work.save()
+            tracking = tracking + 1
+        return Response({'message': 'Work anthology order updated.'}, status=200)
+
+
+class WorkAnthologyDetail(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def delete(self, request, pk, work_id):
+        AnthologyWork.objects.get(work__id=work_id, anthology__id=pk).delete()
+        return Response({'message': 'Work removed from anthology.'}, status=200)
+

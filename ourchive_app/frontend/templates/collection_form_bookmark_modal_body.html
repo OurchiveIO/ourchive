@@ -1,37 +1,43 @@
 {% load i18n %}
-<div class="uk-modal-dialog uk-modal-body" id="collection-add-bookmark-modal-body">
-        <h2 id="collection-add-bookmark-modal-header" class="uk-modal-title">{% translate 'Add Work(s)' %}</h2>
-        <p class="uk-text-medium">{% blocktranslate %}Add from your most recent bookmarks.{% endblocktranslate %}</p>
-        <div class="uk-overflow-auto uk-width-1-1 uk-padding-remove-horizontal">
-            <table class="uk-table uk-table-striped">
-                <thead>
-                    <tr>
-                        <th>{% translate 'Bookmark' %}</th>
-                        <th>{% translate 'Work' %}</th>
-                        <th>{% translate 'Add to Collection' %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for bookmark in bookmarks.response_data.results %}
-                        <tr id="bookmark-{{ bookmark.work.id }}-parent">
-                            <td id="bookmark-{{ bookmark.work.id }}-bookmark">{{ bookmark.title|default:bookmark.work.title }}</td>
-                            <td id="bookmark-{{ bookmark.work.id }}-work">{{ bookmark.work.title }}</td>
-                            <td id="bookmark-{{ bookmark.work.id }}-checkbox"><input type="checkbox" name="{{bookmark.work.id}}" id="add-to-collection-checkbox-{{ bookmark.work.id }}" class="add-to-collection-checkbox"/></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="modal-dialog" id="collection-add-bookmark-modal-body">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="collection-add-bookmark-modal-header">{% translate 'Add Work(s)' %}</h2>
         </div>
-        <div class="uk-child-width-1@m uk-child-width-1@s uk-text-center" uk-grid id="bookmarks-pagination-parent">
-            <div id="bookmarks-pagination-child-div">
-                <ul class="uk-pagination" id="bookmarks-pagination-uk-ul">
-                {% if bookmarks.response_data.previous is not None %}<li id="bookmarks-pagination-prev-li"><a id="bookmarks-pagination-prev-link" href="#" onclick="getWorks('{{bookmarks.response_data.prev_params}}')"><span id="bookmarks-pagination-prev-span" class="uk-margin-small-right" uk-pagination-previous></span> Previous</a></li>{% endif %}
-                {% if bookmarks.response_data.next is not None %}<li id="bookmarks-pagination-next-li" class="uk-margin-auto-left"><a href="#" onclick="getWorks('{{bookmarks.response_data.next_params}}')" id="bookmarks-pagination-next-link">Next <span id="bookmarks-pagination-next-span" class="uk-margin-small-left" uk-pagination-next></span></a></li>{% endif %}
-            </ul>
-            </div>        
-        </div> 
-        <p id="add-to-collection-modal-button-parent" class="uk-text-right">
-            <a id="add-to-collection-modal-cancel" class="uk-button uk-button-default uk-modal-close uk-margin-right">{% translate 'Cancel' %}</a>
-            <a id="add-to-collection-modal-add" class="uk-button uk-button-primary uk-modal-close" onclick="addSelectedWorks()" href="#">{% translate 'Add to Collection' %}</a>
-        </p>
+        <div class="modal-body">
+            <p>{% blocktranslate %}Add from your most recent bookmarks.{% endblocktranslate %}</p>
+            <div class="row row-cols-1">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% translate 'Bookmark' %}</th>
+                            <th scope="col">{% translate 'Work' %}</th>
+                            <th scope="col">{% translate 'Add to Collection' %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bookmark in bookmarks.response_data.results %}
+                            <tr id="bookmark-{{ bookmark.work.id }}-parent">
+                                <td id="bookmark-{{ bookmark.work.id }}-bookmark">{{ bookmark.title|default:bookmark.work.title }}</td>
+                                <td id="bookmark-{{ bookmark.work.id }}-work">{{ bookmark.work.title }}</td>
+                                <td id="bookmark-{{ bookmark.work.id }}-checkbox"><input type="checkbox" name="{{bookmark.work.id}}" id="add-to-collection-checkbox-{{ bookmark.work.id }}" class="form-check-input"/></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if bookmarks.response_data.previous is not None or bookmarks.response_data.next is not None %}
+            <div class="row row-cols-1" id="bookmarks-pagination-parent">
+                <ul class="pagination justify-content-center" id="bookmarks-pagination-uk-ul">
+                    <li id="bookmarks-pagination-prev-li" class="page-item {% if bookmarks.response_data.previous is None %}disabled{% endif %}"><a id="bookmarks-pagination-prev-link" href="#" class="page-link" onclick="getWorks('{{bookmarks.response_data.prev_params}}')">{% translate 'Previous' %}</a></li>
+                    <li id="bookmarks-pagination-next-li" class="page-item {% if bookmarks.response_data.next is None %}disabled{% endif %}"><a href="#" onclick="getWorks('{{bookmarks.response_data.next_params}}')" id="bookmarks-pagination-next-link" class="page-link">{% translate 'Next' %}</a></li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            <a id="add-to-collection-modal-cancel" class="btn btn-secondary" data-bs-dismiss="modal">{% translate 'Cancel' %}</a>
+            <a id="add-to-collection-modal-add" class="btn btn-primary" data-bs-dismiss="modal" onclick="addSelectedWorks()" href="#">{% translate 'Add to Collection' %}</a>
+        </div>
     </div>
+</div>

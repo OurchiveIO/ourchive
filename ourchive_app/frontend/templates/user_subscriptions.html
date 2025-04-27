@@ -1,99 +1,113 @@
 {% extends 'index.html' %}
 {% load i18n %}
-{% block title %}Subscriptions{% endblock %}
-{% block content %}	
-	<div id="user-subscriptions-header" class="uk-width-1-1 uk-padding-remove-horizontal">
-		<h1 id="user-subscriptions-h1">Subscriptions</h1>
-		<hr/>
-	</div>
-	<div id="user-subscriptions-detail" class="uk-width-1-1 uk-padding-remove-horizontal uk-margin-remove-top">
-		<p class="uk-text-large">{% blocktranslate %}Welcome to your subscriptions page. You can access your subscription feeds by clicking the links below, or manage your subscriptions in the table.{% endblocktranslate %}</p>
-	</div>
-	<div class="user-subscriptions-links uk-width-1-1 uk-padding-remove-horizontal" id="individual-subscription-buttons">
-		<a href="{% url 'fe-user-bookmark-subscriptions' request.user.username %}" class="uk-button-primary uk-button">{% translate 'Bookmarks' %}</a>
-		<a href="{% url 'fe-user-collection-subscriptions' request.user.username %}" class="uk-button-primary uk-button">{% translate 'Collections' %}</a>
-		<a href="{% url 'fe-user-work-subscriptions' request.user.username %}" class="uk-button-primary uk-button">{% translate 'Works' %}</a>
-		<a href="#" class="uk-button-default uk-button uk-disabled">{% translate 'Anthologies' %} ({% translate 'Coming Soon!' %})</a>
-		<hr/>
-	</div>
-	<div id="user-subscriptions-content" class="uk-width-1-1 uk-padding-remove-horizontal">
-		<h3>{{ request.user.username }}'s Subscriptions</h3>
-		{% if not subscriptions %}
-		<p id="user-subscriptions-none-message">{% blocktranslate %}No subscriptions yet. To create a subscription, navigate to a user's profile and click the 'subscribe' button.{% endblocktranslate %}</p>
-		{% endif %}
-	</div>
-	{% if subscriptions %}
-	<div class="uk-overflow-auto uk-width-1-1 uk-padding-remove-horizontal">
-		<table class="uk-table uk-table-striped">
-	    <thead>
-	        <tr>
-	            <th>{% translate 'User' %}</th>
-	            <th>{% translate 'Subscribed to' %}</th>
-	            <th>{% translate 'Actions' %}</th>
-	        </tr>
-	    </thead>
-	    <tbody>
-		{% for subscription in subscriptions %}
-			<tr id="user-subscriptions-{{subscription.id}}-parent">
-		        <td id="user-subscriptions-{{subscription.id}}-user"><a href="{% url 'user-profile-parent' subscription.subscribed_user_id %}">{{subscription.subscribed_user}}</a></td>
-		        <td id="user-subscriptions-{{subscription.id}}-st">{% if subscription.subscribed_to_bookmark %}<p><span class="uk-margin"><a class="uk-link" id="user-subscriptions-{{subscription.id}}-bookmark-link" href="{% url 'fe-user-bookmarks' subscription.subscribed_user %}">{% translate 'Bookmarks' %}</a></span></p>{% endif %}{% if subscription.subscribed_to_collection %}<p><span class="uk-margin"><a class="uk-link" id="user-subscriptions-{{subscription.id}}-collection-link" href="{% url 'fe-user-collections' subscription.subscribed_user %}">{% translate 'Collections' %}</span></a></p>{% endif %}{% if subscription.subscribed_to_work %}<p><span class="uk-margin"><a class="uk-link" id="user-subscriptions-{{subscription.id}}-work-link" href="{% url 'fe-user-works' subscription.subscribed_user %}">{% translate 'Works' %}</span></a></p>{% endif %}</td>
-		        <td id="user-subscriptions-{{subscription.id}}-ac">(<a id="user-subscriptions-{{subscription.id}}-unsubscribe-link" uk-toggle="target: #subscription-{{subscription.id}}-unsubscribe">Unsubscribe</a>)</td>
-		        <div id="subscription-{{subscription.id}}-unsubscribe" uk-modal>
-			    <div class="uk-modal-dialog uk-modal-body" id="subscription-{{subscription.id}}-unsubscribe-body">
-			        <h2 id="subscription-{{subscription.id}}-unsubscribe-header" class="uk-modal-title">Unsubscribe</h2>
-			        <form class="uk-form-horizontal" action="{% url 'fe-unsubscribe' request.user.username %}" method="post" id="unsubscribe-{{subscription.id}}-form">
-						{% csrf_token %}
-						<input type="hidden" id="unsubscribe-subscription-id" name="subscription_id" value="{{ subscription.id }}">
-				        <div class="uk-grid" uk-grid>
-				        	{% if subscription.subscribed_to_bookmark and subscription.subscribed_to_collection %}
-				            <div class="uk-width-1-1" id="unsubscribe-{{subscription.id}}-form-parent">
-				                <label id="unsubscribe-{{subscription.id}}-all-label" class="uk-form-label" for="unsubscribe-{{subscription.id}}-all-checkbox">{% translate 'Unsubscribe All' %}
-				                </label>
-				                <div class="uk-form-controls" id="unsubscribe-{{subscription.id}}-all-controls">
-				                    <label id="unsubscribe-{{subscription.id}}-all-switch" class="switch"><input class="uk-checkbox" id="unsubscribe-{{subscription.id}}-all-checkbox" type="checkbox" name="unsubscribe_all"> <span id="unsubscribe-{{subscription.id}}-all-slider" class="slider round"></span></label>
-				                </div>
-				            </div>
-				            {% endif %}
-				            {% if subscription.subscribed_to_bookmark %}
-				            <div class="uk-width-1-1" id="unsubscribe-{{subscription.id}}-bookmarks-parent">
-				                <label id="unsubscribe-{{subscription.id}}-bookmarks-label" class="uk-form-label" for="unsubscribe-{{subscription.id}}-bookmarks-checkbox">{% translate 'Unsubscribe Bookmarks' %}
-				                </label>
-				                <div class="uk-form-controls" id="unsubscribe-{{subscription.id}}-bookmarks-controls">
-				                    <label id="unsubscribe-{{subscription.id}}-bookmarks-switch" class="switch"><input class="uk-checkbox" id="unsubscribe-{{subscription.id}}-bookmarks-checkbox" type="checkbox" name="subscribed_to_bookmark"> <span id="unsubscribe-{{subscription.id}}-bookmarks-slider" class="slider round"></span></label>
-				                </div>
-				            </div>
-				            {% endif %}
-				            {% if subscription.subscribed_to_collection %}
-				            <div class="uk-width-1-1" id="unsubscribe-{{subscription.id}}-collections-parent">
-				                <label id="unsubscribe-{{subscription.id}}-collections-label" class="uk-form-label" for="unsubscribe-{{subscription.id}}-collections-checkbox">{% translate 'Unsubscribe Collections' %}
-				                </label>
-				                <div class="uk-form-controls" id="unsubscribe-{{subscription.id}}-collections-controls">
-				                    <label id="unsubscribe-{{subscription.id}}-collections-switch" class="switch"><input class="uk-checkbox" id="unsubscribe-{{subscription.id}}-collections-checkbox" type="checkbox" name="subscribed_to_collection"> <span id="unsubscribe-{{subscription.id}}-collections-slider" class="slider round"></span></label>
-				                </div>
-				            </div>
-				            {% endif %}
-				            {% if subscription.subscribed_to_work %}
-				            <div class="uk-width-1-1" id="unsubscribe-{{subscription.id}}-works-parent">
-				                <label id="unsubscribe-{{subscription.id}}-works-label" class="uk-form-label" for="unsubscribe-{{subscription.id}}-works-checkbox">{% translate 'Unsubscribe Works' %}
-				                </label>
-				                <div class="uk-form-controls" id="unsubscribe-{{subscription.id}}-works-controls">
-				                    <label id="unsubscribe-{{subscription.id}}-works-switch" class="switch"><input class="uk-checkbox" id="unsubscribe-{{subscription.id}}-works-checkbox" type="checkbox" name="subscribed_to_collection"> <span id="unsubscribe-{{subscription.id}}-works-slider" class="slider round"></span></label>
-				                </div>
-				            </div>
-				            {% endif %}
-				            <div class="uk-text-right uk-width-1-1" id="unsubscribe-buttons-container">
-					        	<input id="unsubcribe-cancel" class="uk-button uk-width-small uk-button-default uk-modal-close" value="Cancel"/>
-				            	<button id="unsubcribe-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
-					            <input id="unsubcribe-submit" class="uk-button uk-width-small uk-button-primary" type="submit" value="Submit"/>
-						    </div>
-			        	</div>
-					</form>
-			    </div>
-			</div>
-		    </tr>
-		{% endfor %}
-		</tbody>
-		</table>
-	</div>
-	{% endif %}
+{% block title %}{% translate 'Subscriptions' %}{% endblock %}
+{% block content %}
+    <div id="user-subscriptions-header" class="row row-cols-1">
+        <h1 id="user-subscriptions-h1">{% translate 'Subscriptions' %}</h1>
+        <hr/>
+    </div>
+    <div id="user-subscriptions-detail" class="row row-cols-1">
+        <p class="fs-5">{% blocktranslate %}Welcome to your subscriptions page. You can access your subscription feeds by clicking the links below, or manage your subscriptions in the table.{% endblocktranslate %}</p>
+    </div>
+    <div class="user-subscriptions-links row row-cols-1" id="individual-subscription-buttons">
+        <p><a href="{% url 'fe-user-bookmark-subscriptions' request.user.username %}" class="btn btn-primary">{% translate 'Bookmarks' %}</a>
+        <a href="{% url 'fe-user-collection-subscriptions' request.user.username %}" class="btn btn-primary">{% translate 'Collections' %}</a>
+        <a href="{% url 'fe-user-work-subscriptions' request.user.username %}" class="btn btn-primary">{% translate 'Works' %}</a>
+        <a href="{% url 'fe-user-series-subscriptions' request.user.username %}" class="btn btn-primary">{% translate 'Series' %}</a>
+        <a href="{% url 'fe-user-anthology-subscriptions' request.user.username %}" class="btn btn-primary">{% translate 'Anthologies' %}</a></p>
+        <hr/>
+    </div>
+    <div id="user-subscriptions-content" class="row row-cols-1">
+        <h3>{{ request.user.username }}'s Subscriptions</h3>
+        {% if not subscriptions %}
+        <p id="user-subscriptions-none-message">{% blocktranslate %}No subscriptions yet. To create a subscription, navigate to a user's profile and click the 'subscribe' button.{% endblocktranslate %}</p>
+        {% endif %}
+    </div>
+    {% if subscriptions %}
+    <div class="row row-cols-1">
+        <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">{% translate 'User' %}</th>
+                <th scope="col">{% translate 'Subscribed to' %}</th>
+                <th scope="col">{% translate 'Actions' %}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for subscription in subscriptions %}
+            <tr id="user-subscriptions-{{subscription.id}}-parent">
+                <td data-testid="subscribed-user" id="user-subscriptions-{{subscription.id}}-user"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{% url 'user-profile-parent' subscription.subscribed_user_id %}">{{subscription.subscribed_user}}</a></td>
+                <td data-testid="subscribed-user-subscriptions" id="user-subscriptions-{{subscription.id}}-st">{% if subscription.subscribed_to_bookmark %}<p><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-subscriptions-{{subscription.id}}-bookmark-link" href="{% url 'fe-user-bookmarks' subscription.subscribed_user %}">{% translate 'Bookmarks' %}</a></p>{% endif %}{% if subscription.subscribed_to_collection %}<p><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-subscriptions-{{subscription.id}}-collection-link" href="{% url 'fe-user-collections' subscription.subscribed_user %}">{% translate 'Collections' %}</a></p>{% endif %}{% if subscription.subscribed_to_work %}<p><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-subscriptions-{{subscription.id}}-work-link" href="{% url 'fe-user-works' subscription.subscribed_user %}">{% translate 'Works' %}</a></p>{% endif %}
+                {% if subscription.subscribed_to_series %}<p><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-subscriptions-{{subscription.id}}-series-link" href="{% url 'fe-user-series' subscription.subscribed_user %}">{% translate 'Series' %}</a></p>{% endif %}
+                {% if subscription.subscribed_to_anthology %}<p><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-subscriptions-{{subscription.id}}-anthology-link" href="{% url 'fe-user-anthologies' subscription.subscribed_user %}">{% translate 'Anthologies' %}</a></p>{% endif %}</td>
+                <td id="user-subscriptions-{{subscription.id}}-ac">(<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-subscriptions-{{subscription.id}}-unsubscribe-link" href="#" data-bs-toggle="modal" data-bs-target="#subscription-{{subscription.id}}-unsubscribe" data-testid="subscribed-user-unsubscribe">Unsubscribe</a>)</td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% for subscription in subscriptions %}
+        <div id="subscription-{{subscription.id}}-unsubscribe" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" id="subscription-{{subscription.id}}-unsubscribe-body">
+                    <div class="modal-header">
+                        <h2 id="subscription-{{subscription.id}}-unsubscribe-header">Unsubscribe</h2>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'fe-unsubscribe' request.user.username %}" method="post" id="unsubscribe-{{subscription.id}}-form">
+                            {% csrf_token %}
+                            <input type="hidden" id="unsubscribe-subscription-id" name="subscription_id" value="{{ subscription.id }}">
+                            <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-form-parent">
+                                <input data-testid="unsubscribe-all" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-all-checkbox" type="checkbox" name="unsubscribe_all">
+                                <label id="unsubscribe-{{subscription.id}}-all-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-all-checkbox">{% translate 'Unsubscribe All' %}
+                                </label>
+                            </div>
+                            {% if subscription.subscribed_to_bookmark %}
+                            <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-bookmarks-parent">
+                                <input data-testid="unsubscribe-bookmark" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-bookmarks-checkbox" type="checkbox" name="subscribed_to_bookmark">
+                                <label id="unsubscribe-{{subscription.id}}-bookmarks-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-bookmarks-checkbox">{% translate 'Unsubscribe Bookmarks' %}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if subscription.subscribed_to_collection %}
+                            <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-collections-parent">
+                                <input data-testid="unsubscribe-collection" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-collections-checkbox" type="checkbox" name="subscribed_to_collection">
+                                <label id="unsubscribe-{{subscription.id}}-collections-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-collections-checkbox">{% translate 'Unsubscribe Collections' %}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if subscription.subscribed_to_work %}
+                            <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-works-parent">
+                                <input data-testid="unsubscribe-work" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-works-checkbox" type="checkbox" name="subscribed_to_work">
+                                <label id="unsubscribe-{{subscription.id}}-works-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-works-checkbox">{% translate 'Unsubscribe Works' %}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if subscription.subscribed_to_series %}
+                            <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-series-parent">
+                                <input data-testid="unsubscribe-series" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-series-checkbox" type="checkbox" name="subscribed_to_series">
+                                <label id="unsubscribe-{{subscription.id}}-series-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-series-checkbox">{% translate 'Unsubscribe Series' %}
+                                </label>
+                            </div>
+                            {% endif %}
+                            {% if subscription.subscribed_to_anthology %}
+                            <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-anthology-parent">
+                                <input data-testid="unsubscribe-anthology" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-anthology-checkbox" type="checkbox" name="subscribed_to_anthology">
+                                <label id="unsubscribe-{{subscription.id}}-anthology-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-anthology-checkbox">{% translate 'Unsubscribe Anthology' %}
+                                </label>
+                            </div>
+                            {% endif %}
+                            <div class="mb-3" id="unsubscribe-buttons-container">
+                                <input id="unsubscribe-{{subscription.id}}-cancel" class="btn btn-secondary w-25" value="{% translate 'Cancel' %}" data-bs-dismiss="modal"/>
+                                <button id="unsubscribe-{{subscription.id}}-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
+                                <input data-testid="unsubscribe-submit" id="unsubscribe-{{subscription.id}}-submit" class="btn btn-primary w-25" type="submit" value="{% translate 'Submit' %}"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+    {% endif %}
 {% endblock %}

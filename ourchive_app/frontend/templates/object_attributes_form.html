@@ -1,25 +1,26 @@
-{% if show_header != False %}<h3 id="obj-attrs-form-header">{{ object }} Attributes <sup uk-icon="icon: ourchive-help;ratio:.75"></sup></h3>{% endif %}
+{% load i18n %}
+{% if show_header != False %}<h3 id="obj-attrs-form-header">{{ object }} Attributes</h3>{% endif %}
 {% for attribute in attribute_types %}
-<div class="uk-margin" id="{{attribute.id}}-attr-form-parent-div">
-    <label id="{{attribute.id}}-attr-form-label" class="uk-form-label" for="{{attribute.id}}-attr-multiselect-parent-div">{{attribute.display_name}}</label>
-    {% if attribute.allow_multiselect %}
-        <div class="uk-form-controls" id="{{attribute.id}}-attr-multiselect-parent-div">
+    <p id="{{attribute.id}}-attr-form-label" class="fs-4">{{attribute.display_name}}</p>
+    <div class="mb-3" id="{{attribute.id}}-attr-form-parent-div">
+        {% if attribute.allow_multiselect %}
+                {% for attribute_val in attribute.attribute_values %}
+                    <div class="form-check form-switch">
+                        <input data-testid="attribute-check-multi" class="form-check-input" role="switch" type="checkbox" title="{{object}} {{attribute.name}}: {{attribute_val.name}}" id="{{object}}_attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute.name}}|_|{{attribute_val.name}}" name="attributevals" {% if attribute_val.checked %} checked {% endif %}>
+                        <label id="{{attribute_val.name}}-attr-label" for="attribute_{{attribute.name}}_{{attribute_val.name}}" class="form-check-label">{{ attribute_val.display_name }}</label>
+                    </div>
+                {% endfor %}
+        {% else %}
             {% for attribute_val in attribute.attribute_values %}
-                <div class="uk-margin-right uk-inline">
-                    <input class="uk-checkbox uk-inline" type="checkbox" title="{{object}} {{attribute.name}}: {{attribute_val.name}}" id="{{object}}_attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute.name}}|_|{{attribute_val.name}}" name="attributevals" {% if attribute_val.checked %} checked {% endif %}>
-                    <label id="{{attribute_val.name}}-attr-label" for="attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute_val.display_name}}">{{ attribute_val.display_name }}</label>
+                <div class="form-check">
+                    <input data-testid="attribute-check-single" class="form-check-input" type="radio" title="{{object}} {{attribute.name}}: {{attribute_val.name}}" id="{{object}}_attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute.name}}|_|{{attribute_val.name}}" name="attributevals" {% if attribute_val.checked %} checked {% endif %}>
+                    <label for="attribute_{{attribute.name}}_{{attribute_val.name}}" id="{{attribute_val.name}}-attr-label" class="form-check-label">{{ attribute_val.display_name }}</label>
                 </div>
             {% endfor %}
-        </div>
-    {% else %}
-        <div class="uk-form-controls" id="{{attribute.id}}-attr-single-select-parent-div">
-        {% for attribute_val in attribute.attribute_values %}
-            <div class="uk-margin-right uk-inline">
-                <input class="uk-radio" type="radio" title="{{object}} {{attribute.name}}: {{attribute_val.name}}" id="{{object}}_attribute_{{attribute.name}}_{{attribute_val.name}}" value="{{attribute.name}}|_|{{attribute_val.name}}" name="attributevals" {% if attribute_val.checked %} checked {% endif %}>
-                <label for="attribute_{{attribute.name}}_{{attribute_val.name}}" id="{{attribute_val.name}}-attr-label" value="{{attribute_val.display_name}}">{{ attribute_val.display_name }}</label>
+            <div class="form-check">
+                <input class="form-check-input" data-testid="attribute-noval" type="radio" title="None" id="empty-radio" value="None" name="attributevals">
+                <label for="empty-radio" id="empty-radio-label" class="form-check-label">{% translate 'No selection' %}</label>
             </div>
-        {% endfor %}
-        </div>
-    {% endif %}
-</div>
+        {% endif %}
+    </div>
 {% endfor %}

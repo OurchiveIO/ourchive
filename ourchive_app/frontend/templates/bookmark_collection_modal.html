@@ -1,29 +1,47 @@
 {% load i18n %}
-<div id="bookmark-add-collection-modal" uk-modal>
-    <div class="uk-modal-dialog uk-modal-body" id="bookmark-add-collection-modal-body">
-        <h2 id="bookmark-add-collection-modal-header" class="uk-modal-title">Add to Collection</h2>
-        <p class="uk-text-medium">{% blocktranslate %}Add this work to any of your 10 most recent collections.{% endblocktranslate %}</p>
-        <div class="uk-overflow-auto uk-width-1-1 uk-padding-remove-horizontal">
-            <table class="uk-table uk-table-striped">
-                <thead>
-                    <tr>
-                        <th>{% translate 'Collection' %}</th>
-                        <th>{% translate 'Add to Collection' %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for collection in collections.results %}
-                        <tr id="collection-{{ work.id }}-parent">
-                            <td id="collection-{{ work.id }}-bookmark">{{ collection.title }}</td>
-                            <td id="collection-{{ work.id }}-radio"><input type="radio" name="{{collection.id}}" id="add-to-bookmark-radio-{{ collection.id }}" class="add-to-bookmark-radio"/></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div id="bookmark-add-collection-modal" class="modal" tabindex="-1">
+    <div class="modal-dialog" id="bookmark-add-collection-modal-body">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="bookmark-add-collection-modal-header">Add to Collection</h2>
+            </div>
+            <div class="modal-body">
+                {% if collections.results %}
+                    <p>{% blocktranslate %}Add this work to one of your most recent collections. Only collections not containing this work are shown.{% endblocktranslate %}</p>
+                    <div class="row row-cols-1">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">{% translate 'Collection' %}</th>
+                                    <th scope="col">{% translate 'Add to Collection' %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for collection in collections.results %}
+                                    <tr id="collection-{{ work.id }}-parent">
+                                        <td id="collection-{{ work.id }}-bookmark"><label class="form-check-input" for="add-to-bookmark-radio-{{ collection.id }}">{{ collection.title }}</label></td>
+                                        <td id="collection-{{ work.id }}-radio"><input type="radio" name="{{collection.id}}" id="add-to-bookmark-radio-{{ collection.id }}" class="add-to-bookmark-radio form-check-input"/></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="add-to-bookmark-modal-button-parent" class="text-end">
+                        <a id="add-to-bookmark-modal-cancel" class="btn btn-secondary" data-bs-dismiss="modal">{% translate 'Cancel' %}</a>
+                        <a id="add-to-bookmark-modal-add" class="btn btn-primary" onclick="addSelectedCollection()" href="#" data-bs-dismiss="modal">{% translate 'Add to Collection' %}</a>
+                    </p>
+                {% elif request.user.is_authenticated %}
+                    <p>{% blocktranslate %}No recent collections were found.{% endblocktranslate %} <a href="{% url 'fe-new-collection' %}" title="{% translate 'New Collection' %}">{% translate 'Create new collection' %}</a>?</p>
+                    <p id="add-to-bookmark-modal-button-parent" class="text-end">
+                        <a id="add-to-bookmark-modal-cancel" class="btn btn-secondary" data-bs-dismiss="modal">{% translate 'Cancel' %}</a>
+                    </p>
+                {% else %}
+                    <p>{% blocktranslate %}You must be logged in to add this work to a collection.{% endblocktranslate %} <a href="{% url 'fe-login' %}" title="{% translate 'Login' %}">{% translate 'Log in' %}</a>?</p>
+                    <p id="add-to-bookmark-modal-button-parent" class="text-end">
+                        <a id="add-to-bookmark-modal-cancel" class="btn btn-secondary" data-bs-dismiss="modal">{% translate 'Cancel' %}</a>
+                    </p>
+                {% endif %}
+            </div>
         </div>
-        <p id="add-to-bookmark-modal-button-parent" class="uk-text-right">
-            <a id="add-to-bookmark-modal-cancel" class="uk-button uk-button-default uk-modal-close uk-margin-right">{% translate 'Cancel' %}</a>
-            <a id="add-to-bookmark-modal-add" class="uk-button uk-button-primary uk-modal-close" onclick="addSelectedCollection()" href="#">{% translate 'Add to Collection' %}</a>
-        </p>
     </div>
 </div>

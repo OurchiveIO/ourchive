@@ -1,6 +1,6 @@
 [
 {
-    "model": "api.userblocks",
+    "model": "core.userblocks",
     "pk": 1,
     "fields": {
         "uid": "4e4cc372-712f-4a2f-84e6-46e931af0d16",
@@ -11,7 +11,7 @@
     }
 },
 {
-    "model": "api.userblocks",
+    "model": "core.userblocks",
     "pk": 2,
     "fields": {
         "uid": "1ef9a344-8a43-413a-ad5b-7f67235a365a",
@@ -22,7 +22,7 @@
     }
 },
 {
-    "model": "api.userblocks",
+    "model": "core.userblocks",
     "pk": 3,
     "fields": {
         "uid": "d1b7358f-18e9-4122-8c68-eab209e155b1",

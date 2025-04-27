@@ -6,7 +6,7 @@ import uuid
 import os
 import pathlib
 import audioread
-from api.models import OurchiveSetting
+from core.models import OurchiveSetting
 
 
 logger = logging.getLogger(__name__)
@@ -56,10 +56,11 @@ class LocalFileHelper:
         filename = self.common.get_filename(name)
         content_type = 'image/' if 'image' in file.content_type else 'audio/' if 'audio' in file.content_type else 'video/' if 'video' in file.content_type else 'upload/' if self.common.get_allowed_content_types(file.content_type) else None
         if not content_type:
-            print(f"CONTENT TYPE: {file.content_type}")
+            logger.warning(f"Invalid content type: {file.content_type}")
             return None
-        full_name = settings.MEDIA_ROOT + '/' + content_type + username + "/" + filename
-        logging.debug(f"File upload: {full_name}")
+        media_root = settings.MEDIA_ROOT if settings.MEDIA_ROOT.endswith('/') else f'{settings.MEDIA_ROOT}/'
+        full_name = (media_root[1:] if media_root.startswith('/') and settings.OURCHIVE_DOCKER else media_root) + content_type + username + "/" + filename
+        logger.debug(f"File upload: {full_name}")
         os.makedirs(os.path.dirname(full_name), exist_ok=True)
         with open(full_name, 'wb+') as destination:
             for chunk in file.chunks():

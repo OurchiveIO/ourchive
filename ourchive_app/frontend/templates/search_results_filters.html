@@ -1,0 +1,57 @@
+{% load i18n %}
+<div data-testid="result-filter-pane" class="offcanvas-lg offcanvas-start" tabindex="-1" id="search-filter-results" aria-labelledby="search-filter-label">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="search-filter-label">{% translate 'Filters' %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#search-filter-results" aria-label="{% translate 'Close' %}"></button>
+    </div>
+	<div class="row overflow-auto">
+        <div class="col-12">
+            <form method="post" class="oc-fixed-width" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">
+                {% csrf_token %}
+                <div class="accordion" id="search-accordion">
+                    {% for facet_group in facets %}
+                        <div class="accordion-item" id="accordion-item-{{forloop.counter0}}">
+                            <h2 class="accordion-header">
+                                <a class="accordion-button {% if not forloop.first and not facet_group.expand %}collapsed{% endif %} link-underline link-underline-opacity-0" data-bs-toggle="collapse" data-bs-target="#accordion-body-{{forloop.counter0}}" aria-expanded="true" aria-controls="accordion-body-{{forloop.counter0}}" href="#" onclick="setSearchToggles({{ forloop.counter0 }})">{{ facet_group.label }}</a>
+                            </h2>
+                            <div class="accordion-collapse collapse {% if forloop.first or facet_group.expand %}show{% endif %}" id="accordion-body-{{forloop.counter0}}">
+                                <div class="accordion-body">
+                                    {% for facet in facet_group.facets %}
+                                        {% include "facet_tile.html" with include='include'%}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if request.user.is_authenticated %}
+                    <div class="border-start border-end border-bottom p-3" id="search-save-name-parent">
+                        <label id="save-search-label" for="search-name" class="form-label">{% translate 'Save search with name' %}</label>
+                        <input type="hidden" id="search_id" name="search_id" value="{{ search_id|default_if_none:0 }}"/>
+                        <input id="search-name" class="form-control" type="text" name="search-name" value="{{ search_name|default_if_none:'' }}">
+                    </div>
+                {% endif %}
+                <div class="border-start border-end border-bottom p-3">
+                    <label class="form-label" for="search-results-sort-select-hidden">{% translate 'Sort by...' %}</label>
+                    <select id="search-results-sort-select-hidden" name="order_by" class="form-select">
+                        <option id="search-results-sort-newest" value="-updated_on" {%if order_by == '-updated_on'%}selected{%endif%}>
+                            {% translate 'Last Updated' %}</option>
+                        <option id="search-results-sort-oldest" value="-comment_count" {%if order_by == '-comment_count'%}selected{%endif%}>
+                            {% translate 'Comments' %}</option>
+                        <option id="search-results-sort-oldest" value="-fingerguns" {%if order_by == '-fingerguns'%}selected{%endif%}>
+                            {% translate 'Fingerguns' %}</option>
+                    </select>
+                </div>
+                <input type="hidden" id="term" name="term" value="{{ term }}">
+                {% if tag_id %}
+                <input type="hidden" id="tag_id" name="tag_id" value="{{ tag_id }}">
+                {% endif %}
+                <input type="hidden" id="active_tab" name="active_tab" value="{{ default_tab }}">
+                <div class="mb-3 border-start border-end border-bottom p-3">
+                    <button data-testid="search-facet-form-cancel" class="btn btn-secondary" type="button" onClick="clearAll()">Clear All</button>
+                    <input data-testid="search-facet-form-submit" id="search-results-work-facet-form-submit" class="btn btn-primary" type="submit" value="Filter"/>
+                </div>
+	        </form>
+        </div>
+	</div>
+</div>
