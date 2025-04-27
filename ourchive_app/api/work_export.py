@@ -23,6 +23,7 @@ def get_media_url(work_uid):
 
 def get_zip_dir(work):
     clean_title = "".join([c for c in work.title if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+    os.makedirs(f"{get_media_directory(work.uid)}", exist_ok=True)
     return f"{get_media_directory(work.uid)}{clean_title}.zip"
 
 
