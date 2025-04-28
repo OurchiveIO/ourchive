@@ -91,10 +91,16 @@
                     <li id="nav-new-series-li"><a href="{% url 'fe-create-series' %}" id="nav-new-series-link" class="dropdown-item">{% translate 'New Series' %}</a></li>
                     <li id="nav-new-anthology-li"><a href="{% url 'fe-create-anthology' %}" id="nav-new-anthology-link" class="dropdown-item">{% translate 'New Anthology' %}</a></li>
                     <li id="nav-creations-li"><a href="{% url 'user-profile-parent' request.user.id %}" id="nav-creations-link" class="dropdown-item">{% translate 'My Chives' %}</a></li>
-                    <li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}" class="dropdown-item">{% translate 'Subscriptions' %}</a></li>
+                    <li id="nav-account-profile"><a href="{% url 'fe-user-profile-edit' request.user.id %}" id="nav-account-profile-link" class="dropdown-item ms-2">{% translate 'Update Profile' %}</a></li>
+                    <li id="nav-account-management"><a href="{% url 'fe-user-account-edit' request.user.id %}" id="nav-account-management-link" class="dropdown-item ms-2">{% translate 'Update Account' %}</a></li>
+                    <li id="nav-account-approvals"><a href="{% url 'fe-view-approvals' %}" id="nav-account-approvals-link" class="dropdown-item ms-2">{% translate 'Approvals' %}</a></li>
+                    <li id="nav-account-blocklist"><a href="{% url 'fe-user-blocklist' request.user %}" id="nav-account-blocklist-link" class="dropdown-item ms-2">{% translate 'Blocklist' %}</a></li>
+                    <li id="nav-subscriptions-parent"><a href="{% url 'fe-user-subscriptions' request.user %}" class="dropdown-item ms-2">{% translate 'Subscriptions' %}</a></li>
+                    <li id="nav-saved-searches-parent"><a href="{% url 'fe-user-saved-searches' request.user %}" class="dropdown-item ms-2">{% translate 'Saved Searches' %}</a></li>
+                    <li id="nav-notifications-li"><a href="/username/{{request.user}}/notifications" id="nav-notifications-link" class="dropdown-item ms-2">Notifications</a></li>
                     <li id="nav-import-works-li"><a href="{% url 'fe-import-works' request.user %}" id="nav-import-work-link" class="dropdown-item">{% translate 'Import Work(s)' %}</a></li>
-                    <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}" class="dropdown-item">{% translate 'Import Status' %}</a></li>
-                    <li id="nav-notifications-li"><a href="/username/{{request.user}}/notifications" id="nav-notifications-link" class="dropdown-item">Notifications</a></li>
+                    <li id="imports-status"><a href="{% url 'fe-import-works-status' request.user.id %}" class="dropdown-item ms-2">{% translate 'Import Status' %}</a></li>
+
                     <li id="nav-signout-li"><a href="/logout" id="nav-signout-link" class="dropdown-item">Log Out</a></li>
                 </ul>
             </li>
