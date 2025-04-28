@@ -18,6 +18,10 @@ python manage.py createourchivesuperuser
 echo Give permission to ourchive:ourchive
 chown -R ourchive:ourchive /ourchive_app
 
+# Start scheduler
+echo Running apscheduler...
+nohup python manage.py runapscheduler &
+
 # Start Ourchive processes
 echo Starting Ourchive...
 exec gosu ourchive gunicorn ourchive_app.wsgi:application \

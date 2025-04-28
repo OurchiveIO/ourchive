@@ -17,6 +17,7 @@ COPY --from=root ./ourchive_app /ourchive_app
 COPY entrypoint.sh /ourchive_app
 WORKDIR /ourchive_app
 RUN ls
+RUN pwd
 
 # grab gosu for easy step-down from root
 # https://github.com/tianon/gosu/blob/master/INSTALL.md
