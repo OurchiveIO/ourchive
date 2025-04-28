@@ -197,6 +197,7 @@ USE_TZ = True
 
 
 STATIC_URL = f"{ os.getenv('OURCHIVE_SCHEME', 'http') }://{ os.getenv('OURCHIVE_DOMAIN', 'localhost:9000') }/static/"
+DEFAULT_ICON_URL = f"{STATIC_URL}icon-default.png"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 

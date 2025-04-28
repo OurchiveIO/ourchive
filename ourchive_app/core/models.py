@@ -11,9 +11,6 @@ from django_registration.validators import ReservedNameValidator
 from django.core.validators import validate_slug
 from django.conf import settings
 
-# TODO: this feels illegal
-DEFAULT_ICON_URL = f'{settings.STATIC_URL}icon-default.png'
-
 
 class User(AbstractUser):
     username_validator = ReservedNameValidator()
@@ -30,7 +27,7 @@ class User(AbstractUser):
     created_on = models.DateTimeField(default=timezone.now)
     updated_on = models.DateTimeField(default=timezone.now)
     profile = models.TextField(null=True, blank=True)
-    icon = models.CharField(max_length=600, null=True, blank=True, default=DEFAULT_ICON_URL)
+    icon = models.CharField(max_length=600, null=True, blank=True, default='CHANGEME')
     icon_alt_text = models.CharField(max_length=600, null=True, blank=True)
     has_notifications = models.BooleanField(default=False)
     default_content = models.TextField(null=True, blank=True)
@@ -56,6 +53,8 @@ class User(AbstractUser):
     default_languages = models.ManyToManyField('Language', related_name='users')
 
     def save(self, *args, **kwargs):
+        if self.icon == 'CHANGEME':
+            self.icon = settings.DEFAULT_ICON_URL
         self.display_username = self.username
         self.username = self.username.lower()
         super(User, self).save(*args, **kwargs)
@@ -864,6 +863,7 @@ class News(models.Model):
         return self.title
 
     class Meta:
+        ordering = ('-created_on', '-updated_on')
         verbose_name_plural = "news"
         db_table = 'core_news'
 
