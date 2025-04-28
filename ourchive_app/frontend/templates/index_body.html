@@ -16,9 +16,11 @@
         <div>
             <ul class="nav nav-tabs" role="tablist">
                 {% for item in browse_cards %}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if forloop.first %}active{% endif %}" id="{{ forloop.counter }}-tab" data-bs-toggle="tab" data-bs-target="#{{ forloop.counter }}-tab-pane" type="button" role="tab" aria-controls="{{ forloop.counter }}-tab-pane" aria-selected="true">{{ item.label }}</button>
-                    </li>
+                    {% if item.cards %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if forloop.first %}active{% endif %}" id="{{ forloop.counter }}-tab" data-bs-toggle="tab" data-bs-target="#{{ forloop.counter }}-tab-pane" type="button" role="tab" aria-controls="{{ forloop.counter }}-tab-pane" aria-selected="true">{{ item.label }}</button>
+                        </li>
+                    {% endif %}
                 {% endfor %}
             </ul>
             <div class="tab-content">
