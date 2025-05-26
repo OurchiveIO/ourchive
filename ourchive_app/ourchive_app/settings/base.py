@@ -280,16 +280,17 @@ CHIVE_HEADER_URLS = [
 CHIVE_COVER_URLS = [
 ]
 
-if not DEBUG and os.getenv('OURCHIVE_CACHE', False):
-    CACHE_MIDDLEWARE_ALIAS = "default"
-    CACHE_MIDDLEWARE_SECONDS = 3600
-    CACHE_MIDDLEWARE_KEY_PREFIX = ""
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-            "LOCATION": 'ourchive_database_cache',
-            "KEY_FUNCTION": "frontend.signals.make_key"
-        }
-    }
-else:
-    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache', }}
+# untested
+#if not DEBUG and os.getenv('OURCHIVE_CACHE', False):
+#    CACHE_MIDDLEWARE_ALIAS = "default"
+#    CACHE_MIDDLEWARE_SECONDS = 3600
+#    CACHE_MIDDLEWARE_KEY_PREFIX = ""
+#    CACHES = {
+#        "default": {
+#            "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+#            "LOCATION": 'ourchive_database_cache',
+#            "KEY_FUNCTION": "frontend.signals.make_key"
+#        }
+#    }
+#else:
+#    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache', }}
