@@ -7100,6 +7100,7 @@ progress {
 
 .choices__list--multiple .choices__item {
   background-color: #1D7E75 !important;
+  color: #272E35 !important;
   border: 1px solid #163C38 !important;
   border-radius: 0px;
 }
@@ -7217,6 +7218,12 @@ progress {
   .oc-nav-items-right {
     min-width: 200px;
   }
+}
+[data-bs-theme=dark] .choices__input {
+  color: #272E35;
+}
+[data-bs-theme=dark] .choices__item--choice {
+  color: #272E35;
 }
 
 /*# sourceMappingURL=ourchive.css.map */
