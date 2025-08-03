@@ -160,6 +160,9 @@ class UserWorkSubscription(models.Model):
         on_delete=models.CASCADE
     )
 
+    def __str__(self):
+        return f'{self.user} - {self.work}'
+
     def __repr__(self):
         return '<UserWorkSubscription {}>'.format(self.id)
 
@@ -184,6 +187,9 @@ class UserCollectionSubscription(models.Model):
         'User',
         on_delete=models.CASCADE
     )
+
+    def __str__(self):
+        return f'{self.user} - {self.collection}'
 
     def __repr__(self):
         return '<UserCollectionSubscription {}>'.format(self.id)
