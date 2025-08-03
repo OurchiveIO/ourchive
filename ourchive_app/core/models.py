@@ -142,6 +142,57 @@ class UserSubscription(models.Model):
     class Meta:
         ordering = ['-updated_on']
         db_table = 'core_usersubscription'
+        verbose_name = 'Subscribed user'
+        verbose_name_plural = 'Subscribed users'
+
+
+class UserWorkSubscription(models.Model):
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
+    work = models.ForeignKey(
+        'Work',
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE
+    )
+
+    def __repr__(self):
+        return '<UserWorkSubscription {}>'.format(self.id)
+
+    class Meta:
+        ordering = ['-updated_on']
+        db_table = 'core_userworksubscription'
+        verbose_name = 'Subscribed work'
+        verbose_name_plural = 'Subscribed works'
+
+
+class UserCollectionSubscription(models.Model):
+    id = models.AutoField(primary_key=True)
+    uid = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_on = models.DateTimeField(default=timezone.now)
+    updated_on = models.DateTimeField(default=timezone.now)
+    collection = models.ForeignKey(
+        'BookmarkCollection',
+        on_delete=models.CASCADE
+    )
+
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE
+    )
+
+    def __repr__(self):
+        return '<UserCollectionSubscription {}>'.format(self.id)
+
+    class Meta:
+        ordering = ['-updated_on']
+        db_table = 'core_usercollectionsubscription'
+        verbose_name = 'Subscribed collection'
+        verbose_name_plural = 'Subscribed collections'
 
 
 class Language(models.Model):
