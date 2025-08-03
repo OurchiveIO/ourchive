@@ -2,7 +2,7 @@ from django.contrib import admin
 from core.models import User, TagType, WorkType, NotificationType, OurchiveSetting, \
     ContentPage, Tag, Invitation, AttributeType, AttributeValue, UserReportReason, \
     UserReport, UserSubscription, AdminAnnouncement, Language, News, Anthology, AnthologyWork, \
-    SearchGroup, UserWorkSubscription, UserCollectionSubscription
+    SearchGroup, UserWorkSubscription, UserCollectionSubscription, Work
 from django.db import models
 from django.forms.widgets import Input
 from django.core.mail import send_mail
@@ -204,3 +204,4 @@ admin.site.register(AnthologyWork)
 admin.site.register(SearchGroup, SearchGroupAdmin)
 admin.site.register(UserCollectionSubscription)
 admin.site.register(UserWorkSubscription)
+admin.site.register(Work)

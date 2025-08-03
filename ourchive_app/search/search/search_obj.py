@@ -53,6 +53,9 @@ class WorkFilter(object):
             },
             'languages': {
                 'languages__display_name__iexact': [],
+            },
+            'user_work_subscriptions': {
+                'user_work_subscriptions__user_id': None
             }
         }
         self.exclude_filters = {
@@ -104,6 +107,8 @@ class WorkFilter(object):
             self.include_filters['word_count']['word_count__lte'] = dict_obj.get(WORD_COUNT_FILTER_KEY_LTE, [])
             self.include_filters['word_count']['word_count__gte'] = dict_obj.get(WORD_COUNT_FILTER_KEY_GTE, [])
             self.include_filters['type']['work_type__type_name__exact'] = dict_obj.get(WORK_TYPE_FILTER_KEY, [])
+            self.include_filters['user_work_subscriptions']['user_work_subscriptions__user_id'] = (
+                dict_obj.get('user_id', None))
             for range_tuple in dict_obj.get('word_count_range', []):
                 self.include_filters['word_count_range']['ranges'].append(range_tuple)
         else:

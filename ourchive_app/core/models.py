@@ -153,7 +153,8 @@ class UserWorkSubscription(models.Model):
     updated_on = models.DateTimeField(default=timezone.now)
     work = models.ForeignKey(
         'Work',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='user_work_subscriptions'
     )
     user = models.ForeignKey(
         'User',

@@ -21,6 +21,7 @@ class OurchiveSearch:
 		if 'work_type_id' in kwargs and kwargs['work_type_id']:
 			return self.filter_by_work_type(**kwargs)
 		if ('work_search') in kwargs:
+			# TODO: figure out best way to indicate 'we are filtering on user subscriptions' - like tag filter probably?
 			results['work'] = self.searcher.search_works(kwargs['options'], **kwargs['work_search'])
 			tags = tags + results['work'].pop('tags')
 		if ('bookmark_search') in kwargs:
