@@ -20,21 +20,22 @@ class OurchiveSearch:
 			return self.filter_by_attribute(**kwargs)
 		if 'work_type_id' in kwargs and kwargs['work_type_id']:
 			return self.filter_by_work_type(**kwargs)
-		if ('work_search') in kwargs:
+		kwargs['options']['request_user'] = user_id
+		if 'work_search' in kwargs:
 			# TODO: figure out best way to indicate 'we are filtering on user subscriptions' - like tag filter probably?
 			results['work'] = self.searcher.search_works(kwargs['options'], **kwargs['work_search'])
 			tags = tags + results['work'].pop('tags')
-		if ('bookmark_search') in kwargs:
+		if 'bookmark_search' in kwargs:
 			results['bookmark'] = self.searcher.search_bookmarks(kwargs['options'], **kwargs['bookmark_search'])
 			tags = tags + results['bookmark'].pop('tags')
-		if ('tag_search') in kwargs:
+		if 'tag_search' in kwargs:
 			results['tag'] = self.searcher.search_tags(kwargs['options'], **kwargs['tag_search'])
 			tags = tags + results['tag'].pop('tags')
-		if ('user_search') in kwargs:
+		if 'user_search' in kwargs:
 			results['user'] = self.searcher.search_users(kwargs['options'], **kwargs['user_search'])
 			if 'tags' in results['user']:
 				tags = tags + results['user'].pop('tags')
-		if ('collection_search') in kwargs:
+		if 'collection_search' in kwargs:
 			results['collection'] = self.searcher.search_collections(kwargs['options'], **kwargs['collection_search'])
 			tags = tags + results['collection'].pop('tags')
 		kwargs['user_id'] = user_id
