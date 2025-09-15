@@ -426,6 +426,7 @@ class SearchOptions(object):
     def __init__(self):
         self.split_include_exclude = False
         self.order_by = '-updated_on'
+        self.subscribed = False
 
     def to_dict(self):
         return self.__dict__
