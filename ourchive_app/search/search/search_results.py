@@ -220,7 +220,7 @@ class SearchResults(object):
         # todo move to db setting
         complete_dict = {}
         complete_dict["label"] = "Completion Status"
-        complete_dict["object_type"] = 'work'
+        complete_dict["object_type"] = 'chive'
         complete_dict['display_type'] = 'checkbox'
         complete_dict["values"] = [{"label": "Complete", "filter_val": "1",
                                     "checked": "1" in getattr(self, f'work_search_{context}').get("Completion Status",

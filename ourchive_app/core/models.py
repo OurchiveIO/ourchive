@@ -154,7 +154,7 @@ class UserWorkSubscription(models.Model):
     work = models.ForeignKey(
         'Work',
         on_delete=models.CASCADE,
-        related_name='user_work_subscriptions'
+        related_name='user_subscriptions'
     )
     user = models.ForeignKey(
         'User',
@@ -181,7 +181,8 @@ class UserCollectionSubscription(models.Model):
     updated_on = models.DateTimeField(default=timezone.now)
     collection = models.ForeignKey(
         'BookmarkCollection',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='user_subscriptions'
     )
 
     user = models.ForeignKey(

@@ -145,11 +145,11 @@ def build_request_filters(request, include_exclude, request_object, request_buil
 			request_object.bookmark_search.exclude_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.exclude_filter)
 	elif filter_type == "chive":
 		if include_exclude == 'include':
-			request_object.bookmark_search.include_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.include_filter)
+			#request_object.bookmark_search.include_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.include_filter)
 			request_object.work_search.include_filter = add_filter_to_work(filter_val, filter_details, request_object.work_search.include_filter)
 			request_object.collection_search.include_filter = add_filter_to_collection(filter_val, filter_details, request_object.collection_search.include_filter)
 		else:
-			request_object.bookmark_search.exclude_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.exclude_filter)
+			#request_object.bookmark_search.exclude_filter = add_filter_to_bookmark(filter_val, filter_details, request_object.bookmark_search.exclude_filter)
 			request_object.work_search.exclude_filter = add_filter_to_work(filter_val, filter_details, request_object.work_search.exclude_filter)
 			request_object.collection_search.include_filter = add_filter_to_collection(filter_val, filter_details, request_object.collection_search.include_filter)
 	return request_object
@@ -270,7 +270,7 @@ def execute_search(request, post_request):
 	term = request.POST.get('term', '')
 	if not term:
 		term = request.GET.get('term')
-	term = '' if term == 'None' else term
+	term = '' if term == 'None' or term is None else term
 	tag_id = request.GET.get('tag_id', None)
 	attr_id = request.GET.get('attr_id', None)
 	work_type_id = request.GET.get('work_type_id', None)

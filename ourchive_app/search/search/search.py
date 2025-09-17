@@ -2,7 +2,7 @@ from core.models import *
 from api import object_factory
 import re
 from django.db.models import Q
-from .search_obj import WorkSearch, BookmarkSearch, TagSearch, UserSearch, CollectionSearch
+from .search_obj import WorkSearch, BookmarkSearch, TagSearch, UserSearch, CollectionSearch, SearchOptions
 from django.contrib.postgres.search import TrigramWordDistance
 from django.core.paginator import Paginator
 from django.conf import settings
@@ -83,13 +83,14 @@ class PostgresProvider:
         '''
         return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
 
-    def get_query(self, query_string, search_fields):
+    def get_query(self, query_string, search_fields, options=None):
         ''' Returns a query, that is a combination of Q objects. That combination
             aims to search keywords within a model by testing the given search fields.
 
         '''
         query = None  # Query to search for every search term
         terms = self.normalize_query(query_string)
+        #TODO: subscription query
         for term in terms:
             or_query = None  # Query to search for a given term in each field
             for field_name in search_fields:
@@ -127,7 +128,6 @@ class PostgresProvider:
                     existing_query = or_query
                 else:
                     existing_query = existing_query | or_query if 'count' not in filter_text else existing_query & or_query
-
         return existing_query
 
     def build_range_query(self, filter_obj, existing_query):
@@ -189,7 +189,7 @@ class PostgresProvider:
         return [resultset, {"count": count, "prev_params": prev_params, "next_params": next_params, "page_params": f"&object_type={obj.__name__}", "current_page": page}]
 
     # TODO: move to kwargs or obj. my god.
-    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True, has_private=False, has_filterable=False):
+    def run_queries(self, filters, query, obj, trigram_fields, term, page=1, order_by='-updated_on', has_drafts=False, trigram_max=0.85, require_distinct=True, has_private=False, has_filterable=False, options=None):
         resultset = None
         page = int(page)
         import time
@@ -197,15 +197,11 @@ class PostgresProvider:
         # filter on query first, then use filters (more exact, used when searching within) to narrow
         if query is not None:
             resultset = obj.objects.filter(query).distinct()
-            if resultset is not None and has_drafts:
-                resultset = resultset.filter(draft=False)
-            if resultset is not None and has_private:
-                resultset = resultset.filter(is_private=False)
             end = time.time()
             length = end - start
             print(f'text execution: {length}')
             start = time.time()
-        if filters is not None and (not not term and resultset is not None and len(resultset) > 0):
+        if filters is not None:
             if resultset is None and filters[0]:
                 resultset = obj.objects.filter(filters[0])
             elif filters[0]:
@@ -229,6 +225,8 @@ class PostgresProvider:
         length = end - start
         print(f'filter execution: {length}')
         start = time.time()
+        if resultset is not None and len(resultset) > 0 and options and options.subscriptions:
+            resultset = obj.objects.filter(user_subscriptions__user__id=options.request_user)
         if resultset is not None and len(resultset) == 0 and query and not filters:
             # if exact matching & filtering produced no results, let's do limited trigram searching
             if len(trigram_fields) > 1:
@@ -279,6 +277,10 @@ class PostgresProvider:
         start = time.time()
         if resultset and has_filterable:
             resultset = resultset.filter(filterable=True)
+        if resultset is not None and has_drafts:
+            resultset = resultset.filter(draft=False)
+        if resultset is not None and has_private:
+            resultset = resultset.filter(is_private=False)
         if require_distinct and resultset:
             # remove any dupes & apply order_by
             if hasattr(obj, order_by.replace('-', '')):
@@ -444,13 +446,15 @@ class PostgresProvider:
     def search_works(self, options, **kwargs):
         work_search = WorkSearch()
         work_search.from_dict(kwargs)
+        search_options = SearchOptions()
+        search_options.from_dict(options)
         work_filters = self.get_filters(work_search)
         # build query
         query = self.get_query(work_search.term, work_search.term_search_fields)
         if not query and not work_filters:
             return {'data': []}
         resultset = self.run_queries(work_filters, query, Work, [
-                                     'title', 'summary'], work_search.term, kwargs['page'], options.get('order_by', '-updated_on'), True)
+                                     'title', 'summary'], work_search.term, kwargs['page'], search_options.order_by, has_drafts=True, options=search_options)
         result_json = self.build_work_resultset(resultset[0][0], work_search.reserved_fields)
         return {'pages': math.ceil(resultset[0][1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 
@@ -470,12 +474,14 @@ class PostgresProvider:
         collection_search = CollectionSearch()
         collection_search.from_dict(kwargs)
         collection_filters = self.get_filters(collection_search)
+        search_options = SearchOptions()
+        search_options.from_dict(options)
         query = self.get_query(collection_search.term,
                                collection_search.term_search_fields)
         if not query and not collection_filters:
             return {'data': []}
         resultset = self.run_queries(collection_filters, query, BookmarkCollection, [
-                                     'title', 'short_description'], collection_search.term, kwargs.get('page', 1), options.get('order_by', '-updated_on'), True)
+                                     'title', 'short_description'], collection_search.term, kwargs.get('page', 1), search_options.order_by, has_drafts=True, options=search_options)
         result_json = self.build_collection_resultset(resultset[0][0], collection_search.reserved_fields)
         return {'pages': math.ceil(resultset[0][1]['count']/settings.REST_FRAMEWORK.get('page_size', 10)), 'data': result_json, 'page': resultset[0][1], 'tags': resultset[1]}
 

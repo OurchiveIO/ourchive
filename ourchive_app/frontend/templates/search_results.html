@@ -194,7 +194,7 @@
                 <div class="row row-cols-1 mb-3">{% include "work_tile.html" %}</div>
             {% endfor %}
             {% if works.data %}
-
+                {% include 'search_results_pagination.html' with chive=works chive_name='work_search' %}
             {% endif %}
         </div>
         <div class="tab-pane fade {% if default_tab == 1 %}show active{% endif %}" role="tabpanel" aria-labelledby="bookmarks_tab" tabindex="0" id="1-tab-pane">
