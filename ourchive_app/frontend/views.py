@@ -22,7 +22,7 @@ import random
 from django.core.cache import cache
 from django.views.decorators.vary import vary_on_cookie
 from operator import itemgetter
-from frontend.searcher import build_and_execute_search, execute_search
+from frontend.searcher import build_and_execute_search, execute_search, get_search_request_from_saved
 from frontend.view_utils import *
 from datetime import *
 from django.urls import reverse
@@ -631,20 +631,28 @@ def user_anthology_subscriptions(request, username):
 	return page_content
 
 
+def user_subscriptions_manage(request, username):
+	if not request.user.is_authenticated or not request.user.username == username:
+		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
+		return redirect('/')
+	response = do_get(f'api/users/{username}/subscriptions', request, 'Subscription')
+	page_content = render(request, 'user_subscriptions_manage.html', {
+		'subscriptions': response.response_data['results'] if 'results' in response.response_data else {}
+	})
+	return page_content
+
 def user_subscriptions(request, username):
 	if not request.user.is_authenticated or not request.user.username == username:
 		messages.add_message(request, messages.ERROR, _('You do not have permission to view these subscriptions.'), 'subscription-not-authed')
 		return redirect('/')
-	cache_key = f'subscription_{username}_{request.user}'
-	if cache.get(cache_key):
-		return cache.get(cache_key)
-	response = do_get(f'api/users/{username}/subscriptions', request, 'Subscription')
-	page_content = render(request, 'user_subscriptions.html', {
-		'subscriptions': response.response_data['results'] if 'results' in response.response_data else {}
-	})
-	if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
-		cache.set(cache_key, page_content, 60 * 60)
-	return page_content
+	# There is probably a better way to do this.
+	request.GET._mutable = True
+	request.GET['subscriptions'] = 'True'
+	request.GET._mutable = False
+	template_data = build_and_execute_search(request)
+	if not template_data:
+		return redirect('/')
+	return render(request, 'user_subscriptions.html', template_data)
 
 
 def unsubscribe(request, username):
@@ -723,7 +731,7 @@ def saved_search_filter(request):
 	data_dict = get_list_from_form('exclude_facets', data_dict, request)
 	data_dict = get_list_from_form('work_types', data_dict, request)
 	data_dict = get_list_from_form('languages', data_dict, request)
-	completes = data_dict.get('complete', None)
+	completes = [data_dict.get('complete', None)]
 	include_filter = {
 		'Work Type': data_dict.get('work_types', []),
 		'Language': data_dict.get('languages', []),
@@ -736,75 +744,7 @@ def saved_search_filter(request):
 	if data_dict.get('word_count_lte'):
 		include_filter['word_count_lte'] = [data_dict.get('word_count_lte')]
 	# TODO: clean this up
-	search_request = {
-		'work_search': {
-			'term': request.POST.get('term', ''),
-			'include_mode': 'all',
-			'exclude_mode': 'all',
-			'page': 1,
-			'include_filter': include_filter,
-			"exclude_filter": {
-				'tags': data_dict.get('exclude_facets', []),
-				"attributes": [],
-			},
-		},
-		'bookmark_search': {
-			'term': request.POST.get('term', ''),
-			'include_mode': 'all',
-			'exclude_mode': 'all',
-			'page': 1,
-			'include_filter': {
-				'tags': data_dict.get('include_facets', []),
-				"attributes": [],
-			},
-			"exclude_filter": {
-				'tags': data_dict.get('exclude_facets', []),
-				"attributes": [],
-			},
-		},
-		'collection_search': {
-			'term': request.POST.get('term', ''),
-			'include_mode': 'all',
-			'exclude_mode': 'all',
-			'page': 1,
-			'include_filter': {
-				'tags': data_dict.get('include_facets', []),
-				"attributes": [],
-			},
-			"exclude_filter": {
-				'tags': data_dict.get('exclude_facets', []),
-				"attributes": [],
-			},
-		},
-		'user_search': {
-			'term': request.POST.get('term', ''),
-			'include_mode': 'all',
-			'exclude_mode': 'all',
-			'page': 1,
-			'include_filter': {
-				'tags': data_dict.get('include_facets', []),
-				"attributes": [],
-			},
-			"exclude_filter": {
-				'tags': data_dict.get('exclude_facets', []),
-				"attributes": [],
-			},
-		},
-		'tag_search': {
-			'term': request.POST.get('term', ''),
-			'include_mode': 'all',
-			'exclude_mode': 'all',
-			'page': 1,
-			'include_filter': {
-			},
-			"exclude_filter": {
-			},
-		},
-		'options': {'order_by': '-updated_on', 'split_include_exclude': False},
-		'tag_id': '',
-		'attr_id': '',
-		'work_type_id': ''
-	}
+	search_request = get_search_request_from_saved(request, include_filter, data_dict)
 	template_data = execute_search(request, search_request)
 	template_data['search_id'] = search_id
 	if not template_data:

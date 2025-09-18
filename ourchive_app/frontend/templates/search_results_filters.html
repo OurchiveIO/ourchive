@@ -6,7 +6,7 @@
     </div>
 	<div class="row overflow-auto">
         <div class="col-12">
-            <form method="post" class="oc-fixed-width" name="searchResultsForm_work" action="/search/filter" id="search-results-work-facet-form">
+            <form method="post" class="oc-fixed-width" name="searchResultsForm_work" action="{{filter_root}}" id="search-results-work-facet-form">
                 {% csrf_token %}
                 <div class="accordion" id="search-accordion">
                     {% for facet_group in facets %}

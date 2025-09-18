@@ -1,27 +1,30 @@
-class ParentSearch():
-	def __init__(self, work_search, bookmark_search, collection_search, user_search, tag_search, order_by, search_name):
+class ParentSearch:
+	def __init__(self, work_search, bookmark_search, collection_search, user_search, tag_search, search_name, options):
 		self.work_search = work_search
 		self.bookmark_search = bookmark_search
 		self.collection_search = collection_search
 		self.user_search = user_search
 		self.tag_search = tag_search
-		self.options = {'split_include_exclude': False, 'order_by': order_by}
+		self.options = options
 		self.tag_id = None
 		self.attr_id = None
 		self.work_type_id = None
-		if search_name:
-			self.search_name = search_name
+		self.search_name = search_name
 
 	def get_dict(self):
-		self.work_search = self.work_search.__dict__
-		self.bookmark_search = self.bookmark_search.__dict__
-		self.collection_search = self.collection_search.__dict__
-		self.user_search = self.user_search.__dict__
-		self.tag_search = self.tag_search.__dict__
-		return self.__dict__
+		return {'work_search': self.work_search.__dict__,
+				'bookmark_search': self.bookmark_search.__dict__,
+				'collection_search': self.collection_search.__dict__,
+				'user_search': self.user_search.__dict__,
+				'tag_search': self.tag_search.__dict__,
+				'options': self.options.__dict__,
+				'tag_id': self.tag_id,
+				'attr_id': self.attr_id,
+				'work_type_id': self.work_type_id,
+				'search_name': self.search_name}
 
 
-class ObjectSearch():
+class ObjectSearch:
 	def __init__(self, term, include_filter=None, exclude_filter=None):
 		self.term = term
 		self.page = 1
@@ -58,14 +61,69 @@ class WorkSearch(object):
 		return False if string_bool == "false" else True
 
 
+class SearchPagination:
+	def __init__(self, page=1, obj=""):
+		self.page = page
+		self.obj = obj
+
+class SearchParams:
+	def __init__(self):
+		self.subscriptions = False
+		self.search_name = None
+		self.term = None
+		self.tag_id = None
+		self.work_type_id = None
+		self.attr_id = None
+		self.order_by = "-updated_on"
+		self.pagination = SearchPagination()
+		self.valid_search = False
+		self.request_data = {}
+
+	def from_request(self, request):
+		if 'term' in request.GET:
+			self.term = request.GET['term']
+			self.valid_search = True
+		elif 'term' in request.POST:
+			self.term = request.POST['term']
+			self.valid_search = True
+		else:
+			self.term = ""
+		if 'tag_id' in request.GET:
+			self.tag_id = request.GET['tag_id']
+			self.term = ""
+			self.valid_search = True
+		elif 'attr_id' in request.GET:
+			self.attr_id = request.GET['attr_id']
+			self.term = ""
+			self.valid_search = True
+		elif 'work_type_id' in request.GET:
+			self.work_type_id = request.GET['work_type_id']
+			self.term = ""
+			self.valid_search = True
+		elif request.GET.get('subscriptions', False):
+			self.subscriptions = bool(request.GET.get('subscriptions'))
+			self.valid_search = True
+		self.search_name = request.POST.get('search-name', None)
+		self.order_by = request.POST['order_by'] if 'order_by' in request.POST else '-updated_on'
+		self.pagination = SearchPagination(request.GET.get('page', 1), request.GET.get('object_type', ''))
+		self.request_data = request.POST.copy()
+
+
+class SearchOptions:
+	def __init__(self, split_include_exclude=False, order_by="-updated_on", subscriptions=False):
+		self.split_include_exclude = split_include_exclude
+		self.order_by = order_by
+		self.subscriptions = subscriptions
+
 class SearchObject(object):
-	def with_term(self, term, pagination=None, order_by='-updated_on', search_name=None):
+	def with_term(self, term, pagination=None, order_by='-updated_on', search_name=None, subscriptions=False):
 		work_search = ObjectSearch(term)
 		bookmark_search = ObjectSearch(term)
 		collection_search = ObjectSearch(term)
 		user_search = ObjectSearch(term)
 		tag_search = TagSearch(term)
-		return_obj = ParentSearch(work_search, bookmark_search, collection_search, user_search, tag_search, order_by, search_name)
+		options = SearchOptions(False, order_by, subscriptions)
+		return_obj = ParentSearch(work_search, bookmark_search, collection_search, user_search, tag_search, search_name, options)
 
 		if pagination:
 			obj = pagination['obj'].lower()

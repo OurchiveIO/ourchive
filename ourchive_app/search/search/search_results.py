@@ -24,7 +24,7 @@ class SearchResults(object):
 
     def set_shared_vals(self, kwargs):
         self.tag_id = kwargs.get('tag_id', None)
-        self.work_type_id = kwargs.get('work_id', None)
+        self.work_type_id = kwargs.get('work_type_id', None)
         self.work_search_include = kwargs.get('work_search', []).get('include_filter', {})
         self.work_search_exclude = kwargs.get('work_search', []).get('exclude_filter', {})
         self.collection_search_include = kwargs.get('collection_search', []).get('include_filter', {})

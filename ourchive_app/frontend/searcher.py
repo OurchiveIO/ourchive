@@ -1,5 +1,5 @@
 from django.conf import settings
-from .search_models import SearchObject, ReturnKeys, SearchRequest
+from .search_models import SearchObject, ReturnKeys, SearchRequest, SearchParams, ParentSearch
 from .view_utils import *
 import logging
 from copy import deepcopy
@@ -79,7 +79,7 @@ def add_filter_to_bookmark(filter_val, filter_details, bookmark_filter):
 	return bookmark_filter
 
 
-def build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val):
+def build_request_filters(include_exclude, request_object, request_builder, key, filter_val):
 	# TODO: split this into two methods, include and exclude. refactor first with include, then split.
 	filter_details = key.split(',')
 	if len(filter_details) == 1:
@@ -159,9 +159,8 @@ def get_empty_response_obj():
 	return {'data': []}
 
 
-def get_search_request(request, request_object, request_builder):
+def get_search_request(request_data, request_object, request_builder):
 	return_keys = ReturnKeys()
-	request_data = request.POST.copy()
 	for key in request_data:
 		if key == 'tag_id' or key == 'attr_id' or key == 'work_type_id':
 			continue
@@ -178,7 +177,7 @@ def get_search_request(request, request_object, request_builder):
 					elif facet:
 						key = key.replace(',input', '')
 						return_keys.add_val(include_exclude, f'{key},{facet}')
-				request_object = build_request_filters(request, include_exclude, request_object, request_builder, key, facet)
+				request_object = build_request_filters(include_exclude, request_object, request_builder, key, facet)
 		else:
 			filter_val = request_data.get(key, None) if request_data.get(key, None) != 'on' else None
 			# TODO: YOU NEED TO GET ALL TAGS FROM THEIR LIST VALUES!!!
@@ -192,7 +191,7 @@ def get_search_request(request, request_object, request_builder):
 				elif filter_val:
 					key = key.replace(',input', '')
 					return_keys.add_val(include_exclude, f'{key},{filter_val}')
-			request_object = build_request_filters(request, include_exclude, request_object, request_builder, key, filter_val)
+			request_object = build_request_filters(include_exclude, request_object, request_builder, key, filter_val)
 	return SearchRequest(request_object, return_keys)
 
 
@@ -210,52 +209,22 @@ def get_tag_results(response_obj):
 	return response_obj
 
 
-def build_search(request):
+def build_search(request: SearchParams):
 	# prepare search & preserve request data
-	tag_id = None
-	attr_id = None
-	work_type_id = None
-	valid_search = False
-	search_name = request.POST.get('search-name', None)
-	term = ''
-	if 'term' in request.GET:
-		term = request.GET['term']
-		valid_search = True
-	elif 'term' in request.POST:
-		term = request.POST['term']
-		valid_search = True
-	if 'tag_id' in request.GET:
-		tag_id = request.GET['tag_id']
-		term = ""
-		valid_search = True
-	elif 'attr_id' in request.GET:
-		attr_id = request.GET['attr_id']
-		term = ""
-		valid_search = True
-	elif 'work_type_id' in request.GET:
-		work_type_id = request.GET['work_type_id']
-		term = ""
-		valid_search = True
-	if not valid_search:
-		logger.info(f'Not a valid search. Returning. Request get: {request.GET} Request post: {request.POST}')
-		return None
-	order_by = request.POST['order_by'] if 'order_by' in request.POST else '-updated_on'
 	request_builder = SearchObject()
-	pagination = {'page': request.GET.get('page', 1), 'obj': request.GET.get('object_type', '')}
 	request_object = request_builder.with_term(
-		term, pagination, order_by, search_name)
-	if tag_id:
-		request_object.tag_id = tag_id
-	if attr_id:
-		request_object.attr_id = attr_id
-	if work_type_id:
-		request_object.work_type_id = work_type_id
-	request_object = get_search_request(request, request_object, request_builder)
-	post_request = request_object.post_data.get_dict()
-	return post_request
+		request.term, request.pagination.__dict__, request.order_by, request.search_name, request.subscriptions)
+	if request.tag_id:
+		request_object.tag_id = request.tag_id
+	if request.attr_id:
+		request_object.attr_id = request.attr_id
+	if request.work_type_id:
+		request_object.work_type_id = request.work_type_id
+	request_object = get_search_request(request.request_data, request_object, request_builder)
+	return request_object
 
 
-def execute_search(request, post_request):
+def execute_search(request, post_request: SearchRequest):
 	active_tab = request.POST.get('active_tab', None)
 	if not active_tab:
 		object_type = request.GET.get('object_type', '')
@@ -275,8 +244,9 @@ def execute_search(request, post_request):
 	attr_id = request.GET.get('attr_id', None)
 	work_type_id = request.GET.get('work_type_id', None)
 	# make request
-	logger.debug(f'Search request data: {post_request}')
-	response_json = do_post(f'api/search/', request, data=post_request).response_data
+	post_request_data = post_request.post_data.get_dict()
+	logger.debug(f'Search request data: {post_request_data}')
+	response_json = do_post(f'api/search/', request, data=post_request_data).response_data
 	logger.debug(f'Search response data: {response_json}')
 	# process results
 	works = get_chive_results(response_json['results']['work']) if 'results' in response_json and 'work' in \
@@ -323,7 +293,8 @@ def execute_search(request, post_request):
 		'root': settings.ROOT_URL,
 		'term': term,
 		'order_by': order_by,
-		'search_name': search_name
+		'search_name': search_name,
+		'filter_root': f'/users/{request.user.username}/subscriptions' if post_request.post_data.options.subscriptions else '/search/filter'
 	}
 	if tag_id:
 		template_data['tag_id'] = tag_id
@@ -333,9 +304,43 @@ def execute_search(request, post_request):
 		template_data['work_type_id'] = work_type_id
 	return template_data
 
+def get_search_request_from_saved(request, include_filter, data_dict):
+	default_exclude_filter = {
+		'tags': data_dict.get('exclude_facets', []),
+		"attributes": [],
+	}
+	default_include_filter = {
+		'tags': data_dict.get('include_facets', []),
+		"attributes": [],
+	}
+
+	search_params = SearchParams()
+	search_params.from_request(request)
+	if not search_params.valid_search:
+		logger.info(f'Not a valid search. Returning. Request get: {request.GET} Request post: {request.POST}')
+		return None
+	request_builder = SearchObject()
+	request_object = request_builder.with_term(
+		search_params.term, search_params.pagination.__dict__, search_params.order_by, search_params.search_name, search_params.subscriptions)
+	request_object.work_search.include_filter = include_filter
+	request_object.bookmark_search.include_filter = default_include_filter
+	request_object.collection_search.include_filter = default_include_filter
+	request_object.user_search.include_filter = default_include_filter
+	request_object.work_search.exclude_filter = default_exclude_filter
+	request_object.collection_search.exclude_filter = default_exclude_filter
+	request_object.user_search.exclude_filter = default_exclude_filter
+	request_object.bookmark_search.exclude_filter = default_exclude_filter
+	filter_request = SearchRequest(request_object, ReturnKeys())
+	return filter_request
+
 
 def build_and_execute_search(request):
-	post_request = build_search(request)
+	search_params = SearchParams()
+	search_params.from_request(request)
+	if not search_params.valid_search:
+		logger.info(f'Not a valid search. Returning. Request get: {request.GET} Request post: {request.POST}')
+		return None
+	post_request = build_search(search_params)
 	if not post_request:
 		return None
 	return execute_search(request, post_request)

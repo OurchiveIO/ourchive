@@ -75,6 +75,7 @@ urlpatterns = [
     path('users/<int:pk>/block', views.block_user, name='fe-block-user'),
     path('users/<str:username>/delete', views.delete_user),
     path('users/<str:username>/report', views.report_user, name='report-user'),
+    path('users/<str:username>/subscriptions/manage', views.user_subscriptions_manage, name='fe-user-subscriptions-manage'),
     path('users/<str:username>/subscriptions', views.user_subscriptions, name='fe-user-subscriptions'),
     path('users/<str:username>/subscriptions/unsubscribe', views.unsubscribe, name='fe-unsubscribe'),
     path('users/subscriptions/subscribe', views.subscribe, name='fe-subscribe'),
