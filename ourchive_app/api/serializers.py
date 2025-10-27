@@ -164,6 +164,12 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
         model = UserSubscription
         fields = '__all__'
 
+class SubscriptionSerializer(serializers.Serializer):
+    works = serializers.DictField()
+    collections = serializers.DictField()
+    users = serializers.DictField()
+    user = serializers.ReadOnlyField()
+
 
 class ImportSerializer(serializers.ModelSerializer):
     class Meta:

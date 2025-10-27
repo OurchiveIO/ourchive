@@ -667,12 +667,33 @@ class SubscriptionList(generics.ListCreateAPIView):
         return UserSubscription.objects.all().order_by('-created_on')
 
 
-class UserSubscriptionList(generics.ListCreateAPIView):
+class UserSubscriptionList(APIView):
+    serializer_class = SubscriptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    # todo - create model for this work
+    def get(self, request, username, format=None):
+        users = []
+        works = []
+        collections = []
+        users_q = UserSubscription.objects.filter(user__id=self.request.user.id).all()
+        for user in users_q:
+            users.append({'id': user.id, 'username': user.user.username})
+        works_q = UserWorkSubscription.objects.filter(user__id=self.request.user.id).all()
+        for work in works_q:
+            works.append({'id': work.id, 'user': work.user.username, 'title': work.work.title})
+        collections_q = UserCollectionSubscription.objects.filter(user__id=self.request.user.id).all()
+        for collection in collections_q:
+            collections.append({'id': collection.id, 'user': collection.user.username, 'title': collection.collection.title})
+        user = self.request.user.id
+        return Response({'subscriptions': {'users': users, 'works': works, 'collections': collections, 'user': user}})
+
+'''class UserSubscriptionList(generics.ListCreateAPIView):
     serializer_class = UserSubscriptionSerializer
     permission_classes = [IsOwner]
 
     def get_queryset(self):
-        return UserSubscription.objects.filter(user__id=self.request.user.id)
+        return UserSubscription.objects.filter(user__id=self.request.user.id)'''
 
 
 class UserSubscriptionBookmarkList(generics.ListAPIView):
