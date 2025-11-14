@@ -27,6 +27,7 @@
                 {% endif %}
                 {% if not work.draft %}<a class="link-underline link-underline-opacity-0" title="{% translate 'Add to collection' %}" id="bookmark-collection-link" href="#" data-bs-toggle="modal" data-bs-target="#bookmark-add-collection-modal"><i class="bi bi-plus-lg"></i></a>{% endif %}
                 {% if not work.draft %}<a class="link-underline link-underline-opacity-0" id="work-bookmark-link" href="/bookmarks/new/{{ id }}?title={{ work.title }}" title="{% translate 'Bookmark' %}"><i class="bi bi-bookmark"></i></a>{% endif %}
+                {% if not work.draft %}<a class="link-underline link-underline-opacity-0" id="chive-subscribe-link" href="{% url 'fe-subscribe' chive_id=work.id %}?subscribed={{ work.subscribed }}&obj_type=work" title="{% if work.subscribed > 0 %}{% translate 'Unsubscribe' %}{% else %}{% translate 'Subscribe' %}{% endif %}">{% if work.subscribed %}<i class="bi bi-send-slash"></i>{% else %}<i class="bi bi-send-plus"></i>{% endif %}</a>{% endif %}
                 <a id="work-fingerguns-link" href="/fingerguns/{{ id }}" title="{% translate 'Fingerguns' %}" class="link-underline link-underline-opacity-0"><i id="work-fingerguns-span" class="bi bi-hand-thumbs-up"></i> </a>
                 <a id="work-download-drop" title="{% translate 'Download' %}" class="link-underline link-underline-opacity-0" data-bs-toggle="collapse" data-bs-target="#download-options" aria-controls="download-options" aria-expanded="false"><i class="bi bi-download"></i></a>
 

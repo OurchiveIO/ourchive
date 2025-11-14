@@ -79,6 +79,7 @@ urlpatterns = [
     path('users/<str:username>/subscriptions', views.user_subscriptions, name='fe-user-subscriptions'),
     path('users/<str:username>/subscriptions/unsubscribe', views.unsubscribe, name='fe-unsubscribe'),
     path('users/subscriptions/subscribe', views.subscribe, name='fe-subscribe'),
+    path('users/subscriptions/subscribe/<int:chive_id>', views.subscribe, name='fe-subscribe'),
     path('users/<str:username>/subscriptions/bookmarks', views.user_bookmark_subscriptions, name='fe-user-bookmark-subscriptions'),
     path('users/<str:username>/subscriptions/collections', views.user_collection_subscriptions, name='fe-user-collection-subscriptions'),
     path('users/<str:username>/subscriptions/works', views.user_work_subscriptions, name='fe-user-work-subscriptions'),

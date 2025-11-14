@@ -142,6 +142,39 @@ class UserReportSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
+class MiniUserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.ReadOnlyField()
+    user = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    obj_type = serializers.SerializerMethodField()
+
+    def get_type(self, obj):
+        subscriptions = []
+        if obj.subscribed_to_work:
+            subscriptions.append('Work')
+        if obj.subscribed_to_collection:
+            subscriptions.append('Collection')
+        if obj.subscribed_to_bookmark:
+            subscriptions.append('Bookmark')
+        if obj.subscribed_to_series:
+            subscriptions.append('Series')
+        return ', '.join(subscriptions)
+
+    def get_obj_type(self, obj):
+        return 'User'
+
+    def get_user(self, obj):
+        return obj.subscribed_user.username
+
+    def get_title(self, obj):
+        return 'User subscription'
+
+    class Meta:
+        model = UserSubscription
+        fields = ['id', 'user', 'type', 'obj_type', 'title', 'subscribed_to_collection', 'subscribed_to_bookmark', 'subscribed_to_work', 'subscribed_to_series', 'subscribed_to_anthology']
+
+
 class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     uid = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
@@ -163,12 +196,6 @@ class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = UserSubscription
         fields = '__all__'
-
-class SubscriptionSerializer(serializers.Serializer):
-    works = serializers.DictField()
-    collections = serializers.DictField()
-    users = serializers.DictField()
-    user = serializers.ReadOnlyField()
 
 
 class ImportSerializer(serializers.ModelSerializer):
@@ -773,6 +800,34 @@ class MiniChapterSerializer(serializers.HyperlinkedModelSerializer):
         model = Chapter
         fields = ['id', 'title', 'number']
 
+class MiniWorkSerializer(serializers.HyperlinkedModelSerializer):
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    id = serializers.ReadOnlyField()
+    type = serializers.SerializerMethodField()
+    obj_type = serializers.SerializerMethodField()
+
+    def get_type(self, obj):
+        return 'Work'
+
+    def get_obj_type(self, obj):
+        return 'Chive'
+
+    class Meta:
+        model = Work
+        fields = ['title', 'user', 'id', 'type', 'obj_type']
+
+class UserWorkSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserWorkSubscription
+        fields = ['user', 'work']
+
+
+class UserCollectionSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserCollectionSubscription
+        fields = ['user', 'collection']
+
 
 class WorkSerializer(serializers.HyperlinkedModelSerializer):
     tags = TagSerializer(many=True, required=False)
@@ -803,6 +858,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     has_drafts = serializers.SerializerMethodField()
     created_on = serializers.DateField(format="%Y-%m-%d", required=False)
     updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = Work
@@ -822,6 +878,10 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
     def get_pending_users(self, obj):
         users = obj.users.filter((Q(user_works__work_id=obj.id) & Q(user_works__approved=False) & ~Q(user_works__user_id=obj.user.id))).all()
         return MiniUserSerializer(users, many=True, required=False, read_only=True).data
+
+    def get_subscribed(self, work):
+        subscription = UserWorkSubscription.objects.filter(work_id=work.id,user_id=self.context['request'].user.id).first()
+        return subscription.id if subscription is not None else 0
 
     def process_tags(self, work, validated_data, tags):
         tags_to_add = []
@@ -1111,6 +1171,24 @@ class BookmarkSummarySerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
+class MiniBookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username')
+    id = serializers.ReadOnlyField()
+    type = serializers.SerializerMethodField()
+    obj_type = serializers.SerializerMethodField()
+
+    def get_type(self, obj):
+        return 'Collection'
+
+    def get_obj_type(self, obj):
+        return 'Chive'
+
+    class Meta:
+        model = BookmarkCollection
+        fields = ['id', 'title', 'user', 'type', 'obj_type']
+
+
 class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field='username')
@@ -1129,6 +1207,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     bookmarks = serializers.PrimaryKeyRelatedField(queryset=Bookmark.objects.all(), required=False, many=True)
     created_on = serializers.DateField(format="%Y-%m-%d", required=False)
     updated_on = serializers.DateField(format="%Y-%m-%d", required=False)
+    subscribed = serializers.SerializerMethodField()
 
     def get_users(self, obj):
         users = obj.users.filter((Q(user_collections__collection_id=obj.id) & Q(user_collections__approved=True)) | Q(id=obj.user.id)).all()
@@ -1137,6 +1216,10 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     def get_pending_users(self, obj):
         users = obj.users.filter((Q(user_collections__collection_id=obj.id) & Q(user_collections__approved=False) & ~Q(user_collections__user_id=obj.user.id))).all()
         return MiniUserSerializer(users, many=True, required=False, read_only=True).data
+
+    def get_subscribed(self, obj):
+        subscription = UserCollectionSubscription.objects.filter(collection_id=obj.id,user_id=self.context['request'].user.id).first()
+        return subscription.id if subscription is not None else 0
 
     class Meta:
         model = BookmarkCollection

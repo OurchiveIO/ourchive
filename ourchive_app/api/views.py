@@ -666,34 +666,12 @@ class SubscriptionList(generics.ListCreateAPIView):
             return UserSubscription.objects.filter(user__id=self.request.user.id, subscribed_user__username=self.request.GET.get('subscribed_to'))
         return UserSubscription.objects.all().order_by('-created_on')
 
-
-class UserSubscriptionList(APIView):
-    serializer_class = SubscriptionSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    # todo - create model for this work
-    def get(self, request, username, format=None):
-        users = []
-        works = []
-        collections = []
-        users_q = UserSubscription.objects.filter(user__id=self.request.user.id).all()
-        for user in users_q:
-            users.append({'id': user.id, 'username': user.user.username})
-        works_q = UserWorkSubscription.objects.filter(user__id=self.request.user.id).all()
-        for work in works_q:
-            works.append({'id': work.id, 'user': work.user.username, 'title': work.work.title})
-        collections_q = UserCollectionSubscription.objects.filter(user__id=self.request.user.id).all()
-        for collection in collections_q:
-            collections.append({'id': collection.id, 'user': collection.user.username, 'title': collection.collection.title})
-        user = self.request.user.id
-        return Response({'subscriptions': {'users': users, 'works': works, 'collections': collections, 'user': user}})
-
-'''class UserSubscriptionList(generics.ListCreateAPIView):
-    serializer_class = UserSubscriptionSerializer
+class UserSubscriptionList(generics.ListAPIView):
+    serializer_class = MiniUserSubscriptionSerializer
     permission_classes = [IsOwner]
 
     def get_queryset(self):
-        return UserSubscription.objects.filter(user__id=self.request.user.id)'''
+        return UserSubscription.objects.filter(user__id=self.request.user.id)
 
 
 class UserSubscriptionBookmarkList(generics.ListAPIView):
@@ -709,27 +687,64 @@ class UserSubscriptionBookmarkList(generics.ListAPIView):
 
 
 class UserSubscriptionBookmarkCollectionList(generics.ListAPIView):
-    serializer_class = BookmarkCollectionSummarySerializer
-    permission_classes = [IsOwner]
+    serializer_class = MiniBookmarkCollectionSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         subscriptions = UserSubscription.objects.filter(
             user__id=self.request.user.id).filter(
             subscribed_to_collection=True)
         ids = subscriptions.values_list('subscribed_user', flat=True).all()
-        return BookmarkCollection.objects.filter(draft=False).filter(user__id__in=ids).order_by('-created_on')
+        collection_ids = UserCollectionSubscription.objects.filter(user__id=self.request.user.id).values_list('collection',
+                                                                                                  flat=True).all()
+        return BookmarkCollection.objects.filter(draft=False).filter(user__id__in=ids).union(BookmarkCollection.objects.filter(draft=False).filter(id__in=collection_ids)).order_by('-created_on')
 
 
 class UserSubscriptionWorkList(generics.ListAPIView):
-    serializer_class = WorkSerializer
-    permission_classes = [IsOwner, ObjectIsPrivate]
+    serializer_class = MiniWorkSerializer
+    permission_classes = [permissions.IsAuthenticated, ObjectIsPrivate]
 
     def get_queryset(self):
-        subscriptions = UserSubscription.objects.filter(
-            user__id=self.request.user.id).filter(
-            subscribed_to_work=True)
-        ids = subscriptions.values_list('subscribed_user', flat=True).all()
-        return Work.objects.filter(draft=False).filter(user__id__in=ids).order_by('-created_on')
+        work_ids = UserWorkSubscription.objects.filter(user__id=self.request.user.id).values_list('work', flat=True).all()
+        return Work.objects.filter(draft=False).filter(id__in=work_ids).distinct().order_by('-created_on')
+
+
+class UserSubscriptionWorkManage(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserWorkSubscriptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return UserWorkSubscription.objects.filter(user__id=self.request.user.id)
+
+
+class UserSubscriptionWorkCreate(generics.ListCreateAPIView):
+    serializer_class = UserWorkSubscriptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return UserWorkSubscription.objects.filter(user__id=self.request.user.id)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class UserSubscriptionCollectionManage(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserCollectionSubscriptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return UserCollectionSubscription.objects.filter(user__id=self.request.user.id)
+
+
+class UserSubscriptionCollectionCreate(generics.ListCreateAPIView):
+    serializer_class = UserCollectionSubscriptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return UserCollectionSubscription.objects.filter(user__id=self.request.user.id)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class UserSubscriptionSeriesList(generics.ListAPIView):

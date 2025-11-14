@@ -19,6 +19,16 @@
             <a class="link link-underline-opacity-0" id="bookmark-collection-delete-link" title="{% translate 'Delete' %}" href="#" data-bs-toggle="modal" data-bs-target="#bookmark-collection-{{bkcol.id}}-modal-delete"><i class="bi bi-trash"></i></a>
             </p>
         </div>
+        {% else %}
+        {% if not bkcol.draft %}
+            <div class="row row-cols-1">
+            <div id="bkcol-controls-parent" class="col-md-12 col-12 mt-2">
+                <p class="text-end">
+                    <a class="link-underline link-underline-opacity-0" id="chive-subscribe-link" href="{% url 'fe-subscribe' chive_id=bkcol.id %}?subscribed={{ bkcol.subscribed }}&obj_type=collection" title="{% if bkcol.subscribed > 0 %}{% translate 'Unsubscribe' %}{% else %}{% translate 'Subscribe' %}{% endif %}">{% if bkcol.subscribed %}<i class="bi bi-send-slash"></i>{% else %}<i class="bi bi-send-plus"></i>{% endif %}</a>
+                </p>
+            </div>
+            </div>
+        {% endif %}
     {% endif %}
     {% if bkcol.description %}
     <div id="bkcol-description-parent" class="row row-cols-1 m-2">
