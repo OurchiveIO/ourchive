@@ -100,7 +100,7 @@ function handleFacetInput(e) {
 
 }
 
-function searchWorks(filter_root, number, term, tag_id, attr_id, work_type_id, page_params) {
+function searchWorks(number, term, tag_id, attr_id, work_type_id, page_params) {
     if (tag_id < 1) {
         tag_id = '';
     }
@@ -127,6 +127,6 @@ function searchWorks(filter_root, number, term, tag_id, attr_id, work_type_id, p
         term = `&term=${term}`;
     }
     let search_form = document.getElementById("search-results-work-facet-form");
-    search_form.action = `${filter_root}?page=${number}${term}${tag_id}${attr_id}${work_type_id}${page_params}`;
+    search_form.action = `/search/?page=${number}${term}${tag_id}${attr_id}${work_type_id}${page_params}`;
     document.getElementById("search-results-work-facet-form").submit();
 }
