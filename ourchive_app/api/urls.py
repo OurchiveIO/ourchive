@@ -80,6 +80,7 @@ urlpatterns = [
          name='ourchivesetting-detail'),
     path('settings/', views.OurchiveSettingList.as_view()),
     path('users/<int:pk>/', views.UserDetail.as_view(), name='user-detail'),
+    path('users/<str:username>/', views.UserDetailByUsername.as_view(), name='user-detail-username'),
     path('groups/', views.GroupList.as_view()),
     path('users/import-works/', views.ImportWorks.as_view(), name='import-works'),
     path('users/<int:pk>/importstatus/', views.ImportStatus.as_view(), name='import-status'),

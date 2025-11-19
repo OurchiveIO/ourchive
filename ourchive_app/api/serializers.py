@@ -278,16 +278,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                 invitation.save()
             else:
                 raise serializers.ValidationError({"message": ["Invite token has expired."]})
-        if 'icon' not in validated_data:
-            icon_alt_text = "Default icon"
-            icon = OurchiveSetting.objects.filter(name='Default Icon URL').first()
-            if icon is not None:
-                icon = f"{settings.API_PROTOCOL}{settings.ALLOWED_HOSTS[0]}{settings.STATIC_URL}{icon.value}"
-            else:
-                icon = ''
-        else:
+        if 'icon' in validated_data:
             icon_alt_text = validated_data['icon_alt_text'] if 'icon_alt_text' in validated_data else ''
             icon = validated_data['icon']
+        else:
+            icon = 'CHANGEME'
+            icon_alt_text = ''
         if 'attributes' in validated_data:
             attributes = validated_data.pop('attributes')
         else:

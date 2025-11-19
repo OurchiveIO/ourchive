@@ -85,6 +85,14 @@ def content_page(request, pk):
 
 def user_name(request, pk):
     user = do_get(f"api/users/profile/{pk}", request, params=request.GET, object_name='User')
+    return process_user(request, user)
+
+def username(request, username):
+    user = do_get(f"api/users/{username}/", request, params=request.GET, object_name='User')
+    return process_user(request, user)
+
+def process_user(request, user):
+    pk = user.response_data['id']
     user_blocked = False
     if request.user.is_authenticated:
         response = do_get(f'api/userblocks/blocked/{pk}', request, 'user block')
@@ -93,7 +101,7 @@ def user_name(request, pk):
     if user.response_info.status_code >= 400:
         messages.add_message(request, messages.ERROR, user.response_info.message, user.response_info.type_label)
         return redirect('/')
-    username = user.response_data['results'][0]['username']
+    username = user.response_data['username']
     work_params = {}
     bookmark_params = {}
     bookmark_collection_params = {}
@@ -121,7 +129,7 @@ def user_name(request, pk):
         anthology_params['limit'] = request.GET.get('anthology_limit', '')
         anchor = 4
     if anchor is None:
-        anchor = 0 if user.response_data['results'][0]["default_content"] == 'Work' else (1 if user.response_data['results'][0]["default_content"] == 'Bookmark' else (2 if user.response_data['results'][0]["default_content"] == 'Collection' else 0))
+        anchor = 0 if user.response_data["default_content"] == 'Work' else (1 if user.response_data["default_content"] == 'Bookmark' else (2 if user.response_data["default_content"] == 'Collection' else 0))
     # TODO: this violates DRY. all of this can be simplified, it's doing the exact same thing with multiple chives. also, we should just work with the results object instead of pulling out individual variables.
     works_list = get_works_list(request, username)
     works = works_list['works']
@@ -157,7 +165,7 @@ def user_name(request, pk):
     anthology_count = anthologies_response.get('count', 0)
     for anthology in anthologies:
         anthology['attributes'] = get_attributes_for_display(anthology.get('attributes', []))
-    user = user.response_data['results'][0]
+    user = user.response_data
     user['attributes'] = get_attributes_for_display(user['attributes'])
     subscription = do_get(f"api/subscriptions/", request, params={'subscribed_to': username}, object_name='Subscription')
     if 'results' in subscription.response_data and len(subscription.response_data['results']) > 0:

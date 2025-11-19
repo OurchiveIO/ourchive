@@ -1,5 +1,7 @@
 from django.contrib.auth.models import Group
 from rest_framework import viewsets, generics, permissions
+from rest_framework.permissions import AllowAny
+
 from api.serializers import *
 from core.models import *
 from api.permissions import *
@@ -494,6 +496,15 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
         response = super(UserDetail, self).retrieve(request, args, kwargs)
         return response
 
+class UserDetailByUsername(generics.RetrieveAPIView):
+    queryset = User.objects.get_queryset().order_by('id')
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+    lookup_field = 'username'
+
+    def retrieve(self, request, *args, **kwargs):
+        response = super(UserDetailByUsername, self).retrieve(request, args, kwargs)
+        return response
 
 class UserSavedSearchesList(generics.ListCreateAPIView):
     serializer_class = SavedSearchSerializer
@@ -571,7 +582,7 @@ class UserBookmarkDraftList(generics.ListCreateAPIView):
         return Bookmark.objects.filter(draft=True, user__username=self.kwargs['username'])
 
 
-class UserNameDetail(generics.ListAPIView):
+class UserNameDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsOwnerOrReadOnly]
 

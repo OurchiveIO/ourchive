@@ -53,6 +53,7 @@ urlpatterns = [
     path('change-password/', auth_views.PasswordChangeView.as_view(template_name="change_password.html"), name='password_change'),
     path('change-password/done/', auth_views.PasswordChangeDoneView.as_view(template_name="change_password_done.html"), name='password_change_done'),
     path('username/<int:pk>/', views.user_name, name='user-profile-parent'),
+    path('users/<str:username>/', views.username, name='fe-user-profile'),
     path('users/<str:username>/import', views.import_works, name='fe-import-works'),
     path('users/<str:username>/save-search', views.search_save),
     path('users/<int:pk>/import-status', views.import_works_status, name='fe-import-works-status'),
