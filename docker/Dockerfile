@@ -35,6 +35,7 @@ RUN set -eux; \
        git \
        net-tools \
        procps \
+       gnupg2 \
        wget; \
     # install gosu
     apt-get install -y --no-install-recommends ca-certificates wget; \
@@ -74,6 +75,7 @@ RUN    apt-get purge -y \
        libpq-dev \
        net-tools \
        procps \
+       gnupg2 \
        wget; \
     apt-get autoremove -y; \
     rm -rf /var/lib/apt/lists/*; \
