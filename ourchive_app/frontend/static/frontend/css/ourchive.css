@@ -7119,6 +7119,10 @@ progress {
   border-radius: 0;
 }
 
+.choices__list .choices__item--choice {
+  color: #163C38 !important;
+}
+
 .chive-rich-text {
   position: relative;
   overflow: hidden;

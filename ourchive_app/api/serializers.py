@@ -148,6 +148,7 @@ class MiniUserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     type = serializers.SerializerMethodField()
     title = serializers.SerializerMethodField()
     obj_type = serializers.SerializerMethodField()
+    user_id = serializers.SerializerMethodField()
 
     def get_type(self, obj):
         subscriptions = []
@@ -167,12 +168,15 @@ class MiniUserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
     def get_user(self, obj):
         return obj.subscribed_user.username
 
+    def get_user_id(self, obj):
+        return obj.subscribed_user.id
+
     def get_title(self, obj):
         return 'User subscription'
 
     class Meta:
         model = UserSubscription
-        fields = ['id', 'user', 'type', 'obj_type', 'title', 'subscribed_to_collection', 'subscribed_to_bookmark', 'subscribed_to_work', 'subscribed_to_series', 'subscribed_to_anthology']
+        fields = ['id', 'user', 'type', 'obj_type', 'title', 'subscribed_to_collection', 'subscribed_to_bookmark', 'subscribed_to_work', 'subscribed_to_series', 'subscribed_to_anthology', 'user_id']
 
 
 class UserSubscriptionSerializer(serializers.HyperlinkedModelSerializer):
@@ -806,6 +810,8 @@ class MiniWorkSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     type = serializers.SerializerMethodField()
     obj_type = serializers.SerializerMethodField()
+    subscription_id = serializers.SerializerMethodField()
+    user_id = serializers.ReadOnlyField()
 
     def get_type(self, obj):
         return 'Work'
@@ -813,9 +819,16 @@ class MiniWorkSerializer(serializers.HyperlinkedModelSerializer):
     def get_obj_type(self, obj):
         return 'Chive'
 
+    def get_subscription_id(self, obj):
+        request = self.context.get('request', None)
+        if request:
+            subscription = UserWorkSubscription.objects.filter(user__id=request.user.id, work__id=obj.id).first()
+            return subscription.id if subscription else 0
+        return 0
+
     class Meta:
         model = Work
-        fields = ['title', 'user', 'id', 'type', 'obj_type']
+        fields = ['title', 'user', 'id', 'type', 'obj_type', 'subscription_id', 'user_id']
 
 class UserWorkSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1177,6 +1190,7 @@ class MiniBookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.ReadOnlyField()
     type = serializers.SerializerMethodField()
     obj_type = serializers.SerializerMethodField()
+    user_id = serializers.ReadOnlyField()
 
     def get_type(self, obj):
         return 'Collection'
@@ -1186,7 +1200,7 @@ class MiniBookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = BookmarkCollection
-        fields = ['id', 'title', 'user', 'type', 'obj_type']
+        fields = ['id', 'title', 'user', 'type', 'obj_type', 'user_id']
 
 
 class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):

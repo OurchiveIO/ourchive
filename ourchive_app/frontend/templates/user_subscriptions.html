@@ -7,6 +7,6 @@
         <h1 id="user-subscriptions-h1">{% translate 'Subscriptions' %}</h1>
         <p class="p-0"><a class="btn btn-primary float-end" href="{% url 'fe-user-subscriptions-manage' user.username %}">{% translate 'Manage Subscriptions' %}</a></p>
     </div>
-    <div class="row row-cols-1"><hr/></div>
+    <div class="row row-cols-1"><hr class="ourchive-hr"/></div>
     {% include "search_results_body.html" %}
 {% endblock %}

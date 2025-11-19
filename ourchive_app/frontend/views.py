@@ -643,7 +643,9 @@ def user_subscriptions_manage(request, username):
                      + (users.response_data['results'] if 'results' in users.response_data else []))
     page_content = render(request, 'user_subscriptions_manage.html', {
         'subscriptions': json.dumps(subscriptions),
-        'subscriptions_md': subscriptions
+        'subscriptions_md': subscriptions,
+        'root_url': settings.ROOT_URL,
+        'protocol': settings.API_PROTOCOL
     })
     return page_content
 
@@ -663,23 +665,26 @@ def user_subscriptions(request, username):
 
 def unsubscribe(request, username):
     subscription_id = request.POST.get('subscription_id')
+    subscription_type = request.POST.get('subscription_type', '')
     if request.POST.get('unsubscribe_all'):
         response = do_delete(f'api/subscriptions/{subscription_id}/', request, object_name='Subscription')
         process_message(request, response)
     else:
-        patch_data = {}
-        if request.POST.get('subscribed_to_bookmark'):
-            patch_data['subscribed_to_bookmark'] = False
-        if request.POST.get('subscribed_to_collection'):
-            patch_data['subscribed_to_collection'] = False
-        if request.POST.get('subscribed_to_work'):
-            patch_data['subscribed_to_work'] = False
-        if request.POST.get('subscribed_to_series'):
-            patch_data['subscribed_to_series'] = False
-        if request.POST.get('subscribed_to_anthology'):
-            patch_data['subscribed_to_anthology'] = False
-        response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
-        process_message(request, response)
+        if subscription_type == 'User':
+            patch_data = {}
+            patch_data['subscribed_to_bookmark'] = request.POST.get('subscribed_to_bookmark') == 'on'
+            patch_data['subscribed_to_collection'] = request.POST.get('subscribed_to_collection') == 'on'
+            patch_data['subscribed_to_work'] = request.POST.get('subscribed_to_work') == 'on'
+            patch_data['subscribed_to_series'] = request.POST.get('subscribed_to_series') == 'on'
+            patch_data['subscribed_to_anthology'] = request.POST.get('subscribed_to_anthology') == 'on'
+            response = do_patch(f'api/subscriptions/{subscription_id}/', request, data=patch_data, object_name='Subscription')
+            process_message(request, response)
+        else:
+            response = do_delete(
+                f'api/users/{request.user}/subscriptions/{subscription_type.lower()}s/{subscription_id}', request,
+                object_name='Subscription')
+            process_message(request, response)
+            return referrer_redirect(request)
     return referrer_redirect(request)
 
 

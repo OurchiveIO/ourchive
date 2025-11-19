@@ -1,12 +1,13 @@
 {% extends 'index.html' %}
 {% load i18n %}
 {% load static %}
-{% block title %}{% translate 'Subscriptions' %}{% endblock %}
+{% block title %}{% translate 'Manage Subscriptions' %}{% endblock %}
 {% block content %}
-    <div id="user-subscriptions-header">
-        <h1 id="user-subscriptions-h1">{% translate 'Manage Subscriptions' %}</h1>
-        <hr class="ourchive-hr"/>
+    <div id="user-subscriptions-manage-header" class="row row-cols-2">
+        <h1 id="user-subscriptions-manage-h1">{% translate 'Manage Subscriptions' %}</h1>
+        <p class="p-0"><a class="btn btn-primary float-end" href="{% url 'fe-user-subscriptions' user.username %}">{% translate 'Subscriptions' %}</a></p>
     </div>
+    <div class="row row-cols-1"><hr class="ourchive-hr"/></div>
     <div id="grid-wrapper"></div>
     {% if subscriptions %}
     <div class="row row-cols-1">
@@ -28,41 +29,32 @@
                                 <label id="unsubscribe-{{subscription.id}}-all-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-all-checkbox">{% translate 'Unsubscribe All' %}
                                 </label>
                             </div>
-                            {% if subscription.subscribed_to_bookmark %}
+                            {{ subscription }}
                             <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-bookmarks-parent">
-                                <input data-testid="unsubscribe-bookmark" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-bookmarks-checkbox" type="checkbox" name="subscribed_to_bookmark">
-                                <label id="unsubscribe-{{subscription.id}}-bookmarks-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-bookmarks-checkbox">{% translate 'Unsubscribe Bookmarks' %}
+                                <input data-testid="unsubscribe-bookmark" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-bookmarks-checkbox" type="checkbox" name="subscribed_to_bookmark" {% if subscription.subscribed_to_bookmark %}checked{% endif %}>
+                                <label id="unsubscribe-{{subscription.id}}-bookmarks-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-bookmarks-checkbox">{% translate 'Bookmarks' %}
                                 </label>
                             </div>
-                            {% endif %}
-                            {% if subscription.subscribed_to_collection %}
                             <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-collections-parent">
-                                <input data-testid="unsubscribe-collection" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-collections-checkbox" type="checkbox" name="subscribed_to_collection">
-                                <label id="unsubscribe-{{subscription.id}}-collections-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-collections-checkbox">{% translate 'Unsubscribe Collections' %}
+                                <input data-testid="unsubscribe-collection" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-collections-checkbox" type="checkbox" name="subscribed_to_collection" {% if subscription.subscribed_to_collection %}checked{% endif %}>
+                                <label id="unsubscribe-{{subscription.id}}-collections-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-collections-checkbox">{% translate 'Collections' %}
                                 </label>
                             </div>
-                            {% endif %}
-                            {% if subscription.subscribed_to_work %}
                             <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-works-parent">
-                                <input data-testid="unsubscribe-work" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-works-checkbox" type="checkbox" name="subscribed_to_work">
-                                <label id="unsubscribe-{{subscription.id}}-works-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-works-checkbox">{% translate 'Unsubscribe Works' %}
+                                <input data-testid="unsubscribe-work" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-works-checkbox" type="checkbox" name="subscribed_to_work" {% if subscription.subscribed_to_work %}checked{% endif %}>
+                                <label id="unsubscribe-{{subscription.id}}-works-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-works-checkbox">{% translate 'Works' %}
                                 </label>
                             </div>
-                            {% endif %}
-                            {% if subscription.subscribed_to_series %}
                             <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-series-parent">
-                                <input data-testid="unsubscribe-series" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-series-checkbox" type="checkbox" name="subscribed_to_series">
-                                <label id="unsubscribe-{{subscription.id}}-series-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-series-checkbox">{% translate 'Unsubscribe Series' %}
+                                <input data-testid="unsubscribe-series" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-series-checkbox" type="checkbox" name="subscribed_to_series" {% if subscription.subscribed_to_series %}checked{% endif %}>
+                                <label id="unsubscribe-{{subscription.id}}-series-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-series-checkbox">{% translate 'Series' %}
                                 </label>
                             </div>
-                            {% endif %}
-                            {% if subscription.subscribed_to_anthology %}
                             <div class="mb-3 form-check form-switch" id="unsubscribe-{{subscription.id}}-anthology-parent">
-                                <input data-testid="unsubscribe-anthology" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-anthology-checkbox" type="checkbox" name="subscribed_to_anthology">
-                                <label id="unsubscribe-{{subscription.id}}-anthology-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-anthology-checkbox">{% translate 'Unsubscribe Anthology' %}
+                                <input data-testid="unsubscribe-anthology" class="form-check-input" role="switch" id="unsubscribe-{{subscription.id}}-anthology-checkbox" type="checkbox" name="subscribed_to_anthology" {% if subscription.subscribed_to_anthology %}checked{% endif %}>
+                                <label id="unsubscribe-{{subscription.id}}-anthology-label" class="form-check-label" for="unsubscribe-{{subscription.id}}-anthology-checkbox">{% translate 'Anthology' %}
                                 </label>
                             </div>
-                            {% endif %}
                             <div class="mb-3" id="unsubscribe-buttons-container">
                                 <input id="unsubscribe-{{subscription.id}}-cancel" class="btn btn-secondary w-25" value="{% translate 'Cancel' %}" data-bs-dismiss="modal"/>
                                 <button id="unsubscribe-{{subscription.id}}-suppress-default-hidden" type="submit" disabled style="display: none" aria-hidden="true"></button>
@@ -83,11 +75,11 @@
                     <div class="modal-body">
                         <form action="{% url 'fe-unsubscribe' request.user.username %}" method="post" id="unsubscribe-{{subscription.id}}-form">
                             {% csrf_token %}
-                            <input type="hidden" id="unsubscribe-subscription-id" name="subscription_id" value="{{ subscription.id }}">
-                            <input type="hidden" id="unsubscribe-subscription-type" name="subscription_type" value="{{ subscription.obj_type }}">
+                            <input type="hidden" id="unsubscribe-subscription-id" name="subscription_id" value="{{ subscription.subscription_id }}">
+                            <input type="hidden" id="unsubscribe-subscription-type" name="subscription_type" value="{{ subscription.type }}">
                             <input data-testid="unsubscribe-chive" id="unsubscribe-{{subscription.id}}-chive-checkbox" type="hidden" name="subscribed_to_chive" value="true">
                             <div id="chive-unsubscribe-{{subscription.id}}-form-title-parent" class="mb-3">
-                                <p>{% blocktranslate %}Are you sure you want to unnsubscribe from{% endblocktranslate %} <em>{{ subscription.title }}</em>?</p>
+                                <p>{% blocktranslate %}Are you sure you want to unsubscribe from{% endblocktranslate %} <em>{{ subscription.title }}</em>?</p>
                             </div>
                             <div class="mb-3" id="unsubscribe-buttons-container">
                                 <input id="unsubscribe-{{subscription.id}}-cancel" class="btn btn-secondary w-25" value="{% translate 'Cancel' %}" data-bs-dismiss="modal"/>
@@ -110,14 +102,30 @@
               {
                 name: 'Creator',
                 id: 'user',
+                formatter: (_, row) => {
+                    let user_url = '{% url 'user-profile-parent' 0 %}'
+                    return gridjs.html(`<a href='${user_url.replace('/0/', '/' + row.cells[4].data + '/')}'>${row.cells[0].data}</a>`)
+                }
               },
               {
                   name: '{% translate 'Chive(s)' %}',
-                  id: 'title'
+                  id: 'title',
+                  formatter: (_, row) => {
+                      let work_url = '{% url 'fe-work-view' 0 %}';
+                      let collection_url = '{% url 'fe-view-collection' 0 %}';
+                      let user_url = '{% url 'user-profile-parent' 0 %}'
+                      return gridjs.html((row.cells[1].data.toLowerCase() === 'user subscription') ? `<a href='${user_url.replace('/0/', '/' + row.cells[4].data + '/')}'>${row.cells[1].data}</a>`
+                          : ( row.cells[2].data.toLowerCase() === 'work' ? `<a href='${work_url.replace('/0/', '/' + row.cells[3].data + '/')}'>${row.cells[1].data}</a>`
+                              : `<a href='${collection_url.replace('/0/', '/' + row.cells[3].data + '/')}'>${row.cells[1].data}</a>`))
+                  }
               },
               'Type',
               {
                 name: 'Id',
+                hidden: true
+              },
+              {
+                name: 'user_id',
                 hidden: true
               },
               {
@@ -129,7 +137,7 @@
                               var myModal = new bootstrap.Modal(document.getElementById(`subscription-${row.cells[3].data}-unsubscribe`));
                               myModal.toggle();
                           }
-                      }, 'Edit');
+                      }, (row.cells[1].data.toLowerCase() === 'user subscription') ? 'Edit' : 'Unsubscribe');
                   }
               }
           ],
