@@ -35,6 +35,7 @@ RUN set -eux; \
        git \
        net-tools \
        procps \
+       gnupg2 \
        wget; \
     # install gosu
     apt-get install -y --no-install-recommends ca-certificates wget; \
