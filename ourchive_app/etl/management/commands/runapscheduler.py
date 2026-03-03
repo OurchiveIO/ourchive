@@ -11,6 +11,7 @@ from django_apscheduler.models import DjangoJobExecution
 from django_apscheduler import util
 from etl.ao3.work_import import EtlWorkImport
 from etl.export.chive_export import ChiveExportOrchestrator
+from etl.maintenance.chive_facet_cleaner import ChiveFacetCleaner
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,11 @@ def process_exports():
 def export_job_cleanup():
   exporter = ChiveExportOrchestrator()
   exporter.clean_old_jobs()
+
+
+def clean_facets():
+  cleaner = ChiveFacetCleaner()
+  cleaner.clean_up_facets()
 
 
 # The `close_old_connections` decorator ensures that database connections, that have become
@@ -93,6 +99,15 @@ class Command(BaseCommand):
       replace_existing=True,
     )
     logger.info("Added job 'process_exports'.")
+
+    scheduler.add_job(
+      clean_facets,
+      trigger=CronTrigger(day="*/1"),
+      id="clean_facets_job",
+      max_instances=1,
+      replace_existing=True,
+    )
+    logger.info("Added job 'clean_facets'.")
 
     try:
       logger.info("Starting scheduler...")
