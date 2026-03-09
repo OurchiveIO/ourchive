@@ -1430,7 +1430,7 @@ def reset_password(request):
             return redirect('/login')
     else:
         if request.user.is_authenticated:
-            return referrer_redirect(request)
+            return redirect('/')
         if 'HTTP_REFERER' in request.META:
             return render(request, 'login.html', {
                 'referrer': request.META['HTTP_REFERER']})

@@ -975,8 +975,8 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         return work
 
     def update(self, work, validated_data):
-        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
-        languages = validated_data.pop('languages') if 'languages' in validated_data else []
+        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else False
+        languages = validated_data.pop('languages') if 'languages' in validated_data else False
         if 'tags' in validated_data:
             tags = validated_data.pop('tags') if 'tags' in validated_data else []
             work = self.process_tags(work, validated_data, tags)
@@ -998,9 +998,12 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         validated_data['zip_url'] = ''
         Work.objects.filter(id=work.id).update(**validated_data)
         work = Work.objects.get(id=work.id)
-        self.process_users(work, users)
-        work = self.process_languages(work, languages)
-        work.draft = validated_data.get('draft', False)
+        if users:
+            self.process_users(work, users)
+        if languages:
+            work = self.process_languages(work, languages)
+        if 'draft' in validated_data:
+            work.draft = validated_data.get('draft', False)
         work.save()
         return Work.objects.filter(id=work.id).first()
 
@@ -1285,7 +1288,7 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
         return collection
 
     def update(self, bookmark, validated_data):
-        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else []
+        users = validated_data.pop('users_to_add') if 'users_to_add' in validated_data else False
         if 'tags' in validated_data:
             tags = validated_data.pop('tags')
             tags_to_add = []
@@ -1332,13 +1335,16 @@ class BookmarkCollectionSerializer(serializers.HyperlinkedModelSerializer):
             collection.save()
         if 'bookmarks' in validated_data:
             validated_data.pop('bookmarks')
-        languages = validated_data.pop('languages') if 'languages' in validated_data else []
+        languages = validated_data.pop('languages') if 'languages' in validated_data else False
         BookmarkCollection.objects.filter(
             id=bookmark.id).update(**validated_data)
         bookmark = BookmarkCollection.objects.get(id=bookmark.id)
-        self.process_users(bookmark, users)
-        self.process_languages(bookmark, languages)
-        bookmark.draft = validated_data['draft']
+        if users:
+            self.process_users(bookmark, users)
+        if languages:
+            self.process_languages(bookmark, languages)
+        if 'draft' in validated_data:
+            bookmark.draft = validated_data['draft']
         bookmark.save()
         return BookmarkCollection.objects.filter(id=bookmark.id).first()
 

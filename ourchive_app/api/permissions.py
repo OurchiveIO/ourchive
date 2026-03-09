@@ -26,6 +26,13 @@ class IsMultiOwnerOrReadOnly(permissions.BasePermission):
         else:
             return request.user in obj.owners.all() or request.user == obj.creating_user or request.user.is_superuser
 
+class IsMultiOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if hasattr(obj, 'users'):
+            return request.user in obj.users.all() or request.user == obj.user or request.user.is_superuser
+        else:
+            return request.user in obj.owners.all() or request.user == obj.creating_user or request.user.is_superuser
+
 
 class IsWorksMultiOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -218,11 +225,6 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return request.user.is_authenticated and (obj.user == request.user or request.user.is_superuser)
-
-
-class IsMultiOwner(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return request.user in obj.users.all() or request.user == obj.user or request.user.is_superuser
 
 
 class IsUser(permissions.BasePermission):

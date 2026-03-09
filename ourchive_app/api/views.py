@@ -1,5 +1,6 @@
 from django.contrib.auth.models import Group
 from rest_framework import viewsets, generics, permissions
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 
 from api.serializers import *
@@ -248,7 +249,7 @@ class ExportWork(APIView):
 
     def get(self, request, pk):
         work = Work.objects.filter(id=pk).first()
-        if work.draft and request.user.id != work.user.id:
+        if (work.draft and request.user.id != work.user.id) or (work.locked_to_users and not request.user.id):
             return Response({'message': ["You do not have permission to download this work."]}, status=400)
         work_url = ''
         # get export if it hasn't been created already.
@@ -538,8 +539,10 @@ class UserWorkList(generics.ListCreateAPIView):
     permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(Q(users__username=self.kwargs['username']) | Q(user__username=self.kwargs['username'])).filter(Q(draft=False) | Q(users__id=self.request.user.id)).distinct().order_by('-updated_on')
-
+        queryset = Work.objects.filter(Q(users__username=self.kwargs['username']) | Q(user__username=self.kwargs['username'])).filter(Q(draft=False) | Q(users__id=self.request.user.id)).distinct().order_by('-updated_on')
+        if not self.request.user:
+            queryset = queryset.filter(locked_to_users=False)
+        return queryset
 
 class UserBookmarkList(generics.ListCreateAPIView):
     serializer_class = BookmarkSerializer
@@ -568,7 +571,11 @@ class UserBookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        queryset = BookmarkCollection.objects.filter(Q(users__username=self.kwargs['username']) | Q(user__username=self.kwargs['username'])).filter(Q(draft=False) | Q(user__id=self.request.user.id))
+        queryset = BookmarkCollection.objects.filter(
+            Q(users__username=self.kwargs['username']) | Q(user__username=self.kwargs['username'])).filter(
+            Q(draft=False) | Q(user__id=self.request.user.id))
+        if not self.request.user.id:
+            queryset = queryset.filter(locked_to_users=False)
         if (self.request.GET.get('work_id', None)):
             queryset = queryset.exclude(works__id=self.request.GET.get('work_id'))
         return queryset.order_by('-updated_on')
@@ -600,7 +607,10 @@ class WorkList(generics.ListCreateAPIView):
     permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+        queryset = Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+        if not self.request.user.id:
+            queryset = queryset.filter(locked_to_users=False)
+        return queryset
 
     def perform_create(self, serializer):
         attributes = []
@@ -617,7 +627,7 @@ class WorkList(generics.ListCreateAPIView):
 
 class UserWorkDraftList(generics.ListCreateAPIView):
     serializer_class = WorkSerializer
-    permission_classes = [IsMultiOwnerOrReadOnly]
+    permission_classes = [IsMultiOwner]
 
     def get_queryset(self):
         return Work.objects.filter(draft=True, user__username=self.kwargs['username']).order_by('-updated_on')
@@ -708,7 +718,10 @@ class UserSubscriptionBookmarkCollectionList(generics.ListAPIView):
         ids = subscriptions.values_list('subscribed_user', flat=True).all()
         collection_ids = UserCollectionSubscription.objects.filter(user__id=self.request.user.id).values_list('collection',
                                                                                                   flat=True).all()
-        return BookmarkCollection.objects.filter(draft=False).filter(user__id__in=ids).union(BookmarkCollection.objects.filter(draft=False).filter(id__in=collection_ids)).order_by('-created_on')
+        queryset = BookmarkCollection.objects.filter(draft=False).filter(user__id__in=ids).union(BookmarkCollection.objects.filter(draft=False).filter(id__in=collection_ids)).order_by('-created_on')
+        if not self.request.user.id:
+            queryset = queryset.filter(locked_to_users=False)
+        return queryset
 
 
 class UserSubscriptionWorkList(generics.ListAPIView):
@@ -793,7 +806,7 @@ class UserSubscriptionDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class WorkDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = WorkSerializer
-    permission_classes = [IsMultiOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly, ObjectIsLocked]
 
     def get_queryset(self):
         return Work.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
@@ -880,7 +893,11 @@ class WorkByTypeList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(work_type__id=self.kwargs['type_id']).order_by('-updated_on')
+        queryset = Work.objects.filter(work_type__id=self.kwargs['type_id'])
+        queryset = queryset.filter(Q(draft=False) | Q(user__id=self.request.user.id))
+        if not self.request.user.id:
+            queryset = queryset.filter(locked_to_users=False)
+        return queryset.order_by('-updated_on')
 
 
 class WorkByTagList(generics.ListCreateAPIView):
@@ -888,7 +905,11 @@ class WorkByTagList(generics.ListCreateAPIView):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_queryset(self):
-        return Work.objects.filter(tags__id=self.kwargs['pk']).order_by('-updated_on')
+        queryset = Work.objects.filter(tags__id=self.kwargs['pk'])
+        queryset = queryset.filter(Q(draft=False) | Q(user__id=self.request.user.id))
+        if not self.request.user.id:
+            queryset = queryset.filter(locked_to_users=False)
+        return queryset.order_by('-updated_on')
 
 
 class TagTypeDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -959,7 +980,10 @@ class RecentWorksList(generics.ListAPIView):
     pagination_class = NonPaginatedResultSetPagination
 
     def get_queryset(self):
-        return Work.objects.filter(draft=False).order_by("-system_updated_on")[:10]
+        queryset = Work.objects.filter(draft=False)
+        if not self.request.user.id:
+            queryset = queryset.filter(locked_to_users=False)
+        return queryset.order_by("-system_updated_on")[:10]
 
 
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -1078,6 +1102,9 @@ class WorkCommentList(generics.ListCreateAPIView):
                           UserAllowsWorkComments, UserAllowsWorkAnonComments]
 
     def get_queryset(self):
+        work = Work.objects.filter(id=self.kwargs['pk']).first()
+        if (not self.request.user.id and work.locked_to_users) or (work.draft and not (self.request.user.id == work.user_id or self.request.user.id not in work.users)):
+            raise PermissionDenied
         return ChapterComment.objects.filter(chapter__work__id=self.kwargs['pk']).filter(parent_comment=None).order_by('created_on')
 
 
@@ -1087,7 +1114,10 @@ class ChapterCommentDetail(generics.ListCreateAPIView):
                           UserAllowsWorkComments, UserAllowsWorkAnonComments]
 
     def get_queryset(self):
-        return ChapterComment.objects.filter(chapter__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
+        work = Work.objects.filter(id=Chapter.objects.get(self.kwargs['pk']).work_id).first()
+        if (not self.request.user.id and work.locked_to_users) or (work.draft and not (self.request.user.id == work.user_id or self.request.user.id not in work.users)):
+            raise PermissionDenied
+        return ChapterComment.objects.filter(chapter__id=self.kwargs['pk']).filter(chapter__draft=False).filter(parent_comment=None).order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -1216,7 +1246,10 @@ class BookmarkCollectionList(generics.ListCreateAPIView):
     permission_classes = [IsMultiOwnerOrReadOnly]
 
     def get_queryset(self):
-        return BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+        queryset = BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('-updated_on')
+        if not self.request.user.id:
+            queryset = queryset.filter(locked_to_users=False)
+        return queryset
 
     def perform_create(self, serializer):
         attributes = []
@@ -1233,7 +1266,7 @@ class BookmarkCollectionList(generics.ListCreateAPIView):
 
 class BookmarkCollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkCollectionSerializer
-    permission_classes = [IsMultiOwnerOrReadOnly]
+    permission_classes = [IsMultiOwnerOrReadOnly, ObjectIsLocked]
 
     def get_queryset(self):
         return BookmarkCollection.objects.filter(Q(draft=False) | Q(user__id=self.request.user.id)).order_by('id')
@@ -1272,7 +1305,7 @@ class BookmarkCollectionWork(APIView):
         work_to_add = Work.objects.get(id=work_id)
         if not collection or not work_to_add:
             return Response({'message': [_('Collection or work not found.')]}, status=404)
-        if not collection.user.id == request.user.id:
+        if not collection.user.id == request.user.id and request.user.id not in collection.users:
             return Response({'message': [_('You do not have permission to modify this collection')]}, status=403)
         collection.works.add(work_to_add)
         collection.save()
@@ -1284,7 +1317,10 @@ class CommentList(generics.ListCreateAPIView):
     permission_classes = [UserAllowsWorkComments, UserAllowsWorkAnonComments]
 
     def get_queryset(self):
-        return ChapterComment.objects.get_queryset().order_by('id')
+        if not self.request.user.id:
+            return ChapterComment.objects.get_queryset().filter(chapter__work__draft=False).filter(chapter__work__locked_to_users=False).order_by('id')
+        else:
+            return ChapterComment.objects.get_queryset().filter(chapter__work__draft=False).order_by('id')
 
     def perform_create(self, serializer):
         offset = self.request.data.get('offset', 0)
@@ -1355,6 +1391,11 @@ class BookmarkCollectionCommentDetail(generics.ListCreateAPIView):
                           UserAllowsCollectionAnonComments]
 
     def get_queryset(self):
+        collection = BookmarkCollection.objects.get(pk=self.kwargs['pk'])
+        if collection.is_private or collection.draft and (collection.user.id != self.request.user.id and self.request.user.id not in collection.users):
+            raise PermissionDenied()
+        if collection.locked_to_users and not self.request.user.id:
+            raise PermissionDenied()
         return CollectionComment.objects.filter(collection__id=self.kwargs['pk']).filter(parent_comment=None).order_by('id')
 
     def perform_create(self, serializer):

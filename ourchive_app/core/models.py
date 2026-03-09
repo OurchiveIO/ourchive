@@ -251,6 +251,7 @@ class Work(models.Model):
     m4b_url = models.CharField(max_length=600, null=True, blank=True)
     zip_url = models.CharField(max_length=600, null=True, blank=True)
     external_id = models.CharField(max_length=100, null=True, blank=True)
+    locked_to_users = models.BooleanField(default=False)
 
     user = models.ForeignKey(
         User,
@@ -755,6 +756,7 @@ class BookmarkCollection(models.Model):
     anon_comments_permitted = models.BooleanField(default=True)
     comments_permitted = models.BooleanField(default=True)
     comment_count = models.IntegerField(default=0)
+    locked_to_users = models.BooleanField(default=False)
 
     user = models.ForeignKey(
         User,
