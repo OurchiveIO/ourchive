@@ -63,6 +63,11 @@
                 <label id="bkcol-form-draft-label" class="form-check-label" for="bkcol-form-draft-input">{% translate 'Draft?' %} <sup><a title="{% translate 'Draft help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#draft-help-text"><i class="bi bi-question-circle"></i></a></sup></label>
                 <div class="mb-3 collapse" id="draft-help-text">{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
             </div>
+             <div class="mb-3 form-check form-switch" id="bkcol-form-locked-parent">
+                <input title="{% translate 'Collection locked toggle' %}" class="form-check-input" id="bkcol-form-locked-checkbox" type="checkbox" role="switch" name="collection_locked" {% if bookmark_collection.locked_to_users %} checked {% endif %}>
+                <label id="bkcol-form-locked-label" class="form-check-label" for="bkcol-form-locked-checkbox">{% translate 'Lock to users?' %} <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#locked-help-text" class="link-underline link-underline-opacity-0" title="{% translate 'Collection lock help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+                <div class="mb-3 collapse" id="locked-help-text">{% blocktranslate %}A locked collection can only be seen by registered users.{% endblocktranslate %}</div>
+             </div>
             <div class="mb-3" id="bkcol-form-created-parent">
                 <label id="bkcol-form-created-label" class="form-label" for="bkcol-form-created-on">{% translate 'Post Date' %}</label>
                 <input title="{% translate 'Collection created on' %}" id="bkcol-form-created-on" type="date" class="form-control" name="created_on" value="{{ bookmark_collection.created_on }}">

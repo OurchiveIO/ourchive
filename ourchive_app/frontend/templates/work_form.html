@@ -63,8 +63,13 @@
                 </div>
                 <div class="mb-3 form-check form-switch" id="work-form-draft-parent">
                     <input title="{% translate 'Work draft toggle' %}" class="form-check-input" id="work-form-draft-checkbox" type="checkbox" role="switch" name="work_draft" {% if work.draft %} checked {% endif %}>
-                    <label id="work-form-draft-label" class="form-check-label" for="work-form-draft-checkbox">Draft? <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#draft-help-text" class="link-underline link-underline-opacity-0" title="{% translate 'Work draft help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+                    <label id="work-form-draft-label" class="form-check-label" for="work-form-draft-checkbox">{% translate 'Draft?' %} <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#draft-help-text" class="link-underline link-underline-opacity-0" title="{% translate 'Work draft help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
                     <div class="mb-3 collapse" id="draft-help-text">{% blocktranslate %}A draft will not be seen by any user except you. You can publish your drafts at any time.{% endblocktranslate %}</div>
+                </div>
+                <div class="mb-3 form-check form-switch" id="work-form-locked-parent">
+                    <input title="{% translate 'Work locked toggle' %}" class="form-check-input" id="work-form-locked-checkbox" type="checkbox" role="switch" name="work_locked" {% if work.locked_to_users %} checked {% endif %}>
+                    <label id="work-form-locked-label" class="form-check-label" for="work-form-locked-checkbox">{% translate 'Lock to users?' %} <sup><a href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#locked-help-text" class="link-underline link-underline-opacity-0" title="{% translate 'Work lock help' %}"><i class="bi bi-question-circle"></i></a></sup></label>
+                    <div class="mb-3 collapse" id="locked-help-text">{% blocktranslate %}A locked work can only be seen by registered users.{% endblocktranslate %}</div>
                 </div>
                 <div class="mb-3 form-check form-switch" id="work-form-publish-all-parent">
                     <input title="{% translate 'Work publish all toggle' %}" class="form-check-input" role="switch" id="work-form-publish-all-checkbox" type="checkbox" name="publish_all">

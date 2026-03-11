@@ -1345,10 +1345,14 @@ def bookmark_collection(request, pk):
     cache_key = f'collection_{pk}_{request.user}_{expand_comments}_{scroll_comment_id}_{comment_id}_{comment_offset}_{comment_count}'
     if cache.get(cache_key):
         return cache.get(cache_key)
-    bookmark_collection = do_get(f'api/bookmarkcollections/{pk}', request, 'Collection').response_data
+    collection_response = do_get(f'api/bookmarkcollections/{pk}', request, 'Collection')
+    if collection_response.response_info.status_code >= 400:
+        messages.add_message(request, messages.ERROR, collection_response.response_info.message, collection_response.response_info.type_label)
+        return redirect('/')
+    bookmark_collection = collection_response.response_data
     tags = group_tags(bookmark_collection['tags']) if 'tags' in bookmark_collection else {}
     bookmark_collection['tags'] = tags
-    bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes'])
+    bookmark_collection['attributes'] = get_attributes_for_display(bookmark_collection['attributes']) if 'attrbiutes' in bookmark_collection else {}
     bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on')
     bookmark_collection['owner'] = get_owns_object(bookmark_collection, request)
     if 'comment_thread' in request.GET:

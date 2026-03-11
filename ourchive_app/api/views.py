@@ -1025,7 +1025,11 @@ class ChapterDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsWorkOwnerOrReadOnly]
 
     def get_queryset(self):
-        return Chapter.objects.filter(Q(draft=False) | Q(work__users__id=self.request.user.id)).distinct('id').order_by('id')
+        if self.request.user.is_authenticated:
+            queryset = Chapter.objects.filter(Q(draft=False) | (Q(work__work_users__user__id=self.request.user.id) | Q(work__user_id=self.request.user.id))).distinct('id').order_by('id')
+            return queryset
+        else:
+            return Chapter.objects.filter(Q(draft=False)).distinct('id').order_by('id')
 
     def perform_create(self, serializer):
         if not self.request.user.can_upload_images and 'image_url' in self.request.data:
@@ -1114,7 +1118,8 @@ class ChapterCommentDetail(generics.ListCreateAPIView):
                           UserAllowsWorkComments, UserAllowsWorkAnonComments]
 
     def get_queryset(self):
-        work = Work.objects.filter(id=Chapter.objects.get(self.kwargs['pk']).work_id).first()
+        chapter = Chapter.objects.get(id=self.kwargs['pk'])
+        work = Work.objects.get(id=chapter.work.id)
         if (not self.request.user.id and work.locked_to_users) or (work.draft and not (self.request.user.id == work.user_id or self.request.user.id not in work.users)):
             raise PermissionDenied
         return ChapterComment.objects.filter(chapter__id=self.kwargs['pk']).filter(chapter__draft=False).filter(parent_comment=None).order_by('id')
