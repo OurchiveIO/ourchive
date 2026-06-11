@@ -4,7 +4,7 @@
         <div class="col-md-4 col-12" id="work-{{work.id}}-tile-card">
             <!-- title, author, work type, 1 tag/attribute type, cover -->
             <p id="work-{{work.id}}-tile-title" class="fs-3 mb-2"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="work-{{work.id}}-tile-title-link" href="/works/{{work.id}}" data-testid="work-tile-title">{{work.title}}</a></p>
-            <p class="fs-4" id="work-{{ work.id }}-creators>">By {% for user in work.users %}<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="work-{{work.id}}-user-link" data-testid="work-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="work-{{work.id}}-user-link" data-testid="work-user-link" href="{% url 'user-profile-parent' work.user_id %}">{{ work.user }}</a>
+            <p class="fs-4" id="work-{{ work.id }}-creators>">By {% for user in work.users %}<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="work-{{work.id}}-user-link" data-testid="work-user-link" href="{% url 'user-profile-parent' user.username %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}<a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="work-{{work.id}}-user-link" data-testid="work-user-link" href="{% url 'user-profile-parent' work.user %}">{{ work.user }}</a>
                     {% endfor %}
             </p>
             <p class="fw-light" id="work-{{ work.id }}-type">{{ work.work_type_name|default_if_none:'' }}</p>

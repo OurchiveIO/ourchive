@@ -5,10 +5,10 @@
     <div class="row row-cols-1" id="user-profile-parent">
         <p class="text-end" id="user-profile-controls-parent">
             {% if user.username == request.user.username %}
-                <a class="link-underline link-underline-opacity-0" id="user-profile-edit-link" title="Edit" href="{% url 'fe-user-profile-edit' user.id %}"><i class="bi bi-pencil"></i></a>
+                <a class="link-underline link-underline-opacity-0" id="user-profile-edit-link" title="Edit" href="{% url 'fe-user-profile-edit' user.username %}"><i class="bi bi-pencil"></i></a>
                 <a id="user-profile-blocklist-link" class="link-underline link-underline-opacity-0" href="{% url 'fe-user-blocklist' user.username %}" title="{% translate 'Blocklist' %}"><i class="bi bi-ban"></i></a>
             {% else %}
-                {% if not user_blocked %}<a class="link-underline link-underline-opacity-0" id="user-block-link" href="{% url 'fe-block-user' user.id %}" title="{% translate 'Block' %}"><i class="bi bi-ban"></i></a>
+                {% if not user_blocked %}<a class="link-underline link-underline-opacity-0" id="user-block-link" href="{% url 'fe-block-user' user.username %}" title="{% translate 'Block' %}"><i class="bi bi-ban"></i></a>
                 {% else %}
                 <a class="link-underline link-underline-opacity-0" id="user-unblock-link" href="{% url 'fe-unblock-user' user.id user_blocked %}" title="{% translate 'Unblock' %}"><i class="bi bi-eye"></i></a>
                 {% endif %}

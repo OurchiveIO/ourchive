@@ -19,7 +19,7 @@
         </div>
         <div id="{{object_name}}-comment-{{comment.id}}-parent-div" class="col-11">
             {% if comment.user is not None %}
-            <h4 id="{{object_name}}-comment-{{comment.id}}-username-h4"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="{{object_name}}-comment-{{comment.id}}-username-link" href="{% url 'user-profile-parent' comment.user.id %}">{{comment.user.username}}</a></h4>
+            <h4 id="{{object_name}}-comment-{{comment.id}}-username-h4"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="{{object_name}}-comment-{{comment.id}}-username-link" href="{% url 'user-profile-parent' comment.user.username %}">{{comment.user.username}}</a></h4>
             {% else %}
             <h4 id="{{object_name}}-comment-{{comment.id}}-anon-h4">{% translate 'Anonymous' %}</h4>
             {% endif %}

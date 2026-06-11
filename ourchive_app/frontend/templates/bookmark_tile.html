@@ -2,7 +2,7 @@
 <div class="border shadow-sm p-3" id="bookmark-{{bookmark.id}}-tile-container">
     <div class="row">
         <div class="col-md-4 col-12" id="bookmark-{{bookmark.id}}-tile-card">
-            <p class="mb-2 fs-3" data-testid="bookmark-tile-title">{% if bookmark.title %}{{ bookmark.title }}{% else %}{% translate 'Bookmark' %}: {{ bookmark.work.title }}{% endif %} by <a href="{% url 'user-profile-parent' bookmark.user_id %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark.user }}</a></p>
+            <p class="mb-2 fs-3" data-testid="bookmark-tile-title">{% if bookmark.title %}{{ bookmark.title }}{% else %}{% translate 'Bookmark' %}: {{ bookmark.work.title }}{% endif %} by <a href="{% url 'user-profile-parent' bookmark.user %}" title="Bookmark Creator" id="bookmark-user-link">{{ bookmark.user }}</a></p>
             {% if bookmark.user == request.user.username %}
                 <div id="bk-tile-actions-parent" class="row row-cols-1 m-2">
                 <p>
@@ -23,7 +23,7 @@
             {% endif %}
         </div>
         <div class="col-md-8 col-12 mt-md-0 mt-4" id="bookmark-{{bookmark.id}}-info-card">
-            {%  if bookmark.work %}<p id="bk-tile-work"><strong id="bk-tile-work-label">Work</strong>: <a href="{% url 'fe-work-view' bookmark.work.id %}" title="Bookmark work link" id="bookmark-work-link">{{ bookmark.work.title|default:bookmark.work.id }}</a> by <a href="{% url 'user-profile-parent' bookmark.work.user_id %}" title="Bookmark work creator" id="bookmark-work-creator-link">{{ bookmark.work.user }}</a></p>{%  endif %}
+            {%  if bookmark.work %}<p id="bk-tile-work"><strong id="bk-tile-work-label">Work</strong>: <a href="{% url 'fe-work-view' bookmark.work.id %}" title="Bookmark work link" id="bookmark-work-link">{{ bookmark.work.title|default:bookmark.work.id }}</a> by <a href="{% url 'user-profile-parent' bookmark.work.user %}" title="Bookmark work creator" id="bookmark-work-creator-link">{{ bookmark.work.user }}</a></p>{%  endif %}
 	        {% if settings.RatingsEnabled %}<p id="bk-tile-rating-body"><strong id="bk-tile-rating-body-label">Rating</strong>: {{ bookmark.rating }} stars</p>{% endif %}
 	        {% if bookmark.tags %}{% include "tag_partial.html" with obj_name='bookmark' tags=bookmark.tags %}{% endif %}
 		   	{% if bookmark.attributes %}{% include "object_attributes.html" with object='bookmark' object_id=bookmark.id attributes=bookmark.attributes %}{% endif %}

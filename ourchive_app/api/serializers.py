@@ -98,7 +98,7 @@ class UserBlocksSerializer(serializers.HyperlinkedModelSerializer):
         source='blocked_user.username',
         read_only=True
     )
-    blocked_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
+    blocked_user = serializers.SlugRelatedField(queryset=User.objects.all(), required=True, slug_field='username')
 
     def create(self, validated_data):
         existing_block = UserBlocks.objects.filter(user__id=validated_data['user'].id, blocked_user__id=validated_data['blocked_user'].id).first()

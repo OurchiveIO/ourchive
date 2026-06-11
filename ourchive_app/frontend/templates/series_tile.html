@@ -4,8 +4,8 @@
         <div class="col-md-4 col-12" id="series-{{series.id}}-tile-card">
             <p class="mb-2 fs-3"><a class="link-underline link-underline-opacity-0" id="series-{{series.id}}-tile-title-link" href="{% url 'fe-series' series.id %}" data-testid="series-tile-title">{{series.title}}</a></p>
             <p class="fs-4">By
-                    {% for user in series.users %}<a class="link-underline link-underline-opacity-0" id="series-{{series.id}}-user-link" data-testid="series-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}
-                        <a class="link-underline link-underline-opacity-0" id="series-{{series.id}}-user-link" data-testid="series-user-link" href="{% url 'user-profile-parent' series.user_id %}">{{ series.user }}</a>
+                    {% for user in series.users %}<a class="link-underline link-underline-opacity-0" id="series-{{series.id}}-user-link" data-testid="series-user-link" href="{% url 'user-profile-parent' user.username %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}
+                        <a class="link-underline link-underline-opacity-0" id="series-{{series.id}}-user-link" data-testid="series-user-link" href="{% url 'user-profile-parent' series.user %}">{{ series.user }}</a>
                     {% endfor %}
             </p>
         </div>

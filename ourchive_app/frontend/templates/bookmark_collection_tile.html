@@ -4,8 +4,8 @@
         <div class="col-md-4 col-12" id="collection-{{bookmark_collection.id}}-tile-card">
             <p class="mb-2 fs-3"><a class="link-underline link-underline-opacity-0" id="collection-{{bookmark_collection.id}}-tile-title-link" href="{% url 'fe-view-collection' bookmark_collection.id %}" data-testid="collection-tile-title">{{bookmark_collection.title}}</a></p>
             <p class="fs-4">By
-                    {% for user in bookmark_collection.users %}<a class="link-underline link-underline-opacity-0" id="collection-{{bookmark_collection.id}}-user-link" data-testid="collection-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}
-                        <a class="link-underline link-underline-opacity-0" id="collection-{{bookmark_collection.id}}-user-link" data-testid="collection-user-link" href="{% url 'user-profile-parent' bookmark_collection.user_id %}">{{ bookmark_collection.user }}</a>
+                    {% for user in bookmark_collection.users %}<a class="link-underline link-underline-opacity-0" id="collection-{{bookmark_collection.id}}-user-link" data-testid="collection-user-link" href="{% url 'user-profile-parent' user.username %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}
+                        <a class="link-underline link-underline-opacity-0" id="collection-{{bookmark_collection.id}}-user-link" data-testid="collection-user-link" href="{% url 'user-profile-parent' bookmark_collection.user %}">{{ bookmark_collection.user }}</a>
                     {% endfor %}
             </p>
             <p class="fw-light fst-italic">{% for language in bookmark_collection.languages_readonly %}{{ language.display_name }}{% if not forloop.last %}, {% endif %}

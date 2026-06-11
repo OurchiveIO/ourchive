@@ -104,7 +104,7 @@
                 id: 'user',
                 formatter: (_, row) => {
                     let user_url = '{% url 'user-profile-parent' 0 %}'
-                    return gridjs.html(`<a href='${user_url.replace('/0/', '/' + row.cells[4].data + '/')}'>${row.cells[0].data}</a>`)
+                    return gridjs.html(`<a href='${user_url.replace('/0/', '/' + row.cells[0].data + '/')}'>${row.cells[0].data}</a>`)
                 }
               },
               {
@@ -114,7 +114,7 @@
                       let work_url = '{% url 'fe-work-view' 0 %}';
                       let collection_url = '{% url 'fe-view-collection' 0 %}';
                       let user_url = '{% url 'user-profile-parent' 0 %}'
-                      return gridjs.html((row.cells[1].data.toLowerCase() === 'user subscription') ? `<a href='${user_url.replace('/0/', '/' + row.cells[4].data + '/')}'>${row.cells[1].data}</a>`
+                      return gridjs.html((row.cells[1].data.toLowerCase() === 'user subscription') ? `<a href='${user_url.replace('/0/', '/' + row.cells[0].data + '/')}'>${row.cells[1].data}</a>`
                           : ( row.cells[2].data.toLowerCase() === 'work' ? `<a href='${work_url.replace('/0/', '/' + row.cells[3].data + '/')}'>${row.cells[1].data}</a>`
                               : `<a href='${collection_url.replace('/0/', '/' + row.cells[3].data + '/')}'>${row.cells[1].data}</a>`))
                   }

@@ -29,7 +29,7 @@
         <tbody>
         {% for approval in approvals %}
             <tr id="user-cocreator-{{approval.id}}-parent">
-                <td id="user-cocreator-{{approval.id}}-user"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{% url 'user-profile-parent' approval.creating_user.id %}">{{approval.creating_user.username}}</a></td>
+                <td id="user-cocreator-{{approval.id}}-user"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" href="{% url 'user-profile-parent' approval.creating_user.username %}">{{approval.creating_user.username}}</a></td>
                 <td id="user-cocreator-{{approval.id}}-ct"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-cocreator-{{approval.id}}-chive-link" {% if approval.type == 'work' %}href="{% url 'fe-work-view' approval.chive %}" {% elif approval.type == 'collection' %}href="{% url 'fe-view-collection' approval.chive %}"{% endif %}>{{approval.title}}</a></td>
                 <td id="user-cocreator-{{approval.id}}-type">{{approval.type}}</td>
                 <td id="user-cocreator-{{approval.id}}-ac"><a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-cocreator-{{approval.id}}-reject-link" href="#" data-bs-toggle="modal" data-bs-target="#approval-{{approval.id}}-remove">Reject</a> | <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="user-cocreator-{{approval.id}}-approve-link" href="#" data-bs-toggle="modal" data-bs-target="#approval-{{approval.id}}-approve">Approve</a></td>

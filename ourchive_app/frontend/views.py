@@ -83,7 +83,11 @@ def content_page(request, pk):
     })
 
 
-def user_name(request, pk):
+def user_name(request, username):
+    user = do_get(f"api/users/profile/{username}", request, params=request.GET, object_name='User')
+    return process_user(request, user)
+
+def user_name_pk(request, pk):
     user = do_get(f"api/users/profile/{pk}", request, params=request.GET, object_name='User')
     return process_user(request, user)
 
@@ -138,28 +142,28 @@ def process_user(request, user):
     work_count = works_list.get('count', 0)
     bookmarks_response = do_get(f'api/users/{username}/bookmarks', request, params=bookmark_params).response_data
     bookmarks = bookmarks_response['results']
-    bookmark_next = f'/username/{pk}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
-    bookmark_previous = f'/username/{pk}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
+    bookmark_next = f'/username/{username}/{bookmarks_response["next_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["next_params"] is not None else None
+    bookmark_previous = f'/username/{username}/{bookmarks_response["prev_params"].replace("limit=", "bookmark_limit=").replace("offset=", "bookmark_offset=")}' if bookmarks_response["prev_params"] is not None else None
     bookmark_count = bookmarks_response.get('count', 0)
     bookmarks = get_object_tags(bookmarks)
     bookmarks = format_date_for_template(bookmarks, 'updated_on', True)
     bookmark_collection_response = do_get(f'api/users/{username}/bookmarkcollections', request, params=bookmark_collection_params).response_data
     bookmark_collection = bookmark_collection_response['results']
-    bookmark_collection_next = f'/username/{pk}/{bookmark_collection_response["next_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["next_params"] is not None else None
-    bookmark_collection_previous = f'/username/{pk}/{bookmark_collection_response["prev_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["prev_params"] is not None else None
+    bookmark_collection_next = f'/username/{username}/{bookmark_collection_response["next_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["next_params"] is not None else None
+    bookmark_collection_previous = f'/username/{username}/{bookmark_collection_response["prev_params"].replace("limit=", "bookmark_collection_limit=").replace("offset=", "bookmark_collection_offset=")}' if bookmark_collection_response["prev_params"] is not None else None
     bookmark_collection = get_object_tags(bookmark_collection)
     bookmark_collection = format_date_for_template(bookmark_collection, 'updated_on', True)
     collection_count = bookmark_collection_response.get('count', 0)
     series_response = do_get(f'api/users/{username}/series', request, params=series_params).response_data
     series = series_response['results']
-    series_next = f'/username/{pk}/{series_response["next_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["next_params"] is not None else None
-    series_previous = f'/username/{pk}/{series_response["prev_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["prev_params"] is not None else None
+    series_next = f'/username/{username}/{series_response["next_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["next_params"] is not None else None
+    series_previous = f'/username/{username}/{series_response["prev_params"].replace("limit=", "series_limit=").replace("offset=", "series_offset=")}' if series_response["prev_params"] is not None else None
     series_count = series_response.get('count', 0)
     series = format_date_for_template(series, 'updated_on', True)
     anthologies_response = do_get(f'api/users/{username}/anthologies', request, params=anthology_params).response_data
     anthologies = anthologies_response['results']
-    anthology_next = f'/username/{pk}/{anthologies_response["next_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["next_params"] is not None else None
-    anthology_previous = f'/username/{pk}/{anthologies_response["prev_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["prev_params"] is not None else None
+    anthology_next = f'/username/{username}/{anthologies_response["next_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["next_params"] is not None else None
+    anthology_previous = f'/username/{username}/{anthologies_response["prev_params"].replace("limit=", "anthology_limit=").replace("offset=", "anthology_offset=")}' if anthologies_response["prev_params"] is not None else None
     anthologies = format_date_for_template(anthologies, 'updated_on', True)
     anthologies = get_object_tags(anthologies)
     anthology_count = anthologies_response.get('count', 0)
@@ -253,8 +257,8 @@ def user_block_list(request, username):
     })
 
 
-def block_user(request, pk):
-    data = {'user': request.user.username, 'blocked_user': pk}
+def block_user(request, username):
+    data = {'user': request.user.username, 'blocked_user': username}
     blocklist = do_post(f'api/userblocks', request, data, 'Block')
     message_type = messages.WARNING
     if blocklist.response_info.status_code >= 400:
@@ -262,7 +266,7 @@ def block_user(request, pk):
     elif blocklist.response_info.status_code >= 200:
         message_type = messages.SUCCESS
     messages.add_message(request, message_type, blocklist.response_info.message, blocklist.response_info.type_label)
-    return redirect(f'/username/{pk}')
+    return redirect(f'/username/{username}')
 
 
 def unblock_user(request, user_id, pk):
@@ -373,7 +377,7 @@ def user_works_drafts(request, username):
         'root': settings.ROOT_URL})
 
 
-def edit_account(request, pk):
+def edit_account(request, username):
     if request.method == 'POST':
         user_data = request.POST.copy()
         profile_id = user_data['id']
@@ -381,17 +385,17 @@ def edit_account(request, pk):
         response = do_patch(f'api/users/{profile_id}/', request, data=user_data, object_name='Account')
         message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
         messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
-        return redirect('/username/{pk}')
+        return redirect(f'/username/{username}')
     else:
         if request.user.is_authenticated:
-            response = do_get(f"api/users/profile/{pk}", request)
+            response = do_get(f"api/users/profile/{request.user.id}", request)
             user = response.response_data['results']
             if len(user) > 0:
                 user = user[0]
                 return render(request, 'account_form.html', {'user': user})
             else:
                 messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
-                return redirect(f'/username/{pk}')
+                return redirect(f'/username/{username}')
         else:
             messages.add_message(request, messages.ERROR, _('You must log in as this user to perform this action.'), 'user-info-unauthorized-error')
             return redirect('/login')
@@ -404,13 +408,13 @@ def export_chives(request):
         message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
         user_message = response.response_info.message if message_type == messages.ERROR else _('Your export has begun. You will be notified when it is complete.')
         messages.add_message(request, message_type, user_message, response.response_info.type_label)
-        return redirect(f'/username/{request.user.id}')
+        return redirect(f'/username/{request.user.username}')
     else:
         messages.add_message(request, messages.ERROR, _('You must log in to perform this action.'), 'user-unauthorized-error')
         return redirect('/login')
 
 
-def edit_user(request, pk):
+def edit_user(request, username):
     if request.method == 'POST':
         user_data = request.POST.copy()
         if 'icon' not in user_data or user_data['icon'] == "":
@@ -425,7 +429,7 @@ def edit_user(request, pk):
         response = do_patch(f'api/users/{user_id}/', request, data=user_data, object_name='User Profile')
         message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
         messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
-        return redirect(f'/username/{pk}/')
+        return redirect(f'/username/{username}/')
     else:
         if request.user.is_authenticated:
             work_types = get_work_types(request)
@@ -433,7 +437,7 @@ def edit_user(request, pk):
             response = do_get(f"api/users/profile/{request.user.id}", request, 'User Profile')
             if response.response_info.status_code >= 400:
                 messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
-                return redirect(f'/username/{pk}')
+                return redirect(f'/username/{username}')
             user = response.response_data['results']
             user = user[0]
             if user is not None:
@@ -1973,7 +1977,7 @@ def cocreator_approvals(request):
         pending_approvals = do_get(f'api/users/approvals/', request)
         if pending_approvals.response_info.status_code >= 400:
             messages.add_message(request, messages.ERROR, pending_approvals.response_info.message, pending_approvals.response_info.type_label)
-            return redirect(f'/username/{request.user.id}')
+            return redirect(f'/username/{request.user.username}')
         else:
             return render(request, 'user_cocreation_approval.html', {'approvals': pending_approvals.response_data})
     else:
@@ -2062,7 +2066,7 @@ def delete_series(request, pk):
     response = do_delete(f'api/series/{pk}/', request, 'Series')
     process_message(request, response)
     if str(pk) in request.META.get('HTTP_REFERER'):
-        return redirect(f'/username/{request.user.id}')
+        return redirect(f'/username/{request.user.username}')
     return referrer_redirect(request)
 
 
@@ -2183,7 +2187,7 @@ def delete_anthology(request, pk):
     response = do_delete(f'api/anthologies/{pk}/', request, 'Anthology')
     process_message(request, response)
     if str(pk) in request.META.get('HTTP_REFERER'):
-        return redirect(f'/username/{request.user.id}')
+        return redirect(f'/username/{request.user.username}')
     return referrer_redirect(request)
 
 

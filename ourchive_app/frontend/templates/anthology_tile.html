@@ -7,8 +7,8 @@
                 <a class="link-underline link-underline-opacity-0" id="anthology-{{anthology.id}}-tile-title-link" href="{% url 'fe-anthology' anthology.id %}" data-testid="anthology-tile-title">{{anthology.title}}</a>
             </p>
             <p class="fs-4">By
-                    {% for user in anthology.owners %}<a class="link-underline link-underline-opacity-0" id="anthology-{{anthology.id}}-user-link" data-testid="anthology-user-link" href="{% url 'user-profile-parent' user.id %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}
-                        <a class="link-underline link-underline-opacity-0" id="anthology-{{anthology.id}}-user-link" data-testid="anthology-user-link" href="{% url 'user-profile-parent' anthology.creating_user_id %}">{{ anthology.creating_user }}</a>
+                    {% for user in anthology.owners %}<a class="link-underline link-underline-opacity-0" id="anthology-{{anthology.id}}-user-link" data-testid="anthology-user-link" href="{% url 'user-profile-parent' user.username %}">{{ user.username }}</a>{% if not forloop.last %}, {% endif %}{% empty %}
+                        <a class="link-underline link-underline-opacity-0" id="anthology-{{anthology.id}}-user-link" data-testid="anthology-user-link" href="{% url 'user-profile-parent' anthology.creating_user %}">{{ anthology.creating_user }}</a>
                     {% endfor %}
             </p>
             <p id="anthology-metadata-language" class="fw-light fst-italic">{% for language in anthology.languages_readonly %}{{ language.display_name }}{% if not forloop.last %},{% endif %}

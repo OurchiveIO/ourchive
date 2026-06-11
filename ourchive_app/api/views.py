@@ -592,10 +592,17 @@ class UserBookmarkDraftList(generics.ListCreateAPIView):
 class UserNameDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsOwnerOrReadOnly]
+    lookup_field = 'username'
+
+    def get_queryset(self):
+        return User.objects.filter(username=self.kwargs['username'])
+
+class UserNameDetailById(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
         return User.objects.filter(pk=self.kwargs['pk'])
-
 
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.get_queryset().order_by('id')
