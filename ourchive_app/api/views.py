@@ -208,7 +208,10 @@ class Invitations(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
-        email_decoded = request.GET.get('email').replace('%40', '@').replace('+', '%2B')
+        email_param = request.GET.get('email')
+        if not email_param:
+            return Response({'message': _("Link is invalid: no email found. Please contact your admin for help.")}, status=400)
+        email_decoded = email_param.replace('%40', '@').replace('+', '%2B')
         invitation = Invitation.objects.filter(
             invite_token=request.GET.get('invite_token'), email=email_decoded).first()
         if invitation:
@@ -220,11 +223,14 @@ class Invitations(APIView):
             return Response({}, status=404)
 
     def post(self, request):
-        existing_user = User.objects.filter(email=request.data['email']).first()
+        email = request.data.get('email', '')
+        if not email or email == '':
+            return Response({'message': 'Email is required.'}, status=400)
+        existing_user = User.objects.filter(email=email).first()
         if existing_user:
             return Response({'message': 'User is already registered.'}, status=418)
         invitation = Invitation()
-        invitation.email = html.escape(request.data['email']).replace('+', '%2B')
+        invitation.email = html.escape(email).replace('+', '%2B')
         invitation.join_reason = nh3.clean(request.data['join_reason'])
         invitation.invite_token = get_random_string(length=100)
         invitation.register_link = f"{settings.ALLOWED_HOSTS[0]}/register?invite_token={invitation.invite_token}&email={invitation.email}"

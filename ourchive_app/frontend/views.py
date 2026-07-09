@@ -1511,6 +1511,7 @@ def request_invite(request):
 
 def log_out(request):
     logout(request)
+    do_post('api/logout/', request)
     messages.add_message(request, messages.SUCCESS, _('Logout successful.'), 'logout-success')
     return redirect(request.META['HTTP_REFERER'])
 
