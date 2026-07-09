@@ -775,7 +775,7 @@ def saved_search_filter(request):
     # TODO: clean this up
     if len(data_dict) < 1:
         return redirect('/')
-        search_request = get_search_request_from_saved(request, include_filter, data_dict)
+    search_request = get_search_request_from_saved(request, include_filter, data_dict)
     template_data = execute_search(request, search_request)
     template_data['search_id'] = search_id
     if not template_data:
