@@ -15,17 +15,28 @@ class Command(BaseCommand):
             return
         password = os.getenv('OURCHIVE_SUPERUSER_PASSWORD')
         email = os.getenv('OURCHIVE_SUPERUSER_EMAIL')
-        get_user_model().objects.create_superuser(username, email, password)
-        user = get_user_model().objects.filter(username=username).first()
+        try:
+            get_user_model().objects.create_superuser(username.lower(), email, password)
+        except:
+            print(f'Superuser creation failed. Superuser might be a duplicate, or OURCHIVE_SUPERUSER_NAME or other env variable is missing. Username: {username} Email: {email}')
+            return False
+        user = get_user_model().objects.filter(username=username.lower()).first()
+        if not user:
+            print(f'Superuser cannot be found. Username: {username}')
+            return False
         user.can_upload_audio = True
         user.can_upload_video = True
         user.can_upload_document = True
         user.can_upload_images = True
         user.can_upload_export_files = True
         user.save()
-
+        return True
 
 
     def handle(self, *args, **options):
-        self.generate_data()
-        print('Superuser created.')
+        try:
+            ret = self.generate_data()
+            if ret:
+                print('Superuser created.')
+        except:
+            print('Error occurred creating superuser. Create a superuser manually using the management console.')
