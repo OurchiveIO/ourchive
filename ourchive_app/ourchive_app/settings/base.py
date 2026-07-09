@@ -111,7 +111,7 @@ SEARCH_BACKEND = 'POSTGRES'
 
 TAG_DIVIDER = '$!$'
 
-USE_MAILGUN = os.getenv('OURCHIVE_USE_MAILGUN')
+USE_MAILGUN = os.getenv('OURCHIVE_USE_MAILGUN', True)
 
 if DEBUG or not USE_MAILGUN:
     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
