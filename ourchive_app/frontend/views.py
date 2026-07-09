@@ -389,13 +389,8 @@ def edit_account(request, username):
     else:
         if request.user.is_authenticated:
             response = do_get(f"api/users/profile/{request.user.id}", request)
-            user = response.response_data['results']
-            if len(user) > 0:
-                user = user[0]
-                return render(request, 'account_form.html', {'user': user})
-            else:
-                messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
-                return redirect(f'/username/{username}')
+            user = response.response_data
+            return render(request, 'account_form.html', {'user': user})
         else:
             messages.add_message(request, messages.ERROR, _('You must log in as this user to perform this action.'), 'user-info-unauthorized-error')
             return redirect('/login')
@@ -438,8 +433,7 @@ def edit_user(request, username):
             if response.response_info.status_code >= 400:
                 messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
                 return redirect(f'/username/{username}')
-            user = response.response_data['results']
-            user = user[0]
+            user = response.response_data
             if user is not None:
                 user['profile'] = sanitize_rich_text(user['profile'])
             user_attributes = do_get(f'api/attributetypes', request, params={'allow_on_user': True}, object_name='Attribute')
@@ -779,7 +773,9 @@ def saved_search_filter(request):
     if data_dict.get('word_count_lte'):
         include_filter['word_count_lte'] = [data_dict.get('word_count_lte')]
     # TODO: clean this up
-    search_request = get_search_request_from_saved(request, include_filter, data_dict)
+    if len(data_dict) < 1:
+        return redirect('/')
+        search_request = get_search_request_from_saved(request, include_filter, data_dict)
     template_data = execute_search(request, search_request)
     template_data['search_id'] = search_id
     if not template_data:
@@ -1054,7 +1050,6 @@ def edit_work(request, id):
             series_id = create_work_series(request, work_dict[5], id)
             if not series_id:
                 messages.add_message(request, messages.ERROR, _('Series could not be created. Please contact an administrator for help.'), 'Series')
-        print(work_dict[0])
         response = do_patch(f'api/works/{id}/', request, data=work_dict[0], object_name='Work')
         if response.response_info.status_code == 200:
             messages.add_message(request, messages.SUCCESS, response.response_info.message, response.response_info.type_label)
@@ -1403,9 +1398,11 @@ def publish_bookmark_collection(request, pk):
 
 def log_in(request):
     if request.method == 'POST':
-        user = authenticate(username=request.POST.get('username').lower(), password=request.POST.get('password'))
-        if user is not None:
+        user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
+        token_resp = do_post(f'api/login/', request, data=request.POST, object_name='Login')
+        if user is not None and token_resp is not None:
             login(request, user)
+            request.session['auth_token'] = token_resp.response_data.get('token')
             messages.add_message(request, messages.SUCCESS, _('Login successful.'), 'login-success')
             return referrer_redirect(request, request.POST.get('referrer'))
         else:
@@ -1525,9 +1522,6 @@ def work(request, pk, chapter_offset=0):
     comment_offset = request.GET.get('comment_offset', 0)
     comment_id = request.GET.get('comment_thread', None)
     comment_count = request.GET.get('comment_count')
-    cache_key = f'work_{pk}_{chapter_offset}_{request.user}_{view_full}_{expand_comments}_{comment_offset}_{comment_id}_{comment_count}'
-    if cache.get(cache_key):
-        return cache.get(cache_key)
     work_types = get_work_types(request)
     url = f'api/works/{pk}/'
     work_response = do_get(url, request, 'Work')
@@ -1599,8 +1593,6 @@ def work(request, pk, chapter_offset=0):
         'chapter_offset': chapter_offset,
         'next_chapter': f'/works/{pk}/{chapter_offset + 1}' if 'next' in chapter_response and chapter_response['next'] else None,
         'previous_chapter': f'/works/{pk}/{chapter_offset - 1}' if 'previous' in chapter_response and chapter_response['previous'] else None,})
-    if not cache.get(cache_key) and len(messages.get_messages(request)) < 1:
-        cache.set(cache_key, page_content, 60 * 60)
     return page_content
 
 

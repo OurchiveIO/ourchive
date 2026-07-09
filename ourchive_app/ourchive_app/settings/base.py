@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'oauth2_provider',
     'rest_framework',
+    'knox',
     'core',
     'frontend',
     'django.contrib.postgres',
@@ -110,7 +111,9 @@ SEARCH_BACKEND = 'POSTGRES'
 
 TAG_DIVIDER = '$!$'
 
-if DEBUG:
+USE_MAILGUN = os.getenv('OURCHIVE_USE_MAILGUN')
+
+if DEBUG or not USE_MAILGUN:
     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
     EMAIL_FILE_PATH = BASE_DIR + "/sent_emails"
 else:
@@ -212,7 +215,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
+        'knox.auth.TokenAuthentication',
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'api.custom_pagination.CustomPagination',

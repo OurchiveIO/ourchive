@@ -1,8 +1,10 @@
-from django.contrib.auth.models import Group
-from rest_framework import viewsets, generics, permissions
+from rest_framework import viewsets, generics, permissions, status
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import AllowAny
-
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth import login, authenticate, user_logged_in
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from knox.views import LoginView as KnoxLoginView
 from api.serializers import *
 from core.models import *
 from api.permissions import *
@@ -61,6 +63,15 @@ def api_root(request, format=None):
         'attributevalues': reverse('attribute-value-list', request=request, format=format),
     })
 
+class LoginView(KnoxLoginView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, format=None):
+        serializer = AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        login(request, user)
+        return super(LoginView, self).post(request, format=None)
 
 class SearchList(APIView):
     parser_classes = [JSONParser]

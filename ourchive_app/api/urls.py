@@ -1,3 +1,4 @@
+from knox import views as knox_views
 from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
 from api import views
@@ -185,6 +186,9 @@ urlpatterns = [
     path('anthology-autocomplete', views.AnthologyAutocomplete.as_view(), name='be-anthology-autocomplete'),
     path('anthologies/<int:pk>/works', views.WorkAnthologyList.as_view(), name='be-anthology-works'),
     path('anthologies/<int:pk>/work/<int:work_id>', views.WorkAnthologyDetail.as_view(), name='be-series-anthology-detail'),
+    path(r'login/', views.LoginView.as_view(), name='knox_login'),
+    path(r'logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
+    path(r'logoutall/', knox_views.LogoutAllView.as_view(), name='knox_logoutall'),
     path('openapi', get_schema_view(
         title="Ourchive",
         description="A fan-created archive software package",
