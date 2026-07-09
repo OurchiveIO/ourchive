@@ -31,6 +31,7 @@ RUN set -eux; \
        gettext \
        # libpq5 needed in runtime for psycopg2
        libpq5 \
+       dos2unix \
        libpq-dev \
        git \
        net-tools \
@@ -56,6 +57,7 @@ RUN set -eux; \
 RUN python -m pip install -r requirements.txt; \
     python manage.py compilemessages; \
     python manage.py collectstatic --no-input; \
+    dos2unix entrypoint.sh; \
     chmod +x entrypoint.sh; \
     # cp docker/config.py settings/config.py; \
     #  create ourchive group and user to use it and give permissions over the code (in entrypoint)
