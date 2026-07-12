@@ -1,4 +1,6 @@
 from django.core.management.base import BaseCommand
+from django.core import management
+from core.models import OurchiveSetting, WorkType
 from ourchive_app.util import ourchive_fixtures
 
 
@@ -10,18 +12,26 @@ class Command(BaseCommand):
         print(f'Loading data. Path: {path}, required data file: {required_filename},'
               f'optional data file: {optional_filename}, load optional data: {load_optional}')
         try:
-            ourchive_fixtures.load_data(path, required_filename)
+            first_setting = OurchiveSetting.objects.first()
+            if not first_setting:
+                management.call_command('loaddata', 'core/fixtures/required_data')
+            else:
+                print('Required data already exists.')
         except Exception as e:
             print(f'Could not load required data. Please check path or refer to repo defaults. Error: {e}')
             return
         if not load_optional:
             return
         try:
-            ourchive_fixtures.load_data(path, optional_filename)
+            first_wt = WorkType.objects.first()
+            if not first_wt:
+                management.call_command('loaddata', 'core/fixtures/recommended_data')
+            else:
+                print('Recommended data already exists.')
+                return
         except Exception as e:
             print(f'Could not load recommended data. Please check path or refer to repo defaults. Error: {e}')
             return
-        print('Data loaded successfully.')
 
     def add_arguments(self, parser):
         # Named (optional) arguments
@@ -51,4 +61,4 @@ class Command(BaseCommand):
         load_optional = recommended_data == 'y' or recommended_data == 'yes'
         self.load_fixture_data(options.get('fixture_path'), options.get('required_fixture'),
                                options.get('optional_fixture'), load_optional)
-        print('Data loaded.')
+        print('Data load complete.')

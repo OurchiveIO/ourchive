@@ -53,6 +53,7 @@ def index(request):
     news = get_news(request).response_data.get('results', [])
     homepage_news = do_get(f'api/news/homepage/', request, params=request.GET, object_name='news').response_data
     browse_cards = create_browse_cards(request)
+    print(browse_cards)
     return render(request, 'index.html', {
         'heading_message': _('ourchive_welcome'),
         'long_message': _('ourchive_intro_copy'),
@@ -1403,6 +1404,9 @@ def log_in(request):
         if user is not None and token_resp is not None:
             login(request, user)
             request.session['auth_token'] = token_resp.response_data.get('token')
+            next_url = request.GET.get('next')
+            if next_url:
+                return redirect(next_url)
             messages.add_message(request, messages.SUCCESS, _('Login successful.'), 'login-success')
             return referrer_redirect(request, request.POST.get('referrer'))
         else:

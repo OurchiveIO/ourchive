@@ -62,6 +62,7 @@ class Command(BaseCommand):
 
   def handle(self, *args, **options):
     scheduler = BlockingScheduler(timezone=settings.TIME_ZONE)
+    scheduler.remove_all_jobs()
     scheduler.add_jobstore(DjangoJobStore(), "default")
 
     scheduler.add_job(

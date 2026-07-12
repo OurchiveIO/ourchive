@@ -512,7 +512,7 @@ class PostgresProvider:
 		term = term.lower()
 		if tag_type:
 			resultset = Tag.objects.filter(
-				tag_type__type_name=tag_type).filter(tag_type__filterable=True).filter(filterable=True).filter(Q(text__icontains=term) | Q(display_text__icontains=term))
+				tag_type__label=tag_type).filter(tag_type__filterable=True).filter(filterable=True).filter(Q(text__icontains=term) | Q(display_text__icontains=term))
 		else:
 			resultset = Tag.objects.annotate(zero_distance=TrigramWordDistance(term, 'text'))
 			resultset = resultset.filter(zero_distance__lte=.85)
@@ -520,7 +520,7 @@ class PostgresProvider:
 			resultset = resultset[:10]
 		if resultset is None:
 			resultset = Tag.objects.filter(
-				tag_type__type_name=tag_type).filter(tag_type__filterable=True).filter(filterable=True) if fetch_all else []
+				tag_type__label=tag_type).filter(tag_type__filterable=True).filter(filterable=True) if fetch_all else []
 		for result in resultset:
 			usages = Work.objects.filter(tags__id=result.id, draft=False).count() + BookmarkCollection.objects.filter(tags__id=result.id, draft=False).count()
 			results.append({"tag": result.text, "display_text": result.display_text, "count": usages,

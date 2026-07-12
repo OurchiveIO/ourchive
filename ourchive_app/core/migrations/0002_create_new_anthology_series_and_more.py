@@ -14,27 +14,33 @@ class Migration(migrations.Migration):
 
     def migrate_languages(apps, schema_editor):
         from core.models import BookmarkCollection, Bookmark, Work, Language
-
-        for collection in BookmarkCollection.objects.all():
-            for tag in collection.tags.filter(tag_type__label__iexact='Language'):
-                language = Language.objects.filter(display_name=tag.display_text).first()
-                if language:
-                    collection.languages.add(language)
-            collection.save()
-
-        for work in Work.objects.all():
-            for tag in work.tags.filter(tag_type__label__iexact='Language'):
-                language = Language.objects.filter(display_name=tag.display_text).first()
-                if language:
-                    work.languages.add(language)
-            work.save()
-
-        for bookmark in Bookmark.objects.all():
-            for tag in bookmark.tags.filter(tag_type__label__iexact='Language'):
-                language = Language.objects.filter(display_name=tag.display_text).first()
-                if language:
-                    bookmark.languages.add(language)
-            bookmark.save()
+        try:
+            for collection in BookmarkCollection.objects.all():
+                for tag in collection.tags.filter(tag_type__label__iexact='Language'):
+                    language = Language.objects.filter(display_name=tag.display_text).first()
+                    if language:
+                        collection.languages.add(language)
+                collection.save()
+        except:
+            pass
+        try:
+            for work in Work.objects.all():
+                for tag in work.tags.filter(tag_type__label__iexact='Language'):
+                    language = Language.objects.filter(display_name=tag.display_text).first()
+                    if language:
+                        work.languages.add(language)
+                work.save()
+        except:
+            pass
+        try:
+            for bookmark in Bookmark.objects.all():
+                for tag in bookmark.tags.filter(tag_type__label__iexact='Language'):
+                    language = Language.objects.filter(display_name=tag.display_text).first()
+                    if language:
+                        bookmark.languages.add(language)
+                bookmark.save()
+        except:
+            pass
 
     operations = [
         migrations.CreateModel(
@@ -269,5 +275,5 @@ class Migration(migrations.Migration):
             name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_collections', to=settings.AUTH_USER_MODEL),
         ),
-        migrations.RunPython(migrate_languages),
+        # migrations.RunPython(migrate_languages),
     ]

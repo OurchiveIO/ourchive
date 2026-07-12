@@ -796,7 +796,7 @@ class Bookmark(models.Model):
     comment_count = models.IntegerField(default=0)
     public_notes = models.TextField(null=True, blank=True)
     private_notes = models.TextField(null=True, blank=True)
-    is_private = models.BooleanField(default=False)
+    is_private = models.BooleanField(default=True)
 
     collection = models.ForeignKey(
         BookmarkCollection,

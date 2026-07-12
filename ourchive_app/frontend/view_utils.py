@@ -572,7 +572,7 @@ def create_browse_cards(request):
     work_types = get_work_types(request, True)
     tag_types = do_get(f'api/tagtypes/browsable?has_chives=true', request, {}, 'Tag Type').response_data.get('results', [])
     attribute_types = do_get(f'api/attributetypes/browsable?has_chives=true', request, {}, 'Attribute Type').response_data.get('results', [])
-    browse_cards = [{'label': 'Work Types', 'cards': []}]
+    browse_cards = [{'label': 'Work Types', 'cards': []}] if len(work_types) > 0 else []
     for wt in work_types:
         browse_cards[0]['cards'].append({
             'label': wt['type_name'],
