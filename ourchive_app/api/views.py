@@ -299,7 +299,7 @@ class ImportWorks(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request):
+    def post(self, request, username):
         if 'work_id' not in request.data and 'username' not in request.data:
             return Response({'message': 'work_id or username required for import.'}, status=400)
         if 'save_as_draft' not in request.data or 'allow_anon_comments' not in request.data or 'allow_comments' not in request.data:
@@ -333,7 +333,7 @@ class ExportChives(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, format=None):
+    def post(self, request, username, format=None):
         if not 'export_works' in request.data and not 'export_bookmarks' in request.data and not 'export_collections' in request.data:
             return Response({'message': ["export_works, export_bookmarks, or export_collections required."]}, status=400)
         export_job = ChiveExport(
@@ -354,7 +354,7 @@ class UserApprovalList(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, format=None):
+    def get(self, request, username, format=None):
         data = []
         pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
@@ -393,7 +393,7 @@ class UserApprovalRemove(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, format=None):
+    def post(self, request, username, format=None):
         user_to_remove = request.user.id
         type_to_remove = request.data.get('type', None)
         approval_id = request.data.get('id', None)
@@ -418,7 +418,7 @@ class UserApprovalApprove(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, format=None):
+    def post(self, request, username, format=None):
         user_to_approve = request.user.id
         type_to_approve = request.data.get('type', None)
         approval_id = request.data.get('id', None)
@@ -444,7 +444,7 @@ class CocreateApproveBulk(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.IsAuthenticated]
 
-    def patch(self, request):
+    def patch(self, request, username):
         pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_anthologies = UserAnthology.objects.filter(user__id=request.user.id).filter(approved=False)
@@ -464,7 +464,7 @@ class CocreateRejectBulk(APIView):
     parser_classes = [JSONParser]
     permission_classes = [permissions.IsAuthenticated]
 
-    def patch(self, request):
+    def patch(self, request, username):
         pending_works = UserWork.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_collections = UserCollection.objects.filter(user__id=request.user.id).filter(approved=False)
         pending_anthologies = UserAnthology.objects.filter(user__id=request.user.id).filter(approved=False)

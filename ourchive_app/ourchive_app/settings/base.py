@@ -215,6 +215,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'knox.auth.TokenAuthentication',
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ),

@@ -35,6 +35,13 @@ def get_token_headers(request):
 		headers['Authorization'] = f'Token {request.session.get('auth_token', '')}'
 	return headers
 
+def get_headers(request):
+	headers = {}
+	headers['X-CSRFToken'] = request.COOKIES['csrftoken'] if 'csrftoken' in request.COOKIES else None
+	headers['content-type'] = 'application/json'
+	headers['Origin'] = f'{settings.API_PROTOCOL}{settings.ROOT_URL}'
+	return headers
+
 
 def append_root_url(url):
 	return f"{settings.API_PROTOCOL}{settings.ROOT_URL}/{url}"
@@ -113,11 +120,11 @@ def get_results(results, object_name='object') -> ResponseFull:
 
 
 def do_patch(url, request, data={}, object_name='object'):
-	return get_results(requests.patch(append_root_url(url), data=json.dumps(data), headers=get_token_headers(request)), object_name)
+	return get_results(requests.patch(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)), object_name)
 
 
 def do_post(url, request, data={}, object_name='object'):
-	response = requests.post(append_root_url(url), data=json.dumps(data), headers=get_token_headers(request))
+	response = requests.post(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request))
 	return get_results(response, object_name)
 
 
@@ -126,15 +133,15 @@ def do_external_post(url, data):
 
 
 def do_put(url, request, data={}, object_name='object'):
-	return get_results(requests.put(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_token_headers(request)), object_name)
+	return get_results(requests.put(append_root_url(url), data=json.dumps(data), cookies=request.COOKIES, headers=get_headers(request)), object_name)
 
 
 def do_delete(url, request, object_name='object'):
-	return get_results(requests.delete(append_root_url(url), cookies=request.COOKIES, headers=get_token_headers(request)), object_name)
+	return get_results(requests.delete(append_root_url(url), cookies=request.COOKIES, headers=get_headers(request)), object_name)
 
 
 def do_get(url, request, params={}, object_name='object'):
-	response = requests.get(append_root_url(url), params=params, headers=get_token_headers(request))
+	response = requests.get(append_root_url(url), params=params, cookies=request.COOKIES, headers=get_headers(request))
 	return get_results(response, object_name)
 
 

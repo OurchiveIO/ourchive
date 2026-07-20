@@ -23,13 +23,14 @@
         {% if user.profile %}
             <div id="user-profile-text-parent">
                 <h3 id="user-profile-text-h2"> Profile </h3>
+                <hr id="user-profile-hr"/>
                 <div id="user-profile-text-span">{% autoescape off %} {{ user.profile }} {% endautoescape %}</div>
             </div>
         {% endif %}
         {% if user.attributes %}
-            <hr id="user-attributes-hr"/>
-            {% include "object_attributes.html" with object='user' object_id=user.id attributes=user.attributes %}
-            <hr id="user-attributes-lower-hr"/>
+            <div id="user-profile-attrs" class="ps-4 mb-4">
+                {% include "object_attributes.html" with object='user' object_id=user.id attributes=user.attributes kill_mt=True %}
+            </div>
         {% endif %}
         <ul class="nav nav-tabs" role="tablist" id="user_content_switcher_header">
             <li class="nav-item" role="presentation"><button class="nav-link {% if anchor == 0 %}active{% endif %}" id="works-tab" data-bs-toggle="tab" data-bs-target="#works-tab-pane" type="button" role="tab" aria-controls="works-tab-pane" aria-selected="true">{% translate 'Works' %} ({{ work_count }})</button></li>

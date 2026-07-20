@@ -47,8 +47,6 @@ class ObjectIsLocked(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
             return True
-        if request.method not in permissions.SAFE_METHODS:
-            return False
         if isinstance(request.user, AnonymousUser):
             return obj.locked_to_users is False
         return True

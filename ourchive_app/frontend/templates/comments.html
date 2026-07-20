@@ -8,7 +8,7 @@
 <div class="row row-cols-1 mb-3 ms-2" id="{{object_name}}-comment-{{comment.id}}-ul">
 {% endif %}
 <div id="{{object_name}}-comment-{{comment.id}}-li">
-<div class="border mt-3 {% if depth < 1 and not forloop.counter|divisibleby:'2' %}oc-bg-light{% elif depth > 1 and depth|divisibleby:'2' and top_level %}oc-bg-secondary{% elif forloop.counter > 1 and depth > 0 and forloop.counter|divisibleby:'2' %}oc-bg-light{% else %}oc-bg-secondary{%endif%}" id="comment_container_{{comment.id}}">
+<div class="border mt-3 {% if depth < 1 and not forloop.counter|divisibleby:'2' %}bs-body-bg{% elif depth > 1 and depth|divisibleby:'2' and top_level %}bs-secondary-bg{% elif forloop.counter > 1 and depth > 0 and forloop.counter|divisibleby:'2' %}bs-body-bg{% else %}bs-secondary-bg{%endif%}" id="comment_container_{{comment.id}}">
     <div id="{{object_name}}-comment-{{comment.id}}-header" class="p-3 row">
         <div class="col-1">
             {% if comment.user is not None and comment.user.icon %}

@@ -20,7 +20,7 @@
                             <tr id="bookmark-{{ bookmark.work.id }}-parent">
                                 <td id="bookmark-{{ bookmark.work.id }}-bookmark">{{ bookmark.title|default:bookmark.work.title }}</td>
                                 <td id="bookmark-{{ bookmark.work.id }}-work">{{ bookmark.work.title }}</td>
-                                <td id="bookmark-{{ bookmark.work.id }}-checkbox"><input type="checkbox" name="{{bookmark.work.id}}" id="add-to-collection-checkbox-{{ bookmark.work.id }}" class="form-check-input"/></td>
+                                <td id="bookmark-{{ bookmark.work.id }}-checkbox"><input type="checkbox" name="{{bookmark.work.id}}" id="add-to-collection-checkbox-{{ bookmark.work.id }}" class="form-check-input add-to-collection-checkbox"/></td>
                             </tr>
                         {% endfor %}
                     </tbody>

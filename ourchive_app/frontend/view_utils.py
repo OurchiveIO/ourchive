@@ -50,6 +50,8 @@ def group_tags(tags):
 
 
 def group_tags_for_edit(tags, tag_types=None):
+    if not tag_types or 'results' not in tag_types:
+        return {}
     tag_parent = {tag_type['label']:{'admin_administrated': tag_type['admin_administrated'], 'type_name': tag_type['type_name']} for tag_type in tag_types['results']}
     for tag in tags:
         tag['text'] = tag['text']
@@ -524,9 +526,9 @@ def process_message(request, response):
     messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
 
 
-def get_works_list(request, username=None):
+def get_works_list(request, username=None, work_params=None):
     url = f'api/users/{username}/works' if username is not None else f'api/works'
-    response = do_get(url, request, params=request.GET, object_name='User Works')
+    response = do_get(url, request, params=work_params if work_params else request.GET, object_name='User Works')
     if response.response_info.status_code >= 400:
         messages.add_message(request, messages.ERROR, response.response_info.message, response.response_info.type_label)
         return redirect('/')

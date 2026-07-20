@@ -531,7 +531,7 @@ class PostgresProvider:
 		results = []
 		resultset = None
 		term = term.lower()
-		resultset = Work.objects.filter(user__id=user,draft=False).filter(
+		resultset = Work.objects.filter(draft=False).filter(
 			Q(title__icontains=term) | Q(summary__icontains=term)).order_by('-updated_on')
 		for result in resultset:
 			work_dict = vars(result)

@@ -62,7 +62,9 @@ function removeWork(event, bookmark_id) {
 
 function addSelectedWorks() {
     var bookmarks = document.querySelectorAll('.add-to-collection-checkbox');
+    console.log(bookmarks);
     bookmarks.forEach((bookmark) => {
+        console.log(bookmark);
         if (bookmark.checked) {
             var bookmark_display = document.getElementById("bookmark-"+bookmark.name+"-bookmark").innerHTML;
             populateWorkInput(bookmark.name, bookmark_display);

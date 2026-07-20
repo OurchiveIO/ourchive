@@ -11,7 +11,7 @@
     {% include "bookmark_collection_tile.html" with bookmark_collection=bkcol %}
     {% if bkcol.owner %}
         <div class="row row-cols-1 m-2">
-            <p>
+            <p class="text-end">
             {% if bkcol.draft %}
             <a class="link link-underline-opacity-0" id="bookmark-collection-publish-link" href="/bookmark-collections/{{ bkcol.id }}/publish"><i class="bi bi-megaphone"></i></a>
             {% endif %}

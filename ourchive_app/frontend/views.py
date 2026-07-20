@@ -136,7 +136,7 @@ def process_user(request, user):
     if anchor is None:
         anchor = 0 if user.response_data["default_content"] == 'Work' else (1 if user.response_data["default_content"] == 'Bookmark' else (2 if user.response_data["default_content"] == 'Collection' else 0))
     # TODO: this violates DRY. all of this can be simplified, it's doing the exact same thing with multiple chives. also, we should just work with the results object instead of pulling out individual variables.
-    works_list = get_works_list(request, username)
+    works_list = get_works_list(request, username, work_params)
     works = works_list['works']
     work_next = works_list['next_params'].replace("limit=", "work_limit=").replace("offset=", "work_offset=") if works_list['next_params'] else None
     work_previous = works_list["prev_params"].replace("limit=", "work_limit=").replace("offset=", "work_offset=") if works_list["prev_params"] else None
@@ -224,7 +224,7 @@ def import_works(request, username):
             data['work_id'] = request.POST.get('work_id', '')
         else:
             data['username'] = request.POST.get('username', '')
-        response = do_post(f'api/users/import-works/', request, data, 'Import')
+        response = do_post(f'api/users/{request.user.username}/import-works/', request, data, 'Import')
         message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
         messages.add_message(request, message_type, _('Import has started. You will receive a notification when it completes.'), response.response_info.type_label)
         return redirect('/')
@@ -400,7 +400,7 @@ def edit_account(request, username):
 def export_chives(request):
     if request.user.is_authenticated:
         form_data = convert_bool(request.POST.copy())
-        response = do_post(f'api/users/export-chives/', request, data=form_data)
+        response = do_post(f'api/users/{request.user.username}/export-chives/', request, data=form_data)
         message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
         user_message = response.response_info.message if message_type == messages.ERROR else _('Your export has begun. You will be notified when it is complete.')
         messages.add_message(request, message_type, user_message, response.response_info.type_label)
@@ -513,7 +513,7 @@ def user_notifications(request, username):
 
 
 def delete_notification(request, username, notification_id):
-    response = do_delete(f'api/notifications/{notification_id}', request, 'Notification')
+    response = do_delete(f'api/notifications/{notification_id}/', request, 'Notification')
     message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
     messages.add_message(request, message_type, response.response_info.message, response.response_info.type_label)
     return redirect(f'/username/{username}/notifications')
@@ -937,7 +937,8 @@ def new_work(request):
         tag_types = do_get(f'api/tagtypes', request, {}, 'Tag').response_data
         tags = group_tags_for_edit([], tag_types)
         work_attributes = do_get(f'api/attributetypes', request, params={'allow_on_work': True}, object_name='Work Attributes')
-        work['attribute_types'] = process_attributes([], work_attributes.response_data['results'])
+        if work_attributes.response_data and 'results' in work_attributes.response_data:
+            work['attribute_types'] = process_attributes([], work_attributes.response_data['results'])
         languages = get_languages(request)
         languages = populate_default_languages(languages, request)
         return render(request, 'work_form.html', {
@@ -1921,7 +1922,7 @@ def remove_as_cocreator(request):
     if request.user.is_authenticated:
         form_data = request.POST.copy()
         form_data['id'] = form_data['id'].partition('_')[0]
-        response = do_post(f'api/users/remove-cocreator/', request, data=form_data)
+        response = do_post(f'api/users/{request.user.username}/remove-cocreator/', request, data=form_data)
         message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
         user_message = response.response_info.message if message_type == messages.ERROR else ('Relationship rejected.')
         messages.add_message(request, message_type, user_message, response.response_info.type_label)
@@ -1935,7 +1936,7 @@ def approve_as_cocreator(request):
     if request.user.is_authenticated:
         form_data = request.POST.copy()
         form_data['id'] = form_data['id'].partition('_')[0]
-        response = do_post(f'api/users/approve-cocreator/', request, data=form_data)
+        response = do_post(f'api/users/{request.user.username}/approve-cocreator/', request, data=form_data)
         message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
         user_message = response.response_info.message if message_type == messages.ERROR else ('Relationship approved.')
         messages.add_message(request, message_type, user_message, response.response_info.type_label)
@@ -1947,7 +1948,7 @@ def approve_as_cocreator(request):
 
 def bulk_approve_cocreator(request):
     if request.user.is_authenticated:
-        response = do_patch(f'api/users/cocreator-bulk-approve/', request)
+        response = do_patch(f'api/users/{request.user.username}/cocreator-bulk-approve/', request)
         message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
         user_message = response.response_info.message if message_type == messages.ERROR else ('Relationships approved.')
         messages.add_message(request, message_type, user_message, response.response_info.type_label)
@@ -1959,7 +1960,7 @@ def bulk_approve_cocreator(request):
 
 def bulk_reject_cocreator(request):
     if request.user.is_authenticated:
-        response = do_patch(f'api/users/cocreator-bulk-reject/', request)
+        response = do_patch(f'api/users/{request.user.username}/cocreator-bulk-reject/', request)
         message_type = messages.ERROR if response.response_info.status_code >= 400 else messages.SUCCESS
         user_message = response.response_info.message if message_type == messages.ERROR else ('Relationships rejected.')
         messages.add_message(request, message_type, user_message, response.response_info.type_label)
@@ -1971,7 +1972,7 @@ def bulk_reject_cocreator(request):
 
 def cocreator_approvals(request):
     if request.user.is_authenticated:
-        pending_approvals = do_get(f'api/users/approvals/', request)
+        pending_approvals = do_get(f'api/users/{request.user.username}/approvals/', request)
         if pending_approvals.response_info.status_code >= 400:
             messages.add_message(request, messages.ERROR, pending_approvals.response_info.message, pending_approvals.response_info.type_label)
             return redirect(f'/username/{request.user.username}')
