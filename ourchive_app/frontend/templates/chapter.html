@@ -24,7 +24,7 @@
         {% endif %}
     </div>
     <div class="col-12 col-md-2">
-        {% if work.chapter_count > 1 or chapter.draft and work.owner %}
+        {% if work.chapter_count > 1 and work.owner %}
             <p class="text-end">
                 {% if chapter.draft %}
                     <a class="link-underline link-underline-opacity-0 link-underline-opacity-25-hover" id="chapter-{{chapter.id}}-publish-link" href="/works/{{ work.id }}/chapters/{{ chapter.id }}/publish" title="{% translate 'Publish' %}"><i class="bi bi-megaphone"></i></a>

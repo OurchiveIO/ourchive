@@ -15,7 +15,9 @@ class Common():
         completes = dict_obj.get(COMPLETE_FILTER_KEY, [])
         new_completes = []
         for item in completes:
-            new_completes.append(int(item))
+            int_itm = int(item)
+            if int_itm > -1:
+                new_completes.append(int_itm)
         return new_completes
 
 
