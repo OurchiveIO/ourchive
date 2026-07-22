@@ -111,12 +111,12 @@ SEARCH_BACKEND = 'POSTGRES'
 
 TAG_DIVIDER = '$!$'
 
-USE_MAILGUN = os.getenv('OURCHIVE_USE_MAILGUN', True)
+USE_MAILGUN = os.getenv('OURCHIVE_USE_MAILGUN', True) == 'True'
 
-if DEBUG or not USE_MAILGUN:
+if DEBUG or USE_MAILGUN is False:
     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
     EMAIL_FILE_PATH = BASE_DIR + "/sent_emails"
-else:
+elif USE_MAILGUN:
     ANYMAIL = {
         "MAILGUN_API_KEY": os.getenv("OURCHIVE_MAILGUN_API_KEY"),
         "MAILGUN_SENDER_DOMAIN": os.getenv("OURCHIVE_MAILGUN_SENDER_DOMAIN"),
@@ -124,7 +124,6 @@ else:
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = os.getenv("OURCHIVE_DEFAULT_FROM_EMAIL")
 SERVER_EMAIL = os.getenv("OURCHIVE_SERVER_EMAIL")
-
 
 TEMPLATES = [
     {
