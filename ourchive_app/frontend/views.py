@@ -41,7 +41,8 @@ def index(request):
         tag_max_size = 3
         for tag in top_tags:
             tag_count = tag['tag_count']
-            font_size = tag_count / highest_count * tag_max_size
+            denominator = (highest_count * tag_max_size) if highest_count * tag_max_size > 0 else 1
+            font_size = tag_count / denominator
             font_size = abs(float(font_size))
             if (font_size <= 1):
                 font_size = font_size + 1
