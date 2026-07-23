@@ -893,37 +893,42 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
         return subscription.id if subscription is not None else 0
 
     def process_tags(self, work, validated_data, tags):
-        tags_to_add = []
-        required_tag_types = list(TagType.objects.filter(required=True))
-        has_any_required = len(required_tag_types) > 0
-        for item in tags:
-            tag_id = unidecode.unidecode(clean_text(item['text'].lower()))
-            tag_friendly_name = item['text']
-            tag_type = item['tag_type']
-            tag_type_id = tag_type.id
-            if tag_type in required_tag_types:
-                if tag_id is None or tag_id == '':
-                    # todo: error
-                    return None
-                else:
-                    required_tag_types.pop()
-            try:
-                tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
-            except IntegrityError:
-                logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Work: {work.id}')
-                continue
-            if tag.display_text == '':
-                tag.display_text = tag_friendly_name
-                tag.save()
-            tags_to_add.append(tag)
-        if has_any_required and len(required_tag_types) > 0:
-            # todo: error
-            return None
-        work.tags.clear()
-        for tag in tags_to_add:
-            work.tags.add(tag)
-        work.save()
-        return work
+        try:
+            tags_to_add = []
+            required_tag_types = list(TagType.objects.filter(required=True))
+            has_any_required = len(required_tag_types) > 0
+            for item in tags:
+                tag_id = unidecode.unidecode(clean_text(item['text'].lower()))
+                tag_friendly_name = item['text']
+                tag_type = item['tag_type']
+                tag_type_id = tag_type.id
+                if tag_type in required_tag_types:
+                    if tag_id is None or tag_id == '':
+                        # todo: error
+                        return work
+                    else:
+                        required_tag_types.pop()
+                try:
+                    tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+                except IntegrityError:
+                    logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Work: {work.id}')
+                    continue
+                if tag.display_text == '':
+                    tag.display_text = tag_friendly_name
+                    tag.save()
+                tags_to_add.append(tag)
+            if has_any_required and len(required_tag_types) > 0:
+                # todo: error
+                return work
+            work.tags.clear()
+            for tag in tags_to_add:
+                work.tags.add(tag)
+            work.save()
+            return work
+        except Exception as e:
+            logger.error(
+                f'Error trying to save tags. Error: {e}. Work: {work.id}')
+            return work
 
     def process_languages(self, work, languages):
         backup_languages = list(work.languages.all())
@@ -963,15 +968,18 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 user_work.save()
             work.save()
         for user in new_users:
-            if user.id == work.user.id:
-                continue
-            notification_type = NotificationType.objects.filter(
-                type_label="System Notification").first()
-            notification = Notification.objects.create(notification_type=notification_type, user=user, title=_("Work Pending Approval"),
-                                                       content=f"""{_("Someone added you as a cocreator to the work")} <strong>{work.title}</strong>. <a href='/users/cocreator-approvals'>{_("Click to approve or reject the relationship.</a>")}""")
-            notification.save()
-            user.has_notifications = True
-            user.save()
+            try:
+                if user.id == work.user.id:
+                    continue
+                notification_type = NotificationType.objects.filter(
+                    type_label="System Notification").first()
+                notification = Notification.objects.create(notification_type=notification_type, user=user, title=_("Work Pending Approval"),
+                                                           content=f"""{_("Someone added you as a cocreator to the work")} <strong>{work.title}</strong>. <a href='/users/cocreator-approvals'>{_("Click to approve or reject the relationship.</a>")}""")
+                notification.save()
+                user.has_notifications = True
+                user.save()
+            except Exception as e:
+                logger.error(f'Error trying to create cocreator notifications: {e}.')
         return work
 
     def update(self, work, validated_data):
@@ -1087,7 +1095,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
             if tag_type in required_tag_types:
                 if tag_id is None or tag_id == '':
                     # todo: error
-                    return None
+                    return bookmark
                 else:
                     required_tag_types.pop()
             try:
@@ -1101,7 +1109,7 @@ class BookmarkSerializer(serializers.HyperlinkedModelSerializer):
             tags_to_add.append(tag)
         if has_any_required and len(required_tag_types) > 0:
             # todo: error
-            return None
+            return bookmark
         bookmark.tags.clear()
         for tag in tags_to_add:
             bookmark.tags.add(tag)
@@ -1493,7 +1501,7 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
             if tag_type in required_tag_types:
                 if tag_id is None or tag_id == '':
                     # todo: error
-                    return None
+                    return anthology
                 else:
                     required_tag_types.pop()
             try:
@@ -1507,7 +1515,7 @@ class AnthologySerializer(serializers.HyperlinkedModelSerializer):
             tags_to_add.append(tag)
         if has_any_required and len(required_tag_types) > 0:
             # todo: error
-            return None
+            return anthology
         anthology.tags.clear()
         for tag in tags_to_add:
             anthology.tags.add(tag)
