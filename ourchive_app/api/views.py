@@ -233,7 +233,7 @@ class Invitations(APIView):
         invitation.email = html.escape(email).replace('+', '%2B')
         invitation.join_reason = nh3.clean(request.data['join_reason'])
         invitation.invite_token = get_random_string(length=100)
-        invitation.register_link = f"{settings.API_PROTOCOL}{settings.ROOT_URL}/register?invite_token={invitation.invite_token}&email={invitation.email}"
+        invitation.register_link = f"{settings.API_PROTOCOL}{settings.OURCHIVE_DOMAIN}/register?invite_token={invitation.invite_token}&email={invitation.email}"
         invitation.save()
         send_mail(
             _("New Registration Request"),

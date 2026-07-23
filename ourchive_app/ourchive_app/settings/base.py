@@ -203,6 +203,7 @@ STATIC_URL = f"{ os.getenv('OURCHIVE_SCHEME', 'http') }://{ os.getenv('OURCHIVE_
 DEFAULT_ICON_URL = f"{STATIC_URL}icon-default.png"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+OURCHIVE_DOMAIN = os.getenv('OURCHIVE_DOMAIN', 'localhost:9000')
 
 OAUTH2_PROVIDER = {
     'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'}
