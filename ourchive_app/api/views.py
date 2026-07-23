@@ -1,3 +1,4 @@
+from dateutil.relativedelta import relativedelta
 from rest_framework import viewsets, generics, permissions, status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.exceptions import PermissionDenied
@@ -233,6 +234,7 @@ class Invitations(APIView):
         invitation.email = html.escape(email).replace('+', '%2B')
         invitation.join_reason = nh3.clean(request.data['join_reason'])
         invitation.invite_token = get_random_string(length=100)
+        invitation.token_expiration = datetime.datetime.now().date() + relativedelta(weeks=+1)
         invitation.register_link = f"{settings.API_PROTOCOL}{settings.OURCHIVE_DOMAIN}/register?invite_token={invitation.invite_token}&email={invitation.email}"
         invitation.save()
         send_mail(

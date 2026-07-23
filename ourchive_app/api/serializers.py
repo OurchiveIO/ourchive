@@ -272,12 +272,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
                 raise serializers.ValidationError({"message": ["Invite only instance; invite_code must be present."]})
             invitation = Invitation.objects.filter(
                 invite_token=validated_data['invite_code']).first()
-            if invitation.token_expiration.date() >= datetime.datetime.now().date():
+            if invitation.token_expiration is not None and invitation.token_expiration.date() < datetime.datetime.now().date():
+                raise serializers.ValidationError({"message": ["Invite token has expired."]})
+            else:
                 invitation.token_used = True
                 allow_upload_all = True if (not allow_upload_all and invitation.allow_upload) else allow_upload_all
                 invitation.save()
-            else:
-                raise serializers.ValidationError({"message": ["Invite token has expired."]})
         if 'icon' in validated_data:
             icon_alt_text = validated_data['icon_alt_text'] if 'icon_alt_text' in validated_data else ''
             icon = validated_data['icon']
