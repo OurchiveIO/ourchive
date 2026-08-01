@@ -206,21 +206,21 @@ class PostgresProvider:
 				resultset = obj.objects.filter(filters[0])
 			elif filters[0]:
 				resultset = resultset.filter(filters[0])
-				if hasattr(obj, 'tags'):
-					for tag in self.tag_filters['include']:
-						resultset = resultset.filter(tag)
-					for tag in self.tag_filters['exclude']:
-						resultset = resultset.filter(~tag)
-				if hasattr(obj, 'attributes'):
-					for attribute in self.attr_filters['include']:
-						resultset = resultset.filter(attribute)
-					for attribute in self.attr_filters['exclude']:
-						resultset = resultset.filter(~attribute)
 				resultset = resultset.distinct()
 			if resultset is None and filters[1]:
 				resultset = obj.objects.filter(filters[1])
 			elif filters[1]:
 				resultset = resultset.filter(filters[1])
+		if hasattr(obj, 'tags'):
+			for tag in self.tag_filters['include']:
+				resultset = resultset.filter(tag)
+			for tag in self.tag_filters['exclude']:
+				resultset = resultset.filter(~tag)
+		if hasattr(obj, 'attributes'):
+			for attribute in self.attr_filters['include']:
+				resultset = resultset.filter(attribute)
+			for attribute in self.attr_filters['exclude']:
+				resultset = resultset.filter(~attribute)
 		end = time.time()
 		length = end - start
 		print(f'filter execution: {length}')
@@ -291,19 +291,8 @@ class PostgresProvider:
 			else:
 				resultset = resultset.order_by('-updated_on')
 			resultset = resultset.distinct()
-		end = time.time()
-		length = end - start
-		print(f'result processing: {length}')
-		start = time.time()
 		tags = self.process_result_tags(resultset) if resultset and hasattr(obj, 'tags') else []
-		end = time.time()
-		length = end - start
-		print(f'tags: {length}')
-		start = time.time()
 		final = self.process_results(resultset, page, obj), tags
-		end = time.time()
-		length = end - start
-		print(f'final: {length}')
 		return final
 
 	def get_filters(self, search_object):

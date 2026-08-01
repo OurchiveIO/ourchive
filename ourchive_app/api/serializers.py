@@ -903,11 +903,7 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
                 tag_type = item['tag_type']
                 tag_type_id = tag_type.id
                 if tag_type in required_tag_types:
-                    if tag_id is None or tag_id == '':
-                        # todo: error
-                        return work
-                    else:
-                        required_tag_types.pop()
+                    required_tag_types.remove(tag_type)
                 try:
                     tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
                 except IntegrityError:

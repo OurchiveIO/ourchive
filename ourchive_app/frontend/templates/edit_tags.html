@@ -3,12 +3,22 @@
     <h3 id="obj-tags-form-header">{{ object_friendly|default_if_none:'' }} Tags <sup><a title="{% translate 'Tags help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#tags-help-text"><i class="bi bi-question-circle"></i></a></sup></h3>
     <div class="collapse mb-3" id="tags-help-text">{% blocktranslate %}Tags are used in searching and filtering. Tags let other people find your anthology, so don't hesitate to be creative! Existing tags will be shown in a dropdown after you start typing.{% endblocktranslate %}</div>
 {% endif %}
+<style>
+    .choices[data-type*="select-multiple"] select.choices__input {
+    display: block !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: 0 !important;
+    bottom: 0 !important;
+}
+</style>
 {% for type, tag_data in tags.items %}
     {% if tag_data.admin_administrated %}
         <div class="mb-3 ourchive-tag-entry-{{ tag_data.type_name }}" data-testid="admin-tag-select-div">
-            <label id="{{ object }}-form-tag-type-label" class="form-label" for="{{ tag_data.type_name }}_new_tag">{{ type }} <sup><a title="{% translate 'Locked tags help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#locked-tags-help-text"><i class="bi bi-lock"></i></a></sup></label>
+            <label id="{{ object }}-form-tag-type-label" class="form-label" for="{{ tag_data.type_name }}_new_tag">{{ type }} {% if tag_data.required %}({% translate 'Required' %}){% endif %} <sup><a title="{% translate 'Locked tags help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#locked-tags-help-text"><i class="bi bi-lock"></i></a></sup></label>
             <div class="collapse mb-3" id="locked-tags-help-text">{% blocktranslate %}This tag type is administrated by your site admin(s). This means that you can select an existing {{ type }}, but cannot create a new one.{% endblocktranslate %}</div>
-            <select data-testid="admin-tag-select" multiple name="{{ tag_data.type_name }}_tags[]" id="{{ tag_data.type_name }}_new_tag" class="form-select oc-searchable-tags" data-tag-type="{{ type }}">
+            <select multiple {% if tag_data.required %}required{% endif %} data-testid="admin-tag-select" name="{{ tag_data.type_name }}_tags[]" id="{{ tag_data.type_name }}_new_tag" class="form-select oc-searchable-tags" data-tag-type="{{ type }}">
                 {% for single_tag in tag_data.tags %}
                     <option value="{{single_tag.text}}" selected>{{single_tag.display_text}}</option>
                 {% endfor %}
@@ -16,8 +26,8 @@
         </div>
     {% else %}
         <div class="mb-3" id="{{ object }}-form-tag-parent" data-testid="tag-select-div">
-            <label id="{{ object }}-form-tag-type-label" class="form-label" for="{{ tag_data.type_name }}_new_tag">{{ type }}</label>
-            <select data-testid="tag-select" multiple name="{{ tag_data.type_name }}_tags[]" id="{{ tag_data.type_name }}_new_tag" class="form-select oc-searchable-tags" data-tag-type="{{ type }}">
+            <label id="{{ object }}-form-tag-type-label" class="form-label" for="{{ tag_data.type_name }}_new_tag">{{ type }} {% if tag_data.required %}({% translate 'Required' %}){% endif %}</label>
+            <select multiple {% if tag_data.required %}required{% endif %} data-testid="tag-select" name="{{ tag_data.type_name }}_tags[]" id="{{ tag_data.type_name }}_new_tag" class="form-select oc-searchable-tags" data-tag-type="{{ type }}">
                 {% for single_tag in tag_data.tags %}
                     <option value="{{single_tag.text}}" selected>{{ single_tag.display_text }}</option>
                 {% endfor %}

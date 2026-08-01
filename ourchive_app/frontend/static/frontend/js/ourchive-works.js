@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeListReorder('chapters_list', '.chapters_tracker');
     }
 
+    // clugey way to fix choices.js's incompatibility with HTML5 form validation
+    let tagElements = document.querySelectorAll('.oc-searchable-tags');
+    tagElements.forEach((elm) => {
+        elm.removeAttribute("hidden");
+    });
 });
 
 function addSelectedCollection() {

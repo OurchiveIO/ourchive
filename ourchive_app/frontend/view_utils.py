@@ -52,7 +52,7 @@ def group_tags(tags):
 def group_tags_for_edit(tags, tag_types=None):
     if not tag_types or 'results' not in tag_types:
         return {}
-    tag_parent = {tag_type['label']:{'admin_administrated': tag_type['admin_administrated'], 'type_name': tag_type['type_name']} for tag_type in tag_types['results']}
+    tag_parent = {tag_type['label']:{'admin_administrated': tag_type['admin_administrated'], 'type_name': tag_type['type_name'], 'required': tag_type.get('required', False)} for tag_type in tag_types['results']}
     for tag in tags:
         tag['text'] = tag['text']
         if 'tags' not in tag_parent[tag['tag_type']]:
