@@ -349,11 +349,13 @@ function doUserAutocomplete(term, select_id) {
 function initializeEditTags() {
     let tagElements = document.getElementsByClassName('oc-searchable-tags');
     for (const tagElement of tagElements) {
+        let allowNew = !tagElement.classList.contains("lock-choices");
         const tag_choices = new Choices(tagElement, {
             searchEnabled: true,
             searchChoices: true,
             removeItemButton: true,
             loadingText: 'Loading...',
+            noChoicesText: allowNew ? 'No choices to choose from' : 'No choices to choose from. Tag is administrated by your admin; contact them to add a new tag.',
         });
 
         tag_choices.passedElement.element.addEventListener('search', function (event) {
@@ -372,9 +374,14 @@ function initializeEditTags() {
                           tag_choices.setChoices(result, 'value', 'label', true);
                       }
                       else {
-                          tag_choices.setChoices([
-                              {value: searchValue, label: searchValue}
-                          ], 'value', 'label', true);
+                          if (allowNew) {
+                              tag_choices.setChoices([
+                                  {value: searchValue, label: searchValue}
+                              ], 'value', 'label', true);
+                          }
+                          else {
+                              tag_choices.setChoices([], 'value', 'label', true);
+                          }
                       }
                   });
                 });

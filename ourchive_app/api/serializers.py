@@ -898,20 +898,27 @@ class WorkSerializer(serializers.HyperlinkedModelSerializer):
             required_tag_types = list(TagType.objects.filter(required=True))
             has_any_required = len(required_tag_types) > 0
             for item in tags:
+                required_item = False
                 tag_id = unidecode.unidecode(clean_text(item['text'].lower()))
                 tag_friendly_name = item['text']
                 tag_type = item['tag_type']
                 tag_type_id = tag_type.id
                 if tag_type in required_tag_types:
                     required_tag_types.remove(tag_type)
-                try:
-                    tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
-                except IntegrityError:
-                    logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Work: {work.id}')
-                    continue
-                if tag.display_text == '':
-                    tag.display_text = tag_friendly_name
-                    tag.save()
+                if tag_type.admin_administrated and not work.user.is_superuser:
+                    tag = Tag.objects.filter(text=tag_id, tag_type_id=tag_type_id).first()
+                    if tag is None:
+                        # we don't allow this through the API. Admins have to create values through the admin console.
+                        continue
+                else:
+                    try:
+                        tag, created = Tag.objects.get_or_create(text=tag_id, tag_type_id=tag_type_id)
+                    except IntegrityError:
+                        logger.error(f'Integrity error trying to save tag having text {tag_id} and type {tag_type_id}. Work: {work.id}')
+                        continue
+                    if tag.display_text == '':
+                        tag.display_text = tag_friendly_name
+                        tag.save()
                 tags_to_add.append(tag)
             if has_any_required and len(required_tag_types) > 0:
                 # todo: error

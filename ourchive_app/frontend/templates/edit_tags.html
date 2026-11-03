@@ -18,7 +18,7 @@
         <div class="mb-3 ourchive-tag-entry-{{ tag_data.type_name }}" data-testid="admin-tag-select-div">
             <label id="{{ object }}-form-tag-type-label" class="form-label" for="{{ tag_data.type_name }}_new_tag">{{ type }} {% if tag_data.required %}({% translate 'Required' %}){% endif %} <sup><a title="{% translate 'Locked tags help' %}" href="#" data-bs-toggle="collapse" aria-expanded="false" data-bs-target="#locked-tags-help-text"><i class="bi bi-lock"></i></a></sup></label>
             <div class="collapse mb-3" id="locked-tags-help-text">{% blocktranslate %}This tag type is administrated by your site admin(s). This means that you can select an existing {{ type }}, but cannot create a new one.{% endblocktranslate %}</div>
-            <select multiple {% if tag_data.required %}required{% endif %} data-testid="admin-tag-select" name="{{ tag_data.type_name }}_tags[]" id="{{ tag_data.type_name }}_new_tag" class="form-select oc-searchable-tags" data-tag-type="{{ type }}">
+            <select multiple {% if tag_data.required %}required{% endif %} data-testid="admin-tag-select" name="{{ tag_data.type_name }}_tags[]" id="{{ tag_data.type_name }}_new_tag" class="form-select oc-searchable-tags lock-choices" data-tag-type="{{ type }}">
                 {% for single_tag in tag_data.tags %}
                     <option value="{{single_tag.text}}" selected>{{single_tag.display_text}}</option>
                 {% endfor %}
